@@ -88,13 +88,12 @@ public abstract class AbstractCommandParser<I extends ICommand> {
         I c = commandRegistry.get(command.getCommandName());
         List<String> required = c.getRequired();
 
-
-        if(null == required || required.isEmpty()){
+        if (null == required || required.isEmpty()) {
             return true;
         }
         boolean result = capabilities.containsAll(required);
         // Check if at least one imapflags or imap4flags cap isAvailable
-        if(!result && required.size()==2 && required.contains("imap4flags") && ( capabilities.contains("imapflags") || capabilities.contains("imap4flags"))){
+        if (!result && required.size() == 2 && required.contains("imap4flags") && (capabilities.contains("imapflags") || capabilities.contains("imap4flags"))) {
             return true;
         }
         return result;

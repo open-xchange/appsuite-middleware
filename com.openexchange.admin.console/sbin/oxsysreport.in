@@ -918,7 +918,7 @@ to separated this first!
    chown open-xchange:open-xchange ${OX_LOG_DIR}
 
 EOF
-read -p "Press ENTER to continue or [ctrl+c] to cancel..."
+read -p "Press ENTER to continue without log files or [ctrl+c] to cancel..."
 echo
 }
 

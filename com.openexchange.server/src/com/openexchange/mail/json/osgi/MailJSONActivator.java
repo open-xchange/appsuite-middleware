@@ -109,6 +109,8 @@ import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorage;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorageRegistry;
 import com.openexchange.mail.attachment.storage.MailAttachmentStorage;
 import com.openexchange.mail.attachment.storage.MailAttachmentStorageRegistry;
+import com.openexchange.mail.authenticity.CustomPropertyJsonHandler;
+import com.openexchange.mail.authenticity.GenericCustomPropertyJsonHandler;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.internal.MailCategoriesPreferenceItem;
 import com.openexchange.mail.compose.CompositionSpace;
@@ -243,9 +245,11 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         RankingAwareNearRegistryServiceTracker<MailFetchListener> listing = new RankingAwareNearRegistryServiceTracker<MailFetchListener>(context, MailFetchListener.class);
         MailFetchListenerRegistry.initInstance(listing);
         rememberTracker(listing);
+        track(CustomPropertyJsonHandler.class);
 
         openTrackers();
 
+        registerService(CustomPropertyJsonHandler.class, new GenericCustomPropertyJsonHandler());
         registerService(ComposeHandlerRegistry.class, composeHandlerRegisty);
 
         DefaultMailAttachmentStorageRegistry.initInstance(context);

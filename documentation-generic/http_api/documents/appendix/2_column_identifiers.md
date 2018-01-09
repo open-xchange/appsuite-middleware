@@ -83,7 +83,7 @@ specific field data of single or multiple objects.
 | 313 | capabilities |Number|Bit mask containing information about mailing system capabilites, as described in [capabilities](#capabilities).|
 | 314 | subscribed |Boolean|Indicates whether this folder should appear in folder tree or not. Note: Standard folders cannot be unsubscribed.|
 | 315 | subscr_subflds |Boolean|Indicates whether subfolders should appear in folder tree or not.|
-| 316 | standard_folder_type |Number|Indicates the default folder type. Zero for non-default folder. See [Standard folder types](#standard-folder-types)|
+| 316 | standard\_folder_type |Number|Indicates the default folder type. Zero for non-default folder. See [Standard folder types](#standard-folder-types)|
 | 317 | supported_capabilities |Array|Each element is a String identifying a supported folder capability as described in [supported capabilities](#supported-capabilities). Only applicable for non-mail folders. Read Only, Since 7.4.0.|
 | 318 | account_id |String|Will be null if the folder does not belong to any account (i.e. if its module doesn't support multiple accounts), is a virtual folder or an account-agnostic system folder. Since 7.8.0.|
 | 319 | folder_name |String|The raw and therefore untranslated name of this folder|
@@ -411,16 +411,18 @@ specific field data of single or multiple objects.
 ||attachments | Array | Each element is an attachment as described in [Attachment](#attachment). The first element is the mail text. If the mail has multiple representations (multipart-alternative), then the alternatives are placed after the mail text and have the field disp set to alternative.|
 ||nested_msgs | Array | Each element is a mail object as described in this table, except for fields id, folder_id and attachment.|
 ||truncated | boolean | true/false if the mail content was trimmed. Since v7.6.1|
-||source | String | RFC822 source of the mail. Only present for action=get&attach_src=true|
+||source | String | RFC822 source of the mail. Only present for ``action=get&attach_src=true``|
 ||cid | String | The value of the "Content-ID" header, if the header is present.|
 |654 | original_id | String | The original mail identifier (e.g. if fetched from "virtual/all" folder).|
-|655 | original_folder_id | String | The original folder identifier (e.g. if fetched from "virtual/all" folder).|
-|656 | content_type | String | The Content-Type of a mail; e.g. multipart/mixed; boundary="-0123456abcdefg--".|
+|655 | original\_folder_id | String | The original folder identifier (e.g. if fetched from "virtual/all" folder).|
+|656 | content_type | String | The Content-Type of a mail; e.g. ``multipart/mixed; boundary="-0123456abcdefg--"``.|
 |657 | answered | String | Special field to sort mails by answered status.|
 |658 | forwarded | String | Special field to sort mails by forwarded status. Note that mail service needs either support a \Forwarded system flag or a $Forwarded user flag |
 |659 | draft | String | Special field to sort mails by draft flag.|
 |660 | flagged | String | Special field to sort mails by flagged status.|
 |661 | date | String | The date of a mail message. As configured, either the internal received date or mail's sent date (as given by <code>"Date"</code> header). Supposed to be the replacement for ``sent_date`` (609) or ``received_date`` (610) to let the Open-Xchange Middleware decide based on configuration for ``com.openexchange.mail.preferSentDate`` property what to consider. Supported at both - ``columns`` parameter and ``sort`` parameter.|
+|662 | text\_preview\_if_available | String | A mail's text preview. Only returned if immediately available from mail server. An empty string signals that mail has no body content. ``NULL`` signals not available.|
+|662 | text_preview | String | A mail's text preview. An empty string signals that mail has no body content. Might be slow.|
 
 ### Mail system flags
 

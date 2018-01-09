@@ -54,21 +54,15 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import com.google.common.collect.ImmutableSet;
-import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IExecutorService;
+import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.Member;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
@@ -190,82 +184,31 @@ public class SessionManagementServiceImpl implements SessionManagementService {
             return Collections.emptyList();
         }
 
-        Cluster cluster = hzInstance.getCluster();
-
-        // Get local member
-        Member localMember = cluster.getLocalMember();
-
         // Determine other cluster members
-        Set<Member> otherMembers = getOtherMembers(cluster.getMembers(), localMember);
+        Set<Member> otherMembers = Hazelcasts.getRemoteMembers(hzInstance);
         if (otherMembers.isEmpty()) {
             return Collections.emptyList();
         }
-        IExecutorService executor = hzInstance.getExecutorService("default");
-        Map<Member, Future<PortableSessionCollection>> futureMap = executor.submitToMembers(new PortableMultipleSessionRemoteLookUp(session.getUserId(), session.getContextId()), otherMembers);
-        for (Iterator<Entry<Member, Future<PortableSessionCollection>>> it = futureMap.entrySet().iterator(); it.hasNext();) {
-            Future<PortableSessionCollection> future = it.next().getValue();
-            // Check Future's return value
-            int retryCount = 3;
-            while (retryCount-- > 0) {
-                try {
-                    PortableSessionCollection portableSessionCollection = future.get();
-                    retryCount = 0;
 
-                    PortableSession[] portableSessions = portableSessionCollection.getSessions();
-                    if (null != portableSessions) {
-                        return Arrays.asList(portableSessions);
-                    }
-                } catch (InterruptedException e) {
-                    // Interrupted - Keep interrupted state
-                    Thread.currentThread().interrupt();
-                } catch (CancellationException e) {
-                    // Canceled
-                    retryCount = 0;
-                } catch (ExecutionException e) {
-                    Throwable cause = e.getCause();
-
-                    // Check for Hazelcast timeout
-                    if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
-                        if (cause instanceof RuntimeException) {
-                            throw ((RuntimeException) cause);
-                        }
-                        if (cause instanceof Error) {
-                            throw (Error) cause;
-                        }
-                        throw new IllegalStateException("Not unchecked", cause);
-                    }
-
-                    // Timeout while awaiting remote result
-                    if (retryCount <= 0) {
-                        // No further retry
-                        cancelFutureSafe(future);
-                    }
+        try {
+            Map<Member, PortableSessionCollection> collectionsByMember = Hazelcasts.executeByMembers(new PortableMultipleSessionRemoteLookUp(session.getUserId(), session.getContextId()), otherMembers, hzInstance);
+            List<PortableSession> remoteSessions = new ArrayList<>(16);
+            for (PortableSessionCollection portableSessionCollection : collectionsByMember.values()) {
+                PortableSession[] portableSessions = portableSessionCollection.getSessions();
+                if (null != portableSessions) {
+                    remoteSessions.addAll(Arrays.asList(portableSessions));
                 }
             }
-        }
-        return Collections.emptyList();
-
-    }
-
-    private Set<Member> getOtherMembers(Set<Member> allMembers, Member localMember) {
-        Set<Member> otherMembers = new LinkedHashSet<Member>(allMembers);
-        if (!otherMembers.remove(localMember)) {
-            LOG.warn("Couldn't remove local member from cluster members.");
-        }
-        return otherMembers;
-    }
-
-    /**
-     * Cancels given {@link Future} safely
-     *
-     * @param future The {@code Future} to cancel
-     */
-    static <V> void cancelFutureSafe(Future<V> future) {
-        if (null != future) {
-            try {
-                future.cancel(true);
-            } catch (Exception e) {
-            /* Ignore */}
+            return remoteSessions;
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof RuntimeException) {
+                throw ((RuntimeException) cause);
+            }
+            if (cause instanceof Error) {
+                throw (Error) cause;
+            }
+            throw new IllegalStateException("Not unchecked", cause);
         }
     }
 

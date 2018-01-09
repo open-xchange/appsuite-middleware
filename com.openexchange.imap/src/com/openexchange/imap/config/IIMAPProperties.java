@@ -47,7 +47,6 @@
  *
  */
 
-
 package com.openexchange.imap.config;
 
 import java.util.Map;
@@ -209,6 +208,13 @@ public interface IIMAPProperties extends IMailProperties {
      * @return The SSL cipher suites
      */
     public String getSSLCipherSuites();
+
+    /**
+     * Checks if attachment search is enabled.
+     * 
+     * @return <code>true</code> if attachment search is enabled for the underlying IMAP; otherwise <code>false</code>
+     */
+    public boolean isAttachmentSearchEnabled();
 
     /**
      * Gets the map holding IMAP servers with new ACL Extension.

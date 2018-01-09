@@ -563,6 +563,21 @@ public class ConsistencyTest {
         protected SortedSet<String> getPreviewCacheFileStoreLocationsPerContext(Context ctx) throws OXException {
             return new TreeSet<String>();
         }
+
+        @Override
+        protected SortedSet<String> getSnippetFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
+            return new TreeSet<String>();
+        }
+
+        @Override
+        protected SortedSet<String> getPreviewCacheFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
+            return new TreeSet<String>();
+        }
+
+        @Override
+        protected SortedSet<String> getVCardFileStoreLocationsPerUser(Context ctx, User user) throws OXException {
+            return new TreeSet<String>();
+        }
     }
 
 }

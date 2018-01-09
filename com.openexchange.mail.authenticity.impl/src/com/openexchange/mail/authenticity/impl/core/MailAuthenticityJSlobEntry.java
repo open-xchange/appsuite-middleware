@@ -65,7 +65,8 @@ import com.openexchange.session.Session;
  */
 public class MailAuthenticityJSlobEntry implements JSlobEntry {
 
-    private static final String NAME = "authenticityEnabled";
+    private static final String NAME = "authenticity";
+    private static final String KEY = JSlobKeys.MAIL + "/features";
     private final ServiceLookup services;
 
     /**
@@ -83,7 +84,7 @@ public class MailAuthenticityJSlobEntry implements JSlobEntry {
      */
     @Override
     public String getKey() {
-        return JSlobKeys.MAIL;
+        return KEY;
     }
 
     /*

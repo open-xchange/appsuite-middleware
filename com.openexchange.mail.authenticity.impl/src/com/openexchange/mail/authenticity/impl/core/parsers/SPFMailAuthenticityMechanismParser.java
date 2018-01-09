@@ -50,6 +50,7 @@
 package com.openexchange.mail.authenticity.impl.core.parsers;
 
 import java.util.Map;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
@@ -87,11 +88,14 @@ public class SPFMailAuthenticityMechanismParser extends AbstractMailAuthenticity
      * @see com.openexchange.mail.authenticity.impl.core.AbstractMailAuthenticityMechanismParser#createResult(java.lang.String, com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult, java.lang.String, boolean, java.util.Map)
      */
     @Override
-    MailAuthenticityMechanismResult createResult(String domain, AuthenticityMechanismResult mechResult, String mechanismName, boolean domainMismatch, Map<String, String> attributes) {
+    MailAuthenticityMechanismResult createResult(String domain, AuthenticityMechanismResult mechResult, String mechanismName, boolean domainMatch, Map<String, String> attributes) {
         SPFAuthMechResult result = new SPFAuthMechResult(domain, (SPFResult) mechResult);
         result.setReason(extractComment(mechanismName));
-        result.setDomainMatch(!domainMismatch);
-        addProperties(attributes, result);
+        result.setDomainMatch(domainMatch);
+        result.addProperty("mail_from", result.getDomain());
+        if (!Strings.isEmpty(result.getClientIP())) {
+            result.addProperty("client_ip", result.getClientIP());
+        }
         return result;
     }
 }

@@ -52,8 +52,7 @@ package com.openexchange.mail.authenticity.impl.core.parsers;
 import java.util.Map;
 import java.util.function.BiFunction;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.authenticity.DefaultMailAuthenticityResultKey;
-import com.openexchange.mail.authenticity.MailAuthenticityStatus;
+import com.openexchange.mail.authenticity.MailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.mechanism.AbstractAuthMechResult;
 import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
@@ -81,7 +80,7 @@ abstract class AbstractMailAuthenticityMechanismParser implements BiFunction<Map
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.util.function.BiFunction#apply(java.lang.Object, java.lang.Object)
      */
     @Override
@@ -90,15 +89,15 @@ abstract class AbstractMailAuthenticityMechanismParser implements BiFunction<Map
         AuthenticityMechanismResult authenticityMechanismResult = parseMechanismResult(extractOutcome(value.toUpperCase()));
 
         String domain = extractDomain(attributes, domainHeaders);
-        boolean domainMismatch = checkDomainMismatch(overallResult, domain);
+        boolean domainMatch = checkDomainMatch(overallResult, domain);
 
-        return createResult(domain, authenticityMechanismResult, value, domainMismatch, attributes);
+        return createResult(domain, authenticityMechanismResult, value, domainMatch, attributes);
     }
 
     /**
      * Parses the specified value to a valid {@link AuthenticityMechanismResult} via the {@link Enum#valueOf(Class, String)}
      * method of the corresponding {@link AuthenticityMechanismResult}
-     * 
+     *
      * @param value The value
      * @return The {@link AuthenticityMechanismResult}
      * @throws IllegalArgumenException if an invalid value is passed as argument
@@ -107,29 +106,28 @@ abstract class AbstractMailAuthenticityMechanismParser implements BiFunction<Map
 
     /**
      * Creates a new {@link MailAuthenticityMechanismResult} with the specified domain, {@link AuthenticityMechanismResult}, mechanism name
-     * 
+     *
      * @param domain The domain
      * @param mechResult the {@link AuthenticityMechanismResult}
      * @param mechanismName The mechanism's name (may contain a comment in parenthesis)
-     * @param domainMismatch Whether there is a domain mismatch
+     * @param domainMatch Whether there is a domain match
      * @param attributes
      * @return The new {@link MailAuthenticityMechanismResult}
      */
-    abstract MailAuthenticityMechanismResult createResult(String domain, AuthenticityMechanismResult mechResult, String mechanismName, boolean domainMismatch, Map<String, String> attributes);
+    abstract MailAuthenticityMechanismResult createResult(String domain, AuthenticityMechanismResult mechResult, String mechanismName, boolean domainMatch, Map<String, String> attributes);
 
     /**
-     * Checks whether there is a domain mismatch between the domain extracted from the <code>From</code> header
-     * and the domain extracted from the authenticity mechanism. If there is a mismatch the overall status
-     * is set to {@link MailAuthenticityStatus#NEUTRAL} and <code>true</code> is returned. Otherwise
-     * no further action is performed and <code>false</code> is returned.
+     * Checks whether there is a domain match between the domain extracted from the <code>From</code> header
+     * and the domain extracted from the authenticity mechanism. In case of a match <code>true</code> is returned,
+     * otherwise <code>false</code>.
      *
      * @param overallResult The overall {@link MailAuthenticityResult}
      * @param domain The domain extracted from the mechanism result
-     * @return <code>true</code> if there is a mismatch between the domains, <code>false</code> otherwise
+     * @return <code>true</code> if there is a match between the domains, <code>false</code> otherwise
      */
-    private boolean checkDomainMismatch(MailAuthenticityResult overallResult, String domain) {
-        String fromDomain = overallResult.getAttribute(DefaultMailAuthenticityResultKey.FROM_DOMAIN, String.class);
-        return !fromDomain.equals(domain);
+    private boolean checkDomainMatch(MailAuthenticityResult overallResult, String domain) {
+        String fromDomain = overallResult.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN, String.class);
+        return fromDomain.equals(domain);
     }
 
     /**
@@ -142,7 +140,7 @@ abstract class AbstractMailAuthenticityMechanismParser implements BiFunction<Map
     private String extractDomain(Map<String, String> attributes, String... keys) {
         for (String key : keys) {
             String value = attributes.get(key);
-            if (!Strings.isEmpty(value)) {
+            if (Strings.isNotEmpty(value)) {
                 return cleanseDomain(value);
             }
         }

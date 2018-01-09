@@ -53,6 +53,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.mail.authenticity.MailAuthenticityAttribute;
 
 /**
@@ -63,11 +65,13 @@ import com.openexchange.mail.authenticity.MailAuthenticityAttribute;
 @SuppressWarnings("unchecked")
 final class StringUtil {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(StringUtil.class);
+
     private static interface CollectorAdder {
 
         /**
          * Adds the specified key/value to the specified {@link T} collector
-         * 
+         *
          * @param key The key
          * @param value The value
          * @param collector The {@link T} collector
@@ -98,22 +102,22 @@ final class StringUtil {
 
     /**
      * Parses the specified element as a key/value {@link Map}
-     * 
+     *
      * @param element The element to parse
      * @return A {@link Map} with the key/value attributes of the element
      */
-    static Map<String, String> parseMap(String element) {
+    static Map<String, String> parseMap(CharSequence element) {
         Map<String, String> mapCollector = new HashMap<>();
         return parseToCollector(element, mapCollector);
     }
 
     /**
      * Parses the specified element as a {@link List} of {@link MailAuthenticityAttribute}s
-     * 
+     *
      * @param element The element to parse
      * @return a {@link List} with the {@link MailAuthenticityAttribute}s
      */
-    static List<MailAuthenticityAttribute> parseList(String element) {
+    static List<MailAuthenticityAttribute> parseList(CharSequence element) {
         List<MailAuthenticityAttribute> listCollector = new ArrayList<>();
         return parseToCollector(element, listCollector);
     }
@@ -124,11 +128,11 @@ final class StringUtil {
      * @param element The element to parse
      * @return A {@link T} with the key/value attributes of the element
      */
-    private static <T> T parseToCollector(String element, T collector) {
+    private static <T> T parseToCollector(CharSequence element, T collector) {
         // No pairs; return as a singleton collector with the line being both the key and the value
-        if (!element.contains("=")) {
-            //pairs.put(element, element);
-            add(element, element, collector);
+        if (!element.toString().contains("=")) {
+            String kv = element.toString();
+            add(kv, kv, collector);
             return collector;
         }
 
@@ -137,12 +141,18 @@ final class StringUtil {
         String key = null;
         boolean valueMode = false;
         boolean backtracking = false;
+        boolean comment = false;
         int backtrackIndex = 0;
         for (int index = 0; index < element.length();) {
             char c = element.charAt(index);
             switch (c) {
                 case '=':
                     if (valueMode) {
+                        if (comment) {
+                            valueBuffer.append(c);
+                            index++;
+                            break;
+                        }
                         // A key found while in value mode, so we backtrack
                         backtracking = true;
                         valueMode = false;
@@ -155,11 +165,24 @@ final class StringUtil {
                         index++;
                     }
                     break;
+                case '(':
+                    if (valueMode) {
+                        comment = true;
+                        valueBuffer.append(c);
+                        index++;
+                    }
+                    break;
+                case ')':
+                    if (valueMode) {
+                        comment = false;
+                        valueBuffer.append(c);
+                        index++;
+                    }
+                    break;
                 case ' ':
                     if (!valueMode) {
                         //Remove the key from the value buffer
                         valueBuffer.setLength(valueBuffer.length() - backtrackIndex);
-                        //pairs.put(key, valueBuffer.toString().trim());
                         add(key, valueBuffer.toString().trim(), collector);
                         // Retain the new key (and reverse if that key came from backtracking)
                         key = backtracking ? keyBuffer.reverse().toString() : keyBuffer.toString();
@@ -202,7 +225,7 @@ final class StringUtil {
 
     /**
      * Adds the specified key/value to the specified {@link T} collector
-     * 
+     *
      * @param key The key
      * @param value The value
      * @param collector The {@link T} collector
@@ -222,19 +245,31 @@ final class StringUtil {
      * @param header The header to split
      * @return A {@link List} with the split elements
      */
-    static List<String> splitElements(String header) {
+    static List<String> splitElements(CharSequence header) {
+        LOGGER.debug("Splitting header: {}", header);
+        long start = System.currentTimeMillis();
+        
         List<String> split = new ArrayList<>();
         boolean openQuotes = false;
+        boolean openParenthesis = false;
         StringBuilder lineBuffer = new StringBuilder(128);
         for (int index = 0; index < header.length(); index++) {
             char c = header.charAt(index);
             switch (c) {
+                case '(':
+                    openParenthesis = true;
+                    lineBuffer.append(c);
+                    break;
+                case ')':
+                    openParenthesis = false;
+                    lineBuffer.append(c);
+                    break;
                 case '"':
                     openQuotes = !openQuotes;
                     lineBuffer.append(c);
                     break;
                 case ';':
-                    if (!openQuotes) {
+                    if (!openQuotes && !openParenthesis) {
                         split.add(lineBuffer.toString().trim());
                         lineBuffer.setLength(0);
                         break;
@@ -247,6 +282,7 @@ final class StringUtil {
         if (lineBuffer.length() > 0) {
             split.add(lineBuffer.toString().trim());
         }
+        LOGGER.trace("Header '{}' split in {} msec.", header, System.currentTimeMillis() - start);
         return split;
     }
 }

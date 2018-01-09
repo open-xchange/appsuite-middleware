@@ -53,7 +53,6 @@ import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -63,7 +62,6 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
@@ -98,6 +96,7 @@ import com.openexchange.sessiond.serialization.PortableUserSessionsCleanerFactor
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
+import com.openexchange.user.UserService;
 
 /**
  * {@link SessiondActivator} - Activator for sessiond bundle.
@@ -314,6 +313,7 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
             track(TimerService.class, new TimerServiceTracker(context));
             track(SessionStorageService.class, new SessionStorageServiceTracker(this, context));
             trackService(ContextService.class);
+            trackService(UserService.class);
             track(SessionSerializationInterceptor.class, new SessionSerializationInterceptorTracker(context));
             openTrackers();
 

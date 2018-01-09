@@ -50,9 +50,14 @@
 package com.openexchange.groupware.infostore;
 
 import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -65,13 +70,41 @@ public class InfostoreDelete implements DeleteListener {
 
     @Override
     public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
-        if (event.getType() != DeleteEvent.TYPE_USER) {
-            return;
+        if (event.getType() == DeleteEvent.TYPE_USER) {
+            InfostoreFacade database = new InfostoreFacadeImpl(new SimpleDBProvider(readCon, writeCon));
+            database.setTransactional(true);
+            database.setCommitsTransaction(false);
+            Integer destUser = event.getDestinationUserID();
+            database.removeUser(event.getId(), event.getContext(), destUser, ServerSessionAdapter.valueOf(event.getSession(), event.getContext()));
+        } else if (event.getType() == DeleteEvent.TYPE_CONTEXT) {
+            deleteContext(event, writeCon);
         }
-        InfostoreFacade database = new InfostoreFacadeImpl(new SimpleDBProvider(readCon, writeCon));
-        database.setTransactional(true);
-        database.setCommitsTransaction(false);
-        Integer destUser = event.getDestinationUserID();
-        database.removeUser(event.getId(), event.getContext(), destUser, ServerSessionAdapter.valueOf(event.getSession(), event.getContext()));
     }
+
+    /**
+     * Delete a context from tasks module.
+     */
+    private void deleteContext(DeleteEvent event, Connection writeCon) throws OXException {
+        Context ctx = event.getContext();
+        Statement stmt = null;
+        try {
+            stmt = writeCon.createStatement();
+
+            stmt.addBatch("DELETE FROM del_infostore_document WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM del_infostore WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM lock_null_lock WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM lock_null WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM infostore_lock WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM infostore_property WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM infostore_document WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM infostore WHERE cid=" + ctx.getContextId());
+
+            stmt.executeBatch();
+        } catch (final SQLException e) {
+            throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
+
 }

@@ -77,7 +77,12 @@ public enum MailAuthenticityProperty implements Property {
      *
      * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.2">RFC-7601, Section 2.2</a>
      */
-    AUTHSERV_ID("authServId", "");
+    AUTHSERV_ID("authServId", ""),
+    /**
+     * Defines whether metrics of the core handler will be logged for future assertion purposes.
+     * Disabled by default.
+     */
+    LOG_METRICS("logMetrics", false);
 
     private final Object defaultValue;
     private final String fqn;

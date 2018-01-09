@@ -58,9 +58,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
@@ -94,9 +96,6 @@ import com.openexchange.java.Strings;
  */
 public class UpgradeSchemata extends UtilAbstraction {
 
-    /**
-     * TYPE_ABORT_TO_ABORT_THE_UPGRADE_PROCESS_OR_CONTINUE_TO_PROCEED_ABORT_CONTINUE
-     */
     private static final String PROMPT = "Type 'abort' to abort the upgrade process, or 'continue' to proceed ['abort'/'continue']:";
     private static final String ABORT = "abort";
     private static final String CONTINUE = "continue";
@@ -223,24 +222,28 @@ public class UpgradeSchemata extends UtilAbstraction {
      * Lists all known schemata
      * 
      * @return The known schemata
-     * @throws RemoteException
-     * @throws StorageException
-     * @throws InvalidCredentialsException
-     * @throws InvalidDataException
+     * @throws RemoteException See {@link OXUtilInterface#listDatabaseSchema(String, Boolean, Credentials)}
+     * @throws StorageException See {@link OXUtilInterface#listDatabaseSchema(String, Boolean, Credentials)}
+     * @throws InvalidCredentialsException See {@link OXUtilInterface#listDatabaseSchema(String, Boolean, Credentials)}
+     * @throws InvalidDataException See {@link OXUtilInterface#listDatabaseSchema(String, Boolean, Credentials)}
      */
     private Database[] listSchemata() throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        Database[] databases = oxUtil.listDatabaseSchema("*", false, credentials);
+        Database[] databases = oxUtil.listDatabaseSchema("*", Boolean.FALSE, credentials);
         if (Strings.isEmpty(startFromSchema) || databases.length == 1) {
             return databases[0].getScheme().equals(startFromSchema) ? new Database[0] : databases;
         }
 
-        Comparator<Database> comparator = (o1, o2) -> o1.getName().compareTo(o2.getName());
+        // Sort arithmetically, that is by integer suffix of each database schema
+        Comparator<Database> comparator = (o1, o2) -> {
+            Integer i1 = Integer.parseInt(o1.getScheme().substring(o1.getScheme().indexOf('_') + 1));
+            Integer i2 = Integer.parseInt(o2.getScheme().substring(o2.getScheme().indexOf('_') + 1));
+            return i1.compareTo(i2);
+        };
         Arrays.sort(databases, comparator);
         int position = Arrays.binarySearch(databases, new Database(-1, startFromSchema), comparator);
         if (position < 0) {
             return filterSchemata(databases, comparator);
         }
-
         System.out.println("Skipping to schema '" + startFromSchema + "'");
         return filterSchemata(Arrays.copyOfRange(databases, position + 1, databases.length), comparator);
     }
@@ -254,21 +257,30 @@ public class UpgradeSchemata extends UtilAbstraction {
      */
     private Database[] filterSchemata(Database[] databases, Comparator<Database> comparator) {
         System.out.print("Filtering out skipped schemata: ");
-        
-        List<Database> databasesList = Arrays.asList(databases);
+
+        Set<Integer> indexesToSkip = new HashSet<>();
         StringBuilder sb = new StringBuilder();
         for (String schema : skippedSchemata) {
             sb.append("'").append(schema).append("', ");
             int position = Arrays.binarySearch(databases, new Database(-1, schema), comparator);
-            if (position > 0) {
-                databasesList.remove(position);
+            if (position >= 0) {
+                // Remember database position to be skipped
+                indexesToSkip.add(position);
             }
         }
-        
+
+        // Copy array and skip relevant databases
+        Database[] filtered = new Database[databases.length - indexesToSkip.size()];
+        for (int i = 0, j = 0; i < databases.length && j < filtered.length; i++) {
+            if (false == indexesToSkip.contains(Integer.valueOf(i))) {
+                filtered[j++] = databases[i];
+            }
+        }
+
         sb.setLength(sb.length() - 2);
         System.out.println(sb.toString());
-        
-        return databasesList.toArray(new Database[databasesList.size()]);
+
+        return filtered;
     }
 
     /**
@@ -516,7 +528,7 @@ public class UpgradeSchemata extends UtilAbstraction {
         jmxPasswordNameOption = setShortLongOpt(parser, 's', "password", "The optional JMX password (if JMX has authentication enabled)", true, NeededQuadState.possibly);
         schemaNameOption = setShortLongOpt(parser, 'm', "schema-name", "The optional schema name to continue from", true, NeededQuadState.possibly);
         forceOption = setShortLongOpt(parser, 'f', "force", "Forces the upgrade even if the updates fail in some schemata", false, NeededQuadState.notneeded);
-        skipOption = setShortLongOpt(parser, 'k', "skip-schemata", "Defines the names of the schemata as a comma separated list that should be skipped during the upgrde phase", true, NeededQuadState.possibly);
+        skipOption = setShortLongOpt(parser, 'k', "skip-schemata", "Defines the names of the schemata as a comma separated list that should be skipped during the upgrade phase", true, NeededQuadState.possibly);
 
         setDefaultCommandLineOptionsWithoutContextID(parser);
     }

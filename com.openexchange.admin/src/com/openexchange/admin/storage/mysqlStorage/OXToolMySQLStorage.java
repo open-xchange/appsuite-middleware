@@ -52,7 +52,6 @@ package com.openexchange.admin.storage.mysqlStorage;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
@@ -216,7 +215,31 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      */
     @Override
     public boolean existsContext(final Context ctx) throws StorageException {
-        return selectwithint(-1, "SELECT cid FROM context WHERE cid = ?;", ctx.getId().intValue());
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getReadConnectionForConfigDB();
+            stmt = con.prepareStatement("SELECT 1 FROM context WHERE cid = ?");
+            stmt.setInt(1, ctx.getId().intValue());
+            rs = stmt.executeQuery();
+            return rs.next();
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (final SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e.toString());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            if (null != con) {
+                try {
+                    cache.pushReadConnectionForConfigDB(con);
+                } catch (final PoolException e) {
+                    log.error("Error pushing connection to pool!", e);
+                }
+            }
+        }
     }
 
     /*
@@ -315,7 +338,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
 
             if (null != con) {
                 try {
@@ -991,7 +1014,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             if (null != con) {
                 try {
                     cache.pushReadConnectionForConfigDB(con);
@@ -1235,7 +1258,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
 
             if (null != con) {
                 try {
@@ -1312,7 +1335,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             try {
                 cache.pushConnectionForContextAfterReading(i(ctx.getId()), con);
             } catch (PoolException e) {
@@ -1390,7 +1413,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
 
             if (null != con) {
                 try {
@@ -1798,7 +1821,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
-            closeSQLStuff(result, stmt);
+            Databases.closeSQLStuff(result, stmt);
         }
     }
 
@@ -2159,7 +2182,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("SQL Error", e);
             throw new StorageException(e.toString());
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             try {
                 cache.pushReadConnectionForConfigDB(con);
             } catch (final PoolException e) {
@@ -2682,7 +2705,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
-            closeSQLStuff(result, stmt);
+            Databases.closeSQLStuff(result, stmt);
             if (null != con) {
                 try {
                     cache.pushConnectionForContextAfterReading(contextId, con);
@@ -2725,7 +2748,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
-            closeSQLStuff(result, stmt);
+            Databases.closeSQLStuff(result, stmt);
             if (null != con) {
                 try {
                     cache.pushConnectionForContextAfterReading(contextId, con);
@@ -3006,7 +3029,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         } catch (SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             try {
                 cache.pushReadConnectionForConfigDB(con);
             } catch (PoolException e) {
@@ -3036,7 +3059,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
-            closeSQLStuff(result, stmt);
+            Databases.closeSQLStuff(result, stmt);
             if (null != con) {
                 try {
                     cache.pushConnectionForContextAfterReading(contextId, con);
@@ -3085,7 +3108,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
-            closeSQLStuff(result, stmt);
+            Databases.closeSQLStuff(result, stmt);
             if (null != con) {
                 try {
                     cache.pushConnectionForContextAfterReading(contextId, con);
@@ -3096,7 +3119,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     *
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#isLastContextInSchema(com.openexchange.admin.rmi.dataobjects.Context)
      */
     @Override
@@ -3111,14 +3136,12 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             // Fetch the schema name
             stmt = con.prepareStatement("SELECT db_schema FROM context_server2db_pool WHERE cid = ?");
             stmt.setInt(1, contextId);
-
             result = stmt.executeQuery();
-
             String schemaName;
             if (result.next()) {
                 schemaName = result.getString(1);
             } else {
-                throw new InvalidDataException("The specified context '" + contextId + "' is does not exist in any known database schema.");
+                throw new InvalidDataException("The specified context '" + contextId + "' does not exist in any known database schema.");
             }
             stmt.close();
             result.close();
@@ -3126,15 +3149,12 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             // Count the contexts that the schema contains
             stmt = con.prepareStatement("SELECT COUNT(cid) FROM context_server2db_pool WHERE db_schema = ?");
             stmt.setString(1, schemaName);
-
             result = stmt.executeQuery();
-
             if (result.next()) {
                 int count = result.getInt(1);
                 return count == 1;
-            } else {
-                throw new InvalidDataException("The specified schema '" + schemaName + "' does not exist.");
             }
+            throw new InvalidDataException("The specified schema '" + schemaName + "' does not exist.");
         } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
@@ -3142,7 +3162,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
-            closeSQLStuff(result, stmt);
+            Databases.closeSQLStuff(result, stmt);
             if (null != con) {
                 try {
                     cache.pushReadConnectionForConfigDB(con);

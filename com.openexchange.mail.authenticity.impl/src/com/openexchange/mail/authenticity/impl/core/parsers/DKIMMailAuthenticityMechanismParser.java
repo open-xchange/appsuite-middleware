@@ -88,15 +88,15 @@ public class DKIMMailAuthenticityMechanismParser extends AbstractMailAuthenticit
      * @see com.openexchange.mail.authenticity.impl.core.AbstractMailAuthenticityMechanismParser#createResult(java.lang.String, com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult, java.lang.String, boolean, java.util.Map)
      */
     @Override
-    MailAuthenticityMechanismResult createResult(String domain, AuthenticityMechanismResult mechResult, String mechanismName, boolean domainMismatch, Map<String, String> attributes) {
+    MailAuthenticityMechanismResult createResult(String domain, AuthenticityMechanismResult mechResult, String mechanismName, boolean domainMatch, Map<String, String> attributes) {
         DKIMAuthMechResult result = new DKIMAuthMechResult(domain, (DKIMResult) mechResult);
         String reason = extractComment(mechanismName);
         if (Strings.isEmpty(reason)) {
             reason = Strings.unquote(attributes.remove(DKIMResultHeader.REASON));
         }
         result.setReason(reason);
-        result.setDomainMatch(!domainMismatch);
-        addProperties(attributes, result);
+        result.setDomainMatch(domainMatch);
+        result.addProperty("signing_domain", result.getDomain());
         return result;
     }
 }

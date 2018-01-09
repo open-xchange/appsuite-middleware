@@ -25,3 +25,6 @@ properties:
     type: integer
     format: int64
     description: The optionally set expiry date for "anonymous" entities.
+  isInherited:
+    type: boolean
+    description: A flag indicating whether the permissions is inherited from the parent folder or not. The client must not allow the user to delete or update inherited permissions.

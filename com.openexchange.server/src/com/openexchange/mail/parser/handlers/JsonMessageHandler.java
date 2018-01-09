@@ -96,8 +96,9 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.attachment.AttachmentToken;
 import com.openexchange.mail.attachment.AttachmentTokenConstants;
 import com.openexchange.mail.attachment.AttachmentTokenService;
+import com.openexchange.mail.authenticity.CustomPropertyJsonHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityResultKey;
-import com.openexchange.mail.authenticity.TrustedMailResultKey;
+import com.openexchange.mail.authenticity.MailAuthenticityStatus;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
@@ -107,6 +108,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.SecurityInfo;
 import com.openexchange.mail.dataobjects.SecurityResult;
 import com.openexchange.mail.dataobjects.SignatureResult;
+import com.openexchange.mail.json.osgi.MailJSONActivator;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
@@ -166,7 +168,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private static final String SECURITY = MailJSONField.SECURITY.getKey();
     private static final String SECURITY_INFO = MailJSONField.SECURITY_INFO.getKey();
     private static final String TEXT_PREVIEW = MailJSONField.TEXT_PREVIEW.getKey();
-    private static final String AUTHENTICATION_RESULTS = MailJSONField.AUTHENTICATION_RESULTS.getKey();
+    private static final String AUTHENTICATION_RESULTS = MailJSONField.AUTHENTICITY.getKey();
 
     private static final String TRUNCATED = MailJSONField.TRUNCATED.getKey();
     private static final String SANITIZED = "sanitized";
@@ -175,8 +177,6 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private static final String MULTIPART_ID = "___MP-ID___";
 
     private static final String HTML_PREFIX = HtmlExceptionCodes.PREFIX;
-
-    //    private static final int DEFAULT_MAX_NESTED_MESSAGES_LEVELS = 10;
 
     private static final class PlainTextContent {
 
@@ -287,7 +287,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * @throws OXException If JSON message handler cannot be initialized
      */
     public JsonMessageHandler(int accountId, String mailPath, DisplayMode displayMode, boolean embedded, boolean asMarkup, Session session, UserSettingMail usm, boolean token, int ttlMillis) throws OXException {
-        this(accountId, new MailPath(mailPath), null, displayMode, true, embedded, asMarkup, session, usm, getContext(session), token, ttlMillis, -1, -1);
+        this(accountId, new MailPath(mailPath), null, displayMode, true, embedded, asMarkup, session, usm, getContext(session), token, ttlMillis, -1);
     }
 
     /**
@@ -304,7 +304,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * @throws OXException If JSON message handler cannot be initialized
      */
     public JsonMessageHandler(int accountId, String mailPath, DisplayMode displayMode, boolean sanitize, boolean embedded, boolean asMarkup, Session session, UserSettingMail usm, boolean token, int ttlMillis) throws OXException {
-        this(accountId, new MailPath(mailPath), null, displayMode, sanitize, embedded, asMarkup, session, usm, getContext(session), token, ttlMillis, -1, -1);
+        this(accountId, new MailPath(mailPath), null, displayMode, sanitize, embedded, asMarkup, session, usm, getContext(session), token, ttlMillis, -1);
     }
 
     /**
@@ -323,7 +323,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * @throws OXException If JSON message handler cannot be initialized
      */
     public JsonMessageHandler(int accountId, MailPath mailPath, MailMessage mail, DisplayMode displayMode, boolean embedded, boolean asMarkup, Session session, UserSettingMail usm, boolean token, int ttlMillis) throws OXException {
-        this(accountId, mailPath, mail, displayMode, true, embedded, asMarkup, session, usm, getContext(session), token, ttlMillis, -1, -1);
+        this(accountId, mailPath, mail, displayMode, true, embedded, asMarkup, session, usm, getContext(session), token, ttlMillis, -1);
     }
 
     /**
@@ -343,7 +343,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * @throws OXException If JSON message handler cannot be initialized
      */
     public JsonMessageHandler(int accountId, MailPath mailPath, MailMessage mail, DisplayMode displayMode, boolean sanitize, boolean embedded, boolean asMarkup, Session session, UserSettingMail usm, boolean token, int ttlMillis) throws OXException {
-        this(accountId, mailPath, mail, displayMode, sanitize, embedded, asMarkup, session, usm, getContext(session), token, ttlMillis, -1, -1);
+        this(accountId, mailPath, mail, displayMode, sanitize, embedded, asMarkup, session, usm, getContext(session), token, ttlMillis, -1);
     }
 
     /**
@@ -365,7 +365,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * @throws OXException If JSON message handler cannot be initialized
      */
     public JsonMessageHandler(int accountId, MailPath mailPath, MailMessage mail, DisplayMode displayMode, boolean sanitize, boolean embedded, boolean asMarkup, Session session, UserSettingMail usm, boolean token, int ttlMillis, int maxContentSize, int maxNestedMessageLevels) throws OXException {
-        this(accountId, mailPath, mail, displayMode, sanitize, embedded, asMarkup, session, usm, getContext(session), token, ttlMillis, maxContentSize, maxNestedMessageLevels);
+        this(accountId, mailPath, mail, displayMode, sanitize, embedded, asMarkup, session, usm, getContext(session), token, ttlMillis, maxContentSize);
     }
 
     private static Context getContext(final Session session) throws OXException {
@@ -378,7 +378,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     /**
      * Initializes a new {@link JsonMessageHandler} for internal usage
      */
-    private JsonMessageHandler(int accountId, MailPath mailPath, MailMessage mail, DisplayMode displayMode, boolean sanitize, boolean embedded, boolean asMarkup, Session session, UserSettingMail usm, Context ctx, boolean token, int ttlMillis, int maxContentSize, int maxNestedMessageLevels) throws OXException {
+    private JsonMessageHandler(int accountId, MailPath mailPath, MailMessage mail, DisplayMode displayMode, boolean sanitize, boolean embedded, boolean asMarkup, Session session, UserSettingMail usm, Context ctx, boolean token, int ttlMillis, int maxContentSize) throws OXException {
         super();
         this.warnings = new LinkedList<>();
         this.multiparts = new LinkedList<MultipartInfo>();
@@ -397,7 +397,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         this.mailPath = mailPath;
         this.maxContentSize = maxContentSize;
         this.jsonObject = new JSONObject(32);
-        this.maxNestedMessageLevels = 1; //maxNestedMessageLevels <= 0 ? DEFAULT_MAX_NESTED_MESSAGES_LEVELS : maxNestedMessageLevels;
+        this.maxNestedMessageLevels = 1;
         try {
             if (DisplayMode.MODIFYABLE.equals(this.displayMode) && null != mailPath) {
                 jsonObject.put(MailJSONField.MSGREF.getKey(), mailPath.toString());
@@ -432,7 +432,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     jsonObject.put(TEXT_PREVIEW, mail.getTextPreview());
                 }
                 MailAuthenticityResult mailAuthenticityResult = mail.getAuthenticityResult();
-                jsonObject.put(AUTHENTICATION_RESULTS, null == mailAuthenticityResult ? JSONObject.NULL : JsonMessageHandler.authenticationMechanismResultsToJson(mailAuthenticityResult));
+                jsonObject.put(AUTHENTICATION_RESULTS, null == mailAuthenticityResult ? JSONObject.EMPTY_OBJECT : JsonMessageHandler.authenticationMechanismResultsToJson(mailAuthenticityResult));
                 // Guard info
                 if (mail.containsSecurityInfo()) {
                     SecurityInfo securityInfo = mail.getSecurityInfo();
@@ -520,37 +520,39 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * Creates the JSON representation of the essential information for the specified {@link MailAuthenticityResult} instance.
      * That is the <code>status</code> and the <code>trustedDomain</code> (if present)
      *
-     * @param authenticationResult The authentication result to create the JSON representation for
-     * @return The JSON representation
+     * @param authenticityResult The authenticity result to create the JSON representation for
+     * @return The JSON representation or an empty {@link JSONObject} if no authenticity result available
      * @throws JSONException If JSON representation cannot be returned
      */
-    public static JSONObject authenticationOverallResultToJson(MailAuthenticityResult authenticationResult) throws JSONException {
-        if (null == authenticationResult) {
-            return null;
+    public static JSONObject authenticityOverallResultToJson(MailAuthenticityResult authenticityResult) throws JSONException {
+        if (null == authenticityResult) {
+            return JSONObject.EMPTY_OBJECT;
         }
 
         JSONObject result = new JSONObject(2);
-        result.put("status", authenticationResult.getStatus().getTechnicalName());
-        if (authenticationResult.getAttribute(TrustedMailResultKey.TRUSTED_MAIL) != null) {
-            result.put(TrustedMailResultKey.TRUSTED_MAIL.getKey(), authenticationResult.getAttribute(TrustedMailResultKey.TRUSTED_MAIL));
+        result.put("status", authenticityResult.getStatus().getTechnicalName());
+        if (MailAuthenticityStatus.TRUSTED.equals(authenticityResult.getStatus()) && authenticityResult.getAttribute(MailAuthenticityResultKey.IMAGE) != null) {
+            result.put("image", authenticityResult.getAttribute(MailAuthenticityResultKey.IMAGE));
         }
         return result;
     }
 
     /**
-     * Creates the JSON representation for specified <code>MailAuthenticationResult</code> instance.
+     * Creates the JSON representation for specified <code>MailAuthenticityResult</code> instance.
      *
-     * @param authenticationResult The authentication result to create the JSON representation for
-     * @return The JSON representation
+     * @param authenticityResult The authenticity result to create the JSON representation for
+     * @return The JSON representation or an empty {@link JSONObject} if no authenticity result available
      * @throws JSONException If JSON representation cannot be returned
      */
+    @SuppressWarnings("unchecked")
     public static JSONObject authenticationMechanismResultsToJson(MailAuthenticityResult authenticityResult) throws JSONException {
         if (null == authenticityResult) {
-            return null;
+            return JSONObject.EMPTY_OBJECT;
         }
 
         Map<MailAuthenticityResultKey, Object> attributes = authenticityResult.getAttributes();
         JSONObject result = new JSONObject(attributes.size());
+        JSONArray unconsideredResults = new JSONArray();
         for (MailAuthenticityResultKey key : attributes.keySet()) {
             if (!key.isVisible()) {
                 continue;
@@ -558,30 +560,38 @@ public final class JsonMessageHandler implements MailMessageHandler {
             Object object = attributes.get(key);
             if (object instanceof Collection<?>) {
                 Collection<?> col = (Collection<?>) object;
-                JSONArray array = new JSONArray(col.size());
+
                 for (Object o : col) {
                     if (o instanceof MailAuthenticityMechanismResult) {
                         MailAuthenticityMechanismResult mechResult = (MailAuthenticityMechanismResult) o;
                         JSONObject mailAuthMechResultJson = new JSONObject();
-                        mailAuthMechResultJson.put("mechanism", mechResult.getMechanism().getTechnicalName());
                         mailAuthMechResultJson.put("result", mechResult.getResult().getTechnicalName());
                         mailAuthMechResultJson.put("reason", mechResult.getReason());
                         for (String k : mechResult.getProperties().keySet()) {
                             mailAuthMechResultJson.put(k, mechResult.getProperties().get(k));
                         }
-                        array.put(mailAuthMechResultJson);
+                        result.put(mechResult.getMechanism().getTechnicalName(), mailAuthMechResultJson);
                     } else if (o instanceof Map) {
-                        array.put(JSONCoercion.coerceToJSON(o));
+                        unconsideredResults.put(JSONCoercion.coerceToJSON(o));
                     } else {
-                        array.put(o);
+                        unconsideredResults.put(o);
                     }
                 }
-                result.put(key.getKey(), array);
             } else {
                 result.put(key.getKey(), object);
             }
         }
+        if (MailAuthenticityStatus.TRUSTED.equals(authenticityResult.getStatus()) && authenticityResult.getAttribute(MailAuthenticityResultKey.IMAGE) != null) {
+            result.put("image", authenticityResult.getAttribute(MailAuthenticityResultKey.IMAGE));
+        }
+        result.put("unconsidered_results", unconsideredResults);
         result.put("status", authenticityResult.getStatus().getTechnicalName());
+
+        CustomPropertyJsonHandler customPropertyJsonHandler = MailJSONActivator.SERVICES.get().getOptionalService(CustomPropertyJsonHandler.class);
+        if(customPropertyJsonHandler != null) {
+            result.put("custom", customPropertyJsonHandler.toJson(authenticityResult.getAttribute(MailAuthenticityResultKey.CUSTOM_PROPERTIES, Map.class)));
+        }
+
         return result;
     }
 
@@ -1509,7 +1519,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 }
 
                 // Generate a dedicated JsonMessageHandler instance to parse the nested message
-                JsonMessageHandler msgHandler = new JsonMessageHandler(accountId, null, null, displayMode, sanitize, embedded, asMarkup, session, usm, ctx, token, ttlMillis, maxContentSize, maxNestedMessageLevels);
+                JsonMessageHandler msgHandler = new JsonMessageHandler(accountId, null, null, displayMode, sanitize, embedded, asMarkup, session, usm, ctx, token, ttlMillis, maxContentSize);
                 msgHandler.setTimeZone(timeZone);
                 msgHandler.includePlainText = includePlainText;
                 msgHandler.attachHTMLAlternativePart = attachHTMLAlternativePart;

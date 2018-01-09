@@ -51,12 +51,21 @@ package com.openexchange.oauth.impl.internal;
 
 import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_PERMISSION_DENIED;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
 import javax.servlet.http.HttpServletRequest;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.Hazelcasts;
+import com.hazelcast.core.IExecutorService;
+import com.hazelcast.core.Member;
 import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
 import com.openexchange.oauth.CallbackRegistry;
 import com.openexchange.oauth.OAuthConstants;
+import com.openexchange.oauth.impl.internal.hazelcast.PortableCallbackRegistryFetch;
+import com.openexchange.oauth.impl.services.Services;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link CallbackRegistryImpl}
@@ -65,6 +74,9 @@ import com.openexchange.oauth.OAuthConstants;
  */
 public class CallbackRegistryImpl implements CustomRedirectURLDetermination, Runnable, CallbackRegistry {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CallbackRegistryImpl.class);
+
+    /** A value kept in managed map */
     private static final class UrlAndStamp {
 
         final String callbackUrl;
@@ -74,6 +86,17 @@ public class CallbackRegistryImpl implements CustomRedirectURLDetermination, Run
             super();
             this.callbackUrl = callbackUrl;
             this.stamp = stamp;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder(128);
+            builder.append("[");
+            if (callbackUrl != null) {
+                builder.append("callbackUrl=").append(callbackUrl).append(", ");
+            }
+            builder.append("stamp=").append(stamp).append("]");
+            return builder.toString();
         }
     }
 
@@ -112,31 +135,56 @@ public class CallbackRegistryImpl implements CustomRedirectURLDetermination, Run
         String token = req.getParameter("oauth_token");
         if (null != token) {
             // By OAuth token
-            UrlAndStamp urlAndStamp = tokenMap.remove(token);
-            return null == urlAndStamp ? null : urlAndStamp.callbackUrl;
+            return getByToken(token);
         }
 
         token = req.getParameter("state");
         if (null != token && token.startsWith("__ox")) {
-            // By state parameter
-            UrlAndStamp urlAndStamp = tokenMap.remove(token);
-            return null == urlAndStamp ? null : urlAndStamp.callbackUrl;
+            return getByToken(token);
         }
 
         token = req.getParameter("denied");
         if (null != token) {
             // Denied...
-            UrlAndStamp urlAndStamp = tokenMap.remove(token);
-            if (null == urlAndStamp) {
+            String callbackUrl = getByToken(token);
+            if (null == callbackUrl) {
                 return null;
             }
-            StringBuilder callback = new StringBuilder(urlAndStamp.callbackUrl);
-            callback.append(urlAndStamp.callbackUrl.indexOf('?') > 0 ? '&' : '?');
+
+            StringBuilder callback = new StringBuilder(callbackUrl);
+            callback.append(callbackUrl.indexOf('?') > 0 ? '&' : '?');
             callback.append(OAuthConstants.URLPARAM_OAUTH_PROBLEM).append('=').append(OAUTH_PROBLEM_PERMISSION_DENIED);
             return callback.toString();
         }
 
         return null;
+    }
+
+    private String getByToken(String token) {
+        UrlAndStamp urlAndStamp = tokenMap.remove(token);
+        if (null != urlAndStamp) {
+            // Local hit
+            return urlAndStamp.callbackUrl;
+        }
+
+        // Try remote look-up
+        HazelcastInstance hazelcastInstance = Services.optService(HazelcastInstance.class);
+        return null == hazelcastInstance ? null : tryGetByTokenFromRemote(token, hazelcastInstance);
+    }
+
+    /**
+     * Gets the call-back URL by specified token
+     *
+     * @param token The token
+     * @return The associated call-back URL or <code>null</code>
+     */
+    public String getLocalUrlByToken(String token) {
+        if (null == token) {
+            return null;
+        }
+
+        UrlAndStamp urlAndStamp = tokenMap.remove(token);
+        return null == urlAndStamp ? null : urlAndStamp.callbackUrl;
     }
 
     @Override
@@ -152,6 +200,44 @@ public class CallbackRegistryImpl implements CustomRedirectURLDetermination, Run
         } catch (final Exception e) {
             final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CallbackRegistryImpl.class);
             logger.error("", e);
+        }
+    }
+
+    /**
+     * Tries to obtain the call-back URL associated with given token from remote nodes (if any)
+     *
+     * @param token The token to look-up
+     * @param hazelcastInstance The Hazelcast instance to use
+     * @return The remotely looked-up call-back URL or <code>null</code>
+     */
+    private String tryGetByTokenFromRemote(String token, HazelcastInstance hazelcastInstance) {
+        // Determine other cluster members
+        Set<Member> otherMembers = Hazelcasts.getRemoteMembers(hazelcastInstance);
+        if (otherMembers.isEmpty()) {
+            return null;
+        }
+
+        Hazelcasts.Filter<String, String> filter = new Hazelcasts.Filter<String, String>() {
+
+            @Override
+            public String accept(String callbackUrl) {
+                return callbackUrl;
+            }
+        };
+
+        ThreadPoolService threadPool = Services.optService(ThreadPoolService.class);
+        IExecutorService executor = hazelcastInstance.getExecutorService("default");
+        try {
+            return Hazelcasts.executeByMembersAndFilter(new PortableCallbackRegistryFetch(token), otherMembers, executor, filter, threadPool.getExecutor());
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof RuntimeException) {
+                throw ((RuntimeException) cause);
+            }
+            if (cause instanceof Error) {
+                throw (Error) cause;
+            }
+            throw new IllegalStateException("Not unchecked", cause);
         }
     }
 

@@ -77,10 +77,14 @@ public enum MailField {
      */
     FOLDER_ID(MailListField.FOLDER_ID),
     /**
-     * The Content-Type; includes whether message contains attachments or not<br>
+     * Whether message contains attachments or not<br>
+     */
+    ATTACHMENT(MailListField.ATTACHMENT),
+    /**
+     * The Content-Type
      * <b>[low cost]</b>
      */
-    CONTENT_TYPE(MailListField.ATTACHMENT),
+    CONTENT_TYPE(MailListField.CONTENT_TYPE),
     /**
      * The MIME type<br>
      * <b>[low cost]</b>
@@ -207,13 +211,16 @@ public enum MailField {
     TEXT_PREVIEW(MailListField.TEXT_PREVIEW),
     /**
      * The message's authentication overall result (light version); maps to <code>"Authentication-Results"</code> header
+     * 
+     * @since v7.10.0
      */
     AUTHENTICATION_OVERALL_RESULT(MailListField.AUTHENTICATION_OVERALL_RESULT),
     /**
      * The message's authentication mechanism results (heavy version); maps to <code>"Authentication-Results"</code> header
+     * 
+     * @since v7.10.0
      */
     AUTHENTICATION_MECHANISM_RESULTS(MailListField.AUTHENTICATION_MECHANISM_RESULTS),
-
     ;
 
     private static final EnumMap<MailListField, MailField> LIST_FIELDS_MAP = new EnumMap<MailListField, MailField>(MailListField.class);
@@ -241,7 +248,7 @@ public enum MailField {
      * ID, FOLDER_ID, CONTENT_TYPE, FROM, TO, CC, BCC, SUBJECT, SIZE, SENT_DATE, RECEIVED_DATE, FLAGS, THREAD_LEVEL,
      * DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL
      */
-    public static final MailField[] FIELDS_LOW_COST = { ID, FOLDER_ID, CONTENT_TYPE, MIME_TYPE, FROM, TO, CC, BCC, SUBJECT, SIZE, SENT_DATE, RECEIVED_DATE, FLAGS, THREAD_LEVEL, DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL };
+    public static final MailField[] FIELDS_LOW_COST = { ID, FOLDER_ID, ATTACHMENT, CONTENT_TYPE, MIME_TYPE, FROM, TO, CC, BCC, SUBJECT, SIZE, SENT_DATE, RECEIVED_DATE, FLAGS, THREAD_LEVEL, DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL };
 
     /**
      * All fields except {@link #BODY} and {@link #FULL}.
@@ -249,7 +256,7 @@ public enum MailField {
      * ID, FOLDER_ID, CONTENT_TYPE, FROM, TO, CC, BCC, SUBJECT, SIZE, SENT_DATE, RECEIVED_DATE, FLAGS, THREAD_LEVEL,
      * DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL, HEADERS
      */
-    public static final MailField[] FIELDS_WO_BODY = { ID, FOLDER_ID, CONTENT_TYPE, MIME_TYPE, FROM, TO, CC, BCC, SUBJECT, SIZE, SENT_DATE, RECEIVED_DATE, FLAGS, THREAD_LEVEL, DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL, HEADERS };
+    public static final MailField[] FIELDS_WO_BODY = { ID, FOLDER_ID, ATTACHMENT, CONTENT_TYPE, MIME_TYPE, FROM, TO, CC, BCC, SUBJECT, SIZE, SENT_DATE, RECEIVED_DATE, FLAGS, THREAD_LEVEL, DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL, HEADERS };
 
     private final MailListField listField;
 

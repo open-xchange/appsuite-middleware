@@ -50,7 +50,6 @@
 package com.openexchange.mail.authenticity;
 
 import java.util.Collection;
-import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
@@ -70,13 +69,12 @@ public interface MailAuthenticityHandler {
      * Handles the specified mail message. Extracts the mail headers from the mail message
      * and checks if the 'Authentication-Results' header is present. If it is, then parses that header
      * and collects the results of the different {@link MailAuthenticityMechanism}s that might be present
-     * in a {@link MailAuthenticityResult} object and returns that
+     * in a {@link MailAuthenticityResult} object.
      *
      * @param session The session providing user data
      * @param mailMessage The mail message to handle
-     * @throws OXException If checking/verifying mail authenticity fails
      */
-    void handle(Session session, MailMessage mailMessage) throws OXException;
+    void handle(Session session, MailMessage mailMessage);
 
     /**
      * Returns an unmodifiable collection with all additionally required mail fields beside mandatory {@link MailField#AUTHENTICATION_OVERALL_RESULT} or {@link MailField#AUTHENTICATION_MECHANISM_RESULTS}

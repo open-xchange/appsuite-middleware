@@ -74,6 +74,25 @@ import com.openexchange.groupware.tasks.Task;
  */
 public class Bug56435Test_TaskStateRoundtrip extends ManagedTaskTest {
 
+	private final String ical =
+			  "BEGIN:VCALENDAR\n"
+			+ "PRODID:Open-Xchange\n"
+			+ "VERSION:2.0\n"
+			+ "CALSCALE:GREGORIAN\n"
+			+ "METHOD:PUBLISH\n"
+			+ "BEGIN:VTODO\n"
+			+ "DTSTAMP:20171212T141546Z\n"
+			+ "SUMMARY:WAITING testTask1513088134715\n"
+			+ "DTSTART:20171212T141542Z\n"
+			+ "DUE:20171212T141542Z\n"
+			+ "CLASS:PUBLIC\n"
+			+ "STATUS;X-RANDOM-STATUS=PARALYZED:CANCELLED\n"
+			+ "UID:573f19d6-645d-45f7-9f47-e93dedae57c9\n"
+			+ "CREATED:20171212T141545Z\n"
+			+ "LAST-MODIFIED:20171212T141545Z\n"
+			+ "END:VTODO\n"
+			+ "END:VCALENDAR";
+
 	@Test
 	public void testTaskWaitingStateRoundtrip() throws OXException, IOException, JSONException {
 		final String title = "WAITING testTask" + System.currentTimeMillis();
@@ -83,14 +102,14 @@ public class Bug56435Test_TaskStateRoundtrip extends ManagedTaskTest {
         taskObj.setStartDate(new Date());
         taskObj.setEndDate(new Date());
         taskObj.setParentFolderID(folderID);
-        taskObj.setStatus(4);
+        taskObj.setStatus(Task.WAITING);
 
         ttm.insertTaskOnServer(taskObj);
 
         ICalExportResponse response = getClient().execute(new ICalExportRequest(folderID));
         String iCal = response.getICal();
         assertTrue(iCal.contains(title));
-        assertTrue(iCal.contains("X-OX-STATUS:WAITING"));
+        assertTrue(iCal.contains("STATUS;X-OX-STATUS=WAITING:CANCELLED"));
 
         Task[] tasks = ttm.getAllTasksOnServer(folderID);
         assertEquals(1, tasks.length);
@@ -101,11 +120,21 @@ public class Bug56435Test_TaskStateRoundtrip extends ManagedTaskTest {
         final ICalImportRequest request = new ICalImportRequest(folderID, new ByteArrayInputStream(iCal.toString().getBytes(com.openexchange.java.Charsets.UTF_8)), false);
         getClient().execute(request);
 
-        getClient().execute(new ICalExportRequest(folderID));
         tasks = ttm.getAllTasksOnServer(folderID);
         assertEquals(1, tasks.length);
         task = tasks[0];
         assertEquals(4, task.getStatus());
+	}
+
+	@Test
+	public void testTaskStatusWithUnknownParameters() throws OXException, IOException, JSONException {
+		final ICalImportRequest request = new ICalImportRequest(folderID, new ByteArrayInputStream(ical.toString().getBytes(com.openexchange.java.Charsets.UTF_8)), false);
+		getClient().execute(request);
+
+		Task[] tasks = ttm.getAllTasksOnServer(folderID);
+		assertEquals(1, tasks.length);
+        Task task = tasks[0];
+        assertEquals(Task.DEFERRED, task.getStatus());
 	}
 
 }

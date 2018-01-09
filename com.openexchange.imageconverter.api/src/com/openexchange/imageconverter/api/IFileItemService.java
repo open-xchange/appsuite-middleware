@@ -20,16 +20,41 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface IFileItemService {
 
     /**
-     * Registering a key or a list of keys for a specific group,
+     * {@link DatabaseType}
+     *
+     * @author <a href="mailto:kai.ahrens@open-xchange.com">Kai Ahrens</a>
+     * @since v7.10.0
+     */
+    public enum DatabaseType {
+        /**
+         * A database, that supports only standard SQL queries.
+         */
+        STANDARD_SQL,
+
+        /**
+         * A database, that supports standard SQL queries as well as MySQL specific queries.
+         */
+        MYSQL
+    }
+
+    /**
+     * Retrieving the type of database, internally used to store and retrieve file metadata.
+     *
+     * @return The {@link DatabaseType}.
+     */
+    public DatabaseType getDatabaseType();
+
+    /**
+     * Registering a group and potential custom keys for this specific group,
      * that can be used as user defined properties of a FileItem for the group.
-     * The registering of keys needs to be done prior to the usage of that key
-     * when accessing the {@link IFileItemReadAccess#getKeyValue(String)}
-     *q
+     * The registering of groups and keys needs to be done prior to the usage of
+     * that group and key(s) when accessing the {@link IFileItemReadAccess#getKeyValue(String)}
+     *
      * @param groupId The groupId to register the key for
      * @param keyNames The key(s) to be used as user defined properties
      * @throws FileItemException
      */
-    public void registerCustomKeys(final String groupId, final String... customKeyN) throws FileItemException;
+    public void registerGroup(final String groupId, final String... customKeyN) throws FileItemException;
 
     /**
      * Getting the array of custom keys, registered for a specific group.
@@ -71,6 +96,16 @@ public interface IFileItemService {
      */
     public boolean containsSubGroup(final String groupId, final String subGroupId) throws FileItemException;
 
+    /**
+     * Querying, if a file is contained in the collection.
+     *
+     * @param groupId
+     * @param subGroupId
+     * @return true, if the collections contains the group-subgroup with the given ids
+     * @throws FileItemException
+     */
+    public boolean contains(final String groupId, final String subGroupId, final String fileId) throws FileItemException;
+
     // -------------------------------------------------------------------------
 
     /**
@@ -101,6 +136,24 @@ public interface IFileItemService {
      * @throws FileItemException
      */
     public IFileItem[] get(final String groupId, final Properties properties) throws FileItemException;
+
+    /**
+     * Getting all {@link IFileItem} interfaces that are selected
+     * by the customQuery SQL string.
+     * The query has to be created with returning all following columns
+     * of the appropriate FileItem database table(s) in the correct order
+     *
+     *  1. FileContent.FileStoreNumber
+     *  2. FileContent.FileStoreId
+     *  3. FileContent.GroupId
+     *  4. FileContent.SubGroupId
+     *  5. FileContent.FileId
+     *
+     * @param customSqlStatement
+     * @return
+     * @throws FileItemException
+     */
+    public IFileItem[] getByCustomQuery(final String customQuery, Object... returnValues) throws FileItemException;
 
     /**
      * Getting the number of distinct subgroup ids.

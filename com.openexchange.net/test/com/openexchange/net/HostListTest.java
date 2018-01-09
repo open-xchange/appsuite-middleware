@@ -59,6 +59,7 @@ import static org.junit.Assert.*;
  * @since v7.8.2
  */
 public class HostListTest {
+
     /**
      * Initializes a new {@link HostListTest}.
      */
@@ -66,22 +67,22 @@ public class HostListTest {
         super();
     }
 
-         @Test
-     public void testValueOf_hostlistEmpty_returnEmpty() {
+    @Test
+    public void testValueOf_hostlistEmpty_returnEmpty() {
         HostList hl = HostList.valueOf("");
 
         assertTrue(hl.equals(HostList.EMPTY));
     }
 
-         @Test
-     public void testValueOf_hostlistNull_returnEmpty() {
+    @Test
+    public void testValueOf_hostlistNull_returnEmpty() {
         HostList hl = HostList.valueOf(null);
 
         assertTrue(hl.equals(HostList.EMPTY));
     }
 
-         @Test
-     public void testContains_containsEmpty_returnFalse() {
+    @Test
+    public void testContains_containsEmpty_returnFalse() {
         HostList hl = HostList.valueOf("");
 
         boolean contains = hl.contains("");
@@ -89,8 +90,8 @@ public class HostListTest {
         assertFalse(contains);
     }
 
-         @Test
-     public void testContains_containsNull_returnEmpty() {
+    @Test
+    public void testContains_containsNull_returnEmpty() {
         HostList hl = HostList.valueOf(null);
 
         boolean contains = hl.contains((String) null);
@@ -98,8 +99,8 @@ public class HostListTest {
         assertFalse(contains);
     }
 
-         @Test
-     public void testHostListv4() {
+    @Test
+    public void testHostListv4() {
         try {
             HostList hl = HostList.valueOf("192.168.0.1, localhost, *.open-xchange.com");
 
@@ -119,8 +120,8 @@ public class HostListTest {
         }
     }
 
-         @Test
-     public void testHostListv4_throwsException() {
+    @Test
+    public void testHostListv4_throwsException() {
         try {
             HostList.valueOf("**.open-xchange.com");
         } catch (Exception e) {
@@ -128,8 +129,8 @@ public class HostListTest {
         }
     }
 
-         @Test
-     public void testHostListv4_throwsException2() {
+    @Test
+    public void testHostListv4_throwsException2() {
         try {
             HostList.valueOf("*");
         } catch (Exception e) {
@@ -137,8 +138,8 @@ public class HostListTest {
         }
     }
 
-         @Test
-     public void testHostListv4_throwsException3() {
+    @Test
+    public void testHostListv4_throwsException3() {
         try {
             HostList.valueOf("test.*.com");
         } catch (Exception e) {
@@ -146,8 +147,8 @@ public class HostListTest {
         }
     }
 
-         @Test
-     public void testHostListv4Ranges() {
+    @Test
+    public void testHostListv4Ranges() {
         try {
             HostList hl = HostList.valueOf("127.0.0.1-127.255.255.255, 10.20.30.1-10.20.30.255");
 
@@ -168,8 +169,8 @@ public class HostListTest {
         }
     }
 
-         @Test
-     public void testHostListv4CIDRRanges() {
+    @Test
+    public void testHostListv4CIDRRanges() {
         try {
             HostList hl = HostList.valueOf("192.168.0.1/16");
 
@@ -184,8 +185,8 @@ public class HostListTest {
         }
     }
 
-         @Test
-     public void testHostListv6() {
+    @Test
+    public void testHostListv6() {
         try {
             HostList hl = HostList.valueOf("::1, FE80:0000:0000:0000:0202:B3FF:FE1E:8329, ");
 
@@ -202,8 +203,8 @@ public class HostListTest {
         }
     }
 
-         @Test
-     public void testHostListv6SimilarityCheck() {
+    @Test
+    public void testHostListv6SimilarityCheck() {
         //        all the same
         //        2001:cdba:0000:0000:0000:0000:3257:9652
         //        2001:cdba:0:0:0:0:3257:9652
@@ -222,8 +223,8 @@ public class HostListTest {
         }
     }
 
-         @Test
-     public void testHostListv6SimilarityCheck2() {
+    @Test
+    public void testHostListv6SimilarityCheck2() {
         //      all the same
         //      2001:cdba:0000:0000:0000:0000:3257:9652
         //      2001:cdba:0:0:0:0:3257:9652
@@ -242,8 +243,8 @@ public class HostListTest {
         }
     }
 
-         @Test
-     public void testHostListv6Ranges() {
+    @Test
+    public void testHostListv6Ranges() {
         try {
             HostList hl = HostList.valueOf("2001:DB8::64-2001:DB8::C8");
 
@@ -260,8 +261,8 @@ public class HostListTest {
         }
     }
 
-         @Test
-     public void testHostListv6CIDRRanges() {
+    @Test
+    public void testHostListv6CIDRRanges() {
         try {
             HostList hl = HostList.valueOf("2001:DB1::0/120");
 
@@ -278,8 +279,8 @@ public class HostListTest {
         }
     }
 
-         @Test
-     public void testHostListFailToParse() {
+    @Test
+    public void testHostListFailToParse() {
         try {
             String hostList = "www.google.*";
             HostList.valueOf(hostList);
@@ -292,14 +293,43 @@ public class HostListTest {
         }
     }
 
-         @Test
-     public void testHostListFailToParse2() {
+    @Test
+    public void testHostListFailToParse2() {
         try {
             String hostList = "*.open-xchange.*";
             HostList.valueOf(hostList);
             fail("Host list did not fail to parse: " + hostList);
         } catch (IllegalArgumentException e) {
             // Expected
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testForBug56558() {
+        try {
+            HostList hl = HostList.valueOf("192.168.0.10");
+
+            String shl = hl.toString();
+            assertNotNull("Host-list's string representation is null", shl);
+
+            assertTrue(hl.contains("192.168.10")); // 16 bit
+            assertTrue(hl.contains("192.11010058")); // 24 bit
+            assertTrue(hl.contains("3232235530")); // 32 bit
+
+            // Octal
+            assertTrue(hl.contains("0300.0250.00.012")); // 8 bit
+            assertTrue(hl.contains("0300.0250.012")); // 16 bit
+            assertTrue(hl.contains("0300.052000012")); // 24 bit
+            assertTrue(hl.contains("030052000012")); // 32 bit
+
+            // Hexadecimal
+            assertTrue(hl.contains("0xc0.0xa8.0x0.0xa")); // 8 bit
+            assertTrue(hl.contains("0xc0.0xa8.0xa")); // 16 bit
+            assertTrue(hl.contains("0xc0.0xa8000a")); // 24 bit
+            assertTrue(hl.contains("0xc0a8000a")); // 32 bit
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

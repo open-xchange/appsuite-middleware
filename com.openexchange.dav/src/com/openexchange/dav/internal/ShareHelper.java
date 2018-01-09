@@ -67,7 +67,7 @@ import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.AbstractFolder;
-import com.openexchange.folderstorage.DefaultPermission;
+import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -280,7 +280,7 @@ public class ShareHelper {
      * @return The permission
      */
     private static Permission createReadWritePermission(PrincipalURL principal) {
-        DefaultPermission permission = new DefaultPermission();
+        BasicPermission permission = new BasicPermission();
         permission.setEntity(principal.getPrincipalID());
         permission.setGroup(CUType.GROUP.equals(principal.getType()));
         permission.setAllPermissions(Permission.CREATE_OBJECTS_IN_FOLDER, Permission.READ_ALL_OBJECTS, Permission.WRITE_ALL_OBJECTS, Permission.DELETE_ALL_OBJECTS);
@@ -296,7 +296,7 @@ public class ShareHelper {
      * @return The permission
      */
     private static Permission createReadOnlyPermission(PrincipalURL principal) {
-        DefaultPermission permission = new DefaultPermission();
+        BasicPermission permission = new BasicPermission();
         permission.setEntity(principal.getPrincipalID());
         permission.setGroup(CUType.GROUP.equals(principal.getType()));
         permission.setAllPermissions(Permission.READ_FOLDER, Permission.READ_ALL_OBJECTS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS);

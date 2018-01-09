@@ -114,6 +114,16 @@ public enum DefaultMailAuthenticityMechanism implements MailAuthenticityMechanis
         return technicalName;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism#getCode()
+     */
+    @Override
+    public int getCode() {
+        return ordinal();
+    }
+
     /**
      * Converts the specified string to a {@link DefaultMailAuthenticityMechanism}
      *

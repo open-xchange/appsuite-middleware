@@ -71,7 +71,15 @@ public enum MailAuthenticityStatus {
     /**
      * Nothing has been analyzed
      */
-    NOT_ANALYZED("Not Analyzed", "not-analyzed");
+    NOT_ANALYZED("Not Analyzed", "not-analyzed"),
+    /**
+     * None (explicitly used for mail before the defined cut-off-date)
+     */
+    NONE("None", "none"),
+    /**
+     * Passed authentication status is also from a trusted mail address
+     */
+    TRUSTED("Trusted", "trusted");
 
     private final String displayName;
     private final String technicalName;

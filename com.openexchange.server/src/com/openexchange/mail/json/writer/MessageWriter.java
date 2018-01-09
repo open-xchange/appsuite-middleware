@@ -553,9 +553,9 @@ public final class MessageWriter {
             public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     MailAuthenticityResult mailAuthenticityResult = mail.getAuthenticityResult();
-                    Object value = null == mailAuthenticityResult ? JSONObject.NULL : JsonMessageHandler.authenticationOverallResultToJson(mailAuthenticityResult);
+                    Object value = null == mailAuthenticityResult ? JSONObject.EMPTY_OBJECT : JsonMessageHandler.authenticityOverallResultToJson(mailAuthenticityResult);
                     if (withKey) {
-                        jsonContainer.toObject().put(MailJSONField.AUTHENTICATION_RESULTS.getKey(), value);
+                        jsonContainer.toObject().put(MailJSONField.AUTHENTICITY.getKey(), value);
                     } else {
                         jsonContainer.toArray().put(value);
                     }
@@ -570,9 +570,9 @@ public final class MessageWriter {
             public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     MailAuthenticityResult mailAuthenticityResult = mail.getAuthenticityResult();
-                    Object value = null == mailAuthenticityResult ? JSONObject.NULL : JsonMessageHandler.authenticationMechanismResultsToJson(mailAuthenticityResult);
+                    Object value = null == mailAuthenticityResult ? JSONObject.EMPTY_OBJECT : JsonMessageHandler.authenticationMechanismResultsToJson(mailAuthenticityResult);
                     if (withKey) {
-                        jsonContainer.toObject().put(MailJSONField.AUTHENTICATION_RESULTS.getKey(), value);
+                        jsonContainer.toObject().put(MailJSONField.AUTHENTICITY.getKey(), value);
                     } else {
                         jsonContainer.toArray().put(value);
                     }

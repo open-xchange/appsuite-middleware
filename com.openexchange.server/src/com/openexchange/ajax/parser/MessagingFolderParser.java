@@ -60,8 +60,8 @@ import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.messaging.MessagingFolderIdentifier;
 import com.openexchange.folderstorage.messaging.contentType.MessagingContentType;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -174,7 +174,7 @@ public final class MessagingFolderParser {
                     }
                     final int entity = elem.getInt(FolderFields.ENTITY);
 
-                    final Permission oclPerm = new CalculatePermission.DummyPermission();
+                    final Permission oclPerm = new BasicPermission();
                     oclPerm.setEntity(entity);
                     if (!elem.has(FolderFields.BITS)) {
                         throw MessagingExceptionCodes.MISSING_PARAMETER.create(FolderFields.BITS);

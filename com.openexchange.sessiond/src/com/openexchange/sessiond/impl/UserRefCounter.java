@@ -58,53 +58,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  * {@link UserRefCounter}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class UserRefCounter {
 
-    /** A counter wrapping an <code>AtomicInteger</code> instance, but implements hashcode()/equals() for safe removal from <code>ConcurrentMap</code> */
-    private static final class Counter {
-
-        private final AtomicInteger count;
-
-        Counter() {
-            super();
-            count = new AtomicInteger(0);
-        }
-
-        int incrementAndGet() {
-            return count.incrementAndGet();
-        }
-
-        int decrementAndGet() {
-            return count.decrementAndGet();
-        }
-
-        int get() {
-            return count.get();
-        }
-
-        @Override
-        public int hashCode() {
-            int prime = 31;
-            return prime * 1 + count.get();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!(obj instanceof Counter)) {
-                return false;
-            }
-            Counter other = (Counter) obj;
-            return count.get() == other.count.get();
-        }
-    }
-
-    // ------------------------------------------------------------------------------------------
-
-    private final ConcurrentMap<Integer, ConcurrentMap<Integer, Counter>> longTermUserGuardian;
+    private final ConcurrentMap<Integer, ConcurrentMap<Integer, AtomicInteger>> longTermUserGuardian;
 
     /**
      * Initializes a new {@link UserRefCounter}.
@@ -114,67 +72,75 @@ public class UserRefCounter {
         longTermUserGuardian = new ConcurrentHashMap<>(256, 0.9F, 1);
     }
 
-    public void add(final int uid, final int cid) {
-        Integer iContextId = Integer.valueOf(cid);
-        ConcurrentMap<Integer, Counter> counters = longTermUserGuardian.get(iContextId);
+    public void add(int userId, int contextId) {
+        Integer iContextId = Integer.valueOf(contextId);
+        ConcurrentMap<Integer, AtomicInteger> counters = longTermUserGuardian.get(iContextId);
         if (null == counters) {
-            ConcurrentMap<Integer, Counter> newCounters = new ConcurrentHashMap<>(16, 0.9F, 1);
+            ConcurrentMap<Integer, AtomicInteger> newCounters = new ConcurrentHashMap<>(16, 0.9F, 1);
             counters = longTermUserGuardian.putIfAbsent(iContextId, newCounters);
             if (null == counters) {
                 counters = newCounters;
             }
         }
 
-        Integer iUserId = Integer.valueOf(uid);
-        Counter counter = counters.get(iUserId);
-        if (null == counter) {
-            Counter nuCounter = new Counter();
-            counter = counters.putIfAbsent(iUserId, nuCounter);
+        Integer iUserId = Integer.valueOf(userId);
+        while (true) {
+            AtomicInteger counter = counters.get(iUserId);
             if (null == counter) {
-                counter = nuCounter;
+                AtomicInteger nuCounter = new AtomicInteger(1);
+                counter = counters.putIfAbsent(iUserId, nuCounter);
+                if (null == counter) {
+                    // This thread was able to put the new counter with initial count of 1
+                    return;
+                }
             }
+            if (counter.getAndIncrement() > 0) {
+                return;
+            }
+            // Became invalid in the meantime: Revert the increment & retry
+            counter.decrementAndGet();
         }
-        counter.incrementAndGet();
     }
 
-    public void remove(final int uid, final int cid) {
-        Integer iContextId = Integer.valueOf(cid);
-        ConcurrentMap<Integer, Counter> counters = longTermUserGuardian.get(iContextId);
+    public void remove(int userId, int contextId) {
+        ConcurrentMap<Integer, AtomicInteger> counters = longTermUserGuardian.get(Integer.valueOf(contextId));
         if (null == counters) {
             return;
         }
 
-        Integer iUserId = Integer.valueOf(uid);
-        Counter counter = counters.get(iUserId);
+        Integer iUserId = Integer.valueOf(userId);
+        AtomicInteger counter = counters.get(iUserId);
         if (null == counter) {
             return;
         }
 
         if (counter.decrementAndGet() <= 0) {
-            // Try to remove counter atomically (remove if equal to zero-count)
-            if (counters.remove(iUserId, new Counter())) {
-                // Counter was removed. Check if counter map is empty now.
-                if (counters.isEmpty()) {
-                    // Try to remove counter map atomically, that is if it is is equal to an empty map
-                    longTermUserGuardian.remove(iContextId, new ConcurrentHashMap<>(0, 0.9F, 1));
-                }
-            }
+            // Remove counter
+            counters.remove(iUserId);
         }
     }
 
-    public boolean contains(final int cid) {
-        return longTermUserGuardian.containsKey(Integer.valueOf(cid));
-    }
-
-    public boolean contains(final int uid, final int cid) {
-        Integer iContextId = Integer.valueOf(cid);
-        ConcurrentMap<Integer, Counter> counters = longTermUserGuardian.get(iContextId);
+    public boolean contains(int contextId) {
+        ConcurrentMap<Integer, AtomicInteger> counters = longTermUserGuardian.get(Integer.valueOf(contextId));
         if (null == counters) {
             return false;
         }
 
-        Integer iUserId = Integer.valueOf(uid);
-        Counter counter = counters.get(iUserId);
+        for (AtomicInteger counter : counters.values()) {
+            if (counter.get() > 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean contains(int userId, int contextId) {
+        ConcurrentMap<Integer, AtomicInteger> counters = longTermUserGuardian.get(Integer.valueOf(contextId));
+        if (null == counters) {
+            return false;
+        }
+
+        AtomicInteger counter = counters.get(Integer.valueOf(userId));
         return null != counter && counter.get() > 0;
     }
 
