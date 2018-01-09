@@ -127,7 +127,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
             if (original != null) {
                 ITipEventUpdate diff = change.getDiff();
                 if (null != diff && false == diff.isEmpty()) {
-                    updateEvent(original, event, session);
+                    event = updateEvent(original, event, session);
                 } else {
                     continue;
                 }
@@ -148,8 +148,8 @@ public class UpdatePerformer extends AbstractActionPerformer {
         return result;
     }
 
-    private void updateEvent(Event original, Event event, CalendarSession session) throws OXException {
-        EventUpdate diff = session.getUtilities().compare(original, event, false, (EventField[]) null);
+    private Event updateEvent(Event original, Event event, CalendarSession session) throws OXException {
+        EventUpdate diff = session.getUtilities().compare(original, event, true, (EventField[]) null);
 
         Event update = new Event();
         boolean write = false;
@@ -160,7 +160,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
 
         update.setFolderId(original.getFolderId());
         update.setId(original.getId());
-        
+
         if (original.containsSeriesId()) {
             update.setSeriesId(original.getSeriesId());
         }
@@ -171,22 +171,14 @@ public class UpdatePerformer extends AbstractActionPerformer {
         }
 
         if (write) {
-            session.getCalendarService().updateEvent(session, new EventID(update.getFolderId(), update.getId()), update, original.getLastModified().getTime());
+            CalendarResult calendarResult = session.getCalendarService().updateEvent(session, new EventID(update.getFolderId(), update.getId()), update, original.getLastModified().getTime());
+            update = calendarResult.getUpdates().get(0).getUpdate();
         }
-
-        event.setId(update.getId());
-        event.setFolderId(update.getFolderId());
-
-        if (update.containsSeriesId()) {
-            event.setSeriesId(update.getSeriesId());
-        }
-        if (update.containsRecurrenceId()) {
-            event.setRecurrenceId(update.getRecurrenceId());
-        }
+        return update;
     }
 
     /**
-     * Creates a new event based on the given event. 
+     * Creates a new event based on the given event.
      * 
      * @param event The event to create
      * @param session The {@link CalendarSession}
