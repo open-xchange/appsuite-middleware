@@ -50,7 +50,6 @@
 package com.openexchange.chronos.common;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.L;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -400,7 +399,7 @@ public class Check {
     public static void startAndEndDate(Event event) throws OXException {
         mandatoryFields(event, EventField.START_DATE, EventField.END_DATE);
         if (event.getStartDate().after(event.getEndDate())) {
-            throw CalendarExceptionCodes.END_BEFORE_START.create(L(event.getStartDate().getTimestamp()), L(event.getEndDate().getTimestamp()));
+            throw CalendarExceptionCodes.END_BEFORE_START.create(String.valueOf(event.getStartDate()), String.valueOf(event.getEndDate()));
         }
         if (event.getStartDate().isAllDay() != event.getEndDate().isAllDay()) {
             throw CalendarExceptionCodes.INCOMPATIBLE_DATE_TYPES.create(String.valueOf(event.getStartDate()), String.valueOf(event.getEndDate()));

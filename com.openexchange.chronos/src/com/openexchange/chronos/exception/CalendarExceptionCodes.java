@@ -234,9 +234,9 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
     MANDATORY_FIELD("Mandatory field missing [field %1$s]", MANDATORY_FIELD_MSG, Category.CATEGORY_USER_INPUT, 4220),
     /**
      * <li>The end date lies before the start date. Please correct the event times and try again.</li>
-     * <li>End before start date [start %1$d, end %2$d]</li>
+     * <li>End before start date [start %1$s, end %2$s]</li>
      */
-    END_BEFORE_START("End before start date [start %1$d, end %2$d]", END_BEFORE_START_MSG, Category.CATEGORY_USER_INPUT, 4221),
+    END_BEFORE_START("End before start date [start %1$s, end %2$s]", END_BEFORE_START_MSG, Category.CATEGORY_USER_INPUT, 4221),
     /**
      * <li>Events in non-personal folders must not be classified as \"private\" or \"confidential\".</li>
      * <li>Unsupported classification [classification %1$s, folder %2$d, type %3$s]</li>
@@ -274,7 +274,7 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
     UNSUPPORTED_OPERATION_FOR_PROVIDER("Unsupported operation for calendar provider [provider %1$s]", UNSUPPORTED_OPERATION_FOR_PROVIDER_MSG, Category.CATEGORY_USER_INPUT, 4228),
     /**
      * <li>The supplied types of start and end date are incompatible. Please correct the event times and try again.</li>
-     * <li>Incompatible date types [start %1$d, end %2$d]</li>
+     * <li>Incompatible date types [start %1$s, end %2$s]</li>
      */
     INCOMPATIBLE_DATE_TYPES("Incompatible date types [start %1$s, end %2$s]", INCOMPATIBLE_DATE_TYPES_MSG, Category.CATEGORY_USER_INPUT, 4229),
     /**
