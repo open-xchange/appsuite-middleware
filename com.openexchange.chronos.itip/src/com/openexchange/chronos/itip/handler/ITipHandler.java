@@ -81,7 +81,7 @@ public class ITipHandler implements CalendarHandler {
     Logger LOG = LoggerFactory.getLogger(ITipHandler.class);
 
     private NotificationMailGeneratorFactory generators;
-    private MailSenderService sender;
+    private MailSenderService                sender;
 
     public ITipHandler(NotificationMailGeneratorFactory generatorFactory, MailSenderService sender) {
         this.generators = generatorFactory;
@@ -90,7 +90,7 @@ public class ITipHandler implements CalendarHandler {
 
     @Override
     public void handle(CalendarEvent event) {
-        boolean suppress = event.getCalendarParameters() != null && event.getCalendarParameters().contains(CalendarParameters.PARAMETER_SUPPRESS_ITIP) && event.getCalendarParameters().get(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.class);
+        boolean suppress = event.getCalendarParameters() != null && event.getCalendarParameters().contains(CalendarParameters.PARAMETER_SUPPRESS_ITIP) && event.getCalendarParameters().get(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.class).booleanValue();
         if (suppress) {
             return;
         }

@@ -202,6 +202,8 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
                 change.setCurrentEvent(matchingException);
                 differ = doAppointmentsDiffer(exception, matchingException);
             } else {
+                // Exception is not yet created
+                exception.removeUid();
                 change.setType(ITipChange.Type.CREATE);
             }
             if (master == null) {

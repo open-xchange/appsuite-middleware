@@ -82,12 +82,12 @@ public class NotificationMailGeneratorFactory implements ITipMailGeneratorFactor
     }
 
     @Override
-    public ITipMailGenerator create(Event original, Event appointment, Session session, int onBehalfOfId, CalendarUser principal) throws OXException {
+    public ITipMailGenerator create(Event original, Event updated, Session session, int onBehalfOfId, CalendarUser principal) throws OXException {
         Context ctx = services.getService(ContextService.class).getContext(session.getContextId());
         User user = services.getService(UserService.class).getUser(session.getUserId(), ctx);
         User onBehalfOf = (onBehalfOfId <= 0) ? user : services.getService(UserService.class).getUser(onBehalfOfId, ctx);
 
-        NotificationMailGenerator generator = new NotificationMailGenerator(services, attachmentMemory, resolver, util, original, appointment, user, onBehalfOf, ctx, session, principal);
+        NotificationMailGenerator generator = new NotificationMailGenerator(services, attachmentMemory, resolver, util, original, updated, user, onBehalfOf, ctx, session, principal);
 
         return generator;
     }
