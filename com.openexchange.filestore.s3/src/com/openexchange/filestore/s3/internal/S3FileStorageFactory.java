@@ -236,10 +236,10 @@ public class S3FileStorageFactory implements FileStorageProvider {
          * configure client
          */
         String endpoint = configService.getProperty("com.openexchange.filestore.s3." + filestoreID + ".endpoint");
-        String region = configService.getProperty("com.openexchange.filestore.s3." + filestoreID + ".region", "us-west-2");
         if (false == Strings.isEmpty(endpoint)) {
-            clientBuilder.setEndpointConfiguration(new EndpointConfiguration(endpoint, endpoint));
+            clientBuilder.setEndpointConfiguration(new EndpointConfiguration(endpoint, clientConfiguration.getSignerOverride()));
         } else {
+            String region = configService.getProperty("com.openexchange.filestore.s3." + filestoreID + ".region", "us-west-2");
             try {
                 clientBuilder.withRegion(Regions.fromName(region));
             } catch (IllegalArgumentException e) {
