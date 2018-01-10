@@ -51,6 +51,7 @@ package com.openexchange.chronos.provider.caching.internal.handler;
 
 import java.util.List;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -84,17 +85,22 @@ public class SearchHandler {
     /**
      * Searches for events
      * 
+     * @param session The groupware {@link Session}
+     * @param account The {@link CalendarAccount}
      * @param searchTerm The {@link SearchTerm}
+     * @param filters A {@link List} with the {@link SearchFilter}s
+     * @param eventFields The optional {@link EventField}s. If <code>null</code> all fields will be retrieved
      * @return A {@link List} with all matching {@link Event}s
      * @throws OXException if an error is occurred
+     * 
      */
-    public List<Event> searchEvents(Session session, CalendarAccount account, SearchTerm<?> searchTerm, List<SearchFilter> filters) throws OXException {
+    public List<Event> searchEvents(Session session, CalendarAccount account, SearchTerm<?> searchTerm, List<SearchFilter> filters, EventField... eventFields) throws OXException {
         ContextService contextService = Services.getService(ContextService.class);
         Context context = contextService.loadContext(session.getContextId());
 
         CalendarStorageFactory storageFactory = Services.getService(CalendarStorageFactory.class);
         SearchOptions sortOptions = new SearchOptions(parameters);
         CalendarStorage storage = storageFactory.create(context, account.getAccountId(), null);
-        return storage.getEventStorage().searchEvents(searchTerm, filters, sortOptions, null);
+        return storage.getEventStorage().searchEvents(searchTerm, filters, sortOptions, eventFields);
     }
 }

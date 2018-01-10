@@ -164,7 +164,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         if ((null == filters || filters.isEmpty()) && (null == queries || queries.isEmpty())) {
             return Collections.emptyList();
         }
-        SearchTerm<?> searchTerm = SearchUtil.compileSearchTerm(filters, queries);
+        SearchTerm<?> searchTerm = SearchUtil.compileSearchTerm(queries);
         return new SearchHandler(parameters).searchEvents(session, account, searchTerm, filters);
     }
 
