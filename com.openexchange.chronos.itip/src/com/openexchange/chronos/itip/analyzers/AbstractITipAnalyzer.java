@@ -99,8 +99,7 @@ import com.openexchange.user.UserService;
 /**
  * {@link AbstractITipAnalyzer}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
- *         Laguna</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 
@@ -305,6 +304,10 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
     }
 
     public boolean doAppointmentsDiffer(final Event update, final Event original) throws OXException {
+        if(original == update) {
+            // Can be the same object .. so omit roundtrip of diff
+            return false;
+        }
         final ITipEventUpdate diff = new ITipEventUpdate(new EventUpdateImpl(original, update, true, AbstractITipAnalyzer.SKIP));
         return !diff.getUpdatedFields().isEmpty();
     }

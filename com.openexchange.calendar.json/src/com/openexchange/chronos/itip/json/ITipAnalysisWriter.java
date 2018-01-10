@@ -222,7 +222,8 @@ public class ITipAnalysisWriter {
                     }
                 }
             } catch (UnsupportedOperationException e) {
-                LOGGER.warn("Could not convert field {}.", CalendarField.getByColumn(column).getJsonName(), e);
+                // getUntil() and calculateRecurrence() not set for unlimited series
+                LOGGER.debug("Could not convert field {}.", CalendarField.getByColumn(column).getJsonName(), e);
             }
         }
     }
