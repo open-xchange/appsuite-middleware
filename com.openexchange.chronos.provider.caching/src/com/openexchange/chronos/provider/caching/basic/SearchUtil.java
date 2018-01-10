@@ -75,10 +75,6 @@ final class SearchUtil {
      */
     private static final String WILDCARD = "*";
 
-    /** The virtual folder identifier used for basic calendar providers */
-    // FIXME: Maybe pass as an argument to the methods?
-    static final String FOLDER_ID = "0";
-
     /**
      * {@link EventField#SUMMARY}
      */
@@ -134,7 +130,7 @@ final class SearchUtil {
      * @return The compiled {@link SearchTerm}
      */
     private static SearchTerm<?> compileQueriesSearchTerm(List<String> queries) {
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(getSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, FOLDER_ID));
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
         if (null == queries || queries.isEmpty()) {
             return searchTerm.getOperands()[0];
         }
@@ -143,12 +139,12 @@ final class SearchUtil {
                 continue;
             }
             String pattern = surroundWithWildcards(query); //FIXME: maybe check for the minimum search pattern length?
-            
+
             CompositeSearchTerm compositeSearchTerm = new CompositeSearchTerm(CompositeOperation.OR);
             compositeSearchTerm.addSearchTerm(getSearchTerm(EventField.SUMMARY, SingleOperation.EQUALS, pattern));
             compositeSearchTerm.addSearchTerm(getSearchTerm(EventField.DESCRIPTION, SingleOperation.EQUALS, pattern));
             compositeSearchTerm.addSearchTerm(getSearchTerm(EventField.CATEGORIES, SingleOperation.EQUALS, pattern));
-            
+
             searchTerm.addSearchTerm(compositeSearchTerm);
         }
         return searchTerm;
