@@ -165,7 +165,7 @@ com.openexchange.calendar.config:
     uri:
       type: string
       description: (ical provider only) The URI of the ICal feed that should be subscribed.
-    refresh_interval:
+    refreshInterval:
       type: string
       description: (ical provider only) Defines the refresh interval used for the subscribed ICal feed.
     login:
@@ -174,6 +174,9 @@ com.openexchange.calendar.config:
     password:
       type: string
       description: (ical provider only) An optional password for the subscribed ICal feed.
+    itemId:
+      type: string
+      description: (schedjoules provider only) Unique identifier for schedjoules feed.
 com.openexchange.calendar.provider:
   type: string
   description: Denotes the identifier of the underlying calendar provider.
