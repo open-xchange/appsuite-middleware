@@ -58,10 +58,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Set;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
@@ -95,9 +96,6 @@ import com.openexchange.java.Strings;
  */
 public class UpgradeSchemata extends UtilAbstraction {
 
-    /**
-     * TYPE_ABORT_TO_ABORT_THE_UPGRADE_PROCESS_OR_CONTINUE_TO_PROCEED_ABORT_CONTINUE
-     */
     private static final String PROMPT = "Type 'abort' to abort the upgrade process, or 'continue' to proceed ['abort'/'continue']:";
     private static final String ABORT = "abort";
     private static final String CONTINUE = "continue";
@@ -235,13 +233,17 @@ public class UpgradeSchemata extends UtilAbstraction {
             return databases[0].getScheme().equals(startFromSchema) ? new Database[0] : databases;
         }
 
-        Comparator<Database> comparator = (o1, o2) -> o1.getScheme().compareTo(o2.getScheme());
+        // Sort arithmetically, that is by integer suffix of each database schema
+        Comparator<Database> comparator = (o1, o2) -> {
+            Integer i1 = Integer.parseInt(o1.getScheme().substring(o1.getScheme().indexOf('_') + 1));
+            Integer i2 = Integer.parseInt(o2.getScheme().substring(o2.getScheme().indexOf('_') + 1));
+            return i1.compareTo(i2);
+        };
         Arrays.sort(databases, comparator);
         int position = Arrays.binarySearch(databases, new Database(-1, startFromSchema), comparator);
         if (position < 0) {
             return filterSchemata(databases, comparator);
         }
-
         System.out.println("Skipping to schema '" + startFromSchema + "'");
         return filterSchemata(Arrays.copyOfRange(databases, position + 1, databases.length), comparator);
     }
@@ -254,24 +256,23 @@ public class UpgradeSchemata extends UtilAbstraction {
      * @return The filtered schemata
      */
     private Database[] filterSchemata(Database[] databases, Comparator<Database> comparator) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Filtering out skipped schemata: ");
+        System.out.print("Filtering out skipped schemata: ");
 
-        List<Integer> toSkip = new LinkedList<>();
+        Set<Integer> indexesToSkip = new HashSet<>();
+        StringBuilder sb = new StringBuilder();
         for (String schema : skippedSchemata) {
             sb.append("'").append(schema).append("', ");
             int position = Arrays.binarySearch(databases, new Database(-1, schema), comparator);
             if (position >= 0) {
-                // Remember databases to be skipped
-                toSkip.add(new Integer(position));
+                // Remember database position to be skipped
+                indexesToSkip.add(position);
             }
         }
 
         // Copy array and skip relevant databases
-        Database[] filtered = new Database[databases.length - toSkip.size()];
-        int j = 0;
-        for (int i = 0; i < databases.length && j < filtered.length; i++) {
-            if (false == toSkip.contains(Integer.valueOf(i))) {
+        Database[] filtered = new Database[databases.length - indexesToSkip.size()];
+        for (int i = 0, j = 0; i < databases.length && j < filtered.length; i++) {
+            if (false == indexesToSkip.contains(Integer.valueOf(i))) {
                 filtered[j++] = databases[i];
             }
         }
@@ -289,7 +290,7 @@ public class UpgradeSchemata extends UtilAbstraction {
      * @throws InstanceNotFoundException if the required MBean does not exist in the registry
      * @throws MBeanException if an error during the runUpdate method is occurred
      * @throws ReflectionException if an invocation error is occurred
-     * @throws IOException if an I/O error is occurred
+     * @throws IOExceptionif an I/O error is occurred
      */
     private void runUpdates(String schemaName) throws InstanceNotFoundException, MBeanException, ReflectionException, IOException {
         System.out.print("Running updates...");

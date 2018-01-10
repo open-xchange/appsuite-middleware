@@ -57,25 +57,34 @@ import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link SimpleColumnCreationTask}
+ * {@link SimpleColumnCreationTask} -  A simple abstract class for such update tasks that intend adding a column to one or more tables.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
+
+    /**
+     * Initializes a new {@link SimpleColumnCreationTask}.
+     */
+    protected SimpleColumnCreationTask() {
+        super();
+    }
 
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
         boolean rollback = false;
         try {
-
             con.setAutoCommit(false);
             rollback = true;
-            for(String table: getTableNames()){
-                if (columnExists(con, table)) {
-                    continue;
+
+            String columnName = getColumnName();
+            Column columnToAdd = new Column(columnName, getColumnDefinition());
+            for (String table : getTableNames()) {
+                if (false == Tools.columnExists(con, table, columnName)) {
+                    Tools.addColumns(con, table, columnToAdd);
                 }
-                Tools.addColumns(con, table, new Column(getColumnName(), getColumnDefinition()));
             }
 
             con.commit();
@@ -90,15 +99,25 @@ public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
         }
     }
 
-    private boolean columnExists(Connection con, String tableName) throws SQLException {
-        return Tools.columnExists(con, tableName, getColumnName());
-    }
-
+    /**
+     * Gets the names of the tables, which are supposed to be extended by a column
+     *
+     * @return The table names (never <code>null</code>)
+     */
     protected abstract String[] getTableNames();
 
+    /**
+     * Gets the name of the column, which should be added.
+     *
+     * @return The column name
+     */
     protected abstract String getColumnName();
 
+    /**
+     * Gets the definition of the column, which should be added; e.g. <code>"INT4 UNSIGNED NOT NULL DEFAULT 0"</code>
+     *
+     * @return The column definition
+     */
     protected abstract String getColumnDefinition();
-
 
 }

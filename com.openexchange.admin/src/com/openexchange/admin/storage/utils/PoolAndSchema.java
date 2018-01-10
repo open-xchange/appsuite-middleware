@@ -50,7 +50,6 @@
 package com.openexchange.admin.storage.utils;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -62,6 +61,7 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.database.Databases;
 import com.openexchange.java.Strings;
 
 /**
@@ -97,7 +97,7 @@ public class PoolAndSchema {
         } catch (SQLException e) {
             throw new StorageException(e);
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
         }
@@ -150,7 +150,7 @@ public class PoolAndSchema {
         } catch (SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -200,7 +200,7 @@ public class PoolAndSchema {
         } catch (SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

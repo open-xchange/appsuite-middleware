@@ -203,12 +203,15 @@ public class TransactionManager {
         if (decorator != null) {
             Object connectionProperty = decorator.getProperty(Connection.class.getName());
             try {
-                if (connectionProperty != null && connectionProperty instanceof Connection && !((Connection) connectionProperty).isReadOnly()) {
-                    connection = (Connection) connectionProperty;
-                    ConnectionMode connectionMode = new ConnectionMode(new ResilientConnection((Connection) connectionProperty), Mode.WRITE);
-                    storageParameters.putParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_CONNECTION, connectionMode);
-                    ownsConnection = false;
-                    return true;
+                if (connectionProperty instanceof Connection) {
+                    Connection con = (Connection) connectionProperty;
+                    if (!con.isReadOnly()) {
+                        connection = con;
+                        ConnectionMode connectionMode = new ConnectionMode(new ResilientConnection((Connection) connectionProperty), Mode.WRITE);
+                        storageParameters.putParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_CONNECTION, connectionMode);
+                        ownsConnection = false;
+                        return true;
+                    }
                 }
             } catch (SQLException e) {
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e.getMessage());

@@ -70,15 +70,20 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.ClientConfiguration;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
 import com.amazonaws.regions.Regions;
+import com.amazonaws.services.s3.AmazonS3Builder;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.AmazonS3EncryptionClient;
-import com.amazonaws.services.s3.S3ClientOptions;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.AmazonS3EncryptionClientBuilder;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.amazonaws.services.s3.model.CreateBucketRequest;
 import com.amazonaws.services.s3.model.CryptoConfiguration;
 import com.amazonaws.services.s3.model.EncryptionMaterials;
 import com.amazonaws.services.s3.model.Region;
+import com.amazonaws.services.s3.model.StaticEncryptionMaterialsProvider;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
@@ -137,36 +142,40 @@ public class S3FileStorageFactory implements FileStorageProvider {
 
     @Override
     public S3FileStorage getFileStorage(URI uri) throws OXException {
-        try{
-        S3FileStorage storage = storages.get(uri);
-        if (null == storage) {
-            LOG.debug("Initializing S3 client for {}", uri);
-            /*
-             * extract filestore ID from authority part of URI
-             */
-            String filestoreID = extractFilestoreID(uri);
-            LOG.debug("Using \"{}\" as filestore ID.", filestoreID);
-            /*
-             * create client
-             */
-            AmazonS3ClientInfo clientInfo = initClient(filestoreID);
-            AmazonS3Client client = clientInfo.client;
-            String bucketName = initBucket(client, filestoreID);
-            LOG.debug("Using \"{}\" as bucket name.", bucketName);
-            S3FileStorage newStorage = new S3FileStorage(client, clientInfo.encrypted, bucketName, extractFilestorePrefix(uri), clientInfo.chunkSize);
-            storage = storages.putIfAbsent(uri, newStorage);
+        try {
+            S3FileStorage storage = storages.get(uri);
             if (null == storage) {
-                storage = newStorage;
+                LOG.debug("Initializing S3 client for {}", uri);
+                /*
+                 * extract filestore ID from authority part of URI
+                 */
+                String filestoreID = extractFilestoreID(uri);
+                LOG.debug("Using \"{}\" as filestore ID.", filestoreID);
+                /*
+                 * create client
+                 */
+                AmazonS3ClientInfo clientInfo = initClient(filestoreID);
+                AmazonS3Client client = clientInfo.client;
+                String bucketName = initBucket(client, filestoreID);
+                LOG.debug("Using \"{}\" as bucket name.", bucketName);
+                S3FileStorage newStorage = new S3FileStorage(client, clientInfo.encrypted, bucketName, extractFilestorePrefix(uri), clientInfo.chunkSize);
+                storage = storages.putIfAbsent(uri, newStorage);
+                if (null == storage) {
+                    storage = newStorage;
+                }
             }
-        }
             return storage;
-        }catch(OXException ex){
-            if(ex.getCause() instanceof AmazonS3Exception && ((AmazonS3Exception)ex.getCause()).getStatusCode() == 400){
-                // throw a simple OXException here to be able to forward this exception to rmi clients (Bug #42102)
-                throw new OXException(S3ExceptionCode.BadRequest.getNumber(), S3ExceptionMessages.BadRequest_MSG);
-            }else{
-                throw ex;
+        } catch (OXException ex) {
+            Throwable cause = ex.getCause();
+            if (cause instanceof AmazonS3Exception) {
+                AmazonS3Exception s3Exception = (AmazonS3Exception) cause;
+                if (s3Exception.getStatusCode() == 400) {
+                    // throw a simple OXException here to be able to forward this exception to rmi clients (Bug #42102)
+                    throw new OXException(S3ExceptionCode.BadRequest.getNumber(), S3ExceptionMessages.BadRequest_MSG);
+                }
             }
+
+            throw ex;
         }
     }
 
@@ -203,39 +212,44 @@ public class S3FileStorageFactory implements FileStorageProvider {
          * instantiate client
          */
         ClientConfiguration clientConfiguration = getClientConfiguration(filestoreID);
-        AmazonS3Client client = null;
-        String encryption = configService.getProperty("com.openexchange.filestore.s3." + filestoreID + ".encryption", "none");
+        AmazonS3Builder<?, ?> clientBuilder;
         boolean encrypted;
-        if (Strings.isEmpty(encryption) || "none".equals(encryption)) {
-            /*
-             * use default AmazonS3Client
-             */
-            client = new AmazonS3Client(credentials, clientConfiguration);
-            encrypted = false;
-        } else {
-            /*
-             * use AmazonS3EncryptionClient
-             */
-            client = new AmazonS3EncryptionClient(credentials, getEncryptionMaterials(filestoreID, encryption), clientConfiguration, new CryptoConfiguration());
-            encrypted = true;
+        {
+            String encryption = configService.getProperty("com.openexchange.filestore.s3." + filestoreID + ".encryption", "none");
+            if (Strings.isEmpty(encryption) || "none".equals(encryption)) {
+                AmazonS3ClientBuilder builder = AmazonS3ClientBuilder.standard()
+                    .withCredentials(new AWSStaticCredentialsProvider(credentials))
+                    .withClientConfiguration(clientConfiguration);
+                clientBuilder = builder;
+                encrypted = false;
+            } else {
+                AmazonS3EncryptionClientBuilder builder = AmazonS3EncryptionClientBuilder.standard()
+                    .withCredentials(new AWSStaticCredentialsProvider(credentials))
+                    .withClientConfiguration(clientConfiguration)
+                    .withEncryptionMaterials(new StaticEncryptionMaterialsProvider(getEncryptionMaterials(filestoreID, encryption)))
+                    .withCryptoConfiguration(new CryptoConfiguration());
+                clientBuilder = builder;
+                encrypted = true;
+            }
         }
         /*
          * configure client
          */
         String endpoint = configService.getProperty("com.openexchange.filestore.s3." + filestoreID + ".endpoint");
         if (false == Strings.isEmpty(endpoint)) {
-            client.setEndpoint(endpoint);
+            clientBuilder.setEndpointConfiguration(new EndpointConfiguration(endpoint, null));
         } else {
             String region = configService.getProperty("com.openexchange.filestore.s3." + filestoreID + ".region", "us-west-2");
             try {
-                client.setRegion(com.amazonaws.regions.Region.getRegion(Regions.fromName(region)));
+                clientBuilder.withRegion(Regions.fromName(region));
             } catch (IllegalArgumentException e) {
                 throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, region);
             }
         }
         if (configService.getBoolProperty("com.openexchange.filestore.s3." + filestoreID + ".pathStyleAccess", true)) {
-            client.setS3ClientOptions(new S3ClientOptions().withPathStyleAccess(true));
+            clientBuilder.setPathStyleAccessEnabled(Boolean.TRUE);
         }
+        clientBuilder.withRequestHandlers(ETagCorrectionHandler.getInstance());
         long chunkSize;
         String chunkSizeValue = configService.getProperty("com.openexchange.filestore.s3." + filestoreID + ".chunkSize", "5MB");
         try {
@@ -243,7 +257,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
         } catch (NumberFormatException e) {
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, chunkSizeValue);
         }
-        return new AmazonS3ClientInfo(client, encrypted, chunkSize);
+        return new AmazonS3ClientInfo((AmazonS3Client) clientBuilder.build(), encrypted, chunkSize);
     }
 
     private ClientConfiguration getClientConfiguration(String filestoreID) {
@@ -332,7 +346,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
         try {
             if (false == s3client.doesBucketExist(bucketName)) {
                 String region = configService.getProperty("com.openexchange.filestore.s3." + filestoreID + ".region", "us-west-2");
-                s3client.createBucket(bucketName, Region.fromValue(region));
+                s3client.createBucket(new CreateBucketRequest(bucketName, Region.fromValue(region)));
             }
             return bucketName;
         } catch (IllegalArgumentException e) {

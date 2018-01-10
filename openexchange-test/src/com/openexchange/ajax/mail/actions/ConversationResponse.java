@@ -162,7 +162,9 @@ public class ConversationResponse extends AbstractAJAXResponse {
                     case ORIGINAL_ID:
                         message.setOriginalId(strValue);
                         break;
-                    case TEXT_PREVIEW_IF_AVAILABLE: case TEXT_PREVIEW:
+                    case TEXT_PREVIEW_IF_AVAILABLE:
+                        // fall-through
+                    case TEXT_PREVIEW:
                         message.setTextPreview(strValue);
                         break;
                     case AUTHENTICATION_OVERALL_RESULT:

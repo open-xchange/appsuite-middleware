@@ -49,18 +49,11 @@
 
 package com.openexchange.push.impl;
 
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import org.slf4j.Logger;
-import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IExecutorService;
+import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.Member;
 import com.openexchange.push.PushUser;
 import com.openexchange.server.ServiceLookup;
@@ -129,90 +122,40 @@ public class SessionLookUpUtility {
 
         if (null == session && considerRemoteLookUp) {
             HazelcastInstance hzInstance = services.getOptionalService(HazelcastInstance.class);
-            ObfuscatorService obfuscatorService = services.getOptionalService(ObfuscatorService.class);
+            final ObfuscatorService obfuscatorService = services.getOptionalService(ObfuscatorService.class);
             if (null != hzInstance && null != obfuscatorService) {
-                Cluster cluster = hzInstance.getCluster();
-
-                // Get local member
-                Member localMember = cluster.getLocalMember();
-
                 // Determine other cluster members
-                Set<Member> otherMembers = getOtherMembers(cluster.getMembers(), localMember);
+                Set<Member> otherMembers = Hazelcasts.getRemoteMembers(hzInstance);
 
                 if (!otherMembers.isEmpty()) {
-                    IExecutorService executor = hzInstance.getExecutorService("default");
-                    Map<Member, Future<PortableSession>> futureMap = executor.submitToMembers(new PortableSessionRemoteLookUp(userId, contextId), otherMembers);
-                    for (Iterator<Entry<Member, Future<PortableSession>>> it = futureMap.entrySet().iterator(); null == session && it.hasNext();) {
-                        Future<PortableSession> future = it.next().getValue();
-                        // Check Future's return value
-                        int retryCount = 3;
-                        while (retryCount-- > 0) {
-                            try {
-                                PortableSession portableSession = future.get();
-                                retryCount = 0;
-                                if (null != portableSession) {
-                                    portableSession.setPassword(obfuscatorService.unobfuscate(portableSession.getPassword()));
-                                    session = portableSession;
-                                }
-                            } catch (InterruptedException e) {
-                                // Interrupted - Keep interrupted state
-                                Thread.currentThread().interrupt();
-                            } catch (CancellationException e) {
-                                // Canceled
-                                retryCount = 0;
-                            } catch (ExecutionException e) {
-                                Throwable cause = e.getCause();
+                    Hazelcasts.Filter<PortableSession, PortableSession> filter = new Hazelcasts.Filter<PortableSession, PortableSession>() {
 
-                                // Check for Hazelcast timeout
-                                if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
-                                    if (cause instanceof RuntimeException) {
-                                        throw ((RuntimeException) cause);
-                                    }
-                                    if (cause instanceof Error) {
-                                        throw (Error) cause;
-                                    }
-                                    throw new IllegalStateException("Not unchecked", cause);
-                                }
-
-                                // Timeout while awaiting remote result
-                                if (retryCount <= 0) {
-                                    // No further retry
-                                    cancelFutureSafe(future);
-                                }
+                        @Override
+                        public PortableSession accept(PortableSession portableSession) {
+                            if (null != portableSession) {
+                                portableSession.setPassword(obfuscatorService.unobfuscate(portableSession.getPassword()));
+                                return portableSession;
                             }
+                            return null;
                         }
+                    };
+                    try {
+                        session = Hazelcasts.executeByMembersAndFilter(new PortableSessionRemoteLookUp(userId, contextId), otherMembers, hzInstance.getExecutorService("default"), filter);
+                    } catch (ExecutionException e) {
+                        Throwable cause = e.getCause();
+                        if (cause instanceof RuntimeException) {
+                            throw ((RuntimeException) cause);
+                        }
+                        if (cause instanceof Error) {
+                            throw (Error) cause;
+                        }
+                        throw new IllegalStateException("Not unchecked", cause);
                     }
                 }
             }
         }
 
         return session;
-    }
-
-    /**
-     * Gets the other cluster members
-     *
-     * @param allMembers All known members
-     * @param localMember The local member
-     * @return Other cluster members
-     */
-    private static Set<Member> getOtherMembers(Set<Member> allMembers, Member localMember) {
-        Set<Member> otherMembers = new LinkedHashSet<Member>(allMembers);
-        if (!otherMembers.remove(localMember)) {
-            LOG.warn("Couldn't remove local member from cluster members.");
-        }
-        return otherMembers;
-    }
-
-    /**
-     * Cancels given {@link Future} safely
-     *
-     * @param future The {@code Future} to cancel
-     */
-    private static <V> void cancelFutureSafe(Future<V> future) {
-        if (null != future) {
-            try { future.cancel(true); } catch (Exception e) {/*Ignore*/}
-        }
     }
 
 }

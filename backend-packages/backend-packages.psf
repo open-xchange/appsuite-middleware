@@ -60,6 +60,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-hostname-ldap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-imageconverter-api"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-imap"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-imap-textpreview-mock"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-l10n"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-linkedin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-mailfilter"/>

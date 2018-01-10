@@ -1062,22 +1062,26 @@ public class MimeMessageFiller {
     }
 
     private Multipart appendVCard(ComposedMailMessage mail, Multipart primaryMultipart, MimeMessage mimeMessage) throws OXException, MessagingException, UnsupportedEncodingException {
-        final String charset = MailProperties.getInstance().getDefaultMimeCharset();
-        final String fileName = compositionParameters.getUserVCardFileName();
-        AppendVCard: if (mail.isAppendVCard() && fileName != null) {
-            final String encodedFileName = MimeUtility.encodeText(fileName, charset, "Q");
-            for (int i = 0; i < mail.getEnclosedCount(); i++) {
-                final MailPart part = mail.getEnclosedMailPart(i);
+        String fileName = compositionParameters.getUserVCardFileName();
+        if (mail.isAppendVCard() && fileName != null) {
+            String charset = MailProperties.getInstance().getDefaultMimeCharset();
+            String encodedFileName = MimeUtility.encodeText(fileName, charset, "Q");
+            int numberOfParts = mail.getEnclosedCount();
+            for (int i = 0; i < numberOfParts; i++) {
+                MailPart part = mail.getEnclosedMailPart(i);
                 if (encodedFileName.equalsIgnoreCase(part.getFileName())) {
                     /*
                      * VCard already attached in (former draft) message
                      */
-                    break AppendVCard;
+                    return primaryMultipart;
                 }
             }
+            /*
+             * No VCard attached...
+             */
             try {
                 /*
-                 * Create a body part for vcard
+                 * Create a body part for VCard
                  */
                 final MimeBodyPart vcardPart = new MimeBodyPart();
                 /*

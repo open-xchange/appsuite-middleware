@@ -227,6 +227,17 @@ public abstract class MailCapabilities {
     }
 
     /**
+     * Indicates if mail system supports text previews for mails.
+     * <p>
+     * Defaults to <code>false</code>
+     *
+     * @return <code>true</code> if mail system supports text preview; otherwise <code>false</code>
+     */
+    public boolean hasTextPreview() {
+        return false;
+    }
+
+    /**
      * Indicates if mail system supports retrieving folder validity information.
      * <p>
      * Defaults to <code>false</code>

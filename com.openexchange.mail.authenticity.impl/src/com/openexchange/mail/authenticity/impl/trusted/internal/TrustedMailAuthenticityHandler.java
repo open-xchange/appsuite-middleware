@@ -57,14 +57,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import javax.naming.ConfigurationException;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
-import com.openexchange.config.PropertyFilter;
 import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -99,6 +97,8 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
     private static final String IMAGE = ".image.";
     private static final String FALLBACK_IMAGE = ".fallbackImage";
 
+    private static final String TRUSTED_MAIL_NAME = "TrustedMail";
+
     static final MailAuthenticityMechanism TRUSTED_MAIL_MECHANISM = new MailAuthenticityMechanism() {
 
         @Override
@@ -108,12 +108,12 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
 
         @Override
         public String getDisplayName() {
-            return "TrustedMail";
+            return TRUSTED_MAIL_NAME;
         }
 
         @Override
         public String getTechnicalName() {
-            return "TrustedMail";
+            return TRUSTED_MAIL_NAME;
         }
 
         @Override
@@ -152,6 +152,11 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
 
         MailAuthenticityResult authenticityResult = mailMessage.getAuthenticityResult();
 
+        if(authenticityResult == null) {
+            LOG.warn("Unable to verify trusted domain without authentication result.");
+            return;
+        }
+
         if (MailAuthenticityStatus.PASS.equals(authenticityResult.getStatus())) {
             String mailAddress = getMailAddress(mailMessage);
             TrustedMail trustedDomain = checkMail(tenant, mailAddress);
@@ -186,27 +191,26 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
 
     private void init(ConfigurationService configurationService) throws OXException {
         String commaSeparatedListOfTenants = configurationService.getProperty(PREFIX + TENANT, "");
-        if (!Strings.isEmpty(commaSeparatedListOfTenants)) {
+        if (Strings.isNotEmpty(commaSeparatedListOfTenants)) {
             String[] tenants = Strings.splitByCommaNotInQuotes(commaSeparatedListOfTenants);
             for (String tenant : tenants) {
-                String commaSeparatedListOfMailAddresses = configurationService.getProperty(PREFIX + tenant + CONFIG, (String) null);
+                String commaSeparatedListOfMailAddresses = configurationService.getProperty(PREFIX + tenant + CONFIG);
                 if (Strings.isNotEmpty(commaSeparatedListOfMailAddresses)) {
                     String[] mailAddresses = Strings.splitByCommaNotInQuotes(commaSeparatedListOfMailAddresses);
-                    String fallbackImageStr = configurationService.getProperty(PREFIX + tenant + FALLBACK_IMAGE, (String) null);
+                    String fallbackImageStr = configurationService.getProperty(PREFIX + tenant + FALLBACK_IMAGE);
                     Icon fallbackImage = null;
-                    if (!Strings.isEmpty(fallbackImageStr)) {
+                    if (Strings.isNotEmpty(fallbackImageStr)) {
                         fallbackImage = getIcon(fallbackImageStr, tenant);
                     }
-                    Map<String, String> images = configurationService.getProperties(new PropertyFilter() {
+                    Map<String, String> images = configurationService.getProperties((name, value) -> name.startsWith(PREFIX + tenant + IMAGE));
 
-                        @Override
-                        public boolean accept(String name, String value) throws OXException {
-                            return name.startsWith(PREFIX + tenant + IMAGE);
-                        }
-                    });
                     List<TrustedMail> trustedMailList = new ArrayList<>();
                     for (String mailAddress : mailAddresses) {
-                        trustedMailList.add(getTrustedMail(mailAddress, images, fallbackImage, tenant));
+                        TrustedMail trustedMail = getTrustedMail(mailAddress, images, fallbackImage, tenant);
+                        if(trustedMail == null) {
+                            throw MailAuthenticityExceptionCodes.INVALID_PROPERTY.create(PREFIX + tenant + CONFIG);
+                        }
+                        trustedMailList.add(trustedMail);
                     }
                     trustedMailAddressesPerTenant.put(tenant, trustedMailList);
                 }
@@ -214,22 +218,17 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
         }
 
         // Add single tenant / fall-back configuration
-        String commaSeparatedListOfMailAddresses = configurationService.getProperty(PREFIX + CONFIG.substring(1), (String) null);
+        String commaSeparatedListOfMailAddresses = configurationService.getProperty(PREFIX + CONFIG.substring(1));
         if (Strings.isNotEmpty(commaSeparatedListOfMailAddresses)) {
             String[] mailAddresses = Strings.splitByCommaNotInQuotes(commaSeparatedListOfMailAddresses);
-            String fallbackImageStr = configurationService.getProperty(PREFIX + FALLBACK_IMAGE.substring(1), (String) null);
+            String fallbackImageStr = configurationService.getProperty(PREFIX + FALLBACK_IMAGE.substring(1));
             Icon fallbackImage = null;
-            if (!Strings.isEmpty(fallbackImageStr)) {
+            if (Strings.isNotEmpty(fallbackImageStr)) {
                 fallbackImage = getIcon(fallbackImageStr, (String) null);
             }
 
-            Map<String, String> images = configurationService.getProperties(new PropertyFilter() {
+            Map<String, String> images = configurationService.getProperties((name, value) -> name.startsWith(PREFIX + IMAGE.substring(1)));
 
-                @Override
-                public boolean accept(String name, String value) throws OXException {
-                    return name.startsWith(PREFIX + IMAGE.substring(1));
-                }
-            });
             for (String mailAddress : mailAddresses) {
                 fallbackTenant.add(getTrustedMail(mailAddress, images, fallbackImage, null));
             }
@@ -238,17 +237,17 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
 
     /**
      *
-     * @param mailAddress
-     * @param images
-     * @param tenant
-     * @return
-     * @throws OXException
+     * @param mailAddress A mail address or a mail address configuration
+     * @param images The map of configured images
+     * @param fallbackImage The fall-back image
+     * @param tenant An optional tenant
+     * @return the {@link TrustedMail} or null in case the mail address configuration is invalid
      */
-    private TrustedMail getTrustedMail(String mailAddress, Map<String, String> images, Icon fallbackImage, String tenant) throws OXException {
+    private TrustedMail getTrustedMail(String mailAddress, Map<String, String> images, Icon fallbackImage, String tenant) {
         if (mailAddress.indexOf(":") > 0) {
             String[] trustedMailConfig = Strings.splitByColon(mailAddress);
             if (trustedMailConfig.length != 2) {
-                throw new OXException(new ConfigurationException("Unable to to parse trusted mail address config. Only one colon is allowed: " + mailAddress));
+                return null;
             }
             String image = null;
             if (tenant == null) {
@@ -267,7 +266,7 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
 
     private Icon getIcon(String image, String tenant) {
         Icon icon = null;
-        if (!Strings.isEmpty(image)) {
+        if (Strings.isNotEmpty(image)) {
             if (UrlValidator.getInstance().isValid(image)) {
                 try {
                     icon = new ImageIcon(new URL(image));

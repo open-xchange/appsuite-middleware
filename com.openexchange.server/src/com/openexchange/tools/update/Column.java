@@ -50,7 +50,7 @@
 package com.openexchange.tools.update;
 
 /**
- * {@link Column}
+ * {@link Column} - Immutable column representation providing column name and column definition.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
