@@ -156,6 +156,12 @@ com.openexchange.calendar.config:
   type: object
   description: Holds arbitrary, provider-specific configuration data for calendar accounts.
   properties:
+    enabled:
+      type: boolean
+      description: Defines if the account is enabled.
+    color:
+      type: string
+      description: Defines the account color.
     uri:
       type: string
       description: (ical provider only) The URI of the ICal feed that should be subscribed.
