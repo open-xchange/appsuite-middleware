@@ -196,13 +196,14 @@ public class ITipChange {
             int position = recurrenceService.calculateRecurrencePosition(master, recurrenceId);
 
             RecurrenceIterator<Event> recurrenceIterator = recurrenceService.iterateEventOccurrences(master, null, null);
-            int count = 0;
-            while (recurrenceIterator.hasNext()) {
-                count++;
+            int count = 1; // calculateRecurrencePosition is 1-based
+            while (recurrenceIterator.hasNext() && count <= position) {
+                Event event = recurrenceIterator.next();
                 if (count == position) {
-                    Event occurrence = recurrenceIterator.next();
-                    diff = new ITipEventUpdate(new EventUpdateImpl(occurrence, newEvent, true, AbstractITipAnalyzer.SKIP));
+                    diff = new ITipEventUpdate(new EventUpdateImpl(event, newEvent, true, AbstractITipAnalyzer.SKIP));
+                    return;
                 }
+                count++;
             }
         }
     }
