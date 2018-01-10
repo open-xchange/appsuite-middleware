@@ -143,7 +143,7 @@ public class SearchHandler {
         Set<EventField> eventFields = new HashSet<>();
         eventFields.addAll(DEFAULT_FIELDS);
         eventFields.addAll(Arrays.asList(requestedFields));
-        if (null != additionalFields && 0 < additionalFields.length) {
+        if (null != additionalFields && additionalFields.length > 0) {
             eventFields.addAll(Arrays.asList(additionalFields));
         }
 
