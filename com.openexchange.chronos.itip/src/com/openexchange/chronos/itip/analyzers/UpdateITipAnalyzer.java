@@ -193,6 +193,8 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             change = new ITipChange();
             change.setException(true);
             change.setMaster(master);
+            
+            exception.setSeriesId(update.getSeriesId());
 
             differ = true;
             if (matchingException != null) {
