@@ -89,6 +89,14 @@ public interface AttachmentStorage {
     Map<String, List<Attachment>> loadAttachments(String[] eventIDs) throws OXException;
 
     /**
+     * Loads information about which events have at least one attachment in the storage.
+     *
+     * @param eventIds The identifiers of the event to get the attachment information for
+     * @return A map that associates the identifiers of those events where at least one attachment stored to {@link Boolean#TRUE}
+     */
+    Map<String, Boolean> hasAttachments(String[] eventIds) throws OXException;
+
+    /**
      * Loads metadata for all attachments of a specific event.
      *
      * @param eventID The identifier of the event to get the attachment metadata for
@@ -132,7 +140,7 @@ public interface AttachmentStorage {
 
     /**
      * Loads the actual data of the {@link Attachment} with the specified managed identifier
-     * 
+     *
      * @param managedId The managed identifier of the {@link Attachment}
      * @return The actual data of the {@link Attachment} as an {@link InputStream}
      * @throws OXException if an error is occurred

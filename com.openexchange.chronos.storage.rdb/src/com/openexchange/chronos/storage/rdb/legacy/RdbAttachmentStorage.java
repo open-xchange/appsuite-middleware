@@ -59,6 +59,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -129,6 +130,19 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
     }
 
     @Override
+    public Map<String, Boolean> hasAttachments(String[] eventIds) throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            return selectHasAttachments(connection, context.getContextId(), eventIds);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    @Override
     public void deleteAttachments(Session session, String folderID, String eventID) throws OXException {
         ServerSession serverSession = checkSession(session);
         AttachmentBase attachmentBase = initAttachmentBase();
@@ -161,7 +175,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
             attachmentBase.finish();
         }
     }
-    
+
     @Override
     public void deleteAttachments(Session session, String folderID, String eventID, List<Attachment> attachments) throws OXException {
         if (null == attachments || 0 == attachments.size()) {
@@ -248,7 +262,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
             attachmentBase.finish();
         }
     }
-    
+
     @Override
     public InputStream loadAttachmentData(int attachmentID) throws OXException {
         String fileID;
@@ -315,6 +329,30 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
         return attachmentsById;
     }
 
+    private static Map<String, Boolean> selectHasAttachments(Connection connection, int contextID, String[] eventIds) throws SQLException, OXException {
+        if (null == eventIds || 0 == eventIds.length) {
+            return Collections.emptyMap();
+        }
+        Map<String, Boolean> attachmentsById = new HashMap<String, Boolean>();
+        String sql = new StringBuilder()
+            .append("SELECT DISTINCT(attached) FROM prg_attachment ")
+            .append("WHERE cid=? AND attached").append(getPlaceholders(eventIds.length)).append(';')
+        .toString();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            for (String id : eventIds) {
+                stmt.setInt(parameterIndex++, asInt(id));
+            }
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                while (resultSet.next()) {
+                    attachmentsById.put(String.valueOf(resultSet.getInt("attached")), Boolean.TRUE);
+                }
+            }
+        }
+        return attachmentsById;
+    }
+
     private static String selectFileID(Connection connection, int contextID, int attachmentID) throws SQLException {
         try (PreparedStatement stmt = connection.prepareStatement("SELECT file_id FROM prg_attachment WHERE cid=? AND id=?;")) {
             stmt.setInt(1, contextID);
@@ -374,7 +412,7 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
         for (Attachment attachment : attachments) {
             attachmentIDs.add(I(attachment.getManagedId()));
         }
-        return I2i(attachmentIDs);   
+        return I2i(attachmentIDs);
     }
 
 }
