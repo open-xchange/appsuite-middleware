@@ -49,7 +49,10 @@
 
 package com.openexchange.chronos.provider.caching.basic.search;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -76,6 +79,18 @@ public class SearchHandler {
     private Session session;
     private CalendarAccount account;
 
+    //@formatter:off
+    /** 
+     * Fields that are always included when searching for events 
+     */
+    private static final List<EventField> DEFAULT_FIELDS = Arrays.asList(
+        EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, 
+        EventField.TIMESTAMP, EventField.CREATED_BY, EventField.CALENDAR_USER, EventField.CLASSIFICATION, 
+        EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE,
+        EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.ORGANIZER
+    );
+    //@formatter:on
+
     /**
      * Initialises a new {@link SearchHandler}.
      * 
@@ -93,7 +108,6 @@ public class SearchHandler {
     /**
      * Searches for events
      * 
-     * 
      * @param searchTerm The {@link SearchTerm}
      * @param filters A {@link List} with the {@link SearchFilter}s
      * @param eventFields The optional {@link EventField}s. If <code>null</code> all fields will be retrieved
@@ -107,6 +121,32 @@ public class SearchHandler {
         CalendarStorageFactory storageFactory = Services.getService(CalendarStorageFactory.class);
         SearchOptions sortOptions = new SearchOptions(parameters);
         CalendarStorage storage = storageFactory.create(context, account.getAccountId(), null);
-        return storage.getEventStorage().searchEvents(searchTerm, filters, sortOptions, eventFields);
+        return storage.getEventStorage().searchEvents(searchTerm, filters, sortOptions, getEventFields(eventFields));
+    }
+
+    /**
+     * <p>Prepares the event fields to request from the storage.</p>
+     * 
+     * <p>If the requested fields is empty or <code>null</code>, then all {@link #DEFAULT_FIELDS} are included.
+     * The client may also define additional fields.
+     * </p>
+     * 
+     * @param requestedFields The fields requested by the client, or <code>null</code> to retrieve all fields
+     * @param requiredFields Additionally required fields to add, or <code>null</code> if not defined
+     * @return The fields to use when querying events from the storage
+     */
+    private EventField[] getEventFields(EventField[] requestedFields, EventField... additionalFields) {
+        if (null == requestedFields || requestedFields.length == 0) {
+            return EventField.values();
+        }
+
+        Set<EventField> eventFields = new HashSet<>();
+        eventFields.addAll(DEFAULT_FIELDS);
+        eventFields.addAll(Arrays.asList(requestedFields));
+        if (null != additionalFields && 0 < additionalFields.length) {
+            eventFields.addAll(Arrays.asList(additionalFields));
+        }
+
+        return eventFields.toArray(new EventField[eventFields.size()]);
     }
 }
