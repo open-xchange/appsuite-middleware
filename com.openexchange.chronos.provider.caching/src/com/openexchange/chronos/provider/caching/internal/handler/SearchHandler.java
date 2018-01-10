@@ -73,28 +73,34 @@ import com.openexchange.session.Session;
 public class SearchHandler {
 
     private CalendarParameters parameters;
+    private Session session;
+    private CalendarAccount account;
 
     /**
      * Initialises a new {@link SearchHandler}.
+     * 
+     * @param session The groupware {@link Session}
+     * @param account The {@link CalendarAccount}
+     * @param calendarParameters The {@link CalendarParameters}
      */
-    public SearchHandler(CalendarParameters parameters) {
+    public SearchHandler(Session session, CalendarAccount account, CalendarParameters parameters) {
         super();
+        this.session = session;
+        this.account = account;
         this.parameters = parameters;
     }
 
     /**
      * Searches for events
      * 
-     * @param session The groupware {@link Session}
-     * @param account The {@link CalendarAccount}
+     * 
      * @param searchTerm The {@link SearchTerm}
      * @param filters A {@link List} with the {@link SearchFilter}s
      * @param eventFields The optional {@link EventField}s. If <code>null</code> all fields will be retrieved
      * @return A {@link List} with all matching {@link Event}s
      * @throws OXException if an error is occurred
-     * 
      */
-    public List<Event> searchEvents(Session session, CalendarAccount account, SearchTerm<?> searchTerm, List<SearchFilter> filters, EventField... eventFields) throws OXException {
+    public List<Event> searchEvents(SearchTerm<?> searchTerm, List<SearchFilter> filters, EventField... eventFields) throws OXException {
         ContextService contextService = Services.getService(ContextService.class);
         Context context = contextService.loadContext(session.getContextId());
 

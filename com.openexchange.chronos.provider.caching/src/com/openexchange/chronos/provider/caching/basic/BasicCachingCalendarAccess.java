@@ -84,6 +84,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     protected final Session session;
     protected CalendarAccount account;
     protected final CalendarParameters parameters;
+    private final SearchHandler searchHandler;
 
     private final SingleFolderCachingCalendarAccess cachingBridge;
 
@@ -100,6 +101,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         this.session = session;
         this.parameters = parameters;
         cachingBridge = new CachingAccessBridge(this);
+        searchHandler = new SearchHandler(session, account, parameters);
     }
 
     /**
@@ -165,7 +167,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             return Collections.emptyList();
         }
         SearchTerm<?> searchTerm = SearchUtil.compileSearchTerm(queries);
-        return new SearchHandler(parameters).searchEvents(session, account, searchTerm, filters);
+        return searchHandler.searchEvents(searchTerm, filters);
     }
 
     private static final class CachingAccessBridge extends SingleFolderCachingCalendarAccess {
