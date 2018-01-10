@@ -1,9 +1,3 @@
 requests:
-  - AllRequest.yaml
-  - DeleteRequest.yaml
-  - GetRequest.yaml
-  - UpdateRequest.yaml
-  - NewRequest.yaml
-  - ProvidersRequest.yaml
   - ProbeRequest.yaml
   

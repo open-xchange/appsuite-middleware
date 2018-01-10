@@ -1,4 +1,4 @@
-/chronos/accounts?action=probe:
+/chronos/account?action=probe:
   put:
     operationId: probe
     tags:
@@ -22,4 +22,4 @@
           A JSON object describing the possible calendar accounts. In case of errors the responsible fields in the
           response are filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/CalendarAccountProbeData"
+          $ref: "#/definitions/CalendarAccountResponse"

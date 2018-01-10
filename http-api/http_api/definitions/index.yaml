@@ -182,16 +182,8 @@ CalendarAccountData:
   $ref: ./chronos-accounts/CalendarAccountData.yaml
 CalendarAccountResponse:
   $ref: ./chronos-accounts/CalendarAccountResponse.yaml
-CalendarAccountsResponse:
-  $ref: ./chronos-accounts/CalendarAccountsResponse.yaml
-CalendarAccountId:
-  $ref: ./chronos-accounts/CalendarAccountId.yaml
 CalendarAccountProbeData:
   $ref: ./chronos-accounts/CalendarAccountProbeData.yaml
-CalendarAccountProviderData:
-  $ref: ./chronos-accounts/CalendarAccountProviderData.yaml
-CalendarAccountProvidersResponse:
-  $ref: ./chronos-accounts/CalendarAccountProvidersResponse.yaml
 # Module: chronos-availability
 AvailabilityData:
   $ref: ./chronos-availability/AvailabilityData.yaml

@@ -1,8 +1,0 @@
-type: object
-properties:
-  id:
-    type: string
-    description: ID of provider.
-  name:
-    type: string
-    description: The provider's display name.
