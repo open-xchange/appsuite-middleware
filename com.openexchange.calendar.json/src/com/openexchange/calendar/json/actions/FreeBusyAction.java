@@ -49,10 +49,10 @@
 
 package com.openexchange.calendar.json.actions;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -61,9 +61,11 @@ import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.chronos.service.FreeBusyService;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
@@ -117,9 +119,21 @@ public final class FreeBusyAction extends AppointmentAction {
         if (null == freeBusyService) {
             throw ServiceExceptionCode.absentService(FreeBusyService.class);
         }
-        Map<Attendee, List<Event>> eventsPerAttendee = freeBusyService.getFreeBusy(session, Collections.singletonList(attendee), from, until);
-        List<Event> events = eventsPerAttendee.get(attendee);
-        return getAppointmentResultWithTimestamp(getEventConverter(session), null == events ? Collections.<Event> emptyList() : events);
+        FreeBusyResult freeBusyResult = freeBusyService.getFreeBusy(session, Collections.singletonList(attendee), from, until, false).get(attendee);
+        return getAppointmentResultWithTimestamp(getEventConverter(session), extractEvents(freeBusyResult));
+    }
+
+    private static List<Event> extractEvents(FreeBusyResult freeBusyResult) {
+        if (null == freeBusyResult || null == freeBusyResult.getFreeBusyTimes()) {
+            return Collections.emptyList();
+        }
+        List<Event> events = new ArrayList<Event>(freeBusyResult.getFreeBusyTimes().size());
+        for (FreeBusyTime freeBusyTime : freeBusyResult.getFreeBusyTimes()) {
+            if (null != freeBusyTime.getEvent()) {
+                events.add(freeBusyTime.getEvent());
+            }
+        }
+        return events;
     }
 
 }

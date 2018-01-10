@@ -71,6 +71,18 @@ public class FreeBusyResult {
     }
 
     /**
+     * Initialises a new {@link FreeBusyResult}.
+     *
+     * @param freeBusyTimes The free/busy times to take over
+     * @param The warnings to take over
+     */
+    public FreeBusyResult(List<FreeBusyTime> freeBusyTimes, List<OXException> warnings) {
+        this();
+        this.freeBusyTimes = freeBusyTimes;
+        this.warnings = warnings;
+    }
+
+    /**
      * Gets the warnings
      *
      * @return The warnings

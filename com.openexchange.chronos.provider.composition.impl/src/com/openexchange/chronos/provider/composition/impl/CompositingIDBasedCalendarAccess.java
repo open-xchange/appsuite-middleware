@@ -579,14 +579,14 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     }
 
     @Override
-    public Map<Attendee, FreeBusyResult> queryFreeBusy(List<Attendee> attendees, Date from, Date until) throws OXException {
+    public Map<Attendee, FreeBusyResult> queryFreeBusy(List<Attendee> attendees, Date from, Date until, boolean merge) throws OXException {
         List<FreeBusyProvider> freeBusyProviders = getFreeBusyProviders();
         if (freeBusyProviders.isEmpty()) {
             return Collections.emptyMap();
         }
         Map<Attendee, List<FreeBusyResult>> results = new HashMap<Attendee, List<FreeBusyResult>>();
         for (FreeBusyProvider freeBusyProvider : getFreeBusyProviders()) {
-            Map<Attendee, Map<Integer, FreeBusyResult>> resultsForProvider = freeBusyProvider.query(session, attendees, from, until, this);
+            Map<Attendee, Map<Integer, FreeBusyResult>> resultsForProvider = freeBusyProvider.query(session, attendees, from, until, merge, this);
             if (null != resultsForProvider && 0 < resultsForProvider.size()) {
                 for (Entry<Attendee, Map<Integer, FreeBusyResult>> resultsForAttendee : resultsForProvider.entrySet()) {
                     for (Entry<Integer, FreeBusyResult> resultsForAccount : resultsForAttendee.getValue().entrySet()) {
@@ -596,11 +596,11 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
                 }
             }
         }
-        Map<Attendee, FreeBusyResult> mergedResults = new HashMap<Attendee, FreeBusyResult>(results.size());
+        Map<Attendee, FreeBusyResult> combinedResults = new HashMap<Attendee, FreeBusyResult>(results.size());
         for (Entry<Attendee, List<FreeBusyResult>> entry : results.entrySet()) {
-            mergedResults.put(entry.getKey(), FreeBusyUtils.merge(entry.getValue()));
+            combinedResults.put(entry.getKey(), merge ? FreeBusyUtils.merge(entry.getValue()) : FreeBusyUtils.combine(entry.getValue()));
         }
-        return mergedResults;
+        return combinedResults;
     }
 
     @Override

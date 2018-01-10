@@ -176,7 +176,7 @@ public class ScheduleOutboxCollection extends DAVCollection {
             for (FreeBusyData freeBusyData : freeBusyRequest) {
                 Map<Attendee, FreeBusyResult> freeBusyPerAttendee;
                 try {
-                    freeBusyPerAttendee = getCalendarSession().getFreeBusyService().calculateFreeBusyTime(getCalendarSession(), freeBusyData.getAttendees(), new Date(freeBusyData.getStartDate().getTimestamp()), new Date(freeBusyData.getEndDate().getTimestamp()));
+                    freeBusyPerAttendee = getCalendarSession().getFreeBusyService().getFreeBusy(getCalendarSession(), freeBusyData.getAttendees(), new Date(freeBusyData.getStartDate().getTimestamp()), new Date(freeBusyData.getEndDate().getTimestamp()), true);
                 } catch (OXException e) {
                     LOG.error("error getting free/busy information", e);
                     continue;

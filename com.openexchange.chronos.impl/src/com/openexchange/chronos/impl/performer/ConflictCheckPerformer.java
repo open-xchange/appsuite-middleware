@@ -65,7 +65,6 @@ import static com.openexchange.chronos.common.CalendarUtils.isPublicClassificati
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.CalendarUtils.truncateTime;
-import static com.openexchange.chronos.impl.Utils.getTimeZone;
 import static com.openexchange.chronos.impl.Utils.isCheckConflicts;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -87,6 +86,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.impl.EventConflictImpl;
+import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
@@ -121,7 +121,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
      */
     public ConflictCheckPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
         super(session, storage);
-        this.today = truncateTime(new Date(), getTimeZone(session));
+        this.today = truncateTime(new Date(), Utils.getTimeZone(session));
         maxConflicts = session.getConfig().getMaxConflicts();
         maxAttendeesPerConflict = session.getConfig().getMaxAttendeesPerConflict();
         maxConflictsPerRecurrence = session.getConfig().getMaxConflictsPerRecurrence();
@@ -165,7 +165,7 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         /*
          * derive checked period (+/- one day to cover floating events in different timezone)
          */
-        TimeZone eventTimeZone = isFloating(event) || null == event.getStartDate().getTimeZone() ? getTimeZone(session) : event.getStartDate().getTimeZone();
+        TimeZone eventTimeZone = isFloating(event) || null == event.getStartDate().getTimeZone() ? Utils.getTimeZone(session) : event.getStartDate().getTimeZone();
         Date from = add(new Date(event.getStartDate().getTimestamp()), Calendar.DATE, -1, eventTimeZone);
         Date until = add(new Date(event.getEndDate().getTimestamp()), Calendar.DATE, 1, eventTimeZone);
         if (today.after(until)) {

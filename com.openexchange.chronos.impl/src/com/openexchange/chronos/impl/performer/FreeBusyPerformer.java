@@ -115,7 +115,8 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
     private static final EventField[] FREEBUSY_FIELDS = {
         EventField.CREATED_BY, EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.COLOR, EventField.CLASSIFICATION,
         EventField.SUMMARY, EventField.START_DATE, EventField.END_DATE, EventField.CATEGORIES, EventField.TRANSP, EventField.LOCATION,
-        EventField.RECURRENCE_ID, EventField.RECURRENCE_RULE };
+        EventField.RECURRENCE_ID, EventField.RECURRENCE_RULE
+    };
 
     /** The restricted event fields returned in free/busy queries if the user has no access to the event */
     private static final EventField[] RESTRICTED_FREEBUSY_FIELDS = { EventField.CREATED_BY, EventField.ID, EventField.SERIES_ID,
@@ -139,12 +140,110 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
     /**
      * Performs the free/busy operation.
      *
+     * @param attendees The attendees to get the free/busy data for
+     * @param from The start of the requested time range
+     * @param until The end of the requested time range
+     * @param merge <code>true</code> to merge the resulting free/busy-times, <code>false</code>, otherwise
+     * @return The free/busy times for each of the requested attendees, wrapped within a free/busy result structure
+     */
+    public Map<Attendee, FreeBusyResult> perform(List<Attendee> attendees, Date from, Date until, boolean merge) throws OXException {
+        if (null == attendees || attendees.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<Attendee, FreeBusyResult> results = new HashMap<Attendee, FreeBusyResult>(attendees.size());
+        /*
+         * get intersecting events per attendee & derive (merged) free/busy times
+         */
+        Map<Attendee, List<Event>> eventsPerAttendee = getOverlappingEvents(attendees, from, until);
+        Map<Attendee, List<FreeBusyTime>> freeBusyPerAttendee = new HashMap<Attendee, List<FreeBusyTime>>(eventsPerAttendee.size());
+        for (Map.Entry<Attendee, List<Event>> entry : eventsPerAttendee.entrySet()) {
+            Attendee attendee = entry.getKey();
+            List<Event> events = entry.getValue();
+            if (null == events || events.isEmpty()) {
+                freeBusyPerAttendee.put(attendee, Collections.emptyList());
+                continue;
+            }
+            List<FreeBusyTime> freeBusyTimes = adjustToBoundaries(getFreeBusyTimes(events, getTimeZone(attendee)), from, until);
+            if (merge && 1 < freeBusyTimes.size()) {
+                freeBusyTimes = FreeBusyUtils.mergeFreeBusy(freeBusyTimes);
+            }
+            freeBusyPerAttendee.put(attendee, freeBusyTimes);
+        }
+
+        // Disabled until further notice
+        if (!AVAILABILITY_ENABLED) {
+            for (Attendee attendee : attendees) {
+                List<FreeBusyTime> freeBusyTimes = freeBusyPerAttendee.get(attendee);
+                if (null == freeBusyTimes) {
+                    OXException e = CalendarExceptionCodes.INVALID_CALENDAR_USER.create(attendee.getUri(), Autoboxing.I(attendee.getEntity()), attendee.getCuType());
+                    results.put(attendee, new FreeBusyResult(null, Collections.singletonList(e)));
+                } else {
+                    results.put(attendee, new FreeBusyResult(freeBusyTimes, null));
+                }
+            }
+            return results;
+        }
+
+        // Get the available time for the attendees
+        CalendarAvailabilityService availabilityService = Services.getService(CalendarAvailabilityService.class);
+        Map<Attendee, Availability> availabilityPerAttendee = availabilityService.getAttendeeAvailability(session, attendees, from, until);
+
+        TimeZone timeZone = Utils.getTimeZone(session);
+        // Expand any recurring available instances
+        expandRecurringInstances(from, until, availabilityPerAttendee, timeZone);
+        // Adjust the intervals
+        adjustIntervals(from, until, availabilityPerAttendee, timeZone);
+
+        // Check for not existing users
+        for (Attendee attendee : attendees) {
+            if (!freeBusyPerAttendee.containsKey(attendee)) {
+                List<OXException> warnings = Collections.singletonList(CalendarExceptionCodes.INVALID_CALENDAR_USER.create(attendee.getUri(), Autoboxing.I(attendee.getEntity()), attendee.getCuType()));
+                FreeBusyResult result = new FreeBusyResult();
+                result.setWarnings(warnings);
+                results.put(attendee, result);
+            }
+        }
+
+        // Iterate over all calendar availability blocks for all attendees
+        for (Attendee attendee : attendees) {
+            Availability availability = availabilityPerAttendee.get(attendee);
+            // For each availability block and each calendar available block create an equivalent free busy time slot
+            List<FreeBusyTime> freeBusyTimes = availability == null ? new ArrayList<FreeBusyTime>(0) : calculateFreeBusyTimes(availability, timeZone);
+            // Adjust the ranges of the FreeBusyTime slots that are marked as FREE
+            // in regard to the mergedFreeBusyTimes
+            List<FreeBusyTime> eventsFreeBusyTimes = freeBusyPerAttendee.get(attendee);
+            if (eventsFreeBusyTimes == null) {
+                continue;
+            }
+            if (eventsFreeBusyTimes.isEmpty()) {
+                // The empty event free/busy list is unmodifiable, so we create a modifiable empty list
+                eventsFreeBusyTimes = new ArrayList<>(0);
+            }
+
+            adjustRanges(freeBusyTimes, eventsFreeBusyTimes);
+            // Sort by starting date
+            Collections.sort(eventsFreeBusyTimes, Comparators.FREE_BUSY_DATE_TIME_COMPARATOR);
+
+            // Create result
+            FreeBusyResult result = new FreeBusyResult();
+            result.setFreeBusyTimes(eventsFreeBusyTimes);
+
+            // Set result for attendee
+            results.put(attendee, result);
+        }
+
+        return results;
+    }
+
+    /**
+     * Gets a list of overlapping events in a certain range for each requested attendee.
+     *
      * @param attendees The attendees to query free/busy information for
      * @param from The start date of the period to consider
      * @param until The end date of the period to consider
-     * @return The free/busy result
+     * @return The overlapping events, mapped to each attendee
      */
-    public Map<Attendee, List<Event>> perform(List<Attendee> attendees, Date from, Date until) throws OXException {
+    private Map<Attendee, List<Event>> getOverlappingEvents(List<Attendee> attendees, Date from, Date until) throws OXException {
         /*
          * prepare & filter internal attendees for lookup
          */
@@ -220,7 +319,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      * @return The free/busy result
      */
     public Map<Attendee, List<FreeBusyTime>> performMerged(List<Attendee> attendees, Date from, Date until) throws OXException {
-        Map<Attendee, List<Event>> eventsPerAttendee = perform(attendees, from, until);
+        Map<Attendee, List<Event>> eventsPerAttendee = getOverlappingEvents(attendees, from, until);
         Map<Attendee, List<FreeBusyTime>> freeBusyDataPerAttendee = new HashMap<Attendee, List<FreeBusyTime>>(eventsPerAttendee.size());
         for (Map.Entry<Attendee, List<Event>> entry : eventsPerAttendee.entrySet()) {
             freeBusyDataPerAttendee.put(entry.getKey(), mergeFreeBusy(entry.getValue(), from, until, Utils.getTimeZone(session)));

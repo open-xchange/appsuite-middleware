@@ -113,7 +113,8 @@ public class FreeBusyAction extends ChronosAction {
         List<Attendee> attendees = parseAttendeesObject(requestData);
         Date from = parseDate(requestData, "from");
         Date until = parseDate(requestData, "until");
-        Map<Attendee, FreeBusyResult> result = calendarAccess.queryFreeBusy(attendees, from, until);
+        boolean merge = Boolean.TRUE.equals(requestData.getParameter("merge", Boolean.class, true));
+        Map<Attendee, FreeBusyResult> result = calendarAccess.queryFreeBusy(attendees, from, until, merge);
         return new AJAXRequestResult(result, FreeBusyConverter.INPUT_FORMAT);
     }
 

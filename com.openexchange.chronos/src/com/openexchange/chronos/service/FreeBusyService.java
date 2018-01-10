@@ -53,9 +53,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.exception.OXException;
 
 /**
@@ -77,28 +75,19 @@ public interface FreeBusyService {
     boolean[] hasEventsBetween(CalendarSession session, Date from, Date until) throws OXException;
 
     /**
-     * Gets free/busy information in a certain interval for one ore more attendees. Only <i>internal</i> attendees are considered.
+     * Gets free/busy information in a certain interval for one ore more attendees.
+     * <p/>
+     * Optionally, the resulting data is pre-processed and sorted by time, so that any overlapping intervals each of the attendee's
+     * free/busy time are merged implicitly to the most conflicting busy times.
      *
      * @param session The calendar session
      * @param attendees The attendees to get the free/busy data for
      * @param from The start of the requested time range
      * @param until The end of the requested time range
-     * @return The free/busy data for the attendees, which are stripped down event objects based on the current session user's access permissions for the events
+     * @param merge <code>true</code> to merge the resulting free/busy-times, <code>false</code>, otherwise
+     * @return The free/busy times for each of the requested attendees, wrapped within a free/busy result structure
      */
-    Map<Attendee, List<Event>> getFreeBusy(CalendarSession session, List<Attendee> attendees, Date from, Date until) throws OXException;
-
-    /**
-     * Gets free/busy information in a certain interval for one ore more attendees. The data is pre-processed and sorted by time, so
-     * that any overlapping intervals each of the attendee's free/busy time are merged implicitly to the most conflicting busy times.
-     * Only <i>internal</i> attendees are considered.
-     *
-     * @param session The calendar session
-     * @param attendees The attendees to get the free/busy data for
-     * @param from The start of the requested time range
-     * @param until The end of the requested time range
-     * @return The free/busy times for each of the attendees
-     */
-    Map<Attendee, List<FreeBusyTime>> getMergedFreeBusy(CalendarSession session, List<Attendee> attendees, Date from, Date until) throws OXException;
+    Map<Attendee, FreeBusyResult> getFreeBusy(CalendarSession session, List<Attendee> attendees, Date from, Date until, boolean merge) throws OXException;
 
     /**
      * Checks for potential conflicting events of the attendees with another event, typically prior event creation or update.
@@ -110,18 +99,4 @@ public interface FreeBusyService {
      */
     List<EventConflict> checkForConflicts(CalendarSession session, Event event, List<Attendee> attendees) throws OXException;
 
-    /**
-     * Calculates the free-busy time information for the specified {@link Attendee}s taken into consideration their
-     * {@link Availability} blocks. It first retrieves the merged free busy information using
-     * the {@link #getMergedFreeBusy(CalendarSession, List, Date, Date)} method and combines those slots
-     * with the {@link Availability} blocks of their respective users.
-     * 
-     * @param session The calendar session
-     * @param attendees The {@link Attendee}s to calculate the free busy time for
-     * @param from The start of the time interval
-     * @param until The end of the time interval
-     * @return A {@link Map} with the calculated free/busy times
-     * @throws OXException if an error is occurred
-     */
-    Map<Attendee, FreeBusyResult> calculateFreeBusyTime(CalendarSession session, List<Attendee> attendees, Date from, Date until) throws OXException;
 }

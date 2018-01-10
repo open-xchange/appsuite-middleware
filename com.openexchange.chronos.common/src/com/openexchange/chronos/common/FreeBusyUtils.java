@@ -69,12 +69,12 @@ import com.openexchange.exception.OXException;
 public class FreeBusyUtils {
 
     /**
-     * Merges the free/busy times of multiple free/busy results.
+     * Combines the free/busy times of multiple free/busy results.
      *
-     * @param freeBusyResults The free/busy results to merge
-     * @return The merged free/busy result
+     * @param freeBusyResults The free/busy results to combine
+     * @return The combined free/busy result
      */
-    public static FreeBusyResult merge(List<FreeBusyResult> freeBusyResults) {
+    public static FreeBusyResult combine(List<FreeBusyResult> freeBusyResults) {
         if (null == freeBusyResults || freeBusyResults.isEmpty()) {
             return null;
         }
@@ -91,10 +91,26 @@ public class FreeBusyUtils {
                 freeBusyTimes.addAll(result.getFreeBusyTimes());
             }
         }
-        FreeBusyResult freeBusyResult = new FreeBusyResult();
-        freeBusyResult.setFreeBusyTimes(mergeFreeBusy(freeBusyTimes));
-        freeBusyResult.setWarnings(warnings);
-        return freeBusyResult;
+        Collections.sort(freeBusyTimes);
+        return new FreeBusyResult(freeBusyTimes, warnings);
+    }
+
+    /**
+     * Merges the free/busy times of multiple free/busy results.
+     *
+     * @param freeBusyResults The free/busy results to merge
+     * @return The merged free/busy result
+     */
+    public static FreeBusyResult merge(List<FreeBusyResult> freeBusyResults) {
+        if (null == freeBusyResults || freeBusyResults.isEmpty()) {
+            return null;
+        }
+        if (1 == freeBusyResults.size()) {
+            return freeBusyResults.get(0);
+        }
+        FreeBusyResult combinedResult = combine(freeBusyResults);
+        combinedResult.setFreeBusyTimes(mergeFreeBusy(combinedResult.getFreeBusyTimes()));
+        return combinedResult;
     }
 
     /**
@@ -103,6 +119,9 @@ public class FreeBusyUtils {
      * <li>the intervals are sorted chronologically, i.e. the earliest interval is first</li>
      * <li>overlapping intervals are merged so that only the most conflicting ones of overlapping time ranges are used</li>
      * </ul>
+     *
+     * @param freeBusyTimes The free/busy-times to merge
+     * @return The merged free/busy times
      */
     public static List<FreeBusyTime> mergeFreeBusy(List<FreeBusyTime> freeBusyTimes) {
         if (null == freeBusyTimes) {

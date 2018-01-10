@@ -87,9 +87,9 @@ public class InternalFreeBusyProvider implements FreeBusyProvider {
     }
 
     @Override
-    public Map<Attendee, Map<Integer, FreeBusyResult>> query(Session session, List<Attendee> attendees, Date from, Date until, CalendarParameters parameters) throws OXException {
+    public Map<Attendee, Map<Integer, FreeBusyResult>> query(Session session, List<Attendee> attendees, Date from, Date until, boolean merge, CalendarParameters parameters) throws OXException {
         CalendarSession calendarSession = services.getService(CalendarService.class).init(session, parameters);
-        Map<Attendee, FreeBusyResult> results = calendarSession.getFreeBusyService().calculateFreeBusyTime(calendarSession, attendees, from, until);
+        Map<Attendee, FreeBusyResult> results = calendarSession.getFreeBusyService().getFreeBusy(calendarSession, attendees, from, until, merge);
         if (null == results || results.isEmpty()) {
             return Collections.emptyMap();
         }

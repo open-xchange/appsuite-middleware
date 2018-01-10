@@ -52,16 +52,18 @@ package com.openexchange.chronos.impl.performer;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
+import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isPublicClassification;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
@@ -99,6 +101,22 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
             }
         }
         return events;
+    }
+
+    /**
+     * Gets the timezone to consider for <i>floating</i> dates of a specific attendee.
+     * <p/>
+     * For <i>internal</i>, individual calendar user attendees, this is the configured timezone of the user; otherwise, the timezone of
+     * the current session's user is used.
+     *
+     * @param attendee The attendee to get the timezone to consider for <i>floating</i> dates for
+     * @return The timezone
+     */
+    protected TimeZone getTimeZone(Attendee attendee) throws OXException {
+        if (isInternal(attendee) && CalendarUserType.INDIVIDUAL.equals(attendee)) {
+            return session.getEntityResolver().getTimeZone(attendee.getEntity());
+        }
+        return Utils.getTimeZone(session);
     }
 
     /**

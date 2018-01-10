@@ -54,7 +54,6 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.FreeBusyTime;
 import com.openexchange.chronos.impl.performer.ConflictCheckPerformer;
 import com.openexchange.chronos.impl.performer.FreeBusyPerformer;
 import com.openexchange.chronos.impl.performer.HasPerformer;
@@ -92,12 +91,12 @@ public class FreeBusyServiceImpl implements FreeBusyService {
     }
 
     @Override
-    public Map<Attendee, List<Event>> getFreeBusy(CalendarSession session, final List<Attendee> attendees, final Date from, final Date until) throws OXException {
-        return new InternalCalendarStorageOperation<Map<Attendee, List<Event>>>(session) {
+    public Map<Attendee, FreeBusyResult> getFreeBusy(CalendarSession session, List<Attendee> attendees, Date from, Date until, boolean merge) throws OXException {
+        return new InternalCalendarStorageOperation<Map<Attendee, FreeBusyResult>>(session) {
 
             @Override
-            protected Map<Attendee, List<Event>> execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new FreeBusyPerformer(session, storage).perform(attendees, from, until);
+            protected Map<Attendee, FreeBusyResult> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return new FreeBusyPerformer(session, storage).perform(attendees, from, until, merge);
             }
         }.executeQuery();
     }
@@ -109,28 +108,6 @@ public class FreeBusyServiceImpl implements FreeBusyService {
             @Override
             protected List<EventConflict> execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new ConflictCheckPerformer(session, storage).perform(event, attendees);
-            }
-        }.executeQuery();
-    }
-
-    @Override
-    public Map<Attendee, List<FreeBusyTime>> getMergedFreeBusy(CalendarSession session, final List<Attendee> attendees, final Date from, final Date until) throws OXException {
-        return new InternalCalendarStorageOperation<Map<Attendee, List<FreeBusyTime>>>(session) {
-
-            @Override
-            protected Map<Attendee, List<FreeBusyTime>> execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new FreeBusyPerformer(session, storage).performMerged(attendees, from, until);
-            }
-        }.executeQuery();
-    }
-
-    @Override
-    public Map<Attendee, FreeBusyResult> calculateFreeBusyTime(CalendarSession session, final List<Attendee> attendees, final Date from, final Date until) throws OXException {
-        return new InternalCalendarStorageOperation<Map<Attendee, FreeBusyResult>>(session) {
-
-            @Override
-            protected Map<Attendee, FreeBusyResult> execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new FreeBusyPerformer(session, storage).performCalculateFreeBusyTime(attendees, from, until);
             }
         }.executeQuery();
     }

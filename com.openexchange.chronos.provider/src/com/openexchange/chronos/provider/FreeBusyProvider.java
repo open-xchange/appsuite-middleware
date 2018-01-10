@@ -79,8 +79,9 @@ public interface FreeBusyProvider {
      * @param from The start of the requested time range
      * @param until The end of the requested time range
      * @param parameters Additional arbitrary parameters, or <code>null</code> if not used
+     * @param merge <code>true</code> to merge the resulting free/busy-times, <code>false</code>, otherwise
      * @return The free/busy times for each of the attendees, mapped to the corresponding account identifier
      */
-    Map<Attendee, Map<Integer, FreeBusyResult>> query(Session session, List<Attendee> attendees, Date from, Date until, CalendarParameters parameters) throws OXException;
+    Map<Attendee, Map<Integer, FreeBusyResult>> query(Session session, List<Attendee> attendees, Date from, Date until, boolean merge, CalendarParameters parameters) throws OXException;
 
 }

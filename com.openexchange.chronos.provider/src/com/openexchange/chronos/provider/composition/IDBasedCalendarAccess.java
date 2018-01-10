@@ -515,8 +515,9 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * @param attendees The queried attendees
      * @param from The start of the requested time range
      * @param until The end of the requested time range
+     * @param merge <code>true</code> to merge the resulting free/busy-times, <code>false</code>, otherwise
      * @return The free/busy results for each of the queried attendees
      */
-    Map<Attendee, FreeBusyResult> queryFreeBusy(List<Attendee> attendees, Date from, Date until) throws OXException;
+    Map<Attendee, FreeBusyResult> queryFreeBusy(List<Attendee> attendees, Date from, Date until, boolean merge) throws OXException;
 
 }
