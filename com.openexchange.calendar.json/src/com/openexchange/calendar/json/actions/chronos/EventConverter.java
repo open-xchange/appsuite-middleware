@@ -1046,7 +1046,7 @@ public abstract class EventConverter {
         EventField [] recurrenceFields = {
             EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE
         };
-        if (false == event.getId().equals(event.getSeriesId())) {
+        if (null != event.getId() && false == event.getId().equals(event.getSeriesId())) {
             if (null == event.getSeriesId()) {
                 // no recurrence (yet)
                 return new DefaultRecurrenceData(null, event.getStartDate(), null);
