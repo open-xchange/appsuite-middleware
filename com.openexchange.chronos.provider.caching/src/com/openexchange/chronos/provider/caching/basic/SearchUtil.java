@@ -49,11 +49,8 @@
 
 package com.openexchange.chronos.provider.caching.basic;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -89,38 +86,13 @@ final class SearchUtil {
     private static final String CATEGORIES = "categories";
 
     /**
+     * Compiles the {@link SearchTerm} from the specified {@link List} of queries
      * 
-     * @param filters
-     * @param queries
-     * @return
+     * @param queries The {@link List} of queries
+     * @return The {@link SearchTerm}
      */
-    static SearchTerm<?> compileSearchTerm(List<SearchFilter> filters, List<String> queries) {
+    static SearchTerm<?> compileSearchTerm(List<String> queries) {
         return compileQueriesSearchTerm(queries);
-    }
-
-    /**
-     * Compiles a {@link List} with storage {@link SearchTerm} filters.
-     * 
-     * @param filters The {@link List} with the {@link SearchFilter}s
-     * @return The {@link List} with the compiled {@link SearchTerm}s
-     */
-    private static List<SearchTerm<?>> compileStorageFilterSearchTerms(List<SearchFilter> filters) {
-        if (null == filters || filters.isEmpty()) {
-            return Collections.emptyList();
-        }
-        List<SearchTerm<?>> filterSearchTerms = new ArrayList<SearchTerm<?>>();
-        for (SearchFilter filter : filters) {
-            if (null == filter.getFields() || filter.getFields().isEmpty()) {
-                continue;
-            }
-            for (String field : filter.getFields()) {
-                SearchTerm<?> filterSearchTerm = compileFieldSearchTerm(field, filter.getQueries());
-                if (null != filterSearchTerm) {
-                    filterSearchTerms.add(filterSearchTerm);
-                }
-            }
-        }
-        return filterSearchTerms;
     }
 
     /**
