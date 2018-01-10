@@ -71,6 +71,7 @@ import com.openexchange.chronos.itip.tools.ITipUtils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 
 /**
  * 
@@ -93,38 +94,38 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
     }
 
     protected Event determineOriginalEvent(final ITipChange change, final Map<String, Event> processed, final CalendarSession session) throws OXException {
-        Event currentAppointment = change.getCurrentEvent();
-        if (currentAppointment == null || currentAppointment.getId() != null) {
+        Event currentEvent = change.getCurrentEvent();
+        if (currentEvent == null || Strings.isEmpty(currentEvent.getId())) {
             if (change.isException()) {
-                currentAppointment = change.getMasterEvent();
-                if (currentAppointment == null || currentAppointment.getId() != null) {
-                    currentAppointment = processed.get(change.getNewEvent().getUid());
-                    if (currentAppointment == null) {
-                        currentAppointment = util.loadEvent(change.getNewEvent(), session);
+                currentEvent = change.getMasterEvent();
+                if (currentEvent == null || currentEvent.getId() != null) {
+                    currentEvent = processed.get(change.getNewEvent().getUid());
+                    if (currentEvent == null) {
+                        currentEvent = util.loadEvent(change.getNewEvent(), session);
                     }
                 }
             }
         }
-        return currentAppointment;
+        return currentEvent;
     }
 
-    protected void ensureFolderId(final Event appointment, final CalendarSession session) throws OXException {
-        if (appointment.containsFolderId() && appointment.getFolderId() != null) {
+    protected void ensureFolderId(final Event event, final CalendarSession session) throws OXException {
+        if (event.containsFolderId() && event.getFolderId() != null) {
             return;
         }
         final String privateCalendarFolderId = util.getPrivateCalendarFolderId(session);
-        appointment.setFolderId(privateCalendarFolderId);
+        event.setFolderId(privateCalendarFolderId);
 
     }
 
-    protected void writeMail(final ITipAction action, Event original, final Event appointment, final CalendarSession session, int owner) throws OXException {
+    protected void writeMail(final ITipAction action, Event original, final Event update, final CalendarSession session, int owner) throws OXException {
         CalendarUser principal = ITipUtils.getPrincipal(session);
         switch (action) {
             case COUNTER:
                 return;
             default: //Continue normally
         }
-        final Event filled = fillup(original, appointment, session);
+        final Event filled = fillup(original, update, session);
         original = constructOriginalForMail(action, original, filled, session, owner);
 
         final ITipMailGenerator generator = mailGenerators.create(original, filled, session.getSession(), owner, ITipUtils.getPrincipal(session));
@@ -191,7 +192,7 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
         }
     }
 
-    private Event constructOriginalForMail(final ITipAction action, final Event original, final Event appointment, final CalendarSession session, int owner) throws OXException {
+    private Event constructOriginalForMail(final ITipAction action, final Event original, final Event update, final CalendarSession session, int owner) throws OXException {
         switch (action) {
             case ACCEPT:
             case ACCEPT_AND_IGNORE_CONFLICTS:
@@ -199,14 +200,14 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
             case ACCEPT_PARTY_CRASHER:
             case DECLINE:
             case TENTATIVE:
-                return constructFakeOriginal(appointment, session, owner);
+                return constructFakeOriginal(update, session, owner);
             default:
                 return original;
         }
     }
 
-    private Event constructFakeOriginal(final Event appointment, final CalendarSession session, int owner) throws OXException {
-        Event copy = session.getUtilities().copyEvent(appointment, (EventField[]) null);
+    private Event constructFakeOriginal(final Event event, final CalendarSession session, int owner) throws OXException {
+        Event copy = session.getUtilities().copyEvent(event, (EventField[]) null);
         if (copy.containsAttendees()) {
             for (Attendee attendee : copy.getAttendees()) {
                 if (attendee.getEntity() == owner) {
@@ -217,12 +218,12 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
         return copy;
     }
 
-    private Event fillup(final Event original, final Event appointment, CalendarSession session) throws OXException {
+    private Event fillup(final Event original, final Event update, CalendarSession session) throws OXException {
         if (original == null) {
-            return appointment;
+            return update;
         }
 
-        EventUpdate diff = session.getUtilities().compare(original, appointment, false, (EventField[]) null);
+        EventUpdate diff = session.getUtilities().compare(original, update, false, (EventField[]) null);
         Event copy = session.getUtilities().copyEvent(original, (EventField[]) null);
         EventMapper.getInstance().copy(original, copy, diff.getUpdatedFields().toArray(new EventField[diff.getUpdatedFields().size()]));
 
