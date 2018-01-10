@@ -155,6 +155,19 @@ com.openexchange.calendar.extendedProperties:
 com.openexchange.calendar.config:
   type: object
   description: Holds arbitrary, provider-specific configuration data for calendar accounts.
+  properties:
+    uri:
+      type: string
+      description: (ical provider only) The URI of the ICal feed that should be subscribed.
+    refresh_interval:
+      type: string
+      description: (ical provider only) Defines the refresh interval used for the subscribed ICal feed.
+    login:
+      type: string
+      description: (ical provider only) Defines an optional login for the subscribed ICal feed.
+    password:
+      type: string
+      description: (ical provider only) An optional password for the subscribed ICal feed.
 com.openexchange.calendar.provider:
   type: string
   description: Denotes the identifier of the underlying calendar provider.
