@@ -66,10 +66,12 @@ import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.EventFlag;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
@@ -182,6 +184,28 @@ public abstract class AbstractQueryPerformer {
      * @return The processed events
      */
     protected List<Event> postProcess(List<Event> events, UserizedFolder inFolder, boolean includeClassified, EventField[] fields) throws OXException {
+        return postProcess(events, inFolder, includeClassified, fields, null);
+    }
+
+    /**
+     * Post-processes a list of events prior returning it to the client. This includes
+     * <ul>
+     * <li>excluding events that are excluded as per {@link Utils#isExcluded(Event, CalendarSession, boolean)}</li>
+     * <li>applying the folder identifier from the passed folder</li>
+     * <li>generate and apply event flags applying the folder identifier from the passed folder</li>
+     * <li>resolving occurrences of the series master event as per {@link Utils#isResolveOccurrences(com.openexchange.chronos.service.CalendarParameters)}</li>
+     * <li>apply <i>userized</i> versions of change- and delete-exception dates in the series master event based on the calendar user's actual attendance</li>
+     * <li>sorting the resulting event list based on the requested sort options</li>
+     * </ul>
+     *
+     * @param events The events to post-process
+     * @param inFolder The parent folder representing the view on the event
+     * @param includeClassified <code>true</code> to include <i>confidential</i> events in shared folders, <code>false</code>, otherwise
+     * @param fields The event fields to consider, or <code>null</code> if not specified
+     * @param flagsGenerator A custom event flags generator, or <code>null</code> to generate the flags in the default way as needed
+     * @return The processed events
+     */
+    protected List<Event> postProcess(List<Event> events, UserizedFolder inFolder, boolean includeClassified, EventField[] fields, EventFlagsGenerator flagsGenerator) throws OXException {
         List<Event> processedEvents = new ArrayList<Event>(events.size());
         int calendarUserId = getCalendarUserId(inFolder);
         for (Event event : events) {
@@ -190,7 +214,7 @@ public abstract class AbstractQueryPerformer {
             }
             event.setFolderId(inFolder.getID());
             if (null == fields || Arrays.contains(fields, EventField.FLAGS)) {
-                event.setFlags(getFlags(event, calendarUserId));
+                event.setFlags(null == flagsGenerator ? getFlags(event, calendarUserId) : flagsGenerator.getFlags(event, calendarUserId));
             }
             event = anonymizeIfNeeded(session, event);
             if (isSeriesMaster(event)) {
@@ -268,4 +292,15 @@ public abstract class AbstractQueryPerformer {
         return list;
     }
 
+    protected static interface EventFlagsGenerator {
+
+        /**
+         * Generates the flags for a specific event.
+         *
+         * @param event The event to get the flags for
+         * @param calendarUser The identifier of the calendar user to get flags for
+         * @return The event flags
+         */
+        EnumSet<EventFlag> getFlags(Event event, int calendarUser);
+    }
 }

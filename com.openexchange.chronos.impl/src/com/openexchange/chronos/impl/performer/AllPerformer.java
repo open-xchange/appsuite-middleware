@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.getFields;
+import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
@@ -60,12 +61,18 @@ import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.tools.arrays.Arrays.contains;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.EventFlag;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -169,10 +176,92 @@ public class AllPerformer extends AbstractQueryPerformer {
          */
         requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         SearchTerm<?> searchTerm = getFolderIdTerm(session, folder);
-        EventField[] fields = getFields(session);
+        EventField[] fields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        if (null == fields || false == contains(fields, EventField.FLAGS)) {
+            /*
+             * get events with default fields & load additional event data as needed
+             */
+            fields = getFields(fields);
+            List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
+            events = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), events, fields);
+            return postProcess(events, folder, isIncludeClassifiedEvents(session), fields);
+        }
+        /*
+         * get events & load additional data for event flag generation dynamically
+         */
+        fields = getFields(fields, EventField.ID, EventField.STATUS, EventField.TRANSP, EventField.CLASSIFICATION, EventField.ORGANIZER);
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
         events = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), events, fields);
-        return postProcess(events, folder, isIncludeClassifiedEvents(session), fields);
+        DynamicEventFlagsGenerator flagsGenerator = new DynamicEventFlagsGenerator(session, storage, getCalendarUserId(folder), getObjectIDs(events), fields);
+        return postProcess(events, folder, isIncludeClassifiedEvents(session), fields, flagsGenerator);
+    }
+
+    private static final class DynamicEventFlagsGenerator implements EventFlagsGenerator {
+
+        private final Map<String, Boolean> attachmentsPerEventId;
+        private final Map<String, Boolean> alarmTriggersPerEventId;
+        private final Map<String, ParticipationStatus> partStatsPerEventId;
+
+        /**
+         * Initializes a new {@link DynamicEventFlagsGenerator}.
+         *
+         * @param session The calendar session
+         * @param storage The calendar storage
+         * @param calendarUserId The identifier of the calendar user
+         * @param eventIds The identifiers of the events to prepare the event flags for
+         * @param loadedFields The already loaded fields
+         */
+        public DynamicEventFlagsGenerator(CalendarSession session, CalendarStorage storage, int calendarUserId, String[] eventIds, EventField[] loadedFields) throws OXException {
+            super();
+            /*
+             * load attachment info dynamically, unless already requested explicitly
+             */
+            attachmentsPerEventId = contains(loadedFields, EventField.ATTACHMENTS) ? null : storage.getAttachmentStorage().hasAttachments(eventIds);
+            /*
+             * load alarm info dynamically, unless already requested explicitly
+             */
+            alarmTriggersPerEventId = contains(loadedFields, EventField.ALARMS) ? null : storage.getAlarmTriggerStorage().hasTriggers(calendarUserId, eventIds);
+            /*
+             * load attendee-related info dynamically, unless already requested explicitly
+             */
+            partStatsPerEventId = contains(loadedFields, EventField.ATTENDEES) ? null : storage.getAttendeeStorage().loadPartStats(eventIds, session.getEntityResolver().prepareUserAttendee(calendarUserId));
+        }
+
+        @Override
+        public EnumSet<EventFlag> getFlags(Event event, int calendarUser) {
+            EnumSet<EventFlag> flags = CalendarUtils.getFlags(event, calendarUser);
+            if (null != event.getOrganizer()) {
+                flags.add(EventFlag.SCHEDULED);
+            }
+            if (null != partStatsPerEventId) {
+                ParticipationStatus partStat = partStatsPerEventId.get(event.getId());
+                if (null != partStat) {
+                    flags.add(EventFlag.ATTENDEE);
+                    if (event.getOrganizer().getEntity() == calendarUser) {
+                        flags.add(EventFlag.ORGANIZER);
+                    }
+                    if (ParticipationStatus.ACCEPTED.equals(partStat)) {
+                        flags.add(EventFlag.ACCEPTED);
+                    } else if (ParticipationStatus.DECLINED.equals(partStat)) {
+                        flags.add(EventFlag.DECLINED);
+                    } else if (ParticipationStatus.DELEGATED.equals(partStat)) {
+                        flags.add(EventFlag.DELEGATED);
+                    } else if (ParticipationStatus.NEEDS_ACTION.equals(partStat)) {
+                        flags.add(EventFlag.NEEDS_ACTION);
+                    } else if (ParticipationStatus.TENTATIVE.equals(partStat)) {
+                        flags.add(EventFlag.TENTATIVE);
+                    }
+                }
+            }
+            if (null != attachmentsPerEventId && Boolean.TRUE.equals(attachmentsPerEventId.get(event.getId()))) {
+                flags.add(EventFlag.ATTACHMENTS);
+            }
+            if (null != alarmTriggersPerEventId && Boolean.TRUE.equals(alarmTriggersPerEventId.get(event.getId()))) {
+                flags.add(EventFlag.ALARMS);
+            }
+            return flags;
+        }
+
     }
 
 }
