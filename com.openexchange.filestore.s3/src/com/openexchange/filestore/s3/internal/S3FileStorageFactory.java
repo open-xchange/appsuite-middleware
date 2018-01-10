@@ -237,7 +237,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
          */
         String endpoint = configService.getProperty("com.openexchange.filestore.s3." + filestoreID + ".endpoint");
         if (false == Strings.isEmpty(endpoint)) {
-            clientBuilder.setEndpointConfiguration(new EndpointConfiguration(endpoint, clientConfiguration.getSignerOverride()));
+            clientBuilder.setEndpointConfiguration(new EndpointConfiguration(endpoint, null));
         } else {
             String region = configService.getProperty("com.openexchange.filestore.s3." + filestoreID + ".region", "us-west-2");
             try {
@@ -249,6 +249,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
         if (configService.getBoolProperty("com.openexchange.filestore.s3." + filestoreID + ".pathStyleAccess", true)) {
             clientBuilder.setPathStyleAccessEnabled(Boolean.TRUE);
         }
+        clientBuilder.withRequestHandlers(ETagCorrectionHandler.getInstance());
         long chunkSize;
         String chunkSizeValue = configService.getProperty("com.openexchange.filestore.s3." + filestoreID + ".chunkSize", "5MB");
         try {
