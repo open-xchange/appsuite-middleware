@@ -186,6 +186,8 @@ CalendarAccountsResponse:
   $ref: ./chronos-accounts/CalendarAccountsResponse.yaml
 CalendarAccountId:
   $ref: ./chronos-accounts/CalendarAccountId.yaml
+CalendarAccountProbeData:
+  $ref: ./chronos-accounts/CalendarAccountProbeData.yaml
 CalendarAccountProviderData:
   $ref: ./chronos-accounts/CalendarAccountProviderData.yaml
 CalendarAccountProvidersResponse:

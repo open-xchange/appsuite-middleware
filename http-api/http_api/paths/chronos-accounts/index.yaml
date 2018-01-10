@@ -5,3 +5,5 @@ requests:
   - UpdateRequest.yaml
   - NewRequest.yaml
   - ProvidersRequest.yaml
+  - ProbeRequest.yaml
+  
