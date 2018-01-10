@@ -29,7 +29,7 @@ Requires:      util-linux
 Requires:      which
 %endif
 Requires:      sed
-
+Conflicts:     open-xchange-core < 7.10.0
 %description
 System integration specific infrastructure
 
