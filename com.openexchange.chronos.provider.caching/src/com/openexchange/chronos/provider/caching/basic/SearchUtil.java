@@ -73,19 +73,6 @@ final class SearchUtil {
     private static final String WILDCARD = "*";
 
     /**
-     * {@link EventField#SUMMARY}
-     */
-    private static final String SUMMARY = "summary";
-    /**
-     * {@link EventField#DESCRIPTION}
-     */
-    private static final String DESCRIPTION = "description";
-    /**
-     * {@link EventField#CATEGORIES}
-     */
-    private static final String CATEGORIES = "categories";
-
-    /**
      * Compiles the {@link SearchTerm} from the specified {@link List} of queries
      * 
      * @param queries The {@link List} of queries
@@ -161,24 +148,5 @@ final class SearchUtil {
             pattern += WILDCARD;
         }
         return pattern;
-    }
-
-    /**
-     * Compiles a field {@link SearchTerm} from the specified field and {@link List} of queries
-     * 
-     * @param field the field for which to compile the {@link SearchTerm}
-     * @param queries The {@link List} of queries
-     * @return The compiled {@link SearchTerm}
-     * @throws IllegalArgumentException if the field is unknown or unsupported.
-     */
-    private static SearchTerm<?> compileFieldSearchTerm(String field, List<String> queries) {
-        //TODO: impl
-        switch (field) {
-            case SUMMARY:
-            case DESCRIPTION:
-            case CATEGORIES:
-            default:
-                throw new IllegalArgumentException("Unkown/Unsupported filter field: '" + field + "'");
-        }
     }
 }
