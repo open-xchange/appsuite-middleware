@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.provider.caching.internal.handler;
+package com.openexchange.chronos.provider.caching.basic.search;
 
 import java.util.List;
 import com.openexchange.chronos.Event;

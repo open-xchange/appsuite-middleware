@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.provider.caching.basic;
+package com.openexchange.chronos.provider.caching.basic.search;
 
 import java.util.List;
 import com.openexchange.chronos.EventField;
@@ -65,7 +65,7 @@ import com.openexchange.search.internal.operands.ConstantOperand;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-final class SearchUtil {
+public final class SearchUtil {
 
     /**
      * The wildcard character '*'
@@ -78,7 +78,7 @@ final class SearchUtil {
      * @param queries The {@link List} of queries
      * @return The {@link SearchTerm}
      */
-    static SearchTerm<?> compileSearchTerm(List<String> queries) {
+    public static SearchTerm<?> compileSearchTerm(List<String> queries) {
         return compileQueriesSearchTerm(queries);
     }
 
