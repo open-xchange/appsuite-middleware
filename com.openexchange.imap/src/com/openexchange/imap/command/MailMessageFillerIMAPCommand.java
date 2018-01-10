@@ -123,11 +123,11 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
         this.uids = tuids.toArray();
         textPreviewProvider = Services.optService(IMAPTextPreviewProvider.class);
         if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
-            this.textPreviewMode = IMAPTextPreviewProvider.Mode.ONLY_IF_AVAILABLE;
+            textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.ONLY_IF_AVAILABLE;
         } else if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS)) {
-            this.textPreviewMode = IMAPTextPreviewProvider.Mode.REQUIRE;
+            textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.REQUIRE;
         } else {
-            this.textPreviewMode = null;
+            textPreviewMode = null;
         }
         if (null != textPreviewMode) {
             fp.add(UIDFolder.FetchProfileItem.UID);

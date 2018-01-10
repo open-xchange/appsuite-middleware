@@ -145,9 +145,9 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         lastHandlers = new HashSet<FetchItemHandler>();
         textPreviewProvider = Services.optService(IMAPTextPreviewProvider.class);
         if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
-            this.textPreviewMode = IMAPTextPreviewProvider.Mode.ONLY_IF_AVAILABLE;
+            this.textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.ONLY_IF_AVAILABLE;
         } else if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS)) {
-            this.textPreviewMode = IMAPTextPreviewProvider.Mode.REQUIRE;
+            this.textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.REQUIRE;
         } else {
             this.textPreviewMode = null;
         }
@@ -185,9 +185,9 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         map = new TLongObjectHashMap<MailMessage>(length);
         textPreviewProvider = Services.optService(IMAPTextPreviewProvider.class);
         if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
-            this.textPreviewMode = IMAPTextPreviewProvider.Mode.ONLY_IF_AVAILABLE;
+            this.textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.ONLY_IF_AVAILABLE;
         } else if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS)) {
-            this.textPreviewMode = IMAPTextPreviewProvider.Mode.REQUIRE;
+            this.textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.REQUIRE;
         } else {
             this.textPreviewMode = null;
         }

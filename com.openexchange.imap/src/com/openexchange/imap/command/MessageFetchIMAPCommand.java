@@ -74,7 +74,6 @@ import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPTextPreviewProvider;
-import com.sun.mail.imap.IMAPTextPreviewProvider.Mode;
 import com.sun.mail.imap.IMAPFolder.FetchProfileItem;
 import com.sun.mail.imap.protocol.BODY;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
@@ -372,9 +371,9 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
         length = fetchLen;
         this.textPreviewProvider = Services.optService(IMAPTextPreviewProvider.class);
         if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
-            textPreviewMode = IMAPTextPreviewProvider.Mode.ONLY_IF_AVAILABLE;
+            textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.ONLY_IF_AVAILABLE;
         } else if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS)) {
-            textPreviewMode = IMAPTextPreviewProvider.Mode.REQUIRE;
+            textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.REQUIRE;
         } else {
             textPreviewMode = null;
         }
