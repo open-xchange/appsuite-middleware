@@ -64,17 +64,22 @@ import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.SingleFolderCachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.internal.handler.SearchHandler;
+import com.openexchange.chronos.provider.extensions.BasicSearchAware;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.exception.OXException;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.session.Session;
 
 /**
  * {@link BasicCachingCalendarAccess}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
-public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess {
+public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess, BasicSearchAware {
 
     protected final Session session;
     protected CalendarAccount account;
@@ -147,6 +152,20 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess 
     @Override
     public void close() {
         // nothing to do
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.provider.extensions.BasicSearchAware#searchEvents(java.util.List, java.util.List)
+     */
+    @Override
+    public List<Event> searchEvents(List<SearchFilter> filters, List<String> queries) throws OXException {
+        if ((null == filters || filters.isEmpty()) && (null == queries || queries.isEmpty())) {
+            return Collections.emptyList();
+        }
+        SearchTerm<?> searchTerm = SearchUtil.compileSearchTerm(filters, queries);
+        return new SearchHandler(parameters).searchEvents(session, account, searchTerm, filters);
     }
 
     private static final class CachingAccessBridge extends SingleFolderCachingCalendarAccess {
