@@ -51,6 +51,7 @@ package com.openexchange.file.storage.infostore.osgi;
 
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.infostore.internal.InfostoreFileStorageService;
 import com.openexchange.file.storage.infostore.internal.TrashCleanupHandler;
@@ -74,7 +75,7 @@ public class InfostoreFileStorageActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { InfostoreFacade.class, InfostoreSearchEngine.class, FolderService.class,
-            ContentTypeDiscoveryService.class, ContextService.class, ConfigViewFactory.class, UserService.class, UserPermissionService.class };
+            ContentTypeDiscoveryService.class, ContextService.class, ConfigViewFactory.class, UserService.class, UserPermissionService.class, DatabaseService.class };
     }
 
     @Override

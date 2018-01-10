@@ -8,9 +8,11 @@ import java.util.Set;
 import com.openexchange.file.storage.AbstractFile;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.FolderPath;
 import com.openexchange.file.storage.UserizedFile;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.InfostoreFolderPath;
 
 /*
  *
@@ -353,6 +355,17 @@ public class InfostoreFile extends AbstractFile implements UserizedFile {
     @Override
     public void setOriginalFolderId(String id) {
         document.setOriginalFolderId(Long.parseLong(id));
+    }
+
+    @Override
+    public FolderPath getOrigin() {
+        InfostoreFolderPath folderPath = document.getOriginFolderPath();
+        return null == folderPath ? null : FolderPath.copyOf(folderPath);
+    }
+
+    @Override
+    public void setOrigin(FolderPath origin) {
+        document.setOriginFolderPath(null == origin ? null : InfostoreFolderPath.copyOf(origin));
     }
 
 }

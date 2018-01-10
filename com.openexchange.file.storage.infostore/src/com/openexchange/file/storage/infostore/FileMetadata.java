@@ -57,12 +57,15 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FolderPath;
 import com.openexchange.file.storage.UserizedFile;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.file.storage.infostore.internal.Utils;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.InfostoreFolderPath;
 
 
 /**
@@ -134,18 +137,14 @@ public class FileMetadata implements DocumentMetadata {
 
     @Override
     public long getFolderId() {
-        if(file.getFolderId() == null) {
-            return -1;
-        }
-        return Long.valueOf(file.getFolderId());
+        String folderId = file.getFolderId();
+        return folderId == null ? -1 : Long.parseLong(folderId);
     }
 
     @Override
     public int getId() {
-        if(file.getId() == FileStorageFileAccess.NEW) {
-            return InfostoreFacade.NEW;
-        }
-        return Integer.valueOf(file.getId());
+        String fileId = file.getId();
+        return (fileId == FileStorageFileAccess.NEW) ? InfostoreFacade.NEW : Utils.getUnsignedInteger(fileId);
     }
 
     @Override
@@ -687,6 +686,16 @@ public class FileMetadata implements DocumentMetadata {
                 return getFolderId();
             }
 
+            @Override
+            public InfostoreFolderPath getOriginFolderPath() {
+                return null;
+            }
+
+            @Override
+            public void setOriginFolderPath(InfostoreFolderPath originFolderPath) {
+                // nothing to do
+            }
+
         };
         return metaData;
     }
@@ -721,6 +730,17 @@ public class FileMetadata implements DocumentMetadata {
         if (file instanceof UserizedFile) {
             ((UserizedFile) file).setOriginalFolderId(Long.toString(id));
         }
+    }
+
+    @Override
+    public InfostoreFolderPath getOriginFolderPath() {
+        FolderPath folderPath = file.getOrigin();
+        return null == folderPath ? null : InfostoreFolderPath.copyOf(folderPath);
+    }
+
+    @Override
+    public void setOriginFolderPath(InfostoreFolderPath originFolderPath) {
+        file.setOrigin(null == originFolderPath ? null : FolderPath.copyOf(originFolderPath));
     }
 
 }

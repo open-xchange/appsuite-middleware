@@ -86,14 +86,15 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.composition.crypto.CryptographicAwareIDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.crypto.CryptographyMode;
 import com.openexchange.file.storage.json.FileMetadataParser;
+import com.openexchange.file.storage.json.FileFieldCollector;
 import com.openexchange.file.storage.json.ParameterBasedFileMetadataParser;
 import com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param;
-import com.openexchange.file.storage.json.osgi.FileFieldCollector;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.java.FileKnowingInputStream;
+import com.openexchange.java.Reference;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.mail.mime.ContentType;
@@ -971,6 +972,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             String[] columns = Strings.splitByComma(columnsParameter);
             fieldsToLoad = new ArrayList<Field>(columns.length);
             requestedColumns = new int[columns.length];
+            Reference<FileFieldCollector> fieldCollectorRef = null;
             for (int i = 0; i < columns.length; i++) {
                 /*
                  * try regular file field first
@@ -979,28 +981,31 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                 if (null != field) {
                     fieldsToLoad.add(field);
                     requestedColumns[i] = field.getNumber();
-                    continue;
-                }
-
+                } else {
                 /*
                  * check additionally registered file fields
                  */
-                FileFieldCollector fieldCollector = Services.getFieldCollector();
-                if (null != fieldCollector) {
-                    AdditionalFileField additionalField = fieldCollector.getField(columns[i]);
+                    FileFieldCollector fieldCollector;
+                    if (null == fieldCollectorRef) {
+                        fieldCollector = Services.getFieldCollector();
+                        fieldCollectorRef = new Reference<FileFieldCollector>(fieldCollector);
+                    } else {
+                        fieldCollector = fieldCollectorRef.getValue();
+                    }
+                    AdditionalFileField additionalField = null == fieldCollector ? null : fieldCollector.getField(columns[i]);
                     if (null != additionalField) {
                         Field[] requiredFields = additionalField.getRequiredFields();
                         if (null != requiredFields && 0 < requiredFields.length) {
                             fieldsToLoad.addAll(Arrays.asList(requiredFields));
                         }
                         requestedColumns[i] = additionalField.getColumnID();
-                        continue;
-                    }
-                }
+                    } else {
                 /*
                  * unknown column
                  */
                 unknownColumns.add(columns[i]);
+            }
+                }
             }
             if (0 < unknownColumns.size()) {
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(PARAM_COLUMNS, unknownColumns.toString());

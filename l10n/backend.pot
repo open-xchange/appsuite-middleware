@@ -2642,6 +2642,13 @@ msgstr ""
 msgid "A file with that name already exists."
 msgstr ""
 
+#. Restore from trash is not supported.
+#. User tries to restore a folders from trash, but that functionality is not supported
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:187
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:107
+msgid "Restore from trash is not supported"
+msgstr ""
+
 #. Access denied.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
 msgid "Access denied."

@@ -98,3 +98,11 @@ DriveFileUpdateBody:
   $ref: ./DriveFileUpdateBody.yaml
 DriveSharingNotificationBody:
   $ref: ./DriveSharingNotificationBody.yaml
+TrashFolderResponse:
+  $ref: ./TrashFolderResponse.yaml
+TrashTargetsBody:
+  $ref: ./TrashTargetsBody.yaml
+RestoreFromTrashResponse:
+  $ref: ./RestoreFromTrashResponse.yaml
+RestoreFromTrashData:
+  $ref: ./RestoreFromTrashData.yaml

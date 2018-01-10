@@ -69,6 +69,7 @@ import com.openexchange.drive.DriveUtility;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.FolderStats;
 import com.openexchange.drive.NotificationParameters;
+import com.openexchange.drive.RestoreContent;
 import com.openexchange.drive.TrashContent;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveUtils;
@@ -626,6 +627,11 @@ public class DriveUtilityImpl implements DriveUtility {
     @Override
     public void removeFromTrash(DriveSession session, List<String> files, List<String> folders) throws OXException {
         new SyncSession(session).getStorage().deleteFromTrash(files, folders);
+    }
+
+    @Override
+    public RestoreContent restoreFromTrash(DriveSession session, List<String> files, List<String> folders) throws OXException {
+        return new SyncSession(session).getStorage().restoreFromTrash(files, folders);
     }
 
 }

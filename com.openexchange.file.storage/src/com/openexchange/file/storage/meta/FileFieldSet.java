@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.file.storage.AbstractFileFieldSwitcher;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.FolderPath;
 
 /**
  * {@link FileFieldSet}
@@ -221,6 +222,12 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
     @Override
     public Object shareable(Object... args) {
         md(args).setShareable(bool(1, args));
+        return null;
+    }
+
+    @Override
+    public Object origin(Object... args) {
+        md(args).setOrigin((FolderPath) args[1]);
         return null;
     }
 

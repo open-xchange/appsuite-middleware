@@ -85,6 +85,7 @@ import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FolderPath;
 import com.openexchange.folder.FolderDeleteListenerService;
 import com.openexchange.folder.internal.FolderDeleteListenerRegistry;
 import com.openexchange.folderstorage.FolderPermissionType;
@@ -95,6 +96,7 @@ import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.FolderPathObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.impl.IDGenerator;
@@ -568,11 +570,12 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         FolderObject storageObject = originalFolder.clone();
 
         int optionz = options;
-        if (((optionz & OPTION_TRASHING) <= 0) && performMove) {
+        if (((optionz & OPTION_TRASHING) >= 0) && performMove) {
             int newParentFolderID = fo.getParentFolderID();
             if (newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
                 if ((FolderObject.TRASH == getFolderTypeFromMaster(newParentFolderID)) && (FolderObject.TRASH != getFolderTypeFromMaster(storageObject.getParentFolderID()))) {
                     // Move to trash
+                    int defaultFolderId = oxfolderAccess.getDefaultFolderID(session.getUserId(), FolderObject.INFOSTORE, FolderObject.PUBLIC);
                     int folderId = fo.getObjectID();
                     String name = fo.containsFolderName() && !Strings.isEmpty(fo.getFolderName()) ? fo.getFolderName() : storageObject.getFolderName();
                     try {
@@ -581,6 +584,14 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                         }
                     } catch (SQLException e) {
                         throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+                    }
+                    if (fo.getModule() == FolderObject.INFOSTORE) {
+                        try {
+                            FolderPathObject path = OXFolderSQL.generateFolderPathFor(folderId, defaultFolderId, readCon, ctx);
+                            fo.setOriginPath(path);
+                        } catch (SQLException e) {
+                            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+                        }
                     }
                     /*
                      * remove any folder-dependent entities
@@ -601,7 +612,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
         Map<Integer, Integer> folderId2OldOwner = null;
         try {
-            if (fo.containsPermissions() || fo.containsModule() || fo.containsMeta()) {
+            if (fo.containsPermissions() || fo.containsModule() || fo.containsMeta() || fo.containsOriginPath()) {
                 int newParentFolderID = fo.getParentFolderID();
                 if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
                     folderId2OldOwner = determineCurrentOwnerships(originalFolder);
@@ -1585,7 +1596,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     }
 
     @Override
-    public FolderObject deleteFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified, boolean hardDelete) throws OXException {
+    public FolderObject deleteFolder(final FolderObject fo, final boolean checkPermissions, final long lastModified, boolean hardDelete, FolderPath originPath) throws OXException {
         final int folderId = fo.getObjectID();
         if (folderId <= 0) {
             throw OXFolderExceptionCode.INVALID_OBJECT_ID.create(Integer.valueOf(fo.getObjectID()));

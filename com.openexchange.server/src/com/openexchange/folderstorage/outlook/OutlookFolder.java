@@ -63,6 +63,7 @@ import com.openexchange.folderstorage.FolderExtension;
 import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.ParameterizedFolder;
+import com.openexchange.folderstorage.FolderPath;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.i18n.LocaleTools;
@@ -468,7 +469,15 @@ public final class OutlookFolder implements FolderExtension, AltNameAwareFolder,
         // Nothing to do
     }
 
+    @Override
+    public FolderPath getOriginPath() {
+        return realFolder.getOriginPath();
+    }
 
+    @Override
+    public void setOriginPath(FolderPath originPath) {
+        realFolder.setOriginPath(originPath);
+    }
 
     @Override
     public void setMeta(Map<String, Object> meta) {

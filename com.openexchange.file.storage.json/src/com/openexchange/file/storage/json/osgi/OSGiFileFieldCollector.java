@@ -57,54 +57,41 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.customizer.file.AdditionalFileField;
+import com.openexchange.file.storage.json.FileFieldCollector;
 import com.openexchange.java.Strings;
 
 /**
- * {@link FileFieldCollector}
+ * {@link OSGiFileFieldCollector}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class FileFieldCollector implements ServiceTrackerCustomizer<AdditionalFileField, AdditionalFileField> {
+public class OSGiFileFieldCollector implements ServiceTrackerCustomizer<AdditionalFileField, AdditionalFileField>, FileFieldCollector {
 
     private final ConcurrentMap<Integer, AdditionalFileField> knownFields;
     private final BundleContext context;
 
     /**
-     * Initializes a new {@link FileFieldCollector}.
+     * Initializes a new {@link OSGiFileFieldCollector}.
      *
      * @param context the bundle context
      */
-    public FileFieldCollector(BundleContext context) {
+    public OSGiFileFieldCollector(BundleContext context) {
         super();
         this.context = context;
         knownFields = new ConcurrentHashMap<Integer, AdditionalFileField>();
     }
 
-    /**
-     * Gets all additionally registered file fields.
-     *
-     * @return The fields, or an empty list if there are none
-     */
+    @Override
     public List<AdditionalFileField> getFields() {
         return new ArrayList<AdditionalFileField>(knownFields.values());
     }
 
-    /**
-     * Gets an additionally registered file field by its numerical column identifier.
-     *
-     * @param columnID the column identifier
-     * @return The field, or <code>null</code> if not found
-     */
+    @Override
     public AdditionalFileField getField(int columnID) {
         return knownFields.get(Integer.valueOf(columnID));
     }
 
-    /**
-     * Gets the additionally registered file fields by their numerical column identifiers, leaving out unknown column identifiers.
-     *
-     * @param columnIDs The column identifiers
-     * @return The additionally registered file fields, with unknown columns missing in the result
-     */
+    @Override
     public List<AdditionalFileField> getFields(int[] columnIDs) {
         List<AdditionalFileField> fields = new ArrayList<AdditionalFileField>();
         for (int columnID : columnIDs) {
@@ -116,12 +103,7 @@ public class FileFieldCollector implements ServiceTrackerCustomizer<AdditionalFi
         return fields;
     }
 
-    /**
-     * Gets an additionally registered file field by its numerical column identifier or field name.
-     *
-     * @param columnNumberOrName A string representation of the column identifier, or the field name
-     * @return The field, or <code>null</code> if not found
-     */
+    @Override
     public AdditionalFileField getField(String columnNumberOrName) {
         if (Strings.isEmpty(columnNumberOrName)) {
             return null;
@@ -147,13 +129,15 @@ public class FileFieldCollector implements ServiceTrackerCustomizer<AdditionalFi
         return null;
     }
 
+    // -------------------------------------------- Service Tracker Stuff --------------------------------------------------
+
     @Override
     public AdditionalFileField addingService(final ServiceReference<AdditionalFileField> reference) {
         AdditionalFileField field = context.getService(reference);
         Integer columnID = Integer.valueOf(field.getColumnID());
         AdditionalFileField existingField = knownFields.putIfAbsent(columnID, field);
         if (null != existingField) {
-            org.slf4j.LoggerFactory.getLogger(FileFieldCollector.class).warn(
+            org.slf4j.LoggerFactory.getLogger(OSGiFileFieldCollector.class).warn(
                 "Collision in file fields. Field '{}' : {} has already been taken. Ignoring second service.", field.getColumnName(), field.getColumnID());
 
         }

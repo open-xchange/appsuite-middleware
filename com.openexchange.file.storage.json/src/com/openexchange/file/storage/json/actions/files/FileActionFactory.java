@@ -109,6 +109,8 @@ public class FileActionFactory implements AJAXActionServiceFactory {
         actions.put("documentpatch", new DocumentPatchAction());
 
         actions.put("checkname", new CheckNameAction());
+
+        actions.put("restore", new RestoreAction());
         this.actions = actions.build();
     }
 

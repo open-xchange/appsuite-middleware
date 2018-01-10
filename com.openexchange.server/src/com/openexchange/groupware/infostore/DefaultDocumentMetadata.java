@@ -94,6 +94,7 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
     protected List<ObjectPermission> objectPermissions;
     protected Map<String, String> properties;
     protected boolean shareable;
+    protected InfostoreFolderPath originFolderPath;
 
 
     @Override
@@ -389,6 +390,16 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
     @Override
     public void setShareable(boolean shareable) {
         this.shareable = shareable;
+    }
+
+    @Override
+    public InfostoreFolderPath getOriginFolderPath() {
+        return originFolderPath;
+    }
+
+    @Override
+    public void setOriginFolderPath(InfostoreFolderPath originFolderPath) {
+        this.originFolderPath = originFolderPath;
     }
 
     @Override

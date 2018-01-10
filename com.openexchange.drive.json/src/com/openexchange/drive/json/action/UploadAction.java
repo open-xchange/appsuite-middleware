@@ -168,7 +168,7 @@ public class UploadAction extends AbstractDriveAction {
          * return json result
          */
         try {
-            if (null != session.isDiagnostics()) {
+            if (null != session.isDiagnostics() && session.isDiagnostics()) {
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("diagnostics", syncResult.getDiagnostics());
                 jsonObject.put("actions", JsonDriveAction.serializeActions(syncResult.getActionsForClient(), session.getLocale()));

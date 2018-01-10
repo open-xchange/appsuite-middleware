@@ -49,8 +49,10 @@
 
 package com.openexchange.drive.impl.storage;
 
-import static com.openexchange.drive.impl.DriveConstants.*;
-import static com.openexchange.drive.impl.DriveUtils.*;
+import static com.openexchange.drive.impl.DriveConstants.PATH_SEPARATOR;
+import static com.openexchange.drive.impl.DriveConstants.ROOT_PATH;
+import static com.openexchange.drive.impl.DriveUtils.combine;
+import static com.openexchange.drive.impl.DriveUtils.split;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,6 +65,7 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FolderStats;
+import com.openexchange.drive.RestoreContent;
 import com.openexchange.drive.TrashContent;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveStrings;
@@ -1281,6 +1284,53 @@ public class DriveStorage {
                 getFileAccess().removeDocument(fileIdsToDelete, FileStorageFileAccess.DISTANT_FUTURE);
             }
         }
+    }
+
+    public RestoreContent restoreFromTrash(List<String> files, List<String> folders) throws OXException {
+        FileStorageFolder trashFolder = getTrashFolder();
+        if (trashFolder == null) {
+            return null;
+        }
+
+        String rootId = getRootFolder().getId();
+
+        Map<String, FileStorageFolder[]> folderRestoreResult = null;
+        if (!folders.isEmpty()) {
+            FileStorageFolder[] subfolders = getFolderAccess().getSubfolders(trashFolder.getId(), true);
+            if (subfolders != null && subfolders.length > 0) {
+                List<String> folderIdsToRestore = new ArrayList<>(folders.size());
+                for (int x = 0; x < subfolders.length; x++) {
+                    if (folders.contains(subfolders[x].getName())) {
+                        folderIdsToRestore.add(subfolders[x].getId());
+                    }
+                }
+                folderRestoreResult = getFolderAccess().restoreFolderFromTrash(folderIdsToRestore, rootId);
+            }
+        }
+
+        Map<String, FileStorageFolder[]> fileRestoreResult = null;
+        if (!files.isEmpty()) {
+            SearchIterator<File> documents = getFileAccess().getDocuments(trashFolder.getId()).results();
+            Map<String, File> ID2FileMapping = new HashMap<>();
+            if (documents != null && documents.hasNext()) {
+                List<String> fileIdsToRestore = new ArrayList<>(folders.size());
+                do {
+                    File file = documents.next();
+                    if (files.contains(file.getFileName())) {
+                        fileIdsToRestore.add(file.getId());
+                        ID2FileMapping.put(file.getId(), file);
+                    }
+                } while (documents.hasNext());
+
+                Map<FileID, FileStorageFolder[]> restore = getFileAccess().restore(fileIdsToRestore, rootId);
+
+                fileRestoreResult = new HashMap<>(fileIdsToRestore.size());
+                for (Map.Entry<FileID, FileStorageFolder[]> restoreEntry : restore.entrySet()) {
+                    fileRestoreResult.put(ID2FileMapping.get(restoreEntry.getKey().toUniqueID()).getFileName(), restoreEntry.getValue());
+                }
+            }
+        }
+        return new RestoreContent(folderRestoreResult, fileRestoreResult);
     }
 
 }

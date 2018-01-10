@@ -421,7 +421,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     @Override
     public List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber, boolean hardDelete) throws OXException {
         try {
-            final List<IDTuple> ret = new ArrayList<IDTuple>(ids.size());
+            final List<IDTuple> ret = new ArrayList<>(ids.size());
             for (IDTuple id : ids) {
                 String path = toPath(id.getFolder(), id.getId());
                 try {
@@ -494,7 +494,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         try {
             ListFolderResult listFolder = client.files().listFolder(folderId);
             Iterator<Metadata> iterator = listFolder.getEntries().iterator();
-            final List<File> files = new ArrayList<File>(listFolder.getEntries().size());
+            final List<File> files = new ArrayList<>(listFolder.getEntries().size());
             while (iterator.hasNext()) {
                 Metadata next = iterator.next();
                 if (next instanceof FileMetadata) {
@@ -615,7 +615,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
         // Range (if needed)
         results = range(results, start, end);
-        return new SearchIteratorAdapter<File>(results.iterator(), results.size());
+        return new SearchIteratorAdapter<>(results.iterator(), results.size());
     }
 
     /*
@@ -773,9 +773,9 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         checkFolderExistence(file.getFolderId());
 
         if ((null == modifiedFields || modifiedFields.contains(Field.FILENAME)) && false == Strings.isEmpty(file.getFileName()) && file.getId() != FileStorageFileAccess.NEW)
-        /*
-         * first check if there is already such a file
-         */
+            /*
+             * first check if there is already such a file
+             */
         {
             String path = toPath(file.getFolderId(), file.getId());
             String toPath = toPath(file.getFolderId(), file.getFileName());
@@ -897,11 +897,11 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      * @return The mapped identifiers
      */
     private Map<String, List<String>> getFilesPerFolder(List<IDTuple> ids) {
-        Map<String, List<String>> filesPerFolder = new HashMap<String, List<String>>();
+        Map<String, List<String>> filesPerFolder = new HashMap<>();
         for (IDTuple id : ids) {
             List<String> files = filesPerFolder.get(id.getFolder());
             if (null == files) {
-                files = new ArrayList<String>();
+                files = new ArrayList<>();
                 filesPerFolder.put(id.getFolder(), files);
             }
             files.add(id.getId());
@@ -946,7 +946,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      * @throws DbxException if a generic Dropbox error is occurred
      */
     private List<File> getAllFiles(String folderId, boolean recursive) throws ListFolderErrorException, DbxException {
-        List<File> results = new ArrayList<File>();
+        List<File> results = new ArrayList<>();
         ListFolderResult listFolderResult = client.files().listFolderBuilder(folderId).withRecursive(recursive).start();
         boolean hasMore = false;
         do {
@@ -980,7 +980,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     private List<File> fireSearch(String folderId, String pattern, boolean includeSubfolders) throws SearchErrorException, DbxException {
         SearchResult searchResult = client.files().searchBuilder(folderId, pattern).start();
 
-        List<File> results = new ArrayList<File>();
+        List<File> results = new ArrayList<>();
         boolean hasMore = false;
         do {
             hasMore = searchResult.getMore();
@@ -1021,4 +1021,5 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         }
         return files.subList(startIndex, endIndex);
     }
+
 }

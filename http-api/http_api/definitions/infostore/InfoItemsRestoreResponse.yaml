@@ -1,0 +1,10 @@
+type: object
+properties:
+  id:
+    type: string
+    description: Object ID
+  path:
+    type: array
+    description: Folder path from restored file down to root folder
+    items:
+      $ref: "#/definitions/InfoFolderPathData"

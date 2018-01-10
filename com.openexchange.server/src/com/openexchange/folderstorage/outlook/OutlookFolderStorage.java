@@ -98,6 +98,7 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
+import com.openexchange.folderstorage.RestoringFolderStorage;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StorageParametersUtility;
@@ -178,7 +179,7 @@ import gnu.trove.map.hash.TObjectIntHashMap;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OutlookFolderStorage implements FolderStorage, SubfolderListingFolderStorage {
+public final class OutlookFolderStorage implements FolderStorage, SubfolderListingFolderStorage, RestoringFolderStorage {
 
     static final String PROTOCOL_UNIFIED_INBOX = UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX;
 
@@ -1536,6 +1537,32 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
     @Override
     public StoragePriority getStoragePriority() {
         return StoragePriority.NORMAL;
+    }
+
+    @Override
+    public Map<String, String> restoreFromTrash(String treeId, List<String> folderIds, String defaultDestFolderId, StorageParameters storageParameters) throws OXException {
+        FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, defaultDestFolderId);
+        if (null == folderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, defaultDestFolderId);
+        }
+
+        if (false == RestoringFolderStorage.class.isInstance(folderStorage)) {
+            throw FolderExceptionErrorMessage.NO_RESTORE_SUPPORT.create();
+        }
+
+        for (String folderId : folderIds) {
+            FolderStorage storage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
+            if (null == storage) {
+                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, defaultDestFolderId);
+            }
+
+            if (false == folderStorage.equals(storage)) {
+                throw FolderExceptionErrorMessage.INVALID_FOLDER_ID.create(folderId);
+            }
+        }
+
+        RestoringFolderStorage restoringFolderStorage = (RestoringFolderStorage) folderStorage;
+        return restoringFolderStorage.restoreFromTrash(realTreeId, folderIds, defaultDestFolderId, storageParameters);
     }
 
     @Override

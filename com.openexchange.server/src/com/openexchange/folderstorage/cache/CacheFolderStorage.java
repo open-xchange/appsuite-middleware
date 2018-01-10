@@ -81,6 +81,7 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.ReinitializableFolderStorage;
 import com.openexchange.folderstorage.RemoveAfterAccessFolder;
+import com.openexchange.folderstorage.RestoringFolderStorage;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
@@ -137,7 +138,7 @@ import gnu.trove.map.hash.TObjectIntHashMap;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CacheFolderStorage implements ReinitializableFolderStorage, FolderCacheInvalidationService, TrashAwareFolderStorage, SubfolderListingFolderStorage {
+public final class CacheFolderStorage implements ReinitializableFolderStorage, FolderCacheInvalidationService, TrashAwareFolderStorage, SubfolderListingFolderStorage, RestoringFolderStorage {
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CacheFolderStorage.class);
 
@@ -747,7 +748,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
             if (null != pathPerformer) {
                 try {
                     pathPerformer.getStorageParameters().setIgnoreCache(Boolean.TRUE);
-                    pathPerformer.getStorageParameters().putParameter(FolderType.GLOBAL, "DO_NOT_CACHE", true);
+                    pathPerformer.getStorageParameters().putParameter(FolderType.GLOBAL, "DO_NOT_CACHE", Boolean.TRUE);
                     if (existsFolder(treeId, id, StorageType.WORKING, pathPerformer.getStorageParameters())) {
                         UserizedFolder[] path = pathPerformer.doPath(treeId, id, true);
                         ids = new ArrayList<String>(path.length);
@@ -1387,7 +1388,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
                         return null;
                     }
                 }
-                LOG.debug("Locally loaded folder {} from context {} for user {}", folderId, contextId, params.getUserId());
+                LOG.debug("Locally loaded folder {} from context {} for user {}", folderId, Integer.valueOf(contextId), Integer.valueOf(params.getUserId()));
                 return folder;
             }
         }
@@ -1844,6 +1845,32 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
                 storage.rollback(storageParameters);
             }
         }
+    }
+
+    @Override
+    public Map<String, String> restoreFromTrash(String treeId, List<String> folderIds, String defaultDestFolderId, StorageParameters storageParameters) throws OXException {
+        FolderStorage folderStorage = registry.getFolderStorage(treeId, defaultDestFolderId);
+        if (null == folderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, defaultDestFolderId);
+        }
+
+        if (false == RestoringFolderStorage.class.isInstance(folderStorage)) {
+            throw FolderExceptionErrorMessage.NO_RESTORE_SUPPORT.create();
+        }
+
+        for (String folderId : folderIds) {
+            FolderStorage storage = registry.getFolderStorage(treeId, folderId);
+            if (null == storage) {
+                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, defaultDestFolderId);
+            }
+
+            if (false == folderStorage.equals(storage)) {
+                throw FolderExceptionErrorMessage.INVALID_FOLDER_ID.create(folderId);
+            }
+        }
+
+        RestoringFolderStorage restoringFolderStorage = (RestoringFolderStorage) folderStorage;
+        return restoringFolderStorage.restoreFromTrash(treeId, folderIds, defaultDestFolderId, storageParameters);
     }
 
     /*-

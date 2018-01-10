@@ -195,7 +195,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         super(client, account, session);
         rootUri = checkFolderId(((String) account.getConfiguration().get(WebDAVConstants.WEBDAV_URL)).trim());
         this.accountAccess = accountAccess;
-        lockTokenMap = new ConcurrentHashMap<LockTokenKey, String>();
+        lockTokenMap = new ConcurrentHashMap<>();
     }
 
     /**
@@ -846,7 +846,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
     @Override
     public List<IDTuple> removeDocument(final List<IDTuple> ids, final long sequenceNumber, boolean hardDelete) throws OXException {
         try {
-            final List<IDTuple> ret = new ArrayList<IDTuple>(ids.size());
+            final List<IDTuple> ret = new ArrayList<>(ids.size());
             for (final IDTuple idTuple : ids) {
                 final String folderId = checkFolderId(idTuple.getFolder(), rootUri);
                 final String id = idTuple.getId();
@@ -963,7 +963,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
              * Perform PropPatch
              */
             final DavPropertySet setProperties = new DavPropertySet();
-            setProperties.add(new DefaultDavProperty<String>(DavPropertyName.create("dummy", WebDAVConstants.OX_NAMESPACE), Long.toString(System.currentTimeMillis())));
+            setProperties.add(new DefaultDavProperty<>(DavPropertyName.create("dummy", WebDAVConstants.OX_NAMESPACE), Long.toString(System.currentTimeMillis())));
             final DavMethod davMethod = new PropPatchMethod(uri.toString(), setProperties, new DavPropertyNameSet());
             try {
                 initMethod(folderId, id, davMethod);
@@ -1032,7 +1032,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
                  */
                 final URI tmp = new URI(fid, true);
                 final MultiStatusResponse[] multiStatusResponses = multiStatus.getResponses();
-                files = new ArrayList<File>(multiStatusResponses.length);
+                files = new ArrayList<>(multiStatusResponses.length);
                 for (final MultiStatusResponse multiStatusResponse : multiStatusResponses) {
                     /*
                      * Get the DAV property set for 200 (OK) status
@@ -1102,7 +1102,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
 
     @Override
     public TimedResult<File> getDocuments(final List<IDTuple> ids, final List<Field> fields) throws OXException {
-        final List<File> list = new ArrayList<File>(ids.size());
+        final List<File> list = new ArrayList<>(ids.size());
         for (final IDTuple idTuple : ids) {
             list.add(getFileMetadata(idTuple.getFolder(), idTuple.getId(), CURRENT_VERSION));
         }
@@ -1128,7 +1128,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             final FieldCollectorVisitor fieldCollector = new FieldCollectorVisitor(Field.ID, Field.FOLDER_ID);
             searchTerm.visit(fieldCollector);
 
-            final List<Field> fieldz = new ArrayList<Field>(fields);
+            final List<Field> fieldz = new ArrayList<>(fields);
             fieldz.addAll(fieldCollector.getFields());
 
             final WebDAVSearchVisitor visitor = new WebDAVSearchVisitor(fieldz, this);
@@ -1145,7 +1145,7 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             final FieldCollectorVisitor fieldCollector = new FieldCollectorVisitor(Field.ID, Field.FOLDER_ID);
             searchTerm.visit(fieldCollector);
 
-            final List<Field> fieldz = new ArrayList<Field>(fields);
+            final List<Field> fieldz = new ArrayList<>(fields);
             fieldz.addAll(fieldCollector.getFields());
 
             final WebDAVSearchVisitor visitor = new WebDAVSearchVisitor(fieldz, this);
@@ -1268,10 +1268,10 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
             /*
              * Recursively search files in directories
              */
-            results = new ArrayList<File>();
+            results = new ArrayList<>();
             recursiveSearchFile(pattern, rootUri, fields, results);
         } else if (includeSubfolders) {
-            results = new ArrayList<File>();
+            results = new ArrayList<>();
             recursiveSearchFile(pattern, folderId, fields, results);
         } else {
             /*
@@ -1324,12 +1324,12 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
              * Return
              */
             final List<File> subList = results.subList(fromIndex, toIndex);
-            return new SearchIteratorAdapter<File>(subList.iterator(), subList.size());
+            return new SearchIteratorAdapter<>(subList.iterator(), subList.size());
         }
         /*
          * Return sorted result
          */
-        return new SearchIteratorAdapter<File>(results.iterator(), results.size());
+        return new SearchIteratorAdapter<>(results.iterator(), results.size());
     }
 
     private void recursiveSearchFile(final String pattern, final String folderId, final List<Field> fields, final List<File> results) throws OXException {

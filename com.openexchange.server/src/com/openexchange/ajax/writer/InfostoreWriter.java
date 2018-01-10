@@ -416,6 +416,13 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
             writeBoolean(dm.isShareable());
             return null;
         }
+
+        @Override
+        public Object origin() {
+            // This is a legacy class... Don't care
+            writeString(dm.getOriginFolderPath().toString());
+            return null;
+        }
     }
 
 	@Override

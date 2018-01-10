@@ -226,4 +226,18 @@ public interface DocumentMetadata extends Serializable {
      */
     void setOriginalFolderId(long id);
 
+    /**
+     * Gets the origin folder path
+     *
+     * @return The origin folder path
+     */
+    InfostoreFolderPath getOriginFolderPath();
+
+    /**
+     * Sets the origin folder path
+     *
+     * @param originFolderPath
+     */
+    void setOriginFolderPath(InfostoreFolderPath originFolderPath);
+
 }

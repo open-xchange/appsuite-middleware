@@ -22,3 +22,4 @@ requests:
   - SharesRequest.yaml
   - NotifyRequest.yaml
   - UploadRequest.yaml
+  - RestoreRequest.yaml

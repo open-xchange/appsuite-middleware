@@ -188,5 +188,10 @@ public class FileFieldGet extends AbstractFileFieldSwitcher {
     public Object shareable(Object... args) {
         return md(args).isShareable();
     }
-    
+
+    @Override
+    public Object origin(Object... args) {
+        return md(args).getOrigin();
+    }
+
 }
