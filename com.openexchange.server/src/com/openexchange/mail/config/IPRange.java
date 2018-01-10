@@ -146,6 +146,10 @@ public class IPRange {
         return delegate.contains(ipAddress);
     }
 
+    public boolean containsIPv6(String ipAddress) {
+        return delegate.containsIPv6(ipAddress);
+    }
+
     @Override
     public String toString() {
         return delegate.toString();

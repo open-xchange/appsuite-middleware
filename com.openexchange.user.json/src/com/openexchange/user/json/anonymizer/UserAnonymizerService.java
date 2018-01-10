@@ -52,6 +52,7 @@ package com.openexchange.user.json.anonymizer;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.ajax.anonymizer.AnonymizerService;
 import com.openexchange.ajax.anonymizer.Anonymizers;
 import com.openexchange.ajax.anonymizer.Module;

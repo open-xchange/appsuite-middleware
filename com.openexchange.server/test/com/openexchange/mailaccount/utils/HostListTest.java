@@ -90,7 +90,7 @@ public class HostListTest extends TestCase {
     public void testContains_containsNull_returnEmpty() {
         HostList hl = HostList.valueOf(null);
 
-        boolean contains = hl.contains(null);
+        boolean contains = hl.contains((String) null);
 
         assertFalse(contains);
     }
@@ -130,7 +130,7 @@ public class HostListTest extends TestCase {
             assertTrue(e instanceof IllegalArgumentException);
         }
     }
-    
+
     public void testHostListv4_throwsException3() {
         try {
             HostList.valueOf("test.*.com");
