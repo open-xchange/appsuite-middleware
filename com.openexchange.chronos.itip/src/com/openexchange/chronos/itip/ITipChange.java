@@ -52,7 +52,9 @@ package com.openexchange.chronos.itip;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.EventUpdateImpl;
 import com.openexchange.chronos.itip.analyzers.AbstractITipAnalyzer;
 import com.openexchange.chronos.itip.osgi.Services;
@@ -118,16 +120,22 @@ public class ITipChange {
             if (isException && master != null && newEvent != null && newEvent.getRecurrenceId() != null) {
                 // TODO: Calculate original ocurrence time for diff
                 RecurrenceService recurrenceService = Services.getService(RecurrenceService.class);
-                Calendar recurrenceId = GregorianCalendar.getInstance(newEvent.getRecurrenceId().getValue().getTimeZone());
-                recurrenceId.setTimeInMillis(newEvent.getRecurrenceId().getValue().getTimestamp());
+                DateTime value = newEvent.getRecurrenceId().getValue();
+                Calendar recurrenceId = GregorianCalendar.getInstance(value.getTimeZone());
+                recurrenceId.setTimeInMillis(value.getTimestamp());
                 int position = recurrenceService.calculateRecurrencePosition(master, recurrenceId);
-
-                RecurrenceIterator<Event> recurrenceIterator = recurrenceService.iterateEventOccurrences(master, null, null);
-                int count = 0;
-                while (recurrenceIterator.hasNext()) {
-                    count++;
-                    if (count == position) {
-                        return recurrenceIterator.next();
+                if (position > 0) {
+                    RecurrenceIterator<Event> recurrenceIterator = recurrenceService.iterateEventOccurrences(master, null, null);
+                    int count = 1; // calculateRecurrencePosition is 1-based
+                    while (recurrenceIterator.hasNext()) {
+                        count++;
+                        Event next = recurrenceIterator.next();
+                        if (count == position) {
+                            if (CalendarUtils.contains(master.getChangeExceptionDates(), next.getRecurrenceId()) || CalendarUtils.contains(master.getDeleteExceptionDates(), next.getRecurrenceId())) {
+                                return next;
+                            }
+                            break;
+                        }
                     }
                 }
             }
@@ -194,16 +202,17 @@ public class ITipChange {
             Calendar recurrenceId = GregorianCalendar.getInstance(newEvent.getRecurrenceId().getValue().getTimeZone());
             recurrenceId.setTimeInMillis(newEvent.getRecurrenceId().getValue().getTimestamp());
             int position = recurrenceService.calculateRecurrencePosition(master, recurrenceId);
-
-            RecurrenceIterator<Event> recurrenceIterator = recurrenceService.iterateEventOccurrences(master, null, null);
-            int count = 1; // calculateRecurrencePosition is 1-based
-            while (recurrenceIterator.hasNext() && count <= position) {
-                Event event = recurrenceIterator.next();
-                if (count == position) {
-                    diff = new ITipEventUpdate(new EventUpdateImpl(event, newEvent, true, AbstractITipAnalyzer.SKIP));
-                    return;
+            if (position > 0) {
+                RecurrenceIterator<Event> recurrenceIterator = recurrenceService.iterateEventOccurrences(master, null, null);
+                int count = 1; // calculateRecurrencePosition is 1-based
+                while (recurrenceIterator.hasNext() && count <= position) {
+                    Event event = recurrenceIterator.next();
+                    if (count == position) {
+                        diff = new ITipEventUpdate(new EventUpdateImpl(event, newEvent, true, AbstractITipAnalyzer.SKIP));
+                        return;
+                    }
+                    count++;
                 }
-                count++;
             }
         }
     }

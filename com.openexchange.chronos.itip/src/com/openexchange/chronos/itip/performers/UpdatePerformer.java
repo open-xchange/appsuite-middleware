@@ -121,7 +121,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
             if (analysis.getMessage().getOwner() > 0) {
                 owner = analysis.getMessage().getOwner();
             }
-            ensureAttendee(event, change.getCurrentEvent(), action, owner, session.getContextId(), attributes);
+            ensureAttendee(event, change.isException() ? change.getMasterEvent() : change.getCurrentEvent(), action, owner, session.getContextId(), attributes);
             Event original = determineOriginalEvent(change, processed, session);
             Event forMail = event;
             if (original != null) {
@@ -131,8 +131,14 @@ public class UpdatePerformer extends AbstractActionPerformer {
                 } else {
                     continue;
                 }
+            } else if (isExceptionCreate(change)) {
+                Event masterEvent = original = change.getMasterEvent();
+                event.setSeriesId(masterEvent.getSeriesId());
+                event = updateEvent(masterEvent, event, session);
+                forMail = event;
             } else {
                 ensureFolderId(event, session);
+                event.removeId();
                 event = createEvent(event, session);
                 forMail = util.reloadEvent(event, session);
             }
@@ -226,6 +232,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
                     attendee.setComment(message);
                 }
                 found = true;
+                break;
             }
         }
 
@@ -278,5 +285,9 @@ public class UpdatePerformer extends AbstractActionPerformer {
         }
 
         return null;
+    }
+
+    private boolean isExceptionCreate(ITipChange change) {
+        return CalendarUtils.isSeriesMaster(change.getMasterEvent()) && change.isException() && null == change.getNewEvent().getId();
     }
 }

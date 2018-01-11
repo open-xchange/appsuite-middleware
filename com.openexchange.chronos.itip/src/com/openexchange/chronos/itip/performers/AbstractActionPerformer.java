@@ -61,6 +61,7 @@ import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipActionPerformer;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipChange;
+import com.openexchange.chronos.itip.ITipChange.Type;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
 import com.openexchange.chronos.itip.generators.ITipMailGenerator;
 import com.openexchange.chronos.itip.generators.ITipMailGeneratorFactory;
@@ -96,7 +97,7 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
     protected Event determineOriginalEvent(final ITipChange change, final Map<String, Event> processed, final CalendarSession session) throws OXException {
         Event currentEvent = change.getCurrentEvent();
         if (currentEvent == null || Strings.isEmpty(currentEvent.getId())) {
-            if (change.isException()) {
+            if (change.isException() && false == change.getType().equals(Type.CREATE)) {
                 currentEvent = change.getMasterEvent();
                 if (currentEvent == null || currentEvent.getId() != null) {
                     currentEvent = processed.get(change.getNewEvent().getUid());
