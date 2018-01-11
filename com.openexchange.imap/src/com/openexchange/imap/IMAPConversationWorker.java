@@ -90,6 +90,7 @@ import com.openexchange.imap.threadsort.MessageInfo;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.threadsort.ThreadSortUtil;
 import com.openexchange.imap.threadsort2.ThreadSorts;
+import com.openexchange.mail.FlaggingMode;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -836,7 +837,8 @@ public final class IMAPConversationWorker {
     }
 
     private Comparator<List<MailMessage>> getListComparator(final MailSortField sortField, final OrderDirection order, final String fullName, final Locale locale) {
-        final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale, imapFolderStorage.getImapConfig().getIMAPProperties().isUserFlagsEnabled());
+        Integer flaggingColor = FlaggingMode.FLAGGED_IMPLICIT.equals(FlaggingMode.getFlaggingMode(imapFolderStorage.getSession())) ? FlaggingMode.getFlaggingColor(imapFolderStorage.getSession()) : null;
+        final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale, imapFolderStorage.getImapConfig().getIMAPProperties().isUserFlagsEnabled(), flaggingColor);
         Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
             @Override
@@ -1063,7 +1065,8 @@ public final class IMAPConversationWorker {
     }
 
     private Comparator<MailThread> getThreadComparator(final MailSortField sortField, final OrderDirection order, Locale locale) {
-        final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale, imapFolderStorage.getImapConfig().getIMAPProperties().isUserFlagsEnabled());
+        Integer flaggingColor = FlaggingMode.FLAGGED_IMPLICIT.equals(FlaggingMode.getFlaggingMode(imapFolderStorage.getSession())) ? FlaggingMode.getFlaggingColor(imapFolderStorage.getSession()) : null;
+        final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale, imapFolderStorage.getImapConfig().getIMAPProperties().isUserFlagsEnabled(), flaggingColor);
         Comparator<MailThread> threadComparator = new Comparator<MailThread>() {
 
             @Override
@@ -1192,7 +1195,8 @@ public final class IMAPConversationWorker {
                 /*
                  * Sort according to order direction
                  */
-                Collections.sort(structuredList, new MailMessageComparator(effectiveSortField, descending, imapMessageStorage.getLocale(), imapMessageStorage.getIMAPProperties().isUserFlagsEnabled()));
+                Integer flaggingColor = FlaggingMode.FLAGGED_IMPLICIT.equals(FlaggingMode.getFlaggingMode(imapFolderStorage.getSession())) ? FlaggingMode.getFlaggingColor(imapFolderStorage.getSession()) : null;
+                Collections.sort(structuredList, new MailMessageComparator(effectiveSortField, descending, imapMessageStorage.getLocale(), imapMessageStorage.getIMAPProperties().isUserFlagsEnabled(), flaggingColor));
                 /*
                  * Output as flat list
                  */
@@ -1273,7 +1277,8 @@ public final class IMAPConversationWorker {
             /*
              * Sort according to order direction
              */
-            Collections.sort(structuredList, new MailMessageComparator(effectiveSortField, descending, imapMessageStorage.getLocale(), imapMessageStorage.getIMAPProperties().isUserFlagsEnabled()));
+            Integer flaggingColor = FlaggingMode.FLAGGED_IMPLICIT.equals(FlaggingMode.getFlaggingMode(imapFolderStorage.getSession())) ? FlaggingMode.getFlaggingColor(imapFolderStorage.getSession()) : null;
+            Collections.sort(structuredList, new MailMessageComparator(effectiveSortField, descending, imapMessageStorage.getLocale(), imapMessageStorage.getIMAPProperties().isUserFlagsEnabled(), flaggingColor));
             /*
              * Output as flat list
              */

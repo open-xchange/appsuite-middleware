@@ -135,6 +135,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.json.OXJSONWriter;
+import com.openexchange.mail.FlaggingMode;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -4169,6 +4170,27 @@ public class Mail extends PermissionServlet {
                 MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailInterface.getMailAccess();
                 FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folder);
                 MailMessage[] messages = mailAccess.getMessageStorage().getMessages(fa.getFullName(), mailIDs, new MailField[] { MailField.FULL });
+
+                for (MailMessage mail : messages) {
+                    /*
+                     * Check color label vs. \Flagged flag
+                     */
+                    if (mail.getColorLabel() == 0) {
+                        // No color label set; check if \Flagged
+                        if (mail.isFlagged()) {
+                            FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
+                            if (mode.equals(FlaggingMode.FLAGGED_IMPLICIT)) {
+                                mail.setColorLabel(FlaggingMode.getFlaggingColor(session));
+                            }
+                        }
+                    } else {
+                        // Color label set. Check whether to swallow that information in case only \Flagged should be advertised
+                        FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
+                        if (mode.equals(FlaggingMode.FLAGGED_ONLY)) {
+                            mail.setColorLabel(0);
+                        }
+                    }
+                }
 
                 // Check if mail authenticity handler is available
                 MailAuthenticityHandler handler = null;

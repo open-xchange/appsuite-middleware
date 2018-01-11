@@ -75,6 +75,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.FlaggingMode;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
@@ -866,7 +867,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             if (null == effectiveSortField) {
                                 effectiveSortField = MailSortField.RECEIVED_DATE;
                             }
-                            final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null, mailAccess.getMailConfig().getMailProperties().isUserFlagsEnabled());
+                            Integer flaggingColor = FlaggingMode.FLAGGED_IMPLICIT.equals(FlaggingMode.getFlaggingMode(getSession())) ? FlaggingMode.getFlaggingColor(getSession()) : null;
+                            final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null, mailAccess.getMailConfig().getMailProperties().isUserFlagsEnabled(), flaggingColor);
                             Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
                                 @Override
@@ -928,7 +930,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 LOG.debug("getThreadSortedMessages from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
 
                 // Sort them
-                final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null, true);
+                Integer flaggingColor = FlaggingMode.FLAGGED_IMPLICIT.equals(FlaggingMode.getFlaggingMode(session)) ? FlaggingMode.getFlaggingColor(session) : null;
+                final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null, true, flaggingColor);
                 Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
                     @Override
@@ -1234,7 +1237,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             if (null == effectiveSortField) {
                                 effectiveSortField = MailSortField.RECEIVED_DATE;
                             }
-                            final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null, mailAccess.getMailConfig().getMailProperties().isUserFlagsEnabled());
+                            Integer flaggingColor = FlaggingMode.FLAGGED_IMPLICIT.equals(FlaggingMode.getFlaggingMode(getSession())) ? FlaggingMode.getFlaggingColor(getSession()) : null;
+                            final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null, mailAccess.getMailConfig().getMailProperties().isUserFlagsEnabled(), flaggingColor);
                             Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
                                 @Override
@@ -1289,7 +1293,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 LOG.debug("getThreadSortedMessages from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
 
                 // Sort them
-                final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null, true);
+                Integer flaggingColor = FlaggingMode.FLAGGED_IMPLICIT.equals(FlaggingMode.getFlaggingMode(session)) ? FlaggingMode.getFlaggingColor(session) : null;
+                final MailMessageComparator comparator = new MailMessageComparator(effectiveSortField, descending, null, true, flaggingColor);
                 Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
                     @Override
@@ -1486,7 +1491,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
     }
 
     private Comparator<List<MailMessage>> getListComparator(final MailSortField sortField, final OrderDirection order, Locale locale, boolean userFlagsEnabled) {
-        final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale, userFlagsEnabled);
+        Integer flaggingColor = FlaggingMode.FLAGGED_IMPLICIT.equals(FlaggingMode.getFlaggingMode(this.session)) ? FlaggingMode.getFlaggingColor(this.session) : null;
+        final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale, userFlagsEnabled, flaggingColor);
         Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
             @Override
@@ -1614,7 +1620,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 LOG.debug("Searching messages from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
 
                 // Sort them
-                MailMessageComparator c = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getLocale(), true);
+                Integer flaggingColor = FlaggingMode.FLAGGED_IMPLICIT.equals(FlaggingMode.getFlaggingMode(this.session)) ? FlaggingMode.getFlaggingColor(this.session) : null;
+                MailMessageComparator c = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getLocale(), true, flaggingColor);
                 Collections.sort(messages, c);
                 // Return as array
                 if (null == indexRange) {
@@ -1828,13 +1835,15 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             ContinuationRegistryService continuationRegistry = Services.optService(ContinuationRegistryService.class);
             if (null != continuationRegistry && mfs.contains(MailField.SUPPORTS_CONTINUATION) && !mfs.contains(MailField.FULL) && !mfs.contains(MailField.BODY)) {
                 ExecutorContinuation<MailMessage> executorContinuation;
+                Integer flaggingColor = FlaggingMode.FLAGGED_IMPLICIT.equals(FlaggingMode.getFlaggingMode(this.session)) ? FlaggingMode.getFlaggingColor(session) : null;
                 {
                     ContinuationResponseGenerator<MailMessage> responseGenerator = new ContinuationResponseGenerator<MailMessage>() {
 
                         @Override
                         public ContinuationResponse<Collection<MailMessage>> responseFor(List<MailMessage> messages, boolean completed) throws OXException {
                             // Sort them
-                            MailMessageComparator c = new MailMessageComparator(effectiveSortField, OrderDirection.DESC.equals(order), locale, true);
+
+                            MailMessageComparator c = new MailMessageComparator(effectiveSortField, OrderDirection.DESC.equals(order), locale, true, flaggingColor);
                             Collections.sort(messages, c);
                             // Return as array
                             if (null == indexRange) {
@@ -2092,7 +2101,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 }
                 LOG.debug("Searching messages from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
                 // Sort them
-                MailMessageComparator c = new MailMessageComparator(effectiveSortField, OrderDirection.DESC.equals(order), locale, true);
+                Integer flaggingColor = FlaggingMode.FLAGGED_IMPLICIT.equals(FlaggingMode.getFlaggingMode(session)) ? FlaggingMode.getFlaggingColor(session) : null;
+                MailMessageComparator c = new MailMessageComparator(effectiveSortField, OrderDirection.DESC.equals(order), locale, true, flaggingColor);
                 Collections.sort(messages, c);
                 // Return as array
                 if (null == indexRange) {
@@ -2291,7 +2301,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                 LOG.debug("Retrieving unread messages from folder \"{}\" took {}msec.", fullName, completionService.getDuration());
 
                 // Sort them
-                Collections.sort(messages, new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getLocale(), true));
+                Integer flaggingColor = FlaggingMode.FLAGGED_IMPLICIT.equals(FlaggingMode.getFlaggingMode(session)) ? FlaggingMode.getFlaggingColor(session) : null;
+                Collections.sort(messages, new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), getLocale(), true, flaggingColor));
                 // Return as array
                 return messages.toArray(new MailMessage[messages.size()]);
             } catch (InterruptedException e) {

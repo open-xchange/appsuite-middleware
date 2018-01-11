@@ -2076,7 +2076,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
 
             // Sort
-            Collections.sort(list, new MailMessageComparator(sortField, order == OrderDirection.DESC, getLocale(), getIMAPProperties().isUserFlagsEnabled()));
+            Integer flaggingColor = FlaggingMode.FLAGGED_IMPLICIT.equals(FlaggingMode.getFlaggingMode(getSession())) ? FlaggingMode.getFlaggingColor(getSession()) : null;
+            Collections.sort(list, new MailMessageComparator(sortField, order == OrderDirection.DESC, getLocale(), getIMAPProperties().isUserFlagsEnabled(), flaggingColor));
 
             // Return
             MailMessage[] mailMessages = list.toArray(new MailMessage[list.size()]);
@@ -2523,7 +2524,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     setAccountInfo(mails);
                 }
                 final List<MailMessage> msgList = Arrays.asList(mails);
-                Collections.sort(msgList, new MailMessageComparator(sortField, order == OrderDirection.DESC, getLocale(), getIMAPProperties().isUserFlagsEnabled()));
+                Integer flaggingColor = FlaggingMode.FLAGGED_IMPLICIT.equals(FlaggingMode.getFlaggingMode(imapFolderStorage.getSession())) ? FlaggingMode.getFlaggingColor(imapFolderStorage.getSession()) : null;
+                Collections.sort(msgList, new MailMessageComparator(sortField, order == OrderDirection.DESC, getLocale(), getIMAPProperties().isUserFlagsEnabled(), flaggingColor));
                 mails = msgList.toArray(mails);
             }
             /*
