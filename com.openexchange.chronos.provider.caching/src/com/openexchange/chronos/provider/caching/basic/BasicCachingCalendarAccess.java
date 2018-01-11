@@ -65,12 +65,10 @@ import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.SingleFolderCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.basic.search.SearchHandler;
-import com.openexchange.chronos.provider.caching.basic.search.SearchUtil;
 import com.openexchange.chronos.provider.extensions.BasicSearchAware;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.exception.OXException;
-import com.openexchange.search.SearchTerm;
 import com.openexchange.session.Session;
 
 /**
@@ -167,8 +165,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         if ((null == filters || filters.isEmpty()) && (null == queries || queries.isEmpty())) {
             return Collections.emptyList();
         }
-        SearchTerm<?> searchTerm = SearchUtil.compileSearchTerm(queries);
-        return searchHandler.searchEvents(searchTerm, filters);
+        return searchHandler.searchEvents(filters, queries);
     }
 
     private static final class CachingAccessBridge extends SingleFolderCachingCalendarAccess {

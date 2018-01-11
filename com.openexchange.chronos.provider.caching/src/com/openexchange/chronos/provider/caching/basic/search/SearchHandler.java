@@ -65,7 +65,14 @@ import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
+import com.openexchange.search.SingleSearchTerm;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.search.internal.operands.ColumnFieldOperand;
+import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.session.Session;
 
 /**
@@ -74,6 +81,11 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class SearchHandler {
+
+    /**
+     * The wildcard character '*'
+     */
+    private static final String WILDCARD = "*";
 
     private CalendarParameters parameters;
     private Session session;
@@ -108,21 +120,24 @@ public class SearchHandler {
     /**
      * Searches for events
      * 
-     * @param searchTerm The {@link SearchTerm}
      * @param filters A {@link List} with the {@link SearchFilter}s
+     * @param queries A {@link List} with the queries
      * @param eventFields The optional {@link EventField}s. If <code>null</code> all fields will be retrieved
      * @return A {@link List} with all matching {@link Event}s
      * @throws OXException if an error is occurred
      */
-    public List<Event> searchEvents(SearchTerm<?> searchTerm, List<SearchFilter> filters, EventField... eventFields) throws OXException {
+    public List<Event> searchEvents(List<SearchFilter> filters, List<String> queries, EventField... eventFields) throws OXException {
         ContextService contextService = Services.getService(ContextService.class);
         Context context = contextService.loadContext(session.getContextId());
 
+        SearchTerm<?> searchTerm = compileSearchTerm(queries);
         CalendarStorageFactory storageFactory = Services.getService(CalendarStorageFactory.class);
         SearchOptions sortOptions = new SearchOptions(parameters);
         CalendarStorage storage = storageFactory.create(context, account.getAccountId(), null);
         return storage.getEventStorage().searchEvents(searchTerm, filters, sortOptions, getEventFields(eventFields));
     }
+
+    ///////////////////////////////////////////////// HELPERS ////////////////////////////////////////////////////////
 
     /**
      * <p>Prepares the event fields to request from the storage.</p>
@@ -148,5 +163,83 @@ public class SearchHandler {
         }
 
         return eventFields.toArray(new EventField[eventFields.size()]);
+    }
+
+    /**
+     * Compiles the {@link SearchTerm} from the specified {@link List} of queries
+     * 
+     * @param queries The {@link List} of queries
+     * @return The {@link SearchTerm}
+     */
+    private SearchTerm<?> compileSearchTerm(List<String> queries) {
+        return compileQueriesSearchTerm(queries);
+    }
+
+    /**
+     * Compiles a {@link SearchTerm} out of the specified {@link List} of queries
+     * 
+     * @param queries the {@link List} of queries from which to compile the {@link SearchTerm}
+     * @return The compiled {@link SearchTerm}
+     */
+    private SearchTerm<?> compileQueriesSearchTerm(List<String> queries) {
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
+        if (null == queries || queries.isEmpty()) {
+            return searchTerm.getOperands()[0];
+        }
+        for (String query : queries) {
+            if (isWildcardOnly(query)) {
+                continue;
+            }
+            String pattern = surroundWithWildcards(query); //FIXME: maybe check for the minimum search pattern length?
+
+            CompositeSearchTerm compositeSearchTerm = new CompositeSearchTerm(CompositeOperation.OR);
+            compositeSearchTerm.addSearchTerm(getSearchTerm(EventField.SUMMARY, SingleOperation.EQUALS, pattern));
+            compositeSearchTerm.addSearchTerm(getSearchTerm(EventField.DESCRIPTION, SingleOperation.EQUALS, pattern));
+            compositeSearchTerm.addSearchTerm(getSearchTerm(EventField.CATEGORIES, SingleOperation.EQUALS, pattern));
+
+            searchTerm.addSearchTerm(compositeSearchTerm);
+        }
+        return searchTerm;
+    }
+
+    /**
+     * Gets a single search term using the field itself as single column operand.
+     *
+     * @param <E> The field type
+     * @param operation The operation to use
+     * @param operand The value to use as constant operand
+     * @return A single search term
+     */
+    private <V, E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation, V operand) {
+        return new SingleSearchTerm(operation).addOperand(new ColumnFieldOperand<E>(field)).addOperand(new ConstantOperand<V>(operand));
+    }
+
+    /**
+     * Checks whether the specified query is a wildcard query.
+     * 
+     * @param query The query to check
+     * @return <code>true</code> if the query is empty or consists out of the wildcard character '*'
+     */
+    private boolean isWildcardOnly(String query) {
+        return Strings.isEmpty(query) || WILDCARD.equals(query);
+    }
+
+    /**
+     * Surrounds the specified pattern with wildcards
+     * 
+     * @param pattern The pattern to surround with wildcards
+     * @return The updated pattern
+     */
+    private String surroundWithWildcards(String pattern) {
+        if (Strings.isEmpty(pattern)) {
+            return WILDCARD;
+        }
+        if (false == pattern.startsWith(WILDCARD)) {
+            pattern = WILDCARD + pattern;
+        }
+        if (false == pattern.endsWith(WILDCARD)) {
+            pattern += WILDCARD;
+        }
+        return pattern;
     }
 }
