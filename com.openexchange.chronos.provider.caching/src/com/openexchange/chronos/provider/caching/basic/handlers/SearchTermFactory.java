@@ -49,56 +49,27 @@
 
 package com.openexchange.chronos.provider.caching.basic.handlers;
 
-import java.util.List;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.common.DefaultUpdatesResult;
-import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.SearchOptions;
-import com.openexchange.chronos.service.UpdatesResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.search.SearchTerm;
+import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
-import com.openexchange.session.Session;
+import com.openexchange.search.internal.operands.ColumnFieldOperand;
+import com.openexchange.search.internal.operands.ConstantOperand;
 
 /**
- * {@link SyncHandler}
+ * {@link SearchTermFactory}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SyncHandler extends AbstractExtensionHandler {
+final class SearchTermFactory {
 
     /**
-     * Initialises a new {@link SyncHandler}.
+     * Creates a single search term using the field itself as single column operand.
+     *
+     * @param <E> The field type
+     * @param operation The operation to use
+     * @param operand The value to use as constant operand
+     * @return A single search term
      */
-    public SyncHandler(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super(session, account, parameters);
-    }
-
-    /**
-     * Gets lists of new and updated as well as deleted events since a specific timestamp.
-     * 
-     * @param updatedSince The timestamp since when the updates should be retrieved
-     * @return The updates result yielding lists of new/modified and deleted events
-     * @throws OXException if the operation fails
-     */
-    public UpdatesResult getUpdatedEvents(long updatedSince) throws OXException {
-        SearchOptions searchOptions = new SearchOptions();
-        SearchTerm<?> searchTerm = createSearchTerm(updatedSince);
-
-        List<Event> tombstoneEvents = getEventStorage().searchEventTombstones(searchTerm, searchOptions, null);
-        List<Event> newAndUpdated = getEventStorage().searchEvents(searchTerm, searchOptions, null);
-        return new DefaultUpdatesResult(newAndUpdated, tombstoneEvents);
-    }
-
-    /**
-     * Compiles the {@link SearchTerm}
-     * 
-     * @param updatedSince The updated since timestamp
-     * @return The compiled {@link SearchTerm}
-     */
-    private SearchTerm<?> createSearchTerm(long updatedSince) {
-        return SearchTermFactory.createSearchTerm(EventField.LAST_MODIFIED, SingleOperation.LESS_OR_EQUAL, updatedSince);
+    static <V, E extends Enum<?>> SingleSearchTerm createSearchTerm(E field, SingleOperation operation, V operand) {
+        return new SingleSearchTerm(operation).addOperand(new ColumnFieldOperand<E>(field)).addOperand(new ConstantOperand<V>(operand));
     }
 }

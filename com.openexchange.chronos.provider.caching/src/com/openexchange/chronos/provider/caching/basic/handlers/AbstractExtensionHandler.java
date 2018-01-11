@@ -56,6 +56,7 @@ import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
+import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -137,5 +138,15 @@ abstract class AbstractExtensionHandler {
 
         CalendarStorageFactory storageFactory = Services.getService(CalendarStorageFactory.class);
         return storageFactory.create(context, getAccount().getAccountId(), getCalendarSession().getEntityResolver());
+    }
+
+    /**
+     * Helper method for getting the {@link EventStorage}
+     * 
+     * @return The {@link EventStorage}
+     * @throws OXException if the {@link EventStorage} cannot be returned
+     */
+    EventStorage getEventStorage() throws OXException {
+        return getStorage().getEventStorage();
     }
 }

@@ -66,10 +66,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
-import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
-import com.openexchange.search.internal.operands.ColumnFieldOperand;
-import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.session.Session;
 
 /**
@@ -124,7 +121,7 @@ public class SearchHandler extends AbstractExtensionHandler {
     public List<Event> searchEvents(List<SearchFilter> filters, List<String> queries, EventField... eventFields) throws OXException {
         SearchTerm<?> searchTerm = compileSearchTerm(queries);
         SearchOptions sortOptions = new SearchOptions(getCalendarSession());
-        return getStorage().getEventStorage().searchEvents(searchTerm, filters, sortOptions, getEventFields(eventFields));
+        return getEventStorage().searchEvents(searchTerm, filters, sortOptions, getEventFields(eventFields));
     }
 
     ///////////////////////////////////////////////// HELPERS ////////////////////////////////////////////////////////
@@ -185,9 +182,9 @@ public class SearchHandler extends AbstractExtensionHandler {
             String pattern = surroundWithWildcards(checkMinimumSearchPatternLength(query, minimumSearchPatternLength));
 
             CompositeSearchTerm compositeSearchTerm = new CompositeSearchTerm(CompositeOperation.OR);
-            compositeSearchTerm.addSearchTerm(getSearchTerm(EventField.SUMMARY, SingleOperation.EQUALS, pattern));
-            compositeSearchTerm.addSearchTerm(getSearchTerm(EventField.DESCRIPTION, SingleOperation.EQUALS, pattern));
-            compositeSearchTerm.addSearchTerm(getSearchTerm(EventField.CATEGORIES, SingleOperation.EQUALS, pattern));
+            compositeSearchTerm.addSearchTerm(SearchTermFactory.createSearchTerm(EventField.SUMMARY, SingleOperation.EQUALS, pattern));
+            compositeSearchTerm.addSearchTerm(SearchTermFactory.createSearchTerm(EventField.DESCRIPTION, SingleOperation.EQUALS, pattern));
+            compositeSearchTerm.addSearchTerm(SearchTermFactory.createSearchTerm(EventField.CATEGORIES, SingleOperation.EQUALS, pattern));
 
             searchTerm.addSearchTerm(compositeSearchTerm);
         }
@@ -207,18 +204,6 @@ public class SearchHandler extends AbstractExtensionHandler {
             throw CalendarExceptionCodes.QUERY_TOO_SHORT.create(I(minimumPatternLength), pattern);
         }
         return pattern;
-    }
-
-    /**
-     * Gets a single search term using the field itself as single column operand.
-     *
-     * @param <E> The field type
-     * @param operation The operation to use
-     * @param operand The value to use as constant operand
-     * @return A single search term
-     */
-    private <V, E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation, V operand) {
-        return new SingleSearchTerm(operation).addOperand(new ColumnFieldOperand<E>(field)).addOperand(new ConstantOperand<V>(operand));
     }
 
     /**
