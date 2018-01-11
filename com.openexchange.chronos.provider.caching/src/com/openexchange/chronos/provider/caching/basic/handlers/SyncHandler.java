@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.caching.basic.handlers;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -87,8 +88,13 @@ public class SyncHandler extends AbstractExtensionHandler {
         SearchOptions searchOptions = new SearchOptions();
         SearchTerm<?> searchTerm = createSearchTerm(updatedSince);
 
+        //TODO: consider the requested fields
         List<Event> tombstoneEvents = getEventStorage().searchEventTombstones(searchTerm, searchOptions, null);
+        getUtilities().loadAdditionalEventTombstoneData(tombstoneEvents, DEFAULT_FIELDS.toArray(new EventField[DEFAULT_FIELDS.size()]));
+        
         List<Event> newAndUpdated = getEventStorage().searchEvents(searchTerm, searchOptions, null);
+        getUtilities().loadAdditionalEventData(getSession().getUserId(), newAndUpdated, DEFAULT_FIELDS.toArray(new EventField[DEFAULT_FIELDS.size()]));
+        
         return new DefaultUpdatesResult(newAndUpdated, tombstoneEvents);
     }
 
@@ -99,6 +105,6 @@ public class SyncHandler extends AbstractExtensionHandler {
      * @return The compiled {@link SearchTerm}
      */
     private SearchTerm<?> createSearchTerm(long updatedSince) {
-        return SearchTermFactory.createSearchTerm(EventField.TIMESTAMP, SingleOperation.GREATER_THAN, updatedSince);
+        return SearchTermFactory.createSearchTerm(EventField.TIMESTAMP, SingleOperation.GREATER_THAN, L(updatedSince));
     }
 }

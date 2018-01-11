@@ -60,7 +60,6 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.SearchFilter;
-import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
@@ -82,18 +81,6 @@ public class SearchHandler extends AbstractExtensionHandler {
     private static final String WILDCARD = "*";
 
     private final int minimumSearchPatternLength;
-
-    //@formatter:off
-    /** 
-     * Fields that are always included when searching for events 
-     */
-    private static final List<EventField> DEFAULT_FIELDS = Arrays.asList(
-        EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, 
-        EventField.TIMESTAMP, EventField.CREATED_BY, EventField.CALENDAR_USER, EventField.CLASSIFICATION, 
-        EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE,
-        EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.ORGANIZER
-    );
-    //@formatter:on
 
     /**
      * Initialises a new {@link SearchHandler}.
@@ -119,9 +106,9 @@ public class SearchHandler extends AbstractExtensionHandler {
      * @throws OXException if an error is occurred
      */
     public List<Event> searchEvents(List<SearchFilter> filters, List<String> queries, EventField... eventFields) throws OXException {
-        SearchTerm<?> searchTerm = compileSearchTerm(queries);
-        SearchOptions sortOptions = new SearchOptions(getCalendarSession());
-        return getEventStorage().searchEvents(searchTerm, filters, sortOptions, getEventFields(eventFields));
+        List<Event> events = getEventStorage().searchEvents(compileSearchTerm(queries), filters, getSearchOptions(), getEventFields(eventFields));
+        // TODO: Maybe post process the events to e.g. resolve occurrences or apply userized versions of change/delete exception dates?
+        return getUtilities().loadAdditionalEventData(getSession().getUserId(), events, eventFields);
     }
 
     ///////////////////////////////////////////////// HELPERS ////////////////////////////////////////////////////////

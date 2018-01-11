@@ -49,13 +49,18 @@
 
 package com.openexchange.chronos.provider.caching.basic.handlers;
 
+import java.util.Arrays;
+import java.util.List;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
+import com.openexchange.chronos.storage.CalendarStorageUtilities;
 import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -68,6 +73,18 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 abstract class AbstractExtensionHandler {
+
+    //@formatter:off
+    /** 
+     * Fields that are always included when searching for events 
+     */
+    static final List<EventField> DEFAULT_FIELDS = Arrays.asList(
+        EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, 
+        EventField.TIMESTAMP, EventField.CREATED_BY, EventField.CALENDAR_USER, EventField.CLASSIFICATION, 
+        EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE,
+        EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.ORGANIZER
+    );
+    //@formatter:on
 
     private final CalendarParameters parameters;
     private final Session session;
@@ -95,7 +112,7 @@ abstract class AbstractExtensionHandler {
      *
      * @return The parameters
      */
-    public CalendarParameters getParameters() {
+    CalendarParameters getParameters() {
         return parameters;
     }
 
@@ -104,7 +121,7 @@ abstract class AbstractExtensionHandler {
      *
      * @return The session
      */
-    public Session getSession() {
+    Session getSession() {
         return session;
     }
 
@@ -113,7 +130,7 @@ abstract class AbstractExtensionHandler {
      *
      * @return The account
      */
-    public CalendarAccount getAccount() {
+    CalendarAccount getAccount() {
         return account;
     }
 
@@ -122,8 +139,17 @@ abstract class AbstractExtensionHandler {
      *
      * @return The calendarSession
      */
-    public CalendarSession getCalendarSession() {
+    CalendarSession getCalendarSession() {
         return calendarSession;
+    }
+
+    /**
+     * Creates and returns the {@link SearchOptions}
+     * 
+     * @return the {@link SearchOptions}
+     */
+    SearchOptions getSearchOptions() {
+        return new SearchOptions(getCalendarSession());
     }
 
     /**
@@ -148,5 +174,15 @@ abstract class AbstractExtensionHandler {
      */
     EventStorage getEventStorage() throws OXException {
         return getStorage().getEventStorage();
+    }
+
+    /**
+     * Gets additional storage utilities.
+     * 
+     * @return The {@link CalendarStorageUtilities}
+     * @throws OXException if the {@link CalendarStorageUtilities} cannot be returned
+     */
+    CalendarStorageUtilities getUtilities() throws OXException {
+        return getStorage().getUtilities();
     }
 }
