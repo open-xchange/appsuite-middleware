@@ -137,12 +137,12 @@ public class SearchHandler {
      * @throws OXException if an error is occurred
      */
     public List<Event> searchEvents(List<SearchFilter> filters, List<String> queries, EventField... eventFields) throws OXException {
-        ContextService contextService = Services.getService(ContextService.class);
-        Context context = contextService.loadContext(session.getContextId());
-
         SearchTerm<?> searchTerm = compileSearchTerm(queries);
         CalendarStorageFactory storageFactory = Services.getService(CalendarStorageFactory.class);
         SearchOptions sortOptions = new SearchOptions(parameters);
+
+        ContextService contextService = Services.getService(ContextService.class);
+        Context context = contextService.loadContext(session.getContextId());
         CalendarStorage storage = storageFactory.create(context, account.getAccountId(), calendarSession.getEntityResolver());
         return storage.getEventStorage().searchEvents(searchTerm, filters, sortOptions, getEventFields(eventFields));
     }
@@ -162,7 +162,7 @@ public class SearchHandler {
      */
     private EventField[] getEventFields(EventField[] requestedFields, EventField... additionalFields) {
         if (null == requestedFields || requestedFields.length == 0) {
-            return EventField.values();
+            return parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class, DEFAULT_FIELDS.toArray(new EventField[DEFAULT_FIELDS.size()]));
         }
 
         Set<EventField> eventFields = new HashSet<>();
@@ -215,10 +215,12 @@ public class SearchHandler {
     }
 
     /**
-     * @param query
-     * @param minimumSearchPatternLength2
-     * @return
-     * @throws OXException
+     * Checks that the supplied search pattern length is equal to or greater than a configured minimum.
+     *
+     * @param minimumPatternLength, The minimum search pattern length, or <code>0</code> for no limitation
+     * @param pattern The pattern to check
+     * @return The passed pattern, after the length was checked
+     * @throws OXException {@link CalendarExceptionCodes#QUERY_TOO_SHORT}
      */
     private String checkMinimumSearchPatternLength(String pattern, int minimumPatternLength) throws OXException {
         if (null != pattern && 0 < minimumPatternLength && pattern.length() < minimumPatternLength) {
