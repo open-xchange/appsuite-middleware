@@ -109,7 +109,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
     // TODO: Principal
     @Override
-    public List<NotificationParticipant> resolveAllRecipients(Event original, Event appointment, User user, User onBehalfOf, Context ctx, Session session, CalendarUser principal) throws OXException {
+    public List<NotificationParticipant> resolveAllRecipients(Event original, Event update, User user, User onBehalfOf, Context ctx, Session session, CalendarUser principal) throws OXException {
         final NotificationConfiguration defaultConfiguration = getDefaultConfiguration(user, ctx);
 
         final Map<Integer, Attendee> userIds = new HashMap<Integer, Attendee>();
@@ -118,7 +118,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
         final Set<Integer> resourceIds = new HashSet<Integer>();
 
-        List<Attendee> participants = appointment.getAttendees();
+        List<Attendee> participants = update.getAttendees();
         if (participants != null) {
             for (final Attendee participant : participants) {
                 if (CalendarUtils.isInternalUser(participant)) {
@@ -155,7 +155,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         }
 
         final User[] participantUsers = userService.getUser(ctx, Coll2i(userIds.keySet()));
-        String organizer = determineOrganizer(original, appointment, ctx);
+        String organizer = determineOrganizer(original, update, ctx);
         if (organizer.startsWith("mailto:")) {
             organizer = organizer.substring(7);
         }
@@ -167,7 +167,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         boolean foundOnBehalfOf = false;
         boolean foundPrincipal = false;
 
-        final String appId = (appointment.getId() == null && original != null) ? original.getId() : appointment.getId();
+        final String appId = (update.getId() == null && original != null) ? original.getId() : update.getId();
 
         for (final User u : participantUsers) {
             final int id = u.getId();
@@ -176,7 +176,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
             final Set<ITipRole> roles = EnumSet.noneOf(ITipRole.class);
 
-            roles.add((mail.equalsIgnoreCase(organizer) || (appointment.containsOrganizer() && id == appointment.getOrganizer().getEntity())) ? ITipRole.ORGANIZER : ITipRole.ATTENDEE);
+            roles.add((mail.equalsIgnoreCase(organizer) || (update.containsOrganizer() && id == update.getOrganizer().getEntity())) ? ITipRole.ORGANIZER : ITipRole.ATTENDEE);
             if (id == onBehalfOf.getId()) {
                 roles.add(ITipRole.ON_BEHALF_OF);
             }
@@ -203,7 +203,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
             String folderIdForUser = util.getFolderIdForUser(session, appId);
             if (folderIdForUser == null) {
-                folderIdForUser = appointment.getFolderId();
+                folderIdForUser = update.getFolderId();
             }
             participant.setFolderId(folderIdForUser);
 
@@ -220,7 +220,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
             final Set<ITipRole> roles = EnumSet.noneOf(ITipRole.class);
 
-            roles.add((mail.equalsIgnoreCase(organizer) || (appointment.containsOrganizer() && id == appointment.getOrganizer().getEntity())) ? ITipRole.ORGANIZER : ITipRole.ATTENDEE);
+            roles.add((mail.equalsIgnoreCase(organizer) || (update.containsOrganizer() && id == update.getOrganizer().getEntity())) ? ITipRole.ORGANIZER : ITipRole.ATTENDEE);
             if (id == onBehalfOf.getId()) {
                 roles.add(ITipRole.ON_BEHALF_OF);
             }
@@ -342,7 +342,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         }
 
         final Map<String, Attendee> statusMap = new HashMap<>();
-        final List<Attendee> confirmations = appointment.getAttendees();
+        final List<Attendee> confirmations = update.getAttendees();
         if (confirmations != null) {
             for (Attendee p : confirmations) {
                 String mail = CalendarUtils.extractEMailAddress(p.getUri());
@@ -363,7 +363,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
             final NotificationParticipant participant = new NotificationParticipant(role, true, mail);
             participant.setDisplayName(e.getCn());
-            participant.setTimezone(null == appointment.getStartDate() ? TimeZone.getDefault() : appointment.getStartDate().getTimeZone());
+            participant.setTimezone(null == update.getStartDate() ? TimeZone.getDefault() : update.getStartDate().getTimeZone());
             participant.setLocale(user.getLocale());
             Attendee cp = statusMap.get(mail);
             if (cp != null) {
@@ -375,11 +375,11 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         }
 
         if (!foundOrganizer) {
-            final User organizerUser = discoverOrganizer(appointment, ctx);
+            final User organizerUser = discoverOrganizer(update, ctx);
             final NotificationParticipant notificationOrganizer = new NotificationParticipant(ITipRole.ORGANIZER, organizerUser == null, organizer, organizerUser == null ? -1 : organizerUser.getId());
             final NotificationConfiguration configuration = defaultConfiguration.clone();
             if (organizerUser == null) {
-                LOG.warn("Unable to resolve Organizer for appointment: " + appointment.getId() + " in context " + ctx.getContextId());
+                LOG.warn("Unable to resolve Organizer for appointment: " + update.getId() + " in context " + ctx.getContextId());
             } else {
                 configure(organizerUser, ctx, configuration, true);
                 notificationOrganizer.setUser(organizerUser);
@@ -408,13 +408,13 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         return u.getMail();
     }
 
-    private User discoverOrganizer(final Event appointment, final Context ctx) throws OXException {
-        if (appointment.getOrganizer() != null && appointment.getOrganizer().getEntity() > 0) {
-            return userService.getUser(appointment.getOrganizer().getEntity(), ctx);
+    private User discoverOrganizer(final Event event, final Context ctx) throws OXException {
+        if (event.getOrganizer() != null && event.getOrganizer().getEntity() > 0) {
+            return userService.getUser(event.getOrganizer().getEntity(), ctx);
         } else {
-            Organizer organizer = appointment.getOrganizer();
+            Organizer organizer = event.getOrganizer();
             if (organizer == null) {
-                return appointment.containsCreatedBy() ? userService.getUser(appointment.getCreatedBy().getEntity(), ctx) : null;
+                return event.containsCreatedBy() ? userService.getUser(event.getCreatedBy().getEntity(), ctx) : null;
             }
             String organizerMail = CalendarUtils.extractEMailAddress(organizer.getUri());
             if (null != organizerMail) {
@@ -429,17 +429,17 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
         return null;
     }
 
-    private String determineOrganizer(Event original, Event appointment, final Context ctx) throws OXException {
+    private String determineOrganizer(Event original, Event update, final Context ctx) throws OXException {
         final Organizer organizer;
-        if (appointment.getOrganizer() != null) {
-            organizer = appointment.getOrganizer();
+        if (update.getOrganizer() != null) {
+            organizer = update.getOrganizer();
         } else {
             organizer = original.getOrganizer();
         }
         if (organizer == null) {
             User owner = null;
-            if (appointment.containsCreatedBy()) {
-                owner = userService.getUser(appointment.getCreatedBy().getEntity(), ctx);
+            if (update.containsCreatedBy()) {
+                owner = userService.getUser(update.getCreatedBy().getEntity(), ctx);
             }
             return owner == null ? "unknown" : owner.getMail();
         }
@@ -447,10 +447,10 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
     }
 
     @Override
-    public List<NotificationParticipant> getAllParticipants(final List<NotificationParticipant> allRecipients, final Event appointment, final User user, final Context ctx) {
+    public List<NotificationParticipant> getAllParticipants(final List<NotificationParticipant> allRecipients, final Event event, final User user, final Context ctx) {
         final List<NotificationParticipant> filtered = new ArrayList<NotificationParticipant>();
         final Set<Integer> userIds = new HashSet<Integer>();
-        final List<Attendee> users = appointment.getAttendees();
+        final List<Attendee> users = event.getAttendees();
         final Set<String> externals = new HashSet<String>();
         if (users != null) {
             for (Attendee userParticipant : users) {
@@ -472,8 +472,8 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
     }
 
     @Override
-    public List<NotificationParticipant> getResources(final Event appointment, final Context ctx) throws OXException {
-        final List<Attendee> resources = CalendarUtils.filter(appointment.getAttendees(), Boolean.TRUE, CalendarUserType.RESOURCE);
+    public List<NotificationParticipant> getResources(final Event event, final Context ctx) throws OXException {
+        final List<Attendee> resources = CalendarUtils.filter(event.getAttendees(), Boolean.TRUE, CalendarUserType.RESOURCE);
         if (resources == null) {
             return Collections.emptyList();
         }
