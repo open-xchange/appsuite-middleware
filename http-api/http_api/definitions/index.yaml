@@ -608,6 +608,11 @@ RemoveSessionBody:
   $ref: ./sessionmanagement/RemoveSessionBody.yaml
 RemoveAllOtherSessionsBody:
   $ref: ./sessionmanagement/RemoveAllOtherSessionsBody.yaml
+# Module: OpenId
+InitResponse:
+  $ref: ./openid/InitRequest.yaml
+LogoutResponse:
+  $ref: ./openid/LogoutRequest.yaml
 
 
 

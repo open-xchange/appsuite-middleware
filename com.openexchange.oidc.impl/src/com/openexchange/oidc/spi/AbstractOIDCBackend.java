@@ -395,7 +395,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         try {
             long expiryDate = Long.parseLong((String) session.getParameter(Session.PARAM_OAUTH_ACCESS_TOKEN_EXPIRY_DATE));
             return System.currentTimeMillis() >= (expiryDate - oauthRefreshTime);
-        } catch (NumberFormatException e) {
+        } catch (@SuppressWarnings("unused") NumberFormatException e) {
             return true;
         }
     }

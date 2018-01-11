@@ -60,7 +60,7 @@ import com.openexchange.config.lean.Property;
  */
 public enum OIDCBackendProperty implements Property {
     /**
-     * clientId - The client id, which was assigned by OP to this client/backend
+     * clientId - The client id, which was assigned by thr OP to this client/backend
      * on registration
      */
     clientId(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
@@ -98,11 +98,11 @@ public enum OIDCBackendProperty implements Property {
      */
     scope(OIDCProperty.PREFIX,"openid"),
     /**
-     * issuer - The OPs path
+     * issuer - The OPs issuer path
      */
     opIssuer(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     /**
-     * responseType - The OPs response type
+     * responseType - The OPs response type, which also identifies the used flow
      */
     responseType(OIDCProperty.PREFIX, "code"),
     /**
@@ -111,7 +111,7 @@ public enum OIDCBackendProperty implements Property {
     opLogoutEndpoint(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     /**
      * redirectURIPostSSOLogout - The location where the Browser should be redirected after logout
-     * on OP
+     * from OP
      */
     rpRedirectURIPostSSOLogout(OIDCProperty.PREFIX, OIDCProperty.EMPTY), 
     /**
@@ -124,12 +124,19 @@ public enum OIDCBackendProperty implements Property {
     rpRedirectURILogout(OIDCProperty.PREFIX, OIDCProperty.EMPTY),
     /**
      * autologinCookieMode - Which login mode is enabled look at {@link OIDCBackendConfig.AutologinMode}
+     * for all valid values.
+     * so far the following values are valid: {off, ox_direct, sso_redirect}.
+     * <br>
+     *   off - no autologin<br>
+     *   ox_direct - load user session from cookie and load Appsuite directly<br>
+     *   sso_redirect - check for a valid session on OPs side before login into<br>
+     *     a valid session loaded from a cookie
      */
     autologinCookieMode(OIDCProperty.PREFIX, OIDCBackendConfig.AutologinMode.OFF.getValue()),
     /**
      * oauthRefreshTime - Time in milliseconds determines how long before the expiration of the
      * OAuth {@link AccessToken} a new {@link AccessToken} should be requested. "refresh_token"
-     * grant type must be registered in OP.
+     * grant type must be registered for this client.
      */
     oauthRefreshTime(OIDCProperty.PREFIX, 60000),
     /**

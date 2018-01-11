@@ -58,7 +58,6 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.oidc.OIDCExceptionHandler;
 import com.openexchange.oidc.OIDCWebSSOProvider;
-import com.openexchange.oidc.state.LogoutRequestInfo;
 import com.openexchange.oidc.tools.OIDCTools;
 
 /**

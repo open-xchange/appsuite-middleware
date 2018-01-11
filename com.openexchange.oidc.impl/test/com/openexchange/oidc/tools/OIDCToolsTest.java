@@ -132,7 +132,7 @@ public class OIDCToolsTest {
     @After
     public void cleanUp() {
         File files = new File(TESTFILES_PATH);
-        if (null != files && files.isDirectory() && files.exists()) {
+        if (files.isDirectory() && files.exists()) {
             for (File file : files.listFiles()) {
                 file.delete();
             }
