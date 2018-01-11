@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.provider.caching.basic.search;
+package com.openexchange.chronos.provider.caching.basic.handlers;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Arrays;
@@ -58,17 +58,10 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.CalendarService;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SearchOptions;
-import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.chronos.storage.CalendarStorageFactory;
-import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -84,18 +77,14 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SearchHandler {
+public class SearchHandler extends AbstractExtensionHandler {
 
     /**
      * The wildcard character '*'
      */
     private static final String WILDCARD = "*";
 
-    private final CalendarParameters parameters;
-    private final Session session;
-    private final CalendarAccount account;
     private final int minimumSearchPatternLength;
-    private final CalendarSession calendarSession;
 
     //@formatter:off
     /** 
@@ -119,12 +108,8 @@ public class SearchHandler {
      *             is not an integer
      */
     public SearchHandler(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super();
-        this.session = session;
-        this.account = account;
-        this.parameters = parameters;
-        this.calendarSession = Services.getService(CalendarService.class).init(session);
-        this.minimumSearchPatternLength = calendarSession.getConfig().getMinimumSearchPatternLength();
+        super(session, account, parameters);
+        this.minimumSearchPatternLength = getCalendarSession().getConfig().getMinimumSearchPatternLength();
     }
 
     /**
@@ -138,13 +123,8 @@ public class SearchHandler {
      */
     public List<Event> searchEvents(List<SearchFilter> filters, List<String> queries, EventField... eventFields) throws OXException {
         SearchTerm<?> searchTerm = compileSearchTerm(queries);
-        CalendarStorageFactory storageFactory = Services.getService(CalendarStorageFactory.class);
-        SearchOptions sortOptions = new SearchOptions(parameters);
-
-        ContextService contextService = Services.getService(ContextService.class);
-        Context context = contextService.loadContext(session.getContextId());
-        CalendarStorage storage = storageFactory.create(context, account.getAccountId(), calendarSession.getEntityResolver());
-        return storage.getEventStorage().searchEvents(searchTerm, filters, sortOptions, getEventFields(eventFields));
+        SearchOptions sortOptions = new SearchOptions(getCalendarSession());
+        return getStorage().getEventStorage().searchEvents(searchTerm, filters, sortOptions, getEventFields(eventFields));
     }
 
     ///////////////////////////////////////////////// HELPERS ////////////////////////////////////////////////////////
@@ -162,7 +142,7 @@ public class SearchHandler {
      */
     private EventField[] getEventFields(EventField[] requestedFields, EventField... additionalFields) {
         if (null == requestedFields || requestedFields.length == 0) {
-            return parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class, DEFAULT_FIELDS.toArray(new EventField[DEFAULT_FIELDS.size()]));
+            return getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class, DEFAULT_FIELDS.toArray(new EventField[DEFAULT_FIELDS.size()]));
         }
 
         Set<EventField> eventFields = new HashSet<>();

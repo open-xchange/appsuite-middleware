@@ -64,10 +64,13 @@ import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.SingleFolderCachingCalendarAccess;
-import com.openexchange.chronos.provider.caching.basic.search.SearchHandler;
+import com.openexchange.chronos.provider.caching.basic.handlers.SearchHandler;
+import com.openexchange.chronos.provider.caching.basic.handlers.SyncHandler;
 import com.openexchange.chronos.provider.extensions.BasicSearchAware;
+import com.openexchange.chronos.provider.extensions.BasicSyncAware;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.SearchFilter;
+import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -78,7 +81,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
-public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess, BasicSearchAware {
+public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess, BasicSearchAware, BasicSyncAware {
 
     protected final Session session;
     protected CalendarAccount account;
@@ -86,6 +89,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     private final SearchHandler searchHandler;
 
     private final SingleFolderCachingCalendarAccess cachingBridge;
+    private final SyncHandler syncHandler;
 
     /**
      * Initializes a new {@link BirthdaysCalendarAccess}.
@@ -101,6 +105,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         this.parameters = parameters;
         this.cachingBridge = new CachingAccessBridge(this);
         this.searchHandler = new SearchHandler(session, account, parameters);
+        this.syncHandler = new SyncHandler(session, account, parameters);
     }
 
     /**
@@ -166,6 +171,38 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             return Collections.emptyList();
         }
         return searchHandler.searchEvents(filters, queries);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.provider.extensions.BasicSyncAware#getUpdatedEvents(long)
+     */
+    @Override
+    public UpdatesResult getUpdatedEvents(long updatedSince) throws OXException {
+        return syncHandler.getUpdatedEvents(updatedSince);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.provider.extensions.BasicSyncAware#getSequenceNumber()
+     */
+    @Override
+    public long getSequenceNumber() throws OXException {
+        // TODO Auto-generated method stub
+        return 0;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.provider.extensions.BasicSyncAware#resolveResource(java.lang.String)
+     */
+    @Override
+    public List<Event> resolveResource(String resourceName) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     private static final class CachingAccessBridge extends SingleFolderCachingCalendarAccess {
