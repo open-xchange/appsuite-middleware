@@ -79,7 +79,7 @@ import com.openexchange.server.ServiceLookup;
 @OAuthAction(ChronosOAuthScope.OAUTH_READ_SCOPE)
 public class NeedsActionAction extends ChronosAction {
 
-    private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet("rangeStart", "rangeEnd");
+    private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet(PARAM_RANGE_START, PARAM_RANGE_END);
 
     private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAMETER_ORDER_BY, PARAMETER_ORDER, PARAMETER_FIELDS, PARAMETER_LEFT_HAND_LIMIT, PARAMETER_RIGHT_HAND_LIMIT);
 

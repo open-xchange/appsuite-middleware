@@ -90,9 +90,9 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 @OAuthAction(ChronosOAuthScope.OAUTH_READ_SCOPE)
 public class AllAction extends ChronosAction {
 
-    private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet("rangeStart", "rangeEnd");
+    private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet(PARAM_RANGE_START, PARAM_RANGE_END);
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet("expand", PARAMETER_ORDER_BY, PARAMETER_ORDER, PARAMETER_FIELDS, PARAMETER_INCLUDE_PRIVATE);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_EXPAND, PARAMETER_ORDER_BY, PARAMETER_ORDER, PARAMETER_FIELDS, PARAMETER_INCLUDE_PRIVATE);
 
     private static final String FOLDERS = "folders";
 
