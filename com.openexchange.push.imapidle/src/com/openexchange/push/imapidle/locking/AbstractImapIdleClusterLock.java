@@ -56,7 +56,6 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import org.slf4j.Logger;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.hazelcast.core.Cluster;
@@ -75,7 +74,7 @@ import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionEx
  */
 public abstract class AbstractImapIdleClusterLock implements ImapIdleClusterLock {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractImapIdleClusterLock.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractImapIdleClusterLock.class);
 
     /** The time-to-live in cache; cluster lock timeout minus 5 minutes */
     private static final long CACHE_EXPIRATION = ImapIdleClusterLock.TIMEOUT_MILLIS - 300000L;
@@ -102,37 +101,37 @@ public abstract class AbstractImapIdleClusterLock implements ImapIdleClusterLock
     /**
      * Generate an appropriate value for given time stamp and session identifier pair
      *
-     * @param nanos The time stamp
+     * @param millis The time stamp
      * @param sessionInfo The session info
      * @return The value
      */
-    protected String generateValue(long nanos, SessionInfo sessionInfo) {
+    protected String generateValue(long millis, SessionInfo sessionInfo) {
         if (sessionInfo.isPermanent()) {
-            return Long.toString(nanos);
+            return Long.toString(millis);
         }
-        return new StringBuilder(32).append(nanos).append('?').append(sessionInfo.getSessionId()).toString();
+        return new StringBuilder(32).append(millis).append('?').append(sessionInfo.getSessionId()).toString();
     }
 
     /**
      * Checks validity of passed value in comparison to given time stamp (and session).
      *
      * @param value The value to check
-     * @param now The current time stamp nano seconds
+     * @param now The current time stamp
      * @param tranzient <code>true</code> if session is not supposed to be held in session storage; otherwise <code>false</code>
      * @param hzInstance The Hazelcast instance
      * @return <code>true</code> if valid; otherwise <code>false</code>
      */
     protected boolean validValue(String value, long now, boolean tranzient, HazelcastInstance hzInstance) {
-        return (TimeUnit.NANOSECONDS.toMillis(now - parseNanosFromValue(value)) <= TIMEOUT_MILLIS) && existsSessionFromValue(value, tranzient, hzInstance);
+        return (now - parseMillisFromValue(value) <= TIMEOUT_MILLIS) && existsSessionFromValue(value, tranzient, hzInstance);
     }
 
     /**
-     * Parses the time stamp nanos from given value
+     * Parses the time stamp milliseconds from given value
      *
      * @param value The value
-     * @return The nano seconds
+     * @return The milliseconds
      */
-    protected long parseNanosFromValue(String value) {
+    protected long parseMillisFromValue(String value) {
         int pos = value.indexOf('?');
         return Long.parseLong(pos > 0 ? value.substring(0, pos) : value);
     }

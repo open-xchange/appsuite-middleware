@@ -62,7 +62,7 @@ public class ExponentialBackOffRetryPolicy implements RetryPolicy {
     private final int maxTries;
     private int retryCount = 1;
     private final Random random;
-    private double multiplier = 1.5;
+    private final double multiplier = 1.5;
     private double randomFactor = 0.5;
     private double interval = 0.5;
 
@@ -75,19 +75,19 @@ public class ExponentialBackOffRetryPolicy implements RetryPolicy {
 
     /**
      * Initialises a new {@link ExponentialBackOffRetryPolicy}.
-     * 
+     *
      * @param maxTries The amount of maximum retries
      */
     public ExponentialBackOffRetryPolicy(int maxTries) {
         super();
         this.maxTries = maxTries;
-        random = new Random(System.nanoTime());
+        random = new Random(System.currentTimeMillis());
         randomFactor = random.nextDouble();
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cluster.lock.policies.RetryPolicy#getMaxTries()
      */
     @Override
@@ -97,7 +97,7 @@ public class ExponentialBackOffRetryPolicy implements RetryPolicy {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cluster.lock.policies.RetryPolicy#retryCount()
      */
     @Override
@@ -107,7 +107,7 @@ public class ExponentialBackOffRetryPolicy implements RetryPolicy {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cluster.lock.policies.RetryPolicy#isRetryAllowed()
      */
     @Override
@@ -125,7 +125,7 @@ public class ExponentialBackOffRetryPolicy implements RetryPolicy {
 
     /**
      * Returns the sleep time in milliseconds
-     * 
+     *
      * @return the sleep time in milliseconds
      */
     private long getSleepTime() {

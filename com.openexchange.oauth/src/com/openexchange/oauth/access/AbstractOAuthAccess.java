@@ -148,7 +148,7 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
      * @return <code>true</code> if expired; <code>false</code> otherwise
      */
     protected boolean isExpired() {
-        long now = System.nanoTime();
+        long now = System.currentTimeMillis();
         return TimeUnit.NANOSECONDS.toSeconds(now - lastAccessed) > RECHECK_THRESHOLD;
     }
 
@@ -158,7 +158,7 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
      * @param client The {@link OAuthClient} to set
      */
     protected <T> void setOAuthClient(OAuthClient<T> client) {
-        lastAccessed = System.nanoTime();
+        lastAccessed = System.currentTimeMillis();
         oauthClientRef.set(client);
     }
 
