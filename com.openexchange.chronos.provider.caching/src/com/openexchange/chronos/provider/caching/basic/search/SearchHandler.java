@@ -49,12 +49,14 @@
 
 package com.openexchange.chronos.provider.caching.basic.search;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -62,6 +64,7 @@ import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -87,9 +90,10 @@ public class SearchHandler {
      */
     private static final String WILDCARD = "*";
 
-    private CalendarParameters parameters;
-    private Session session;
-    private CalendarAccount account;
+    private final CalendarParameters parameters;
+    private final Session session;
+    private final CalendarAccount account;
+    private final int minimumSearchPatternLength;
 
     //@formatter:off
     /** 
@@ -109,12 +113,15 @@ public class SearchHandler {
      * @param session The groupware {@link Session}
      * @param account The {@link CalendarAccount}
      * @param calendarParameters The {@link CalendarParameters}
+     * @throws OXException if the property <code>com.openexchange.MinimumSearchCharacters</code> is missing or it type
+     *             is not an integer
      */
-    public SearchHandler(Session session, CalendarAccount account, CalendarParameters parameters) {
+    public SearchHandler(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         super();
         this.session = session;
         this.account = account;
         this.parameters = parameters;
+        this.minimumSearchPatternLength = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
     }
 
     /**
@@ -170,8 +177,9 @@ public class SearchHandler {
      * 
      * @param queries The {@link List} of queries
      * @return The {@link SearchTerm}
+     * @throws OXException if one of the queries is too short
      */
-    private SearchTerm<?> compileSearchTerm(List<String> queries) {
+    private SearchTerm<?> compileSearchTerm(List<String> queries) throws OXException {
         return compileQueriesSearchTerm(queries);
     }
 
@@ -180,8 +188,9 @@ public class SearchHandler {
      * 
      * @param queries the {@link List} of queries from which to compile the {@link SearchTerm}
      * @return The compiled {@link SearchTerm}
+     * @throws OXException if one of the queries is too short
      */
-    private SearchTerm<?> compileQueriesSearchTerm(List<String> queries) {
+    private SearchTerm<?> compileQueriesSearchTerm(List<String> queries) throws OXException {
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
         if (null == queries || queries.isEmpty()) {
             return searchTerm.getOperands()[0];
@@ -190,7 +199,7 @@ public class SearchHandler {
             if (isWildcardOnly(query)) {
                 continue;
             }
-            String pattern = surroundWithWildcards(query); //FIXME: maybe check for the minimum search pattern length?
+            String pattern = surroundWithWildcards(checkMinimumSearchPatternLength(query, minimumSearchPatternLength));
 
             CompositeSearchTerm compositeSearchTerm = new CompositeSearchTerm(CompositeOperation.OR);
             compositeSearchTerm.addSearchTerm(getSearchTerm(EventField.SUMMARY, SingleOperation.EQUALS, pattern));
@@ -200,6 +209,19 @@ public class SearchHandler {
             searchTerm.addSearchTerm(compositeSearchTerm);
         }
         return searchTerm;
+    }
+
+    /**
+     * @param query
+     * @param minimumSearchPatternLength2
+     * @return
+     * @throws OXException
+     */
+    private String checkMinimumSearchPatternLength(String pattern, int minimumPatternLength) throws OXException {
+        if (null != pattern && 0 < minimumPatternLength && pattern.length() < minimumPatternLength) {
+            throw CalendarExceptionCodes.QUERY_TOO_SHORT.create(I(minimumPatternLength), pattern);
+        }
+        return pattern;
     }
 
     /**
