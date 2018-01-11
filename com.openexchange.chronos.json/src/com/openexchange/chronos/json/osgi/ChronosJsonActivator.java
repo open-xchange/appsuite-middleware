@@ -61,6 +61,10 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.alarm.json.AlarmActionFactory;
 import com.openexchange.chronos.availability.json.mapper.AvailableMapper;
 import com.openexchange.chronos.common.DataHandlers;
+import com.openexchange.chronos.itip.ITipActionPerformerFactoryService;
+import com.openexchange.chronos.itip.ITipAnalyzerService;
+import com.openexchange.chronos.itip.json.action.ITipActionFactory;
+import com.openexchange.chronos.itip.json.converter.ITipAnalysisResultConverter;
 import com.openexchange.chronos.json.action.ChronosActionFactory;
 import com.openexchange.chronos.json.action.account.ChronosAccountActionFactory;
 import com.openexchange.chronos.json.converter.AlarmTriggerConverter;
@@ -83,10 +87,12 @@ import com.openexchange.chronos.service.AvailableField;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 
 /**
  * {@link ChronosJsonActivator}
@@ -99,7 +105,7 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            IDBasedCalendarAccessFactory.class, CalendarUtilities.class, CalendarService.class, LeanConfigurationService.class, CalendarAccountService.class
+            IDBasedCalendarAccessFactory.class, CalendarUtilities.class, CalendarService.class, LeanConfigurationService.class, CalendarAccountService.class, ConversionService.class
         };
     }
 
@@ -113,6 +119,17 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
             registerModule(new ChronosActionFactory(this), "chronos");
             registerModule(new ChronosAccountActionFactory(this), "chronos/account");
             registerModule(new AlarmActionFactory(this), "chronos/alarm");
+            
+            /*
+             * ITip stuff
+             */
+            RankingAwareNearRegistryServiceTracker<ITipAnalyzerService> analyzerTracker = new RankingAwareNearRegistryServiceTracker<>(context, ITipAnalyzerService.class, 0);
+            RankingAwareNearRegistryServiceTracker<ITipActionPerformerFactoryService> factoryTracker = new RankingAwareNearRegistryServiceTracker<>(context, ITipActionPerformerFactoryService.class, 0);
+            rememberTracker(analyzerTracker);
+            rememberTracker(factoryTracker);
+            openTrackers();
+            registerModule(new ITipActionFactory(this, analyzerTracker, factoryTracker), "chronos/itip");
+            
             // Availability disabled until further notice
             //registerModule(new AvailabilityActionFactory(this), "chronos/availability");
             /*
@@ -141,6 +158,7 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
             registerService(ResultConverter.class, new CalendarResultConverter());
             registerService(ResultConverter.class, new MultipleCalendarResultConverter());
             registerService(ResultConverter.class, new AlarmTriggerConverter());
+            registerService(ResultConverter.class, new ITipAnalysisResultConverter());
             /*
              * register data handlers
              */
