@@ -120,26 +120,36 @@ public class RequestReportingFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
+        if (isLongRunning(httpRequest) || isIgnored(httpRequest)) {
+            // Do not consider long running requests
+            chain.doFilter(request, response);
+            return;
+        }
+
+        RequestRegistryEntry entry = tryRegister(httpRequest, (HttpServletResponse) response);
+        if (null == entry) {
+            // Registration failed
+            chain.doFilter(request, response);
+            return;
+        }
+
         try {
-            if (isLongRunning(httpRequest) || isIgnored(httpRequest)) {
-                // Do not track long running requests
-                chain.doFilter(request, response);
-            } else {
-                HttpServletResponse httpResponse = (HttpServletResponse) response;
-                RequestRegistryEntry entry = requestWatcher.registerRequest(httpRequest, httpResponse, Thread.currentThread(), LogProperties.getPropertyMap());
-                try {
-                    // Proceed processing
-                    chain.doFilter(request, response);
-                } finally {
-                    // Remove request from watcher after processing finished
-                    requestWatcher.unregisterRequest(entry);
-                }
-            }
+            // Proceed processing
+            chain.doFilter(request, response);
+        } finally {
+            // Remove request from watcher after processing finished
+            requestWatcher.unregisterRequest(entry);
+        }
+    }
+
+    private RequestRegistryEntry tryRegister(HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        try {
+            return requestWatcher.registerRequest(httpRequest, httpResponse, Thread.currentThread(), LogProperties.getPropertyMap());
         } catch (Exception exception) {
             org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RequestReportingFilter.class);
             logger.error("RequestWatcher is not able to check requests to be ignored and/or to register for watching. Move forward with filter chain processing.", exception);
-            chain.doFilter(request, response);
         }
+        return null;
     }
 
     /**
