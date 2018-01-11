@@ -80,9 +80,10 @@ public interface ImageMetadataService {
      * @param imageStream The image data
      * @param mimeType The image MIME type
      * @param name The image name
+     * @param options The options to consider when retrieving image's meta-data
      * @return The meta-data
      * @throws IOException If meta-data cannot be returned
      */
-    ImageMetadata getMetadataFor(InputStream imageStream, String mimeType, String name, ImageMetadataOptions imageMetadataOptions) throws IOException;
+    ImageMetadata getMetadataFor(InputStream imageStream, String mimeType, String name, ImageMetadataOptions options) throws IOException;
 
 }
