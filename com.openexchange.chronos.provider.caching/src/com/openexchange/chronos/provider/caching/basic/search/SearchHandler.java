@@ -60,11 +60,12 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
-import com.openexchange.configuration.ServerConfig;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -94,6 +95,7 @@ public class SearchHandler {
     private final Session session;
     private final CalendarAccount account;
     private final int minimumSearchPatternLength;
+    private final CalendarSession calendarSession;
 
     //@formatter:off
     /** 
@@ -121,7 +123,8 @@ public class SearchHandler {
         this.session = session;
         this.account = account;
         this.parameters = parameters;
-        this.minimumSearchPatternLength = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
+        this.calendarSession = Services.getService(CalendarService.class).init(session);
+        this.minimumSearchPatternLength = calendarSession.getConfig().getMinimumSearchPatternLength();
     }
 
     /**
@@ -140,7 +143,7 @@ public class SearchHandler {
         SearchTerm<?> searchTerm = compileSearchTerm(queries);
         CalendarStorageFactory storageFactory = Services.getService(CalendarStorageFactory.class);
         SearchOptions sortOptions = new SearchOptions(parameters);
-        CalendarStorage storage = storageFactory.create(context, account.getAccountId(), null);
+        CalendarStorage storage = storageFactory.create(context, account.getAccountId(), calendarSession.getEntityResolver());
         return storage.getEventStorage().searchEvents(searchTerm, filters, sortOptions, getEventFields(eventFields));
     }
 
