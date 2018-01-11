@@ -53,6 +53,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.generators.ITipMailGenerator;
 import com.openexchange.chronos.itip.generators.NotificationMail;
 import com.openexchange.chronos.itip.generators.NotificationMailGeneratorFactory;
@@ -109,7 +111,9 @@ public class ITipHandler implements CalendarHandler {
             List<UpdateResult> updates = event.getUpdates();
             if (updates != null && updates.size() > 0) {
                 for (UpdateResult update : updates) {
-                    handleUpdate(update, event);
+                    if (false == isMasterExceptionUpdate(update, creations)) {
+                        handleUpdate(update, event);
+                    }
                 }
             }
 
@@ -182,5 +186,26 @@ public class ITipHandler implements CalendarHandler {
 
     private int onBehalfOf(int calendarUser, Session session) {
         return calendarUser == session.getUserId() ? -1 : calendarUser;
+    }
+
+    /**
+     * Contains the three fields that are updated if a master event has a new change/delete exception
+     */
+    private final static EventField[] MASTER_EXCEPTION_UPDATE = new EventField[] { EventField.CHANGE_EXCEPTION_DATES, EventField.TIMESTAMP, EventField.LAST_MODIFIED };
+
+    /**
+     * Checks if the given {@link UpdateResult} is an update on a series master that has a new
+     * event exception and checks if such a exception was created
+     * 
+     * @param update The {@link UpdateResult} an potentially master event
+     * @param creations The {@link List} of {@link CreateResult}s
+     * @return <code>true</code> if the series master got only an update on its exceptions
+     */
+    private boolean isMasterExceptionUpdate(UpdateResult update, List<CreateResult> creations) {
+        return CalendarUtils.isSeriesMaster(update.getUpdate()) 
+            && update.getUpdatedFields().size() == 3 
+            && update.containsAnyChangeOf(MASTER_EXCEPTION_UPDATE) 
+            && creations.stream().filter(c -> update.getUpdate().getId().equals(c.getCreatedEvent().getSeriesId())).findAny().isPresent()
+            ;
     }
 }

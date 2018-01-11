@@ -938,6 +938,9 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
         @Override
         public NotificationMail generateCreateMailFor(final NotificationParticipant participant) throws OXException {
+            if(CalendarUtils.isSeriesException(updated)) {
+                return counter(counter(participant), ITipRole.ORGANIZER);
+            }
             return null;
         }
 
