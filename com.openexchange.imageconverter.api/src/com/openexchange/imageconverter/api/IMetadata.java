@@ -69,6 +69,14 @@ public interface IMetadata {
     public Dimension getImageDimension();
 
     /**
+     * Retrieving the lower case image format short name.
+     *
+     * @return The lower case image format short name.
+     */
+    public String getImageFormatName();
+
+
+    /**
      * Retrieving the {@link IMetadataGroup} interface with the given
      *  {@link MetadataKey}.
      *

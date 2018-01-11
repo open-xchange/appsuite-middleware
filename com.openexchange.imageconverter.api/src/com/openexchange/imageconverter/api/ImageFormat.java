@@ -80,6 +80,8 @@ public class ImageFormat implements Comparable<ImageFormat> {
      */
     public enum ImageType {
 
+        AUTO("auto"),
+
         JPG("jpg"),
 
         PNG("png");
@@ -442,6 +444,9 @@ public class ImageFormat implements Comparable<ImageFormat> {
             int scalePos = curFormatStr.indexOf('~', crossPos);
             int qualityPos = curFormatStr.indexOf('@', scalePos);
             final boolean hasFormat = (extentsPos > -1);
+            final String imageFormatShortName = hasFormat ?
+                curFormatStr.substring(0, extentsPos) :
+                    ImageFormat.ImageType.AUTO.getShortName();
 
             if (scalePos < 0) {
                 scalePos = curFormatStr.length();
@@ -515,7 +520,7 @@ public class ImageFormat implements Comparable<ImageFormat> {
                 }
             }
 
-            ret = ImageFormat.createFrom(curFormatStr, autoRotate, width, height, scaleType, shrinkOnly, quality);
+            ret = ImageFormat.createFrom(imageFormatShortName, autoRotate, width, height, scaleType, shrinkOnly, quality);
         } else {
             ret = new ImageFormat();
         }
