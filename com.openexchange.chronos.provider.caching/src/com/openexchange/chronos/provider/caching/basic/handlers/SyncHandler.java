@@ -99,6 +99,6 @@ public class SyncHandler extends AbstractExtensionHandler {
      * @return The compiled {@link SearchTerm}
      */
     private SearchTerm<?> createSearchTerm(long updatedSince) {
-        return SearchTermFactory.createSearchTerm(EventField.LAST_MODIFIED, SingleOperation.LESS_OR_EQUAL, updatedSince);
+        return SearchTermFactory.createSearchTerm(EventField.TIMESTAMP, SingleOperation.GREATER_THAN, updatedSince);
     }
 }
