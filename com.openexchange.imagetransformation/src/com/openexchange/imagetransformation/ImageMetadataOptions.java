@@ -49,40 +49,92 @@
 
 package com.openexchange.imagetransformation;
 
-import java.awt.Dimension;
-import java.io.IOException;
-import java.io.InputStream;
-import com.openexchange.osgi.annotation.SingletonService;
-
 /**
- * {@link ImageMetadataService} - A service for providing several meta-data information for an image.
+ * {@link ImageMetadataOptions} - The options for retrieving an image's meta-data.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.4
+ * @since v7.10.0
  */
-@SingletonService
-public interface ImageMetadataService {
+public class ImageMetadataOptions {
 
     /**
-     * Gets the {@link Dimension dimension} for specified image data.
+     * Creates a new builder instance.
      *
-     * @param imageStream The image data
-     * @param mimeType The image MIME type
-     * @param name The image name
-     * @return The dimension
-     * @throws IOException If dimension cannot be returned
+     * @return The new builder instance
      */
-    Dimension getDimensionFor(InputStream imageStream, String mimeType, String name) throws IOException;
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /** The builder for an instance of <code>ImageMetadataOptions</code> */
+    public static class Builder {
+
+        private boolean dimension;
+        private boolean formatName;
+
+        Builder() {
+            super();
+        }
+
+        /**
+         * Marks this builder that dimension meta-data is demanded
+         *
+         * @return This builder
+         */
+        public ImageMetadataOptions.Builder withDimension() {
+            this.dimension = true;
+            return this;
+        }
+
+        /**
+         * Marks this builder that format name meta-data is demanded
+         *
+         * @return This builder
+         */
+        public ImageMetadataOptions.Builder withFormatName() {
+            this.formatName = true;
+            return this;
+        }
+
+        /**
+         * Builds a new options instance from this builder's arguments.
+         *
+         * @return The new options instance
+         */
+        public ImageMetadataOptions build() {
+            return new ImageMetadataOptions(dimension, formatName);
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------
+
+    private final boolean dimension;
+    private final boolean formatName;
 
     /**
-     * Gets the {@link Dimension dimension} for specified image data.
-     *
-     * @param imageStream The image data
-     * @param mimeType The image MIME type
-     * @param name The image name
-     * @return The dimension
-     * @throws IOException If dimension cannot be returned
+     * Initializes a new {@link ImageMetadataOptions}.
      */
-    ImageMetadata getMetadataFor(InputStream imageStream, String mimeType, String name, ImageMetadataOptions imageMetadataOptions) throws IOException;
+    ImageMetadataOptions(boolean dimension, boolean formatName) {
+        super();
+        this.dimension = dimension;
+        this.formatName = formatName;
+    }
 
+    /**
+     * Checks whether dimension meta-data is demanded
+     *
+     * @return <code>true</code> if demanded; otherwise <code>false</code>
+     */
+    public boolean isDimension() {
+        return dimension;
+    }
+
+    /**
+     * Checks whether format name meta-data is demanded
+     *
+     * @return <code>true</code> if demanded; otherwise <code>false</code>
+     */
+    public boolean isFormatName() {
+        return formatName;
+    }
 }
