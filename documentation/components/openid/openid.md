@@ -78,14 +78,3 @@ The frontend plugin `open-xchange-appsuite-oidc` is deactivated by default. In o
     default:
         host: my-domain.com
         oidcLogin: true
-
-# Feature overview
-
-* Code flow authorization
-* Autologin with valid session confirmation on OP side
-* Direct autologin via session storage in own OIDC Cookie
-* Logout with additional redirect to OP for session termination
-* Direct logout from Appsuite
-* Oauth token refresh
-* Third Party initiated login
-* Multiple registration of OpenID backends in one instance
