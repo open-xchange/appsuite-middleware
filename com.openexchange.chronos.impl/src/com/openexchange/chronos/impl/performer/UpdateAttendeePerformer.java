@@ -217,6 +217,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
 
     private void updateAttendee(Event originalEvent, Attendee originalAttendee, Attendee attendee, RecurrenceId recurrenceId) throws OXException {
         if (isSeriesMaster(originalEvent)) {
+            Event originalSeriesMaster = originalEvent;
             recurrenceId = Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceId);
             if (contains(originalEvent.getChangeExceptionDates(), recurrenceId)) {
                 /*
@@ -227,37 +228,34 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 updateAttendee(originalExceptionEvent, originalExceptionAttendee, attendee);
             } else {
                 /*
-                 * check if quota is exceeded before inserting new events
+                 * update for new change exception; prepare & insert a plain exception first, based on the original data from the master
                  */
+                Event newExceptionEvent = prepareException(originalSeriesMaster, recurrenceId);
                 Check.quotaNotExceeded(storage, session);
-                /*
-                 * update for new change exception, prepare & insert the exception
-                 */
-                Event exceptionEvent = prepareException(originalEvent, Check.recurrenceIdExists(session.getRecurrenceService(), originalEvent, recurrenceId));
-                storage.getEventStorage().insertEvent(exceptionEvent);
-                /*
-                 * take over all original attendees, attachments & alarms
-                 */
-                storage.getAttendeeStorage().insertAttendees(exceptionEvent.getId(), originalEvent.getAttendees());
-                storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getID(), exceptionEvent.getId(), originalEvent.getAttachments());
-                for (Entry<Integer, List<Alarm>> entry : storage.getAlarmStorage().loadAlarms(originalEvent).entrySet()) {
-                    insertAlarms(exceptionEvent, entry.getKey().intValue(), entry.getValue(), true);
+                storage.getEventStorage().insertEvent(newExceptionEvent);
+                storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), originalSeriesMaster.getAttendees());
+                storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getID(), newExceptionEvent.getId(), originalSeriesMaster.getAttachments());
+                for (Entry<Integer, List<Alarm>> entry : storage.getAlarmStorage().loadAlarms(originalSeriesMaster).entrySet()) {
+                    insertAlarms(newExceptionEvent, entry.getKey().intValue(), entry.getValue(), true);
                 }
+                newExceptionEvent = loadEventData(newExceptionEvent.getId());
+                resultTracker.trackCreation(newExceptionEvent, originalSeriesMaster);
                 /*
                  * perform the attendee update & add new change exception date to series master event
                  */
-                Attendee attendeeUpdate = prepareAttendeeUpdate(exceptionEvent, originalAttendee, attendee);
+                Attendee attendeeUpdate = prepareAttendeeUpdate(newExceptionEvent, originalAttendee, attendee);
                 if (null != attendeeUpdate) {
-                    storage.getAttendeeStorage().updateAttendee(exceptionEvent.getId(), attendeeUpdate);
+                    storage.getAttendeeStorage().updateAttendee(newExceptionEvent.getId(), attendeeUpdate);
                 }
-                addChangeExceptionDate(originalEvent, recurrenceId);
                 /*
-                 * track results
+                 * add change exception date to series master & track results
                  */
-                Event createdException = loadEventData(exceptionEvent.getId());
-                Event updatedMasterEvent = loadEventData(originalEvent.getId());
-                resultTracker.trackCreation(createdException, originalEvent);
-                resultTracker.trackUpdate(originalEvent, updatedMasterEvent);
+                addChangeExceptionDate(originalSeriesMaster, recurrenceId);
+                Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
+                resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
+
+                storage.getAlarmTriggerStorage().deleteTriggers(originalSeriesMaster.getId());
+                storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent);
             }
         } else if (isSeriesException(originalEvent)) {
             /*

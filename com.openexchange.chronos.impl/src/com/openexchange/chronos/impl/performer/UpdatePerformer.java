@@ -181,28 +181,23 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             updateEvent(updatedMasterEvent, updatedEventData, ignoredFields);
         } else {
             /*
-             * update for new change exception, prepare & insert a plain exception first
+             * update for new change exception; prepare & insert a plain exception first, based on the original data from the master
              */
             Event newExceptionEvent = prepareException(originalSeriesMaster, recurrenceId);
             Check.quotaNotExceeded(storage, session);
             storage.getEventStorage().insertEvent(newExceptionEvent);
-            /*
-             * take over all original attendees, attachments & alarms
-             */
             storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), originalSeriesMaster.getAttendees());
             storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getID(), newExceptionEvent.getId(), originalSeriesMaster.getAttachments());
             for (Entry<Integer, List<Alarm>> entry : storage.getAlarmStorage().loadAlarms(originalSeriesMaster).entrySet()) {
                 insertAlarms(newExceptionEvent, entry.getKey().intValue(), entry.getValue(), true);
             }
+            newExceptionEvent = loadEventData(newExceptionEvent.getId());
+            resultTracker.trackCreation(newExceptionEvent, originalSeriesMaster);
             /*
-             * reload the newly created exception as 'original' & perform the update, w/o tracking as update result
+             * perform the update on the newly created change exception
              * - recurrence rule is forcibly ignored during update to satisfy UsmFailureDuringRecurrenceTest.testShouldFailWhenTryingToMakeAChangeExceptionASeriesButDoesNot()
              * - sequence number is also ignored (since possibly incremented implicitly before)
-             * - attachments & attendees are copied over from the master to detect possible differences correctly
              */
-            newExceptionEvent = storage.getEventStorage().loadEvent(newExceptionEvent.getId(), null);
-            newExceptionEvent.setAttendees(originalSeriesMaster.getAttendees());
-            newExceptionEvent.setAttachments(originalSeriesMaster.getAttachments());
             updateEvent(newExceptionEvent, updatedEventData, EventField.ID, EventField.RECURRENCE_RULE, EventField.SEQUENCE);
             /*
              * add change exception date to series master & track results
@@ -210,7 +205,6 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             addChangeExceptionDate(originalSeriesMaster, recurrenceId);
             Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
             resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
-            resultTracker.trackCreation(loadEventData(newExceptionEvent.getId()), originalSeriesMaster);
 
             storage.getAlarmTriggerStorage().deleteTriggers(originalSeriesMaster.getId());
             storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent);
