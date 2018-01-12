@@ -86,10 +86,8 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     protected final Session session;
     protected CalendarAccount account;
     protected final CalendarParameters parameters;
-    private final SearchHandler searchHandler;
 
     private final SingleFolderCachingCalendarAccess cachingBridge;
-    private final SyncHandler syncHandler;
 
     /**
      * Initializes a new {@link BirthdaysCalendarAccess}.
@@ -104,8 +102,6 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         this.session = session;
         this.parameters = parameters;
         this.cachingBridge = new CachingAccessBridge(this);
-        this.searchHandler = new SearchHandler(session, account, parameters);
-        this.syncHandler = new SyncHandler(session, account, parameters);
     }
 
     /**
@@ -162,7 +158,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.extensions.BasicSearchAware#searchEvents(java.util.List, java.util.List)
      */
     @Override
@@ -170,22 +166,22 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         if ((null == filters || filters.isEmpty()) && (null == queries || queries.isEmpty())) {
             return Collections.emptyList();
         }
-        return searchHandler.searchEvents(filters, queries);
+        return new SearchHandler(session, account, parameters).searchEvents(filters, queries);
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.extensions.BasicSyncAware#getUpdatedEvents(long)
      */
     @Override
     public UpdatesResult getUpdatedEvents(long updatedSince) throws OXException {
-        return syncHandler.getUpdatedEvents(updatedSince);
+        return new SyncHandler(session, account, parameters).getUpdatedEvents(updatedSince);
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.extensions.BasicSyncAware#getSequenceNumber()
      */
     @Override
@@ -196,7 +192,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.extensions.BasicSyncAware#resolveResource(java.lang.String)
      */
     @Override
