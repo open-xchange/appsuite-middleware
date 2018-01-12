@@ -96,7 +96,6 @@ public final class MimeStorageUtility {
         CACHE_FETCH_PROFILE.add(FetchProfile.Item.SIZE);
         CACHE_FETCH_PROFILE.add(MessageHeaders.HDR_IMPORTANCE);
         CACHE_FETCH_PROFILE.add(MessageHeaders.HDR_X_PRIORITY);
-        CACHE_FETCH_PROFILE.add(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY);
         // CACHE_FETCH_PROFILE.add(IMAPFolder.FetchProfileItem.HEADERS);
 
         // Cache fields
