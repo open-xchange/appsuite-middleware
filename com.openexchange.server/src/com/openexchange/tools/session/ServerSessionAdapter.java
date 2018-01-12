@@ -522,7 +522,7 @@ public class ServerSessionAdapter implements ServerSession, PutIfAbsent {
             throw ServiceExceptionCode.absentService(UserConfigurationService.class);
         }
 
-        return service.getUserConfiguration(getUserId(), getContext());
+        return service.getUserConfiguration(session());
     }
 
 }
