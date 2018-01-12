@@ -89,7 +89,7 @@ public class DefaultCalendarPermission implements CalendarPermission {
             CalendarPermission.READ_ALL_OBJECTS,
             CalendarPermission.NO_PERMISSIONS,
             CalendarPermission.NO_PERMISSIONS,
-            false,
+            true,
             false,
             CalendarPermission.NO_PERMISSIONS)
         ;
