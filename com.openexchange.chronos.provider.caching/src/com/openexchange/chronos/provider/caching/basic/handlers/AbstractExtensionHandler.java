@@ -79,9 +79,9 @@ abstract class AbstractExtensionHandler {
      * Fields that are always included when searching for events 
      */
     static final List<EventField> DEFAULT_FIELDS = Arrays.asList(
-        EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, 
-        EventField.TIMESTAMP, EventField.CREATED_BY, EventField.CALENDAR_USER, EventField.CLASSIFICATION, 
-        EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE,
+        EventField.ID, EventField.SUMMARY, EventField.DESCRIPTION, EventField.SERIES_ID, EventField.FOLDER_ID, 
+        EventField.RECURRENCE_ID, EventField.TIMESTAMP, EventField.CREATED_BY, EventField.CALENDAR_USER, 
+        EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE,
         EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.ORGANIZER
     );
     //@formatter:on
