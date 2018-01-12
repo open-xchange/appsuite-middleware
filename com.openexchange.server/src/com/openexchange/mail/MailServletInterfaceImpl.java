@@ -2005,8 +2005,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          * Live-Fetch from mail storage
          */
         initConnection(accountId);
-        boolean cachable = uids.length < mailAccess.getMailConfig().getMailProperties().getMailFetchLimit();
         MailField[] useFields = MailField.getFields(fields);
+        boolean cachable = uids.length < mailAccess.getMailConfig().getMailProperties().getMailFetchLimit() && !MailField.contains(useFields, MailField.TEXT_PREVIEW_IF_AVAILABLE);
 
         if (cachable) {
             useFields = MailFields.addIfAbsent(useFields, MimeStorageUtility.getCacheFieldsArray());
@@ -2154,19 +2154,18 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if ((mails == null) || (mails.length == 0) || onlyNull(mails)) {
             return SearchIteratorAdapter.<MailMessage> emptyIterator();
         }
-        boolean cachable = (mails.length < mailAccess.getMailConfig().getMailProperties().getMailFetchLimit());
+        MailField[] useFields = MailField.getFields(fields);
+        boolean cachable = (mails.length < mailAccess.getMailConfig().getMailProperties().getMailFetchLimit()) && !MailField.contains(useFields, MailField.TEXT_PREVIEW_IF_AVAILABLE);;
 
-        MailField[] useFields;
         boolean onlyFolderAndID;
         if (cachable) {
             /*
              * Selection fits into cache: Prepare for caching
              */
-            useFields = MailFields.addIfAbsent(MailField.getFields(fields), MimeStorageUtility.getCacheFieldsArray());
+            useFields = MailFields.addIfAbsent(useFields, MimeStorageUtility.getCacheFieldsArray());
             useFields = MailFields.addIfAbsent(useFields, MailField.ID, MailField.FOLDER_ID);
             onlyFolderAndID = false;
         } else {
-            useFields = MailField.getFields(fields);
             onlyFolderAndID = (null != headers && 0 < headers.length) ? false : onlyFolderAndID(useFields);
         }
         if (supportsContinuation) {
@@ -2287,8 +2286,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     private SearchIterator<MailMessage> getMessageRange(SearchTerm<?> searchTerm, int[] fields, String[] headerNames, String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection orderDir, int accountId) throws OXException {
-        boolean cachable = (indexRange.end - indexRange.start) < mailAccess.getMailConfig().getMailProperties().getMailFetchLimit();
         MailField[] useFields = MailField.getFields(fields);
+        boolean cachable = (indexRange.end - indexRange.start) < mailAccess.getMailConfig().getMailProperties().getMailFetchLimit() && !MailField.contains(useFields, MailField.TEXT_PREVIEW_IF_AVAILABLE);
         if (cachable) {
             useFields = MailFields.addIfAbsent(useFields, MimeStorageUtility.getCacheFieldsArray());
             useFields = MailFields.addIfAbsent(useFields, MailField.ID, MailField.FOLDER_ID);
@@ -2732,18 +2731,17 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if ((mails == null) || (mails.length == 0)) {
             return SearchIteratorAdapter.<MailMessage> emptyIterator();
         }
-        MailField[] useFields;
+        MailField[] useFields = MailField.toFields(MailListField.getFields(fields));
+        boolean cacheable = mails.length < mailAccess.getMailConfig().getMailProperties().getMailFetchLimit() && !MailField.contains(useFields, MailField.TEXT_PREVIEW_IF_AVAILABLE);;
         boolean onlyFolderAndID;
-        boolean cacheable = mails.length < mailAccess.getMailConfig().getMailProperties().getMailFetchLimit();
         if (cacheable) {
             /*
              * Selection fits into cache: Prepare for caching
              */
-            useFields = MailFields.addIfAbsent(MailField.getFields(fields), MimeStorageUtility.getCacheFieldsArray());
+            useFields = MailFields.addIfAbsent(useFields, MimeStorageUtility.getCacheFieldsArray());
             useFields = MailFields.addIfAbsent(useFields, MailField.ID, MailField.FOLDER_ID);
             onlyFolderAndID = false;
         } else {
-            useFields = MailField.toFields(MailListField.getFields(fields));
             onlyFolderAndID = onlyFolderAndID(useFields);
         }
 

@@ -211,13 +211,13 @@ public enum MailField {
     TEXT_PREVIEW(MailListField.TEXT_PREVIEW),
     /**
      * The message's authentication overall result (light version); maps to <code>"Authentication-Results"</code> header
-     * 
+     *
      * @since v7.10.0
      */
     AUTHENTICATION_OVERALL_RESULT(MailListField.AUTHENTICATION_OVERALL_RESULT),
     /**
      * The message's authentication mechanism results (heavy version); maps to <code>"Authentication-Results"</code> header
-     * 
+     *
      * @since v7.10.0
      */
     AUTHENTICATION_MECHANISM_RESULTS(MailListField.AUTHENTICATION_MECHANISM_RESULTS),
@@ -404,6 +404,28 @@ public enum MailField {
         final EnumSet<MailField> set = EnumSet.noneOf(MailField.class);
         searchTerm.addMailField(set);
         return set;
+    }
+
+    /**
+     * Checks if specified fields contains one of the given fields
+     *
+     * @param mailFields The fields
+     * @param fieldsToCheck The fields to check for
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    public static boolean contains(MailField[] mailFields, MailField... fieldsToCheck) {
+        if (null == mailFields || fieldsToCheck == null) {
+            return false;
+        }
+
+        for (MailField mailField : mailFields) {
+            for (MailField fieldToCheck : fieldsToCheck) {
+                if (mailField == fieldToCheck) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }
