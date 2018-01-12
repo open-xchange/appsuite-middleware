@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.chronos;
 
+import java.util.concurrent.TimeUnit;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.LoginResponse;
@@ -90,6 +91,7 @@ public class UserApi {
      */
     public UserApi(ApiClient client, EnhancedApiClient enhancedApiClient, TestUser user) throws Exception {
         this.client = client;
+        this.client.setConnectTimeout(java.lang.Math.toIntExact(TimeUnit.MINUTES.toMillis(5)));
         this.enhancedApiClient = enhancedApiClient;
         this.user = user;
         chronosApi = new ChronosApi(client);

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,40 +47,28 @@
  *
  */
 
-package com.openexchange.ajax.chronos;
+package com.openexchange.ajax.proxy;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link ChronosTestSuite}
+ * 
+ * {@link MockResponse}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.8.3
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    // @formatter:off
-    AcknowledgeAndSnoozeTest.class,
-    BasicAlarmTest.class,
-    BasicAlarmTriggerTest.class,
-    BasicAvailabilityTest.class,
-    BasicFreeBusyTest.class,
-    // FIXME: The SchedJoules tests were deactivated due to the nature of their implementation
-    //        i.e. external/third party service provider. Will be re-activated for CI tests.
-    //BasicSchedJoulesAPITest.class,
-    //BasicSchedJoulesProviderTest.class,
-    BasicSelfProtectionTest.class,
-    BasicSeriesEventTest.class,
-    BasicSingleEventTest.class,
-    CalendarAccountTest.class,
-    ChronosQuotaTest.class,
-    TimezoneAlarmTriggerTest.class,
-    ICalEventImportExportTest.class,
-    ICalCalendarProviderTest.class
-    // @formatter:on
+public class MockResponse extends AbstractAJAXResponse {
 
-})
-public class ChronosTestSuite {
+    private boolean failOnError = true;
+
+    public MockResponse(Response response) {
+        super(response);
+    }
+
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
+    }
 
 }

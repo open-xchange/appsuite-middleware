@@ -81,16 +81,6 @@ import com.openexchange.testing.httpclient.models.InfoItemExport;
 @RunWith(BlockJUnit4ClassRunner.class)
 public class ICalEventImportExportTest extends AbstractChronosTest {
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
     private List<EventData> getEventData(String fileName) throws Exception {
         String response = importICalFile(fileName);
         List<EventId> eventIds = importExportManager.parseImportJSONResponseToEventIds(response);

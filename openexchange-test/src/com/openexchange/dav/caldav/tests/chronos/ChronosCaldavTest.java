@@ -102,7 +102,8 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
                     eventId.setRecurrenceId(event.getRecurrenceId());
                     rememberEventId(defaultUserApi, eventId);
                 }
-                return defaultUserApi.getChronosApi().getEvent(defaultUserApi.getSession(), event.getId(), event.getFolder(), event.getRecurrenceId(), null).getData();
+                return event;
+//                return defaultUserApi.getChronosApi().getEvent(defaultUserApi.getSession(), event.getId(), event.getFolder(), event.getRecurrenceId(), null).getData();
             }
         }
         return null;
@@ -132,7 +133,8 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
         List<EventData> result = new ArrayList<>();
         for (EventData event : allEventResponse.getData()) {
             if (seriesId.equals(event.getSeriesId()) && !seriesId.equals(event.getId())) {
-                result.add(defaultUserApi.getChronosApi().getEvent(defaultUserApi.getSession(), event.getId(), event.getFolder(), event.getRecurrenceId(), null).getData());
+                result.add(event);
+//                result.add(defaultUserApi.getChronosApi().getEvent(defaultUserApi.getSession(), event.getId(), event.getFolder(), event.getRecurrenceId(), null).getData());
             }
         }
         return result;

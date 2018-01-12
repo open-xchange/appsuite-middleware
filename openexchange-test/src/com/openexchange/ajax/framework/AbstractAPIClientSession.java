@@ -87,6 +87,7 @@ public abstract class AbstractAPIClientSession {
     protected LoginApi loginApi;
     protected ApiClient apiClient;
     private Set<ApiClient> apiClients;
+    protected AJAXClient client;
 
     /**
      * Default constructor.
@@ -121,6 +122,8 @@ public abstract class AbstractAPIClientSession {
         admin = testContext.getAdmin();
         apiClient = generateClient(testUser);
         rememberClient(apiClient);
+        
+        client = new AJAXClient(testUser);
     }
 
     protected void rememberClient(ApiClient client) {

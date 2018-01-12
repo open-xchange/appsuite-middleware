@@ -49,23 +49,30 @@
 
 package com.openexchange.ajax.chronos.manager;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import org.json.JSONException;
 import org.json.JSONObject;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openexchange.ajax.chronos.UserApi;
-import com.openexchange.ajax.chronos.factory.AccountFactory;
+import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.java.Strings;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CalendarAccountData;
-import com.openexchange.testing.httpclient.models.CalendarAccountId;
-import com.openexchange.testing.httpclient.models.CalendarAccountProviderData;
-import com.openexchange.testing.httpclient.models.CalendarAccountProvidersResponse;
 import com.openexchange.testing.httpclient.models.CalendarAccountResponse;
-import com.openexchange.testing.httpclient.models.CalendarAccountsResponse;
-import com.openexchange.testing.httpclient.models.CommonResponse;
+import com.openexchange.testing.httpclient.models.FolderBody;
+import com.openexchange.testing.httpclient.models.FolderData;
+import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalendarConfig;
+import com.openexchange.testing.httpclient.models.FolderPermission;
+import com.openexchange.testing.httpclient.models.FolderResponse;
+import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
+import com.openexchange.testing.httpclient.models.FoldersResponse;
+import com.openexchange.testing.httpclient.models.NewFolderBody;
+import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
+import com.openexchange.testing.httpclient.modules.FoldersApi;
 
 /**
  * {@link CalendarAccountManager}
@@ -76,40 +83,74 @@ import com.openexchange.testing.httpclient.models.CommonResponse;
  */
 public class CalendarAccountManager extends AbstractManager {
 
+    private static final String COLUMNS = Strings.concat(",", Arrays.stream(Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY)).mapToObj(String::valueOf).toArray(String[]::new));
+
     public final String DEFAULT_ACCOUNT_ID = "0";
+
+    public final String DEFAULT_FOLDER_ID = "1";
+
+    public final String TREE_ID = "0";
 
     public final String DEFAULT_ACCOUNT_PROVIDER_ID = "chronos";
 
+    private final String MODULE = "calendar";
+
     private final UserApi userApi;
 
-    private List<CalendarAccountId> calAccIds;
+    private List<String> calAccIds;
+
+    private FoldersApi foldersApi;
 
     /**
      * Initializes a new {@link CalendarAccountManager}.
      */
-    public CalendarAccountManager(UserApi userApi) {
+    public CalendarAccountManager(UserApi userApi, FoldersApi foldersApi) {
         super();
         this.userApi = userApi;
-        calAccIds = new ArrayList<>();
+        this.foldersApi = foldersApi;
+        this.calAccIds = new ArrayList<>();
     }
 
     public void cleanUp() {
         try {
-            for (CalendarAccountId id : calAccIds) {
-                userApi.getChronosApi().deleteAccount(userApi.getSession(), id.getId(), System.currentTimeMillis());
-            }
+            foldersApi.deleteFolders(userApi.getSession(), calAccIds, TREE_ID, System.currentTimeMillis(), MODULE, true, false, false);
         } catch (ApiException e) {
             System.err.println("Could not clean up the calendar accounts for user " + userApi.getCalUser() + ": " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    public CalendarAccountResponse createCalendarAccount(String providerId, String configuration) throws ApiException {
-        CalendarAccountResponse response = userApi.getChronosApi().createAccount(userApi.getSession(), providerId, configuration);
+    public FolderUpdateResponse createCalendarAccount(String providerId, String folderName, FolderDataComOpenexchangeCalendarConfig config) throws ApiException {
+        NewFolderBody body = createBody(providerId, folderName, config);
+        FolderUpdateResponse response = foldersApi.createFolder(DEFAULT_FOLDER_ID, userApi.getSession(), body, TREE_ID, MODULE);
+
         assertNull("Calendar account could not be created due an error.", response.getError());
         assertNotNull(response.getData());
-        rememberCalendarAccountId(AccountFactory.createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
+        rememberCalendarAccountId(response.getData());
         return response;
+    }
+
+    private NewFolderBody createBody(String providerId, String folderId, FolderDataComOpenexchangeCalendarConfig config) {
+        NewFolderBody body = new NewFolderBody();
+        NewFolderBodyFolder folder = new NewFolderBodyFolder();
+        folder.setComOpenexchangeCalendarProvider(providerId);
+        folder.setComOpenexchangeCalendarConfig(config);
+        folder.setTitle(folderId);
+        folder.setFolderId(folderId);
+        folder.setId(folderId);
+        folder.setModule(MODULE);
+
+        FolderPermission perm = new FolderPermission();
+        perm.setEntity(userApi.getCalUser());
+        perm.setGroup(Boolean.FALSE);
+        perm.setBits(403710016);
+
+        List<FolderPermission> permissions = new ArrayList<>();
+        permissions.add(perm);
+
+        folder.setPermissions(permissions);
+        body.setFolder(folder);
+        return body;
     }
 
     /**
@@ -121,9 +162,17 @@ public class CalendarAccountManager extends AbstractManager {
      * @return The created {@link CalendarAccountData}
      * @throws ApiException if an API error is occurred
      * @throws ChronosApiException if a Chronos API error is occurred
+     * @throws IOException
+     * @throws JsonMappingException
+     * @throws JsonParseException
      */
-    public CalendarAccountData createCalendarAccount(String providerId, String configuration, boolean expectedException) throws ApiException, ChronosApiException {
-        CalendarAccountResponse response = userApi.getChronosApi().createAccount(userApi.getSession(), providerId, configuration);
+    public FolderUpdateResponse createCalendarAccount(String providerId, String folderName, JSONObject config, boolean expectedException) throws ApiException, ChronosApiException, JsonParseException, JsonMappingException, IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        FolderDataComOpenexchangeCalendarConfig calendarConfig = objectMapper.readValue(config.toString(), FolderDataComOpenexchangeCalendarConfig.class);
+
+        NewFolderBody body = createBody(providerId, folderName, calendarConfig);
+        FolderUpdateResponse response = foldersApi.createFolder(DEFAULT_FOLDER_ID, userApi.getSession(), body, TREE_ID, MODULE);
+
         if (expectedException) {
             assertNotNull("An error was expected", response.getError());
             throw new ChronosApiException(response.getCode(), response.getError());
@@ -131,26 +180,23 @@ public class CalendarAccountManager extends AbstractManager {
         return handleCreation(response);
     }
 
-    public void deleteCalendarAccount(List<CalendarAccountId> idsToDelete) throws ApiException {
-        for (CalendarAccountId id : idsToDelete) {
-            CommonResponse resp = userApi.getChronosApi().deleteAccount(userApi.getSession(), id.getId(), System.currentTimeMillis());
-            assertNull(resp.getError(), resp.getError());
-        }
-        for (CalendarAccountId calendarAccountId : idsToDelete) {
+    public void deleteCalendarAccount(List<String> idsToDelete) throws ApiException {
+        foldersApi.deleteFolders(userApi.getSession(), idsToDelete, TREE_ID, System.currentTimeMillis(), MODULE, true, false, false);
+        for (String calendarAccountId : idsToDelete) {
             forgetCalendarAccountId(calendarAccountId);
         }
     }
 
-    public CalendarAccountResponse loadCalendarAccount(CalendarAccountId calAccId) throws ApiException {
-        CalendarAccountResponse response = userApi.getChronosApi().getAccount(userApi.getSession(), calAccId.getId());
+    public FolderResponse loadCalendarAccount(String calAccId) throws ApiException {
+        FolderResponse response = foldersApi.getFolder(userApi.getSession(), calAccId, TREE_ID, MODULE);
         assertNull(response.getError(), response.getError());
         assertNotNull(response.getData());
-        assertEquals("The id of the calendar account is invalid!", calAccId.getId(), response.getData().getId());
+        assertEquals("The id of the calendar account is invalid!", calAccId, response.getData().getId());
         return response;
     }
 
-    public CalendarAccountsResponse loadAllCalendarAccounts(String providerId) throws ApiException {
-        CalendarAccountsResponse response = userApi.getChronosApi().getAllAccounts(userApi.getSession(), providerId);
+    public FoldersResponse loadAllCalendarAccounts() throws ApiException {
+        FoldersResponse response = foldersApi.getSubFolders(userApi.getSession(), DEFAULT_FOLDER_ID, COLUMNS, 1, TREE_ID, MODULE, false);
         assertNull(response.getError(), response.getError());
         assertNotNull(response.getData());
         return response;
@@ -164,55 +210,98 @@ public class CalendarAccountManager extends AbstractManager {
      * @param configuration The optional configuration
      * @return The updated {@link CalendarAccountData}
      * @throws ApiException if an API error is occurred
+     * @throws IOException
+     * @throws JsonMappingException
+     * @throws JsonParseException
      */
-    public CalendarAccountData updateCalendarAccount(String accountId, long timestamp, String configuration) throws ApiException {
-        CalendarAccountResponse response = userApi.getChronosApi().updateAccount(userApi.getSession(), accountId, timestamp, configuration);
-        return checkResponse(response.getError(), response.getErrorDesc(), response.getData());
+    public FolderUpdateResponse updateCalendarAccount(String providerId, String accountId, long timestamp, JSONObject configuration) throws ApiException, JsonParseException, JsonMappingException, IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        FolderDataComOpenexchangeCalendarConfig calendarConfig = objectMapper.readValue(configuration.toString(), FolderDataComOpenexchangeCalendarConfig.class);
+
+        FolderBody body = new FolderBody();
+        FolderData folderData = new FolderData();
+        folderData.setAccountId(accountId);
+        folderData.setComOpenexchangeCalendarConfig(calendarConfig);
+        folderData.setComOpenexchangeCalendarProvider(providerId);
+        body.setFolder(folderData);
+        FolderUpdateResponse response = foldersApi.updateFolder(userApi.getSession(), accountId, timestamp, body, Boolean.FALSE, TREE_ID, MODULE, true);
+
+        return checkResponse(response.getError(), response.getErrorDesc(), response);
     }
 
-    public CalendarAccountResponse updateCalendarAccount(CalendarAccountId calAccId, String configuration) throws ApiException {
-        forgetCalendarAccountId(calAccId);
-        CalendarAccountResponse response = userApi.getChronosApi().updateAccount(userApi.getSession(), calAccId.getId(), System.currentTimeMillis(), configuration);
+    public FolderUpdateResponse updateCalendarAccount(String providerId, String accountId, String configuration) throws ApiException, JsonParseException, JsonMappingException, IOException {
+        forgetCalendarAccountId(accountId);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        FolderDataComOpenexchangeCalendarConfig calendarConfig = objectMapper.readValue(configuration.toString(), FolderDataComOpenexchangeCalendarConfig.class);
+        FolderBody body = new FolderBody();
+        FolderData folderData = new FolderData();
+        folderData.setAccountId(accountId);
+        folderData.setComOpenexchangeCalendarConfig(calendarConfig);
+        folderData.setComOpenexchangeCalendarProvider(providerId);
+        body.setFolder(folderData);
+
+        FolderUpdateResponse response = foldersApi.updateFolder(userApi.getSession(), accountId, System.currentTimeMillis(), body, Boolean.FALSE, TREE_ID, MODULE, true);
+
         if (null != response.getData()) {
-            rememberCalendarAccountId(AccountFactory.createCalendarAccountId(response.getData().getId(), null));
+            rememberCalendarAccountId(response.getData());
         }
         return response;
     }
 
-    /**
-     * Returns a {@link List} with all available calendar providers
-     * 
-     * @return A {@link List} with all available calendar providers
-     * @throws ApiException if an API error is occurred
-     */
-    public List<CalendarAccountProviderData> listAvailableProviders() throws ApiException {
-        CalendarAccountProvidersResponse providersResponse = userApi.getChronosApi().providers(userApi.getSession());
-        return checkResponse(providersResponse.getError(), providersResponse.getErrorDesc(), providersResponse.getData());
-    }
+    public FolderUpdateResponse updateCalendarAccount(String providerId, String accountId, String folderId, FolderDataComOpenexchangeCalendarConfig configuration) throws ApiException {
+        forgetCalendarAccountId(accountId);
 
-    private void rememberCalendarAccountId(CalendarAccountId calAccId) throws ApiException {
-        CalendarAccountResponse response = userApi.getChronosApi().getAccount(userApi.getSession(), calAccId.getId());
-        if (calAccIds == null) {
-            calAccIds = new ArrayList<>();
-        }
-        calAccIds.add(AccountFactory.createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
-    }
+        createBody(providerId, folderId, configuration);
 
-    private void forgetCalendarAccountId(CalendarAccountId calAccId) throws ApiException {
-        CalendarAccountResponse response = userApi.getChronosApi().getAccount(userApi.getSession(), calAccId.getId());
-        if (calAccIds == null) {
-            calAccIds = new ArrayList<>();
-        }
+        FolderBody body = new FolderBody();
+        FolderData folderData = new FolderData();
+        folderData.setAccountId(accountId);
+        folderData.setComOpenexchangeCalendarConfig(configuration);
+        folderData.setComOpenexchangeCalendarProvider(providerId);
+        folderData.setTitle(folderId);
+        folderData.setFolderId(DEFAULT_FOLDER_ID);
+        folderData.setId(folderId);
+        FolderPermission perm = new FolderPermission();
+        perm.setEntity(userApi.getCalUser());
+        perm.setGroup(Boolean.FALSE);
+        perm.setBits(403710016);
+
+        List<FolderPermission> permissions = new ArrayList<>();
+        permissions.add(perm);
+
+        folderData.setPermissions(permissions);
+        body.setFolder(folderData);
+
+        FolderUpdateResponse response = foldersApi.updateFolder(userApi.getSession(), DEFAULT_FOLDER_ID, System.currentTimeMillis(), body, Boolean.FALSE, TREE_ID, MODULE, true);
+
         if (null != response.getData()) {
-            calAccIds.remove(AccountFactory.createCalendarAccountId(response.getData().getId(), response.getData().getTimestamp()));
+            rememberCalendarAccountId(response.getData());
+        }
+        return response;
+    }
+
+    private void rememberCalendarAccountId(String calAccId) {
+        if (calAccIds == null) {
+            calAccIds = new ArrayList<>();
+        }
+        calAccIds.add(calAccId);
+    }
+
+    private void forgetCalendarAccountId(String calAccId) {
+        if (calAccIds == null) {
+            calAccIds = new ArrayList<>();
+        }
+        if (Strings.isNotEmpty(calAccId)) {
+            calAccIds.remove(calAccId);
         }
     }
 
-    public String createCalendarAccountTestConfiguration(boolean updateConfig) throws JSONException {
-        JSONObject obj = new JSONObject();
-        obj.put("enabled", "true");
-        obj.put("color", updateConfig ? "blue" : "red");
-        return obj.toString();
+    public FolderDataComOpenexchangeCalendarConfig createCalendarAccountTestConfiguration(boolean updateConfig) {
+        FolderDataComOpenexchangeCalendarConfig config = new FolderDataComOpenexchangeCalendarConfig();
+        config.setEnabled(Boolean.TRUE);
+        config.setColor(updateConfig ? "blue" : "red");
+        return config;
     }
 
     /**
@@ -222,9 +311,9 @@ public class CalendarAccountManager extends AbstractManager {
      * @return The {@link CalendarAccountData}
      * @throws ApiException if an API error is occurred
      */
-    private CalendarAccountData handleCreation(CalendarAccountResponse response) throws ApiException {
-        CalendarAccountData data = checkResponse(response.getError(), response.getErrorDesc(), response.getData());
-        rememberCalendarAccountId(AccountFactory.createCalendarAccountId(data.getId(), data.getTimestamp()));
+    private FolderUpdateResponse handleCreation(FolderUpdateResponse response) throws ApiException {
+        FolderUpdateResponse data = checkResponse(response.getError(), response.getErrorDesc(), response);
+        rememberCalendarAccountId(data.getData());
         return data;
     }
 }

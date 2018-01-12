@@ -75,7 +75,6 @@ import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.ChronosUpdatesResponse;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
-import com.openexchange.testing.httpclient.models.EventResponse;
 import com.openexchange.testing.httpclient.models.EventsResponse;
 import com.openexchange.testing.httpclient.models.UpdatesResult;
 
@@ -241,12 +240,17 @@ public class EventManager extends AbstractManager {
      * @throws ChronosApiException if a Chronos API error is occurred
      */
     public EventData getRecurringEvent(String eventId, String reccurenceId, boolean expectException) throws ApiException, ChronosApiException {
-        EventResponse eventResponse = userApi.getChronosApi().getEvent(userApi.getSession(), eventId, defaultFolder, reccurenceId, null);
+        EventId event = new EventId();
+        event.setFolder(defaultFolder);
+        event.setRecurrenceId(reccurenceId);
+        event.setId(eventId);
+        EventsResponse eventsResponse = userApi.getChronosApi().getEventList(userApi.getSession(), Collections.singletonList(event), null);
         if (expectException) {
-            assertNotNull("An error was expected", eventResponse.getError());
-            throw new ChronosApiException(eventResponse.getCode(), eventResponse.getError());
+            assertNotNull("An error was expected", eventsResponse.getError());
+            throw new ChronosApiException(eventsResponse.getCode(), eventsResponse.getError());
         }
-        return checkResponse(eventResponse.getError(), eventResponse.getError(), eventResponse.getData());
+        checkResponse(eventsResponse.getError(), eventsResponse.getError(), eventsResponse.getData());
+        return eventsResponse.getData().get(0);
     }
 
     /**
@@ -314,6 +318,11 @@ public class EventManager extends AbstractManager {
      */
     public List<EventData> getAllEvents(Date from, Date until, boolean expand) throws ApiException {
         EventsResponse eventsResponse = userApi.getChronosApi().getAllEvents(userApi.getSession(), DateTimeUtil.getZuluDateTime(from.getTime()).getValue(), DateTimeUtil.getZuluDateTime(until.getTime()).getValue(), defaultFolder, null, null, null, expand, true);
+        return checkResponse(eventsResponse.getErrorDesc(), eventsResponse.getError(), eventsResponse.getData());
+    }
+
+    public List<EventData> getAllEvents(Date from, Date until, boolean expand, String folder) throws ApiException {
+        EventsResponse eventsResponse = userApi.getChronosApi().getAllEvents(userApi.getSession(), DateTimeUtil.getZuluDateTime(from.getTime()).getValue(), DateTimeUtil.getZuluDateTime(until.getTime()).getValue(), folder, null, null, null, expand, true);
         return checkResponse(eventsResponse.getErrorDesc(), eventsResponse.getError(), eventsResponse.getData());
     }
 

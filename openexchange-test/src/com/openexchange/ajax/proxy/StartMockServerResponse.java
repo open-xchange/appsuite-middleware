@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,28 +47,28 @@
  *
  */
 
-package com.openexchange.ajax.chronos.factory;
+package com.openexchange.ajax.proxy;
 
-import com.openexchange.testing.httpclient.models.CalendarAccountId;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * {@link AccountFactory}
+ * 
+ * {@link StartMockServerResponse}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.8.3
  */
-public final class AccountFactory {
+public class StartMockServerResponse extends AbstractAJAXResponse {
 
-    /**
-     * Creates a {@link CalendarAccountId} from the specified account identifier and the timestamp
-     * 
-     * @param id The calendar account identifier
-     * @param timestamp the timestamp
-     * @return The newly created {@link CalendarAccountId}
-     */
-    public static CalendarAccountId createCalendarAccountId(String id, Long timestamp) {
-        CalendarAccountId calAccId = new CalendarAccountId();
-        calAccId.setId(id);
-        calAccId.setTimestamp(timestamp);
-        return calAccId;
+    private boolean failOnError = true;
+
+    public StartMockServerResponse(Response response) {
+        super(response);
     }
+
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
+    }
+
 }

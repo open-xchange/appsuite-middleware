@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,40 +47,29 @@
  *
  */
 
-package com.openexchange.ajax.chronos;
-
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import com.openexchange.test.concurrent.ParallelSuite;
+package com.openexchange.ajax.proxy;
 
 /**
- * {@link ChronosTestSuite}
+ * {@link MockConstants}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.0
  */
-@RunWith(ParallelSuite.class)
-@Suite.SuiteClasses({
-    // @formatter:off
-    AcknowledgeAndSnoozeTest.class,
-    BasicAlarmTest.class,
-    BasicAlarmTriggerTest.class,
-    BasicAvailabilityTest.class,
-    BasicFreeBusyTest.class,
-    // FIXME: The SchedJoules tests were deactivated due to the nature of their implementation
-    //        i.e. external/third party service provider. Will be re-activated for CI tests.
-    //BasicSchedJoulesAPITest.class,
-    //BasicSchedJoulesProviderTest.class,
-    BasicSelfProtectionTest.class,
-    BasicSeriesEventTest.class,
-    BasicSingleEventTest.class,
-    CalendarAccountTest.class,
-    ChronosQuotaTest.class,
-    TimezoneAlarmTriggerTest.class,
-    ICalEventImportExportTest.class,
-    ICalCalendarProviderTest.class
-    // @formatter:on
+public class MockConstants {
 
-})
-public class ChronosTestSuite {
+    // Describes the method the mocked call will be from
+    public static final String METHOD_KEY = "method";
+
+    // Describes the URI the mocked call should target
+    public static final String URI_KEY = "uri";
+
+    // Describes a delay (in seconds) the server should have when returning the response
+    public static final String DELAY_KEY = "delay";
+
+    /* ------------ Fields for mocked response ---------------- */
+
+    public static final String STATUS_CODE_KEY = "statusCode";
+
+    public static final String HEADERS_KEY = "headers";
 
 }
