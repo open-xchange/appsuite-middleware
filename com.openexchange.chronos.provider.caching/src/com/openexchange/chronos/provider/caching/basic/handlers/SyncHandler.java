@@ -75,6 +75,9 @@ import com.openexchange.tools.arrays.Arrays;
  */
 public class SyncHandler extends AbstractExtensionHandler {
 
+    private static final String IGNORE_DELETED = "deleted";
+    private static final String IGNORE_CHANGED = "changed";
+
     /**
      * Initialises a new {@link SyncHandler}.
      */
@@ -93,17 +96,19 @@ public class SyncHandler extends AbstractExtensionHandler {
         SearchOptions searchOptions = getSearchOptions();
         SearchTerm<?> searchTerm = createSearchTerm(updatedSince);
 
+        EventField[] eventFields = getDefaultEventFields();
+
         List<Event> newAndUpdated = null;
         String[] ignore = getCalendarSession().get(CalendarParameters.PARAMETER_IGNORE, String[].class);
-        if (false == Arrays.contains(ignore, "changed")) {
+        if (false == Arrays.contains(ignore, IGNORE_CHANGED)) {
             newAndUpdated = getEventStorage().searchEvents(searchTerm, searchOptions, null);
-            getUtilities().loadAdditionalEventData(getSession().getUserId(), newAndUpdated, getDefaultEventFields());
+            getUtilities().loadAdditionalEventData(getSession().getUserId(), newAndUpdated, eventFields);
         }
 
         List<Event> tombstoneEvents = null;
-        if (false == Arrays.contains(ignore, "deleted")) {
+        if (false == Arrays.contains(ignore, IGNORE_DELETED)) {
             tombstoneEvents = getEventStorage().searchEventTombstones(searchTerm, searchOptions, null);
-            getUtilities().loadAdditionalEventTombstoneData(tombstoneEvents, getDefaultEventFields());
+            getUtilities().loadAdditionalEventTombstoneData(tombstoneEvents, eventFields);
         }
 
         return new DefaultUpdatesResult(newAndUpdated, tombstoneEvents);
