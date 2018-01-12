@@ -196,8 +196,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      */
     @Override
     public List<Event> resolveResource(String resourceName) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return new SyncHandler(session, account, parameters).resolveResource(resourceName);
     }
 
     private static final class CachingAccessBridge extends SingleFolderCachingCalendarAccess {

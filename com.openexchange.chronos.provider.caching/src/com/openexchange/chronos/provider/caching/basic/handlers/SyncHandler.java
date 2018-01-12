@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.caching.basic.handlers;
 
 import static com.openexchange.java.Autoboxing.L;
+import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -60,6 +61,8 @@ import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.session.Session;
@@ -128,6 +131,30 @@ public class SyncHandler extends AbstractExtensionHandler {
             timestamp = tombstoneEvents.get(0).getTimestamp();
         }
         return timestamp;
+    }
+
+    /**
+     * Resolve the specified resource
+     * 
+     * @param resourceNameThe name of the resource to resolve
+     * @return A {@link List} with the resovled {@link Event}s
+     * @throws OXException if an error is occurred
+     */
+    public List<Event> resolveResource(String resourceName) throws OXException {
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.OR);
+        searchTerm.addSearchTerm(SearchTermFactory.createSearchTerm(EventField.UID, SingleOperation.EQUALS, resourceName));
+        searchTerm.addSearchTerm(SearchTermFactory.createSearchTerm(EventField.FILENAME, SingleOperation.EQUALS, resourceName));
+
+        EventField[] defaultEventFields = getDefaultEventFields();
+
+        List<Event> resolvedEvents = getEventStorage().searchEvents(searchTerm, getSearchOptions(), defaultEventFields);
+        List<Event> resolvedTombstoneEvents = getEventStorage().searchEventTombstones(searchTerm, getSearchOptions(), defaultEventFields);
+
+        List<Event> events = new ArrayList<>();
+        events.addAll(getUtilities().loadAdditionalEventData(getSession().getUserId(), resolvedEvents, defaultEventFields));
+        events.addAll(getUtilities().loadAdditionalEventTombstoneData(resolvedTombstoneEvents, defaultEventFields));
+
+        return events;
     }
 
     /**

@@ -50,7 +50,9 @@
 package com.openexchange.chronos.provider.caching.basic.handlers;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.internal.Services;
@@ -150,6 +152,41 @@ abstract class AbstractExtensionHandler {
      */
     SearchOptions getSearchOptions() {
         return new SearchOptions(getCalendarSession());
+    }
+
+    /**
+     * Returns the {@link #DEFAULT_FIELDS}
+     * 
+     * @return the {@link #DEFAULT_FIELDS}
+     */
+    EventField[] getDefaultEventFields() {
+        return getEventFields(null);
+    }
+
+    /**
+     * <p>Prepares the event fields to request from the storage.</p>
+     * 
+     * <p>If the requested fields is empty or <code>null</code>, then all {@link #DEFAULT_FIELDS} are included.
+     * The client may also define additional fields.
+     * </p>
+     * 
+     * @param requestedFields The fields requested by the client, or <code>null</code> to retrieve all fields
+     * @param requiredFields Additionally required fields to add, or <code>null</code> if not defined
+     * @return The fields to use when querying events from the storage
+     */
+    EventField[] getEventFields(EventField[] requestedFields, EventField... additionalFields) {
+        if (null == requestedFields || requestedFields.length == 0) {
+            return getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class, DEFAULT_FIELDS.toArray(new EventField[DEFAULT_FIELDS.size()]));
+        }
+
+        Set<EventField> eventFields = new HashSet<>();
+        eventFields.addAll(DEFAULT_FIELDS);
+        eventFields.addAll(Arrays.asList(requestedFields));
+        if (null != additionalFields && additionalFields.length > 0) {
+            eventFields.addAll(Arrays.asList(additionalFields));
+        }
+
+        return eventFields.toArray(new EventField[eventFields.size()]);
     }
 
     /**
