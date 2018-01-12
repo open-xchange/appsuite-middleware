@@ -63,7 +63,7 @@ public final class AssertUtil extends Assert {
 
     /**
      * Asserts that the expected {@link EventData} is equal the actual {@link EventData}
-     * 
+     *
      * @param expected The expected {@link EventData}
      * @param actual The actual {@link EventData}
      */
@@ -79,7 +79,6 @@ public final class AssertUtil extends Assert {
         assertEquals("The identifier does not match", expected.getId(), actual.getId());
         assertEquals("The property class does not match", expected.getPropertyClass(), actual.getPropertyClass());
         assertEquals("The transparency does not match", expected.getTransp(), actual.getTransp());
-        assertEquals("The all day flag does not match", expected.getAllDay(), actual.getAllDay());
         assertEquals("The color does not match", expected.getColor(), actual.getColor());
         assertEquals("The folder does not match", expected.getFolder(), actual.getFolder());
         assertEquals("The created by identifier does not match", expected.getCreatedBy(), actual.getCreatedBy());
@@ -98,7 +97,7 @@ public final class AssertUtil extends Assert {
 
     /**
      * Asserts that the expected {@link EventData} is not equal the actual {@link EventData}
-     * 
+     *
      * @param expected The expected {@link EventData}
      * @param actual The actual {@link EventData}
      */
@@ -114,7 +113,6 @@ public final class AssertUtil extends Assert {
         assertNotEquals("The identifier does match", expected.getId(), actual.getId());
         assertNotEquals("The property class does match", expected.getPropertyClass(), actual.getPropertyClass());
         assertNotEquals("The transparency does match", expected.getTransp(), actual.getTransp());
-        assertNotEquals("The all day flag does match", expected.getAllDay(), actual.getAllDay());
         assertNotEquals("The color does match", expected.getColor(), actual.getColor());
         assertNotEquals("The folder does match", expected.getFolder(), actual.getFolder());
         assertNotEquals("The created by identifier does match", expected.getCreatedBy(), actual.getCreatedBy());

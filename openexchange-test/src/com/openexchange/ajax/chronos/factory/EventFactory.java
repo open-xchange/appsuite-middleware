@@ -71,7 +71,7 @@ public final class EventFactory {
 
     /**
      * Creates a single event for the specified user with in the specified interval.
-     * 
+     *
      * @param userId The user identifier
      * @param emailAddress The user's e-mail address
      * @param summary The summary of the event
@@ -88,7 +88,6 @@ public final class EventFactory {
         singleEvent.setStartDate(startDate);
         singleEvent.setEndDate(endDate);
         singleEvent.setTransp(TranspEnum.OPAQUE);
-        singleEvent.setAllDay(false);
         singleEvent.setSummary(summary);
 
         return singleEvent;
@@ -96,7 +95,7 @@ public final class EventFactory {
 
     /**
      * Creates a simple daily two hour event with the specified amount of occurrences
-     * 
+     *
      * @param userId The user identifier
      * @param emailAddress The e-mail address of the user
      * @param summary The summary of the event
@@ -105,13 +104,12 @@ public final class EventFactory {
     public static EventData createSeriesEvent(int userId, String emailAddress, String summary, int occurences) {
         EventData seriesEvent = createSingleTwoHourEvent(userId, emailAddress, summary);
         seriesEvent.setRrule("FREQ=DAILY;COUNT=" + occurences);
-        seriesEvent.setAllDay(false);
         return seriesEvent;
     }
 
     /**
      * Creates a simple daily two hour event with the specified amount of occurrences
-     * 
+     *
      * @param userId The user identifier
      * @param emailAddress The e-mail address of the user
      * @param summary The summary of the event
@@ -120,13 +118,12 @@ public final class EventFactory {
     public static EventData createSeriesEvent(int userId, String emailAddress, String summary, DateTimeData startDate, DateTimeData endDate, int occurences) {
         EventData seriesEvent = createSingleEvent(userId, emailAddress, summary, startDate, endDate);
         seriesEvent.setRrule("FREQ=DAILY;COUNT=" + occurences);
-        seriesEvent.setAllDay(false);
         return seriesEvent;
     }
 
     /**
      * Creates a single event with the specified start and end time and with the specified attachment.
-     * 
+     *
      * @param userId The user identifier
      * @param emailAddress The e-mail address of the user
      * @param summary The summary of the event
@@ -161,7 +158,7 @@ public final class EventFactory {
 
     /**
      * Creates a {@link ChronosAttachment} out of the specified {@link Asset}
-     * 
+     *
      * @param asset The {@link Asset}
      * @return The {@link ChronosAttachment}
      */
@@ -176,7 +173,7 @@ public final class EventFactory {
 
     /**
      * Creates a single event two-hour event
-     * 
+     *
      * @param userId The user identifier
      * @param emailAddress The user's e-mail address
      * @param summary The event's summary

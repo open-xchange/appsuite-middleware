@@ -107,7 +107,6 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         singleEvent.setStartDate(DateTimeUtil.getDateTime(startDate));
         singleEvent.setEndDate(DateTimeUtil.getDateTime(endDate));
         singleEvent.setTransp(TranspEnum.OPAQUE);
-        singleEvent.setAllDay(false);
         singleEvent.setSummary(summary);
         return singleEvent;
     }

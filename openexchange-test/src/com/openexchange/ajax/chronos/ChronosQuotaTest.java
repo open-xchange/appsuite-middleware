@@ -99,7 +99,7 @@ public class ChronosQuotaTest extends AbstractChronosTest {
         super.setUp();
 
         ajaxClient = new AJAXClient(testUser);
-        Map<String, String> userAttributes = new HashMap<String, String>(1);
+        Map<String, String> userAttributes = new HashMap<>(1);
         userAttributes.put("com.openexchange.quota.calendar", "0");
         setQuota(userAttributes);
     }
@@ -149,7 +149,7 @@ public class ChronosQuotaTest extends AbstractChronosTest {
 
     @Override
     public void tearDown() throws Exception {
-        Map<String, String> userAttributes = new HashMap<String, String>(1);
+        Map<String, String> userAttributes = new HashMap<>(1);
         userAttributes.put("com.openexchange.quota.calendar", "-1");
         setQuota(userAttributes);
         if (null != ajaxClient) {
@@ -189,7 +189,6 @@ public class ChronosQuotaTest extends AbstractChronosTest {
         singleEvent.setStartDate(startDate);
         singleEvent.setEndDate(endDate);
         singleEvent.setTransp(TranspEnum.OPAQUE);
-        singleEvent.setAllDay(Boolean.FALSE);
         singleEvent.setSummary(summary);
         return singleEvent;
     }
