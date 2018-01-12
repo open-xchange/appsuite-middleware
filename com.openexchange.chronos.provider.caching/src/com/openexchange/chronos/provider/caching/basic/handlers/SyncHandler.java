@@ -62,6 +62,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.session.Session;
+import com.openexchange.tools.arrays.Arrays;
 
 /**
  * {@link SyncHandler}
@@ -89,12 +90,20 @@ public class SyncHandler extends AbstractExtensionHandler {
         SearchTerm<?> searchTerm = createSearchTerm(updatedSince);
 
         //TODO: consider the requested fields
-        List<Event> tombstoneEvents = getEventStorage().searchEventTombstones(searchTerm, searchOptions, null);
-        getUtilities().loadAdditionalEventTombstoneData(tombstoneEvents, DEFAULT_FIELDS.toArray(new EventField[DEFAULT_FIELDS.size()]));
-        
-        List<Event> newAndUpdated = getEventStorage().searchEvents(searchTerm, searchOptions, null);
-        getUtilities().loadAdditionalEventData(getSession().getUserId(), newAndUpdated, DEFAULT_FIELDS.toArray(new EventField[DEFAULT_FIELDS.size()]));
-        
+
+        List<Event> newAndUpdated = null;
+        String[] ignore = getCalendarSession().get(CalendarParameters.PARAMETER_IGNORE, String[].class);
+        if (Arrays.contains(ignore, "changed")) {
+            newAndUpdated = getEventStorage().searchEvents(searchTerm, searchOptions, null);
+            getUtilities().loadAdditionalEventData(getSession().getUserId(), newAndUpdated, DEFAULT_FIELDS.toArray(new EventField[DEFAULT_FIELDS.size()]));
+        }
+
+        List<Event> tombstoneEvents = null;
+        if (Arrays.contains(ignore, "deleted")) {
+            tombstoneEvents = getEventStorage().searchEventTombstones(searchTerm, searchOptions, null);
+            getUtilities().loadAdditionalEventTombstoneData(tombstoneEvents, DEFAULT_FIELDS.toArray(new EventField[DEFAULT_FIELDS.size()]));
+        }
+
         return new DefaultUpdatesResult(newAndUpdated, tombstoneEvents);
     }
 
