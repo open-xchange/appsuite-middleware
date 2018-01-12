@@ -57,6 +57,7 @@ import com.openexchange.chronos.common.DefaultUpdatesResult;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.SearchOptions;
+import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.search.SearchTerm;
@@ -86,25 +87,37 @@ public class SyncHandler extends AbstractExtensionHandler {
      * @throws OXException if the operation fails
      */
     public UpdatesResult getUpdatedEvents(long updatedSince) throws OXException {
-        SearchOptions searchOptions = new SearchOptions();
+        SearchOptions searchOptions = getSearchOptions();
         SearchTerm<?> searchTerm = createSearchTerm(updatedSince);
 
         //TODO: consider the requested fields
 
         List<Event> newAndUpdated = null;
         String[] ignore = getCalendarSession().get(CalendarParameters.PARAMETER_IGNORE, String[].class);
-        if (Arrays.contains(ignore, "changed")) {
+        if (false == Arrays.contains(ignore, "changed")) {
             newAndUpdated = getEventStorage().searchEvents(searchTerm, searchOptions, null);
             getUtilities().loadAdditionalEventData(getSession().getUserId(), newAndUpdated, DEFAULT_FIELDS.toArray(new EventField[DEFAULT_FIELDS.size()]));
         }
 
         List<Event> tombstoneEvents = null;
-        if (Arrays.contains(ignore, "deleted")) {
+        if (false == Arrays.contains(ignore, "deleted")) {
             tombstoneEvents = getEventStorage().searchEventTombstones(searchTerm, searchOptions, null);
             getUtilities().loadAdditionalEventTombstoneData(tombstoneEvents, DEFAULT_FIELDS.toArray(new EventField[DEFAULT_FIELDS.size()]));
         }
 
         return new DefaultUpdatesResult(newAndUpdated, tombstoneEvents);
+    }
+
+    /**
+     * Gets the sequence number, which is the highest last-modification timestamp of the account itself and its contents.
+     * 
+     * @return The sequence number
+     */
+    public long getSequenceNumber() {
+        SearchOptions searchOptions = new SearchOptions().addOrder(SortOrder.getSortOrder(EventField.TIMESTAMP, SortOrder.Order.DESC)).setLimits(0, 1);
+        EventField[] fields = { EventField.TIMESTAMP };
+        //getEventStorage().searchEvents(searchTerm, searchOptions, fields);
+        return 0;
     }
 
     /**
