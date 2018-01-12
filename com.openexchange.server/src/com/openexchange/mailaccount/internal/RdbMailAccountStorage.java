@@ -53,9 +53,9 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.mail.utils.DefaultFolderNamesProvider.extractFullname;
 import static com.openexchange.mail.utils.ProviderUtility.toSocketAddrString;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.closeSQLStuff;
+import static com.openexchange.database.Databases.rollback;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntObjectMap;
@@ -94,6 +94,7 @@ import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.crypto.CryptoService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -559,7 +560,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     @Override
     public void clearFullNamesForMailAccount(final int id, final int[] indexes, final int userId, final int contextId) throws OXException {
-        Connection con = Database.get(contextId, true);
+        DatabaseService databaseService = Database.getDatabaseService();
+
+        Connection con = databaseService.getWritable(contextId);
         boolean rollback = false;
         try {
             con.setAutoCommit(false);
@@ -576,7 +579,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 rollback(con);
             }
             autocommit(con);
-            Database.back(contextId, true, con);
+            databaseService.backWritable(contextId, con);
         }
     }
 
@@ -657,13 +660,18 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public void setFullNamesForMailAccount(int id, int[] indexes, String[] fullNames, int userId, int contextId) throws OXException {
-        Connection con = Database.get(contextId, true);
+    public boolean setFullNamesForMailAccount(int id, int[] indexes, String[] fullNames, int userId, int contextId) throws OXException {
+        DatabaseService databaseService = Database.getDatabaseService();
+
+        Connection con = databaseService.getWritable(contextId);
         boolean rollback = false;
+        boolean modified = false;
         try {
             con.setAutoCommit(false);
             rollback = true;
-            setFullNamesForMailAccount(id, indexes, fullNames, userId, contextId, con);
+
+            modified = setFullNamesForMailAccount(id, indexes, fullNames, userId, contextId, con);
+
             con.commit();
             rollback = false;
         } catch (final SQLException e) {
@@ -675,8 +683,13 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 rollback(con);
             }
             autocommit(con);
-            Database.back(contextId, true, con);
+            if (modified) {
+                databaseService.backWritable(contextId, con);
+            } else {
+                databaseService.backWritableAfterReading(contextId, con);
+            }
         }
+        return modified;
     }
 
     /**
@@ -688,13 +701,14 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
      * @param userId The user ID
      * @param contextId The context ID
      * @param con The connection
+     * @return <code>true</code> if names were changed as a result of this call; otherwise <code>false</code>
      * @throws OXException If invalidation fails
      */
-    public void setFullNamesForMailAccount(int id, int[] indexes, String[] fullNames, int userId, int contextId, Connection con) throws OXException {
+    public boolean setFullNamesForMailAccount(int id, int[] indexes, String[] fullNames, int userId, int contextId, Connection con) throws OXException {
         if (null == con) {
-            setFullNamesForMailAccount(id, indexes, fullNames, userId, contextId);
-            return;
+            return setFullNamesForMailAccount(id, indexes, fullNames, userId, contextId);
         }
+
         PreparedStatement stmt = null;
         try {
             StringBuilder sqlBuilder = new StringBuilder("UPDATE user_mail_account SET ");
@@ -730,7 +744,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             }
 
             if (!somethingAdded) {
-                return;
+                return false;
             }
 
             sqlBuilder.setLength(sqlBuilder.length() - 2);
@@ -745,6 +759,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.setLong(num++, id);
             stmt.setLong(num++, userId);
             stmt.executeUpdate();
+            return true;
         } catch (final SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -755,13 +770,18 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public void setNamesForMailAccount(int id, int[] indexes, String[] names, int userId, int contextId) throws OXException {
-        Connection con = Database.get(contextId, true);
+    public boolean setNamesForMailAccount(int id, int[] indexes, String[] names, int userId, int contextId) throws OXException {
+        DatabaseService databaseService = Database.getDatabaseService();
+
+        Connection con = databaseService.getWritable(contextId);
         boolean rollback = false;
+        boolean modified = false;
         try {
             con.setAutoCommit(false);
             rollback = true;
-            setNamesForMailAccount(id, indexes, names, userId, contextId, con);
+
+            modified = setNamesForMailAccount(id, indexes, names, userId, contextId, con);
+
             con.commit();
             rollback = false;
         } catch (final SQLException e) {
@@ -773,8 +793,14 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 rollback(con);
             }
             autocommit(con);
-            Database.back(contextId, true, con);
+            if (modified) {
+                databaseService.backWritable(contextId, con);
+            } else {
+                databaseService.backWritableAfterReading(contextId, con);
+            }
         }
+
+        return modified;
     }
 
     /**
@@ -786,13 +812,14 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
      * @param userId The user ID
      * @param contextId The context ID
      * @param con The connection
+     * @return <code>true</code> if names were changed as a result of this call; otherwise <code>false</code>
      * @throws OXException If invalidation fails
      */
-    public void setNamesForMailAccount(int id, int[] indexes, String[] names, int userId, int contextId, Connection con) throws OXException {
+    public boolean setNamesForMailAccount(int id, int[] indexes, String[] names, int userId, int contextId, Connection con) throws OXException {
         if (null == con) {
-            setNamesForMailAccount(id, indexes, names, userId, contextId);
-            return;
+            return setNamesForMailAccount(id, indexes, names, userId, contextId);
         }
+
         PreparedStatement stmt = null;
         try {
             StringBuilder sqlBuilder = new StringBuilder("UPDATE user_mail_account SET ");
@@ -828,7 +855,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             }
 
             if (!somethingAdded) {
-                return;
+                return false;
             }
 
             sqlBuilder.setLength(sqlBuilder.length() - 2);
@@ -843,6 +870,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.setLong(num++, id);
             stmt.setLong(num++, userId);
             stmt.executeUpdate();
+            return true;
         } catch (final SQLException e) {
             throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
