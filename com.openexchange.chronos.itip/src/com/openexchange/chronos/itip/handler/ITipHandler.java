@@ -49,10 +49,15 @@
 
 package com.openexchange.chronos.itip.handler;
 
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.generators.ITipMailGenerator;
@@ -76,11 +81,22 @@ import com.openexchange.session.Session;
  * {@link ITipHandler}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
 public class ITipHandler implements CalendarHandler {
 
-    Logger LOG = LoggerFactory.getLogger(ITipHandler.class);
+    private final static Logger LOG = LoggerFactory.getLogger(ITipHandler.class);
+
+    /**
+     * Contains the three fields that are updated if a series is updated
+     */
+    private final static EventField[] SERIES_UPDATE = new EventField[] { EventField.LAST_MODIFIED, EventField.SEQUENCE, EventField.TIMESTAMP };
+
+    /**
+     * Contains the three fields that are updated if a master event has a new change/delete exception
+     */
+    private final static EventField[] MASTER_EXCEPTION_UPDATE = new EventField[] { EventField.CHANGE_EXCEPTION_DATES, EventField.LAST_MODIFIED, EventField.TIMESTAMP };
 
     private NotificationMailGeneratorFactory generators;
     private MailSenderService                sender;
@@ -108,19 +124,19 @@ public class ITipHandler implements CalendarHandler {
                 }
             }
 
-            List<UpdateResult> updates = event.getUpdates();
-            if (updates != null && updates.size() > 0) {
+            List<UpdateResult> updates = new LinkedList<>(event.getUpdates());
+            if (updates.size() > 0) {
                 for (UpdateResult update : updates) {
                     if (false == isMasterExceptionUpdate(update, creations)) {
-                        handleUpdate(update, event);
+                        handleUpdate(update, updates, event);
                     }
                 }
             }
 
-            List<DeleteResult> deletions = event.getDeletions();
-            if (deletions != null && deletions.size() > 0) {
+            List<DeleteResult> deletions = new LinkedList<>(event.getDeletions());
+            if (deletions.size() > 0) {
                 for (DeleteResult delete : deletions) {
-                    handleDelete(delete, event);
+                    handleDelete(delete, deletions, event);
                 }
             }
         } catch (OXException oe) {
@@ -129,55 +145,97 @@ public class ITipHandler implements CalendarHandler {
     }
 
     private void handleCreate(CreateResult create, CalendarEvent event) throws OXException {
-        Session session = event.getSession();
-        int onBehalfOf = onBehalfOf(event.getCalendarUser(), session);
-        CalendarUser principal = ITipUtils.getPrincipal(event.getCalendarParameters());
+        handle(event, State.Type.NEW, null, create.getCreatedEvent(), null);
+    }
 
-        ITipMailGenerator generator = generators.create(null, create.getCreatedEvent(), session, onBehalfOf, principal);
-        List<NotificationParticipant> recipients = generator.getRecipients();
-        for (NotificationParticipant notificationParticipant : recipients) {
-            NotificationMail mail = generator.generateCreateMailFor(notificationParticipant);
-            if (mail != null) {
-                if (mail.getStateType() == null) {
-                    mail.setStateType(State.Type.NEW);
+    private void handleUpdate(UpdateResult update, List<UpdateResult> updates, CalendarEvent event) throws OXException {
+        List<UpdateResult> exceptions = Collections.emptyList();
+
+        // Check for series update
+        if (update.getUpdate().containsSeriesId()) {
+            // Get all events of the series
+            String seriesId = update.getUpdate().getSeriesId();
+            List<UpdateResult> eventGroup = updates.stream().filter(u -> seriesId.equals(u.getUpdate().getSeriesId())).collect(Collectors.toList());
+
+            // Check if there is a group to handle
+            if (eventGroup.size() > 1) {
+                // Check if master is present and if every update is a series update
+                Optional<UpdateResult> master = eventGroup.stream().filter(u -> seriesId.equals(u.getUpdate().getId())).findFirst();
+                if (master.isPresent() && CalendarUtils.isSeriesMaster(master.get().getUpdate()) && eventGroup.stream().filter(u -> u.containsAnyChangeOf(SERIES_UPDATE)).collect(Collectors.toList()).size() == eventGroup.size()) {
+                    // Series update, remove those items from the update list and the master from the exceptions
+                    updates.removeAll(eventGroup);
+                    eventGroup.remove(master.get());
+
+                    // Set for processing
+                    update = master.get();
+                    exceptions = eventGroup;
                 }
-                sender.sendMail(mail, session, principal);
             }
         }
 
+        // Handle update
+        handle(event, State.Type.MODIFIED, update.getOriginal(), update.getUpdate(), exceptions.stream().map(UpdateResult::getUpdate).collect(Collectors.toList()));
     }
 
-    private void handleDelete(DeleteResult delete, CalendarEvent event) throws OXException {
-        Session session = event.getSession();
-        int onBehalfOf = onBehalfOf(event.getCalendarUser(), session);
-        CalendarUser principal = ITipUtils.getPrincipal(event.getCalendarParameters());
+    private void handleDelete(DeleteResult delete, List<DeleteResult> deletions, CalendarEvent event) throws OXException {
+        List<DeleteResult> exceptions = Collections.emptyList();
 
-        ITipMailGenerator generator = generators.create(null, delete.getOriginal(), session, onBehalfOf, principal);
-        List<NotificationParticipant> recipients = generator.getRecipients();
-        for (final NotificationParticipant notificationParticipant : recipients) {
-            final NotificationMail mail = generator.generateDeleteMailFor(notificationParticipant);
-            if (mail != null) {
-                if (mail.getStateType() == null) {
-                    mail.setStateType(State.Type.DELETED);
+        // Check for series update
+        if (delete.getOriginal().containsSeriesId()) {
+            // Get all events of the series
+            String seriesId = delete.getOriginal().getSeriesId();
+            List<DeleteResult> eventGroup = deletions.stream().filter(u -> seriesId.equals(u.getOriginal().getSeriesId())).collect(Collectors.toList());
+
+            // Check if there is a group to handle
+            if (eventGroup.size() > 1) {
+                // Check if master is present 
+                Optional<DeleteResult> master = eventGroup.stream().filter(u -> seriesId.equals(u.getOriginal().getId())).findFirst();
+                if (master.isPresent() && CalendarUtils.isSeriesMaster(master.get().getOriginal())) {
+                    // Series update, remove those items from the update list and the master from the exceptions
+                    deletions.removeAll(eventGroup);
+                    eventGroup.remove(master.get());
+
+                    // Set for processing
+                    delete = master.get();
+                    exceptions = eventGroup;
                 }
-                sender.sendMail(mail, session, principal);
             }
         }
+
+        handle(event, State.Type.DELETED, null, delete.getOriginal(), exceptions.stream().map(DeleteResult::getOriginal).collect(Collectors.toList()));
     }
 
-    private void handleUpdate(UpdateResult update, CalendarEvent event) throws OXException {
+    private void handle(CalendarEvent event, State.Type type, Event original, Event update, List<Event> exceptions) throws OXException {
         Session session = event.getSession();
         int onBehalfOf = onBehalfOf(event.getCalendarUser(), session);
         CalendarUser principal = ITipUtils.getPrincipal(event.getCalendarParameters());
 
-        ITipMailGenerator generator = generators.create(update.getOriginal(), update.getUpdate(), session, onBehalfOf, principal);
+        ITipMailGenerator generator = generators.create(original, update, session, onBehalfOf, principal);
         List<NotificationParticipant> recipients = generator.getRecipients();
         for (NotificationParticipant notificationParticipant : recipients) {
             NotificationMail mail;
-            mail = generator.generateUpdateMailFor(notificationParticipant);
+            switch (type) {
+                case NEW:
+                    mail = generator.generateCreateMailFor(notificationParticipant);
+                    break;
+                case MODIFIED:
+                    mail = generator.generateUpdateMailFor(notificationParticipant);
+                    break;
+                case DELETED:
+                    mail = generator.generateDeleteMailFor(notificationParticipant);
+                    break;
+                default:
+                    mail = null;
+            }
             if (mail != null) {
                 if (mail.getStateType() == null) {
-                    mail.setStateType(State.Type.MODIFIED);
+                    mail.setStateType(type);
+                }
+                if (null != exceptions) {
+                    // Set exceptions
+                    for (Event exception : exceptions) {
+                        mail.getMessage().addException(exception);
+                    }
                 }
                 sender.sendMail(mail, session, principal);
             }
@@ -189,23 +247,14 @@ public class ITipHandler implements CalendarHandler {
     }
 
     /**
-     * Contains the three fields that are updated if a master event has a new change/delete exception
-     */
-    private final static EventField[] MASTER_EXCEPTION_UPDATE = new EventField[] { EventField.CHANGE_EXCEPTION_DATES, EventField.TIMESTAMP, EventField.LAST_MODIFIED };
-
-    /**
      * Checks if the given {@link UpdateResult} is an update on a series master that has a new
      * event exception and checks if such a exception was created
      * 
      * @param update The {@link UpdateResult} an potentially master event
      * @param creations The {@link List} of {@link CreateResult}s
-     * @return <code>true</code> if the series master got only an update on its exceptions
+     * @return <code>true</code> if the series master got only an update on its exceptions, <code>false</code> otherwise
      */
     private boolean isMasterExceptionUpdate(UpdateResult update, List<CreateResult> creations) {
-        return CalendarUtils.isSeriesMaster(update.getUpdate()) 
-            && update.getUpdatedFields().size() == 3 
-            && update.containsAnyChangeOf(MASTER_EXCEPTION_UPDATE) 
-            && creations.stream().filter(c -> update.getUpdate().getId().equals(c.getCreatedEvent().getSeriesId())).findAny().isPresent()
-            ;
+        return CalendarUtils.isSeriesMaster(update.getUpdate()) && update.containsAnyChangeOf(MASTER_EXCEPTION_UPDATE) && creations.stream().filter(c -> update.getUpdate().getId().equals(c.getCreatedEvent().getSeriesId())).findAny().isPresent();
     }
 }
