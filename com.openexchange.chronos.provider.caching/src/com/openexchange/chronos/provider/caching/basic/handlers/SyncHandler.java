@@ -93,19 +93,17 @@ public class SyncHandler extends AbstractExtensionHandler {
         SearchOptions searchOptions = getSearchOptions();
         SearchTerm<?> searchTerm = createSearchTerm(updatedSince);
 
-        //TODO: consider the requested fields
-
         List<Event> newAndUpdated = null;
         String[] ignore = getCalendarSession().get(CalendarParameters.PARAMETER_IGNORE, String[].class);
         if (false == Arrays.contains(ignore, "changed")) {
             newAndUpdated = getEventStorage().searchEvents(searchTerm, searchOptions, null);
-            getUtilities().loadAdditionalEventData(getSession().getUserId(), newAndUpdated, DEFAULT_FIELDS.toArray(new EventField[DEFAULT_FIELDS.size()]));
+            getUtilities().loadAdditionalEventData(getSession().getUserId(), newAndUpdated, getDefaultEventFields());
         }
 
         List<Event> tombstoneEvents = null;
         if (false == Arrays.contains(ignore, "deleted")) {
             tombstoneEvents = getEventStorage().searchEventTombstones(searchTerm, searchOptions, null);
-            getUtilities().loadAdditionalEventTombstoneData(tombstoneEvents, DEFAULT_FIELDS.toArray(new EventField[DEFAULT_FIELDS.size()]));
+            getUtilities().loadAdditionalEventTombstoneData(tombstoneEvents, getDefaultEventFields());
         }
 
         return new DefaultUpdatesResult(newAndUpdated, tombstoneEvents);
