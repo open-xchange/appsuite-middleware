@@ -198,11 +198,12 @@ public class LoginLocation {
     /**
      * Sets the login name, i.e. the guest users email address.
      *
-     * @param name The login name
-     * @return
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return This login location
      */
-    public LoginLocation loginName(String name) {
-        return parameter("login_name", name);
+    public LoginLocation loginName(int userId, int contextId) {
+        return parameter("login_name", new StringBuilder(16).append(userId).append('@').append(contextId).toString());
     }
 
     /**

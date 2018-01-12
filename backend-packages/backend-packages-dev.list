@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.4,open-xchange-imageserver"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.4,open-xchange-imagetransformation-imagemagick"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-geoip"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-imagetransformation-imagemagick"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-geoip"/>
 </provider>
 </psf>

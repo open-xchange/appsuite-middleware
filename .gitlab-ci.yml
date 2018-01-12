@@ -1,0 +1,57 @@
+stages:
+  - build
+  - deploy
+
+build documentation:
+  image: gitlab.open-xchange.com:4567/engineering/documentation:latest
+  stage: build
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - echo $CI_COMMIT_REF_NAME
+    - echo $CI_REPOSITORY_URL
+    - git clone --depth 1 --no-checkout --branch $CI_COMMIT_REF_NAME $CI_REPOSITORY_URL middleware
+    - cd middleware
+    - git config core.sparsecheckout true
+    - mkdir -p .git/info
+    - echo "documentation/*" > .git/info/sparse-checkout
+    - echo "com.openexchange.version/META-INF/MANIFEST.MF" >> .git/info/sparse-checkout
+    - git read-tree -mu HEAD
+    - export VERSION=`grep 'OXVersion:' com.openexchange.version/META-INF/MANIFEST.MF | cut -d' ' -f2`
+    - ln -s $CI_PROJECT_DIR/middleware/documentation /documentation/jekyll/_middleware
+    - cd /documentation
+    - bundle exec jekyll b --baseurl /$VERSION --config _config.yml
+    - cd $CI_PROJECT_DIR
+    - mkdir -p doku/$VERSION
+    - cp -r /documentation/dist/* doku/$VERSION
+  dependencies: []
+  tags:
+    - docker
+  artifacts:
+    paths:
+      - doku/
+    expire_in: 2 hours
+  only:
+    - develop
+    - master
+    - /^master-.*$/
+
+deploy documentation:
+  stage: deploy
+  variables:
+    GIT_STRATEGY: none
+  script:
+    - export VERSION=`ls doku --sort=time | cut -f1 | head -n1`
+    - rsync -aHAX --delete doku/$VERSION/middleware/ /var/www/documentation/$VERSION/middleware
+    - rm -rf doku/$VERSION/middleware/
+    - find /var/www/documentation -user gitlab-runner -exec chmod g+w '{}' \;
+    - find /var/www/documentation -user gitlab-runner -exec chgrp www-data '{}' \;
+  dependencies:
+    - build documentation
+  tags:
+    - shell
+    - documentation
+  only:
+    - develop
+    - master
+    - /^master-.*$/

@@ -9,17 +9,13 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-core
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+%if 0%{?suse_version}
+BuildRequires: java-1_8_0-openjdk-devel
 %else
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires: java-1_7_0-openjdk-devel
-%else
-BuildRequires: java-devel >= 1.7.0
-%endif
+BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -59,14 +55,9 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %post
-. /opt/open-xchange/lib/oxfunctions.sh
-CONFFILES="deferrer.properties oauth.properties twitteroauth.properties yahoooauth.properties"
-for FILE in ${CONFFILES}; do
-    ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
-done
-
 if [ ${1:-0} -eq 2 ]; then
     # only when updating
+    . /opt/open-xchange/lib/oxfunctions.sh
 
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
@@ -75,21 +66,6 @@ if [ ${1:-0} -eq 2 ]; then
     for FILE in $PROTECT; do
         ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
     done
-
-    # SoftwareChange_Request-1494
-    pfile=/opt/open-xchange/etc/yahoooauth.properties
-    if ! ox_exists_property com.openexchange.oauth.yahoo $pfile; then
-       if grep -E '^com.openexchange.*REPLACE_THIS_WITH_VALUE_OBTAINED_FROM' $pfile > /dev/null; then
-           ox_set_property com.openexchange.oauth.yahoo false $pfile
-       else
-           ox_set_property com.openexchange.oauth.yahoo true $pfile
-       fi
-    fi
-
-    # SoftwareChange_Request-2146
-    PFILE=/opt/open-xchange/etc/xingoauth.properties
-    ox_add_property com.openexchange.oauth.xing.consumerKey REPLACE_THIS_WITH_YOUR_XING_PRODUCTIVE_CONSUMER_KEY /opt/open-xchange/etc/xingoauth.properties
-    ox_add_property com.openexchange.oauth.xing.consumerSecret REPLACE_THIS_WITH_YOUR_XING_PRODUCTIVE_CONSUMER_SECRET /opt/open-xchange/etc/xingoauth.properties
 
     # SoftwareChange_Request-2410
     if [ -e /opt/open-xchange/etc/twitter.properties ]; then
@@ -145,6 +121,8 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/settings/tumblroauth.properties
 
 %changelog
+* Thu Oct 12 2017 Steffen Templin <marcus.klein@open-xchange.com>
+prepare for 7.10.0 release
 * Fri May 19 2017 Steffen Templin <marcus.klein@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Steffen Templin <marcus.klein@open-xchange.com>

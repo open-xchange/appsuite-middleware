@@ -60,7 +60,7 @@ import javax.activation.DataSource;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class InputStreamDataSource implements DataSource {
+public final class InputStreamDataSource implements DataSource {
 
     private final InputStream inStream;
 

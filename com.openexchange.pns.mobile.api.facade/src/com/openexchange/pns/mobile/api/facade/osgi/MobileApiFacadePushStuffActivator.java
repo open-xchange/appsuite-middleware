@@ -152,7 +152,7 @@ public class MobileApiFacadePushStuffActivator extends HousekeepingActivator imp
 
             // Check values map
             if (false == Map.class.isInstance(entry.getValue())) {
-                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Invalid PNS obile API Facade configuration specified for client: " + client);
+                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Invalid PNS Mobile API Facade configuration specified for client: " + client);
             }
 
             // Parse values map

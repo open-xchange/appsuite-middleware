@@ -2,11 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Filestorage implementation storing files in a S3 API compatible storage
 Bundle-SymbolicName: com.openexchange.filestore.s3
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.amazonaws,
  com.amazonaws.auth,
+ com.amazonaws.client.builder,
  com.amazonaws.handlers,
  com.amazonaws.http,
  com.amazonaws.regions,
@@ -14,6 +15,7 @@ Import-Package: com.amazonaws,
  com.amazonaws.services.s3.internal,
  com.amazonaws.services.s3.model,
  com.amazonaws.util,
+ com.google.common.collect,
  com.openexchange.ajax.container,
  com.openexchange.cache.dynamic,
  com.openexchange.config,

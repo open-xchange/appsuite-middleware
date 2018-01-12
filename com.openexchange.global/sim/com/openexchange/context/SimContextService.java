@@ -50,6 +50,7 @@
 package com.openexchange.context;
 
 import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
@@ -66,6 +67,31 @@ public class SimContextService implements ContextService{
     @Override
     public List<Integer> getAllContextIds() throws OXException {
         // Nothing to do
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.context.ContextService#getDistinctContextsPerSchema()
+     */
+    @Override
+    public List<Integer> getDistinctContextsPerSchema() throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.context.ContextService#getSchemaAssociations()
+     */
+    @Override
+    public Map<PoolAndSchema, List<Integer>> getSchemaAssociations() throws OXException {
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.context.ContextService#getSchemaAssociationsFor(java.util.Collection)
+     */
+    @Override
+    public Map<PoolAndSchema, List<Integer>> getSchemaAssociationsFor(List<Integer> contextIds) throws OXException {
         return null;
     }
 

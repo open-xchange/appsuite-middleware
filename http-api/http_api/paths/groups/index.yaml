@@ -6,3 +6,4 @@ requests:
   - DeleteRequest.yaml
   - UpdateRequest.yaml
   - UpdatesRequest.yaml
+  - AllRequest.yaml

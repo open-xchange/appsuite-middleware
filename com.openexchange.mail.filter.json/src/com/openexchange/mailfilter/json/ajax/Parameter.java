@@ -49,9 +49,9 @@
 
 package com.openexchange.mailfilter.json.ajax;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 
 /**
  *
@@ -93,12 +93,11 @@ public enum Parameter {
     }
 
     static {
-        final Map<String, Parameter> tmp = new HashMap<String, Parameter>(
-            values().length, 1);
-        for (final Parameter action : values()) {
+        Map<String, Parameter> tmp = new HashMap<String, Parameter>(values().length, 1);
+        for (Parameter action : values()) {
             tmp.put(action.getName(), action);
         }
-        name2Parameter = Collections.unmodifiableMap(tmp);
+        name2Parameter = ImmutableMap.copyOf(tmp);
     }
 
 }

@@ -8,6 +8,7 @@
       - application/json
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/glbQueryParamsAllowEnqueue"
       - in: query
         name: id
         type: string
@@ -43,3 +44,9 @@
         description: A JSON object with the object id of the folder. In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/FolderUpdateResponse"
+      202:
+        description: |
+          The operation did not complete in time and was added to job queue providing the job identifier. In case of errors the responsible fields in the response are
+          filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/GetJobResponse"

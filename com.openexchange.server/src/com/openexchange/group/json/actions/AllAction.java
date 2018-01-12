@@ -49,15 +49,14 @@
 
 package com.openexchange.group.json.actions;
 
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
-import com.openexchange.group.Group.Field;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.group.json.GroupAJAXRequest;
 import com.openexchange.server.ServiceLookup;
@@ -82,24 +81,22 @@ public final class AllAction extends AbstractGroupAction {
     protected AJAXRequestResult perform(final GroupAJAXRequest req) throws OXException, JSONException {
         Date timestamp = new Date(0);
 
-        List<Field> fields = new LinkedList<Field>();
         boolean loadMembers = false;
         {
             int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
             for (final int column : columns) {
-                final Field field = Group.Field.getByColumnNumber(column);
-                if (field == Group.Field.MEMBERS) {
+                if (Group.Field.MEMBERS.getColNumber() == column) {
                     loadMembers = true;
                 }
-                fields.add(field);
             }
         }
 
         GroupStorage groupStorage = GroupStorage.getInstance();
         Group[] groups = groupStorage.getGroups(loadMembers, req.getSession().getContext());
 
-        List<Group> groupList = new LinkedList<Group>();
-        for (int a = 0; a < groups.length; a++) {
+        int length = groups.length;
+        List<Group> groupList = new ArrayList<Group>(length);
+        for (int a = 0; a < length; a++) {
             Group group = groups[a];
             groupList.add(group);
 

@@ -112,7 +112,7 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
 
     @Override
     public Object handle(final Field field, final Object... args) {
-        final Object value = field.doSwitch(get, args);
+        Object value = field.doSwitch(get, args);
         if (File.Field.FILE_MIMETYPE == field) {
             if (null == value) {
                 return value;
@@ -127,8 +127,13 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
                 return value;
             }
         }
-        if ((value == null) && (field == File.Field.LOCKED_UNTIL)) {
-            return Integer.valueOf(0);
+        if (value == null) {
+            if (field == File.Field.LOCKED_UNTIL) {
+                return Integer.valueOf(0);
+            }
+            if (field == File.Field.FILENAME) {
+                return "";
+            }
         }
         if (Date.class.isInstance(value)) {
             Date d = (Date) value;

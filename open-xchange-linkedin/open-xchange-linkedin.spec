@@ -2,15 +2,10 @@
 
 Name:          open-xchange-linkedin
 BuildArch:     noarch
-#!BuildIgnore: post-build-checks
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+%if 0%{?suse_version}
+BuildRequires: java-1_8_0-openjdk-devel
 %else
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires: java-1_7_0-openjdk-devel
-%else
-BuildRequires: java-devel >= 1.7.0
-%endif
+BuildRequires: java-1.8.0-openjdk-devel
 %endif
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires:  ant
@@ -20,7 +15,7 @@ BuildRequires:  ant-nodeps
 BuildRequires: open-xchange-oauth
 BuildRequires: open-xchange-halo
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -58,27 +53,11 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    PROTECT="linkedinoauth.properties"
-    for FILE in $PROTECT; do
-        ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
-    done
+    ox_update_permissions "/opt/open-xchange/etc/linkedinoauth.properties" root:open-xchange 640
 
-    # SoftwareChange_Request-1494
     PFILE=/opt/open-xchange/etc/linkedinoauth.properties
-    if ! ox_exists_property com.openexchange.oauth.linkedin $PFILE; then
-       if grep -E '^com.openexchange.*REPLACE_THIS_WITH_THE_KEY_FROM' $PFILE > /dev/null; then
-           ox_set_property com.openexchange.oauth.linkedin false $PFILE
-       else
-           ox_set_property com.openexchange.oauth.linkedin true $PFILE
-       fi
-    fi
-
-    # SoftwareChange_Request-1501
-    # updated by SoftwareChange_Request-1710
-    ox_add_property com.openexchange.subscribe.socialplugin.linkedin.autorunInterval 1d /opt/open-xchange/etc/linkedinsubscribe.properties
 
     # SoftwareChange_Request-2410
-    PFILE=/opt/open-xchange/etc/linkedinoauth.properties
     OLDNAMES=( com.openexchange.socialplugin.linkedin.apikey com.openexchange.socialplugin.linkedin.apisecret )
     NEWNAMES=( com.openexchange.oauth.linkedin.apiKey com.openexchange.oauth.linkedin.apiSecret )
     for I in $(seq 1 ${#OLDNAMES[@]}); do
@@ -90,9 +69,7 @@ if [ ${1:-0} -eq 2 ]; then
     done
 
     # SoftwareChange_Request-4123
-    PFILE=/opt/open-xchange/etc/linkedinoauth.properties
     ox_add_property com.openexchange.oauth.linkedin.redirectUrl REPLACE_THIS_WITH_YOUR_LINKEDIN_REDIRECT_URI ${PFILE}
-
 fi
 
 %clean
@@ -110,6 +87,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/linkedinsubscribe.properties
 
 %changelog
+* Thu Oct 12 2017 Marc Arens <marc.arens@open-xchange.com>
+prepare for 7.10.0 release
 * Fri May 19 2017 Marc Arens <marc.arens@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Marc Arens <marc.arens@open-xchange.com>

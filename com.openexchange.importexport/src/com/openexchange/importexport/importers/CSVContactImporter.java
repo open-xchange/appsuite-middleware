@@ -67,6 +67,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
@@ -219,7 +220,7 @@ public class CSVContactImporter extends AbstractImporter {
         {
             final int size = csv.size();
             intentions = new ArrayList<ImportIntention>(size);
-            final ContactSwitcher conSet = getContactSwitcher();
+            final ContactSwitcher conSet = getContactSwitcher(sessObj.getUser().getLocale());
             for (int lineNumber = 1; lineNumber < size; lineNumber++) {
                 // ...and writing them
                 final List<String> row = csv.get(lineNumber);
@@ -416,24 +417,26 @@ public class CSVContactImporter extends AbstractImporter {
         result.setEntryNumber(lineNumber);
     }
 
-    public ContactSwitcher getContactSwitcher() {
+    public ContactSwitcher getContactSwitcher(Locale locale) {
         final ContactSwitcherForSimpleDateFormat dateSwitch = new ContactSwitcherForSimpleDateFormat();
         dateSwitch.addDateFormat(DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM));
-
+        
         final TimeZone utc = TimeZoneUtils.getTimeZone("UTC");
         final SimpleDateFormat df1 = new SimpleDateFormat("dd.MM.yyyy");
         df1.setTimeZone(utc);
 
-        final SimpleDateFormat df2 = new SimpleDateFormat("MM/dd/yyyy");
-        df2.setTimeZone(utc);
-
-        final SimpleDateFormat df3 = new SimpleDateFormat("yyyy-MM-dd");
-        df3.setTimeZone(utc);
-
+        final SimpleDateFormat df2 = new SimpleDateFormat("yyyy-MM-dd");
+        df2.setTimeZone(utc);        
+        
         dateSwitch.addDateFormat(df1);
         dateSwitch.addDateFormat(df2);
-        dateSwitch.addDateFormat(df3);
-
+        
+        if (null != locale) {
+            final DateFormat df3 = DateFormat.getDateInstance(DateFormat.SHORT, locale);
+            df3.setTimeZone(utc);
+            dateSwitch.addDateFormat(df3);
+        }             
+        
         final ContactSwitcherForTimestamp timestampSwitch = new ContactSwitcherForTimestamp();
         final ContactSwitcherForBooleans boolSwitch = new ContactSwitcherForBooleans();
         ContactSwitcherForEmailAddresses emailSwitch = new ContactSwitcherForEmailAddresses();

@@ -2,33 +2,28 @@
 
 Name:           open-xchange-themes-default
 BuildArch: 	noarch
-#!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires:  ant
 %else
 BuildRequires:  ant-nodeps
 %endif
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+%if 0%{?suse_version}
+BuildRequires:  java-1_8_0-openjdk-devel
 %else
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires: java-1_7_0-openjdk-devel
-%else
-BuildRequires: java-devel >= 1.7.0
+BuildRequires:  java-1.8.0-openjdk-devel
 %endif
-%endif
-Version:	@OXVERSION@
-%define        ox_release 3
-Release:	%{ox_release}_<CI_CNT>.<B_CNT>
+Version:        @OXVERSION@
+%define         ox_release 0
+Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Enables the default themes in the UI
-Autoreqprov:   no
-Requires:	open-xchange-core
-Provides:	open-xchange-theme-default
+Autoreqprov:    no
+Requires:       open-xchange-core
+Provides:       open-xchange-theme-default
 
 %description
 Contains configuration files transfered through preferences interface to the UI. Tells the UI the installed themes.
@@ -47,22 +42,20 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %post
-if [ ${1:-0} -eq 2 ]; then
-    . /opt/open-xchange/lib/oxfunctions.sh
-    pfile=/opt/open-xchange/etc/settings/themes.properties
-    ox_remove_property "modules/themes/default" $pfile
-    ox_remove_property "modules/themes/light_breeze" $pfile
-fi
 
 %clean
 %{__rm} -rf %{buildroot}
 
 %files
 %defattr(-,root,root)
+%dir /opt/open-xchange
+%dir /opt/open-xchange/etc
 %dir /opt/open-xchange/etc/settings
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Thu Oct 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.10.0 release
 * Fri May 19 2017 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Marcus Klein <marcus.klein@open-xchange.com>

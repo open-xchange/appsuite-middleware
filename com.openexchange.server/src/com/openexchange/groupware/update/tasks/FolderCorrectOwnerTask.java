@@ -60,7 +60,6 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import com.openexchange.database.Databases;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
@@ -109,7 +108,7 @@ public final class FolderCorrectOwnerTask extends UpdateTaskAdapter {
         Logger log = org.slf4j.LoggerFactory.getLogger(FolderCorrectOwnerTask.class);
         log.info("Performing update task {}", FolderCorrectOwnerTask.class.getSimpleName());
 
-        Connection con = Database.getNoTimeout(params.getContextId(), true);
+        Connection con = params.getConnection();
         boolean rollback = false;
         final Map<Integer, List<Map<Integer, List<VersionControlResult>>>> resultMaps = new LinkedHashMap<Integer, List<Map<Integer, List<VersionControlResult>>>>();
         try {
@@ -191,7 +190,6 @@ public final class FolderCorrectOwnerTask extends UpdateTaskAdapter {
 
             // Ensure auto-commit mode is restored & push back to pool
             Databases.autocommit(con);
-            Database.backNoTimeout(params.getContextId(), true, con);
         }
         log.info("{} successfully performed.", FolderCorrectOwnerTask.class.getSimpleName());
     }

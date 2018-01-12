@@ -151,11 +151,15 @@ public final class BoxAccountAccess implements CapabilityAware {
         if (null == boxAccess) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }
-        return new BoxFileAccess((BoxOAuthAccess) boxAccess, account, session, this);
+        return new BoxFileAccess((BoxOAuthAccess) boxAccess, account, session, this, getBoxFolderAccess());
     }
 
     @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
+        return getBoxFolderAccess();
+    }
+
+    private BoxFolderAccess getBoxFolderAccess() throws OXException {
         OAuthAccess boxAccess = this.boxAccess;
         if (null == boxAccess) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();

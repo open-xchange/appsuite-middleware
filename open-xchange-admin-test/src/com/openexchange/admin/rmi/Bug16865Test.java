@@ -72,7 +72,7 @@ public final class Bug16865Test {
         db.setName("test" + System.currentTimeMillis());
         db.setPassword("secret");
         db.setMaster(Boolean.TRUE);
-        Database created = util.registerDatabase(db, cred);
+        Database created = util.registerDatabase(db, Boolean.FALSE, Integer.valueOf(0), cred);
         try {
             Database test = null;
             for (Database tmpDB : util.listAllDatabase(cred)) {

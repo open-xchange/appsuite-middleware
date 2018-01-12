@@ -56,7 +56,15 @@ import com.openexchange.importexport.formats.Format;
 @DispatcherNotes(defaultFormat="file")
 public class ICalExportAction extends AbstractExportAction {
 
-	private Exporter exporter;
+	private final Exporter exporter;
+
+    /**
+     * Initializes a new {@link ICalExportAction}.
+     */
+    public ICalExportAction() {
+        super();
+        exporter = new ICalExporter();
+    }
 
 	@Override
 	public Format getFormat() {
@@ -65,10 +73,7 @@ public class ICalExportAction extends AbstractExportAction {
 
 	@Override
 	public Exporter getExporter() {
-		if(this.exporter == null) {
-            this.exporter = new ICalExporter();
-        }
-		return this.exporter;
+		return exporter;
 	}
 
 }

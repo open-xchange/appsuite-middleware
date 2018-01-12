@@ -60,6 +60,7 @@ import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.ConvertUtils;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -123,6 +124,8 @@ final class BasicPropertyImpl implements BasicProperty {
         if (Strings.isEmpty(newValue)) {
             throw ConfigCascadeExceptionCodes.UNEXPECTED_ERROR.create("New value is null");
         }
+
+        newValue = ConvertUtils.saveConvert(newValue, false, true);
 
         // Require service
         ContextService contextService = services.getOptionalService(ContextService.class);
@@ -193,7 +196,8 @@ final class BasicPropertyImpl implements BasicProperty {
             String value = values.get(0);
             int pos = value.indexOf(';');
             if (pos < 0) {
-                this.value = value.replaceAll("%3B", ";").replace("%25", "%");
+                value = value.replaceAll("%3B", ";").replace("%25", "%");
+                this.value = ConvertUtils.loadConvert(value);
                 // Assume "protected=true" by default
                 metadata = new HashMap<String, String>(2);
                 metadata.put("protected", "true");
@@ -202,7 +206,8 @@ final class BasicPropertyImpl implements BasicProperty {
 
             // Parameters available
             String params = value.substring(pos).trim();
-            this.value = value.substring(0, pos).trim().replaceAll("%3B", ";").replace("%25", "%");
+            value = value.substring(0, pos).trim().replaceAll("%3B", ";").replace("%25", "%");
+            this.value = ConvertUtils.loadConvert(value);
             metadata = new LinkedHashMap<String, String>(2);
             pos = 0;
             while (pos >= 0 && pos < params.length()) {

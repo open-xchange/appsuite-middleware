@@ -53,6 +53,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
@@ -122,6 +123,10 @@ public class ExtendedFolderPermission extends ExtendedPermission {
                 jsonObject.put("type", "user");
                 addUserInfo(requestData, jsonObject, user);
             }
+        }
+        if (permission.getType() == FolderPermissionType.INHERITED) {
+            jsonObject.put("isInherited", true);
+            jsonObject.put("isInheritedFrom", permission.getPermissionLegator());
         }
         return jsonObject;
     }

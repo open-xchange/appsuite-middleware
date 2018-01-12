@@ -179,6 +179,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         Locale locale = LocaleTools.getLocale(sLocale);
         if (null == locale) {
             LOG.warn("Specified \"language\" parameter (\"{}\") cannot be parsed to a locale. Using user's locale instead.", sLocale);
+            return null;
         }
 
         return tryBestFitFor(locale);
@@ -636,18 +637,20 @@ public abstract class AbstractFolderAction implements AJAXActionService {
      * @throws OXException If the request body is invalid
      */
     protected UpdateData parseRequestBody(String treeId, String folderId, AJAXRequestData request, ServerSession session) throws OXException {
-        JSONObject folderObject;
-        JSONObject data = (JSONObject) request.requireData();
         UpdateData updateData = new UpdateData();
-        if (data.hasAndNotNull("folder")) {
-            try {
-                folderObject = data.getJSONObject("folder");
-                updateData.setNotificationData(parseNotificationData(data.optJSONObject("notification")));
-            } catch (JSONException e) {
-                throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
+        JSONObject folderObject;
+        {
+            JSONObject data = (JSONObject) request.requireData();
+            if (data.hasAndNotNull("folder")) {
+                try {
+                    folderObject = data.getJSONObject("folder");
+                    updateData.setNotificationData(parseNotificationData(data.optJSONObject("notification")));
+                } catch (JSONException e) {
+                    throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
+                }
+            } else {
+                folderObject = data;
             }
-        } else {
-            folderObject = data;
         }
 
         final ParsedFolder folder = new FolderParser(ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class)).parseFolder(folderObject, getTimeZone(request, session));

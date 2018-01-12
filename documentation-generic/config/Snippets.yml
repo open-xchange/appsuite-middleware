@@ -25,3 +25,34 @@ properties:
       file: snippets.properties
       packageName: open-xchange-core
       tags: ["Snippet", "Limit"]
+    - key: com.openexchange.snippet.filestore.quota.mode
+      description: |
+        Specifies the quota mode for snippets stored in the filestore.
+
+        Possible values:
+        <ul>
+          <li><code>context</code> - The quota of the filestore will be used.</li>
+          <li><code>dedicated</code> - Snippets doesn't influence filestore quota. Instead an own quota is used (See [[com.openexchange.snippet.filestore.quota.perUserLimit]]) </li>
+        </ul>
+
+      defaultValue: context
+      version: 7.10.0
+      reloadable: false
+      configcascadeAware: false
+      related: com.openexchange.snippet.filestore.quota.perUserLimit
+      file: snippets.properties
+      packageName: open-xchange-core
+      tags: ["Snippet", "Limit"]
+    - key: com.openexchange.snippet.filestore.quota.perUserLimit
+      description: |
+        Specifies the snippet quota limit in bytes. Supports specifying a value including an optional unit; e.g. <code>10 MB</code> or <code>17.5kB</code> (unit is ignore-case)
+        Supported units are: B, KB, MB, GB, and TB 
+        Only active in case [[com.openexchange.snippet.filestore.quota.mode]] is set to <code>dedicated</code>.
+      defaultValue: 5242880
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.snippet.filestore.quota.mode
+      file: snippets.properties
+      packageName: open-xchange-core
+      tags: ["Snippet", "Limit"]

@@ -56,7 +56,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -89,23 +88,24 @@ public final class MailAccountMigrateReplyToTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int contextId = params.getContextId();
-        final Connection con = Database.getNoTimeout(contextId, true);
-        boolean committed = false;
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
             con.setAutoCommit(false); // BEGIN
+            rollback = true;
+
             process("user_mail_account", con);
             process("user_transport_account", con);
+
             con.commit(); // COMMIT
-            committed = true;
+            rollback = false;
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (!committed) {
+            if (rollback) {
                 DBUtils.rollback(con);
             }
             DBUtils.autocommit(con);
-            Database.backNoTimeout(contextId, true, con);
         }
     }
 

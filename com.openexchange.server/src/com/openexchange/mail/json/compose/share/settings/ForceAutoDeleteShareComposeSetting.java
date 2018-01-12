@@ -75,7 +75,7 @@ public class ForceAutoDeleteShareComposeSetting extends AbstractShareComposeSett
 
     @Override
     protected Boolean getSettingValue(Session session, Context ctx, User user, UserConfiguration userConfig) throws OXException {
-        return Boolean.valueOf(Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.forceAutoDelete", false, session));
+        return Boolean.valueOf(Utilities.getBoolFromProperty(PROPERTY_FORCE_AUTO_DELETE, false, session));
     }
 
 }

@@ -56,24 +56,23 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
@@ -86,6 +85,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -147,15 +147,16 @@ public abstract class AbstractOneDriveResourceAccess {
          *
          * @param httpResponse The HTTP response
          * @throws OXException If an Open-Xchange error is yielded from status
+         * @throws ClientProtocolException To singal a client error
          */
-        void handleStatusCode(HttpResponse httpResponse) throws OXException;
+        void handleStatusCode(HttpResponse httpResponse) throws OXException, ClientProtocolException;
     }
 
     /** The default status code policy; accepting greater than/equal to <code>200</code> and lower than <code>300</code> */
     public static final StatusCodePolicy STATUS_CODE_POLICY_DEFAULT = new StatusCodePolicy() {
 
         @Override
-        public void handleStatusCode(HttpResponse httpResponse) throws OXException {
+        public void handleStatusCode(HttpResponse httpResponse) throws OXException, ClientProtocolException {
             StatusLine statusLine = httpResponse.getStatusLine();
             int statusCode = statusLine.getStatusCode();
             if (statusCode < 200 || statusCode >= 300) {
@@ -164,8 +165,15 @@ public abstract class AbstractOneDriveResourceAccess {
                 }
                 String reason;
                 try {
-                    JSONObject jsonObject = new JSONObject(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
-                    reason = jsonObject.getJSONObject("error").getString("message");
+                    JSONObject jResponse = new JSONObject(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
+                    JSONObject jError = jResponse.getJSONObject("error");
+                    String code = jError.getString("code");
+                    if ("resource_already_exists".equals(code)) {
+                        throw new DuplicateResourceException(jError.getString("message"));
+                    }
+                    reason = jError.getString("message");
+                } catch (DuplicateResourceException e) {
+                    throw e;
                 } catch (Exception e) {
                     reason = statusLine.getReasonPhrase();
                 }
@@ -178,14 +186,21 @@ public abstract class AbstractOneDriveResourceAccess {
     public static final StatusCodePolicy STATUS_CODE_POLICY_IGNORE_NOT_FOUND = new StatusCodePolicy() {
 
         @Override
-        public void handleStatusCode(HttpResponse httpResponse) throws OXException {
+        public void handleStatusCode(HttpResponse httpResponse) throws OXException, ClientProtocolException {
             StatusLine statusLine = httpResponse.getStatusLine();
             int statusCode = statusLine.getStatusCode();
             if ((statusCode < 200 || statusCode >= 300) && statusCode != 404) {
                 String reason;
                 try {
-                    JSONObject jsonObject = new JSONObject(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
-                    reason = jsonObject.getJSONObject("error").getString("message");
+                    JSONObject jResponse = new JSONObject(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));
+                    JSONObject jError = jResponse.getJSONObject("error");
+                    String code = jError.getString("code");
+                    if ("resource_already_exists".equals(code)) {
+                        throw new DuplicateResourceException(jError.getString("message"));
+                    }
+                    reason = jError.getString("message");
+                } catch (DuplicateResourceException e) {
+                    throw e;
                 } catch (Exception e) {
                     reason = statusLine.getReasonPhrase();
                 }
@@ -202,7 +217,7 @@ public abstract class AbstractOneDriveResourceAccess {
     protected static final String URL_API_BASE = "https://apis.live.net/v5.0/";
 
     /** The type constants for a folder */
-    private static final Set<String> TYPES_FOLDER = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(OneDriveConstants.TYPE_FOLDER, OneDriveConstants.TYPE_ALBUM)));
+    private static final Set<String> TYPES_FOLDER = ImmutableSet.of(OneDriveConstants.TYPE_FOLDER, OneDriveConstants.TYPE_ALBUM);
 
     /**
      * Checks if specified JSON item is a folder
@@ -255,7 +270,7 @@ public abstract class AbstractOneDriveResourceAccess {
                 try {
                     int keepOn = 1;
                     while (keepOn > 0) {
-                        DefaultHttpClient httpClient = oneDriveAccess.<DefaultHttpClient> getClient().client;
+                        HttpClient httpClient = oneDriveAccess.<HttpClient> getClient().client;
                         HttpGet method = new HttpGet(buildUri("/me/skydrive", initiateQueryString()));
                         request = method;
                         // HttpClients.setRequestTimeout(3500, method);
@@ -300,7 +315,7 @@ public abstract class AbstractOneDriveResourceAccess {
      * @throws ClientProtocolException If client protocol error occurs
      * @throws IOException If an I/O error occurs
      */
-    protected HttpResponse execute(HttpRequestBase method, DefaultHttpClient httpClient) throws ClientProtocolException, IOException {
+    protected HttpResponse execute(HttpRequestBase method, HttpClient httpClient) throws ClientProtocolException, IOException {
         //long st = System.currentTimeMillis();
         HttpResponse httpResponse = httpClient.execute(method);
         //long dur = System.currentTimeMillis() - st;
@@ -317,6 +332,33 @@ public abstract class AbstractOneDriveResourceAccess {
      * @param request The HTTP request
      */
     public static void reset(HttpRequestBase request) {
+        if (null != request) {
+            try {
+                request.reset();
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
+    }
+
+    /**
+     * Closes the supplied HTTP request & response resources silently.
+     *
+     * @param request The HTTP request to reset
+     * @param response The HTTP response to consume and close
+     */
+    public static void close(HttpRequestBase request, HttpResponse response) {
+        if (null != response) {
+            HttpEntity entity = response.getEntity();
+            if (null != entity) {
+                try {
+                    EntityUtils.consume(entity);
+                } catch (Exception e) {
+                    // Ignore
+                }
+            }
+        }
+
         if (null != request) {
             try {
                 request.reset();
@@ -427,7 +469,7 @@ public abstract class AbstractOneDriveResourceAccess {
      * @throws OXException If performing closure fails
      */
     protected <R> R perform(OneDriveClosure<R> closure) throws OXException {
-        return closure.perform(this, oneDriveAccess.<DefaultHttpClient> getClient().client, session);
+        return closure.perform(this, oneDriveAccess.<HttpClient> getClient().client, session);
     }
 
     /**

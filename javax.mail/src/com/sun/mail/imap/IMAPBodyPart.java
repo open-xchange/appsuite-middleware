@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -201,10 +201,18 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
 	    }
 	}
 
-	if (is == null)
-	    throw new MessagingException("No content");
-	else
-	    return is;
+	if (is == null) {
+	    message.forceCheckExpunged(); // may throw MessageRemovedException
+	    boolean errorOnNoContent = false;
+	    if (errorOnNoContent)
+	        throw new MessagingException("No content");
+	    // nope, the server doesn't think it's expunged.
+	    // can't tell the difference between the server returning NIL
+	    // and some other error that caused null to be returned above,
+	    // so we'll just assume it was empty content.
+	    is = new ByteArrayInputStream(new byte[0]);
+	}
+	return is;
     }
 
     /**
@@ -250,7 +258,6 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
 
 		    try {
 			// Write out the header
-			@SuppressWarnings("unchecked")
 			Enumeration<String> hdrLines
 				= super.getAllHeaderLines();
 			while (hdrLines.hasMoreElements())
@@ -282,6 +289,7 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
      * @return	the MIME format stream
      * @since	JavaMail 1.4.5
      */
+    @Override
     public InputStream getMimeStream() throws MessagingException {
 	/*
 	 * The IMAP protocol doesn't support returning the entire
@@ -291,6 +299,7 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
 	return new SequenceInputStream(getHeaderStream(), getContentStream());
     }
 	    
+    @Override
     public synchronized DataHandler getDataHandler() 
 		throws MessagingException {
 	if (dh == null) {
@@ -312,18 +321,22 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
 	return super.getDataHandler();
     }
 
+    @Override
     public void setDataHandler(DataHandler content) throws MessagingException {
 	throw new IllegalWriteException("IMAPBodyPart is read-only");
     }
 
+    @Override
     public void setContent(Object o, String type) throws MessagingException {
 	throw new IllegalWriteException("IMAPBodyPart is read-only");
     }
 
+    @Override
     public void setContent(Multipart mp) throws MessagingException {
 	throw new IllegalWriteException("IMAPBodyPart is read-only");
     }
 
+    @Override
     public String[] getHeader(String name) throws MessagingException {
 	loadHeaders();
 	return super.getHeader(name);
@@ -334,53 +347,56 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
 	throw new IllegalWriteException("IMAPBodyPart is read-only");
     }
 
+    @Override
     public void addHeader(String name, String value)
 		throws MessagingException {
 	throw new IllegalWriteException("IMAPBodyPart is read-only");
     }
 
+    @Override
     public void removeHeader(String name) throws MessagingException {
 	throw new IllegalWriteException("IMAPBodyPart is read-only");
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
     public Enumeration<Header> getAllHeaders() throws MessagingException {
 	loadHeaders();
 	return super.getAllHeaders();
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
     public Enumeration<Header> getMatchingHeaders(String[] names)
 		throws MessagingException {
 	loadHeaders();
 	return super.getMatchingHeaders(names);
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
     public Enumeration<Header> getNonMatchingHeaders(String[] names)
 		throws MessagingException {
 	loadHeaders();
 	return super.getNonMatchingHeaders(names);
     }
 
+    @Override
     public void addHeaderLine(String line) throws MessagingException {
 	throw new IllegalWriteException("IMAPBodyPart is read-only");
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
     public Enumeration<String> getAllHeaderLines() throws MessagingException {
 	loadHeaders();
 	return super.getAllHeaderLines();
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
     public Enumeration<String> getMatchingHeaderLines(String[] names)
 		throws MessagingException {
 	loadHeaders();
 	return super.getMatchingHeaderLines(names);
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
     public Enumeration<String> getNonMatchingHeaderLines(String[] names)
 		throws MessagingException {
 	loadHeaders();

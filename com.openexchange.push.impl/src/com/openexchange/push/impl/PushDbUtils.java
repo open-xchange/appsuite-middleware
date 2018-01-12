@@ -57,9 +57,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import com.openexchange.context.ContextService;
+import com.openexchange.context.PoolAndSchema;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -189,9 +191,10 @@ public class PushDbUtils {
      */
     public static List<PushUserClient> getPushClientRegistrations() throws OXException {
         DatabaseService service = Services.requireService(DatabaseService.class);
+        ContextService contextService = Services.requireService(ContextService.class);
 
         // Query context2push_registration table
-        Set<Integer> contextIds = getContextsWithPushRegistrations(service);
+        List<Integer> contextIds = getContextsWithPushRegistrations(service, contextService);
         if (contextIds.isEmpty()) {
             return Collections.emptyList();
         }
@@ -240,9 +243,10 @@ public class PushDbUtils {
      */
     public static List<PushUser> getPushRegistrations() throws OXException {
         DatabaseService service = Services.requireService(DatabaseService.class);
+        ContextService contextService = Services.requireService(ContextService.class);
 
         // Query context2push_registration table
-        Set<Integer> contextIds = getContextsWithPushRegistrations(service);
+        List<Integer> contextIds = getContextsWithPushRegistrations(service, contextService);
         if (contextIds.isEmpty()) {
             return Collections.emptyList();
         }
@@ -281,30 +285,30 @@ public class PushDbUtils {
         }
     }
 
-    private static Set<Integer> getContextsWithPushRegistrations(DatabaseService service) throws OXException {
+    private static List<Integer> getContextsWithPushRegistrations(DatabaseService service, ContextService contextService) throws OXException {
         Connection con = service.getReadOnly();
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             if (false == tableExists(con, "context2push_registration")) {
-                return Collections.emptySet();
+                return Collections.emptyList();
             }
             stmt = con.prepareStatement("SELECT cid FROM context2push_registration");
             rs = stmt.executeQuery();
             if (false == rs.next()) {
-                return Collections.emptySet();
+                return Collections.emptyList();
             }
-            Set<Integer> contextIds = new LinkedHashSet<Integer>(128);
-            Set<Integer> alreadyProcessed = new HashSet<Integer>(1024);
+
+            List<Integer> queriedContextIds = new ArrayList<>();
             do {
-                Integer contextId = Integer.valueOf(rs.getInt(1));
-                if (alreadyProcessed.add(contextId)) {
-                    contextIds.add(contextId);
-                    for (int iContextId : service.getContextsInSameSchema(contextId.intValue())) {
-                        alreadyProcessed.add(Integer.valueOf(iContextId));
-                    }
-                }
+                queriedContextIds.add(Integer.valueOf(rs.getInt(1)));
             } while (rs.next());
+
+            Map<PoolAndSchema, List<Integer>> schemaAssociations = contextService.getSchemaAssociationsFor(queriedContextIds);
+            List<Integer> contextIds = new ArrayList<Integer>(schemaAssociations.size());
+            for (List<Integer> cids : schemaAssociations.values()) {
+                contextIds.add(cids.get(0));
+            }
             return contextIds;
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());

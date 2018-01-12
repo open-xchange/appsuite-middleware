@@ -55,7 +55,7 @@ package com.openexchange.groupware.update;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface PerformParameters {
+public interface PerformParameters extends ConnectionProvider {
 
     /**
      * Gets the schema.
@@ -65,14 +65,21 @@ public interface PerformParameters {
     Schema getSchema();
 
     /**
-     * Gets the (representative) context identifier to aid fetching / returning the correct database connection from / to the pool.
+     * Gets the optional (representative) identifier of the context for which the update process has been initialized.
      * <p/>
      * <strong>Note:</strong> for update tasks working on {@link WorkingLevel#SCHEMA}-level, the context ID should not be used as
      * restriction in <code>WHERE</code> clauses; instead the task should be executed for all contexts in the schema.
      *
-     * @return The context ID
+     * @return The context ID or <code>-1</code>
      */
-    int getContextId();
+    int optContextId();
+
+    /**
+     * Gets thread-specific connection provider.
+     *
+     * @return The connection provider
+     */
+    ConnectionProvider getConnectionProvider();
 
     /**
      * Gets the progress state.

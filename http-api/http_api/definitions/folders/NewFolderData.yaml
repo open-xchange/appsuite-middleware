@@ -1,0 +1,5 @@
+type: object
+required:
+  - module
+properties:
+  $ref: ./RawFolderData.yaml

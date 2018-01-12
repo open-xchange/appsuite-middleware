@@ -114,6 +114,7 @@ public class MutableUserConfiguration extends UserConfiguration {
      * Enables/Disables WebDAV XML access in user configuration.
      *
      * @param enableWebDAVXML
+     * @deprecated
      */
     public void setWebDAVXML(final boolean enableWebDAVXML) {
         setPermission(enableWebDAVXML, WEBDAV_XML);

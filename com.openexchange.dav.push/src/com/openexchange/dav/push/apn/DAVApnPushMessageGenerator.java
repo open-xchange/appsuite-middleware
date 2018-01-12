@@ -50,6 +50,7 @@
 package com.openexchange.dav.push.apn;
 
 import java.util.Map;
+import org.json.JSONException;
 import com.openexchange.dav.push.DAVPushUtility;
 import com.openexchange.exception.OXException;
 import com.openexchange.pns.KnownTransport;
@@ -57,7 +58,6 @@ import com.openexchange.pns.Message;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMessageGenerator;
 import com.openexchange.pns.PushNotification;
-import javapns.json.JSONException;
 import javapns.notification.Payload;
 import javapns.notification.PushNotificationPayload;
 

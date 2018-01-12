@@ -49,11 +49,12 @@
 
 package com.openexchange.find.basic.mail;
 
-import static com.openexchange.find.basic.mail.Constants.FIELD_FILENAME_NAME;
 import static com.openexchange.find.basic.mail.Constants.FIELD_BCC;
 import static com.openexchange.find.basic.mail.Constants.FIELD_BODY;
 import static com.openexchange.find.basic.mail.Constants.FIELD_CC;
+import static com.openexchange.find.basic.mail.Constants.FIELD_FILENAME_NAME;
 import static com.openexchange.find.basic.mail.Constants.FIELD_FROM;
+import static com.openexchange.find.basic.mail.Constants.FIELD_HAS_ATTACHMENT;
 import static com.openexchange.find.basic.mail.Constants.FIELD_SUBJECT;
 import static com.openexchange.find.basic.mail.Constants.FIELD_TO;
 import static com.openexchange.find.basic.mail.Constants.FROM_AND_TO_FIELDS;
@@ -68,17 +69,18 @@ import static com.openexchange.find.common.CommonFacetType.GLOBAL;
 import static com.openexchange.find.common.CommonStrings.LAST_MONTH;
 import static com.openexchange.find.common.CommonStrings.LAST_WEEK;
 import static com.openexchange.find.common.CommonStrings.LAST_YEAR;
+import static com.openexchange.find.facet.Facets.newExclusiveBuilder;
 import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import static com.openexchange.find.mail.MailFacetType.CONTACTS;
+import static com.openexchange.find.mail.MailFacetType.FILENAME;
 import static com.openexchange.find.mail.MailFacetType.MAIL_TEXT;
 import static com.openexchange.find.mail.MailFacetType.SUBJECT;
-import static com.openexchange.find.mail.MailFacetType.FILENAME;
+import static com.openexchange.find.mail.MailStrings.FACET_FILENAME_NAME;
 import static com.openexchange.find.mail.MailStrings.FACET_FROM;
 import static com.openexchange.find.mail.MailStrings.FACET_FROM_AND_TO;
 import static com.openexchange.find.mail.MailStrings.FACET_MAIL_TEXT;
 import static com.openexchange.find.mail.MailStrings.FACET_SUBJECT;
 import static com.openexchange.find.mail.MailStrings.FACET_TO;
-import static com.openexchange.find.mail.MailStrings.FACET_FILENAME_NAME;
 import static com.openexchange.java.SimpleTokenizer.tokenize;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -110,6 +112,7 @@ import com.openexchange.find.basic.AbstractContactFacetingModuleSearchDriver;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.basic.common.Comparison;
 import com.openexchange.find.common.CommonFacetType;
+import com.openexchange.find.common.CommonStrings;
 import com.openexchange.find.common.FolderType;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.DisplayItem;
@@ -124,6 +127,7 @@ import com.openexchange.find.facet.SimpleDisplayItem;
 import com.openexchange.find.facet.SimpleFacet;
 import com.openexchange.find.mail.MailDocument;
 import com.openexchange.find.mail.MailFacetType;
+import com.openexchange.find.mail.MailStrings;
 import com.openexchange.find.spi.SearchConfiguration;
 import com.openexchange.find.util.DisplayItems;
 import com.openexchange.find.util.TimeFrame;
@@ -142,13 +146,13 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.ANDTerm;
-import com.openexchange.mail.search.FileNameTerm;
 import com.openexchange.mail.search.BccTerm;
 import com.openexchange.mail.search.BodyTerm;
 import com.openexchange.mail.search.CatenatingTerm;
 import com.openexchange.mail.search.CcTerm;
 import com.openexchange.mail.search.ComparablePattern;
 import com.openexchange.mail.search.ComparisonType;
+import com.openexchange.mail.search.FileNameTerm;
 import com.openexchange.mail.search.FromTerm;
 import com.openexchange.mail.search.ORTerm;
 import com.openexchange.mail.search.ReceivedDateTerm;
@@ -156,6 +160,7 @@ import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.SentDateTerm;
 import com.openexchange.mail.search.SubjectTerm;
 import com.openexchange.mail.search.ToTerm;
+import com.openexchange.mail.search.UserFlagTerm;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.tools.session.ServerSession;
 
@@ -221,7 +226,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         parameters.put(AutocompleteParameters.REQUIRE_EMAIL, Boolean.TRUE);
         parameters.put(AutocompleteParameters.IGNORE_DISTRIBUTION_LISTS, Boolean.TRUE);
         List<Contact> contacts = autocompleteContacts(session, autocompleteRequest, parameters);
-        List<Facet> facets = new ArrayList<Facet>(5);
+        List<Facet> facets = new ArrayList<Facet>(6);
         List<String> prefixTokens = null;
         int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
 
@@ -230,9 +235,11 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
             @Override
             public Object[] call(MailServletInterface mailServletInterface, MailFolder folder) throws OXException {
-                Object[] vals = new Object[2];
+                Object[] vals = new Object[3];
                 vals[0] = folder;
                 vals[1] = prefixAvailable ? Boolean.valueOf(mailServletInterface.getMailConfig().getCapabilities().hasFileNameSearch()) : Boolean.FALSE;
+                vals[2] = Boolean.valueOf(mailServletInterface.getMailConfig().getCapabilities().hasAttachmentSearch());
+
                 return vals;
             }
         });
@@ -248,6 +255,9 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         } else {
             prefixTokens = Collections.emptyList();
         }
+        if ((values[2] != null) && ((Boolean) values[2]).booleanValue()) {
+            addHasAttachmentFacet(facets);
+        }
 
         MailFolder folder = (MailFolder) values[0];
         boolean toAsDefaultOption = folder.isSent();
@@ -258,7 +268,21 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
         addContactsFacet(toAsDefaultOption, facets, contacts, prefix, prefixTokens, session);
         addDateFacet(facets);
+
         return new AutocompleteResult(facets);
+    }
+
+    private static void addHasAttachmentFacet(List<Facet> facets) {
+        List<String> fields = Collections.singletonList(Constants.FIELD_HAS_ATTACHMENT);
+
+        Facet hasAttachmentFacet = newExclusiveBuilder(MailFacetType.HAS_ATTACHMENT)
+            .addValue(buildStaticFacetValue(CommonStrings.FACET_VALUE_TRUE, MailStrings.HAS_ATTACHMENT_TRUE, fields, CommonStrings.FACET_VALUE_TRUE))
+            .build();
+        facets.add(hasAttachmentFacet);
+    }
+
+    private static FacetValue buildStaticFacetValue(String id, String displayName, List<String> filterFields, String filterQuery) {
+        return FacetValue.newBuilder(id).withLocalizableDisplayItem(displayName).withFilter(Filter.of(filterFields, filterQuery)).build();
     }
 
     @Override
@@ -274,17 +298,11 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         }
 
         List<MailMessage> messages = accessMailStorage(searchRequest, session, new MailServletClosure<List<MailMessage>>() {
+
             @Override
             public List<MailMessage> call(MailServletInterface mailServletInterface, MailFolder folder) throws OXException {
                 SearchTerm<?> searchTerm = prepareSearchTerm(folder, searchRequest);
-                List<MailMessage> messages = searchMessages(
-                    mailServletInterface,
-                    folder,
-                    searchTerm,
-                    mailFields,
-                    headers,
-                    searchRequest.getStart(),
-                    searchRequest.getSize());
+                List<MailMessage> messages = searchMessages(mailServletInterface, folder, searchTerm, mailFields, headers, searchRequest.getStart(), searchRequest.getSize());
                 return messages;
             }
         });
@@ -335,24 +353,11 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     private static void addSimpleFacets(List<Facet> facets, String prefix, List<String> prefixTokens, boolean addFileNameSearch) {
         if (!prefixTokens.isEmpty()) {
 
-            facets.add(newSimpleBuilder(GLOBAL)
-                .withSimpleDisplayItem(prefix)
-                .withFilter(Filter.of(GLOBAL.getId(), prefixTokens))
-                .build());
+            facets.add(newSimpleBuilder(GLOBAL).withSimpleDisplayItem(prefix).withFilter(Filter.of(GLOBAL.getId(), prefixTokens)).build());
 
-            facets.add(buildSimpleFacet(
-                SUBJECT,
-                FACET_SUBJECT,
-                prefix,
-                FIELD_SUBJECT,
-                prefixTokens));
+            facets.add(buildSimpleFacet(SUBJECT, FACET_SUBJECT, prefix, FIELD_SUBJECT, prefixTokens));
 
-            facets.add(buildSimpleFacet(
-                MAIL_TEXT,
-                FACET_MAIL_TEXT,
-                prefix,
-                FIELD_BODY,
-                prefixTokens));
+            facets.add(buildSimpleFacet(MAIL_TEXT, FACET_MAIL_TEXT, prefix, FIELD_BODY, prefixTokens));
 
             if (addFileNameSearch) {
                 facets.add(buildSimpleFacet(FILENAME, FACET_FILENAME_NAME, prefix, FIELD_FILENAME_NAME, prefixTokens));
@@ -361,27 +366,11 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     }
 
     private static SimpleFacet buildSimpleFacet(FacetType type, String formatString, String formatArg, String filterField, List<String> prefixTokens) {
-        return newSimpleBuilder(type)
-            .withFormattableDisplayItem(formatString, formatArg)
-            .withFilter(Filter.of(filterField, prefixTokens))
-            .build();
+        return newSimpleBuilder(type).withFormattableDisplayItem(formatString, formatArg).withFilter(Filter.of(filterField, prefixTokens)).build();
     }
 
     private static void addDateFacet(List<Facet> facets) {
-        facets.add(Facets.newExclusiveBuilder(DATE)
-            .addValue(FacetValue.newBuilder(QUERY_LAST_WEEK)
-                .withLocalizableDisplayItem(LAST_WEEK)
-                .withFilter(Filter.of(FIELD_DATE, QUERY_LAST_WEEK))
-                .build())
-            .addValue(FacetValue.newBuilder(QUERY_LAST_MONTH)
-                .withLocalizableDisplayItem(LAST_MONTH)
-                .withFilter(Filter.of(FIELD_DATE, QUERY_LAST_MONTH))
-                .build())
-            .addValue(FacetValue.newBuilder(QUERY_LAST_YEAR)
-                .withLocalizableDisplayItem(LAST_YEAR)
-                .withFilter(Filter.of(FIELD_DATE, QUERY_LAST_YEAR))
-                .build())
-            .build());
+        facets.add(Facets.newExclusiveBuilder(DATE).addValue(FacetValue.newBuilder(QUERY_LAST_WEEK).withLocalizableDisplayItem(LAST_WEEK).withFilter(Filter.of(FIELD_DATE, QUERY_LAST_WEEK)).build()).addValue(FacetValue.newBuilder(QUERY_LAST_MONTH).withLocalizableDisplayItem(LAST_MONTH).withFilter(Filter.of(FIELD_DATE, QUERY_LAST_MONTH)).build()).addValue(FacetValue.newBuilder(QUERY_LAST_YEAR).withLocalizableDisplayItem(LAST_YEAR).withFilter(Filter.of(FIELD_DATE, QUERY_LAST_YEAR)).build()).build());
     }
 
     private static void addContactsFacet(boolean toAsDefaultOption, List<Facet> facets, List<Contact> contacts, String prefix, List<String> prefixTokens, ServerSession session) {
@@ -390,7 +379,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         for (Contact contact : contacts) {
             String valueId = prepareFacetValueId("contact", session.getContextId(), Integer.toString(contact.getObjectID()));
             List<String> queries = extractMailAddessesFrom(contact);
-            builder.addValue(buildContactValue(valueId, queries, DisplayItems.convert(contact), toAsDefaultOption, session));
+            builder.addValue(buildContactValue(valueId, queries, DisplayItems.convert(contact, session.getUser().getLocale()), toAsDefaultOption, session));
             valuesAdded = true;
         }
 
@@ -420,10 +409,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             options.add(all);
         }
 
-        return FacetValue.newBuilder(valueId)
-            .withDisplayItem(item)
-            .withOptions(options)
-            .build();
+        return FacetValue.newBuilder(valueId).withDisplayItem(item).withOptions(options).build();
     }
 
     static List<MailMessage> searchMessages(MailServletInterface mailServletInterface, MailFolder folder, SearchTerm<?> searchTerm, MailField[] fields, String headers[], int start, int size) throws OXException {
@@ -443,7 +429,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     }
 
     private static CatenatingTerm catenationFor(OP op, SearchTerm<?> t1, SearchTerm<?> t2) {
-        switch(op) {
+        switch (op) {
             case OR:
                 return new ORTerm(t1, t2);
 
@@ -507,6 +493,11 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         SearchTerm<?> attachmentTerm = prepareTermForFacet(searchRequest, MailFacetType.FILENAME, folder, OP.AND, OP.AND, OP.AND);
         if (attachmentTerm != null) {
             facetTerms.add(attachmentTerm);
+        }
+
+        SearchTerm<?> hasAttachmentTerm = prepareTermForFacet(searchRequest, MailFacetType.HAS_ATTACHMENT, folder, OP.AND, OP.AND, OP.AND);
+        if (hasAttachmentTerm != null) {
+            facetTerms.add(hasAttachmentTerm);
         }
 
         SearchTerm<?> contactsTerm = prepareTermForFacet(searchRequest, MailFacetType.CONTACTS, folder, OP.AND, OP.OR, OP.OR);
@@ -704,6 +695,9 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             return buildDateTerm(comparison, timestamp.longValue(), isOutgoingFolder);
         } else if (FIELD_FILENAME_NAME.equals(field)) {
             return new FileNameTerm(query);
+        } else if (FIELD_HAS_ATTACHMENT.equals(field)) {
+            boolean hasAttachment = Boolean.parseBoolean(query);
+            return new UserFlagTerm(hasAttachment ? MailMessage.HAS_ATTACHMENT_LABEL : MailMessage.HAS_NO_ATTACHMENT_LABEL, true);
         }
 
         throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
@@ -713,38 +707,32 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         Date date = new Date(timestamp);
         ComparisonType type;
         switch (comparison) {
-            case EQUALS:
-            {
+            case EQUALS: {
                 type = ComparisonType.EQUALS;
                 break;
             }
 
-            case GREATER_THAN:
-            {
+            case GREATER_THAN: {
                 type = ComparisonType.GREATER_THAN;
                 break;
             }
 
-            case LOWER_THAN:
-            {
+            case LOWER_THAN: {
                 type = ComparisonType.LESS_THAN;
                 break;
             }
 
-            case GREATER_EQUALS:
-            {
+            case GREATER_EQUALS: {
                 type = ComparisonType.GREATER_EQUALS;
                 break;
             }
 
-            case LOWER_EQUALS:
-            {
+            case LOWER_EQUALS: {
                 type = ComparisonType.LESS_EQUALS;
                 break;
             }
 
-            default:
-            {
+            default: {
                 type = ComparisonType.EQUALS;
                 break;
             }
@@ -760,7 +748,6 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
         return new ReceivedDateTerm(comparisonType, date);
     }
-
 
     private static Pair<Comparison, Long> parseDateQuery(String query) throws OXException {
         if (Strings.isEmpty(query)) {

@@ -239,6 +239,26 @@ gblQueryParamMailColumns:
   type: string
   description: A comma-separated list of either columns or header names to return, like "600,601,X-Custom-Header". Each column is specified by a numeric column identifier, see [Detailed mail data](#detailed-mail-data).
   required: true
+gblQueryParamMailHeaders:
+  name: headers
+  in: query
+  type: string
+  description: A comma-separated list of header names to return, like "From,X-Custom-Header". This parameter can be used in addition to the columns parameter.
+  required: false
+gblQueryParamMailUnseen:
+  name: unseen
+  in: query
+  type: boolean
+  description: If `true` only mails without the `\Seen` flag are returned.
+  required: false
+  default: false
+gblQueryParamMailDeleted:
+  name: deleted
+  in: query
+  type: boolean
+  description: If `false` only mails without the `\Deleted` flag are returned.
+  required: false
+  default: true
 gblQueryParamInfostoreFolder:
   name: folder
   in: query
@@ -305,4 +325,22 @@ glbQueryParamsCryptoAuth:
   type: string
   description: Authentication token used for Guard in order to decrypt or sign items.  Required if the token is not attached to the session and the decrypt flag was sent.
   required: false
-
+glbQueryParamsRampUp:
+  in: formData
+  name: rampup
+  type: boolean
+  description: Determines whether client specific rampup data should be returned with a successfull login request or not.
+  required: false
+glbQueryParamsRampUpFor:
+  in: formData
+  name: rampupFor
+  type: string
+  description: Optional client identifier which is used to retrieve the rampup data.
+  required: false
+glbQueryParamsAllowEnqueue:
+  in: query
+  name: allow_enqueue
+  type: boolean
+  description: Optional flag that specifies whether the request is allowed for being submitted to job queue.
+  required: false
+  default: false

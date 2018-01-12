@@ -9,17 +9,13 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-core
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+%if 0%{?suse_version}
+BuildRequires: java-1_8_0-openjdk-devel
 %else
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires: java-1_7_0-openjdk-devel
-%else
-BuildRequires: java-devel >= 1.7.0
-%endif
+BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -87,7 +83,6 @@ if [ ${1:-0} -eq 2 ]; then # only when updating
     # SoftwareChange_Request-3414
     sed -i 's/-> Requires "emclient" capability/-> Requires "emclient_basic" or "emclient_premium" capability/' /opt/open-xchange/etc/client-onboarding-scenarios.yml
 
-
     # SoftwareChange_Request-3954
     PFILE=/opt/open-xchange/etc/client-onboarding.properties
     NAMES=( com.openexchange.client.onboarding.apple.mac.scenarios com.openexchange.client.onboarding.apple.ipad.scenarios com.openexchange.client.onboarding.apple.iphone.scenarios com.openexchange.client.onboarding.android.tablet.scenarios com.openexchange.client.onboarding.android.phone.scenarios com.openexchange.client.onboarding.windows.desktop.scenarios )
@@ -129,6 +124,8 @@ fi
 %doc com.openexchange.client.onboarding/doc/examples
 
 %changelog
+* Thu Oct 12 2017 Thorben Betten <thorben.betten@open-xchange.com>
+prepare for 7.10.0 release
 * Fri May 19 2017 Thorben Betten <thorben.betten@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Thorben Betten <thorben.betten@open-xchange.com>

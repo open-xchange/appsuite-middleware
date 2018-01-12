@@ -71,6 +71,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -139,7 +140,11 @@ public final class GetReplyAllAction extends AbstractMailAction {
             String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
             String view = req.getParameter(Mail.PARAMETER_VIEW);
             String csid = req.getParameter(AJAXServlet.PARAMETER_CSID);
-            UserSettingMail usmNoSave = session.getUserSettingMail().clone();
+            UserSettingMail userSettingMail = session.getUserSettingMail();
+            if (userSettingMail == null) {
+                throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("Unable to retrieve the mail settings.");
+            }
+            UserSettingMail usmNoSave = userSettingMail.clone();
             /*
              * Deny saving for this request-specific settings
              */

@@ -70,6 +70,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageCaseInsensitiveAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolderAccess;
@@ -104,7 +105,7 @@ import com.sun.mail.imap.SortTerm;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class MailDriveFileAccess extends AbstractMailDriveResourceAccess implements FileStorageFileAccess, FileStorageSequenceNumberProvider, FileStorageReadOnly, FileStorageMailAttachments, FileStorageRangeFileAccess {
+public class MailDriveFileAccess extends AbstractMailDriveResourceAccess implements FileStorageFileAccess, FileStorageSequenceNumberProvider, FileStorageReadOnly, FileStorageMailAttachments, FileStorageRangeFileAccess, FileStorageCaseInsensitiveAccess {
 
     /** The fetch profile for a virtual folder */
     public static final FetchProfile FETCH_PROFILE_VIRTUAL = new FetchProfile() {

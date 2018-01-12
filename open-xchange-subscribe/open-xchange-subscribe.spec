@@ -9,17 +9,13 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-oauth
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+%if 0%{?suse_version}
+BuildRequires: java-1_8_0-openjdk-devel
 %else
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires: java-1_7_0-openjdk-devel
-%else
-BuildRequires: java-devel >= 1.7.0
-%endif
+BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -67,103 +63,6 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    CONFFILES="crawler.properties linkedinsubscribe.properties microformatSubscription.properties yahoosubscribe.properties"
-    for FILE in ${CONFFILES}; do
-        ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc "$FILE"
-    done
-
-    #SoftwareChange_Request-1318
-    pfile=/opt/open-xchange/etc/microformatSubscription.properties
-    if ! ox_exists_property com.openexchange.subscribe.microformats.allowedHosts $pfile; then
-        ox_set_property com.openexchange.subscribe.microformats.allowedHosts '' $pfile
-    fi
-
-    #SoftwareChange_Request-1284
-    pfile=/opt/open-xchange/etc/crawler.properties
-    for prop in com.openexchange.subscribe.crawler.yahoocom \
-                com.openexchange.subscribe.xing; do
-        if ox_exists_property $prop $pfile; then
-            ox_remove_property $prop $pfile
-        fi
-    done
-
-    #SoftwareChange_Request-1091
-    pfile=/opt/open-xchange/etc/crawler.properties
-    if grep -E '^com.openexchange.subscribe.crawler.path.*/' $pfile >/dev/null; then
-        ox_set_property com.openexchange.subscribe.crawler.path crawlers $pfile
-    fi
-
-    # SoftwareChange_Request-1501
-    # updated by SoftwareChange_Request-1710
-    FILES=( crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties crawler.properties microformatSubscription.properties microformatSubscription.properties yahoosubscribe.properties )
-    NEWPROPS=( com.openexchange.subscribe.crawler.googlemail.autorunInterval com.openexchange.subscribe.xing.autorunInterval com.openexchange.subscribe.crawler.webde.autorunInterval com.openexchange.subscribe.crawler.google.calendar.autorunInterval com.openexchange.subscribe.crawler.t-online.de.autorunInterval com.openexchange.subscribe.crawler.gmx.de.autorunInterval com.openexchange.subscribe.crawler.msn.de.autorunInterval com.openexchange.subscribe.crawler.suncontacts.autorunInterval com.openexchange.subscribe.crawler.suncalendar.autorunInterval com.openexchange.subscribe.crawler.suntasks.autorunInterval com.openexchange.subscribe.microformats.contacts.http.autorunInterval com.openexchange.subscribe.microformats.infostore.http.autorunInterval com.openexchange.subscribe.socialplugin.yahoo.autorunInterval )
-    for I in $(seq 1 ${#NEWPROPS[@]}); do
-        NEWPROP=${NEWPROPS[$I-1]}
-        PFILE=/opt/open-xchange/etc/${FILES[$I-1]}
-        if ! ox_exists_property $NEWPROP $PFILE; then
-            ox_set_property $NEWPROP 1d $PFILE
-        fi
-    done
-
-    # SoftwareChange_Request-1613
-    pfile=/opt/open-xchange/etc/crawler.properties
-    if ! ox_exists_property com.openexchange.subscribe.xing $pfile; then
-        ox_set_property com.openexchange.subscribe.xing true $pfile
-    fi
-
-    #SoftwareChange_Request-1623
-    PFILE=/opt/open-xchange/etc/crawler.properties
-    NEWPROPS=( com.openexchange.subscribe.crawler.gmx.de com.openexchange.subscribe.crawler.yahoocom com.openexchange.subscribe.crawler.web.de )
-    for I in $(seq 1 ${#NEWPROPS[@]}); do
-        NEWPROP=${NEWPROPS[$I-1]}
-        if ! ox_exists_property $NEWPROP $PFILE; then
-            ox_set_property $NEWPROP true $PFILE
-        fi
-    done
-
-    #SoftwareChange_Request-1710
-    pfile=/opt/open-xchange/etc/crawler.properties
-    for prop in com.openexchange.subscribe.crawler.gmx.com com.openexchange.subscribe.crawler.gmx; do
-        if ox_exists_property ${prop}.autorunInterval $pfile; then
-            ox_remove_property ${prop}.autorunInterval $pfile
-        fi
-        if ox_exists_property $prop $pfile; then
-            ox_remove_property $prop $pfile
-        fi
-    done
-
-    #SoftwareChange_Request-1800
-    pfile=/opt/open-xchange/etc/crawler.properties
-    for prop in com.openexchange.subscribe.crawler.updatepath com.openexchange.subscribe.crawler.updatedfile com.openexchange.subscribe.crawler.updateinterval com.openexchange.subscribe.crawler.enableautoupdate com.openexchange.subscribe.crawler.onlyupdatealreadyinstalled; do
-        if ox_exists_property $prop $pfile; then
-            ox_remove_property $prop $pfile
-        fi
-    done
-
-    #SoftwareChange_Request-1847
-    ox_move_config_file /opt/open-xchange/etc/crawlers /opt/open-xchange/etc/crawlers XING.yml xing.yml
-
-    find /opt/open-xchange/etc/crawlers -name "*.yml" -print0 | while read -d $'\0' i; do
-        ox_update_permissions "$i" open-xchange:root 644
-    done
-    ox_update_permissions "/opt/open-xchange/etc/crawlers" open-xchange:root 755
-
-    #SoftwareChange_Request-2145
-    pfile=/opt/open-xchange/etc/crawler.properties
-    for prop in com.openexchange.subscribe.crawler.googlemail com.openexchange.subscribe.crawler.google.calendar com.openexchange.subscribe.crawler.googlemail.autorunInterval com.openexchange.subscribe.crawler.google.calendar.autorunInterval; do
-        if ox_exists_property $prop $pfile; then
-            ox_remove_property $prop $pfile
-        fi
-    done
-
-    # SoftwareChange_Request-2147
-    pfile=/opt/open-xchange/etc/crawler.properties
-    for prop in com.openexchange.subscribe.xing com.openexchange.subscribe.xing.autorunInterval; do
-        if ox_exists_property $prop $pfile; then
-            ox_remove_property $prop $pfile
-        fi
-    done
-
     # SoftwareChange_Request-2470
     ox_add_property com.openexchange.subscribe.microformats.createModifyEnabled false /opt/open-xchange/etc/microformatSubscription.properties
 
@@ -210,6 +109,8 @@ fi
 %doc docs/
 
 %changelog
+* Thu Oct 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.10.0 release
 * Fri May 19 2017 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Marcus Klein <marcus.klein@open-xchange.com>

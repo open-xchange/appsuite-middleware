@@ -69,6 +69,7 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.UserizedFile;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.file.storage.composition.crypto.CryptoAwareSharingService;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
@@ -116,6 +117,7 @@ public class ShareHelper {
                 throw FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(
                     fileAccess.getAccountAccess().getService().getDisplayName(), document.getFolderId(), session.getContextId());
             }
+
             /*
              * Remove new guests from the document and check them in terms of permission bits
              */
@@ -222,11 +224,31 @@ public class ShareHelper {
      */
     public static IDTuple applyGuestPermissions(Session session, FileStorageFileAccess fileAccess, File document, ComparedObjectPermissions comparedPermissions) throws OXException {
         List<FileStorageObjectPermission> updatedPermissions = handleGuestPermissions(session, fileAccess, document, comparedPermissions);
+        updateEncryptionForGuests(session, fileAccess, document, comparedPermissions, updatedPermissions);
         if (null != updatedPermissions) {
             document.setObjectPermissions(updatedPermissions);
             return fileAccess.saveFileMetadata(document, document.getSequenceNumber(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
         } else {
             return new IDTuple(document.getFolderId(), document.getId());
+        }
+    }
+
+    /**
+     * Updates any encryption settings for Guests if applicable.  Should be called after Guests are created.
+     * @param session
+     * @param fileAccess
+     * @param document
+     * @param comparedPermissions
+     * @throws OXException
+     */
+    private static void updateEncryptionForGuests(Session session, FileStorageFileAccess fileAccess, File document, ComparedObjectPermissions comparedPermissions, List<FileStorageObjectPermission> updatedPermissions) throws OXException {
+        // Check if Encrypted/Guard file, and we need to change encryption in the file
+        CryptoAwareSharingService cryptoSharingService = Services.getServiceLookup().getOptionalService(CryptoAwareSharingService.class);
+        if (cryptoSharingService != null && comparedPermissions.hasChanges()) {
+            File oldDocument = fileAccess.getFileMetadata(document.getFolderId(), document.getId(), FileStorageFileAccess.CURRENT_VERSION);
+            if (cryptoSharingService.isEncrypted(oldDocument)) {
+                cryptoSharingService.updateSharing(session, document, fileAccess, comparedPermissions, updatedPermissions);
+            }
         }
     }
 

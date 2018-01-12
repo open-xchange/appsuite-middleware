@@ -2,7 +2,6 @@
 
 Name:          open-xchange-admin-user-copy
 BuildArch:     noarch
-#!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
 %else
@@ -10,17 +9,13 @@ BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-core
 BuildRequires: open-xchange-admin
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+%if 0%{?suse_version}
+BuildRequires: java-1_8_0-openjdk-devel
 %else
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires: java-1_7_0-openjdk-devel
-%else
-BuildRequires: java-devel >= 1.7.0
-%endif
+BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -75,6 +70,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %doc com.openexchange.admin.user.copy/ChangeLog
 
 %changelog
+* Thu Oct 12 2017 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+prepare for 7.10.0 release
 * Fri May 19 2017 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Jan Bauerdick <jan.bauerdick@open-xchange.com>

@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Monitoring
 Bundle-SymbolicName: com.openexchange.monitoring
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: ch.qos.logback.classic,
  ch.qos.logback.classic.boolex,
  ch.qos.logback.classic.db,
@@ -79,6 +79,7 @@ Import-Package: ch.qos.logback.classic,
  com.openexchange.server,
  com.openexchange.sessiond,
  com.openexchange.timer,
+ com.planetj.math.rabinhash,
  javax.crypto,
  javax.crypto.interfaces,
  javax.crypto.spec,

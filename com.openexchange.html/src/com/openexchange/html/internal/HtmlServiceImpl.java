@@ -68,6 +68,7 @@ import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -103,7 +104,10 @@ import org.htmlcleaner.Serializer;
 import org.htmlcleaner.SimpleHtmlSerializer;
 import org.htmlcleaner.TagNode;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Comment;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Node;
+import org.jsoup.select.NodeVisitor;
 import org.owasp.esapi.codecs.HTMLEntityCodec;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -113,6 +117,7 @@ import com.openexchange.html.HtmlSanitizeResult;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.HtmlServices;
 import com.openexchange.html.internal.emoji.EmojiRegistry;
+import com.openexchange.html.internal.filtering.FilterMaps;
 import com.openexchange.html.internal.image.DroppingImageHandler;
 import com.openexchange.html.internal.image.ImageProcessor;
 import com.openexchange.html.internal.image.ProxyRegistryImageHandler;
@@ -127,6 +132,7 @@ import com.openexchange.html.internal.parser.HtmlParser;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
 import com.openexchange.html.services.ServiceRegistry;
+import com.openexchange.html.whitelist.Whitelist;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
@@ -167,6 +173,8 @@ public final class HtmlServiceImpl implements HtmlService {
     private final Tika tika;
     private final String lineSeparator;
     private final HTMLEntityCodec htmlCodec;
+    private final DefaultWhitelist fullWhitelist;
+    private final DefaultWhitelist htmlOnlyWhitelist;
 
     /**
      * Initializes a new {@link HtmlServiceImpl}.
@@ -188,6 +196,15 @@ public final class HtmlServiceImpl implements HtmlService {
         this.htmlEntityMap = htmlEntityMap;
         tika = new Tika();
         htmlCodec = new HTMLEntityCodec();
+
+        DefaultWhitelist.Builder builder = DefaultWhitelist.builder();
+        builder.setHtmlWhitelistMap(FilterMaps.getStaticHTMLMap());
+        builder.setStyleWhitelistMap(FilterMaps.getStaticStyleMap());
+        fullWhitelist = builder.build();
+
+        builder = DefaultWhitelist.builder();
+        builder.setHtmlWhitelistMap(FilterMaps.getStaticHTMLMap());
+        htmlOnlyWhitelist = builder.build();
     }
 
     @Override
@@ -484,6 +501,11 @@ public final class HtmlServiceImpl implements HtmlService {
         return htmlCodec.encode(immune, input);
     }
 
+    @Override
+    public Whitelist getWhitelist(boolean withCss) {
+        return withCss ? fullWhitelist : htmlOnlyWhitelist;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -536,7 +558,10 @@ public final class HtmlServiceImpl implements HtmlService {
         try {
             String html = htmlContent;
 
-            boolean useJericho = HtmlServices.useJericho();
+            // Check if input is a full HTML document or a fragment of HTML to parse
+            boolean hasBody = html.indexOf("<body") >= 0 || html.indexOf("<BODY") >= 0;
+
+            boolean useJericho = options.isSanitize() && (HtmlSanitizeOptions.ParserPreference.JERICHO == options.getParserPreference() || HtmlServices.useJericho());
             if (useJericho) {
                 // Normalize the string
                 {
@@ -550,6 +575,8 @@ public final class HtmlServiceImpl implements HtmlService {
                         html = sb.toString();
                     }
                 }
+
+                html = removeComments(html, hasBody);
 
                 // Perform one-shot sanitizing
                 html = replacePercentTags(html);
@@ -601,10 +628,14 @@ public final class HtmlServiceImpl implements HtmlService {
                     throw HtmlExceptionCodes.TOO_BIG.create(I(maxLength), I(html.length()));
                 }
 
-                // Check if input is a full HTML document or a fragment of HTML to parse
-                boolean hasBody = html.indexOf("<body") >= 0 || html.indexOf("<BODY") >= 0;
-
                 if (options.isSanitize()) {
+                    boolean[] sanitized = new boolean[] { true };
+                    while (sanitized[0]) {
+                        sanitized[0] = false;
+                        // Start sanitizing round
+                        html = SaneScriptTags.saneScriptTags(html, sanitized);
+                    }
+
                     CleaningJsoupHandler handler = getJsoupHandlerFor(options.getOptConfigName());
                     handler.setDropExternalImages(options.isDropExternalImages()).setCssPrefix(options.getCssPrefix()).setMaxContentSize(options.getMaxContentSize());
                     handler.setSuppressLinks(options.isSuppressLinks()).setReplaceBodyWithDiv(options.isReplaceBodyWithDiv());
@@ -674,6 +705,29 @@ public final class HtmlServiceImpl implements HtmlService {
             LOG.warn("HTML content will be returned un-sanitized.", e);
             return htmlSanitizeResult;
         }
+    }
+
+    private static String removeComments(String html, boolean hasBody) {
+        Document document = Jsoup.parse(html);
+        final Set<Node> removedNodes = new HashSet<>(16, 0.9F);
+        document.traverse(new NodeVisitor() {
+
+            @Override
+            public void tail(Node node, int depth) {
+                // Ignore
+            }
+
+            @Override
+            public void head(Node node, int depth) {
+                if (node instanceof Comment) {
+                    removedNodes.add(node);
+                }
+            }
+        });
+        for (Node node : removedNodes) {
+            node.remove();
+        }
+        return hasBody ? document.outerHtml() : document.body().html();
     }
 
     private FilterJerichoHandler getHandlerFor(int initialCapacity, String optionalConfigName) {
@@ -2134,7 +2188,7 @@ public final class HtmlServiceImpl implements HtmlService {
      */
     private static String asHex(final byte[] hash) {
         final int length = hash.length;
-        final char[] buf = new char[length * 2];
+        final char[] buf = new char[length << 1];
         for (int i = 0, x = 0; i < length; i++) {
             buf[x++] = HEX_CHARS[(hash[i] >>> 4) & 0xf];
             buf[x++] = HEX_CHARS[hash[i] & 0xf];

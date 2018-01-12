@@ -49,6 +49,9 @@
 
 package com.openexchange.appsuite;
 
+import java.util.Collection;
+import java.util.Collections;
+import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.login.DefaultAppSuiteLoginRampUp;
 import com.openexchange.server.ServiceLookup;
 
@@ -69,7 +72,51 @@ public class AppSuiteLoginRampUp extends DefaultAppSuiteLoginRampUp {
     }
 
     @Override
+    protected String getConfigInfix() {
+        return "open-xchange-appsuite";
+    }
+
+    @Override
     public boolean contributesTo(String client) {
         return "open-xchange-appsuite".equals(client);
+    }
+
+    @Override
+    protected Collection<Contribution> getExtendedContributions() {
+        Dispatcher ox = services.getService(Dispatcher.class);
+        if (null == ox) {
+            return Collections.emptyList();
+        }
+
+        return Collections.<Contribution> singletonList(new OnboardingDevicesContribution(ox));
+    }
+
+    // -------------------------------------------------------------------------------
+
+    private static final class OnboardingDevicesContribution extends AbstractDispatcherContribution {
+
+        OnboardingDevicesContribution(Dispatcher ox) {
+            super(ox);
+        }
+
+        @Override
+        public String getKey() {
+            return "onboardingDevices";
+        }
+
+        @Override
+        protected String[] getParams() {
+            return new String[0];
+        }
+
+        @Override
+        protected String getModule() {
+            return "onboarding";
+        }
+
+        @Override
+        protected String getAction() {
+            return "devices";
+        }
     }
 }

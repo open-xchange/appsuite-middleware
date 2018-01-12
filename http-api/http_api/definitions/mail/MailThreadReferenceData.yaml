@@ -1,22 +1,22 @@
 type: object
 properties:
   rootMailId:
-    type: String
+    type: string
     description: The unique id of the root mail.
   rootOriginalMailId:
-    type: String
+    type: string
     description: The original unique id of the root mail.
   rootOriginalFolderId:
-    type: String
+    type: string
     description: The original folder id of the root mail.
   latestMailId:
-    type: String
+    type: string
     description: The unique id of the latest mail.
   latestOriginalMailId:
-    type: String
+    type: string
     description: The original unique id of the latest mail.
   latestOriginalFolderId:
-    type: String
+    type: string
     description: The original folder id of the latest mail.
   latestReceivedDate:
     type: integer

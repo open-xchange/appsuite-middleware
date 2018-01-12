@@ -58,13 +58,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
@@ -91,16 +89,12 @@ public final class DropFKTaskv2 extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int cid = params.getContextId();
-        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-
-        boolean modified = false;
-        Connection con = null;
+        Connection con = params.getConnection();
         boolean rollback = false;
         try {
-            con = dbService.getForUpdateTask(cid);
             con.setAutoCommit(false);
             rollback = true;
+
             final List<String> tables = Arrays.asList(
                 "pop3_storage_deleted",
                 "pop3_storage_ids",
@@ -110,8 +104,9 @@ public final class DropFKTaskv2 extends UpdateTaskAdapter {
                 "user_transport_account"
             );
             for (final String table : tables) {
-                modified |= handleTable(table, con);
+                handleTable(table, con);
             }
+
             con.commit();
             rollback = false;
         } catch (final SQLException e) {
@@ -123,91 +118,25 @@ public final class DropFKTaskv2 extends UpdateTaskAdapter {
                 rollback(con);
             }
             autocommit(con);
-            if (modified) {
-                dbService.backForUpdateTask(cid, con);
-            } else {
-                dbService.backForUpdateTaskAfterReading(cid, con);
-            }
         }
 
         // Check for >>CONSTRAINT `pop3_storage_deleted_ibfk_1` FOREIGN KEY (`cid`, `user`) REFERENCES `user` (`cid`, `id`)<<
-        con = dbService.getForUpdateTask(cid);
-        modified = false;
-        try {
-            modified = dropForeignKeySafe("pop3_storage_deleted_ibfk_1", "pop3_storage_deleted", con);
-        } finally {
-            if (modified) {
-                dbService.backForUpdateTask(cid, con);
-            } else {
-                dbService.backForUpdateTaskAfterReading(cid, con);
-            }
-        }
+        dropForeignKeySafe("pop3_storage_deleted_ibfk_1", "pop3_storage_deleted", con);
 
         // Check for >>CONSTRAINT `pop3_storage_deleted_ibfk_2` FOREIGN KEY (`cid`, `user`, `id`) REFERENCES `user_mail_account` (`cid`, `user`, `id`)<<
-        con = dbService.getForUpdateTask(cid);
-        modified = false;
-        try {
-            modified = dropForeignKeySafe("pop3_storage_deleted_ibfk_2", "pop3_storage_deleted", con);
-        } finally {
-            if (modified) {
-                dbService.backForUpdateTask(cid, con);
-            } else {
-                dbService.backForUpdateTaskAfterReading(cid, con);
-            }
-        }
+        dropForeignKeySafe("pop3_storage_deleted_ibfk_2", "pop3_storage_deleted", con);
 
         // Check for >>CONSTRAINT `pop3_storage_ids_ibfk_1` FOREIGN KEY (`cid`, `user`) REFERENCES `user` (`cid`, `id`)<<
-        con = dbService.getForUpdateTask(cid);
-        modified = false;
-        try {
-            modified = dropForeignKeySafe("pop3_storage_ids_ibfk_1", "pop3_storage_ids", con);
-        } finally {
-            if (modified) {
-                dbService.backForUpdateTask(cid, con);
-            } else {
-                dbService.backForUpdateTaskAfterReading(cid, con);
-            }
-        }
+        dropForeignKeySafe("pop3_storage_ids_ibfk_1", "pop3_storage_ids", con);
 
         // Check for >>CONSTRAINT `pop3_storage_ids_ibfk_2` FOREIGN KEY (`cid`, `user`, `id`) REFERENCES `user_mail_account` (`cid`, `user`, `id`)<<
-        con = dbService.getForUpdateTask(cid);
-        modified = false;
-        try {
-            modified = dropForeignKeySafe("pop3_storage_ids_ibfk_2", "pop3_storage_ids", con);
-        } finally {
-            if (modified) {
-                dbService.backForUpdateTask(cid, con);
-            } else {
-                dbService.backForUpdateTaskAfterReading(cid, con);
-            }
-        }
+        dropForeignKeySafe("pop3_storage_ids_ibfk_2", "pop3_storage_ids", con);
 
         // Check "uid" column in prg_dates
-        con = dbService.getForUpdateTask(cid);
-        modified = false;
-        try {
-            modified = enlargeVarcharColumn("uid", 1024, "prg_dates", con);
-        } finally {
-            if (modified) {
-                dbService.backForUpdateTask(cid, con);
-            } else {
-                dbService.backForUpdateTaskAfterReading(cid, con);
-            }
-        }
+        enlargeVarcharColumn("uid", 1024, "prg_dates", con);
 
         // Check "uid" column in del_dates
-        con = dbService.getForUpdateTask(cid);
-        modified = false;
-        try {
-            modified = enlargeVarcharColumn("uid", 1024, "del_dates", con);
-        } finally {
-            if (modified) {
-                dbService.backForUpdateTask(cid, con);
-            } else {
-                dbService.backForUpdateTaskAfterReading(cid, con);
-            }
-        }
-
+        enlargeVarcharColumn("uid", 1024, "del_dates", con);
     }
 
     private boolean enlargeVarcharColumn(final String colName, final int newSize, final String tableName, final Connection con) throws OXException {

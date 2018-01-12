@@ -54,7 +54,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -89,14 +88,15 @@ public class AddStartTLSColumnForMailAccountTablesTask extends UpdateTaskAdapter
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         boolean force = configService.getBoolProperty("com.openexchange.mail.enforceSecureConnection", false);
-        Connection con = null;
+
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
-            con = dbService.getForUpdateTask(contextId);
             con.setAutoCommit(false);
+            rollback = true;
+
             Column column = new Column("starttls", "TINYINT UNSIGNED NOT NULL DEFAULT 0");
             for (String table : tables) {
                 if (false == Tools.columnExists(con, table, "starttls")) {
@@ -106,16 +106,18 @@ public class AddStartTLSColumnForMailAccountTablesTask extends UpdateTaskAdapter
             if (force) {
                 activateStartTLS(con, force);
             }
+
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            DBUtils.rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            DBUtils.rollback(con);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                DBUtils.rollback(con);
+            }
             DBUtils.autocommit(con);
-            dbService.backForUpdateTask(contextId, con);
         }
     }
 

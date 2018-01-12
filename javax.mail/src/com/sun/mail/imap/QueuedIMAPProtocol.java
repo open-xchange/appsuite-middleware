@@ -86,8 +86,8 @@ public class QueuedIMAPProtocol extends IMAPProtocol implements Comparable<Queue
      * <p>
      * Opens a connection to the given host at given port.
      */
-    public QueuedIMAPProtocol(final String name, final String host, final int port, final Properties props, final boolean isSSL, final MailLogger logger, final CountingQueue q, final QueuingIMAPStore store) throws IOException, ProtocolException {
-        super(name, host, port, props, isSSL, logger);
+    public QueuedIMAPProtocol(String name, String host, int port, String user, Properties props, boolean isSSL, MailLogger logger, CountingQueue q, QueuingIMAPStore store) throws IOException, ProtocolException {
+        super(name, host, port, user, props, isSSL, logger);
         this.queue = q;
         this.store = store;
     }

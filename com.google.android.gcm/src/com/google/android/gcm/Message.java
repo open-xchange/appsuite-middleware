@@ -20,6 +20,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * GCM message.
@@ -181,7 +182,7 @@ public final class Message implements Serializable {
     private Message(Builder builder) {
         collapseKey = builder.collapseKey;
         delayWhileIdle = builder.delayWhileIdle;
-        data = Collections.unmodifiableMap(builder.data);
+        data = ImmutableMap.copyOf(builder.data);
         timeToLive = builder.timeToLive;
         dryRun = builder.dryRun;
         restrictedPackageName = builder.restrictedPackageName;

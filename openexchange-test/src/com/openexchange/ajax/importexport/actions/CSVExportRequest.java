@@ -1,15 +1,20 @@
 
 package com.openexchange.ajax.importexport.actions;
 
+import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 import com.openexchange.ajax.importexport.actions.AbstractImportRequest.Action;
+import com.openexchange.java.Strings;
+import edu.emory.mathcs.backport.java.util.Arrays;
 
 public class CSVExportRequest extends AbstractExportRequest<CSVExportResponse> {
 
     private boolean exportDlists = true;
     private boolean failOnError = true;
-    private String objectId = "";
+    private final String body;
 
     public CSVExportRequest(int folderId) {
         this(folderId, true);
@@ -18,11 +23,13 @@ public class CSVExportRequest extends AbstractExportRequest<CSVExportResponse> {
     public CSVExportRequest(int folderId, boolean exportDlists) {
         super(Action.CSV, folderId);
         this.exportDlists = exportDlists;
+        this.body = "";
     }    
     
-    public CSVExportRequest(int folderId, String objectId) {
-        this(folderId, true);
-        this.objectId = objectId;
+    public CSVExportRequest(int folderId, boolean exportDlists, String body) {
+        super(Action.CSV, folderId);
+        this.exportDlists = exportDlists;
+        this.body = body;
     }
 
     @Override
@@ -31,8 +38,11 @@ public class CSVExportRequest extends AbstractExportRequest<CSVExportResponse> {
         if (!exportDlists) {
             parameters = parametersToAdd(new Parameter("export_dlists", false), parameters);
         }
-        if(null != objectId || !objectId.equals("")) {
-            parameters = parametersToAdd(new Parameter(AJAXServlet.PARAMETER_ID, this.objectId), parameters);
+        if (this.getFolderId() < 0) {
+            parameters = parametersToRemove(AJAXServlet.PARAMETER_FOLDERID, parameters);
+        }
+        if (!Strings.isEmpty(body)) {
+            parameters = parametersToAdd(new Parameter("body", body), parameters);
         }
         return parameters;
     }
@@ -47,6 +57,17 @@ public class CSVExportRequest extends AbstractExportRequest<CSVExportResponse> {
         System.arraycopy(parameters, 0, newParameters, 0, parameters.length);
         newParameters[newParameters.length - 1] = parameter;
         return newParameters;
+    }
+    
+    private com.openexchange.ajax.framework.AJAXRequest.Parameter[] parametersToRemove(String parameter, Parameter[] parameters) {
+        List<Parameter> list = Arrays.asList(parameters);
+        List<Parameter> newList = new ArrayList<Parameter>();
+        for(Parameter param : list){
+            if(!param.getName().equals(parameter)){
+                newList.add(param);
+            }
+        }
+        return newList.toArray(new Parameter[newList.size()]);
     }
 
 }

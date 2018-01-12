@@ -70,7 +70,7 @@ ox_set_JAVA_BIN() {
     fi
     test -x $JAVA_BIN || die "$0: unable to get path to java vm"
     version=$(detect_java_version)
-    if [ $version -lt 7 ]; then
+    if [ $version -lt 8 ]; then
       JAVA_BIN=/opt/open-xchange/sbin/insufficientjava
     fi
 }
@@ -555,6 +555,7 @@ ox_update_config_init() {
     local cini=$1
     local cinitemplate=$2
     local bdir=$3
+    local osgi_jar=$4
 
     test -z "$cini" && die \
         "ox_update_config_init: missing config.ini argument (arg 1)"
@@ -566,6 +567,11 @@ ox_update_config_init() {
     test -d $bdir || die "$bdir is not a directory"
     test -f $cinitemplate || die "$cinitemplate does not exist"
     test "$(echo $bdir/*.ini)" == "$bdir/*.ini" && die "$bdir is empty"
+
+    # update referenced osgi jar if given
+    if [[ -n "${osgi_jar}" ]]; then
+      sed -i -e "s;^\(osgi.framework=\).*$;\1file:${osgi_jar};" ${cinitemplate}
+    fi
 
     # read all installed bundles into an array
     local dirbundles=()

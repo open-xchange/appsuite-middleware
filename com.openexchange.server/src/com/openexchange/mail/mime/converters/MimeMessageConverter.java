@@ -1112,8 +1112,8 @@ public final class MimeMessageConverter {
                 /*
                  * Add all as regular headers; except previously inserted headers
                  */
-                for (final Enumeration<?> e = msg.getNonMatchingHeaders(ALREADY_INSERTED_HEADERS); e.hasMoreElements();) {
-                    final Header h = (Header) e.nextElement();
+                for (final Enumeration<Header> e = msg.getNonMatchingHeaders(ALREADY_INSERTED_HEADERS); e.hasMoreElements();) {
+                    final Header h = e.nextElement();
                     try {
                         mailMessage.addHeader(h.getName(), h.getValue());
                     } catch (final Exception exc) {
@@ -1416,8 +1416,8 @@ public final class MimeMessageConverter {
                 /*
                  * Add all as regular headers; except previously inserted headers
                  */
-                for (final Enumeration<?> e = msg.getNonMatchingHeaders(ALREADY_INSERTED_HEADERS); e.hasMoreElements();) {
-                    final Header h = (Header) e.nextElement();
+                for (final Enumeration<Header> e = msg.getNonMatchingHeaders(ALREADY_INSERTED_HEADERS); e.hasMoreElements();) {
+                    final Header h = e.nextElement();
                     try {
                         mailMessage.addHeader(h.getName(), h.getValue());
                     } catch (final Exception exc) {
@@ -2451,8 +2451,8 @@ public final class MimeMessageConverter {
                 }
             } else {
              */
-                for (final Enumeration<?> e = part.getAllHeaders(); e.hasMoreElements();) {
-                    final Header h = (Header) e.nextElement();
+                for (final Enumeration<Header> e = part.getAllHeaders(); e.hasMoreElements();) {
+                    final Header h = e.nextElement();
                     final String value = h.getValue();
                     if (value == null || isEmpty(value)) {
                         headers.addHeader(h.getName(), STR_EMPTY);

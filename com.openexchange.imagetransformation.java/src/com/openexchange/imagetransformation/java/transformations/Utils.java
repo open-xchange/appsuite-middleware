@@ -57,7 +57,6 @@ import java.awt.image.ColorModel;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +67,7 @@ import javax.imageio.spi.IIORegistry;
 import javax.imageio.spi.ImageReaderSpi;
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.exception.OXException;
@@ -129,8 +129,8 @@ public class Utils {
                 }
             }
         }
-        READER_SPI_BY_EXTENSION = Collections.unmodifiableMap(readerSpiByExtension);
-        READER_SPI_BY_FORMAT_NAME = Collections.unmodifiableMap(readerSpiByFormatName);
+        READER_SPI_BY_EXTENSION = ImmutableMap.copyOf(readerSpiByExtension);
+        READER_SPI_BY_FORMAT_NAME = ImmutableMap.copyOf(readerSpiByFormatName);
     }
 
     /**

@@ -134,6 +134,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tx.TransactionAwares;
 import com.openexchange.user.UserService;
 
 /**
@@ -445,11 +446,9 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 }
                 attachmentsControl.finish();
             }
-            if (null != previewImages) {
-                if (rollback) {
-                    for (ThresholdFileHolder tfh : previewImages.values()) {
-                        tfh.close();
-                    }
+            if (rollback && null != previewImages) {
+                for (ThresholdFileHolder tfh : previewImages.values()) {
+                    tfh.close();
                 }
             }
         }
@@ -493,19 +492,26 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         Map<String, Future<ThresholdFileHolder>> previewFutures = new HashMap<>(6);
         Map<String, String> mimeTypes = new HashMap<>(6);
         IDBasedFileAccess access = fileAccessFactory.createAccess(session);
-        for (int k = Math.min(items.size(), 6), i = 0; k-- > 0; i++) {
-            String id = items.get(i).getId();
-            InputStream document = access.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);
-            String mimeType = access.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION).getFileMIMEType();
-            PreviewTask previewTask = new PreviewTask(id, document, mimeType, transformationService, previewService, documentPreviewEnabled, session);
-            Future<ThresholdFileHolder> future = threadPoolService.submit(previewTask);
-            previewFutures.put(id, future);
-            mimeTypes.put(id, mimeType);
+        try {
+            for (int k = Math.min(items.size(), 6), i = 0; k-- > 0; i++) {
+                String id = items.get(i).getId();
+                InputStream document = access.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);
+                String mimeType = access.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION).getFileMIMEType();
+                PreviewTask previewTask = new PreviewTask(id, document, mimeType, transformationService, previewService, documentPreviewEnabled, session);
+                Future<ThresholdFileHolder> future = threadPoolService.submit(previewTask);
+                previewFutures.put(id, future);
+                mimeTypes.put(id, mimeType);
+            }
+        } finally {
+            TransactionAwares.finishSafe(access);
         }
         for (Entry<String, Future<ThresholdFileHolder>> entry : previewFutures.entrySet()) {
             String id = entry.getKey();
             try {
                 ThresholdFileHolder encodedThumbnail = entry.getValue().get(timeout, TimeUnit.MILLISECONDS);
+                if (null != encodedThumbnail) {
+                    encodedThumbnail.automanaged();
+                }
                 previews.put(id, encodedThumbnail);
             } catch (InterruptedException | TimeoutException e) {
                 LOG.debug(e.getMessage(), e);
@@ -647,14 +653,15 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         public ThresholdFileHolder call() throws Exception {
             ThresholdFileHolder encodedThumbnail = null;
             try {
+                String mimeType = Strings.isEmpty(this.mimeType) ? null : Strings.asciiLowerCase(this.mimeType);
 
                 // Document is an image
-                if (!Strings.isEmpty(mimeType) && mimeType.toLowerCase().startsWith("image") && !mimeType.toLowerCase().startsWith("image/svg+xml")) {
+                if (null != mimeType && mimeType.startsWith("image/") && mimeType.indexOf("svg") < 0) {
                     encodedThumbnail = transformImage(document, mimeType);
                 }
 
                 // Document is an audio file
-                else if (!Strings.isEmpty(mimeType) && mimeType.toLowerCase().startsWith("audio/mpeg")) {
+                else if (null != mimeType && mimeType.startsWith("audio/mpeg")) {
                     if (Mp3CoverExtractor.isSupported(mimeType)) {
                         IFileHolder mp3Cover = null;
                         try {
@@ -673,11 +680,11 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 // Document is something else, try to get preview image with document converter
                 else {
                     if (documentPreviewEnabled) {
-                        PreviewDocument preview = getDocumentPreview(document, mimeType, session);
+                        PreviewDocument preview = getDocumentPreview(document, this.mimeType, session);
                         InputStream in = null;
                         try {
                             in = preview.getThumbnail();
-                            encodedThumbnail = new ThresholdFileHolder();
+                            encodedThumbnail = new ThresholdFileHolder(false);
                             encodedThumbnail.write(in);
                         } finally {
                             Streams.close(in);
@@ -697,7 +704,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         private ThresholdFileHolder transformImage(InputStream image, String mimeType) throws OXException {
             try {
                 ImageTransformations transformed = transformationService.transfom(image).rotate().scale(200, 150, ScaleType.COVER_AND_CROP, true);
-                ThresholdFileHolder transformedImage = new ThresholdFileHolder();
+                ThresholdFileHolder transformedImage = new ThresholdFileHolder(false);
                 transformedImage.write(transformed.getFullTransformedImage(mimeType).getImageStream());
                 return transformedImage;
             } catch (IOException e) {
@@ -709,7 +716,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             Mp3CoverExtractor mp3CoverExtractor = new Mp3CoverExtractor();
             ThresholdFileHolder fileHolder = null;
             try {
-                fileHolder = new ThresholdFileHolder();
+                fileHolder = new ThresholdFileHolder(false);
                 fileHolder.write(audioFile);
                 fileHolder.setContentType("audio/mpeg");
                 fileHolder.setName(id + ".mp3");

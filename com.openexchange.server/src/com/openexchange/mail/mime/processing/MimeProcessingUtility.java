@@ -50,6 +50,7 @@
 package com.openexchange.mail.mime.processing;
 
 import static com.openexchange.java.Strings.toLowerCase;
+import static com.openexchange.java.Strings.toUpperCase;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
 import static com.openexchange.mail.text.HtmlProcessing.htmlFormat;
@@ -641,14 +642,17 @@ public final class MimeProcessingUtility {
         if (null == addr) {
             return "";
         }
-        final String sAddress = addr.getAddress();
-        final int pos = null == sAddress ? 0 : sAddress.indexOf('/');
-        if (pos <= 0) {
+
+        String sAddress = addr.getAddress();
+        int pos = null == sAddress ? 0 : sAddress.indexOf('/');
+        if (pos <= 0 || false == toUpperCase(sAddress).endsWith("/TYPE=PLMN")) {
             // No slash character present
             return addr.toUnicodeString();
         }
-        final StringBuilder sb = new StringBuilder(32);
-        final String personal = addr.getPersonal();
+
+        // Assume something like "+491234567890/TYPE=PLMN"
+        StringBuilder sb = new StringBuilder(32);
+        String personal = addr.getPersonal();
         if (null == personal) {
             sb.append(MimeMessageUtility.prepareAddress(sAddress.substring(0, pos)));
         } else {

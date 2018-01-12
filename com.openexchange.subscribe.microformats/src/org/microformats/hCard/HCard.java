@@ -12,6 +12,7 @@
  */
 package org.microformats.hCard;
 
+import com.google.common.collect.ImmutableMap;
 import java.io.Serializable;
 import java.net.URI;
 import java.text.DateFormat;
@@ -1167,7 +1168,7 @@ public final class HCard implements Serializable {
 		m.put('\n', "\\n");
 		m.put('\r', "\\r");
 		m.put('\t', "\\t");
-		JSON_STRING_REPLACEMENTS = Collections.unmodifiableMap(m);
+		JSON_STRING_REPLACEMENTS = ImmutableMap.copyOf(m);
 	}
 
 	private static String s2h(String x) {

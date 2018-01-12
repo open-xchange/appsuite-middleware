@@ -68,6 +68,7 @@ public final class CustomThreadPoolExecutorTimerService implements TimerService,
 
     /**
      * Initializes a new {@link CustomThreadPoolExecutorTimerService}.
+     * @param executorService The {@link CustomThreadPoolExecutor} 
      */
     public CustomThreadPoolExecutorTimerService(final CustomThreadPoolExecutor executorService) {
         super();

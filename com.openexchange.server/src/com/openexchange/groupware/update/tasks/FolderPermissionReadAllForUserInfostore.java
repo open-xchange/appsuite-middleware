@@ -56,7 +56,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import org.slf4j.Logger;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.update.Attributes;
@@ -98,11 +97,11 @@ public final class FolderPermissionReadAllForUserInfostore extends UpdateTaskAda
     public void perform(PerformParameters params) throws OXException {
         Logger log = org.slf4j.LoggerFactory.getLogger(FolderPermissionReadAllForUserInfostore.class);
         log.info("Performing update task {}", FolderPermissionReadAllForUserInfostore.class.getSimpleName());
-        Connection connection = Database.getNoTimeout(params.getContextId(), true);
+        Connection connection = params.getConnection();
         boolean committed = false;
         try {
             connection.setAutoCommit(false);
-            adjustReadPermission(connection, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, OCLPermission.READ_ALL_OBJECTS);            
+            adjustReadPermission(connection, FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, OCLPermission.READ_ALL_OBJECTS);
             connection.commit();
             committed = true;
         } catch (SQLException e) {
@@ -114,7 +113,6 @@ public final class FolderPermissionReadAllForUserInfostore extends UpdateTaskAda
                 rollback(connection);
             }
             autocommit(connection);
-            Database.backNoTimeout(params.getContextId(), true, connection);
         }
         log.info("{} successfully performed.", FolderPermissionReadAllForUserInfostore.class.getSimpleName());
     }

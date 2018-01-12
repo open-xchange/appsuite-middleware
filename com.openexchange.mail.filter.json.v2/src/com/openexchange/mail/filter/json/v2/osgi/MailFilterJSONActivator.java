@@ -80,6 +80,7 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.RemoveFlag
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.SetFlagActionCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.StopActionCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.VacationActionCommandParser;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.simplified.SimplifiedAction;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.AddressTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.AllOfTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.AnyOfTestCommandParser;
@@ -88,13 +89,13 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.CurrentDateT
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.DateTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.EnvelopeTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.ExistsTestCommandParser;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.FalseTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.HasFlagCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.NotTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.SizeTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.TrueTestCommandParser;
-import com.openexchange.mail.filter.json.v2.mapper.parser.action.simplified.SimplifiedActions;
-import com.openexchange.mail.filter.json.v2.mapper.parser.test.simplified.SimplifiedHeaderTest;
-import com.openexchange.mail.filter.json.v2.mapper.parser.test.simplified.SimplifiedHeaderTestParser;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.simplified.SimplifiedHeaderTest;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.simplified.SimplifiedHeaderTestParser;
 import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.sessiond.SessiondService;
 
@@ -124,6 +125,7 @@ public class MailFilterJSONActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         registerTestCommandParserRegistry();
         registerActionCommandParserRegistry();
+        openTrackers();
 
         getService(CapabilityService.class).declareCapability(MailFilterChecker.CAPABILITY);
 
@@ -154,6 +156,7 @@ public class MailFilterJSONActivator extends AJAXModuleActivator {
         registry.register(Commands.NOT.getCommandName(), new NotTestCommandParser(this));
         registry.register(Commands.SIZE.getCommandName(), new SizeTestCommandParser(this));
         registry.register(Commands.TRUE.getCommandName(), new TrueTestCommandParser(this));
+        registry.register(Commands.FALSE.getCommandName(), new FalseTestCommandParser(this));
         registry.register(Commands.HASFLAG.getCommandName(), new HasFlagCommandParser(this));
 
         registry.register(SimplifiedHeaderTest.From.getCommandName(), simplifiedHeaderTestParser);
@@ -163,7 +166,9 @@ public class MailFilterJSONActivator extends AJAXModuleActivator {
         registry.register(SimplifiedHeaderTest.AnyRecipient.getCommandName(), simplifiedHeaderTestParser);
         registry.register(SimplifiedHeaderTest.MailingList.getCommandName(), simplifiedHeaderTestParser);
 
-        addService(TestCommandParserRegistry.class, registry);
+        registerService(TestCommandParserRegistry.class, registry);
+        trackService(TestCommandParserRegistry.class);
+
     }
 
     /**
@@ -184,8 +189,9 @@ public class MailFilterJSONActivator extends AJAXModuleActivator {
         registry.register(ActionCommand.Commands.REMOVEFLAG.getJsonName(), new RemoveFlagActionCommandParser(this));
         registry.register(ActionCommand.Commands.PGP_ENCRYPT.getJsonName(), new PGPEncryptActionCommandParser(this));
 
-        registry.register(SimplifiedActions.Copy.getCommandName(), new FileIntoActionCommandParser(this));
+        registry.register(SimplifiedAction.COPY.getCommandName(), new FileIntoActionCommandParser(this));
 
-        addService(ActionCommandParserRegistry.class, registry);
+        registerService(ActionCommandParserRegistry.class, registry);
+        trackService(ActionCommandParserRegistry.class);
     }
 }

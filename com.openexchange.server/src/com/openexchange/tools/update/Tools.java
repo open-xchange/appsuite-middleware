@@ -50,7 +50,7 @@
 package com.openexchange.tools.update;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -60,6 +60,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -264,7 +265,7 @@ public final class Tools {
                     set.add(keyName);
                 }
             }
-            return new ArrayList<String>(set);
+            return set.isEmpty() ? Collections.<String> emptyList() : new ArrayList<String>(set);
         } finally {
             closeSQLStuff(result);
         }

@@ -1,0 +1,11 @@
+type: object
+required:
+  - id
+  - folder_id
+properties:
+  id:
+    type: string
+    description: The object ID of the contact, task or appointment (e.g. "368").
+  folder_id:
+    type: string
+    description: The object ID of the related folder (e.g. "2435").

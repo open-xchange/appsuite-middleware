@@ -191,7 +191,7 @@ public final class CSSMatcher {
 
         final String strTIME = "(?:" + strNUMBER + RegexUtility.optional(strTIME_UNITS) + ")";
 
-        final String strURL = "url\\(\"?[\\p{ASCII}\\p{L}]+\"?\\)";
+        final String strURL = "url\\((\"?[\\p{ASCII}\\p{L}]+\"?)\\)";
 
         final String strURLCid = "url\\(\"?cid:[\\p{ASCII}\\p{L}]+\"?\\)";
 
@@ -277,7 +277,7 @@ public final class CSSMatcher {
                     return false;
                 }
                 if (allowedValue.indexOf('*') >= 0) {
-                    return true;
+                    return value.indexOf('<') < 0 && value.indexOf('>') < 0;
                 }
                 int length = allowedValue.length();
                 for (int k = length, j = 0; k-- > 0; j++) {
@@ -323,7 +323,11 @@ public final class CSSMatcher {
                     return Result.NEUTRAL;
                 }
                 Result dataUriResult = HtmlServices.isAcceptableDataUri(value, null);
-                return Result.NEUTRAL == dataUriResult ? Result.ALLOW : dataUriResult;
+                if (Result.NEUTRAL == dataUriResult) {
+                    String url = matcher.group(1);
+                    return url.indexOf('<') >= 0 || url.indexOf('>') >= 0 ? Result.DENY : Result.ALLOW;
+                }
+                return dataUriResult;
             }
         case 'n':
             return PAT_n.matcher(value).matches() ? Result.ALLOW : Result.NEUTRAL;
@@ -571,8 +575,8 @@ public final class CSSMatcher {
     private static final Pattern SPLIT_COMMA = Pattern.compile(",");
 
     static String prefixBlock(final String match, final String cssPrefix) {
-        if (isEmpty(match)) {
-            return match;
+        if (isEmpty(match) || HtmlServices.containsEventHandler(match)) {
+            return "{";
         }
         if (isEmpty(cssPrefix)) {
             return new StringBuilder(match).append('{').toString();

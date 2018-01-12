@@ -52,13 +52,13 @@ package com.openexchange.mailaccount.json.parser;
 import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.java.Strings.toLowerCase;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -117,7 +117,7 @@ public class DefaultMailAccountParser extends DataParser {
         sslPorts = new TIntHashSet(new int[] {465});
         m.put("smtp", new StandardPorts(ports, sslPorts));
 
-        PORTS = Collections.unmodifiableMap(m);
+        PORTS = ImmutableMap.copyOf(m);
     }
 
     private static final DefaultMailAccountParser INSTANCE = new DefaultMailAccountParser();

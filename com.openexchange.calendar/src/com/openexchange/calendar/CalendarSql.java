@@ -49,8 +49,7 @@
 
 package com.openexchange.calendar;
 
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.*;
 import java.sql.BatchUpdateException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -61,13 +60,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.configuration.ConfigurationException;
@@ -133,7 +132,7 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     protected final static int EXCEPTION_NOT_FOUND = -1;
 
-    private static final Set<Integer> EXEMPT = new HashSet<Integer>(Arrays.asList(Appointment.RECURRENCE_START, Appointment.ALARM, Appointment.RECURRENCE_DATE_POSITION, Appointment.DAYS, Appointment.DAY_IN_MONTH, Appointment.MONTH, Appointment.INTERVAL, Appointment.UNTIL, Appointment.NOTIFICATION, Appointment.RECURRENCE_COUNT, Appointment.LAST_MODIFIED_UTC));
+    private static final Set<Integer> EXEMPT = ImmutableSet.of(Appointment.RECURRENCE_START, Appointment.ALARM, Appointment.RECURRENCE_DATE_POSITION, Appointment.DAYS, Appointment.DAY_IN_MONTH, Appointment.MONTH, Appointment.INTERVAL, Appointment.UNTIL, Appointment.NOTIFICATION, Appointment.RECURRENCE_COUNT, Appointment.LAST_MODIFIED_UTC);
 
     public static final int[] EXCEPTION_FIELDS = new int[Appointment.ALL_COLUMNS.length - EXEMPT.size()];
 
@@ -677,7 +676,7 @@ public class CalendarSql implements AppointmentSQLInterface {
             if (conflicts.length == 0) {
                 /*
                  * Bug 49322 - NPE at c.o.calendar.CalendarSql.updateAppointmentObject
-                 * Added a check if users actually exist before accessing the data 
+                 * Added a check if users actually exist before accessing the data
                  */
                 // Check user participants completeness
                 if (cdao.containsUserParticipants() && null != cdao.getUsers() && 0 < cdao.getUsers().length) {
@@ -1035,9 +1034,29 @@ public class CalendarSql implements AppointmentSQLInterface {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
         }
-        final Context ctx = Tools.getContext(session);
+        Context ctx = Tools.getContext(session);
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setObjectID(objectId);
+        cdao.setParentFolderID(folderId);
+        cdao.setContext(ctx);
         validateConfirmMessage(message);
-        return cimp.setExternalConfirmation(objectId, folderId, mail, confirm, message, session, ctx);
+        /*
+         * load existing appointment (implicitly checks permissions)
+         */
+        CalendarDataObject edao;
+        Connection connection = null;
+        try {
+            connection = DBPool.pickup(ctx);
+            edao = CalendarSql.cimp.loadObjectForUpdate(cdao, session, ctx, folderId, connection, true);
+        } catch (SQLException e) {
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
+        } finally {
+            DBPool.push(ctx, connection);
+        }
+        /*
+         * set external confirmation
+         */
+        return cimp.setExternalConfirmation(edao.getObjectID(), folderId, mail, confirm, message, session, ctx);
     }
 
     /**

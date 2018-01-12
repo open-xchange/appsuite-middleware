@@ -63,7 +63,6 @@ import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushSubscription;
 import com.openexchange.pns.subscription.storage.ClientAndTransport;
 import com.openexchange.pns.subscription.storage.MapBackedHits;
-import com.openexchange.pns.subscription.storage.inmemory.InMemoryPushMatch;
 
 /**
  * {@link CachedPushSubscriptionCollection}

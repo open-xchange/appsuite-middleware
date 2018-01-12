@@ -90,7 +90,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
             return getService().getWritable();
         } catch (OXException e) {
             log.error("Error pickup configdb database write connection from pool!", e);
-            throw new PoolException(e.getMessage());
+            throw new PoolException(e.getMessage(), e);
         }
     }
 
@@ -100,7 +100,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
             return getService().getWritable();
         } catch (OXException e) {
             log.error("Error pickup configdb database write connection from pool!", e);
-            throw new PoolException(e.getMessage());
+            throw new PoolException(e.getMessage(), e);
         }
     }
 
@@ -110,7 +110,17 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
             return getService().getReadOnly();
         } catch (OXException e) {
             log.error("Error pickup configdb database read connection from pool!", e);
-            throw new PoolException(e.getMessage());
+            throw new PoolException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public Connection getWriteConnectionForConfigDBNoTimeout() throws PoolException {
+        try {
+            return getService().getForUpdateTask();
+        } catch (OXException e) {
+            log.error("Error pickup no-timeout configdb database write connection from pool!", e);
+            throw new PoolException(e.getMessage(), e);
         }
     }
 
@@ -120,7 +130,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
             return getService().getWritable(contextId);
         } catch (OXException e) {
             log.error("Error pickup context database write connection from pool!", e);
-            throw new PoolException(e.getMessage());
+            throw new PoolException(e.getMessage(), e);
         }
     }
 
@@ -130,7 +140,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
             return getService().get(poolId, schema);
         } catch (OXException e) {
             log.error("Error pickup context database write connection from pool!", e);
-            throw new PoolException(e.getMessage());
+            throw new PoolException(e.getMessage(), e);
         }
     }
 
@@ -140,125 +150,151 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
             return getService().getForUpdateTask(contextId);
         } catch (OXException e) {
             log.error("Error pickup context database write connection from pool!", e);
-            throw new PoolException(e.getMessage());
+            throw new PoolException(e.getMessage(), e);
         }
     }
 
     @Override
     public boolean pushConnectionForConfigDB(Connection con) throws PoolException {
-        if (null != con) {
-            try {
-                if (!con.getAutoCommit() && !con.isClosed()) {
-                    con.setAutoCommit(true);
-                }
-            } catch (SQLException e) {
-                log.error("Error pushing configdb write connection to pool!", e);
-                throw new PoolException(e.getMessage());
-            } finally {
-                getService().backWritable(con);
+        if (null == con) {
+            return false;
+        }
+
+        try {
+            if (!con.getAutoCommit() && !con.isClosed()) {
+                con.setAutoCommit(true);
             }
+        } catch (SQLException e) {
+            log.error("Error pushing configdb write connection to pool!", e);
+            throw new PoolException(e.getMessage(), e);
+        } finally {
+            getService().backWritable(con);
         }
         return true;
     }
 
     @Override
     public boolean pushReadConnectionForConfigDB(Connection con) throws PoolException {
-        if (null != con) {
-            try {
-                if (!con.getAutoCommit() && !con.isClosed()) {
-                    con.setAutoCommit(true);
-                }
-            } catch (SQLException e) {
-                log.error("Error pushing configdb read connection to pool!", e);
-                throw new PoolException(e.getMessage());
-            } finally {
-                getService().backReadOnly(con);
+        if (null == con) {
+            return false;
+        }
+        try {
+            if (!con.getAutoCommit() && !con.isClosed()) {
+                con.setAutoCommit(true);
             }
+        } catch (SQLException e) {
+            log.error("Error pushing configdb read connection to pool!", e);
+            throw new PoolException(e.getMessage(), e);
+        } finally {
+            getService().backReadOnly(con);
         }
         return true;
     }
 
     @Override
     public boolean pushWriteConnectionForConfigDB(Connection con) throws PoolException {
-        if (null != con) {
-            try {
-                if (!con.getAutoCommit() && !con.isClosed()) {
-                    con.setAutoCommit(true);
-                }
-            } catch (SQLException e) {
-                log.error("Error pushing configdb write connection to pool!", e);
-                throw new PoolException(e.getMessage());
-            } finally {
-                getService().backWritable(con);
+        if (null == con) {
+            return false;
+        }
+        try {
+            if (!con.getAutoCommit() && !con.isClosed()) {
+                con.setAutoCommit(true);
             }
+        } catch (SQLException e) {
+            log.error("Error pushing configdb write connection to pool!", e);
+            throw new PoolException(e.getMessage(), e);
+        } finally {
+            getService().backWritable(con);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean pushWriteConnectionForConfigDBNoTimeout(Connection con) throws PoolException {
+        if (null == con) {
+            return false;
+        }
+        try {
+            if (!con.getAutoCommit() && !con.isClosed()) {
+                con.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            log.error("Error pushing no-timeout configdb write connection to pool!", e);
+            throw new PoolException(e.getMessage(), e);
+        } finally {
+            getService().backForUpdateTask(con);
         }
         return true;
     }
 
     @Override
     public boolean pushConnectionForContext(int contextId, Connection con) throws PoolException {
-        if (null != con) {
-            try {
-                if (!con.getAutoCommit() && !con.isClosed()) {
-                    con.setAutoCommit(true);
-                }
-            } catch (SQLException e) {
-                log.error("Error pushing context database write connection to pool!", e);
-                throw new PoolException(e.getMessage());
-            } finally {
-                getService().backWritable(contextId, con);
+        if (null == con) {
+            return false;
+        }
+        try {
+            if (!con.getAutoCommit() && !con.isClosed()) {
+                con.setAutoCommit(true);
             }
+        } catch (SQLException e) {
+            log.error("Error pushing context database write connection to pool!", e);
+            throw new PoolException(e.getMessage(), e);
+        } finally {
+            getService().backWritable(contextId, con);
         }
         return true;
     }
 
     @Override
     public boolean pushConnectionForContextAfterReading(int contextId, Connection con) throws PoolException {
-        if (null != con) {
-            try {
-                if (!con.getAutoCommit() && !con.isClosed()) {
-                    con.setAutoCommit(true);
-                }
-            } catch (SQLException e) {
-                log.error("Error pushing context database write connection to pool!", e);
-                throw new PoolException(e.getMessage());
-            } finally {
-                getService().backWritableAfterReading(contextId, con);
+        if (null == con) {
+            return false;
+        }
+        try {
+            if (!con.getAutoCommit() && !con.isClosed()) {
+                con.setAutoCommit(true);
             }
+        } catch (SQLException e) {
+            log.error("Error pushing context database write connection to pool!", e);
+            throw new PoolException(e.getMessage(), e);
+        } finally {
+            getService().backWritableAfterReading(contextId, con);
         }
         return true;
     }
 
     @Override
     public boolean pushConnectionForContextNoTimeout(int contextId, Connection con) throws PoolException {
-        if (null != con) {
-            try {
-                if (!con.getAutoCommit() && !con.isClosed()) {
-                    con.setAutoCommit(true);
-                }
-            } catch (SQLException e) {
-                log.error("Error pushing context database write connection to pool!", e);
-                throw new PoolException(e.getMessage());
-            } finally {
-                getService().backForUpdateTask(contextId, con);
+        if (null == con) {
+            return false;
+        }
+        try {
+            if (!con.getAutoCommit() && !con.isClosed()) {
+                con.setAutoCommit(true);
             }
+        } catch (SQLException e) {
+            log.error("Error pushing context database write connection to pool!", e);
+            throw new PoolException(e.getMessage(), e);
+        } finally {
+            getService().backForUpdateTask(contextId, con);
         }
         return true;
     }
 
     @Override
     public boolean pushConnection(int poolId, Connection con) throws PoolException {
-        if (null != con) {
-            try {
-                if (!con.getAutoCommit() && !con.isClosed()) {
-                    con.setAutoCommit(true);
-                }
-            } catch (SQLException e) {
-                log.error("Error pushing context database write connection to pool!", e);
-                throw new PoolException(e.getMessage());
-            } finally {
-                getService().back(poolId, con);
+        if (null == con) {
+            return false;
+        }
+        try {
+            if (!con.getAutoCommit() && !con.isClosed()) {
+                con.setAutoCommit(true);
             }
+        } catch (SQLException e) {
+            log.error("Error pushing context database write connection to pool!", e);
+            throw new PoolException(e.getMessage(), e);
+        } finally {
+            getService().back(poolId, con);
         }
         return true;
     }
@@ -270,7 +306,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
             serverId = getService().getServerId();
         } catch (OXException e) {
             log.error("Error getting the identifier of the server! This is normal until at least one server is configured.", e);
-            throw new PoolException(e.getMessage());
+            throw new PoolException(e.getMessage(), e);
         }
         return serverId;
     }
@@ -281,7 +317,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
             getService().writeAssignment(con, assign);
         } catch (OXException e) {
             log.error("Error writing a context to database assigment.", e);
-            throw new PoolException(e.getMessage());
+            throw new PoolException(e.getMessage(), e);
         }
     }
 
@@ -291,7 +327,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
             getService().deleteAssignment(con, contextId);
         } catch (OXException e) {
             log.error("Error deleting a context to database assigment.", e);
-            throw new PoolException(e.getMessage());
+            throw new PoolException(e.getMessage(), e);
         }
     }
 
@@ -301,7 +337,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
             return getService().getContextsInSameSchema(con, contextId);
         } catch (OXException e) {
             log.error("Error getting all contexts from the same schema.", e);
-            throw new PoolException(e.getMessage());
+            throw new PoolException(e.getMessage(), e);
         }
     }
 
@@ -311,17 +347,17 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
             return getService().getContextsInSchema(con, poolId, schema);
         } catch (OXException e) {
             log.error("Error getting all contexts from the same schema.", e);
-            throw new PoolException(e.getMessage());
+            throw new PoolException(e.getMessage(), e);
         }
     }
 
     @Override
-    public int[] listContexts(int poolId) throws PoolException {
+    public int[] listContexts(int poolId, int offset, int length) throws PoolException {
         try {
-            return getService().listContexts(poolId);
+            return getService().listContexts(poolId, offset, length);
         } catch (OXException e) {
             log.error("Error getting all contexts from the same schema.", e);
-            throw new PoolException(e.getMessage());
+            throw new PoolException(e.getMessage(), e);
         }
     }
 
@@ -331,7 +367,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
             return getService().getUnfilledSchemas(con, poolId, maxContexts);
         } catch (OXException e) {
             log.error("Error getting unfilled schemas", e);
-            throw new PoolException(e.getMessage());
+            throw new PoolException(e.getMessage(), e);
         }
     }
 
@@ -341,7 +377,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
             return getService().getContextCountPerSchema(con, poolId, maxContexts);
         } catch (OXException e) {
             log.error("Error getting unfilled schemas", e);
-            throw new PoolException(e.getMessage());
+            throw new PoolException(e.getMessage(), e);
         }
     }
 
@@ -351,7 +387,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
             return getService().getWritablePool(contextId);
         } catch (OXException e) {
             log.error("Error getting the write pool identifier for context {}.", contextId, e);
-            throw new PoolException(e.getMessage());
+            throw new PoolException(e.getMessage(), e);
         }
     }
 
@@ -361,7 +397,7 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
             return getService().getSchemaName(contextId);
         } catch (OXException e) {
             log.error("Error getting the schema name for context {}.", contextId, e);
-            throw new PoolException(e.getMessage());
+            throw new PoolException(e.getMessage(), e);
         }
     }
 
@@ -370,8 +406,8 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
         try {
             getService().lock(con, writePoolId);
         } catch (OXException e) {
-            log.error("Error locking context_server2db_pool table", e);
-            throw new PoolException(e.getMessage());
+            log.error("Error locking database pool {}", writePoolId, e);
+            throw new PoolException(e.getMessage(), e);
         }
     }
 }

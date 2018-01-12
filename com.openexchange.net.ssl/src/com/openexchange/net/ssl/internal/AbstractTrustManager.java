@@ -54,10 +54,12 @@ import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
+import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -87,6 +89,8 @@ import com.openexchange.net.ssl.osgi.Services;
  * @since v7.8.3
  */
 public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
+
+    private static final String FINGERPRINT_NAME = "fingerprint";
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractTrustManager.class);
 
@@ -120,10 +124,10 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         if (Services.getService(SSLConfigurationService.class).isWhitelisted(socket.getInetAddress().getHostName())) {
             return;
         }
+        checkCommonName(getUseId(), getContextId(), chain, socket);
 
         try {
             this.trustManager.checkServerTrusted(chain, authType, socket);
-            return;
         } catch (CertificateException e) {
             handleCertificateException(chain, socket, e);
         }
@@ -266,20 +270,15 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             throw new IllegalArgumentException("The supplied certificate chain is empty", e);
         }
 
-        // Try to determine the reason of failure
-        if (!e.getMessage().contains("unable to find valid certification path to requested target")) {
-            throw e;
-        }
-
         logChain(chain);
 
         // Fetch user details
-        int user = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
+        int user = getUseId();
         if (user < 0) {
             // Missing user information
             throw e;
         }
-        int context = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
+        int context = getContextId();
         if (context < 0) {
             // Missing context information
             throw e;
@@ -288,20 +287,18 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         // Check if the user is allowed to accept untrusted certificates
         UserAwareSSLConfigurationService sslConfigurationService = Services.optService(UserAwareSSLConfigurationService.class);
         if (null == sslConfigurationService || false == sslConfigurationService.isAllowedToDefineTrustLevel(user, context)) {
-            throw new CertificateException(SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, getHostFromSocket(socket)));
+            X509Certificate certificate = chain[0];
+            String fingerprint = getFingerprint(certificate);
+            throw new CertificateException(SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, Collections.singletonMap(FINGERPRINT_NAME, fingerprint), fingerprint, getHostFromSocket(socket)));
         }
 
-        /*
-         * The following check is disabled until 7.10. Instead we throw the originating CertificateException
-         */
         // Check if the user trusts it
-        //checkUserTrustsServer(user, context, chain, socket);
-        throw e;
+        checkUserTrustsServer(user, context, chain, socket, e);
     }
 
     /**
      * Log the entire {@link X509Certificate} chain in the debug level
-     * 
+     *
      * @param chain The chain to log
      * @throws CertificateEncodingException if the fingerprint of a certificate cannot be generated
      */
@@ -332,11 +329,31 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
     }
 
     /**
+     * Performs a preliminary check on the specified {@link CertificateException}
+     * to determine any common/known reasons of failure
+     *
+     * @param e The {@link CertificateException} to check
+     * @throws CertificateException
+     */
+    private void preliminaryChecks(int userId, int contextId, X509Certificate[] chain, Socket socket, CertificateException ce) throws CertificateException {
+        if (!(ce.getCause() instanceof CertPathValidatorException)) {
+            return;
+        }
+
+        CertPathValidatorException cp = (CertPathValidatorException) ce.getCause();
+        FailureResponse failureResponse = ReasonHandler.handle(cp.getReason());
+
+        String socketHostname = getHostFromSocket(socket);
+        String fingerprint = cacheCertificate(userId, contextId, chain[0], socketHostname, failureResponse.getFailureReason());
+        throw new CertificateException(failureResponse.getSSLExceptionCode().create(Collections.singletonMap(FINGERPRINT_NAME, fingerprint), fingerprint, socketHostname, userId, contextId));
+    }
+
+    /**
      * Checks whether the user trusts the specified {@link X509Certificate}
      *
      * @param chain The certificate to check
      */
-    private void checkUserTrustsServer(int userId, int contextId, X509Certificate[] chain, Socket socket) throws CertificateException {
+    private void checkUserTrustsServer(int userId, int contextId, X509Certificate[] chain, Socket socket, CertificateException ce) throws CertificateException {
         // The certificate under examination is always the first one in the chain
         X509Certificate cert = chain[0];
         String socketHostname = getHostFromSocket(socket);
@@ -347,29 +364,30 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             Certificate certificate = certificateManagement.get(userId, contextId, socketHostname, fingerprint);
             if (!certificate.isTrusted()) {
                 cacheCertificate(userId, contextId, cert, socketHostname, FailureReason.NOT_TRUSTED_BY_USER);
-                throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(fingerprint, userId, contextId));
+                throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(Collections.singletonMap(FINGERPRINT_NAME, fingerprint), fingerprint, socketHostname, userId, contextId));
             }
 
             if (!Strings.isEmpty(socketHostname) && !socketHostname.equals(certificate.getHostName())) {
                 cacheCertificate(userId, contextId, cert, socketHostname, FailureReason.INVALID_COMMON_NAME);
-                throw new CertificateException(SSLExceptionCode.INVALID_HOSTNAME.create(fingerprint, socketHostname));
+                throw new CertificateException(SSLExceptionCode.INVALID_HOSTNAME.create(Collections.singletonMap(FINGERPRINT_NAME, fingerprint), fingerprint, socketHostname));
             }
         } catch (OXException e) {
             if (SSLCertificateManagementExceptionCode.CERTIFICATE_NOT_FOUND.equals(e)) {
                 // If not found in the user's store, try to determine the reason of failure
-
-                // a) Check if the certificate is self-signed
+                // a) Perform some common preliminary checks
+                preliminaryChecks(userId, contextId, chain, socket, ce);
+                // b) Check if the certificate is self-signed
                 checkSelfSigned(userId, contextId, chain, socketHostname);
-                // b) Check if expired
-                checkExpired(userId, contextId, chain);
-                // c) Check common name
-                checkCommonName(userId, contextId, chain, socket);
-                // d) Check if the root certificate authority is trusted
+                // c) Check if the root certificate authority is trusted
                 checkRootCATrusted(userId, contextId, chain);
+                // d) Check common name
+                checkCommonName(userId, contextId, chain, socket);
+                // e) Check if expired
+                checkExpired(userId, contextId, chain);
 
                 // If the previous checks did not fail, cache it for future reference and throw as last resort
                 String fingerprint = cacheCertificate(userId, contextId, cert, socketHostname, FailureReason.UNTRUSTED_CERTIFICATE);
-                throw new CertificateException(SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(socketHostname, fingerprint));
+                throw new CertificateException(SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(Collections.singletonMap(FINGERPRINT_NAME, fingerprint), fingerprint, socketHostname));
             }
             throw new CertificateException(e);
         }
@@ -383,9 +401,12 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      */
     private void checkSelfSigned(int userId, int contextId, X509Certificate[] chain, String socketHostname) throws CertificateException {
         // Self-signed certificates are the only certificates in the chain
-        if (chain.length == 1) {
+        if (chain.length > 1) {
+            return;
+        }
+        if (chain[0].getIssuerDN().equals(chain[0].getSubjectDN()) && !isRootCATrusted(chain)) {
             String fingerprint = cacheCertificate(userId, contextId, chain[0], socketHostname, FailureReason.SELF_SIGNED);
-            throw new CertificateException(SSLExceptionCode.SELF_SIGNED_CERTIFICATE.create(fingerprint));
+            throw new CertificateException(SSLExceptionCode.SELF_SIGNED_CERTIFICATE.create(Collections.singletonMap(FINGERPRINT_NAME, fingerprint), fingerprint, socketHostname));
         }
     }
 
@@ -396,17 +417,30 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      * @throws CertificateException if the root CA is not trusted by the user
      */
     private void checkRootCATrusted(int userId, int contextId, X509Certificate[] chain) throws CertificateException {
+        if (isRootCATrusted(chain)) {
+            return;
+        }
+
+        String fingerprint = cacheCertificate(userId, contextId, chain[0], null, FailureReason.UNTRUSTED_ISSUER);
+        throw new CertificateException(SSLExceptionCode.UNTRUSTED_ROOT_AUTHORITY.create(Collections.singletonMap(FINGERPRINT_NAME, fingerprint), fingerprint));
+    }
+
+    /**
+     * Perform a check whether the Certificate Authority that issued the specified chain is trusted
+     *
+     * @param chain The {@link X509Certificate} chain
+     * @return <code>true</code> if the certificate authority is trusted, <code>false</code> otherwise
+     */
+    private boolean isRootCATrusted(X509Certificate[] chain) {
         X509Certificate[] acceptedIssuers = trustManager.getAcceptedIssuers();
         X509Certificate rootCert = chain[chain.length - 1];
         for (X509Certificate x509Certificate : acceptedIssuers) {
             if (x509Certificate.getSubjectDN().equals(rootCert.getIssuerDN())) {
                 LOG.debug("The root CA '{}' is trusted", rootCert.getIssuerDN());
-                return;
+                return true;
             }
         }
-
-        String fingerprint = cacheCertificate(userId, contextId, chain[0], null, FailureReason.UNTRUSTED_ISSUER);
-        throw new CertificateException(SSLExceptionCode.USER_DOES_NOT_TRUST_CERTIFICATE.create(fingerprint, userId, contextId));
+        return false;
     }
 
     /**
@@ -436,8 +470,19 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             return;
         }
 
+        // Check for wildcard certificates
+        if (commonName.startsWith("*")) {
+            int cnDotCount = commonName.split("\\.").length;
+            int hnDotCount = hostname.split("\\.").length;
+            if (hnDotCount == cnDotCount) {
+                return;
+            }
+        }
+
+        logChain(chain);
+
         String fingerprint = cacheCertificate(userId, contextId, chain[0], hostname, FailureReason.INVALID_COMMON_NAME);
-        throw new CertificateException(SSLExceptionCode.INVALID_HOSTNAME.create(fingerprint, hostname));
+        throw new CertificateException(SSLExceptionCode.INVALID_HOSTNAME.create(Collections.singletonMap(FINGERPRINT_NAME, fingerprint), fingerprint, hostname));
     }
 
     /**
@@ -451,8 +496,9 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
     private void checkExpired(int userId, int contextId, X509Certificate[] chain) throws CertificateException {
         X509Certificate certificate = chain[0];
         if (certificate.getNotAfter().getTime() < System.currentTimeMillis()) {
+            String hostname = getHostFromPrincipal(chain[0]);
             String fingerprint = cacheCertificate(userId, contextId, chain[0], null, FailureReason.EXPIRED);
-            throw new CertificateException(SSLExceptionCode.CERTIFICATE_IS_EXPIRED.create(fingerprint));
+            throw new CertificateException(SSLExceptionCode.CERTIFICATE_IS_EXPIRED.create(fingerprint, hostname));
         }
     }
 
@@ -516,12 +562,40 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         if (bytes.length == 0) {
             throw new IllegalArgumentException("The specified byte array cannot be empty");
         }
-        char[] hexChars = new char[bytes.length * 2];
+        char[] hexChars = new char[bytes.length << 1];
         for (int j = 0; j < bytes.length; j++) {
             int v = bytes[j] & 0xFF;
             hexChars[j * 2] = hexArray[v >>> 4];
             hexChars[j * 2 + 1] = hexArray[v & 0x0F];
         }
         return new String(hexChars);
+    }
+
+    /**
+     * Retrieves the context identifier from the {@link LogProperties}
+     *
+     * @return the context identifier from the LogProperties
+     */
+    private int getContextId() {
+        return getLogPropertyValue(LogProperties.Name.SESSION_CONTEXT_ID);
+    }
+
+    /**
+     * Retrieves the user identifier from the {@link LogProperties}
+     *
+     * @return the user identifier from the {@link LogProperties}
+     */
+    private int getUseId() {
+        return getLogPropertyValue(LogProperties.Name.SESSION_USER_ID);
+    }
+
+    /**
+     * Retrieves value of the specified property from the {@link LogProperties}
+     *
+     * @param name The log property's name
+     * @return the property's value
+     */
+    private int getLogPropertyValue(LogProperties.Name name) {
+        return Tools.getUnsignedInteger(LogProperties.get(name));
     }
 }

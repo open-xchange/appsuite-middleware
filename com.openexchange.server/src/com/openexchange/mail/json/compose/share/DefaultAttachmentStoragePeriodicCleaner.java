@@ -59,7 +59,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -132,24 +131,7 @@ public class DefaultAttachmentStoragePeriodicCleaner implements Runnable {
 
         long start = System.currentTimeMillis();
         try {
-
-            List<Integer> contextsIdInDifferentSchemas = new LinkedList<Integer>();
-            {
-                List<Integer> contextIds = ContextStorage.getInstance().getAllContextIds();
-                int size = contextIds.size();
-                Set<Integer> processed = new HashSet<Integer>(size, 0.9F);
-                Iterator<Integer> iter = contextIds.iterator();
-                for (int k = size; k-- > 0;) {
-                    Integer contextId = iter.next();
-                    if (processed.add(contextId)) {
-                        contextsIdInDifferentSchemas.add(contextId);
-                        for (int contextInSameSchema : databaseService.getContextsInSameSchema(contextId.intValue())) {
-                            processed.add(I(contextInSameSchema));
-                        }
-                    }
-                }
-            }
-
+            List<Integer> contextsIdInDifferentSchemas = ContextStorage.getInstance().getDistinctContextsPerSchema();
             int size = contextsIdInDifferentSchemas.size();
             LOG.info("Periodic cleanup task for shared mail attachments starts. Going to check {} schemas...", I(size));
 

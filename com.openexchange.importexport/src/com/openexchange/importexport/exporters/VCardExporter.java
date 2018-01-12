@@ -58,7 +58,6 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.container.ThresholdFileHolder;
@@ -69,7 +68,6 @@ import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.exception.OXException;
-import com.openexchange.folder.FolderService;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.CommonObject;
@@ -78,7 +76,6 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.importexport.actions.exporter.ContactExportAction;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
@@ -95,6 +92,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a> (minor: changes to new interface)
+ * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a> batch export
  */
 public class VCardExporter implements Exporter {
 
@@ -206,7 +204,7 @@ public class VCardExporter implements Exporter {
         Contact.YOMI_FIRST_NAME,
         Contact.YOMI_LAST_NAME
     };
-    
+
     @Override
     public boolean canExport(final ServerSession session, final Format format, final String folder, final Map<String, Object> optionalParams) throws OXException {
         if (!format.equals(Format.VCARD)) {
@@ -241,6 +239,21 @@ public class VCardExporter implements Exporter {
     }
 
     @Override
+    public boolean canExportBatch(ServerSession session, Format format, Map.Entry<String, List<String>> batchIds, Map<String, Object> optionalParams) throws OXException {
+        if (!canExport(session, format, batchIds.getKey(), optionalParams)) {
+            return false;
+        }
+        for (String objectId : batchIds.getValue()) {
+            try {
+                Integer.parseInt(objectId);
+            } catch (NumberFormatException e) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
     public SizedInputStream exportFolderData(final ServerSession session, final Format format, final String folder, int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
         return export(session, format, folder, fieldsToBeExported, optionalParams, null);
     }
@@ -250,14 +263,20 @@ public class VCardExporter implements Exporter {
         return export(session, format, null, fieldsToBeExported, optionalParams, batchIds);
     }
 
-    @Override
-    public SizedInputStream exportSingleData(ServerSession session, Format format, String folderID, String objectID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
-        Map<String, List<String>> batchIds = Collections.singletonMap(folderID, Collections.singletonList(objectID));
-        return export(session, format, null, fieldsToBeExported, optionalParams, batchIds);
-    }
-
     private SizedInputStream export(final ServerSession session, final Format format, final String folder, final int[] fieldsToBeExported, final Map<String, Object> optionalParams, final Map<String, List<String>> batchIds) throws OXException {
-      boolean exportDistributionLists = null != optionalParams ? Boolean.parseBoolean(String.valueOf(optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS))) : false;
+      if (null != batchIds) {
+          for (Map.Entry<String, List<String>> batchEntry : batchIds.entrySet()) {
+              if (!canExportBatch(session, format, batchEntry, optionalParams)) {
+                  throw ImportExportExceptionCodes.CANNOT_EXPORT.create(batchEntry.getKey(), format);
+              }
+          }
+      } else {
+          if (!canExport(session, format, folder, optionalParams)) {
+              throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folder, format);
+          }
+      }
+
+      boolean exportDistributionLists = null == optionalParams ? false : Boolean.parseBoolean(String.valueOf(optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS)));
       try {
           AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
           if (null != requestData) {
@@ -266,11 +285,11 @@ public class VCardExporter implements Exporter {
               if (null != out) {
                   requestData.setResponseHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.VCARD.getMimeType() + "; charset=UTF-8");
                   if (null != folder) {
-                      requestData.setResponseHeader("Content-Disposition", "attachment; filename=" + getFolderExportFileName(session, folder) + Format.VCARD.getExtension());
+                      requestData.setResponseHeader("Content-Disposition", "attachment"+appendFileNameParameter(requestData, getFolderExportFileName(session, folder, Format.VCARD.getExtension())));
                   } else if (null != batchIds) {
-                      requestData.setResponseHeader("Content-Disposition", "attachment; filename=" + getBatchExportFileName(session, batchIds) + Format.VCARD.getExtension());
+                      requestData.setResponseHeader("Content-Disposition", "attachment"+appendFileNameParameter(requestData, getBatchExportFileName(session, batchIds, Format.VCARD.getExtension())));
                   } else {
-                      requestData.setResponseHeader("Content-Disposition", "attachment; filename=export."+ Format.VCARD.getExtension());
+                      requestData.setResponseHeader("Content-Disposition", "attachment; filename=Export."+ Format.VCARD.getExtension());
                   }
                   requestData.removeCachingHeader();
                   export(session, folder, exportDistributionLists, fieldsToBeExported, new OutputStreamWriter(out, DEFAULT_CHARSET), batchIds);
@@ -302,7 +321,7 @@ public class VCardExporter implements Exporter {
         ContactField[] fields;
         if (fieldsToBeExported == null || fieldsToBeExported.length == 0) {
             fields = ContactMapper.getInstance().getFields(_contactFields);
-            List<ContactField> tmp = new ArrayList<ContactField>();
+            List<ContactField> tmp = new ArrayList<>();
             tmp.addAll(Arrays.asList(fields));
             tmp.add(ContactField.VCARD_ID);
             fields = tmp.toArray(new ContactField[tmp.size()]);
@@ -433,12 +452,17 @@ public class VCardExporter implements Exporter {
     }
 
     @Override
-    public String getFolderExportFileName(ServerSession sessionObj, String folder) throws OXException {
-        return ExportFileNameCreator.createFolderExportFileName(sessionObj, folder);
+    public String getFolderExportFileName(ServerSession sessionObj, String folder, String extension) {
+        return ExportFileNameCreator.createFolderExportFileName(sessionObj, folder, extension);
     }
 
     @Override
-    public String getBatchExportFileName(ServerSession sessionObj, Map<String, List<String>> batchIds) throws OXException {
-        return ExportFileNameCreator.createBatchExportFileName(sessionObj, batchIds);
+    public String getBatchExportFileName(ServerSession sessionObj, Map<String, List<String>> batchIds, String extension) {
+        return ExportFileNameCreator.createBatchExportFileName(sessionObj, batchIds, extension);
     }
+
+    private String appendFileNameParameter(AJAXRequestData requestData, String fileName) {
+        return ExportFileNameCreator.appendFileNameParameter(requestData, fileName);
+    }
+
 }

@@ -71,7 +71,7 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     public static final String FILE_VERSION_NOT_EXISTS_MSG = "The file version you requested does not exist.";
 
     // A folder named "%1$s" already exists below the parent folder "%2$s".
-    public static final String DUPLICATE_FOLDER_MSG = "A folder named \"%1$s\" already exists below the parent folder \"%2$s\".";
+    public static final String DUPLICATE_FOLDER_MSG = "A folder named \"%1$s\" already exists.";
 
     // You do not have the appropriate permissions to create a subfolder below the folder "%1$s".
     public static final String NO_CREATE_ACCESS_MSG = "You do not have the appropriate permissions to create a subfolder below the folder \"%1$s\".";
@@ -114,7 +114,7 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
 
     // The file \"%1$s\" was not updated due to possible data loss. Please review the warnings for details.
     public static final String FILE_UPDATE_ABORTED_MSG = "The file \"%1$s\" was not updated due to possible data loss. Please review the warnings for details.";
-    
+
     // The file(s) were not moved due to possible data loss. Please review the warnings for details.
     public static final String FILE_MOVE_ABORTED_MSG = "The file(s) were not moved due to possible data loss. Please review the warnings for details.";
 
@@ -179,7 +179,7 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
 
     // File name must not end with a dot or whitespace.
     public static final String WHITESPACE_END_MSG = "File name must not end with a dot or whitespace.";
-    
+
     // A file with that name already exists.
     public static final String FILE_ALREADY_EXISTS = "A file with that name already exists.";
 

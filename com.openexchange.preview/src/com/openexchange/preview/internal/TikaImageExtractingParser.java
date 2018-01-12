@@ -53,8 +53,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 import org.apache.tika.config.TikaConfig;
 import org.apache.tika.exception.TikaException;
@@ -67,6 +65,7 @@ import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 
@@ -82,29 +81,11 @@ public final class TikaImageExtractingParser implements Parser {
     private static final org.slf4j.Logger LOG =
         org.slf4j.LoggerFactory.getLogger(TikaImageExtractingParser.class);
 
-    private static final Set<MediaType> TYPES_IMAGE;
+    private static final Set<MediaType> TYPES_IMAGE = ImmutableSet.of(MediaType.image("bmp"), MediaType.image("gif"), MediaType.image("jpg"), MediaType.image("jpeg"), MediaType.image("png"), MediaType.image("tiff"));
 
-    private static final Set<MediaType> TYPES_EXCEL;
+    private static final Set<MediaType> TYPES_EXCEL = ImmutableSet.of(MediaType.image("vnd.ms-excel"));
 
-    private static final Set<MediaType> TYPES;
-
-    static {
-        Set<MediaType> types = new HashSet<MediaType>(6);
-        types.add(MediaType.image("bmp"));
-        types.add(MediaType.image("gif"));
-        types.add(MediaType.image("jpg"));
-        types.add(MediaType.image("jpeg"));
-        types.add(MediaType.image("png"));
-        types.add(MediaType.image("tiff"));
-        TYPES_IMAGE = Collections.unmodifiableSet(types);
-        types = new HashSet<MediaType>(1);
-        types.add(MediaType.image("vnd.ms-excel"));
-        TYPES_EXCEL = Collections.unmodifiableSet(types);
-
-        types = new HashSet<MediaType>(TYPES_IMAGE);
-        types.addAll(TYPES_EXCEL);
-        TYPES = Collections.unmodifiableSet(types);
-    }
+    private static final Set<MediaType> TYPES = ImmutableSet.<MediaType> builder().addAll(TYPES_IMAGE).addAll(TYPES_EXCEL).build();
 
     private final TikaDocumentHandler documentHandler;
 

@@ -2,11 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Messaging Generic Bundle
 Bundle-SymbolicName: com.openexchange.messaging.generic
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Activator: com.openexchange.messaging.generic.osgi.MessagingGenericActivator
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.cache,
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.google.common.collect,
+ com.openexchange.cache,
  com.openexchange.caching,
  com.openexchange.context,
  com.openexchange.crypto,

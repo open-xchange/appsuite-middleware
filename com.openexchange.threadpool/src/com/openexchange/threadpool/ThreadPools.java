@@ -619,7 +619,7 @@ public final class ThreadPools {
         if (task == null) {
             throw new NullPointerException();
         }
-        return new TaskAdapter<T>(task);
+        return task instanceof Task ? (Task<T>) task : new TaskAdapter<T>(task);
     }
 
     /**

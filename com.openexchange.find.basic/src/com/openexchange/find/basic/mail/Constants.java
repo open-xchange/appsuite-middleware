@@ -77,6 +77,8 @@ public class Constants {
 
     final static String FIELD_FILENAME_NAME = "filename";
 
+    final static String FIELD_HAS_ATTACHMENT = "has_attachment";
+
     static final List<String> FROM_FIELDS = asList(FIELD_FROM);
 
     static final List<String> TO_FIELDS = Arrays.asList(new String[] { FIELD_TO, FIELD_CC, FIELD_BCC });

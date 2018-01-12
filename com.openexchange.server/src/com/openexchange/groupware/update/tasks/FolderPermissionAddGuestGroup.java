@@ -57,7 +57,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.slf4j.Logger;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.update.Attributes;
@@ -108,11 +107,11 @@ public final class FolderPermissionAddGuestGroup extends UpdateTaskAdapter {
     public void perform(PerformParameters params) throws OXException {
         log.info("Performing update task {}", FolderPermissionAddGuestGroup.class.getSimpleName());
         ProgressState progress = params.getProgressState();
-        Connection connection = Database.getNoTimeout(params.getContextId(), true);
+        Connection connection = params.getConnection();
         boolean committed = false;
         try {
             connection.setAutoCommit(false);
-            int[] contextIDs = Database.getContextsInSameSchema(params.getContextId());
+            int[] contextIDs = params.getContextsInSameSchema();
             progress.setTotal(contextIDs.length);
             for (int i = 0; i < contextIDs.length; i++) {
                 progress.setState(i);
@@ -129,7 +128,6 @@ public final class FolderPermissionAddGuestGroup extends UpdateTaskAdapter {
                 rollback(connection);
             }
             autocommit(connection);
-            Database.backNoTimeout(params.getContextId(), true, connection);
         }
         log.info("{} successfully performed.", FolderPermissionAddGuestGroup.class.getSimpleName());
     }

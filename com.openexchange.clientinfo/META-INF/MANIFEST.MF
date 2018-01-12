@@ -1,0 +1,14 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange client info bundle
+Bundle-SymbolicName: com.openexchange.clientinfo
+Bundle-Version: 7.10.0
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.exception,
+ com.openexchange.java,
+ com.openexchange.osgi.annotation,
+ com.openexchange.session,
+ com.openexchange.sessiond,
+ org.slf4j
+Export-Package: com.openexchange.clientinfo

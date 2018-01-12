@@ -59,6 +59,7 @@ import javax.management.StandardMBean;
 import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
 import com.openexchange.database.migration.DBMigration;
+import com.openexchange.database.migration.DBMigrationConnectionProvider;
 import com.openexchange.database.migration.internal.DBMigrationExecutorServiceImpl;
 import com.openexchange.exception.OXException;
 
@@ -120,10 +121,11 @@ public class DefaultDBMigrationMBean extends StandardMBean implements DBMigratio
      */
     @Override
     public void releaseLocks() throws MBeanException {
+        DBMigrationConnectionProvider connectionProvider = migration.getConnectionProvider();
         Connection connection = null;
         PreparedStatement stmt = null;
         try {
-            connection = migration.getConnectionProvider().get();
+            connection = connectionProvider.get();
             stmt = connection.prepareStatement("UPDATE DATABASECHANGELOGLOCK SET LOCKED=0, LOCKGRANTED=null, LOCKEDBY=null where ID=1;");
             stmt.execute();
         } catch (Exception e) {
@@ -139,7 +141,7 @@ public class DefaultDBMigrationMBean extends StandardMBean implements DBMigratio
                 }
             }
             if (connection != null) {
-                migration.getConnectionProvider().back(connection);
+                connectionProvider.back(connection);
             }
         }
     }

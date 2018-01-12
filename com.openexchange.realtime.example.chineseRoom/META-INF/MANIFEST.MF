@@ -4,7 +4,7 @@ Bundle-Name: ChineseRoom
 Bundle-SymbolicName: com.openexchange.realtime.example.chineseRoom
 Bundle-Version: 7.1.0.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
  com.fasterxml.jackson.core.format,

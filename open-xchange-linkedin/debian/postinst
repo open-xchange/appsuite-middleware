@@ -19,8 +19,6 @@ set -e
 
 . /opt/open-xchange/lib/oxfunctions.sh
 
-PROTECT="linkedinoauth.properties"
-
 postFix() {
     local version=${1%-*}
     version=${version//[-.]/}
@@ -28,22 +26,9 @@ postFix() {
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    # SoftwareChange_Request-1494
     PFILE=/opt/open-xchange/etc/linkedinoauth.properties
-    if ! ox_exists_property com.openexchange.oauth.linkedin $PFILE; then
-       if grep -E '^com.openexchange.*REPLACE_THIS_WITH_THE_KEY_FROM' $PFILE > /dev/null; then
-           ox_set_property com.openexchange.oauth.linkedin false $PFILE
-       else
-           ox_set_property com.openexchange.oauth.linkedin true $PFILE
-       fi
-    fi
-
-    # SoftwareChange_Request-1501
-    # updated by SoftwareChange_Request-1710
-    ox_add_property com.openexchange.subscribe.socialplugin.linkedin.autorunInterval 1d /opt/open-xchange/etc/linkedinsubscribe.properties
 
     # SoftwareChange_Request-2410
-    PFILE=/opt/open-xchange/etc/linkedinoauth.properties
     OLDNAMES=( com.openexchange.socialplugin.linkedin.apikey com.openexchange.socialplugin.linkedin.apisecret )
     NEWNAMES=( com.openexchange.oauth.linkedin.apiKey com.openexchange.oauth.linkedin.apiSecret )
     for I in $(seq 1 ${#OLDNAMES[@]}); do
@@ -55,16 +40,11 @@ postFix() {
     done
 
     # SoftwareChange_Request-4123
-    PFILE=/opt/open-xchange/etc/linkedinoauth.properties
     ox_add_property com.openexchange.oauth.linkedin.redirectUrl REPLACE_THIS_WITH_YOUR_LINKEDIN_REDIRECT_URI ${PFILE}
-
 }
 
 setConfigFilePermissions() {
-    for FILE in $PROTECT
-    do
-        ox_update_permissions /opt/open-xchange/etc/$FILE root:open-xchange 640
-    done
+    ox_update_permissions /opt/open-xchange/etc/linkedinoauth.properties root:open-xchange 640
 }
 
 case "$1" in

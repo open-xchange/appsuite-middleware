@@ -7,5 +7,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.admin.diff"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.admin.plugin.hosting"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.admin.rmi"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.admin.rest.passwordchange.history"/>
 </provider>
 </psf>

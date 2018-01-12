@@ -1,29 +1,38 @@
 package com.openexchange.spamhandler.spamexperts.servlets;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import org.apache.commons.httpclient.HostConfiguration;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.HttpMethodBase;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import org.apache.commons.httpclient.URIException;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
-import org.apache.commons.io.IOUtils;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
+import org.apache.http.StatusLine;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.google.common.io.BaseEncoding;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
+import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.spamexperts.exceptions.SpamExpertsExceptionCode;
 import com.openexchange.spamhandler.spamexperts.management.SpamExpertsConfig;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /*
  *
@@ -80,114 +89,109 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  *
  *
  */
-public final class SpamExpertsServletRequest  {
+public final class SpamExpertsServletRequest {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpamExpertsServletRequest.class);
 
     public static final String ACTION_GET_NEW_PANEL_SESSION = "generate_panel_session";
-
-    private static final HttpClient HTTPCLIENT;
-
-    static {
-            final MultiThreadedHttpConnectionManager manager = new MultiThreadedHttpConnectionManager();
-            final HttpConnectionManagerParams params = manager.getParams();
-            params.setMaxConnectionsPerHost(HostConfiguration.ANY_HOST_CONFIGURATION, 23);
-            HTTPCLIENT = new HttpClient(manager);
-    }
 
     // ------------------------------------------------------------------------------------------------------------
 
 	private final Session session;
 	private final User user;
     private final SpamExpertsConfig config;
+    private final CloseableHttpClient httpClient;
 
-	public SpamExpertsServletRequest(Session session, SpamExpertsConfig config) throws OXException {
+	/**
+	 * Initializes a new {@link SpamExpertsServletRequest}.
+	 *
+	 * @param session The session providing user data
+	 * @param config The configuration
+	 * @param httpClient The HTTP client to use
+	 * @throws OXException If initialization fails
+	 */
+	public SpamExpertsServletRequest(Session session, SpamExpertsConfig config, CloseableHttpClient httpClient) throws OXException {
 		super();
 	    this.session = session;
         this.config = config;
-        this.user = UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
+        this.user = getUserFrom(session);
+        this.httpClient = httpClient;
 	}
 
-	public Object action(final String action, final JSONObject jsonObject) throws OXException, JSONException {
-		Object retval = null;
+	private static User getUserFrom(Session session) throws OXException {
+	    if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser();
+        }
 
-		if(action.equalsIgnoreCase(ACTION_GET_NEW_PANEL_SESSION)){
-			// create new panel session id and return it
-			retval = actionGetNewPanelSession(jsonObject);
-		}else{
-			throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
-		}
-
-		return retval;
+	    return UserStorage.getInstance().getUser(session.getUserId(), session.getContextId());
 	}
+
+    /**
+     * Performs the specified action
+     *
+     * @param action The action identifier
+     * @param jArgs The request's arguments
+     * @return The result object
+     * @throws OXException If request fails
+     */
+    public Object action(String action, JSONObject jArgs) throws OXException {
+        try {
+            if (action.equalsIgnoreCase(ACTION_GET_NEW_PANEL_SESSION)) {
+                // create new panel session id and return it
+                return actionGetNewPanelSession(jArgs);
+            }
+
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
 
 	/**
-	 * Returns the spamexperts panel session ID
+	 * Returns the spamexperts panel session ID<br>
 	 * Needed by UI to redirect to Panel
 	 *
-	 * @param jsonObject
+	 * @param jArgs The request's arguments
 	 * @return
 	 * @throws AbstractOXException
 	 * @throws JSONException
 	 */
-	private JSONObject actionGetNewPanelSession(final JSONObject jsonObject) throws OXException, JSONException {
-		// our response object for the client
-		final JSONObject jsonResponseObject = new JSONObject();
-
+	private JSONObject actionGetNewPanelSession(final JSONObject jArgs) throws OXException, JSONException {
 		try {
-
-			String sessionid = null;
-
-			// new parameter version to optionally determine the ui version
-			String uiVersion = null;
-			try {
-			    uiVersion = (String) jsonObject.get("version");
-			} catch( JSONException e1) {};
-
+			// new parameter version to optionally determine the UI version
+			String uiVersion = jArgs.optString("version", null);
 			LOG.debug("trying to create new spamexperts panel session for user {} in context {}", getCurrentUserUsername(), getCurrentUserContextID());
-			// create complete new session id
-			sessionid = createPanelSessionID(uiVersion);
-			LOG.debug("new spamexperts panel session created for user {} in context {}", getCurrentUserUsername(), getCurrentUserContextID());
 
-			if(sessionid==null){
-				throw SpamExpertsExceptionCode.SPAMEXPERTS_COMMUNICATION_ERROR.create("save and cache session", "invalid data for sessionid");
-			}
+			// create complete new session identifier
+			String sessionid = createPanelSessionID(uiVersion);
+            if (sessionid == null) {
+                throw SpamExpertsExceptionCode.SPAMEXPERTS_COMMUNICATION_ERROR.create("save and cache session", "invalid data for sessionid");
+            }
+            LOG.debug("new spamexperts panel session created for user {} in context {}", getCurrentUserUsername(), getCurrentUserContextID());
 
 			String panelWebUiUrl = config.getUriProperty(session, "com.openexchange.custom.spamexperts.panel.web_ui_url", "http://demo1.spambrand.com/?authticket=").toString();
 
 			// add valid data to response
 			// UI Plugin will format session and URL and redirect
+			JSONObject jsonResponseObject = new JSONObject(2);
 			jsonResponseObject.put("panel_session",sessionid); // send session id
 			jsonResponseObject.put("panel_web_ui_url", panelWebUiUrl); // send UI URL
-
-		} catch (final URIException e) {
-			LOG.error("error creating uri object of spamexperts api interface", e);
-			throw SpamExpertsExceptionCode.HTTP_COMMUNICATION_ERROR.create(e.getMessage());
-		} catch (final HttpException e) {
+			return jsonResponseObject;
+		} catch (ClientProtocolException e) {
 			LOG.error("http communication error detected with spamexperts api interface", e);
 			throw SpamExpertsExceptionCode.HTTP_COMMUNICATION_ERROR.create(e.getMessage());
-		} catch (final IOException e) {
+		} catch (IOException e) {
 			LOG.error("IO error occured while communicating with spamexperts api interface");
 			throw SpamExpertsExceptionCode.HTTP_COMMUNICATION_ERROR.create(e.getMessage());
-		}finally{
-			// add clean up stuff for http client here
 		}
-
-		return jsonResponseObject;
 	}
-
-
-	private String reponse2String(final HttpMethodBase httpmethod) throws IOException {
-		 final Reader reader = new InputStreamReader(httpmethod.getResponseBodyAsStream(), httpmethod.getResponseCharSet());
-		 return IOUtils.toString(reader);
-   }
 
 	private static String AUTH_ID_MAIL ="mail";
 	private static String AUTH_ID_LOGIN ="login";
 	private static String AUTH_ID_IMAP_LOGIN ="imaplogin";
 	private static String AUTH_ID_USERNAME ="username";
 
-	private String createPanelSessionID(final String uiVersion) throws OXException, JSONException, IOException {
+	private String createPanelSessionID(final String uiVersion) throws OXException, IOException {
 	    String admin = config.requireProperty(session, "com.openexchange.custom.spamexperts.panel.admin_user");
 	    String password = config.getPropertyFor(session, "com.openexchange.custom.spamexperts.panel.admin_password", "demo", String.class).trim();
 
@@ -209,48 +213,50 @@ public final class SpamExpertsServletRequest  {
 
 		LOG.debug("Using {} as authID string from user {} in context {} to authenticate against panel API", authid, getCurrentUserUsername(), getCurrentUserContextID());
 
-		// call the API to retrieve the URL to access panel
-        final GetMethod GET = new GetMethod(config.getUriProperty(session, "com.openexchange.custom.spamexperts.panel.api_interface_url", "http://demo1.spambrand.com/api/authticket/create/username/")+authid);
-
-        // send request
-        if( null != uiVersion ) {
-            GET.setQueryString("version=" + uiVersion);
-        }
-
-        HTTPCLIENT.getState().setCredentials(new AuthScope(GET.getURI().getHost(), 80, "API user authentication"), new UsernamePasswordCredentials(admin, password));
+		HttpGet getRequest = null;
+		HttpResponse getResponse = null;
 		try {
+		    // call the API to retrieve the URL to access panel
+		    List<NameValuePair> queryString = null;
+		    if (null != uiVersion) {
+		        queryString = new ArrayList<>(1);
+		        queryString.add(new BasicNameValuePair("version", uiVersion));
+		    }
+            getRequest = new HttpGet(buildUri(getURIFor(authid), queryString, null));
+		    setAuthorizationHeader(getRequest, admin, password);
 
-			final int statusCode = HTTPCLIENT.executeMethod(GET);
-
-			if (statusCode != HttpStatus.SC_OK) {
-				LOG.error("HTTP request to create new spamexperts panel session failed with status: {}", GET.getStatusLine());
-				throw SpamExpertsExceptionCode.SPAMEXPERTS_COMMUNICATION_ERROR.create("create panel authticket", GET.getStatusLine());
-			}
-
-			final String resp = reponse2String(GET);
-			LOG.debug("Got response for user {} in context {} from  panel API: \n{}", getCurrentUserUsername(), getCurrentUserContextID(), resp);
-
-			if(resp.indexOf("ERROR")!=-1){
-				// ERROR DETECTED
-				throw SpamExpertsExceptionCode.SPAMEXPERTS_COMMUNICATION_ERROR.create("create panel authticket", resp);
-			}
-
-			return resp;
-		} catch (final IllegalArgumentException e){
-			LOG.error("error in http communication", e);
-			throw e;
-		} catch (final HttpException e) {
-			LOG.error("error in http communication", e);
-			throw e;
-		} catch (final IOException e) {
-			LOG.error("IO error in http communication", e);
-			throw e;
-        } finally {
-            if (GET != null) {
-                GET.releaseConnection();
+		    HttpResponse httpResponse = httpClient.execute(getRequest);
+            StatusLine statusLine = httpResponse.getStatusLine();
+            int statusCode = statusLine.getStatusCode();
+            if (statusCode != HttpStatus.SC_OK) {
+                LOG.error("HTTP request to create new spamexperts panel session failed with status: {}", statusLine);
+                throw SpamExpertsExceptionCode.SPAMEXPERTS_COMMUNICATION_ERROR.create("create panel authticket", statusLine);
             }
-        }
 
+            HttpEntity entity = httpResponse.getEntity();
+            if (null == entity) {
+                return null;
+            }
+
+            String resp = EntityUtils.toString(entity);
+            LOG.debug("Got response for user {} in context {} from  panel API: \n{}", getCurrentUserUsername(), getCurrentUserContextID(), resp);
+
+            if (Strings.isEmpty(resp)) {
+                return null;
+            }
+
+            if (resp.indexOf("ERROR") != -1) {
+                // ERROR DETECTED
+                throw SpamExpertsExceptionCode.SPAMEXPERTS_COMMUNICATION_ERROR.create("create panel authticket", resp);
+            }
+
+            return resp;
+        } catch (RuntimeException e) {
+            LOG.error("runtime error", e);
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            HttpClients.close(getRequest, getResponse);
+        }
 	}
 
 	private String getCurrentUserUsername(){
@@ -260,4 +266,43 @@ public final class SpamExpertsServletRequest  {
 	private int getCurrentUserContextID(){
 		return this.session.getContextId();
 	}
+
+	private URI getURIFor(String authid) throws OXException {
+	    String uriString = config.getUriProperty(session, "com.openexchange.custom.spamexperts.panel.api_interface_url", "http://demo1.spambrand.com/api/authticket/create/username/") + authid;
+	    try {
+            return new URI(uriString);
+        } catch (URISyntaxException e) {
+            throw OXException.general("Invalid URI: " + uriString, e);
+        }
+	}
+
+	/**
+     * Sets the Authorization header.
+     *
+     * @param request The HTTP request
+     * @param login The login
+     * @param password The password
+     */
+    private void setAuthorizationHeader(HttpRequestBase request, String login, String password) {
+        String encodedCredentials = BaseEncoding.base64().encode((login + ":" + password).getBytes(Charsets.UTF_8));
+        request.setHeader(HttpHeaders.AUTHORIZATION, "Basic " + encodedCredentials);
+    }
+
+	/**
+     * Builds the URI from given arguments
+     *
+     * @param baseUri The base URI
+     * @param queryString The query string parameters
+     * @return The built URI string
+     * @throws IllegalArgumentException If the given string violates RFC 2396
+     */
+    private URI buildUri(URI baseUri, List<NameValuePair> queryString, String optPath) {
+        try {
+            URIBuilder builder = new URIBuilder();
+            builder.setScheme(baseUri.getScheme()).setHost(baseUri.getHost()).setPort(baseUri.getPort()).setPath(null == optPath ? baseUri.getPath() : optPath).setQuery(null == queryString ? null : URLEncodedUtils.format(queryString, "UTF-8"));
+            return builder.build();
+        } catch (final URISyntaxException x) {
+            throw new IllegalArgumentException("Failed to build URI", x);
+        }
+    }
 }

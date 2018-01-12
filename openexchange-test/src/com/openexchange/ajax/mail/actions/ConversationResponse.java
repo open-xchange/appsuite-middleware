@@ -62,6 +62,7 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailListField;
+import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.ThreadSortMailMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
@@ -160,6 +161,17 @@ public class ConversationResponse extends AbstractAJAXResponse {
                         break;
                     case ORIGINAL_ID:
                         message.setOriginalId(strValue);
+                        break;
+                    case TEXT_PREVIEW_IF_AVAILABLE:
+                        // fall-through
+                    case TEXT_PREVIEW:
+                        message.setTextPreview(strValue);
+                        break;
+                    case AUTHENTICATION_OVERALL_RESULT:
+                        message.setAuthenticityResult((MailAuthenticityResult) messageMap.get(key));
+                        break;
+                    case AUTHENTICATION_MECHANISM_RESULTS:
+                        message.setAuthenticityResult((MailAuthenticityResult) messageMap.get(key));
                         break;
                     case PRIORITY:
                         message.setPriority((int) messageMap.get(key));

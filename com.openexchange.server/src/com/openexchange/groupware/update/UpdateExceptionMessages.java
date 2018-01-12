@@ -81,6 +81,8 @@ public final class UpdateExceptionMessages implements LocalizableStrings {
 
     public static final String COLUMN_NOT_FOUND_DISPLAY = "Column \"%1$s\" not found in table \"%2$s\".";
 
+    public static final String FOUND_MULTIPLE_SCHEMAS_DISPLAY = "Found multiple schemas for name: \"%1$s\".";
+
     private UpdateExceptionMessages() {
         super();
     }

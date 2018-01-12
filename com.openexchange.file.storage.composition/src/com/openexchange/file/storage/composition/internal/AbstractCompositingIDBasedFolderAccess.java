@@ -82,6 +82,7 @@ import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.FolderStatsAware;
+import com.openexchange.file.storage.PathKnowingFileStorageFolderAccess;
 import com.openexchange.file.storage.PermissionAware;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
@@ -179,6 +180,21 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         return withUniqueID(folders, folderID.getService(), folderID.getAccountId());
     }
 
+    private FolderID[] getPathIds(String folderId, String accountId, String serviceId, FileStorageFolderAccess folderAccess) throws OXException {
+        if (folderAccess instanceof PathKnowingFileStorageFolderAccess) {
+            PathKnowingFileStorageFolderAccess pathKnowing = (PathKnowingFileStorageFolderAccess) folderAccess;
+            String[] pathIds = pathKnowing.getPathIds2DefaultFolder(folderId);
+            FolderID[] path = new FolderID[pathIds.length];
+            for (int i = 0; i < pathIds.length; i++) {
+                path[i] = new FolderID(serviceId, accountId, pathIds[i]);
+            }
+            return path;
+        }
+
+        FileStorageFolder[] pathFolders = folderAccess.getPath2DefaultFolder(folderId);
+        return getPath(pathFolders, serviceId, accountId);
+    }
+
     @Override
     public String createFolder(FileStorageFolder toCreate) throws OXException {
 
@@ -192,7 +208,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         if (containsForeignPermissions(session.getUserId(), toCreate) && false == PermissionAware.class.isInstance(folderAccess)) {
             throw FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(FileStorageTools.getAccountName(this, parentFolderID), parentFolderID, session.getContextId());
         }
-        FileStorageFolder[] path = folderAccess.getPath2DefaultFolder(parentFolderID.getFolderId());
+        FolderID[] path = getPathIds(parentFolderID.getFolderId(), parentFolderID.getAccountId(), parentFolderID.getService(), folderAccess);
         String newID = folderAccess.createFolder(withRelativeID(toCreate));
         FolderID newFolderID = new FolderID(parentFolderID.getService(), parentFolderID.getAccountId(), newID);
         fire(new Event(FileStorageEventConstants.CREATE_FOLDER_TOPIC, getEventProperties(session, newFolderID, path)));
@@ -211,7 +227,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         if (containsForeignPermissions(session.getUserId(), toUpdate) && false == PermissionAware.class.isInstance(folderAccess)) {
             throw FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(FileStorageTools.getAccountName(this, folderID), folderID, session.getContextId());
         }
-        FileStorageFolder[] path = folderAccess.getPath2DefaultFolder(folderID.getFolderId());
+        FolderID[] path = getPathIds(folderID.getFolderId(), folderID.getAccountId(), folderID.getService(), folderAccess);
         String newID;
         if (cascadePermissions) {
             if (false == PermissionAware.class.isInstance(folderAccess)) {
@@ -245,10 +261,10 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
              * move within same storage
              */
             FileStorageFolderAccess folderAccess = getFolderAccess(sourceFolderID);
-            FileStorageFolder[] sourcePath = folderAccess.getPath2DefaultFolder(sourceFolderID.getFolderId());
+            FolderID[] sourcePath = getPathIds(sourceFolderID.getFolderId(), sourceFolderID.getAccountId(), sourceFolderID.getService(), folderAccess);
             String newID = folderAccess.moveFolder(sourceFolderID.getFolderId(), targetParentFolderID.getFolderId(), newName);
             FolderID newFolderID = new FolderID(sourceFolderID.getService(), sourceFolderID.getAccountId(), newID);
-            FileStorageFolder[] newPath = folderAccess.getPath2DefaultFolder(newID);
+            FolderID[] newPath = getPathIds(newID, sourceFolderID.getAccountId(), sourceFolderID.getService(), folderAccess);
             fire(new Event(FileStorageEventConstants.DELETE_FOLDER_TOPIC, getEventProperties(session, sourceFolderID, sourcePath)));
             fire(new Event(FileStorageEventConstants.CREATE_FOLDER_TOPIC, getEventProperties(session, newFolderID, newPath)));
 
@@ -295,7 +311,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
     public String renameFolder(String folderId, String newName) throws OXException {
         FolderID folderID = new FolderID(folderId);
         FileStorageFolderAccess folderAccess = getFolderAccess(folderID);
-        FileStorageFolder[] path = folderAccess.getPath2DefaultFolder(folderID.getFolderId());
+        FolderID[] path = getPathIds(folderID.getFolderId(), folderID.getAccountId(), folderID.getService(), folderAccess);
         String newID = folderAccess.renameFolder(folderID.getFolderId(), newName);
         FolderID newFolderID =new FolderID(folderID.getService(), folderID.getAccountId(), newID);
         fire(new Event(FileStorageEventConstants.UPDATE_FOLDER_TOPIC, getEventProperties(session, newFolderID, path)));
@@ -314,7 +330,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
             throw FileStorageExceptionCodes.DELETE_DENIED.create(folderID.getService(), folderId);
         }
         FileStorageFolderAccess folderAccess = getFolderAccess(folderID);
-        FileStorageFolder[] path = folderAccess.getPath2DefaultFolder(folderID.getFolderId());
+        FolderID[] path = getPathIds(folderID.getFolderId(), folderID.getAccountId(), folderID.getService(), folderAccess);
         folderAccess.deleteFolder(folderID.getFolderId(), hardDelete);
         Dictionary<String, Object> eventProperties = getEventProperties(session, folderID, path);
         eventProperties.put(FileStorageEventConstants.HARD_DELETE, Boolean.valueOf(hardDelete));

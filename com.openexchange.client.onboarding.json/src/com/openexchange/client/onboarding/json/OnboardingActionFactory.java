@@ -56,6 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.client.onboarding.json.actions.AllScenariosAction;
 import com.openexchange.client.onboarding.json.actions.ConfigAction;
+import com.openexchange.client.onboarding.json.actions.DevicesAction;
 import com.openexchange.client.onboarding.json.actions.ExecuteAction;
 import com.openexchange.client.onboarding.json.actions.GetScenarioAction;
 import com.openexchange.exception.OXException;
@@ -80,6 +81,7 @@ public class OnboardingActionFactory implements AJAXActionServiceFactory {
         super();
         ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
         actions.put("config", new ConfigAction(services));
+        actions.put("devices", new DevicesAction(services));
         actions.put("get", new GetScenarioAction(services));
         actions.put("scenarios", new AllScenariosAction(services));
         actions.put("execute", new ExecuteAction(services));

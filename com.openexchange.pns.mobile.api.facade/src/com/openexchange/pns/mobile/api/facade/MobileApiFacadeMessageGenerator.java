@@ -50,16 +50,17 @@
 package com.openexchange.pns.mobile.api.facade;
 
 import java.util.Map;
+import org.json.JSONException;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.pns.ApnsConstants;
 import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.Message;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMessageGenerator;
 import com.openexchange.pns.PushNotification;
-import javapns.json.JSONException;
 import javapns.notification.PushNotificationPayload;
-
 
 /**
  * {@link MobileApiFacadeMessageGenerator} - The message generator for Mobile API Facade.
@@ -70,7 +71,6 @@ import javapns.notification.PushNotificationPayload;
 public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
 
     private static final String TRANSPORT_ID_GCM = KnownTransport.GCM.getTransportId();
-    private static final int GCM_MAX_PAYLOAD_SIZE = 4096;
     private static final String TRANSPORT_ID_APNS = KnownTransport.APNS.getTransportId();
 
     // ------------------------------------------------------------------------------------------------------------------------
@@ -122,7 +122,7 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
                 public com.google.android.gcm.Message getMessage() {
                     return gcmMessage;
                 }
-           };
+            };
         } else if (TRANSPORT_ID_APNS.equals(transportId)) {
             // Build APNS payload as expected by client
 
@@ -132,32 +132,53 @@ public class MobileApiFacadeMessageGenerator implements PushMessageGenerator {
                 String subject = MessageDataUtil.getSubject(messageData);
                 String displayName = MessageDataUtil.getDisplayName(messageData);
                 String senderAddress = MessageDataUtil.getSender(messageData);
-                String sender = displayName.length() != 0 ? displayName : senderAddress;
+                String sender = displayName.length() == 0 ? senderAddress : displayName;
+                String folder = MessageDataUtil.getFolder(messageData);
+                String id = MessageDataUtil.getId(messageData);
                 String path = MessageDataUtil.getPath(messageData);
                 int unread = MessageDataUtil.getUnread(messageData);
 
-                StringBuffer sb = new StringBuffer(sender);
-                sb.append("\n");
-                sb.append(subject);
+                if (false == Strings.isEmpty(subject)) {
+                    // Non-silent push
+                    StringBuilder sb = new StringBuilder(sender);
+                    sb.append("\n");
+                    sb.append(subject);
+                    String alertMessage = sb.toString();
+                    alertMessage = alertMessage.length() > ApnsConstants.APNS_MAX_ALERT_LENGTH ? alertMessage.substring(0, ApnsConstants.APNS_MAX_ALERT_LENGTH) : alertMessage;
+                    payload.addAlert(alertMessage);
 
-                payload.addAlert(sb.toString());
+                    MobileApiFacadePushConfiguration config = MobileApiFacadePushConfiguration.getConfigFor(notification.getUserId(), notification.getContextId(), viewFactory);
 
-                MobileApiFacadePushConfiguration config = MobileApiFacadePushConfiguration.getConfigFor(notification.getUserId(), notification.getContextId(), viewFactory);
-                if (config.isApnBadgeEnabled() && unread > -1) {
-                    payload.addBadge(unread);
+                    if (config.isApnBadgeEnabled() && unread >= 0) {
+                        payload.addBadge(unread);
+                    }
+
+                    if (config.isApnSoundEnabled()) {
+                        payload.addSound(config.getApnSoundFile());
+                    }
+
+                    payload.setContentAvailable(false);
+                } else {
+                    // Silent push
+                    payload.setContentAvailable(true);
                 }
 
-                if (config.isApnSoundEnabled()) {
-                    payload.addSound(config.getApnSoundFile());
+                if (Strings.isEmpty(path) && Strings.isNotEmpty(folder) && Strings.isNotEmpty(id)) {
+                    path = folder + "/" + id;
                 }
 
-                payload.addCustomDictionary("cid", path);
+                if (path.length() > 0) {
+                    payload.addCustomDictionary("cid", path);
+                } else if (folder.length() > 0) {
+                    payload.addCustomDictionary("folder", folder);
+                }
+
                 return new Message<PushNotificationPayload>() {
 
                     @Override
                     public PushNotificationPayload getMessage() {
                         return payload;
-                    };
+                    }
                 };
             } catch (JSONException e) {
                 throw PushExceptionCodes.MESSAGE_GENERATION_FAILED.create(e, e.getMessage());

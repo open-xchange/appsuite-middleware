@@ -201,7 +201,7 @@ public interface OAuthServiceMetaData {
      * @param session The associated session
      * @return The modified callback URL
      */
-    String modifyCallbackURL(String callbackUrl, String currentHost, Session session);
+    String modifyCallbackURL(String callbackUrl, HostInfo currentHost, Session session);
 
     /**
      * Gets the style of API (e.g. Twitter...).
@@ -229,7 +229,9 @@ public interface OAuthServiceMetaData {
     String getRegisterToken(String authUrl);
 
     /**
-     * Returns an unmodifiable {@link Set} with all available {@link OAuthScope}s
+     * Returns an unmodifiable {@link Set} with all available {@link OAuthScope}s.
+     * <p>
+     * Available scopes are all scopes offered by associated OAuth API filtered by <i>possibly</i> defined configuration (e.g. <code>"com.openexchange.oauth.modules.enabled.google"</code> property).
      *
      * @param userId The user id
      * @param ctxId The context id

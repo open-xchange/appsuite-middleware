@@ -143,7 +143,10 @@ public class DriveJsonActivator extends AJAXModuleActivator {
     @Override
     protected void stopBundle() throws Exception {
         LOG.info("stopping bundle: \"com.openexchange.drive.json\"");
-        getService(DriveEventService.class).unregisterPublisher(ListenerRegistrar.getInstance());
+        DriveEventService driveEventService = getService(DriveEventService.class);
+        if (null != driveEventService) {
+            driveEventService.unregisterPublisher(ListenerRegistrar.getInstance());
+        }
         Services.set(null);
         super.stopBundle();
     }

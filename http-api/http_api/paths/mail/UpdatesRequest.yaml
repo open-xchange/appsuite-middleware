@@ -10,6 +10,12 @@
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/gblQueryParamMailFolder"
       - $ref: "#/parameters/gblQueryParamMailColumns"
+      - $ref: "#/parameters/gblQueryParamMailHeaders"
+      - in: query
+        name: ignore
+        type: string
+        description: The type of updates which should be ignored. Currently known values are 'deleted' and 'changed'. E.g. if you only want to retrieve deleted mails you use 'ignore=changed'.
+        required: false      
     responses:
       200:
         description: |

@@ -60,6 +60,7 @@ import java.util.Map;
 import org.junit.Test;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.SchemaInfo;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.Info;
 import com.openexchange.filestore.OwnerInfo;
@@ -326,7 +327,7 @@ public class QuotaFileStorageTest {
         }
 
         @Override
-        public int[] listContexts(final int poolId) {
+        public int[] listContexts(int poolId, int offset, int length) {
             return null;
         }
 
@@ -467,13 +468,11 @@ public class QuotaFileStorageTest {
 
         @Override
         public Connection getWritable(Assignment assignment, boolean noTimeout) throws OXException {
-            // TODO Auto-generated method stub
             return null;
         }
 
         @Override
         public Connection getReadOnly(Assignment assignment, boolean noTimeout) throws OXException {
-            // TODO Auto-generated method stub
             return null;
         }
 
@@ -484,7 +483,11 @@ public class QuotaFileStorageTest {
 
         @Override
         public Map<String, Integer> getAllSchemata(Connection con) throws OXException {
-            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public SchemaInfo getSchemaInfo(int contextId) throws OXException {
             return null;
         }
     }

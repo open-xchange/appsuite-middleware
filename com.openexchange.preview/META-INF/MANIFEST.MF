@@ -2,10 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Preview Bundle
 Bundle-SymbolicName: com.openexchange.preview
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Activator: com.openexchange.preview.osgi.PreviewActivator
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
  com.fasterxml.jackson.core.format,
@@ -13,7 +13,8 @@ Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.json,
  com.fasterxml.jackson.core.sym,
  com.fasterxml.jackson.core.type,
- com.fasterxml.jackson.core.util, 
+ com.fasterxml.jackson.core.util,
+ com.google.common.collect,
  com.openexchange.conversion,
  com.openexchange.exception,
  com.openexchange.filemanagement,
@@ -95,11 +96,4 @@ Import-Package: com.fasterxml.jackson.core,
  org.xml.sax.helpers
 Export-Package: com.openexchange.preview,
  com.openexchange.preview.cache
-Bundle-ClassPath: .,
- lib/itextpdf-5.1.2.jar,
- lib/jOpenDocument-1.2.jar,
- lib/jodconverter-core-3.0-beta-4.jar,
- lib/juh-3.2.1.jar,
- lib/jurt-3.2.1.jar,
- lib/ridl-3.2.1.jar,
- lib/jodreports-2.4.0.jar
+Bundle-ClassPath: .

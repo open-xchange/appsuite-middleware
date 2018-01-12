@@ -1062,22 +1062,26 @@ public class MimeMessageFiller {
     }
 
     private Multipart appendVCard(ComposedMailMessage mail, Multipart primaryMultipart, MimeMessage mimeMessage) throws OXException, MessagingException, UnsupportedEncodingException {
-        final String charset = MailProperties.getInstance().getDefaultMimeCharset();
-        final String fileName = compositionParameters.getUserVCardFileName();
-        AppendVCard: if (mail.isAppendVCard() && fileName != null) {
-            final String encodedFileName = MimeUtility.encodeText(fileName, charset, "Q");
-            for (int i = 0; i < mail.getEnclosedCount(); i++) {
-                final MailPart part = mail.getEnclosedMailPart(i);
+        String fileName = compositionParameters.getUserVCardFileName();
+        if (mail.isAppendVCard() && fileName != null) {
+            String charset = MailProperties.getInstance().getDefaultMimeCharset();
+            String encodedFileName = MimeUtility.encodeText(fileName, charset, "Q");
+            int numberOfParts = mail.getEnclosedCount();
+            for (int i = 0; i < numberOfParts; i++) {
+                MailPart part = mail.getEnclosedMailPart(i);
                 if (encodedFileName.equalsIgnoreCase(part.getFileName())) {
                     /*
                      * VCard already attached in (former draft) message
                      */
-                    break AppendVCard;
+                    return primaryMultipart;
                 }
             }
+            /*
+             * No VCard attached...
+             */
             try {
                 /*
-                 * Create a body part for vcard
+                 * Create a body part for VCard
                  */
                 final MimeBodyPart vcardPart = new MimeBodyPart();
                 /*
@@ -1237,7 +1241,7 @@ public class MimeMessageFiller {
         final List<String> cidList = MimeMessageUtility.getContentIDs(wellFormedHTMLContent);
         final StringBuilder tmp = new StringBuilder(32);
         NextImg: for (final String cid : cidList) {
-            final BodyPart relatedImageBodyPart;
+            final MimeBodyPart relatedImageBodyPart;
             final SourcedImage image = images.get(cid);
             if (null == image) {
                 /*
@@ -1252,9 +1256,13 @@ public class MimeMessageFiller {
                  */
                 relatedImageBodyPart = new MimeBodyPart();
                 relatedImageBodyPart.setDataHandler(imgPart.getDataHandler());
-                for (final Iterator<Map.Entry<String, String>> iter = imgPart.getHeadersIterator(); iter.hasNext();) {
-                    final Map.Entry<String, String> e = iter.next();
-                    relatedImageBodyPart.setHeader(e.getKey(), e.getValue());
+                tmp.setLength(0);
+                relatedImageBodyPart.setContentID(tmp.append('<').append(cid).append('>').toString());
+                for (Iterator<Map.Entry<String, String>> iter = imgPart.getHeadersIterator(); iter.hasNext();) {
+                    Map.Entry<String, String> e = iter.next();
+                    if (false == MessageHeaders.HDR_CONTENT_ID.equalsIgnoreCase(e.getKey())) {
+                        relatedImageBodyPart.setHeader(e.getKey(), e.getValue());
+                    }
                 }
             } else {
                 final DataSource dataSource;
@@ -1669,6 +1677,8 @@ public class MimeMessageFiller {
 
     private static final String VERSION_NAME = Version.NAME;
 
+    private static final Pattern PATTERN_SRC_ATTR = Pattern.compile("(?i)src=\"[^\"]*\"");
+
     /**
      * Processes referenced local images, inserts them as inlined HTML images and adds their binary data to parental instance of <code>
      * {@link Multipart}</code>.
@@ -1698,15 +1708,9 @@ public class MimeMessageFiller {
                     final String id = m.getManagedFileId();
                     ImageProvider imageProvider;
                     if (null != id) {
-                        if (mfm.contains(id)) {
-                            try {
-                                imageProvider = new ManagedFileImageProvider(mfm.getByID(id));
-                            } catch (final OXException e) {
-                                LOG.warn("Image with id \"{}\" could not be loaded. Referenced image is skipped.", id, e);
-                                // Anyway, replace image tag
-                                m.appendLiteralReplacement(sb, blankSrc(imageTag));
-                                continue;
-                            }
+                        ManagedFile managedFile = mfm.optByID(id);
+                        if (null != managedFile) {
+                            imageProvider = new ManagedFileImageProvider(managedFile);
                         } else {
                             // "ajax/file?..." but no matching file, check in referenced ones
                             int size = mail.getEnclosedCount();
@@ -1727,7 +1731,7 @@ public class MimeMessageFiller {
                             }
                             for (int i = size; null == tmp && i-- > 0;) {
                                 MailPart part = mail.getEnclosedMailPart(i);
-                                if (ComposedPartType.REFERENCE.equals(((ComposedMailPart) part).getType())) {
+                                if ((part instanceof ComposedMailPart) && ComposedPartType.REFERENCE.equals(((ComposedMailPart) part).getType())) {
                                     String contentId = part.getContentId();
                                     if (null != contentId && contentId.startsWith(prefix, 0)) {
                                         tmp = new ReferencedPartImageProvider(part);
@@ -1839,9 +1843,7 @@ public class MimeMessageFiller {
                     /*
                      * Replace "src" attribute
                      */
-                    String iTag = imageTag.replaceFirst(
-                        "(?i)src=\"[^\"]*\"",
-                        com.openexchange.java.Strings.quoteReplacement("src=\"cid:" + processLocalImage(imageProvider, iid, appendBodyPart, mp) + "\""));
+                    String iTag = PATTERN_SRC_ATTR.matcher(imageTag).replaceFirst(com.openexchange.java.Strings.quoteReplacement("src=\"cid:" + processLocalImage(imageProvider, iid, appendBodyPart, mp) + "\""));
                     iTag = iTag.replaceFirst("(?i)id=\"[^\"]*@" + VERSION_NAME + "\"", "");
                     m.appendLiteralReplacement(sb, iTag);
                 } else {

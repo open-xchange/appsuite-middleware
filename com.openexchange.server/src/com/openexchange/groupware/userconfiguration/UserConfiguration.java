@@ -111,6 +111,7 @@ public class UserConfiguration implements Serializable, Cloneable {
 
     /**
      * The permission bit for WebDAV/XML access.
+     * @deprecated
      */
     public static final int WEBDAV_XML = UserPermissionBits.WEBDAV_XML;
 
@@ -410,6 +411,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * Detects if user configuration allows WebDAV XML.
      *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
+     * @deprecated
      */
     public boolean hasWebDAVXML() {
         return capabilities.contains(Permission.WEBDAV_XML.getCapabilityName());

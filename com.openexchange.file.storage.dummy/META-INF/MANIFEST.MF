@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.file.storage.dummy
 Bundle-Version: 1.0.0.qualifier
 Bundle-Activator: com.openexchange.file.storage.dummy.osgi.DummyFileStorageActivator
 Bundle-Vendor: OPENEXCHANGE
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.datatypes.genericonf,
  com.openexchange.exception,
  com.openexchange.file.storage,

@@ -57,6 +57,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.database.SchemaInfo;
 import com.openexchange.database.internal.wrapping.JDBC4ConnectionReturner;
 import com.openexchange.database.migration.DBMigration;
 import com.openexchange.database.migration.DBMigrationConnectionProvider;
@@ -82,10 +83,10 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     private final ContextDatabaseAssignmentImpl contextAssignment;
     private final ReplicationMonitor monitor;
 
-    ConfigDatabaseServiceImpl(ConfigDatabaseAssignmentService assignmentService, Pools pools, ReplicationMonitor monitor) {
+    ConfigDatabaseServiceImpl(ConfigDatabaseAssignmentService assignmentService, Pools pools, ReplicationMonitor monitor, LockMech lockMech) {
         super();
         this.assignmentService = assignmentService;
-        contextAssignment = new ContextDatabaseAssignmentImpl(this);
+        contextAssignment = new ContextDatabaseAssignmentImpl(this, lockMech);
         this.pools = pools;
         this.monitor = monitor;
     }
@@ -208,8 +209,8 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     }
 
     @Override
-    public int[] listContexts(final int poolId) throws OXException {
-        return contextAssignment.getContextsInDatabase(poolId);
+    public int[] listContexts(int poolId, int offset, int length) throws OXException {
+        return contextAssignment.getContextsInDatabase(poolId, offset, length);
     }
 
     @Override
@@ -224,13 +225,18 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
 
     @Override
     public int getWritablePool(int contextId) throws OXException {
-        final Assignment assign = contextAssignment.getAssignment(contextId);
-        return assign.getWritePoolId();
+        return contextAssignment.getAssignment(contextId).getWritePoolId();
     }
 
     @Override
     public String getSchemaName(int contextId) throws OXException {
         return contextAssignment.getAssignment(contextId).getSchema();
+    }
+
+    @Override
+    public SchemaInfo getSchemaInfo(int contextId) throws OXException {
+        Assignment assign = contextAssignment.getAssignment(contextId);
+        return SchemaInfo.valueOf(assign.getWritePoolId(), assign.getSchema());
     }
 
     @Override

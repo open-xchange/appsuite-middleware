@@ -58,7 +58,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -74,6 +73,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.json.JSONValue;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.tools.JSONUtil;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -686,15 +686,18 @@ public final class ConfigJSlobService implements JSlobService {
         final int userId = session.getUserId();
         final int contextId = session.getContextId();
 
-        if (null == jSlob) {
+        if ((DefaultJSlob.EMPTY_JSLOB == jSlob) || (null == jSlob)) {
             getStorage().remove(new JSlobId(SERVICE_ID, id, userId, contextId));
         } else {
-            final DefaultJSlob jsonJSlob = new DefaultJSlob(jSlob);
-            final JSONObject jObject = jsonJSlob.getJsonObject();
-            if (null == jObject) {
+            if (null == jSlob.getJsonObject()) {
                 getStorage().remove(new JSlobId(SERVICE_ID, id, userId, contextId));
                 return;
             }
+
+            // Clone it
+            final DefaultJSlob jsonJSlob = new DefaultJSlob(jSlob);
+            final JSONObject jObject = jsonJSlob.getJsonObject();
+
             // Remember the paths to purge
             final List<List<JSONPathElement>> pathsToPurge = new LinkedList<List<JSONPathElement>>();
 
@@ -927,8 +930,8 @@ public final class ConfigJSlobService implements JSlobService {
             {
                 JSlob opt = storage.opt(jslobId);
                 if (null == opt) {
-                    jsonJSlob = new DefaultJSlob();
                     storageObject = new JSONObject();
+                    jsonJSlob = new DefaultJSlob(storageObject);
                 } else {
                     jsonJSlob = new DefaultJSlob(opt);
                     storageObject = jsonJSlob.getJsonObject();
@@ -1167,7 +1170,7 @@ public final class ConfigJSlobService implements JSlobService {
         return services.getService(ConfigViewFactory.class);
     }
 
-    private static final Set<String> SKIP_META = new HashSet<String>(Arrays.asList("final", METADATA_PROTECTED, METADATA_PREFERENCE_PATH));
+    private static final Set<String> SKIP_META = ImmutableSet.of("final", METADATA_PROTECTED, METADATA_PREFERENCE_PATH);
 
     private static void add2JSlob(final AttributedProperty attributedProperty, final JSlob jsonJSlob, final ConfigView view) throws OXException {
         if (null == attributedProperty) {
@@ -1252,6 +1255,10 @@ public final class ConfigJSlobService implements JSlobService {
     }
 
     private static void addValueByPath(final List<JSONPathElement> path, final Object value, final JSONObject object) throws JSONException {
+        if (null == object) {
+            LOG.debug("JSONObject is null. Can't add value {}", value);
+            return;
+        }
         final int msize = path.size() - 1;
         JSONObject current = object;
         for (int i = 0; i < msize; i++) {

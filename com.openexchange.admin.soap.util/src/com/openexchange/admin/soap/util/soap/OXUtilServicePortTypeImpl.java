@@ -497,10 +497,10 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
     }
 
     @Override
-    public Database registerDatabase(final Database db,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
+    public Database registerDatabase(final Database db, final Boolean createSchemas, final Integer optNumberOfSchemas, final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
-            return database2Soap(utilInterface.registerDatabase(soap2Database(db), soap2Credentials(auth)));
+            return database2Soap(utilInterface.registerDatabase(soap2Database(db), createSchemas, optNumberOfSchemas, soap2Credentials(auth)));
         } catch (final RemoteException e) {
             com.openexchange.admin.soap.util.soap.RemoteException fd = new com.openexchange.admin.soap.util.soap.RemoteException();
             com.openexchange.admin.soap.util.rmi.RemoteException value = new com.openexchange.admin.soap.util.rmi.RemoteException();
@@ -888,12 +888,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
         }
         final com.openexchange.admin.rmi.dataobjects.Database ret = new com.openexchange.admin.rmi.dataobjects.Database();
 
-        Integer itg = soapDatabase.getClusterWeight();
-        if (itg != null) {
-            ret.setClusterWeight(itg);
-        }
-
-        itg = soapDatabase.getCurrentUnits();
+        Integer itg = soapDatabase.getCurrentUnits();
         if (itg != null) {
             ret.setCurrentUnits(itg);
         }
@@ -975,7 +970,6 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
             return null;
         }
         final Database soapDatabase = new Database();
-        soapDatabase.setClusterWeight(database.getClusterWeight());
         soapDatabase.setCurrentUnits(database.getCurrentUnits());
         soapDatabase.setDriver(database.getDriver());
         soapDatabase.setId(database.getId());

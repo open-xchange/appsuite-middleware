@@ -50,11 +50,13 @@
 package com.openexchange.context.osgi;
 
 import java.util.List;
+import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.context.ContextService;
+import com.openexchange.context.PoolAndSchema;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
@@ -101,6 +103,21 @@ public class WhiteboardContextService implements ServiceTrackerCustomizer<Contex
     @Override
     public List<Integer> getAllContextIds() throws OXException {
         return getDelegate().getAllContextIds();
+    }
+
+    @Override
+    public List<Integer> getDistinctContextsPerSchema() throws OXException {
+        return getDelegate().getDistinctContextsPerSchema();
+    }
+
+    @Override
+    public Map<PoolAndSchema, List<Integer>> getSchemaAssociations() throws OXException {
+        return getDelegate().getSchemaAssociations();
+    }
+
+    @Override
+    public Map<PoolAndSchema, List<Integer>> getSchemaAssociationsFor(List<Integer> contextIds) throws OXException {
+        return getDelegate().getSchemaAssociationsFor(contextIds);
     }
 
     @Override

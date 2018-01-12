@@ -2,30 +2,25 @@
 
 Name:          open-xchange-system
 BuildArch:     noarch
-#!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
 %else
 BuildRequires: ant-nodeps
 %endif
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+%if 0%{?suse_version}
+BuildRequires: java-1_8_0-openjdk-devel
 %else
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires: java-1_7_0-openjdk-devel
-%else
-BuildRequires: java-devel >= 1.7.0
-%endif
+BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
 BuildRoot:     %{_tmppath}/%{name}-%{version}-build
 URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
-Summary:       system integration specific infrastructure
+Summary:       System integration specific infrastructure
 Autoreqprov:   no
 PreReq:        /usr/sbin/useradd
 %if 0%{?suse_version} && 0%{?suse_version} <= 1210
@@ -34,9 +29,9 @@ Requires:      util-linux
 Requires:      which
 %endif
 Requires:      sed
-
+Conflicts:     open-xchange-core < 7.10.0
 %description
-system integration specific infrastructure
+System integration specific infrastructure
 
 Authors:
 --------
@@ -53,8 +48,6 @@ mkdir -p %{buildroot}/opt/open-xchange/lib
 
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
-%post
-
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -67,9 +60,13 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %dir /opt/open-xchange/
 %dir /opt/open-xchange/lib/
 /opt/open-xchange/lib/oxfunctions.sh
+%dir /opt/open-xchange/sbin/
+/opt/open-xchange/sbin/*
 
 %changelog
-* Fri May 19 2017 Carsten Hoeger <choeger@open-xchange.com>
+* Thu Oct 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.10.0 release
+* Fri May 19 2017 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Carsten Hoeger <choeger@open-xchange.com>
 Second preview of 7.8.4 release

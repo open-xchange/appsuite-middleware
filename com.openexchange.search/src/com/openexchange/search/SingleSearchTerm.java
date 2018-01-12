@@ -54,7 +54,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.search.internal.terms.EqualsTerm;
 import com.openexchange.search.internal.terms.GreaterOrEqualTerm;
 import com.openexchange.search.internal.terms.GreaterThanTerm;
@@ -205,12 +205,12 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
         private static final transient Map<String, SingleOperation> map;
 
         static {
-            final SingleOperation[] values = SingleOperation.values();
-            final Map<String, SingleOperation> m = new HashMap<String, SingleOperation>(values.length);
-            for (final SingleOperation singleOperation : values) {
+            SingleOperation[] values = SingleOperation.values();
+            Map<String, SingleOperation> m = new HashMap<String, SingleOperation>(values.length);
+            for (SingleOperation singleOperation : values) {
                 m.put(singleOperation.str, singleOperation);
             }
-            map = java.util.Collections.unmodifiableMap(m);
+            map = ImmutableMap.copyOf(m);
         }
 
         /**

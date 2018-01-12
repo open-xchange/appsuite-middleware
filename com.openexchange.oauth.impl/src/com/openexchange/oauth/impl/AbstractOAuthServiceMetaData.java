@@ -60,6 +60,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.oauth.HostInfo;
 import com.openexchange.oauth.OAuthConfigurationProperty;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -307,7 +308,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     }
 
     @Override
-    public String modifyCallbackURL(final String callbackUrl, String currentHost, final Session session) {
+    public String modifyCallbackURL(final String callbackUrl, HostInfo currentHost, final Session session) {
         return callbackUrl;
     }
 

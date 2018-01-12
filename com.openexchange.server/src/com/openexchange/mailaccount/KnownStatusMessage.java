@@ -81,5 +81,8 @@ public class KnownStatusMessage implements LocalizableStrings {
 
     // The message advertising that affected account is currently in setup phase and does not yet reflect up-to-date information
     public static final String MESSAGE_IN_SETUP = "Account is currently being set-up.";
+    
+    // The message advertising that the affected account is facing an SSL problem
+    public static final String MESSAGE_SSL_ERROR = "There was an SSL problem.";
 
 }

@@ -103,13 +103,11 @@ public class S3FileStorage implements FileStorage {
      */
     private static final String DELIMITER = "/";
 
-
     private final AmazonS3Client amazonS3;
     private final boolean encrypted;
     private final String bucketName;
     private final String prefix;
     private final long chunkSize;
-
 
     /**
      * Initializes a new {@link S3FileStorage}.
@@ -131,7 +129,6 @@ public class S3FileStorage implements FileStorage {
         this.bucketName = bucketName;
         this.prefix = prefix;
         this.chunkSize = chunkSize;
-        this.amazonS3.addRequestHandler(ETagCorrectionHandler.getInstance());
         LOG.info("S3 file storage initialized for \"{}/{}{}\"", bucketName, prefix, DELIMITER);
     }
 

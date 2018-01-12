@@ -11,13 +11,32 @@
         type: string
         description: Object ID of the folder whose content shall be exported. This must be a calendar folder.
         required: true
-      - in: query
-        name: id
-        type: string
-        description: Object ID of the single object whose content shall be exported. This must be an object in a calendar folder.
-        required: false
     responses:
       200:
         description: An input stream containing the content of the iCal file with the MIME type `text/calendar`.
+        schema:
+          type: string
+  put:
+    operationId: exportAsVICal
+    tags:
+      - Export
+    summary: Exports a batch of appointments and tasks data to a iCalendar file.
+    description: 
+      Exports a batch of appointments and tasks data to a iCalendar file. 
+    consumes:
+      - application/json
+    parameters:  
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: body
+        name: body
+        description: A JSON array of JSON objects with the id and folder_id.
+        required: true
+        schema:
+          type: array
+          items:
+            $ref: "#/definitions/InfoItemExport"
+    responses:
+      200:
+        description: 'An input stream containing the content of the vCard file with the MIME type `text/calendar`.'
         schema:
           type: string

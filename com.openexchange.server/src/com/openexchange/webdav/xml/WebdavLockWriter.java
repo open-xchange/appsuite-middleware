@@ -54,81 +54,76 @@ import com.openexchange.webdav.protocol.WebdavLock;
 
 public class WebdavLockWriter {
 
-	public String lock2xml(final WebdavLock lock) {
-		final StringBuffer lockXML = new StringBuffer();
-		activeLock(lockXML);
-		lockType(lock, lockXML);
-		lockScope(lock, lockXML);
-		depth(lock, lockXML);
-		owner(lock, lockXML);
-		timeout(lock, lockXML);
-		lockToken(lock, lockXML);
-		endActiveLock(lockXML);
-		return lockXML.toString();
-	}
+    public String lock2xml(final WebdavLock lock) {
+        final StringBuffer lockXML = new StringBuffer();
+        activeLock(lockXML);
+        lockType(lock, lockXML);
+        lockScope(lock, lockXML);
+        depth(lock, lockXML);
+        owner(lock, lockXML);
+        timeout(lock, lockXML);
+        lockToken(lock, lockXML);
+        endActiveLock(lockXML);
+        return lockXML.toString();
+    }
 
-	private final void endActiveLock(final StringBuffer lockXML) {
-		lockXML.append("</D:activelock>");
-	}
+    private final void endActiveLock(final StringBuffer lockXML) {
+        lockXML.append("</D:activelock>");
+    }
 
-	private final void lockToken(final WebdavLock lock, final StringBuffer lockXML) {
-		lockXML.append("<D:locktoken><D:href>");
-		lockXML.append(lock.getToken());
-		lockXML.append("</D:href></D:locktoken>");
+    private final void lockToken(final WebdavLock lock, final StringBuffer lockXML) {
+        lockXML.append("<D:locktoken><D:href>");
+        lockXML.append(lock.getToken());
+        lockXML.append("</D:href></D:locktoken>");
 
-	}
+    }
 
-	private final void timeout(final WebdavLock lock, final StringBuffer lockXML) {
-		lockXML.append("<D:timeout>");
-		if(WebdavLock.NEVER == lock.getTimeout()) {
-			lockXML.append("Infinite");
-		} else {
-			lockXML.append("Second-"+lock.getTimeout()/1000);
-		}
-		lockXML.append("</D:timeout>");
-	}
+    private final void timeout(final WebdavLock lock, final StringBuffer lockXML) {
+        lockXML.append("<D:timeout>");
+        if (WebdavLock.NEVER == lock.getTimeout()) {
+            lockXML.append("Infinite");
+        } else {
+            lockXML.append("Second-" + lock.getTimeout() / 1000);
+        }
+        lockXML.append("</D:timeout>");
+    }
 
-	private final void owner(final WebdavLock lock, final StringBuffer lockXML) {
-		lockXML.append("<D:owner>");
-		lockXML.append(lock.getOwner()); //TODO: OWNER NS
-		lockXML.append("</D:owner>");
-	}
+    private final void owner(final WebdavLock lock, final StringBuffer lockXML) {
+        lockXML.append("<D:owner>");
+        lockXML.append(lock.getOwner()); //TODO: OWNER NS
+        lockXML.append("</D:owner>");
+    }
 
-	private final void depth(final WebdavLock lock, final StringBuffer lockXML) {
-		lockXML.append("<D:depth>");
-		if(lock.getDepth() == WebdavCollection.INFINITY) {
-			lockXML.append("infinity");
-		} else {
-			lockXML.append(lock.getDepth());
-		}
-		lockXML.append("</D:depth>");
-	}
+    private final void depth(final WebdavLock lock, final StringBuffer lockXML) {
+        lockXML.append("<D:depth>");
+        if (lock.getDepth() == WebdavCollection.INFINITY) {
+            lockXML.append("infinity");
+        } else {
+            lockXML.append(lock.getDepth());
+        }
+        lockXML.append("</D:depth>");
+    }
 
-	private final void lockScope(final WebdavLock lock, final StringBuffer lockXML) {
-		lockXML.append("<D:lockscope>");
-		if(lock.getScope().equals(WebdavLock.Scope.EXCLUSIVE_LITERAL)){
-			lockXML.append("<D:exclusive/>");
-		} else if (lock.getScope().equals(WebdavLock.Scope.SHARED_LITERAL)) {
-			lockXML.append("<D:shared/>");
-		}
-		lockXML.append("</D:lockscope>");
-	}
+    private final void lockScope(final WebdavLock lock, final StringBuffer lockXML) {
+        lockXML.append("<D:lockscope>");
+        if (lock.getScope().equals(WebdavLock.Scope.EXCLUSIVE_LITERAL)) {
+            lockXML.append("<D:exclusive/>");
+        } else if (lock.getScope().equals(WebdavLock.Scope.SHARED_LITERAL)) {
+            lockXML.append("<D:shared/>");
+        }
+        lockXML.append("</D:lockscope>");
+    }
 
-	private final void lockType(final WebdavLock lock, final StringBuffer lockXML) {
-		lockXML.append("<D:locktype>");
-		/*switch(lock.getType()) {
-		case WebdavLock.Type.WRITE_LITERAL: lockXML.append("<write />"); break;
-		default: break;
-		}*/
-		if(lock.getType().equals(WebdavLock.Type.WRITE_LITERAL)) {
-			lockXML.append("<D:write />");
-		}
-		lockXML.append("</D:locktype>");
-	}
+    private final void lockType(final WebdavLock lock, final StringBuffer lockXML) {
+        lockXML.append("<D:locktype>");
+        if (lock.getType().equals(WebdavLock.Type.WRITE_LITERAL)) {
+            lockXML.append("<D:write />");
+        }
+        lockXML.append("</D:locktype>");
+    }
 
-	private final void activeLock(final StringBuffer lockXML) {
-		lockXML.append("<D:activelock>");
-	}
-
+    private final void activeLock(final StringBuffer lockXML) {
+        lockXML.append("<D:activelock>");
+    }
 
 }

@@ -51,9 +51,8 @@ package com.openexchange.pgp.core.packethandling;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import org.apache.commons.lang.ArrayUtils;
+import gnu.trove.list.TByteList;
+import gnu.trove.list.array.TByteArrayList;
 
 /**
  * {@link RememberingInputStream} represents an InputStream which remembers the data which has been read
@@ -64,7 +63,7 @@ import org.apache.commons.lang.ArrayUtils;
 class RememberingInputStream extends InputStream {
 
     private final InputStream in;
-    private ArrayList<Byte> buffer = null;
+    private TByteList buffer = null;
     private boolean remember;
 
     /**
@@ -82,12 +81,26 @@ class RememberingInputStream extends InputStream {
      *
      * @param b The bytes to remember
      */
-    private void addToBuffer(byte... b) {
-        if(remember) {
+    private void addToBuffer(byte b) {
+        if (remember) {
             if (buffer == null) {
-                buffer = new ArrayList<Byte>(b.length);
+                buffer = new TByteArrayList();
             }
-            buffer.addAll(Arrays.asList(ArrayUtils.toObject(b)));
+            buffer.add(b);
+        }
+    }
+
+    /**
+     * Internal method to write the bytes read to the internal buffer
+     *
+     * @param b The bytes to remember
+     */
+    private void addToBuffer(byte[] b, int off, int len) {
+        if (remember) {
+            if (buffer == null) {
+                buffer = new TByteArrayList(len);
+            }
+            buffer.add(b, off, len);
         }
     }
 
@@ -97,17 +110,17 @@ class RememberingInputStream extends InputStream {
      * @return
      */
     public byte[] getBuffer() {
-        if(buffer == null) {
+        if (buffer == null) {
             return new byte[] {};
         }
-        return ArrayUtils.toPrimitive(this.buffer.toArray(new Byte[buffer.size()]));
+        return buffer.toArray();
     }
 
     /**
      * Resets the internal "remember" buffer
      */
     public void resetBuffer() {
-        if(buffer != null) {
+        if (buffer != null) {
             buffer.clear();
             buffer = null;
         }
@@ -157,9 +170,9 @@ class RememberingInputStream extends InputStream {
      */
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
-        int read = super.read(b, off, len);
-        if (read != -1) {
-            addToBuffer(Arrays.copyOfRange(b, off, read));
+        int read = in.read(b, off, len);
+        if (read > 0) {
+            addToBuffer(b, off, read);
         }
         return read;
     }
@@ -171,11 +184,6 @@ class RememberingInputStream extends InputStream {
      */
     @Override
     public int read(byte[] b) throws IOException {
-        int read = super.read(b);
-        if (read != -1) {
-            addToBuffer(Arrays.copyOf(b, read));
-        }
-        return read;
+        return read(b, 0, b.length);
     }
-
 }

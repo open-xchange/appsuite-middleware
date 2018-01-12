@@ -64,14 +64,14 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.spamexperts.SpamExpertsSpamHandler;
 import com.openexchange.spamhandler.spamexperts.management.SpamExpertsConfig;
+import com.openexchange.spamhandler.spamexperts.servlets.SpamExpertsServlet;
 import com.openexchange.tools.servlet.http.HTTPServletRegistration;
 import com.openexchange.user.UserService;
 
 public class SpamExpertsActivator extends HousekeepingActivator {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpamExpertsActivator.class);
-
 	private HTTPServletRegistration servletRegistration;
+    private SpamExpertsServlet spamExpertsServlet;
 
 	public SpamExpertsActivator() {
 		super();
@@ -84,7 +84,8 @@ public class SpamExpertsActivator extends HousekeepingActivator {
 
 	@Override
 	protected synchronized void startBundle() throws Exception {
-        LOG.info("starting bundle: \"com.openexchange.spamhandler.spamexperts\"");
+	    org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(SpamExpertsActivator.class);
+        logger.info("starting bundle: \"com.openexchange.spamhandler.spamexperts\"");
 
 	    final SpamExpertsConfig config = new SpamExpertsConfig(this);
 
@@ -107,17 +108,26 @@ public class SpamExpertsActivator extends HousekeepingActivator {
         });
 
         String alias = getService(ConfigurationService.class).getProperty("com.openexchange.custom.spamexperts.panel_servlet", "/ajax/spamexperts/panel").trim();
-		servletRegistration = new HTTPServletRegistration(context, new com.openexchange.spamhandler.spamexperts.servlets.SpamExpertsServlet(config), alias);
+		SpamExpertsServlet spamExpertsServlet = new SpamExpertsServlet(config);
+		this.spamExpertsServlet = spamExpertsServlet;
+        servletRegistration = new HTTPServletRegistration(context, spamExpertsServlet, alias);
 	}
 
 	@Override
 	protected synchronized void stopBundle() throws Exception {
-        LOG.info("stopping bundle: \"com.openexchange.spamhandler.spamexperts\"");
+	    org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(SpamExpertsActivator.class);
+        logger.info("stopping bundle: \"com.openexchange.spamhandler.spamexperts\"");
 
         HTTPServletRegistration servletRegistration = this.servletRegistration;
         if (servletRegistration != null) {
             this.servletRegistration = null;
             servletRegistration.unregister();
+        }
+
+        SpamExpertsServlet spamExpertsServlet = this.spamExpertsServlet;
+        if (null != spamExpertsServlet) {
+            this.spamExpertsServlet = null;
+            spamExpertsServlet.shutDown();
         }
 
         super.stopBundle();

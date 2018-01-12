@@ -440,6 +440,9 @@ public final class UploadUtility {
                 throwException(uuid, UploadSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true), session, listeners);
             }
             throwException(uuid, UploadException.UploadCode.UPLOAD_FAILED.create(e, action), session, listeners);
+        } catch (EOFException e) {
+            // Stream closed/ended unexpectedly
+            throwException(uuid, UploadException.UploadCode.UNEXPECTED_EOF.create(e, e.getMessage()), session, listeners);
         } catch (IOException e) {
             Throwable cause = e.getCause();
             if (cause instanceof java.util.concurrent.TimeoutException) {
@@ -485,7 +488,7 @@ public final class UploadUtility {
             if (null == forcedMimeType) {
                 String itemContentType = item.getContentType();
                 ContentType contentType = getContentTypeSafe(itemContentType);
-                if (null == contentId) {
+                if (null == contentId && contentType != null) {
                     contentId = contentType.getParameter("cid");
                     retval.setContentId(contentId);
                 }

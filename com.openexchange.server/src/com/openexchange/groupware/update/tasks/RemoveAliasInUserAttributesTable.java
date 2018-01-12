@@ -49,19 +49,17 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.database.Databases.closeSQLStuff;
-import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RemoveAliasInUserAttributesTable}
@@ -75,28 +73,28 @@ public class RemoveAliasInUserAttributesTable extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int ctxId = params.getContextId();
-        Connection conn = Database.getNoTimeout(ctxId, true);
-        Statement stmt = null;
+        Connection con = params.getConnection();
         boolean rollback = false;
+        Statement stmt = null;
         try {
-            conn.setAutoCommit(false);
+            con.setAutoCommit(false);
             rollback = true;
-            stmt = conn.createStatement();
+
+            stmt = con.createStatement();
             stmt.execute(DELETE_ALIAS_STMT);
-            conn.commit();
+
+            con.commit();
             rollback = false;
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (rollback) {
-                rollback(conn);
-            }
-            autocommit(conn);
             closeSQLStuff(stmt);
-            Database.backNoTimeout(ctxId, true, conn);
+            if (rollback) {
+                DBUtils.rollback(con);
+            }
+            DBUtils.autocommit(con);
         }
     }
 

@@ -93,7 +93,7 @@ public final class PlainTextAddress extends InternetAddress {
         if (Strings.isEmpty(addressList)) {
             return new PlainTextAddress[0];
         }
-        String[] addrs = Strings.splitByCommaNotInQuotes(addressList);
+        String[] addrs = addressList.indexOf(',') >= 0 ? Strings.splitByCommaNotInQuotes(addressList) : new String[] { addressList };
         List<InternetAddress> l = new ArrayList<InternetAddress>(addrs.length);
         for (String addr : addrs) {
             l.add(new PlainTextAddress(addr));
@@ -112,7 +112,7 @@ public final class PlainTextAddress extends InternetAddress {
      * @param address The plain text address
      */
     public PlainTextAddress(final String address) {
-        this.plainAddress = MimeMessageUtility.decodeMultiEncodedHeader(address);
+        this.plainAddress = QuotedInternetAddress.init(MimeMessageUtility.decodeMultiEncodedHeader(address));
         hashCode = Strings.asciiLowerCase(address).hashCode();
     }
 

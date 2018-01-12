@@ -58,13 +58,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.ExternalUserParticipant;
@@ -163,12 +163,12 @@ public class RdbParticipantStorage extends ParticipantStorage {
         } finally {
             closeSQLStuff(rs, stmt);
         }
-        final Map<Integer, ExternalUserParticipant[]> retval2 = new HashMap<Integer, ExternalUserParticipant[]>();
+        final ImmutableMap.Builder<Integer, ExternalUserParticipant[]> retval2 = ImmutableMap.builder();
         for (final Entry<Integer, List<ExternalUserParticipant>> entry : retval.entrySet()) {
             final List<ExternalUserParticipant> participants = entry.getValue();
             retval2.put(entry.getKey(), participants.toArray(new ExternalUserParticipant[participants.size()]));
         }
-        return Collections.unmodifiableMap(retval2);
+        return retval2.build();
     }
 
     @Override

@@ -54,11 +54,11 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link ContactInfoField2Text}
@@ -77,19 +77,24 @@ public class ContactInfoField2Text extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        Connection con = null;
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
-            con = Database.getNoTimeout(contextId, true);
+            con.setAutoCommit(false);
+            rollback = true;
+
             innerPerform(con);
-        } catch (OXException e) {
+
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            if (con != null) {
-                Database.backNoTimeout(contextId, true, con);
+            if (rollback) {
+                DBUtils.rollback(con);
             }
+            DBUtils.autocommit(con);
         }
-
     }
 
     private void innerPerform(Connection con) throws OXException {

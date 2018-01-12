@@ -62,6 +62,7 @@ import org.apache.commons.codec.net.URLCodec;
 import org.slf4j.Logger;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.html.internal.GlobalEventHandler;
 import com.openexchange.html.internal.WhitelistedSchemes;
 import com.openexchange.html.osgi.Services;
 import com.openexchange.java.Strings;
@@ -75,7 +76,7 @@ import net.htmlparser.jericho.HTMLElementName;
 public final class HtmlServices {
 
     public static void main(String[] args) {
-        boolean nonJavaScriptURL = isNonJavaScriptURL("java&#09;script:alert(document.domain)", null);
+        boolean nonJavaScriptURL = containsEventHandler("on'onerror=\"alert(document.cookie)\";'");
 
         System.out.println(nonJavaScriptURL);
     }
@@ -263,14 +264,19 @@ public final class HtmlServices {
 
     private static boolean doContainsEventHandler(String lc) {
         int pos = lc.indexOf("on");
-        if (pos == 0) {
-            if (nextAreAsciiLetter(pos + 1, 3, lc)) {
-                return true;
+        while (pos >= 0) {
+            if (pos == 0 ? true : (false == isWordCharacter(lc.charAt(pos - 1)))) {
+                for (String globalEventHandler : GlobalEventHandler.getInstance().getGlobalEventHandlerIdentifiers()) {
+                    if (lc.regionMatches(false, pos, globalEventHandler, 0, globalEventHandler.length())) {
+                        int end = pos + globalEventHandler.length();
+                        if ((end >= lc.length()) || (false == isWordCharacter(lc.charAt(end)))) {
+                            // Ends with or contains global event handler
+                            return true;
+                        }
+                    }
+                }
             }
-        } else if (pos > 0) {
-            if (false == isWordCharacter(lc.charAt(pos - 1)) && nextAreAsciiLetter(pos + 1, 3, lc)) {
-                return true;
-            }
+            pos = lc.indexOf("on", pos + 1);
         }
         return false;
     }
@@ -281,24 +287,7 @@ public final class HtmlServices {
      * @return <code>true</code> if the indicated character is a word character; otherwise <code>false</code>
      */
     private static boolean isWordCharacter(char c) {
-        return '-' == c || '_' == c || Strings.isAsciiLetterOrDigit(c);
-    }
-
-    private static boolean nextAreAsciiLetter(int pos, int count, String s) {
-        int c = count;
-        int npos = pos + c--;
-        if (npos >= s.length()) {
-            return false;
-        }
-
-        while (c >= 0) {
-            if (false == Strings.isAsciiLetter(s.charAt(npos))) {
-                return false;
-            }
-            npos = pos + c--;
-        }
-
-        return true;
+        return '-' == c || '_' == c || Strings.isDigit(c) || Character.isLetter(c);
     }
 
     private static String dropWhitespacesFrom(String str) {

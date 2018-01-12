@@ -87,12 +87,14 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageAutoRenameFoldersAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePersistentIDs;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
-import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.FileTimedResult;
+import com.openexchange.file.storage.NameBuilder;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.googledrive.access.GoogleDriveOAuthAccess;
 import com.openexchange.groupware.results.Delta;
@@ -109,9 +111,10 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements ThumbnailAware, FileStorageSequenceNumberProvider, FileStoragePersistentIDs {
+public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements ThumbnailAware, FileStorageSequenceNumberProvider, FileStoragePersistentIDs, FileStorageAutoRenameFoldersAccess {
 
     private final GoogleDriveAccountAccess accountAccess;
+    private final GoogleDriveFolderAccess folderAccess;
     private final int userId;
 
     /**
@@ -122,10 +125,21 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
      * @param session The session
      * @param accountAccess A Google Drive account access reference
      */
-    public GoogleDriveFileAccess(GoogleDriveOAuthAccess googleDriveAccess, FileStorageAccount account, Session session, GoogleDriveAccountAccess accountAccess) throws OXException {
+    public GoogleDriveFileAccess(GoogleDriveOAuthAccess googleDriveAccess, FileStorageAccount account, Session session, GoogleDriveAccountAccess accountAccess, GoogleDriveFolderAccess folderAccess) throws OXException {
         super(googleDriveAccess, account, session);
         this.accountAccess = accountAccess;
+        this.folderAccess = folderAccess;
         this.userId = session.getUserId();
+    }
+
+    @Override
+    public String createFolder(FileStorageFolder toCreate, boolean autoRename) throws OXException {
+        return folderAccess.createFolder(toCreate, autoRename);
+    }
+
+    @Override
+    public String moveFolder(String folderId, String newParentId, String newName, boolean autoRename) throws OXException {
+        return folderAccess.moveFolder(folderId, newParentId, newName, autoRename);
     }
 
     @Override
@@ -225,23 +239,21 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                     String fileNameToUse = null;
                     {
                         List<Field> fields = Arrays.asList(Field.ID, Field.FILENAME);
-                        String name = file.getFileName();
-                        String fileName = name;
-                        int count = 0;
-
+                        NameBuilder fileName = NameBuilder.nameBuilderFor(file.getFileName());
                         while (null == fileNameToUse) {
-                            List<File> hits = searchByFileNamePattern(fileName, file.getFolderId(), false, fields, null, null, 0);
+                            String fileNameToTest = fileName.toString();
+                            List<File> hits = searchByFileNamePattern(fileNameToTest, file.getFolderId(), false, fields, null, null, 0);
                             boolean found = false;
                             for (Iterator<File> it = hits.iterator(); !found && it.hasNext();) {
-                                if (it.next().getFileName().equals(fileName)) {
+                                if (it.next().getFileName().equals(fileNameToTest)) {
                                     found = true;
                                 }
                             }
 
                             if (found) {
-                                fileName = FileStorageUtility.enhance(name, ++count);
+                                fileName.advance();
                             } else {
-                                fileNameToUse = fileName;
+                                fileNameToUse = fileNameToTest;
                             }
                         }
                     }
@@ -592,23 +604,21 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                     String fileNameToUse = null;
                     {
                         List<Field> fields = Arrays.asList(Field.ID, Field.FILENAME);
-                        String name = file.getFileName();
-                        String fileName = name;
-                        int count = 0;
-
+                        NameBuilder fileName = NameBuilder.nameBuilderFor(file.getFileName());
                         while (null == fileNameToUse) {
-                            List<File> hits = searchByFileNamePattern(fileName, file.getFolderId(), false, fields, null, null, 0);
+                            String fileNameToTest = fileName.toString();
+                            List<File> hits = searchByFileNamePattern(fileNameToTest, file.getFolderId(), false, fields, null, null, 0);
                             boolean found = false;
                             for (Iterator<File> it = hits.iterator(); !found && it.hasNext();) {
-                                if (it.next().getFileName().equals(fileName)) {
+                                if (it.next().getFileName().equals(fileNameToTest)) {
                                     found = true;
                                 }
                             }
 
                             if (found) {
-                                fileName = FileStorageUtility.enhance(name, ++count);
+                                fileName.advance();
                             } else {
-                                fileNameToUse = fileName;
+                                fileNameToUse = fileNameToTest;
                             }
                         }
                     }

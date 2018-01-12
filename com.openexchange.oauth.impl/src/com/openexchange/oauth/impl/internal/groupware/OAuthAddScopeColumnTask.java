@@ -61,7 +61,6 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -80,24 +79,18 @@ import com.openexchange.tools.update.Tools;
  */
 public class OAuthAddScopeColumnTask extends UpdateTaskAdapter {
 
-    private final DatabaseService dbService;
-
-    public OAuthAddScopeColumnTask(final DatabaseService dbService) {
+    public OAuthAddScopeColumnTask() {
         super();
-        this.dbService = dbService;
     }
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        final int contextId = params.getContextId();
-        final Connection writeCon;
-        try {
-            writeCon = dbService.getForUpdateTask(contextId);
-        } catch (final OXException e) {
-            throw e;
-        }
+        Connection writeCon = params.getConnection();
+        boolean rollback = false;
         try {
             startTransaction(writeCon);
+            rollback = true;
+
             final List<Column> toCreate = new ArrayList<>();
             if (!Tools.columnExists(writeCon, "oauthAccounts", "scope")) {
                 toCreate.add(new Column("scope", "varchar(767)"));
@@ -106,17 +99,22 @@ public class OAuthAddScopeColumnTask extends UpdateTaskAdapter {
                 Tools.addColumns(writeCon, "oauthAccounts", toCreate.toArray(new Column[toCreate.size()]));
             }
 
-            Set<OAuthAccount> accounts = getAccounts(writeCon, contextId);
-            if (!accounts.isEmpty()) {
-                migrate(writeCon, accounts);
+            for (int contextId : params.getContextsInSameSchema()) {
+                Set<OAuthAccount> accounts = getAccounts(writeCon, contextId);
+                if (!accounts.isEmpty()) {
+                    migrate(writeCon, accounts);
+                }
             }
+
             writeCon.commit();
+            rollback = false;
         } catch (final SQLException e) {
-            DBUtils.rollback(writeCon);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                DBUtils.rollback(writeCon);
+            }
             autocommit(writeCon);
-            dbService.backForUpdateTask(contextId, writeCon);
         }
     }
 
@@ -201,7 +199,6 @@ public class OAuthAddScopeColumnTask extends UpdateTaskAdapter {
     private Set<OAuthAccount> getAccounts(Connection con, int ctxId) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        Set<OAuthAccount> accounts = new LinkedHashSet<>();
         try {
             stmt = con.prepareStatement("SELECT id, serviceId FROM oauthAccounts WHERE cid=?");
             stmt.setInt(1, ctxId);
@@ -210,6 +207,7 @@ public class OAuthAddScopeColumnTask extends UpdateTaskAdapter {
                 return Collections.emptySet();
             }
 
+            Set<OAuthAccount> accounts = new LinkedHashSet<>();
             int index;
             do {
                 index = 0;
@@ -217,13 +215,13 @@ public class OAuthAddScopeColumnTask extends UpdateTaskAdapter {
                 String serviceId = rs.getString(++index);
                 accounts.add(new OAuthAccount(ctxId, id, serviceId));
             } while (rs.next());
+            return accounts;
         } finally {
             closeSQLStuff(stmt);
         }
-        return accounts;
     }
 
-    private class OAuthAccount {
+    private static final class OAuthAccount {
 
         int cid;
         int id;
@@ -231,7 +229,7 @@ public class OAuthAddScopeColumnTask extends UpdateTaskAdapter {
 
         /**
          * Initializes a new {@link OAuthAccount}.
-         * 
+         *
          * @param cid
          * @param id
          * @param serviceId

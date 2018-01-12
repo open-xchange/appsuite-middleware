@@ -50,7 +50,9 @@
 package com.openexchange.context.internal;
 
 import java.util.List;
+import java.util.Map;
 import com.openexchange.context.ContextService;
+import com.openexchange.context.PoolAndSchema;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -78,6 +80,21 @@ public final class ContextServiceImpl implements ContextService {
     @Override
     public List<Integer> getAllContextIds() throws OXException {
         return ContextStorage.getInstance().getAllContextIds();
+    }
+
+    @Override
+    public List<Integer> getDistinctContextsPerSchema() throws OXException {
+        return ContextStorage.getInstance().getDistinctContextsPerSchema();
+    }
+
+    @Override
+    public Map<PoolAndSchema, List<Integer>> getSchemaAssociations() throws OXException {
+        return ContextStorage.getInstance().getSchemaAssociations();
+    }
+
+    @Override
+    public Map<PoolAndSchema, List<Integer>> getSchemaAssociationsFor(List<Integer> contextIds) throws OXException {
+        return ContextStorage.getInstance().getSchemaAssociationsFor(contextIds);
     }
 
     @Override

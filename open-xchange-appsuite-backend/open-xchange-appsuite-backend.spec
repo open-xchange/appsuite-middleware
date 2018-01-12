@@ -9,17 +9,13 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-core
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+%if 0%{?suse_version}
+BuildRequires: java-1_8_0-openjdk-devel
 %else
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires: java-1_7_0-openjdk-devel
-%else
-BuildRequires: java-devel >= 1.7.0
-%endif
+BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -59,23 +55,9 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    # SoftwareChange_Request-1287
-    pfile=/opt/open-xchange/etc/manifests.properties
-    if ! ox_exists_property com.openexchange.apps.path $pfile; then
-       ox_set_property com.openexchange.apps.path "/opt/open-xchange/appsuite" $pfile
-    fi
-
-    # SoftwareChange_Request-2436
-    sed -i 's/2014 Open-Xchange/2015 Open-Xchange/' /opt/open-xchange/etc/as-config-defaults.yml
-
     # SoftwareChange_Request-2880
     ox_add_property io.ox/core//pdf/enableRangeRequests true /opt/open-xchange/etc/settings/appsuite.properties
 fi
-
-ox_move_config_file /opt/open-xchange/templates /opt/open-xchange/templates print_dayview_table.tmpl cp_dayview_table_appsuite.tmpl
-ox_move_config_file /opt/open-xchange/templates /opt/open-xchange/templates print_monthview_list.tmpl cp_monthview_list_appsuite.tmpl
-ox_move_config_file /opt/open-xchange/templates /opt/open-xchange/templates print_weekview_table.tmpl cp_weekview_table_appsuite.tmpl
-ox_move_config_file /opt/open-xchange/templates /opt/open-xchange/templates print_workweekview_table.tmpl cp_workweekview_table_appsuite.tmpl
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -97,6 +79,8 @@ ox_move_config_file /opt/open-xchange/templates /opt/open-xchange/templates prin
 %config(noreplace) /opt/open-xchange/templates/*
 
 %changelog
+* Thu Oct 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.10.0 release
 * Fri May 19 2017 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Marcus Klein <marcus.klein@open-xchange.com>

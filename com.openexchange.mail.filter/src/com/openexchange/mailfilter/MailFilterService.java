@@ -50,6 +50,7 @@
 package com.openexchange.mailfilter;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.Rule;
@@ -193,6 +194,15 @@ public interface MailFilterService {
      * @throws OXException
      */
     public Set<String> getCapabilities(final Credentials credentials) throws OXException;
+
+    /**
+     * Get a map with extended properties
+     *
+     * @param credentials the user's credentials
+     * @return a map with extended properties
+     * @throws OXException
+     */
+    public Map<String, Object> getExtendedProperties(final Credentials credentials) throws OXException;
 
     /**
      * Get a set with static capabilities

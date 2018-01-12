@@ -109,7 +109,7 @@ public class SwiftActivator extends HousekeepingActivator {
 
         // Register update task, create table job and delete listener
         registerService(CreateTableService.class, new SwiftCreateTableService());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new SwiftCreateTableTask(this)));
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new SwiftCreateTableTask()));
         registerService(DeleteListener.class, new SwiftDeleteListener());
         registerService(FileStorageUnregisterListener.class, new SwiftFileStorageUnregisterListener());
 

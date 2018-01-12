@@ -63,6 +63,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.idn.IDNA;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -92,7 +93,6 @@ import com.openexchange.mail.utils.AddressUtility;
 import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.mail.utils.MsisdnUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.TransportAccount;
 import com.openexchange.server.ServiceLookup;
@@ -148,7 +148,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     /**
      * Cachable formats: <code>"apiResponse"</code>, <code>"json"</code>.
      */
-    protected static final Set<String> CACHABLE_FORMATS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("apiResponse", "json")));
+    protected static final Set<String> CACHABLE_FORMATS = ImmutableSet.of("apiResponse", "json");
 
     /**
      * Gets the service of specified type
@@ -328,12 +328,17 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
         if (null != ccs) {
             Set<InternetAddress> addrs = null;
+            Set<InternetAddress> aliases = null;
             for (MailMessage mail : mails) {
                 if (null != mail) {
+                    if (null == aliases) {
+                        aliases = AddressUtility.getAliases(session);
+                    }
+
                     if (null == addrs) {
-                        addrs = AddressUtility.getAddresses(mail, session);
+                        addrs = AddressUtility.getFilteredAddresses(mail, aliases);
                     } else {
-                        addrs.addAll(AddressUtility.getAddresses(mail, session));
+                        addrs.addAll(AddressUtility.getFilteredAddresses(mail, aliases));
                     }
                 }
             }
@@ -420,52 +425,12 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      * @throws OXException If address cannot be resolved
      */
     protected static int resolveFrom2Account(final ServerSession session, final InternetAddress from, final boolean checkTransportSupport, final boolean checkFrom) throws OXException {
-        /*
-         * Resolve "From" to proper mail account to select right transport server
-         */
-        int accountId;
-        {
-            MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-            int user = session.getUserId();
-            int cid = session.getContextId();
+        // Resolve "From" to proper mail account to select right transport server
+        int accountId = doResolveFrom2Account(session, from, checkTransportSupport);
 
-            if (null == from) {
-                accountId = MailAccount.DEFAULT_ID;
-            } else {
-                String address = from.getAddress();
-
-                // The special ACE notation always starts with "xn--" prefix
-                if (address.indexOf("xn--") >= 0) {
-                    // Seems to be in ACE notation; therefore try with its IDN representation
-                    accountId = storageService.getTransportByPrimaryAddress(IDNA.toIDN(address), user, cid);
-                    if (accountId < 0) {
-                        // Retry with ACE representation
-                        accountId = storageService.getTransportByPrimaryAddress(address, user, cid);
-                    }
-                } else {
-                    accountId = storageService.getTransportByPrimaryAddress(address, user, cid);
-                }
-            }
-            if (accountId >= 0) {
-                // Found a candidate
-                if (accountId != MailAccount.DEFAULT_ID && !session.getUserPermissionBits().isMultipleMailAccounts()) {
-                    throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(user), Integer.valueOf(cid));
-                }
-                if (checkTransportSupport) {
-                    final TransportAccount account = storageService.getTransportAccount(accountId, user, cid);
-                    // Check if determined account supports mail transport
-                    if (null == account.getTransportServer()) {
-                        // Account does not support mail transport
-                        throw MailExceptionCode.NO_TRANSPORT_SUPPORT.create(account.getName(), Integer.valueOf(accountId));
-                    }
-                }
-            }
-        }
         if (accountId < 0) {
             if (checkFrom && null != from) {
-                /*
-                 * Check aliases
-                 */
+                // Check aliases
                 try {
                     final Set<InternetAddress> validAddrs = new HashSet<InternetAddress>(4);
                     final User user = session.getUser();
@@ -490,6 +455,47 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
             }
             accountId = MailAccount.DEFAULT_ID;
         }
+
+        return accountId;
+    }
+
+    private static int doResolveFrom2Account(ServerSession session, InternetAddress from, boolean checkTransportSupport) throws OXException {
+        MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        int user = session.getUserId();
+        int cid = session.getContextId();
+
+        int accountId;
+        if (null == from) {
+            // No "From" address given. Assume primary account
+            accountId = MailAccount.DEFAULT_ID;
+        } else {
+            String address = from.getAddress();
+            if (address.indexOf("xn--") >= 0) { // The special ACE notation always starts with "xn--" prefix
+                // Seems to be in ACE notation; therefore try with its IDN representation
+                accountId = storageService.getTransportByPrimaryAddress(IDNA.toIDN(address), user, cid);
+                if (accountId < 0) {
+                    // Retry with ACE representation
+                    accountId = storageService.getTransportByPrimaryAddress(address, user, cid);
+                }
+            } else {
+                accountId = storageService.getTransportByPrimaryAddress(address, user, cid);
+            }
+
+            // Check if resolved to non-primary account and required "multiplemailaccounts" permission is granted
+            if (accountId > 0 && (false == session.getUserPermissionBits().isMultipleMailAccounts())) {
+                throw MailExceptionCode.INVALID_SENDER.create(from.toString());
+            }
+        }
+
+        if (checkTransportSupport && accountId >= 0) {
+            // Check if determined account supports mail transport
+            TransportAccount account = storageService.getTransportAccount(accountId, user, cid);
+            if (null == account.getTransportServer()) {
+                // Account does not support mail transport
+                throw MailExceptionCode.NO_TRANSPORT_SUPPORT.create(account.getName(), Integer.valueOf(accountId));
+            }
+        }
+
         return accountId;
     }
 

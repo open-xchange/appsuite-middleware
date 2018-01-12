@@ -59,11 +59,8 @@ import java.sql.Statement;
  */
 public class JDBC41StatementWrapper extends JDBC4StatementWrapper {
 
-    private final Statement delegate;
-
     public JDBC41StatementWrapper(Statement delegate, JDBC4ConnectionReturner con) {
         super(delegate, con);
-        this.delegate = delegate;
     }
 
     @Override

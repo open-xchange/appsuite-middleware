@@ -78,6 +78,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.groupware.impl.IDGenerator;
@@ -429,7 +430,7 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
                 int groupId = i(group.getId());
                 // let the groupware api know that the group will be deleted
                 OXFolderAdminHelper.propagateGroupModification(groupId, con, con, ctxId);
-                DeleteRegistry.getInstance().fireDeleteEvent(new DeleteEvent(this, groupId, DeleteEvent.TYPE_GROUP, ctxId), con, con);
+                DeleteRegistry.getInstance().fireDeleteEvent(DeleteEvent.createDeleteEventForGroupDeletion(this, groupId, ContextStorage.getInstance().getContext(ctxId)), con, con);
 
                 final List<Integer> members = new LinkedList<Integer>();
                 {

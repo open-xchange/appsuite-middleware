@@ -5,5 +5,7 @@ properties:
     type: array
     description: |
       An array with object IDs of folders that could not be processed because of a concurrent modification or something else.
+
+      If the extendedResponse parameter is set to `true` the array contains json objects instead.
     items:
       type: string

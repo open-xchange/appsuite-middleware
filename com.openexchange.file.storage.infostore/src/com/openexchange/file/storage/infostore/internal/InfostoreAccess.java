@@ -49,9 +49,8 @@
 
 package com.openexchange.file.storage.infostore.internal;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.groupware.container.FolderObject;
@@ -69,14 +68,10 @@ import com.openexchange.java.Strings;
 public abstract class InfostoreAccess {
 
     protected static final InfostoreFacade VIRTUAL_INFOSTORE = new VirtualFolderInfostoreFacade();
-    protected static final Set<Long> VIRTUAL_FOLDERS;
-    static {
-        final Set<Long> set = new HashSet<Long>(4);
-        set.add(Long.valueOf(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID));
-        set.add(Long.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID));
-        set.add(Long.valueOf(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID));
-        VIRTUAL_FOLDERS = Collections.unmodifiableSet(set);
-    }
+    protected static final Set<Long> VIRTUAL_FOLDERS = ImmutableSet.of(
+        Long.valueOf(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID),
+        Long.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID),
+        Long.valueOf(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID));
 
     protected final InfostoreFacade infostore;
 
@@ -94,7 +89,7 @@ public abstract class InfostoreAccess {
             } catch (NumberFormatException e) {
                 throw InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER.create(e, folderId);
             }
-        }        
+        }
         return infostore;
     }
 

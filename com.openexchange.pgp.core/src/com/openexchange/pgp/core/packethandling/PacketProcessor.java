@@ -52,7 +52,6 @@ package com.openexchange.pgp.core.packethandling;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import org.apache.commons.io.IOUtils;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGInputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
@@ -72,6 +71,8 @@ import com.openexchange.java.Streams;
 public class PacketProcessor {
 
     private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PacketProcessor.class);
+    private static final int STREAM_BUFFER_SIZE = 1024 * 500 /*500 kB*/ ;
+    private static final byte[] GARBAGE_SINK = new byte[STREAM_BUFFER_SIZE];
 
     /**
      * Parses the next packet from a given stream
@@ -107,9 +108,10 @@ public class PacketProcessor {
      * @param packet The parsed packet to handle
      * @param out The output to write the modified packet to
      * @param handler The handler which want't to modify the parsed package
+     * @param rememberInpuStream The underlying stream containing the whole PGP Message
      * @throws IOException
      */
-    protected void handlePacket(PGPPacket packet, BCPGOutputStream out, PacketProcessorHandler handler) throws Exception {
+    protected void handlePacket(PGPPacket packet, BCPGOutputStream out, PacketProcessorHandler handler, RememberingInputStream rememberInpuStream) throws Exception {
         if (packet != null) {
             //Handle the packet
             logger.debug("Processing PGP Packet " + packet.getBcPacket());
@@ -129,9 +131,21 @@ public class PacketProcessor {
                                 //InputStreamPackets cannot be re-encoded;
                                 //We need to re-write the already parsed header to the output stream before writing the stream content
                                 out.write(newPacket.getBcPacketHeader());
-                                IOUtils.copy(inputStream, out);
+
+                                //The content-stream might also contain header information (PGP partial streams) which will be parsed out by
+                                //Bouncy Castle. Since we do not want to loose this information, which would create
+                                //a corrupt data stream, we remember every byte read from the stream and write it to the output
+                                rememberInpuStream.resetBuffer();
+                                rememberInpuStream.startRemembering();
+                                while(inputStream.read(GARBAGE_SINK, 0, STREAM_BUFFER_SIZE) > 0) {
+                                    final byte[] buffer = rememberInpuStream.getBuffer();
+                                    out.write(buffer, 0, buffer.length);
+                                    rememberInpuStream.resetBuffer();
+                                }
                             } finally {
                                 Streams.close(inputStream);
+                                rememberInpuStream.stopRemembering();
+                                rememberInpuStream.resetBuffer();
                             }
                         }
                         else {
@@ -185,10 +199,10 @@ public class PacketProcessor {
                 PGPUtil.getDecoderStream(in)); BCPGInputStream bcIn = new BCPGInputStream(rememberingStream);) {
 
                 PGPPacket packet = parseNextPackage(bcIn, rememberingStream);
-                handlePacket(packet, bcOut, handler);
+                handlePacket(packet, bcOut, handler, rememberingStream);
                 while (packet != null) {
                     packet = parseNextPackage(bcIn, rememberingStream);
-                    handlePacket(packet, bcOut, handler);
+                    handlePacket(packet, bcOut, handler, rememberingStream);
                 }
             }
         }

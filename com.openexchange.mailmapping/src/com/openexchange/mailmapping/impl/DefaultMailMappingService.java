@@ -189,23 +189,13 @@ public class DefaultMailMappingService implements MultipleMailResolver {
             throw ServiceExceptionCode.absentService(DatabaseService.class);
         }
 
-        List<Integer> contextIds = contexts.getAllContextIds();
-        Set<Integer> visited = new HashSet<Integer>(contextIds.size(), 0.9f);
+        List<Integer> contextIds = contexts.getDistinctContextsPerSchema();
         for (Integer contextId : contextIds) {
-            if (visited.add(contextId)) {
-                // Search for a user with the mail address in that context's schema
-                resolvedMail = lookUpInSchema(mail, contextId.intValue(), databaseService);
-                if (null != resolvedMail) {
-                    return resolvedMail;
-                }
 
-                // Discard other contexts in that schema
-                int[] contextsInSameSchema = databaseService.getContextsInSameSchema(contextId.intValue());
-                if (null != contextsInSameSchema) {
-                    for (int i = contextsInSameSchema.length; i-- > 0;) {
-                        visited.add(Integer.valueOf(contextsInSameSchema[i]));
-                    }
-                }
+            // Search for a user with the mail address in that context's schema
+            resolvedMail = lookUpInSchema(mail, contextId.intValue(), databaseService);
+            if (null != resolvedMail) {
+                return resolvedMail;
             }
         }
 

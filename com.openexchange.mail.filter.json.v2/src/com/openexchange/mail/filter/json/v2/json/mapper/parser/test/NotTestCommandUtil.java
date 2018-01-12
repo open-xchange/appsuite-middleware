@@ -64,11 +64,12 @@ public class NotTestCommandUtil {
 
     /**
      * Wraps a given {@link TestCommand} in a {@link TestCommand.Commands.NOT} {@link TestCommand}
+     * 
      * @param com
      * @return
      * @throws SieveException
      */
-    public static TestCommand wrapTestCommand(TestCommand com) throws SieveException{
+    public static TestCommand wrapTestCommand(TestCommand com) throws SieveException {
         ArrayList<TestCommand> testcommands = new ArrayList<TestCommand>();
         final List<Object> argList0 = new ArrayList<Object>();
         testcommands.add(com);

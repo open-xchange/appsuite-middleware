@@ -3,7 +3,6 @@
 
 Name:           open-xchange-messaging
 BuildArch:      noarch
-#!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires:  ant
 %else
@@ -12,17 +11,13 @@ BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-core
 BuildRequires:  open-xchange-oauth
 BuildRequires:  open-xchange-xerces
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+%if 0%{?suse_version}
+BuildRequires: java-1_8_0-openjdk-devel
 %else
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires: java-1_7_0-openjdk-devel
-%else
-BuildRequires: java-devel >= 1.7.0
-%endif
+BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:        @OXVERSION@
-%define        ox_release 3
+%define         ox_release 0
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -30,7 +25,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        The Open Xchange backend messaging extension
-Autoreqprov:   no
+Autoreqprov:    no
 Requires:       open-xchange-core >= @OXVERSION@
 Requires:       open-xchange-oauth >= @OXVERSION@
 Requires:       open-xchange-xerces
@@ -68,34 +63,6 @@ find %{buildroot}/opt/open-xchange/etc \
 perl -pi -e 's;%{buildroot};;' %{configfiles}
 perl -pi -e 's;(^.*?)\s+(.*/(twitter)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
 
-%post
-if [ ${1:-0} -eq 2 ]; then
-    # only when updating
-    . /opt/open-xchange/lib/oxfunctions.sh
-
-    # prevent bash from expanding, see bug 13316
-    GLOBIGNORE='*'
-
-    CONFFILES="rssmessaging.properties twittermessaging.properties twitter.properties"
-    for FILE in ${CONFFILES}; do
-        ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
-    done
-    ox_update_permissions "/opt/open-xchange/etc/twitter.properties" root:open-xchange 640
-
-    # SoftwareChange_Request-1903
-    PFILE=/opt/open-xchange/etc/twitter.properties
-    if ox_exists_property com.openexchange.twitter.http.useSSL $PFILE; then
-        ox_remove_property com.openexchange.twitter.http.useSSL $PFILE
-    fi
-
-    # SoftwareChange_Request-3255
-    ox_add_property com.openexchange.messaging.rss.feed.size 4194304 /opt/open-xchange/etc/rssmessaging.properties
-
-    # SoftwareChange_Request-3260
-    ox_add_property com.openexchange.messaging.rss.feed.blacklist "127.0.0.1-127.255.255.255, localhost"  /opt/open-xchange/etc/rssmessaging.properties
-    ox_add_property com.openexchange.messaging.rss.feed.whitelist.ports "80,443"  /opt/open-xchange/etc/rssmessaging.properties
-fi
-
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -108,6 +75,8 @@ fi
 %dir /opt/open-xchange/etc/
 
 %changelog
+* Thu Oct 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.10.0 release
 * Fri May 19 2017 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Marcus Klein <marcus.klein@open-xchange.com>

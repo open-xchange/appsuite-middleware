@@ -56,9 +56,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.drive.DriveExceptionCodes;
@@ -197,12 +195,10 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
     public int removeSubscriptions(String serviceID, String token, long timestamp) throws OXException {
         int removed = 0;
         ContextService contextService = SubscribeServiceLookup.getService(ContextService.class, true);
-        Set<Integer> allContextIDs = new HashSet<Integer>(contextService.getAllContextIds());
-        while (false == allContextIDs.isEmpty()) {
+        for (Integer contextID : contextService.getDistinctContextsPerSchema()) {
             /*
-             * Delete for whole schema using connection for first context
+             * Delete for whole schema using connection for representative context
              */
-            int contextID = allContextIDs.iterator().next().intValue();
             Connection connection = databaseService.getWritable(contextID);
             try {
                 removed += deleteSubscriptionsForToken(connection, serviceID, token, timestamp);
@@ -215,13 +211,6 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
             } finally {
                 databaseService.backWritable(contextID, connection);
             }
-            /*
-             * Remember processed contexts
-             */
-            int[] contextsInSameSchema = databaseService.getContextsInSameSchema(contextID);
-            for (int cid : contextsInSameSchema) {
-                allContextIDs.remove(Integer.valueOf(cid));
-            }
         }
         return removed;
     }
@@ -231,13 +220,11 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
         String[] services = new String[] { serviceID };
         List<Subscription> subscriptions = new ArrayList<Subscription>();
         ContextService contextService = SubscribeServiceLookup.getService(ContextService.class, true);
-        Set<Integer> allContextIDs = new HashSet<Integer>(contextService.getAllContextIds());
-        while (false == allContextIDs.isEmpty()) {
+        for (Integer contextId : contextService.getDistinctContextsPerSchema()) {
             /*
-             * Select for whole schema using connection for first context
+             * Select for whole schema using connection for representative context
              */
-            int contextID = allContextIDs.iterator().next().intValue();
-            Connection connection = databaseService.getReadOnly(contextID);
+            Connection connection = databaseService.getReadOnly(contextId.intValue());
             try {
                 subscriptions.addAll(selectSubscriptions(connection, services));
             } catch (SQLException e) {
@@ -247,14 +234,7 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
                     throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
                 }
             } finally {
-                databaseService.backWritable(contextID, connection);
-            }
-            /*
-             * Remember processed contexts
-             */
-            int[] contextsInSameSchema = databaseService.getContextsInSameSchema(contextID);
-            for (int cid : contextsInSameSchema) {
-                allContextIDs.remove(Integer.valueOf(cid));
+                databaseService.backWritable(contextId.intValue(), connection);
             }
         }
         return subscriptions;

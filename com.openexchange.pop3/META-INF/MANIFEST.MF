@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange POP3
 Bundle-SymbolicName: com.openexchange.pop3
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
 Import-Package: com.openexchange.api2,
  com.openexchange.caching,
@@ -71,7 +71,7 @@ Import-Package: com.openexchange.api2,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .
 Bundle-Activator: com.openexchange.pop3.osgi.POP3Activator
 Export-Package: com.openexchange.pop3.config

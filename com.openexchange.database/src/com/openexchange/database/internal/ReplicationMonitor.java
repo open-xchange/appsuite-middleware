@@ -265,6 +265,7 @@ public class ReplicationMonitor {
         }
 
         // Apply state
+        boolean wasHeartbeatEnabled = state.isHeartbeatEnabled();
         if (con instanceof StateAware) {
             StateAware stateAware = (StateAware) con;
             ConnectionState connectionState = stateAware.getConnectionState();
@@ -280,9 +281,11 @@ public class ReplicationMonitor {
             try {
                 pool.back(con);
             } catch (final PoolingException e) {
-                Databases.close(con);
-                final OXException e1 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, con.toString());
-                LOG.error("", e1);
+                if (!wasHeartbeatEnabled) {
+                    Databases.close(con);
+                    final OXException e1 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, con.toString());
+                    LOG.error("", e1);
+                }
             }
         }
     }

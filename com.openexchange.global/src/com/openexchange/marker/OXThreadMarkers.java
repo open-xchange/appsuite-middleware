@@ -97,11 +97,15 @@ public class OXThreadMarkers {
             return false;
         }
 
-        try {
-            return ThreadLocalCloseableControl.getInstance().addCloseable(closeable);
-        } catch (Exception e) {
-            // Ignore
+        Thread t = Thread.currentThread();
+        if (t instanceof OXThreadMarker) {
+            try {
+                return ThreadLocalCloseableControl.getInstance().addCloseable(closeable);
+            } catch (Exception e) {
+                // Ignore
+            }
         }
+
         return false;
     }
 

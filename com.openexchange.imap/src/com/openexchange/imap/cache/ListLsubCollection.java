@@ -54,7 +54,6 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -73,6 +72,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.java.Strings;
@@ -616,12 +616,20 @@ final class ListLsubCollection implements Serializable {
             ListLsubEntryImpl lsubEntry = lsubMap.get(sharedNamespace);
             if (null != lsubEntry && false == lsubEntry.hasChildren()) {
                 lsubMap.remove(sharedNamespace);
+                ListLsubEntryImpl rootEntry = lsubMap.get(ROOT_FULL_NAME);
+                if (null != rootEntry) {
+                    rootEntry.removeChildByFullName(lsubEntry.getFullName());
+                }
             }
         }
         for (String userNamespace : user) {
             ListLsubEntryImpl lsubEntry = lsubMap.get(userNamespace);
             if (null != lsubEntry && false == lsubEntry.hasChildren()) {
                 lsubMap.remove(userNamespace);
+                ListLsubEntryImpl rootEntry = lsubMap.get(ROOT_FULL_NAME);
+                if (null != rootEntry) {
+                    rootEntry.removeChildByFullName(lsubEntry.getFullName());
+                }
             }
         }
     }
@@ -819,21 +827,21 @@ final class ListLsubCollection implements Serializable {
         }
     }
 
-    private static final Set<String> ATTRIBUTES_NON_EXISTING_PARENT = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-        "\\noselect",
-        "\\haschildren")));
+    private static final Set<String> ATTRIBUTES_NON_EXISTING_PARENT = ImmutableSet.of("\\noselect", "\\haschildren");
 
-    private static final Set<String> ATTRIBUTES_NON_EXISTING_NAMESPACE = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-        "\\noselect",
-        "\\hasnochildren")));
+    private static final Set<String> ATTRIBUTES_NON_EXISTING_NAMESPACE = ImmutableSet.of("\\noselect", "\\hasnochildren");
 
-    // private static final Set<String> ATTRIBUTES_NO_SELECT_NAMESPACE = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("\\noselect")));
+    // private static final Set<String> ATTRIBUTES_NO_SELECT_NAMESPACE = ImmutableSet.of("\\noselect");
 
     private static final String ATTRIBUTE_DRAFTS = "\\drafts";
     private static final String ATTRIBUTE_JUNK = "\\junk";
     private static final String ATTRIBUTE_SENT = "\\sent";
     private static final String ATTRIBUTE_TRASH = "\\trash";
     private static final String ATTRIBUTE_ARCHIVE = "\\archive";
+    /**
+     * New mailbox attribute added by the "LIST-EXTENDED" extension.
+     */
+    private static final String ATTRIBUTE_NON_EXISTENT = "\\nonexistent";
 
     private static final String[] ATTRIBUTES_SPECIAL_USE = { ATTRIBUTE_DRAFTS, ATTRIBUTE_JUNK, ATTRIBUTE_SENT, ATTRIBUTE_TRASH };
 
@@ -1185,7 +1193,7 @@ final class ListLsubCollection implements Serializable {
                     final ListLsubEntryImpl oldEntry = listMap.get(ROOT_FULL_NAME);
                     if (null == oldEntry) {
                         listMap.put(ROOT_FULL_NAME, listLsubEntry);
-                        lsubMap.put(ROOT_FULL_NAME, listLsubEntry);
+                        lsubMap.put(ROOT_FULL_NAME, new ListLsubEntryImpl(listLsubEntry, true));
                     } else {
                         oldEntry.clearChildren();
                         oldEntry.copyFrom(listLsubEntry);
@@ -2030,6 +2038,11 @@ final class ListLsubCollection implements Serializable {
         }
 
         @Override
+        public boolean existsAndIsNotNonExistent() {
+            return false;
+        }
+
+        @Override
         public ListLsubEntry getParent() {
             return null;
         }
@@ -2141,6 +2154,8 @@ final class ListLsubCollection implements Serializable {
 
         private final String fullName;
 
+        private boolean nonExistent;
+
         private Set<String> attributes;
 
         private char separator;
@@ -2171,6 +2186,7 @@ final class ListLsubCollection implements Serializable {
             super();
             this.fullName = checkFullName(fullName, separator);
             this.attributes = attributes;
+            this.nonExistent = null != attributes && attributes.contains(ATTRIBUTE_NON_EXISTENT);
             this.separator = separator;
             this.changeState = changeState;
             this.hasInferiors = hasInferiors;
@@ -2192,6 +2208,7 @@ final class ListLsubCollection implements Serializable {
             super();
             fullName = newEntry.fullName;
             attributes = newEntry.attributes;
+            nonExistent = newEntry.nonExistent;
             canOpen = newEntry.canOpen;
             changeState = newEntry.changeState;
             hasInferiors = newEntry.hasInferiors;
@@ -2209,6 +2226,7 @@ final class ListLsubCollection implements Serializable {
                 return;
             }
             attributes = newEntry.attributes;
+            nonExistent = newEntry.nonExistent;
             canOpen = newEntry.canOpen;
             changeState = newEntry.changeState;
             hasInferiors = newEntry.hasInferiors;
@@ -2312,6 +2330,27 @@ final class ListLsubCollection implements Serializable {
         }
 
         /**
+         * Removes specified LIST/LSUB entry from this LIST/LSUB entry's children
+         *
+         * @param childFullName The child full-name
+         */
+        protected void removeChildByFullName(final String childFullName) {
+            if (null == childFullName) {
+                return;
+            }
+            if (null == children) {
+                return;
+            }
+            for (Iterator<ListLsubEntryImpl> iter = children.iterator(); iter.hasNext(); ) {
+                ListLsubEntryImpl child = iter.next();
+                if (childFullName.equals(child.getFullName())) {
+                    iter.remove();
+                    return;
+                }
+            }
+        }
+
+        /**
          * Adds (if absent) specified LIST/LSUB entry to this LIST/LSUB entry's children
          *
          * @param child The child LIST/LSUB entry
@@ -2387,6 +2426,12 @@ final class ListLsubCollection implements Serializable {
         @Override
         public boolean exists() {
             return true;
+        }
+
+        @Override
+        public boolean existsAndIsNotNonExistent() {
+            // This instance is known to exist, therefore only check for \NonExistent attribute
+            return !nonExistent;
         }
 
         protected void setSubscribed(final boolean subscribed) {

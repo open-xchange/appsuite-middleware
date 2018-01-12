@@ -118,6 +118,7 @@ import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.protocol.IMAPProtocol;
+import com.sun.mail.imap.protocol.Status;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
 
@@ -196,7 +197,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     private final boolean supportsPermanentListeners;
     private volatile IMAPFolder imapFolderInUse;
     private volatile Map<String, Object> additionalProps;
-    private volatile long lastLockRefreshNanos;
+    private volatile long lastLockRefreshMillis;
     private volatile boolean interrupted;
     private volatile boolean idling;
 
@@ -216,7 +217,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         this.control = control;
         this.pushMode = pushMode;
         additionalProps = null;
-        lastLockRefreshNanos = System.nanoTime();
+        lastLockRefreshMillis = System.currentTimeMillis();
     }
 
     private boolean isUserValid() {
@@ -582,10 +583,10 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
      * @return <code>true</code> if refresh is needed; otherwise <code>false</code>
      */
     private boolean doRefreshLock() {
-        long last = lastLockRefreshNanos;
-        long nanos = System.nanoTime();
-        if (nanos - last > TimeUnit.MILLISECONDS.toNanos(TIMEOUT_THRESHOLD_MILLIS)) {
-            lastLockRefreshNanos = nanos;
+        long last = lastLockRefreshMillis;
+        long now = System.currentTimeMillis();
+        if (now - last > TIMEOUT_THRESHOLD_MILLIS) {
+            lastLockRefreshMillis = now;
             return true;
         }
         return false;
@@ -797,7 +798,8 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 @Override
                 public Object doCommand(IMAPProtocol p) throws ProtocolException {
                     String[] item = { "UIDNEXT" };
-                    return Long.valueOf(p.status(fullName, item).uidnext);
+                    Status status = p.status(fullName, item);
+                    return Long.valueOf(null == status ? -1 : status.uidnext);
                 }
             })).longValue();
         } catch (MessagingException e) {

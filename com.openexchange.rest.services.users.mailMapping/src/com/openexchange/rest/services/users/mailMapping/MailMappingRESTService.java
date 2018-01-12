@@ -63,7 +63,7 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mailmapping.MailResolver;
-import com.openexchange.mailmapping.MultipleMailResolver;
+import com.openexchange.mailmapping.MailResolverService;
 import com.openexchange.mailmapping.ResolvedMail;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
@@ -111,7 +111,7 @@ public class MailMappingRESTService {
         mails.addAll(mail.getMatrixParameters().keySet());
 
         // Check required service
-        MailResolver resolver = services.getService(MailResolver.class);
+        MailResolverService resolver = services.getService(MailResolverService.class);
         if (null == resolver) {
             throw ServiceExceptionCode.absentService(MailResolver.class);
         }
@@ -127,25 +127,13 @@ public class MailMappingRESTService {
             int size = mails.size();
             JSONObject response = new JSONObject(size);
 
-            if (resolver instanceof MultipleMailResolver) {
-                MultipleMailResolver multipleMailResolver = (MultipleMailResolver) resolver;
-
-                String[] sMails = mails.toArray(new String[size]);
-                ResolvedMail[] resolveds = multipleMailResolver.resolveMultiple(sMails);
-                for (int i = 0; i < resolveds.length; i++) {
-                    ResolvedMail resolved = resolveds[i];
-                    if (resolved != null) {
-                        User user = users.getUser(resolved.getUserID(), resolved.getContextID());
-                        response.put(sMails[i], asJson(resolved, user));
-                    }
-                }
-            } else {
-                for (String m : mails) {
-                    ResolvedMail resolved = resolver.resolve(m);
-                    if (resolved != null) {
-                        User user = users.getUser(resolved.getUserID(), resolved.getContextID());
-                        response.put(m, asJson(resolved, user));
-                    }
+            String[] sMails = mails.toArray(new String[size]);
+            ResolvedMail[] resolveds = resolver.resolveMultiple(sMails);
+            for (int i = 0; i < resolveds.length; i++) {
+                ResolvedMail resolved = resolveds[i];
+                if (resolved != null) {
+                    User user = users.getUser(resolved.getUserID(), resolved.getContextID());
+                    response.put(sMails[i], asJson(resolved, user));
                 }
             }
 

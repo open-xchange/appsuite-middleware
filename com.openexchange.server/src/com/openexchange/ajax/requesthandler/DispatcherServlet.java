@@ -318,11 +318,11 @@ public class DispatcherServlet extends SessionServlet {
             try {
                 result = SessionUtility.getSession(req, resp, sessionId, sessiondService);
             } catch (OXException e) {
-                if (!SessionExceptionCodes.WRONG_SESSION_SECRET.equals(e)) {
+                if (!SessionExceptionCodes.SESSION_EXPIRED.equals(e)) {
                     throw e;
                 }
                 // Got a wrong or missing secret
-                String wrongSecret = e.getProperty(SessionExceptionCodes.WRONG_SESSION_SECRET.name());
+                String wrongSecret = e.getProperty(SessionExceptionCodes.SESSION_EXPIRED.name());
                 if (!"null".equals(wrongSecret)) {
                     // No information available or a differing secret
                     throw e;
@@ -396,8 +396,6 @@ public class DispatcherServlet extends SessionServlet {
             MailExceptionCode.REFERENCED_MAIL_NOT_FOUND,
             MailExceptionCode.FOLDER_NOT_FOUND,
             SessionExceptionCodes.SESSION_EXPIRED,
-            SessionExceptionCodes.WRONG_SESSION_SECRET,
-            SessionExceptionCodes.WRONG_CLIENT_IP,
             UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED,
             UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED,
             AjaxExceptionCodes.CONNECTION_RESET
@@ -461,6 +459,7 @@ public class DispatcherServlet extends SessionServlet {
         AJAXRequestResult result = null;
         Exception exc = null;
         Dispatcher dispatcher = DISPATCHER.get();
+        boolean enqueued = false;
         try {
             AJAXRequestData requestData = initializeRequestData(httpRequest, httpResp, preferStream);
 
@@ -492,6 +491,10 @@ public class DispatcherServlet extends SessionServlet {
                 /*
                  * ... and send response
                  */
+                ResultType resultType = result.getType();
+                if (ResultType.ENQUEUED == resultType) {
+                    enqueued = true;
+                }
                 sendResponse(requestData, result, httpRequest, httpResp);
             }
         } catch (UploadException e) {
@@ -509,6 +512,10 @@ public class DispatcherServlet extends SessionServlet {
             Locale locale = getLocaleFrom(session, null);
             if (null != locale) {
                 e.setProperty(OXExceptionConstants.PROPERTY_LOCALE, locale.toString());
+            }
+            if (UploadException.UploadCode.IMAGE_TOO_BIG.equals(e) || UploadException.UploadCode.IMAGE_RESOLUTION_TOO_HIGH.equals(e)) {
+                // Do log exceed image size/resolution
+                LOG.warn(e.getSoleMessage());
             }
             handleOXException(e, httpRequest, httpResp);
         } catch (OXException e) {
@@ -530,9 +537,11 @@ public class DispatcherServlet extends SessionServlet {
             }
             super.handleOXException(oxe, httpRequest, httpResp, false, false);
         } finally {
-            Dispatchers.signalDone(result, exc);
-            if (null != state) {
-                dispatcher.end(state);
+            if (false == enqueued) {
+                Dispatchers.signalDone(result, exc);
+                if (null != state) {
+                    dispatcher.end(state);
+                }
             }
         }
     }

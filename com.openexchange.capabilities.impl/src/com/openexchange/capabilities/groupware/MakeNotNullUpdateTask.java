@@ -51,8 +51,6 @@ package com.openexchange.capabilities.groupware;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import com.openexchange.capabilities.osgi.CapabilitiesActivator;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
@@ -89,10 +87,7 @@ public class MakeNotNullUpdateTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        DatabaseService databaseService = CapabilitiesActivator.SERVICES.get().getService(DatabaseService.class);
-
-        int cid = params.getContextId();
-        Connection con = databaseService.getForUpdateTask(cid);
+        Connection con = params.getConnection();
         boolean rollback = false;
         try {
             con.setAutoCommit(false);
@@ -119,7 +114,6 @@ public class MakeNotNullUpdateTask extends UpdateTaskAdapter {
                 Databases.rollback(con);
             }
             Databases.autocommit(con);
-            databaseService.backForUpdateTask(cid, con);
         }
     }
 

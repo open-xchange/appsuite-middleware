@@ -62,51 +62,25 @@ public abstract class SchemaImpl implements Schema {
     private static final long serialVersionUID = 8722328691217424068L;
 
     private boolean locked;
-
-    private boolean groupwareCompatible;
-
-    private boolean adminCompatible;
-
     private String server;
-
     private String schema;
+    private int poolId;
 
     protected SchemaImpl() {
         super();
     }
 
-    public SchemaImpl(boolean locked, boolean groupwareCompatible, boolean adminCompatible) {
+    public SchemaImpl(boolean locked) {
         super();
         this.locked = locked;
-        this.groupwareCompatible = groupwareCompatible;
-        this.adminCompatible = adminCompatible;
     }
 
     public SchemaImpl(Schema schema) {
         super();
         this.locked = schema.isLocked();
-        this.groupwareCompatible = schema.isGroupwareCompatible();
-        this.adminCompatible = schema.isAdminCompatible();
         this.server = schema.getServer();
         this.schema = schema.getSchema();
-    }
-
-    @Override
-    public boolean isAdminCompatible() {
-        return adminCompatible;
-    }
-
-    public void setAdminCompatible(final boolean adminCompatible) {
-        this.adminCompatible = adminCompatible;
-    }
-
-    @Override
-    public boolean isGroupwareCompatible() {
-        return groupwareCompatible;
-    }
-
-    public void setGroupwareCompatible(final boolean groupwareCompatible) {
-        this.groupwareCompatible = groupwareCompatible;
+        this.poolId = schema.getPoolId();
     }
 
     @Override
@@ -135,4 +109,19 @@ public abstract class SchemaImpl implements Schema {
     public void setSchema(final String schema) {
         this.schema = schema;
     }
+
+    @Override
+    public int getPoolId() {
+        return poolId;
+    }
+
+    /**
+     * Sets the identifier of the database pool
+     *
+     * @param poolId The pool identifier to set
+     */
+    public void setPoolId(int poolId) {
+        this.poolId = poolId;
+    }
+
 }

@@ -59,16 +59,17 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.snippet.json.SnippetJsonParser;
+import com.openexchange.snippet.json.SnippetRequest;
 import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultAttachment;
 import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.Property;
-import com.openexchange.snippet.SnippetProcessor;
+import com.openexchange.snippet.utils.SnippetProcessor;
 import com.openexchange.snippet.SnippetService;
-import com.openexchange.snippet.json.SnippetJsonParser;
-import com.openexchange.snippet.json.SnippetRequest;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -126,13 +127,29 @@ public final class NewAction extends SnippetAction {
         // Process image in an img HTML tag and add it as an attachment
         ServerSession session = snippetRequest.getSession();
         String contentSubType = getContentSubType(snippet);
+        List<String> managedFileIds = null;
         if (contentSubType.equals("html")) {
-            new SnippetProcessor(session).processImages(snippet);
+            managedFileIds = new SnippetProcessor(session).processImages(snippet);
         }
 
         // Create via management
         String id = getSnippetService(session).getManagement(session).createSnippet(snippet);
-        return new AJAXRequestResult(id, "string");
+        AJAXRequestResult requestResult = new AJAXRequestResult(id, "string");
+
+        if (null != managedFileIds && false == managedFileIds.isEmpty()) {
+            ManagedFileManagement fileManagement = services.getOptionalService(ManagedFileManagement.class);
+            if (null != fileManagement) {
+                for (String managedFileId : managedFileIds) {
+                    try {
+                        fileManagement.removeByID(managedFileId);
+                    } catch (Exception e) {
+                        // Ignore
+                    }
+                }
+            }
+        }
+
+        return requestResult;
     }
 
     @Override

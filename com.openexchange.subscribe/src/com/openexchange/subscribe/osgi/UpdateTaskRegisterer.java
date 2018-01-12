@@ -87,10 +87,10 @@ public final class UpdateTaskRegisterer implements ServiceTrackerCustomizer<Data
             @Override
             public Collection<UpdateTaskV2> getUpdateTasks() {
                 return Arrays.asList(
-                    (UpdateTaskV2) new EnabledColumn(service),
-                    new SubscriptionsCreatedAndLastModifiedColumn(service),
-                    new FixSubscriptionTablePrimaryKey(service),
-                    new AddFolderIndex(service));
+                    (UpdateTaskV2) new EnabledColumn(),
+                    new SubscriptionsCreatedAndLastModifiedColumn(),
+                    new FixSubscriptionTablePrimaryKey(),
+                    new AddFolderIndex());
             }
         }, null);
         return service;

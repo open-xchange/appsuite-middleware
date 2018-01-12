@@ -59,10 +59,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.impl.osgi.Services;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
@@ -94,15 +92,12 @@ public class AddInitialUserFilestoreUsage extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
         ProgressState state = params.getProgressState();
-
-        DatabaseService dbService = Services.requireService(DatabaseService.class);
-        Connection con = dbService.getForUpdateTask(contextId);
+        Connection con = params.getConnection();
         boolean rollback = false;
         try {
             IntReference count = new IntReference();
-            Map<Integer, List<Integer>> users = loadUsersInSchema(contextId, dbService, count, con);
+            Map<Integer, List<Integer>> users = loadUsersInSchema(params.getContextsInSameSchema(), count, con);
 
             con.setAutoCommit(false);
             rollback = true;
@@ -128,13 +123,10 @@ public class AddInitialUserFilestoreUsage extends UpdateTaskAdapter {
                Databases.rollback(con);
             }
             Databases.autocommit(con);
-            dbService.backForUpdateTask(contextId, con);
         }
     }
 
-    private Map<Integer, List<Integer>> loadUsersInSchema(int contextId, DatabaseService dbService, IntReference count, Connection con) throws OXException, SQLException {
-        int[] contextIds = dbService.getContextsInSameSchema(contextId);
-
+    private Map<Integer, List<Integer>> loadUsersInSchema(int[] contextIds, IntReference count, Connection con) throws SQLException {
         int c = 0;
         Map<Integer, List<Integer>> map = new HashMap<Integer, List<Integer>>(contextIds.length);
         for (int cid : contextIds) {

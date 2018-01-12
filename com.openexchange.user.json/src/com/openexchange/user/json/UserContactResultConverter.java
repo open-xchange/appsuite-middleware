@@ -49,14 +49,12 @@
 
 package com.openexchange.user.json;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.anonymizer.AnonymizerService;
 import com.openexchange.ajax.anonymizer.Anonymizers;
@@ -78,9 +76,9 @@ import com.openexchange.user.json.actions.GetAction;
  */
 public class UserContactResultConverter implements ResultConverter {
 
-    private static final Set<String> EXPECTED_NAMES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
+    private static final Set<String> EXPECTED_NAMES = ImmutableSet.of(
     		AJAXServlet.PARAMETER_COLUMNS, AJAXServlet.PARAMETER_SORT, AJAXServlet.PARAMETER_ORDER, AJAXServlet.LEFT_HAND_LIMIT,
-    		AJAXServlet.RIGHT_HAND_LIMIT, AJAXServlet.PARAMETER_TIMEZONE, AJAXServlet.PARAMETER_SESSION, AJAXServlet.PARAMETER_ACTION)));
+    		AJAXServlet.RIGHT_HAND_LIMIT, AJAXServlet.PARAMETER_TIMEZONE, AJAXServlet.PARAMETER_SESSION, AJAXServlet.PARAMETER_ACTION);
 
 	@Override
 	public String getInputFormat() {

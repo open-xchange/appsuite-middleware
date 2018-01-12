@@ -9,11 +9,7 @@
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/gblQueryParamMailColumns"
-      - in: query
-        name: headers
-        type: string
-        description: A comma-separated list of header names. Each name requests denoted header from each mail.
-        required: false
+      - $ref: "#/parameters/gblQueryParamMailHeaders"
       - in: body
         name: body
         description: A JSON array of JSON objects with the id and folder of the requested mails.

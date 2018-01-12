@@ -4,7 +4,7 @@ Bundle-Name: Liquibase core bundle
 Bundle-SymbolicName: liquibase.core
 Bundle-Version: 3.0.7
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .
 Import-Package: javax.servlet,
  javax.servlet.http,

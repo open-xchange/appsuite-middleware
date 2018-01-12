@@ -80,6 +80,10 @@ public enum KnownStatus implements Status {
      * Account is currently being set-up.
      */
     IN_SETUP("in_setup", KnownStatusMessage.MESSAGE_IN_SETUP),
+    /**
+     * There was an SSL problem.
+     */
+    INVALID_SSL_CERTIFICATE("invalid_ssl", KnownStatusMessage.MESSAGE_SSL_ERROR),
 
     ;
 

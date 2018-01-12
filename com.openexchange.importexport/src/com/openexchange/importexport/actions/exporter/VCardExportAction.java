@@ -56,7 +56,15 @@ import com.openexchange.importexport.formats.Format;
 @DispatcherNotes(defaultFormat="file")
 public class VCardExportAction extends ContactExportAction {
 
-	private Exporter exporter;
+	private final Exporter exporter;
+
+    /**
+     * Initializes a new {@link VCardExportAction}.
+     */
+    public VCardExportAction() {
+        super();
+        exporter = new VCardExporter();
+    }
 
 	@Override
 	public Format getFormat() {
@@ -65,9 +73,6 @@ public class VCardExportAction extends ContactExportAction {
 
 	@Override
 	public Exporter getExporter() {
-		if(this.exporter == null) {
-            exporter = new VCardExporter();
-        }
 		return exporter;
 	}
 

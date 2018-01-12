@@ -8,6 +8,7 @@
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/gblQueryParamMailFolder"
       - $ref: "#/parameters/gblQueryParamMailColumns"
+      - $ref: "#/parameters/gblQueryParamMailHeaders"      
       - in: query
         name: sort
         type: string

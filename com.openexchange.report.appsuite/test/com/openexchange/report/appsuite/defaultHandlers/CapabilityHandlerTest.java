@@ -35,6 +35,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -43,6 +44,8 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
+import com.openexchange.context.PoolAndSchema;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserImpl;
@@ -52,9 +55,10 @@ import com.openexchange.report.appsuite.UserReport;
 import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.report.appsuite.serialization.ReportConfigs;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(Services.class)
+@PrepareForTest({Services.class, ServerServiceRegistry.class})
 public class CapabilityHandlerTest {
 
     @Mock
@@ -181,12 +185,12 @@ public class CapabilityHandlerTest {
     }
 
      @Test
-     public void testCalculatedDriveMetricsSingleCapS() {
+     public void testCalculatedDriveMetricsSingleCapS() throws OXException {
         // Mock all potential return values for Drive calculations
         InfostoreInformationService informationService = new InfostoreInformationService() {
 
             @Override
-            public Map<String, Integer> getStorageUseMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
+            public Map<String, Integer> getStorageUseMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException {
                 return createPotentialInfostoreReturn(10, 20, 15, 30, null, 0);
             }
 
@@ -196,41 +200,54 @@ public class CapabilityHandlerTest {
             }
 
             @Override
-            public Map<String, Integer> getFileSizeMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
+            public Map<String, Integer> getFileSizeMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException {
                 return createPotentialInfostoreReturn(10, 20, 15, 30, null, 0);
             }
 
             @Override
-            public Map<String, Integer> getFileCountNoVersions(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
+            public Map<String, Integer> getFileCountNoVersions(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException {
                 HashMap<String, Integer> returnMap = new HashMap<>();
                 returnMap.put("total", 2);
                 return returnMap;
             }
 
             @Override
-            public Map<String, Integer> getFileCountMimetypeMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
+            public Map<String, Integer> getFileCountMimetypeMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException {
                 return new HashMap<>();
             }
 
             @Override
-            public Map<String, Integer> getFileCountMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
+            public Map<String, Integer> getFileCountMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException {
                 return createPotentialInfostoreReturn(1, 1, 1, 2, "users", 2);
             }
 
             @Override
-            public Map<String, Integer> getFileCountInTimeframeMetrics(Map<Integer, List<Integer>> usersInContext, Date start, Date end) throws SQLException, OXException {
+            public Map<String, Integer> getFileCountInTimeframeMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash, Date start, Date end) throws SQLException, OXException {
                 return createPotentialInfostoreReturn(1, 1, 1, 2, null, 0);
             }
 
             @Override
-            public Map<String, Integer> getExternalStorageMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
+            public Map<String, Integer> getExternalStorageMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException {
                 return createPotentialInfostoreReturn(1, 1, 1, 1, null, 0);
             }
+
 
         };
 
         PowerMockito.mockStatic(Services.class);
+        PowerMockito.mockStatic(ServerServiceRegistry.class);
         PowerMockito.when(Services.getService(InfostoreInformationService.class)).thenReturn(informationService);
+        ServerServiceRegistry serverServiceRegistry = PowerMockito.mock(ServerServiceRegistry.class);
+        PowerMockito.when(ServerServiceRegistry.getInstance()).thenReturn(serverServiceRegistry);
+        
+        ContextService contextService = PowerMockito.mock(ContextService.class);
+        PowerMockito.when(serverServiceRegistry.getService(ContextService.class)).thenReturn(contextService);
+        
+        Map<PoolAndSchema, List<Integer>> poolContextMap = new HashMap<>();
+        PoolAndSchema poolAndSchema = new PoolAndSchema(4, "testSchema");
+        poolContextMap.put(poolAndSchema, Arrays.asList(15));
+        PowerMockito.when(contextService.getSchemaAssociationsFor(Matchers.anyList())).thenReturn(poolContextMap);
+        
         this.initReport("extended");
         initTenantMapForReport();
         addCapSToReport(report, CAPS1);
@@ -239,78 +256,101 @@ public class CapabilityHandlerTest {
     }
 
      @Test
-     public void testCalculatedDriveMetricsTwoCapS() {
+     public void testCalculatedDriveMetricsTwoCapS() throws OXException {
         // Mock all potential return values for Drive calculations, for each context different values
         InfostoreInformationService informationService = new InfostoreInformationService() {
 
             @Override
-            public Map<String, Integer> getStorageUseMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
-                if (usersInContext.containsKey(20)) {
-                    return createPotentialInfostoreReturn(30, 60, 45, 135, null, 0);
+            public Map<String, Integer> getStorageUseMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException {
+                for (PoolAndSchema pool : dbContextToUserBash.keySet()) {
+                    if (dbContextToUserBash.get(pool).containsKey(20) && dbContextToUserBash.get(pool).get(20) != null) {
+                        return createPotentialInfostoreReturn(30, 60, 45, 135, null, 0);
+                    }
                 }
                 return createPotentialInfostoreReturn(10, 20, 15, 30, null, 0);
             }
 
             @Override
             public Map<String, Integer> getQuotaUsageMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
-                if (usersInContext.containsKey(20)) {
+                if (usersInContext.containsKey(20) && usersInContext.get(20) != null) {
                     return createPotentialInfostoreReturn(5, 20, 15, 3, "sum", 35);
                 }
                 return createPotentialInfostoreReturn(1, 1, 1, 1, "sum", 1);
             }
 
             @Override
-            public Map<String, Integer> getFileSizeMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
-                if (usersInContext.containsKey(20)) {
-                    return createPotentialInfostoreReturn(30, 60, 45, 135, null, 0);
+            public Map<String, Integer> getFileSizeMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException {
+                for (PoolAndSchema pool : dbContextToUserBash.keySet()) {
+                        if (dbContextToUserBash.get(pool).containsKey(20) && dbContextToUserBash.get(pool).get(20) != null) {
+                        return createPotentialInfostoreReturn(30, 60, 45, 135, null, 0);
+                    }
                 }
                 return createPotentialInfostoreReturn(10, 20, 15, 30, null, 0);
             }
 
             @Override
-            public Map<String, Integer> getFileCountNoVersions(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
+            public Map<String, Integer> getFileCountNoVersions(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException {
                 HashMap<String, Integer> returnMap = new HashMap<>();
-                if (usersInContext.containsKey(20)) {
-                    returnMap.put("total", 3);
-                    return returnMap;
+                for (PoolAndSchema pool : dbContextToUserBash.keySet()) {
+                        if (dbContextToUserBash.get(pool).containsKey(20) && dbContextToUserBash.get(pool).get(20) != null) {
+                        returnMap.put("total", 3);
+                        return returnMap;
+                    }
                 }
                 returnMap.put("total", 2);
                 return returnMap;
             }
 
             @Override
-            public Map<String, Integer> getFileCountMimetypeMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
+            public Map<String, Integer> getFileCountMimetypeMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException {
                 return new HashMap<>();
             }
 
             @Override
-            public Map<String, Integer> getFileCountMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
-                if (usersInContext.containsKey(20)) {
-                    return createPotentialInfostoreReturn(1, 1, 1, 3, "users", 3);
+            public Map<String, Integer> getFileCountMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException {
+                for (PoolAndSchema pool : dbContextToUserBash.keySet()) {
+                        if (dbContextToUserBash.get(pool).containsKey(20) && dbContextToUserBash.get(pool).get(20) != null) {
+                        return createPotentialInfostoreReturn(1, 1, 1, 3, "users", 3);
+                    }
                 }
                 return createPotentialInfostoreReturn(1, 1, 1, 2, "users", 2);
             }
 
             @Override
-            public Map<String, Integer> getFileCountInTimeframeMetrics(Map<Integer, List<Integer>> usersInContext, Date start, Date end) throws SQLException, OXException {
-                if (usersInContext.containsKey(20)) {
-                    return createPotentialInfostoreReturn(1, 1, 1, 3, null, 0);
+            public Map<String, Integer> getFileCountInTimeframeMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash, Date start, Date end) throws SQLException, OXException {
+                for (PoolAndSchema pool : dbContextToUserBash.keySet()) {
+                        if (dbContextToUserBash.get(pool).containsKey(20) && dbContextToUserBash.get(pool).get(20) != null) {
+                        return createPotentialInfostoreReturn(1, 1, 1, 3, null, 0);
+                    }
                 }
                 return createPotentialInfostoreReturn(1, 1, 1, 2, null, 0);
             }
 
             @Override
-            public Map<String, Integer> getExternalStorageMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
-                if (usersInContext.containsKey(20)) {
-                    return createPotentialInfostoreReturn(0, 0, 0, 0, null, 0);
+            public Map<String, Integer> getExternalStorageMetrics(Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUserBash) throws SQLException, OXException {
+                for (PoolAndSchema pool : dbContextToUserBash.keySet()) {
+                        if (dbContextToUserBash.get(pool).containsKey(20) && dbContextToUserBash.get(pool).get(20) != null) {
+                        return createPotentialInfostoreReturn(0, 0, 0, 0, null, 0);
+                    }
                 }
                 return createPotentialInfostoreReturn(1, 1, 1, 1, null, 0);
             }
-
         };
 
         PowerMockito.mockStatic(Services.class);
+        PowerMockito.mockStatic(ServerServiceRegistry.class);
         PowerMockito.when(Services.getService(InfostoreInformationService.class)).thenReturn(informationService);
+        ServerServiceRegistry serverServiceRegistry = PowerMockito.mock(ServerServiceRegistry.class);
+        PowerMockito.when(ServerServiceRegistry.getInstance()).thenReturn(serverServiceRegistry);
+        
+        ContextService contextService = PowerMockito.mock(ContextService.class);
+        PowerMockito.when(serverServiceRegistry.getService(ContextService.class)).thenReturn(contextService);
+        
+        Map<PoolAndSchema, List<Integer>> poolContextMap = new HashMap<>();
+        PoolAndSchema poolAndSchema = new PoolAndSchema(4, "testSchema");
+        poolContextMap.put(poolAndSchema, Arrays.asList(15, 20));
+        PowerMockito.when(contextService.getSchemaAssociationsFor(Matchers.anyList())).thenReturn(poolContextMap);
+        
         this.initReport("extended");
         initTenantMapForReport();
         addCapSToReport(report, CAPS1);

@@ -51,14 +51,15 @@ package com.openexchange.session.management.json;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.management.json.actions.GetSessionsAction;
-import com.openexchange.session.management.json.actions.RemoveAllOtherSessionsAction;
-import com.openexchange.session.management.json.actions.RemoveSessionAction;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.management.json.actions.AllAction;
+import com.openexchange.session.management.json.actions.ClearAction;
+import com.openexchange.session.management.json.actions.DeleteAction;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -71,12 +72,13 @@ public class SessionManagementActionFactory implements AJAXActionServiceFactory 
 
     private final Map<String, AJAXActionService> actions;
 
-    public SessionManagementActionFactory() {
+    public SessionManagementActionFactory(ServiceLookup services) {
         super();
-        actions = new HashMap<>();
-        actions.put("getSessions", new GetSessionsAction());
-        actions.put("removeSession", new RemoveSessionAction());
-        actions.put("removeAllOtherSessions", new RemoveAllOtherSessionsAction());
+        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
+        actions.put("all", new AllAction(services));
+        actions.put("delete", new DeleteAction(services));
+        actions.put("clear", new ClearAction(services));
+        this.actions = actions.build();
     }
 
     @Override

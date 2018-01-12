@@ -70,9 +70,10 @@ import com.openexchange.ajax.fileholder.IFileHolder.RandomAccess;
 import com.openexchange.ajax.fileholder.Readable;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.groupware.upload.impl.UploadImageSizeExceededException;
+import com.openexchange.groupware.upload.impl.UploadException.UploadCode;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.HtmlServices;
-import com.openexchange.imagetransformation.ImageTransformationDeniedIOException;
 import com.openexchange.imagetransformation.Utility;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
@@ -191,60 +192,66 @@ public final class DownloadUtility {
             // Some variables
             String fn = fileName;
             // Check by Content-Type and file name
-            if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "htm", "xhtm")) {
+            if (Strings.containsAny(toLowerCase(contentType.getSubType()), "htm", "xhtm")) {
                 /*
                  * HTML content requested for download...
                  */
                 if (null == sContentDisposition) {
                     sContentDisposition = "attachment";
                 } else if (toLowerCase(sContentDisposition).startsWith("inline")) {
-                    /*
-                     * Sanitizing of HTML content needed
-                     */
-                    sink = new ThresholdFileHolder();
-                    sink.write(in);
-                    in = null;
-                    String cs = contentType.getCharsetParameter();
-                    if (!CharsetDetector.isValid(cs)) {
-                        cs = CharsetDetector.detectCharset(sink.getStream());
-                        if ("US-ASCII".equalsIgnoreCase(cs)) {
-                            cs = "ISO-8859-1";
-                        }
-                    }
-                    // Check size
-                    String htmlContent;
-                    if (sink.getLength() > HtmlServices.htmlThreshold()) {
-                        // HTML cannot be sanitized as it exceeds the threshold for HTML parsing
-                        OXException oxe = AjaxExceptionCodes.HTML_TOO_BIG.create();
-                        htmlContent = SessionServlet.getErrorPage(200, oxe.getDisplayMessage(locale), "");
+                    if (contentType.contains("application/")) {
+                        sContentDisposition = "attachment";
                     } else {
-                        htmlContent = new String(sink.toByteArray(), Charsets.forName(cs));
-                        HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-                        htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
+                        /*
+                         * Sanitizing of HTML content needed
+                         */
+                        sink = new ThresholdFileHolder();
+                        sink.write(in);
+                        in = null;
+                        String cs = contentType.getCharsetParameter();
+                        if (!CharsetDetector.isValid(cs)) {
+                            cs = CharsetDetector.detectCharset(sink.getStream());
+                            if ("US-ASCII".equalsIgnoreCase(cs)) {
+                                cs = "ISO-8859-1";
+                            }
+                        }
+                        // Check size
+                        String htmlContent;
+                        if (sink.getLength() > HtmlServices.htmlThreshold()) {
+                            // HTML cannot be sanitized as it exceeds the threshold for HTML parsing
+                            OXException oxe = AjaxExceptionCodes.HTML_TOO_BIG.create();
+                            htmlContent = SessionServlet.getErrorPage(200, oxe.getDisplayMessage(locale), "");
+                        } else {
+                            htmlContent = new String(sink.toByteArray(), Charsets.forName(cs));
+                            HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                            htmlContent = htmlService.sanitize(htmlContent, null, true, null, null);
+                        }
+                        sink.close();
+                        sink = null; // Null'ify as not needed anymore
+                        contentType.setCharsetParameter("UTF-8");
+                        byte[] tmp = htmlContent.getBytes(Charsets.UTF_8);
+                        sz = tmp.length;
+                        in = new ByteArrayRandomAccess(tmp);
                     }
-                    sink.close();
-                    sink = null; // Null'ify as not needed anymore
-                    contentType.setCharsetParameter("UTF-8");
-                    byte[] tmp = htmlContent.getBytes(Charsets.UTF_8);
-                    sz = tmp.length;
-                    in = new ByteArrayRandomAccess(tmp);
                 }
             } else if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "javascript") || fileNameImpliesJavascript(fileName)) {
                 // Treat all JavaScript content as harmful
                 harmful = true;
                 sContentDisposition = "attachment";
-            } else if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "svg") || fileNameImpliesSvg(fileName)) {
+            } else if (Strings.containsAny(toLowerCase(contentType.getSubType()), "svg") || fileNameImpliesSvg(fileName)) {
                 // Treat all SVG content as harmful
                 harmful = true;
                 sContentDisposition = "attachment";
-            } else if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "xml") || fileNameImpliesXml(fileName)) {
+            } else if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "xsl") || fileNameImpliesExcel(fileName)) {
+                sContentDisposition = "attachment";
+            } else if (Strings.containsAny(toLowerCase(contentType.getSubType()), "xml") || fileNameImpliesXml(fileName)) {
                 /*
                  * XML content requested for download...
                  */
                 if (null == sContentDisposition) {
                     sContentDisposition = "attachment";
                 } else if (toLowerCase(sContentDisposition).startsWith("inline")) {
-                    if (contentType.startsWith("application/")) {
+                    if (contentType.contains("application/")) {
                         sContentDisposition = "attachment";
                     } else {
                         /*
@@ -539,6 +546,10 @@ public final class DownloadUtility {
         return null != fileName && MimeType2ExtMap.getContentType(fileName).indexOf("svg") >= 0;
     }
 
+    private static boolean fileNameImpliesExcel(final String fileName) {
+        return null != fileName && MimeType2ExtMap.getContentType(fileName).indexOf("excel") >= 0;
+    }
+
     private static boolean fileNameImpliesJavascript(final String fileName) {
         return null != fileName && MimeType2ExtMap.getContentType(fileName).indexOf("javascript") >= 0;
     }
@@ -612,7 +623,7 @@ public final class DownloadUtility {
             if (pos >= 0) {
                 isoFileName = isoFileName.substring(0, pos) + toUpperCase(isoFileName.substring(pos));
             }
-        } 
+        }
         String encoded = encoder.escape(fn);
         appendTo.append("; filename*=UTF-8''").append(encoded);
         appendTo.append("; filename=\"").append(isoFileName).append('"');
@@ -829,8 +840,9 @@ public final class DownloadUtility {
      * @param file The file to check
      * @return <code>true</code> if specified uploaded file is an illegal image; otherwise <code>false</code>
      * @throws IOException If uploaded file cannot be checked
+     * @throws OXException if the image is too big or the resolution is too high
      */
-    public static boolean isIllegalImage(UploadFile file) throws IOException {
+    public static boolean isIllegalImage(UploadFile file) throws IOException, OXException {
         String contentType = file.getContentType();
         if (isImageContentType(contentType)) {
             return isIllegalImageData(file);
@@ -852,7 +864,7 @@ public final class DownloadUtility {
         return null != contentType && com.openexchange.java.Strings.toLowerCase(contentType).startsWith("image/");
     }
 
-    private static boolean isIllegalImageData(UploadFile imageFile) throws IOException {
+    private static boolean isIllegalImageData(UploadFile imageFile) throws IOException, OXException {
         if (!isValidImage(imageFile)) {
             // Invalid
             return true;
@@ -865,7 +877,7 @@ public final class DownloadUtility {
         return false;
     }
 
-    private static boolean isValidImage(UploadFile imageFile) throws IOException {
+    private static boolean isValidImage(UploadFile imageFile) throws IOException, OXException {
         Dimension dimension = Utility.getImageDimensionFor(imageFile.openStream(), imageFile.getContentType(), imageFile.getPreparedFileName());
         if (dimension == null || dimension.getHeight() <= 0 || dimension.getWidth() <= 0) {
             return false;
@@ -876,7 +888,7 @@ public final class DownloadUtility {
             long maxSize = Utility.maxSize();
             if (0 < maxSize && maxSize < imageFile.getSize()) {
                 // Too big
-                throw new ImageTransformationDeniedIOException(new StringBuilder("Image upload denied. Size is too big. (current=").append(imageFile.getSize()).append(", max=").append(maxSize).append(')').toString());
+                throw UploadImageSizeExceededException.create(imageFile.getSize(), maxSize, true);
             }
         }
 
@@ -887,7 +899,7 @@ public final class DownloadUtility {
                 int resolution = dimension.height * dimension.width;
                 if (resolution > maxResolution) {
                     // Resolution too high
-                    throw new ImageTransformationDeniedIOException(new StringBuilder("Image upload denied. Resolution is too high. (current=").append(resolution).append(", max=").append(maxResolution).append(')').toString());
+                    throw UploadCode.IMAGE_RESOLUTION_TOO_HIGH.create(resolution, maxResolution);
                 }
             }
         }

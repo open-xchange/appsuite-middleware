@@ -1,3 +1,9 @@
+open-xchange-admin-autocontextid (7.10.0-0) unstable; urgency=medium
+
+  * prepare for 7.10.0 release
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Thu, 12 Oct 2017 14:38:20 +0200
+
 open-xchange-admin-autocontextid (7.8.4-3) stable; urgency=medium
 
   * First candidate for 7.8.4 release

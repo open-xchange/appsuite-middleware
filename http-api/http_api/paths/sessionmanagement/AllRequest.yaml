@@ -1,0 +1,15 @@
+/sessionmanagement?action=all:
+  get:
+    operationId: all
+    tags:
+      - sessionmanagement
+    summary: Get all user's sessions
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+    responses:
+      200:
+        description: |
+          A JSON object containing the sessions that were found. In case of errors the responsible fields in the response are
+          filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/AllSessionsResponse"

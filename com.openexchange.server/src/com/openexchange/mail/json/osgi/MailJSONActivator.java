@@ -97,15 +97,20 @@ import com.openexchange.groupware.settings.tree.modules.mail.MailColorModePrefer
 import com.openexchange.groupware.settings.tree.modules.mail.MailFlaggedModePreferenceItem;
 import com.openexchange.groupware.settings.tree.modules.mail.MaliciousCheck;
 import com.openexchange.groupware.settings.tree.modules.mail.MaliciousListing;
+import com.openexchange.groupware.settings.tree.modules.mail.Whitelist;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.jslob.ConfigTreeEquivalent;
+import com.openexchange.mail.MailFetchListener;
+import com.openexchange.mail.MailFetchListenerRegistry;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.crypto.CryptographicAwareMailAccessFactory;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorage;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorageRegistry;
 import com.openexchange.mail.attachment.storage.MailAttachmentStorage;
 import com.openexchange.mail.attachment.storage.MailAttachmentStorageRegistry;
+import com.openexchange.mail.authenticity.CustomPropertyJsonHandler;
+import com.openexchange.mail.authenticity.GenericCustomPropertyJsonHandler;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.internal.MailCategoriesPreferenceItem;
 import com.openexchange.mail.compose.CompositionSpace;
@@ -237,8 +242,14 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         rememberTracker(exceptionHandlerTracker);
         MimeMailException.setExceptionHandlers(exceptionHandlerTracker);
 
+        RankingAwareNearRegistryServiceTracker<MailFetchListener> listing = new RankingAwareNearRegistryServiceTracker<MailFetchListener>(context, MailFetchListener.class);
+        MailFetchListenerRegistry.initInstance(listing);
+        rememberTracker(listing);
+        track(CustomPropertyJsonHandler.class);
+
         openTrackers();
 
+        registerService(CustomPropertyJsonHandler.class, new GenericCustomPropertyJsonHandler());
         registerService(ComposeHandlerRegistry.class, composeHandlerRegisty);
 
         DefaultMailAttachmentStorageRegistry.initInstance(context);
@@ -330,6 +341,9 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         AllMessagesFolder allMessagesFolder = new AllMessagesFolder(); // --> Statically registered via ConfigTree class
         registerService(ConfigTreeEquivalent.class, allMessagesFolder);
 
+        Whitelist whitelist = new Whitelist(); // --> Statically registered via ConfigTree class
+        registerService(ConfigTreeEquivalent.class, whitelist);
+
         DeleteDraftOnTransport deleteDraftOnTransport = new DeleteDraftOnTransport(); // --> Statically registered via ConfigTree class
         registerService(ConfigTreeEquivalent.class, deleteDraftOnTransport);
     }
@@ -341,6 +355,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         ServerServiceRegistry.getInstance().removeService(ComposeHandlerRegistry.class);
         DefaultMailAttachmentStorageRegistry.dropInstance();
         MailActionFactory.releaseActionFactory();
+        MailFetchListenerRegistry.releaseInstance();
         SERVICES.set(null);
     }
 

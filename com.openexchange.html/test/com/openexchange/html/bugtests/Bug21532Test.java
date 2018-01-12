@@ -64,11 +64,16 @@ public class Bug21532Test extends AbstractSanitizing {
      public void testConvertConditionalCommentsWihoutWhitespaces() throws Exception {
         String content = getHtmlService().getConformHTML("</head><body><![if !supportLists]><p>You should see this</p><![endif]></body></html>", "UTF-8");
 
-        String expected = "<!DOCTYPE html>\n" +
-            "<html><head>\n" +
-            "    <meta charset=\"UTF-8\">\n" +
-            "</head><body><p>You should see this</p></body></html>\n ";
+        String expected = "<!doctype html>\n" +
+            "<html>\n"
+            + "<head>\n" +
+            "<meta charset=\"UTF-8\">\n" +
+            "</head>\n"
+            + "<body>\n"
+            + "<p>You should see this</p>\n"
+            + "</body>\n"
+            + "</html>\n";
 
-        assertEquals("Unexpected return value", expected, content);
+        assertEquals("Unexpected return value", expected, trimLines(content));
     }
 }

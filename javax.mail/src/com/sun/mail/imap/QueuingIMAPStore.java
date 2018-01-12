@@ -343,7 +343,7 @@ public class QueuingIMAPStore extends IMAPStore {
                         return protocol;
                     }
                     // Create a new protocol instance
-                    protocol = new QueuedIMAPProtocol(name, host, port, session.getProperties(), isSSL, logger, q, this);
+                    protocol = new QueuedIMAPProtocol(name, host, port, user, session.getProperties(), isSSL, logger, q, this);
                     if (debug) {
                         final String msg = "\nQueueingIMAPStore.newIMAPProtocol(): Created new protocol instance " + protocol.toString() + "\n\t(total=" + q.getNewCount() + ")";
                         logger.fine(msg);

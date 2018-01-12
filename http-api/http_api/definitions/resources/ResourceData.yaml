@@ -21,6 +21,8 @@ properties:
   last_modified:
     type: string
     description: Date and time of the last modification.
+    readOnly: true
   last_modified_utc:
     type: string
     description: Timestamp of the last modification.
+    readOnly: true

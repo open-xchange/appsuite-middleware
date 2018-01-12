@@ -51,7 +51,9 @@ package com.openexchange.objectusecount.osgi;
 
 import com.openexchange.contact.ContactService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.objectusecount.ObjectUseCountService;
+import com.openexchange.objectusecount.groupware.ObjectUseCountDeleteListener;
 import com.openexchange.objectusecount.impl.ObjectUseCountServiceImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -80,6 +82,7 @@ public class ObjectUseCountActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         registerService(ObjectUseCountService.class, new ObjectUseCountServiceImpl(this));
+        registerService(DeleteListener.class, new ObjectUseCountDeleteListener());
     }
 
 }

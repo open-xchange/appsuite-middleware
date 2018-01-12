@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.file.storage.CacheAware;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
@@ -65,7 +66,7 @@ import com.openexchange.file.storage.composition.FolderID;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class IDManglingFolder implements TypeAware {
+public class IDManglingFolder implements TypeAware, CacheAware {
 
     /**
      * Create a new {@link FileStorageFolder} instance delegating all regular calls to the supplied folder, but returning the unique ID
@@ -137,6 +138,14 @@ public class IDManglingFolder implements TypeAware {
             return ((TypeAware) delegate).getType();
         }
         return FileStorageFolderType.NONE;
+    }
+
+    @Override
+    public boolean cacheable() {
+        if (delegate instanceof CacheAware) {
+            return ((CacheAware) delegate).cacheable();
+        }
+        return true;
     }
 
     @Override

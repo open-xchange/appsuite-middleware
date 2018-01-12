@@ -56,12 +56,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.jsieve.commands.MatchType;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
 import com.openexchange.mail.filter.json.v2.json.fields.HeaderTestField;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSONUtil;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserRegistry;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.TestCommandParser;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.TestCommandParserRegistry;
 import com.openexchange.mail.filter.json.v2.mapper.ArgumentUtil;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -75,7 +79,7 @@ import com.openexchange.tools.session.ServerSession;
 public class HeaderTestCommandParser extends AbstractSimplifiedMatcherAwareCommandParser {
 
     /**
-     * Initializes a new {@link HeaderTestCommandParser}.
+     * Initialises a new {@link HeaderTestCommandParser}.
      */
     public HeaderTestCommandParser(ServiceLookup services) {
         super(services, Commands.HEADER);
@@ -86,41 +90,40 @@ public class HeaderTestCommandParser extends AbstractSimplifiedMatcherAwareComma
         final List<Object> argList = new ArrayList<Object>();
         String matcher = CommandParserJSONUtil.getString(jsonObject, HeaderTestField.comparison.name(), Commands.HEADER.getCommandName());
         String normalizedMatcher = MatchType.getNormalName(matcher);
-        if (normalizedMatcher != null) {
-            if(StartsOrEndsWithMatcherUtil.isSimplifiedMatcher(normalizedMatcher)){
-                handleSimplifiedMatcher(normalizedMatcher, argList, jsonObject);
-            } else {
-                argList.add(ArgumentUtil.createTagArgument(normalizedMatcher));
-                argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, HeaderTestField.headers.name(), Commands.HEADER.getCommandName())));
-                argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, HeaderTestField.values.name(), Commands.HEADER.getCommandName())));
-            }
-            return NotTestCommandUtil.wrapTestCommand(new TestCommand(Commands.HEADER, argList, new ArrayList<TestCommand>()));
+
+        String comparison = Strings.isEmpty(normalizedMatcher) ? matcher : normalizedMatcher;
+        boolean wrap = MatchType.valueOf(comparison).getNotName().equals(matcher);
+
+        if (StartsOrEndsWithMatcherUtil.isSimplifiedMatcher(comparison)) {
+            handleSimplifiedMatcher(comparison, argList, jsonObject);
+        } else if (TestCommand.Commands.EXISTS.getCommandName().equals(comparison)) {
+            CommandParserRegistry<TestCommand, TestCommandParser<TestCommand>> parserRegistry = services.getService(TestCommandParserRegistry.class);
+            TestCommandParser<TestCommand> testCommandParser = parserRegistry.get(comparison);
+            TestCommand testCommand = testCommandParser.parse(jsonObject, session);
+            return wrap ? NotTestCommandUtil.wrapTestCommand(testCommand) : testCommand;
         } else {
-            if(StartsOrEndsWithMatcherUtil.isSimplifiedMatcher(matcher)){
-                handleSimplifiedMatcher(matcher, argList, jsonObject);
-            } else {
-                argList.add(ArgumentUtil.createTagArgument(matcher));
-                argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, HeaderTestField.headers.name(), Commands.HEADER.getCommandName())));
-                argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, HeaderTestField.values.name(), Commands.HEADER.getCommandName())));
-            }
-            return new TestCommand(Commands.HEADER, argList, new ArrayList<TestCommand>());
+            argList.add(ArgumentUtil.createTagArgument(comparison));
+            argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, HeaderTestField.headers.name(), Commands.HEADER.getCommandName())));
+            argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, HeaderTestField.values.name(), Commands.HEADER.getCommandName())));
         }
+
+        TestCommand testCommand = new TestCommand(Commands.HEADER, argList, new ArrayList<TestCommand>());
+        return wrap ? NotTestCommandUtil.wrapTestCommand(testCommand) : testCommand;
     }
 
     @Override
-    void handleSimplifiedMatcher(String matcher, List<Object> argList, JSONObject data) throws JSONException, OXException{
+    void handleSimplifiedMatcher(String matcher, List<Object> argList, JSONObject data) throws JSONException, OXException {
         StartsOrEndsWithMatcherUtil.insertMatchesMatcher(argList);
         argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(data, HeaderTestField.headers.name(), Commands.HEADER.getCommandName())));
         List<String> list = CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(data, HeaderTestField.values.name(), Commands.ENVELOPE.getCommandName()));
         StartsOrEndsWithMatcherUtil.insertValuesArgumentWithWildcards(list, matcher, argList);
     }
 
-
     @SuppressWarnings("unchecked")
     @Override
     public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
-        List<String> values = (List<String>) command.getArguments().get(command.getTagArguments().size()+1);
+        List<String> values = (List<String>) command.getArguments().get(command.getTagArguments().size() + 1);
         String matchType = command.getMatchType();
         MatchType type;
         if (matchType == null) {
@@ -130,11 +133,7 @@ public class HeaderTestCommandParser extends AbstractSimplifiedMatcherAwareComma
             matchType = matchType.substring(1);
             type = MatchType.valueOf(matchType);
             type = StartsOrEndsWithMatcherUtil.checkMatchType(type, values);
-            if(transformToNotMatcher){
-                jsonObject.put(HeaderTestField.comparison.name(), type.getNotName());
-            } else {
-                jsonObject.put(HeaderTestField.comparison.name(), type.name());
-            }
+            jsonObject.put(HeaderTestField.comparison.name(), transformToNotMatcher ? type.getNotName() : type.name());
         }
         jsonObject.put(HeaderTestField.headers.name(), new JSONArray((List<?>) command.getArguments().get(command.getTagArguments().size())));
         jsonObject.put(HeaderTestField.values.name(), new JSONArray(StartsOrEndsWithMatcherUtil.retrieveListForMatchType(values, type)));

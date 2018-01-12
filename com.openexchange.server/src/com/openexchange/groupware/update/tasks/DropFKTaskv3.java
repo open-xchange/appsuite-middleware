@@ -57,7 +57,6 @@ import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
 import com.openexchange.database.Databases;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -86,8 +85,7 @@ public final class DropFKTaskv3 extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        int cid = params.getContextId();
-        Connection con = Database.getNoTimeout(cid, true);
+        Connection con = params.getConnection();
         boolean rollback = false;
         try {
             Databases.startTransaction(con);
@@ -111,7 +109,6 @@ public final class DropFKTaskv3 extends UpdateTaskAdapter {
                 rollback(con);
             }
             autocommit(con);
-            Database.backNoTimeout(cid, true, con);
         }
     }
 

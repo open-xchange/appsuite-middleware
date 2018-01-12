@@ -2,10 +2,14 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange SessionD
 Bundle-SymbolicName: com.openexchange.sessiond
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.hazelcast.config,
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.cache,
+ com.google.common.collect,
+ com.hazelcast.config,
  com.hazelcast.core,
  com.hazelcast.instance,
  com.hazelcast.logging,
@@ -23,6 +27,7 @@ Import-Package: com.hazelcast.config,
  com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.groupware.contexts,
+ com.openexchange.groupware.ldap,
  com.openexchange.hazelcast.configuration,
  com.openexchange.hazelcast.serialization,
  com.openexchange.java,
@@ -38,10 +43,16 @@ Import-Package: com.hazelcast.config,
  com.openexchange.sessionstorage.hazelcast.serialization,
  com.openexchange.threadpool,
  com.openexchange.timer,
+ com.openexchange.user,
  gnu.trove,
+ gnu.trove.iterator,
+ gnu.trove.list,
+ gnu.trove.list.array,
  gnu.trove.map,
  gnu.trove.map.hash,
  gnu.trove.procedure,
+ gnu.trove.set,
+ gnu.trove.set.hash,
  javax.management,
  org.apache.commons.lang,
  org.apache.commons.logging,

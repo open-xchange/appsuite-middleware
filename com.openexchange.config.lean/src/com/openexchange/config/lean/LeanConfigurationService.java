@@ -49,6 +49,7 @@
 
 package com.openexchange.config.lean;
 
+import java.util.Map;
 import com.openexchange.osgi.annotation.SingletonService;
 
 /**
@@ -159,4 +160,135 @@ public interface LeanConfigurationService {
      * @return The {@link Long} value of the property
      */
     long getLongProperty(int userId, int contextId, Property property);
+
+    /**
+     * Fetches the string value of the {@link Property}. If the property is not found, then the default value
+     * of that property is returned.
+     *
+     * @param property The {@link Property} to fetch
+     * @param optionals A {@link Map} containing optional path parameters. The parameters will be used to replace
+     *                  optional parameters in the full qualified name of the property with the value stored for
+     *                  each path parameter.
+     * @return The string value of the property
+     */
+    String getProperty(Property property, Map<String, String> optionals);
+
+    /**
+     * Fetches the integer value of the {@link Property}. If the property is not found, then the default value
+     * of that property is returned.
+     *
+     * @param property The {@link Property} to fetch
+     * @param optionals A {@link Map} containing optional path parameters. The parameters will be used to replace
+     *                  optional parameters in the full qualified name of the property with the value stored for
+     *                  each path parameter.
+     * 
+     * @return The integer value of the property
+     */
+    int getIntProperty(Property property, Map<String, String> optionals);
+
+    /**
+     * Fetches the boolean value of the {@link Property}. If the property is not found, then the default value
+     * of that property is returned.
+     *
+     * @param property The {@link Property} to fetch
+     * @param optionals A {@link Map} containing optional path parameters. The parameters will be used to replace
+     *                  optional parameters in the full qualified name of the property with the value stored for
+     *                  each path parameter.
+     * @return The boolean value of the property
+     */
+    boolean getBooleanProperty(Property property, Map<String, String> optionals);
+
+    /**
+     * Fetches the float value of the {@link Property}. If the property is not found, then the default value
+     * of that property is returned.
+     *
+     * @param property The {@link Property} to fetch
+     * @param optionals A {@link Map} containing optional path parameters. The parameters will be used to replace
+     *                  optional parameters in the full qualified name of the property with the value stored for
+     *                  each path parameter.
+     * @return The float value of the property
+     */
+    float getFloatProperty(Property property, Map<String, String> optionals);
+
+    /**
+     * Fetches the long value of the {@link Property}. If the property is not found, then the default value
+     * of that property is returned.
+     *
+     * @param property The {@link Property} to fetch
+     * @param optionals A {@link Map} containing optional path parameters. The parameters will be used to replace
+     *                  optional parameters in the full qualified name of the property with the value stored for
+     *                  each path parameter.
+     * @return The long value of the property
+     */
+    long getLongProperty(Property property, Map<String, String> optionals);
+
+    /**
+     * Fetches the {@link String} value of specified {@link Property} for
+     * the specified user in the specified context via ConfigCascade
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param property The {@link Property} name to fetch
+     * @param optionals A {@link Map} containing optional path parameters. The parameters will be used to replace
+     *                  optional parameters in the full qualified name of the property with the value stored for
+     *                  each path parameter.
+     * @return The {@link String} value of the property
+     */
+    String getProperty(int userId, int contextId, Property property, Map<String, String> optionals);
+
+    /**
+     * Fetches the {@link Integer} value of specified {@link Property} for
+     * the specified user in the specified context via ConfigCascade
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param property The {@link Property} name to fetch
+     * @param optionals A {@link Map} containing optional path parameters. The parameters will be used to replace
+     *                  optional parameters in the full qualified name of the property with the value stored for
+     *                  each path parameter.
+     * @return The {@link Integer} value of the property
+     */
+    int getIntProperty(int userId, int contextId, Property property, Map<String, String> optionals);
+
+    /**
+     * Fetches the {@link Boolean} value of specified {@link Property} for
+     * the specified user in the specified context via ConfigCascade
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param property The {@link Property} name to fetch
+     * @param optionals A {@link Map} containing optional path parameters. The parameters will be used to replace
+     *                  optional parameters in the full qualified name of the property with the value stored for
+     *                  each path parameter.
+     * @return The {@link Boolean} value of the property
+     */
+    boolean getBooleanProperty(int userId, int contextId, Property property, Map<String, String> optionals);
+
+    /**
+     * Fetches the {@link Float} value of specified {@link Property} for
+     * the specified user in the specified context via ConfigCascade
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param property The {@link Property} name to fetch
+     * @param optionals A {@link Map} containing optional path parameters. The parameters will be used to replace
+     *                  optional parameters in the full qualified name of the property with the value stored for
+     *                  each path parameter.
+     * @return The {@link Float} value of the property
+     */
+    float getFloatProperty(int userId, int contextId, Property property, Map<String, String> optionals);
+
+    /**
+     * Fetches the {@link Long} value of specified {@link Property} for
+     * the specified user in the specified context via ConfigCascade
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param property The {@link Property} name to fetch
+     * @param optionals A {@link Map} containing optional path parameters. The parameters will be used to replace
+     *                  optional parameters in the full qualified name of the property with the value stored for
+     *                  each path parameter.
+     * @return The {@link Long} value of the property
+     */
+    long getLongProperty(int userId, int contextId, Property property, Map<String, String> optionals);
 }

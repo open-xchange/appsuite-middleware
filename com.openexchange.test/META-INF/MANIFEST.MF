@@ -4,7 +4,7 @@ Bundle-Name: Test resources
 Bundle-SymbolicName: com.openexchange.test
 Bundle-Version: 6.21.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
  testlib/jchronic-0.2.3.jar,
  testlib/junit-4.12.jar,
@@ -47,6 +47,9 @@ Export-Package: junit.extensions,
  junitx.framework,
  junitx.tool,
  junitx.util,
+ org.hamcrest,
+ org.hamcrest.core,
+ org.hamcrest.internal,
  org.junit,
  org.junit.contrib.java.lang.system,
  org.junit.experimental,

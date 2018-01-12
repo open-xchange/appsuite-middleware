@@ -53,6 +53,7 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountManager;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.rdb.internal.CachingFileStorageAccountStorage;
 import com.openexchange.session.Session;
@@ -116,7 +117,11 @@ public class RdbFileStorageAccountManager implements FileStorageAccountManager {
 
     @Override
     public FileStorageAccount getAccount(final String id, final Session session) throws OXException {
-        return CACHE.getAccount(serviceId, Integer.parseInt(id), session);
+        try {
+            return CACHE.getAccount(serviceId, Integer.parseInt(id), session);
+        } catch (NumberFormatException e) {
+            throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(id, serviceId, session.getUserId(), session.getContextId());
+        }
     }
 
     @Override

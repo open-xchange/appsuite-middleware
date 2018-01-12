@@ -50,12 +50,10 @@
 package com.openexchange.admin.storage.sqlStorage;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.database.CreateTableService;
-
 
 /**
  * {@link CreateTableRegistry}
@@ -68,13 +66,14 @@ public class CreateTableRegistry {
 
     private static final CreateTableRegistry SINGLETON = new CreateTableRegistry();
 
-    private final Set<CreateTableService> createTables = new HashSet<CreateTableService>();
+    private final ConcurrentMap<CreateTableService, Object> createTables;
 
     /**
      * Prevent instantiation.
      */
     private CreateTableRegistry() {
         super();
+        createTables = new ConcurrentHashMap<CreateTableService, Object>(128, 0.9F, 1);
     }
 
     public static CreateTableRegistry getInstance() {
@@ -82,20 +81,18 @@ public class CreateTableRegistry {
     }
 
     public void addCreateTable(CreateTableService service) {
-        if (!createTables.add(service)) {
+        if (null != createTables.putIfAbsent(service, service)) {
             LOG.warn("CreateTableService {} found twice.", service.getClass().getName());
         }
     }
 
     public void removeCreateTable(CreateTableService service) {
-        if (!createTables.remove(service)) {
+        if (null == createTables.remove(service)) {
             LOG.warn("Unkown CreateTableService {} removed.", service.getClass().getName());
         }
     }
 
     public List<CreateTableService> getList() {
-        List<CreateTableService> tmp = new ArrayList<CreateTableService>(createTables.size());
-        tmp.addAll(createTables);
-        return Collections.unmodifiableList(tmp);
+        return new ArrayList<CreateTableService>(createTables.keySet());
     }
 }

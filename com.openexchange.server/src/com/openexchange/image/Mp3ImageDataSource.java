@@ -230,16 +230,27 @@ public final class Mp3ImageDataSource implements ImageDataSource {
         if (imageBytes == null) {
             LOG.debug("Requested a non-existing image in MP3 file: file-id={} folder={} context={} session-user={}. Returning an empty image as fallback.", fileId, folderId, session.getContextId(), session.getUserId());
             DataProperties properties = new DataProperties();
-            properties.put(DataProperties.PROPERTY_CONTENT_TYPE, mimeType);
+            properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
             properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
+            properties.put(DataProperties.PROPERTY_NAME, "image.jpg");
+            return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
+        }
+
+        if (false == com.openexchange.ajax.helper.ImageUtils.isValidImage(imageBytes)) {
+            LOG.debug("Detected non-image data in MP3 file: file-id={} folder={} context={} session-user={}. Returning an empty image as fallback.", fileId, folderId, session.getContextId(), session.getUserId());
+            DataProperties properties = new DataProperties();
+            properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
+            properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
+            properties.put(DataProperties.PROPERTY_NAME, "image.jpg");
             return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
         }
 
         if (com.openexchange.ajax.helper.ImageUtils.isSvg(imageBytes)) {
             LOG.debug("Detected a possibly harmful SVG image in MP3 file: file-id={} folder={} context={} session-user={}. Returning an empty image as fallback.", fileId, folderId, session.getContextId(), session.getUserId());
             DataProperties properties = new DataProperties();
-            properties.put(DataProperties.PROPERTY_CONTENT_TYPE, mimeType);
+            properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
             properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
+            properties.put(DataProperties.PROPERTY_NAME, "image.jpg");
             return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
         }
 

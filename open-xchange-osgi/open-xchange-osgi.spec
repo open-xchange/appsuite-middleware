@@ -2,23 +2,18 @@
 
 Name:          open-xchange-osgi
 BuildArch:     noarch
-#!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
 %else
 BuildRequires: ant-nodeps
 %endif
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+%if 0%{?suse_version}
+BuildRequires: java-1_8_0-openjdk-devel
 %else
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires: java-1_7_0-openjdk-devel
-%else
-BuildRequires: java-devel >= 1.7.0
-%endif
+BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -31,10 +26,10 @@ Provides:      open-xchange-common = %{version}
 Obsoletes:     open-xchange-common < %{version}
 Provides:      open-xchange-activation = %{version}
 Obsoletes:     open-xchange-activation < %{version}
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-Requires:      java7
+%if 0%{?rhel_version}
+Requires:      java-1.8.0-openjdk-headless
 %else
-Requires:      java >= 1.7.0
+Requires:      java-1_8_0-openjdk-headless
 %endif
 # No ibm java on RHEL and on SLE, please
 Conflicts:     java-ibm
@@ -62,6 +57,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %files
 %defattr(-,root,root)
+%dir /opt/open-xchange/
 %dir %attr(750,open-xchange,open-xchange) /opt/open-xchange/osgi
 %dir /opt/open-xchange/bundles/
 /opt/open-xchange/bundles/*
@@ -69,6 +65,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Thu Oct 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.10.0 release
 * Fri May 19 2017 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Marcus Klein <marcus.klein@open-xchange.com>

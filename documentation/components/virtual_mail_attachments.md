@@ -212,19 +212,19 @@ userdb {
 Deploying the Open-Xchange Virtual Mail Attachments Connector simply requires to install the `open-xchange-file-storage-mail` package.
 
 # Configuration
-After the package is deployed, an administrator is able to configure the Open-Xchange Virtual Mail Attachments Connector through `/opt/open-xchange/etc/filestorage-maildrive.properties` file. All configuration options are config-cascade capable. See [mail drive configuration](https://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#mode=features&feature=Mail Drive) for more infos.
+After the package is deployed, an administrator is able to configure the Open-Xchange Virtual Mail Attachments Connector through `/opt/open-xchange/etc/filestorage-maildrive.properties` file. All configuration options are config-cascade capable. See [mail drive configuration](/components/middleware/config{{ site.baseurl }}/index.html#mode=features&feature=Mail Drive) for more infos.
 
 ## Enable/disable
-Enabling or disabling the Open-Xchange Virtual Mail Attachments Connector is managed by property [com.openexchange.file.storage.mail.enabled](https://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.file.storage.mail.enabled).
+Enabling or disabling the Open-Xchange Virtual Mail Attachments Connector is managed by property [com.openexchange.file.storage.mail.enabled](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.file.storage.mail.enabled).
 
 ## Folder paths
 As last step, the paths to the folders need to be set:
 
- - [com.openexchange.file.storage.mail.fullNameAll](https://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.file.storage.mail.fullNameAll)  
+ - [com.openexchange.file.storage.mail.fullNameAll](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.file.storage.mail.fullNameAll)  
   Specifies the path to the virtual folder containing all messages, which is used to list the file attachment of all messages in primary account.
- - [com.openexchange.file.storage.mail.fullNameReceived](https://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.file.storage.mail.fullNameReceived)  
+ - [com.openexchange.file.storage.mail.fullNameReceived](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.file.storage.mail.fullNameReceived)  
   Specifies the path to the INBOX folder, which is used to list the file attachment of received messages in primary account.
- - [com.openexchange.file.storage.mail.fullNameSent](https://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.file.storage.mail.fullNameSent)  
+ - [com.openexchange.file.storage.mail.fullNameSent](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.file.storage.mail.fullNameSent)  
   Specifies the path to the standard sent folder, which is used to list the file attachment of sent messages in primary account.
 
 ## Example

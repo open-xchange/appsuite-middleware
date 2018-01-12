@@ -77,7 +77,7 @@ import java.util.Map;
  */
 public abstract class JDBC4ResultSetWrapper implements ResultSet {
 
-    private final ResultSet delegate;
+    protected final ResultSet delegate;
 
     private final JDBC4StatementWrapper stmt;
 

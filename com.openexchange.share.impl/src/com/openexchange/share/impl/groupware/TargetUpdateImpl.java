@@ -50,6 +50,8 @@
 package com.openexchange.share.impl.groupware;
 
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -58,10 +60,14 @@ import java.util.Map.Entry;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.AbstractFolder;
+import com.openexchange.folderstorage.FolderPermissionType;
+import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.osgi.Tools;
@@ -69,6 +75,9 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.core.HandlerParameters;
+import com.openexchange.share.core.ModuleHandler;
+import com.openexchange.share.core.groupware.FolderTargetProxy;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.user.UserService;
 
@@ -82,7 +91,7 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
 
     private final HandlerParameters parameters;
 
-    public TargetUpdateImpl(Session session, Connection writeCon, ServiceLookup services, ModuleHandlerRegistry handlers) throws OXException {
+    public TargetUpdateImpl(Session session, Connection writeCon, ServiceLookup services, ModuleExtensionRegistry<ModuleHandler> handlers) throws OXException {
         super(services, handlers);
         parameters = new HandlerParameters();
         parameters.setSession(session);
@@ -113,7 +122,8 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
     protected void updateFolders(List<TargetProxy> proxies) throws OXException {
         FolderService folderService = getFolderService();
         for (TargetProxy proxy : proxies) {
-            UserizedFolder folder = ((FolderTargetProxy) proxy).getFolder();
+            FolderTargetProxy folderTargetProxy = ((FolderTargetProxy) proxy);
+            UserizedFolder folder = folderTargetProxy.getFolder();
             AbstractFolder toUpdate = new AbstractFolder() {
 
                 private static final long serialVersionUID = -842650996626709735L;
@@ -127,7 +137,78 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
             toUpdate.setPermissions(folder.getPermissions());
             toUpdate.setID(folder.getID());
             folderService.updateFolder(toUpdate, folder.getLastModifiedUTC(), parameters.getSession(), parameters.getFolderServiceDecorator());
+
+            if (folder.getContentType().getModule() == FolderObject.INFOSTORE) {
+                // Add permission to sub folders
+                FolderResponse<UserizedFolder[]> folderObjects = folderService.getSubfolders(folder.getTreeID(), folder.getID(), true, parameters.getSession(), parameters.getFolderServiceDecorator());
+
+                List<Permission> appliedPermissions = folderTargetProxy.getAppliedPermissions();
+                List<Permission> removedPermissions = folderTargetProxy.getRemovedPermissions();
+
+                FolderServiceDecorator folderServiceDecorator;
+                try {
+                    folderServiceDecorator = parameters.getFolderServiceDecorator().clone();
+                } catch (CloneNotSupportedException e) {
+                    // should never occur
+                    folderServiceDecorator = parameters.getFolderServiceDecorator();
+                }
+                folderServiceDecorator.put("permissions", "inherit");
+                for (UserizedFolder fol : folderObjects.getResponse()) {
+                    prepareInheritedPermissions(fol, appliedPermissions, removedPermissions);
+                    folderService.updateFolder(fol, fol.getLastModifiedUTC(), parameters.getSession(), folderServiceDecorator);
+                }
+            }
         }
+    }
+
+    private static UserizedFolder prepareInheritedPermissions(UserizedFolder folder, List<Permission> added, List<Permission> removed) {
+        Permission[] originalPermissions = folder.getPermissions();
+        if (null == originalPermissions) {
+            originalPermissions = new Permission[0];
+        }
+
+        List<Permission> filtered = new ArrayList<>(added.size());
+        for (Permission add : added) {
+            if(add.getType() == FolderPermissionType.LEGATOR) {
+                add.setPermissionLegator(folder.getParentID());
+                add.setType(FolderPermissionType.INHERITED);
+                filtered.add(add);
+            }
+        }
+
+        for (Permission rem : removed) {
+            if(rem.getType() == FolderPermissionType.LEGATOR) {
+                rem.setPermissionLegator(String.valueOf(folder.getParentID()));
+            }
+            rem.setType(FolderPermissionType.INHERITED);
+        }
+
+        List<Permission> permissions = new ArrayList<>(originalPermissions.length + filtered.size());
+        Collections.addAll(permissions, originalPermissions);
+        permissions.addAll(filtered);
+        permissions = removePermissions(permissions, removed);
+        folder.setPermissions(permissions.toArray(new Permission[permissions.size()]));
+        return folder;
+    }
+
+    protected static List<Permission> removePermissions(List<Permission> origPermissions, List<Permission> toRemove) {
+        if (origPermissions == null || origPermissions.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Permission> newPermissions = new ArrayList<Permission>(origPermissions);
+        Iterator<Permission> it = newPermissions.iterator();
+        while (it.hasNext()) {
+            Permission permission = it.next();
+            for (Permission removable : toRemove) {
+                if (permission.isGroup() == removable.isGroup() && permission.getEntity() == removable.getEntity()) {
+                    it.remove();
+                    break;
+                }
+            }
+        }
+
+        return newPermissions;
     }
 
     @Override
@@ -193,7 +274,7 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
                     folderTarget.getFolder(),
                     parameters.getSession(),
                     parameters.getFolderServiceDecorator());
-                FolderTargetProxy proxy = new FolderTargetProxy(folderTarget.getModule(), folder);
+                FolderTargetProxy proxy = new FolderTargetProxy(folderTarget, folder);
                 if (checkPermissions && !canShareFolder(folder)) {
                     throw ShareExceptionCodes.NO_SHARE_PERMISSIONS.create(
                         parameters.getUser().getId(),

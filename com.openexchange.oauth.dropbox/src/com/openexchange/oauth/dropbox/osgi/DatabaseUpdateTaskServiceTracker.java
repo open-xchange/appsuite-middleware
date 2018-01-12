@@ -67,7 +67,7 @@ import com.openexchange.oauth.dropbox.internal.groupware.OAuthDropboxDropTokensT
  */
 public class DatabaseUpdateTaskServiceTracker implements ServiceTrackerCustomizer<DatabaseService, DatabaseService> {
 
-    private BundleContext bundleContext;
+    private final BundleContext bundleContext;
 
     private ServiceRegistration<UpdateTaskProviderService> registration;
 
@@ -79,41 +79,26 @@ public class DatabaseUpdateTaskServiceTracker implements ServiceTrackerCustomize
         this.bundleContext = bundleContext;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
-     */
     @Override
     public DatabaseService addingService(ServiceReference<DatabaseService> reference) {
-        final DatabaseService databaseService = bundleContext.getService(reference);
+        DatabaseService databaseService = bundleContext.getService(reference);
         registration = bundleContext.registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
             @Override
             public Collection<? extends UpdateTaskV2> getUpdateTasks() {
-                return Arrays.asList(new OAuthDropboxDropTokensTask(databaseService));
+                return Arrays.asList(new OAuthDropboxDropTokensTask());
             }
 
         }, null);
         return databaseService;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     @Override
     public void modifiedService(ServiceReference<DatabaseService> reference, DatabaseService service) {
         // Nothing to do
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
-     */
     @Override
     public void removedService(ServiceReference<DatabaseService> reference, DatabaseService service) {
         registration.unregister();

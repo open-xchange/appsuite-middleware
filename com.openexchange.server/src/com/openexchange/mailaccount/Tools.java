@@ -54,7 +54,6 @@ import static com.openexchange.java.Strings.toLowerCase;
 import java.sql.Connection;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -80,7 +79,6 @@ import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-
 
 /**
  * {@link Tools} - A utility class for folder storage processing.
@@ -424,72 +422,72 @@ public final class Tools {
     private static String getName(final int index, final MailAccount primaryAccount, final Locale locale, final Policy policy) {
         String retval;
         switch (index) {
-        case StorageUtility.INDEX_DRAFTS:
-            if (Policy.BY_PRIMARY_ACCOUNT == policy) {
-                retval = primaryAccount.getDrafts();
-                if (null == retval) {
-                    retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getDrafts();
+            case StorageUtility.INDEX_DRAFTS:
+                if (Policy.BY_PRIMARY_ACCOUNT == policy) {
+                    retval = primaryAccount.getDrafts();
+                    if (null == retval) {
+                        retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getDrafts();
+                    }
+                } else {
+                    retval = StringHelper.valueOf(locale).getString(MailStrings.DRAFTS);
                 }
-            } else {
-                retval = StringHelper.valueOf(locale).getString(MailStrings.DRAFTS);
-            }
-            break;
-        case StorageUtility.INDEX_SENT:
-            if (Policy.BY_PRIMARY_ACCOUNT == policy) {
-                retval = primaryAccount.getSent();
-                if (null == retval) {
-                    retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getSent();
+                break;
+            case StorageUtility.INDEX_SENT:
+                if (Policy.BY_PRIMARY_ACCOUNT == policy) {
+                    retval = primaryAccount.getSent();
+                    if (null == retval) {
+                        retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getSent();
+                    }
+                } else {
+                    retval = StringHelper.valueOf(locale).getString(MailStrings.SENT);
                 }
-            } else {
-                retval = StringHelper.valueOf(locale).getString(MailStrings.SENT);
-            }
-            break;
-        case StorageUtility.INDEX_SPAM:
-            if (Policy.BY_PRIMARY_ACCOUNT == policy) {
-                retval = primaryAccount.getSpam();
-                if (null == retval) {
-                    retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getSpam();
+                break;
+            case StorageUtility.INDEX_SPAM:
+                if (Policy.BY_PRIMARY_ACCOUNT == policy) {
+                    retval = primaryAccount.getSpam();
+                    if (null == retval) {
+                        retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getSpam();
+                    }
+                } else {
+                    retval = StringHelper.valueOf(locale).getString(MailStrings.SPAM);
                 }
-            } else {
-                retval = StringHelper.valueOf(locale).getString(MailStrings.SPAM);
-            }
-            break;
-        case StorageUtility.INDEX_TRASH:
-            if (Policy.BY_PRIMARY_ACCOUNT == policy) {
-                retval = primaryAccount.getTrash();
-                if (null == retval) {
-                    retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getTrash();
+                break;
+            case StorageUtility.INDEX_TRASH:
+                if (Policy.BY_PRIMARY_ACCOUNT == policy) {
+                    retval = primaryAccount.getTrash();
+                    if (null == retval) {
+                        retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getTrash();
+                    }
+                } else {
+                    retval = StringHelper.valueOf(locale).getString(MailStrings.TRASH);
                 }
-            } else {
-                retval = StringHelper.valueOf(locale).getString(MailStrings.TRASH);
-            }
-            break;
-        case StorageUtility.INDEX_CONFIRMED_SPAM:
-            if (Policy.BY_PRIMARY_ACCOUNT == policy) {
-                retval = primaryAccount.getConfirmedSpam();
-                if (null == retval) {
-                    retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getConfirmedSpam();
+                break;
+            case StorageUtility.INDEX_CONFIRMED_SPAM:
+                if (Policy.BY_PRIMARY_ACCOUNT == policy) {
+                    retval = primaryAccount.getConfirmedSpam();
+                    if (null == retval) {
+                        retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getConfirmedSpam();
+                    }
+                } else {
+                    // Special handling for confirmed-spam; see AdminUser.properties: no translation for that folder
+                    retval = "confirmed-spam";
+                    // retval = StringHelper.valueOf(locale).getString(MailStrings.CONFIRMED_SPAM);
                 }
-            } else {
-                // Special handling for confirmed-spam; see AdminUser.properties: no translation for that folder
-                retval = "confirmed-spam";
-                // retval = StringHelper.valueOf(locale).getString(MailStrings.CONFIRMED_SPAM);
-            }
-            break;
-        case StorageUtility.INDEX_CONFIRMED_HAM:
-            if (Policy.BY_PRIMARY_ACCOUNT == policy) {
-                retval = primaryAccount.getConfirmedHam();
-                if (null == retval) {
-                    retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getConfirmedHam();
+                break;
+            case StorageUtility.INDEX_CONFIRMED_HAM:
+                if (Policy.BY_PRIMARY_ACCOUNT == policy) {
+                    retval = primaryAccount.getConfirmedHam();
+                    if (null == retval) {
+                        retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getConfirmedHam();
+                    }
+                } else {
+                    // Special handling for confirmed-ham; see AdminUser.properties: no translation for that folder
+                    retval = "confirmed-ham";
+                    // retval = StringHelper.valueOf(locale).getString(MailStrings.CONFIRMED_HAM);
                 }
-            } else {
-                // Special handling for confirmed-ham; see AdminUser.properties: no translation for that folder
-                retval = "confirmed-ham";
-                // retval = StringHelper.valueOf(locale).getString(MailStrings.CONFIRMED_HAM);
-            }
-            break;
-        default:
-            throw new IllegalArgumentException("Unknown index value: " + index);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown index value: " + index);
         }
         return retval;
     }
@@ -621,20 +619,4 @@ public final class Tools {
         }
         return fullName.substring(fullName.lastIndexOf(separator) + 1);
     }
-
-    /**
-     * Validates specified account description.
-     *
-     * @param account The account to check
-     * @param session The associated session
-     * @param ignoreInvalidTransport
-     * @param warnings The warnings list
-     * @param errorOnDenied <code>true</code> to throw an error in case account description is denied (either by host or port); otherwise <code>false</code>
-     * @return <code>true</code> for successful validation; otherwise <code>false</code>
-     * @throws OXException If an severe error occurs
-     */
-    public static Boolean actionValidateBoolean(MailAccount account, ServerSession session, boolean ignoreInvalidTransport, List<OXException> warnings, boolean errorOnDenied) throws OXException {
-        return com.openexchange.mailaccount.json.actions.StatusAction.actionValidateBoolean(account, session, ignoreInvalidTransport, warnings, errorOnDenied);
-    }
-
 }

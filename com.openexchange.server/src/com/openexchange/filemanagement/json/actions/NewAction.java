@@ -52,6 +52,7 @@ package com.openexchange.filemanagement.json.actions;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 import org.json.JSONArray;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.helper.DownloadUtility;
@@ -68,6 +69,7 @@ import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.imagetransformation.ImageTransformationDeniedIOException;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -88,6 +90,10 @@ public final class NewAction implements AJAXActionService {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+        ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+        if (null == management) {
+            throw ServiceExceptionCode.absentService(ManagedFileManagement.class);
+        }
         long maxSize = sysconfMaxUpload();
         if (!requestData.hasUploads(-1, maxSize > 0 ? maxSize : -1L)) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("Not an upload request.");
@@ -104,11 +110,11 @@ public final class NewAction implements AJAXActionService {
         /*
          * Iterate & store uploaded files
          */
-        ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
-        JSONArray jArray = new JSONArray();
+        List<UploadFile> uploadFiles = upload.getUploadFiles();
+        JSONArray jArray = new JSONArray(uploadFiles.size());
         boolean error = true;
         try {
-            for (UploadFile uploadFile : upload.getUploadFiles()) {
+            for (UploadFile uploadFile : uploadFiles) {
                 // Check file item
                 ContentType ct = new ContentType(uploadFile.getContentType());
                 if (!checkFileType(fileTypeFilter, ct)) {

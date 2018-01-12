@@ -115,7 +115,23 @@ public enum Client {
     /**
      * The client for WebDav vCard: <code>"WEBDAV_VCARD"</code>
      */
-    WEBDAV_VCARD("WEBDAV_VCARD", "The client identifier for WebDav vCard");
+    WEBDAV_VCARD("WEBDAV_VCARD", "The client identifier for WebDav vCard"),
+    /**
+     * The client identifier for Windows Drive client: <code>"OpenXchange.HTTPClient.OXDrive"</code>
+     */
+    DRIVE_WINDOWS("OpenXchange.HTTPClient.OXDrive", "The client identifier for Windows Drive client"),
+    /**
+     * The client identifier for Windows Drive client: <code>"OSX.OXDrive"</code>
+     */
+    DRIVE_OSX("OSX.OXDrive", "The client identifier for OSX Drive client"),
+    /**
+     * The client identifier for Windows Drive client: <code>"OpenXchange.iosClient.OXDrive"</code>
+     */
+    DRIVE_IOS("OpenXchange.iosClient.OXDrive", "The client identifier for iOS Drive client"),
+    /**
+     * The client identifier for Windows Drive client: <code>"OpenXchange.Android.OXDrive"</code>
+     */
+    DRIVE_ANDROID("OpenXchange.Android.OXDrive", "The client identifier for Android Drive client");
 
     private final String clientId;
     private final String description;

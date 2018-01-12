@@ -100,8 +100,8 @@ public class CountingIMAPProtocol extends IMAPProtocol {
      * @param props The properties object used by this protocol
      * @param logger The logger
      */
-    public CountingIMAPProtocol(final String name, final String host, final int port, final Properties props, final boolean isSSL, final MailLogger logger) throws IOException, ProtocolException {
-        super(name, host, port, props, isSSL, logger);
+    public CountingIMAPProtocol(String name, String host, int port, String user, Properties props, boolean isSSL, MailLogger logger) throws IOException, ProtocolException {
+        super(name, host, port, user, props, isSSL, logger);
     }
 
     @Override

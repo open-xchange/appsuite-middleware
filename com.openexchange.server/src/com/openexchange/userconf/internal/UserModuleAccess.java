@@ -92,6 +92,7 @@ public class UserModuleAccess implements Serializable, Cloneable {
 
     private boolean Webdav = true;
 
+    /** @deprecated */
     private boolean WebdavXml = true;
 
     private boolean Webmail = true;
@@ -424,10 +425,12 @@ public class UserModuleAccess implements Serializable, Cloneable {
         this.Webdav = val;
     }
 
+    /** @deprecated */
     public boolean getWebdavXml() {
         return WebdavXml;
     }
 
+    /** @deprecated */
     public void setWebdavXml(final boolean val) {
         this.WebdavXml = val;
     }

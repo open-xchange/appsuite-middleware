@@ -80,7 +80,7 @@ public class RemoveFileSolver implements ProblemSolver {
                         LOG.info("Deleted identifier: {}", identifier);
                     }
                 } catch (Exception e) {
-                    // Ignore
+                    LOG.debug("{}", e.getMessage(), e);
                 }
             }
             /*
@@ -88,7 +88,7 @@ public class RemoveFileSolver implements ProblemSolver {
              */
             storage.recreateStateFile();
         } catch (final OXException e) {
-            LOG.error("", e);
+            LOG.error("{}", e.getMessage(), e);
         }
     }
 

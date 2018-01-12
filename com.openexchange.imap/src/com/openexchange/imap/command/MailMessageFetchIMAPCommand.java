@@ -77,21 +77,26 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.ParameterList;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPServerInfo;
+import com.openexchange.imap.services.Services;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.mime.utils.MimeStorageUtility;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPTextPreviewProvider;
 import com.sun.mail.imap.protocol.BODY;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 import com.sun.mail.imap.protocol.ENVELOPE;
@@ -101,6 +106,7 @@ import com.sun.mail.imap.protocol.INTERNALDATE;
 import com.sun.mail.imap.protocol.Item;
 import com.sun.mail.imap.protocol.RFC822DATA;
 import com.sun.mail.imap.protocol.RFC822SIZE;
+import com.sun.mail.imap.protocol.SNIPPET;
 import com.sun.mail.imap.protocol.UID;
 import com.sun.mail.imap.protocol.X_REAL_UID;
 
@@ -137,6 +143,8 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
     private final Set<FetchItemHandler> lastHandlers;
     private final TLongIntHashMap uid2index;
     private final TIntIntHashMap seqNum2index;
+    private final IMAPTextPreviewProvider.Mode textPreviewMode;
+    private final IMAPTextPreviewProvider textPreviewProvider;
 
     /**
      * Initializes a new {@link MailMessageFetchIMAPCommand}.
@@ -157,6 +165,17 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
         accountId = null == serverInfo ? 0 : serverInfo.getAccountId();
         lastHandlers = new HashSet<FetchItemHandler>();
+        textPreviewProvider = Services.optService(IMAPTextPreviewProvider.class);
+        if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
+            textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.ONLY_IF_AVAILABLE;
+        } else if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS)) {
+            textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.REQUIRE;
+        } else {
+            this.textPreviewMode = null;
+        }
+        if (null != textPreviewMode) {
+            fp.add(UIDFolder.FetchProfileItem.UID);
+        }
         command = getFetchCommand(isRev1, fp, false, serverInfo);
         uid = false;
         length = seqNums.length;
@@ -191,6 +210,17 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
         accountId = null == serverInfo ? 0 : serverInfo.getAccountId();
         lastHandlers = new HashSet<FetchItemHandler>();
+        textPreviewProvider = Services.optService(IMAPTextPreviewProvider.class);
+        if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
+            textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.ONLY_IF_AVAILABLE;
+        } else if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS)) {
+            textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.REQUIRE;
+        } else {
+            textPreviewMode = null;
+        }
+        if (null != textPreviewMode) {
+            fp.add(UIDFolder.FetchProfileItem.UID);
+        }
         command = getFetchCommand(isRev1, fp, false, serverInfo);
         uid = false;
         length = messageCount;
@@ -228,6 +258,17 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         seqNum2index = null;
         for (int i = 0; i < length; i++) {
             uid2index.put(uids[i], i);
+        }
+        textPreviewProvider = Services.optService(IMAPTextPreviewProvider.class);
+        if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
+            textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.ONLY_IF_AVAILABLE;
+        } else if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS)) {
+            textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.REQUIRE;
+        } else {
+            textPreviewMode = null;
+        }
+        if (null != textPreviewMode) {
+            fp.add(UIDFolder.FetchProfileItem.UID);
         }
         if (length == messageCount) {
             fp.add(UIDFolder.FetchProfileItem.UID);
@@ -449,6 +490,9 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         MailMessage mail;
         try {
             mail = handleFetchRespone(fetchResponse, fullname, accountId, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard, treatEmbeddedAsAttachment);
+            if (null != mail && null != textPreviewMode) {
+                mail.setTextPreview(textPreviewProvider.getTextPreview(Long.parseLong(mail.getMailId()), textPreviewMode));
+            }
         } catch (final MessagingException e) {
             /*
              * Discard corrupt message
@@ -547,6 +591,10 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                 m.setHasAttachment(new ContentType(cts).startsWith("multipart/mixed"));
             }
         }
+
+        // Drop possible set "com.openexchange.mail.mailId" log property
+        LogProperties.remove(LogProperties.Name.MAIL_MAIL_ID);
+
         return m;
     }
 
@@ -569,6 +617,8 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             return X_REAL_UID_ITEM_HANDLER;
         } else if (item instanceof com.sun.mail.imap.protocol.X_MAILBOX) {
             return X_MAILBOX_ITEM_HANDLER;
+        } else if (item instanceof SNIPPET) {
+            return SNIPPET_ITEM_HANDLER;
         } else {
             return null;
         }
@@ -746,8 +796,8 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
         @Override
         public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException, OXException {
-            for (final Enumeration<?> e = message.getAllHeaders(); e.hasMoreElements();) {
-                final Header hdr = (Header) e.nextElement();
+            for (final Enumeration<Header> e = message.getAllHeaders(); e.hasMoreElements();) {
+                final Header hdr = e.nextElement();
                 final String name = hdr.getName();
                 {
                     final HeaderHandler headerHandler = hh.get(name);
@@ -928,11 +978,13 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             int length = addresses.length;
             InternetAddress[] ret = new InternetAddress[length];
             for (int i = length; i-- > 0;) {
+                String sAddress = addresses[i].toString();
                 try {
-                    ret[i] = new QuotedInternetAddress(addresses[i].toString());
+                    ret[i] = new QuotedInternetAddress(sAddress, false);
                 } catch (AddressException e) {
                     // Use as-is
-                    ret[i] = addresses[i];
+                    String parsed = e.getRef();
+                    ret[i] = new PlainTextAddress(null == parsed ? sAddress : parsed);
                 }
             }
             return ret;
@@ -1128,8 +1180,10 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         @Override
         public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
             long id = ((UID) item).uid;
-            msg.setMailId(Long.toString(id));
+            String sUid = Long.toString(id);
+            msg.setMailId(sUid);
             msg.setUid(id);
+            LogProperties.put(LogProperties.Name.MAIL_MAIL_ID, sUid);
         }
 
         @Override
@@ -1168,18 +1222,33 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
     };
 
+    private static final FetchItemHandler SNIPPET_ITEM_HANDLER = new FetchItemHandler() {
+
+        @Override
+        public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
+            String textPreview = ((SNIPPET) item).getText();
+            msg.setTextPreview(textPreview);
+        }
+
+        @Override
+        public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
+            // Nothing
+        }
+    };
+
     private static final Map<Class<? extends Item>, FetchItemHandler> MAP;
 
     static {
-        MAP = new HashMap<Class<? extends Item>, FetchItemHandler>(8);
-        MAP.put(UID.class, UID_ITEM_HANDLER);
-        MAP.put(X_REAL_UID.class, X_REAL_UID_ITEM_HANDLER);
-        MAP.put(com.sun.mail.imap.protocol.X_MAILBOX.class, X_MAILBOX_ITEM_HANDLER);
-        MAP.put(INTERNALDATE.class, INTERNALDATE_ITEM_HANDLER);
-        MAP.put(FLAGS.class, FLAGS_ITEM_HANDLER);
-        MAP.put(ENVELOPE.class, ENVELOPE_ITEM_HANDLER);
-        MAP.put(RFC822SIZE.class, SIZE_ITEM_HANDLER);
-        MAP.put(INTERNALDATE.class, INTERNALDATE_ITEM_HANDLER);
+        ImmutableMap.Builder<Class<? extends Item>, FetchItemHandler> builder = ImmutableMap.builder();
+        builder.put(UID.class, UID_ITEM_HANDLER);
+        builder.put(X_REAL_UID.class, X_REAL_UID_ITEM_HANDLER);
+        builder.put(com.sun.mail.imap.protocol.X_MAILBOX.class, X_MAILBOX_ITEM_HANDLER);
+        builder.put(SNIPPET.class, SNIPPET_ITEM_HANDLER);
+        builder.put(INTERNALDATE.class, INTERNALDATE_ITEM_HANDLER);
+        builder.put(FLAGS.class, FLAGS_ITEM_HANDLER);
+        builder.put(ENVELOPE.class, ENVELOPE_ITEM_HANDLER);
+        builder.put(RFC822SIZE.class, SIZE_ITEM_HANDLER);
+        MAP = builder.build();
     }
 
     /*-
@@ -1255,9 +1324,11 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             command.append(" UID");
         }
 
+        Map<String, String> capabilities = null == serverInfo ? null : serverInfo.getCapabilities();
+
         // Decide per IMAP server
         if (fp.contains(ORIGINAL_MAILBOX)) {
-            if (null != serverInfo && serverInfo.getCapabilities().containsKey("XDOVECOT")) {
+            if (null != capabilities && capabilities.containsKey("XDOVECOT")) {
                 command.append(" X-MAILBOX");
             } else if (!uidIncluded) {
                 command.append(" UID");
@@ -1266,8 +1337,18 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
         // Decide per IMAP server
         if (fp.contains(ORIGINAL_UID)) {
-            if (null != serverInfo && serverInfo.getCapabilities().containsKey("XDOVECOT")) {
+            if (null != capabilities && capabilities.containsKey("XDOVECOT")) {
                 command.append(" X-REAL-UID");
+            }
+        }
+
+        if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
+            if (null != capabilities && capabilities.containsKey("SNIPPET=FUZZY")) {
+                command.append(" SNIPPET (LAZY=FUZZY)");
+            }
+        } else if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS)) {
+            if (null != capabilities && capabilities.containsKey("SNIPPET=FUZZY")) {
+                command.append(" SNIPPET (FUZZY)");
             }
         }
 

@@ -7,7 +7,7 @@ title: OX-Report Client
 
 **You have been blocked already?**
 
-**Don't panic**, you can still access <http://software.open-xchange.com/OX6/stable>, 
+**Don't panic**, you can still access <https://software.open-xchange.com/OX6/stable>, 
 because that is open for everyone. So install the Report Client from stable instead 
 of updates and once you're done, update to the latest version.
 
@@ -22,8 +22,8 @@ extension.
 
 You will find further information at the Open-Xchange Frequent Asked Questions (FAQ) 
 
-- [English](http://sdb.open-xchange.com/faq/70)
-- [German](http://sdb.open-xchange.com/category/1/71)
+- [English](https://sdb.open-xchange.com/faq/70)
+- [German](https://sdb.open-xchange.com/category/1/71)
 
 # Installation on OX App Suite
 
@@ -280,20 +280,20 @@ displayed after the report has been sent to activation.open-xchange.com.
 ## Report performance and storage
 With version 7.8.3 new properties are introduced.
 
-* [com.openexchange.report.appsuite.fileStorage](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.report.appsuite.fileStorage)
+* [com.openexchange.report.appsuite.fileStorage](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.report.appsuite.fileStorage)
  
  Describes the storage path for all report relevant data. Saving a report will place a JSON-Version of the report in that folder.
 
-* [com.openexchange.report.appsuite.maxChunkSize](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.report.appsuite.maxChunkSize=200)
+* [com.openexchange.report.appsuite.maxChunkSize](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.report.appsuite.maxChunkSize=200)
 	
  This property enables the client to store parts of the report on hard drive to keep memory usage small. A chunk is a CapabilitySet.
  The stored parts are combined into a single .report file and then deleted when the report is finished. The .report file is not deleted automatically.
 
-* [com.openexchange.report.appsuite.maxThreadPoolSize](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.report.appsuite.maxThreadPoolSize)
+* [com.openexchange.report.appsuite.maxThreadPoolSize](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.report.appsuite.maxThreadPoolSize)
 	
  The report will use multithreading for faster processing. Therefore the user can edit the threadpoolsize by editing this property value. Each thread is processing the needed values from a schema. If the threadpool is smaller then the schemas in the database, the threads are queued.
 
-* [com.openexchange.report.appsuite.threadPriority](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.report.appsuite.threadPriority)
+* [com.openexchange.report.appsuite.threadPriority](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.report.appsuite.threadPriority)
 	
  This property determines the used threads priotity. It can range from 1 (lowest) to 10 (highest).
 
@@ -465,6 +465,8 @@ Report was finished: Tue Jun 07 11:31:30 CEST 2016
 **clientlogincount:**
 
 - number of client logins for the last month
+
+**Additional Information:** Both login count values respect only the last client login of a user with a distinct client like olox2 or appsuite. If a user logs in with olox2 and appsuite during the last 30 days, he will be considered in both counts for the clients and also in both timeframes (clientlogincountyear & clientlogincount). If his last login with a client is further away in the past but still in the timeframe of the last year (365 days in the past), he will only be considered in the yearly counter (clientlogincountyear) and not in the last monthly counter (clientlogincount).
 
 **uuid:**
 

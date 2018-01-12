@@ -49,13 +49,12 @@
 
 package com.openexchange.folderstorage.internal.performers;
 
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.AbstractFolder;
@@ -90,9 +89,9 @@ public abstract class AbstractPerformer {
     /**
      * Known working trees.
      */
-    protected static final Set<String> KNOWN_TREES = Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList(
+    protected static final Set<String> KNOWN_TREES = ImmutableSet.of(
         FolderStorage.REAL_TREE_ID,
-        OutlookFolderStorage.OUTLOOK_TREE_ID)));
+        OutlookFolderStorage.OUTLOOK_TREE_ID);
 
     protected final FolderStorageDiscoverer folderStorageDiscoverer;
 

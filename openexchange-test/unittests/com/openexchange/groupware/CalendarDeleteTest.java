@@ -152,7 +152,7 @@ public class CalendarDeleteTest {
         final Connection writecon = DBPool.pickupWriteable(context);
         final SessionObject so = SessionObjectWrapper.createSessionObject(deleteuserid, context.getContextId(), "deleteAllUserApps");
 
-        final DeleteEvent delEvent = new DeleteEvent(this, so.getUserId(), DeleteEvent.TYPE_USER, ContextStorage.getInstance().getContext(so.getContextId()));
+        final DeleteEvent delEvent = DeleteEvent.createDeleteEventForUserDeletion(this, so.getUserId(), ContextStorage.getInstance().getContext(so.getContextId()));
 
         final CalendarAdministration ca = new CalendarAdministration();
         ca.deletePerformed(delEvent, readcon, writecon);
@@ -186,7 +186,7 @@ public class CalendarDeleteTest {
         final Connection writecon = DBPool.pickupWriteable(context);
         final SessionObject so = SessionObjectWrapper.createSessionObject(deleteuserid, context.getContextId(), "deleteAllUserApps");
 
-        final DeleteEvent delEvent = new DeleteEvent(this, groupid, DeleteEvent.TYPE_GROUP, ContextStorage.getInstance().getContext(so.getContextId()));
+        final DeleteEvent delEvent = DeleteEvent.createDeleteEventForGroupDeletion(this, groupid, ContextStorage.getInstance().getContext(so.getContextId()));
 
         final CalendarAdministration ca = new CalendarAdministration();
         ca.deletePerformed(delEvent, readcon, writecon);
@@ -208,7 +208,7 @@ public class CalendarDeleteTest {
         final Connection writecon = DBPool.pickupWriteable(context);
         final SessionObject so = SessionObjectWrapper.createSessionObject(deleteuserid, context.getContextId(), "deleteAllUserApps");
 
-        final DeleteEvent delEvent = new DeleteEvent(this, resourceid, DeleteEvent.TYPE_RESOURCE, ContextStorage.getInstance().getContext(so.getContextId()));
+        final DeleteEvent delEvent = DeleteEvent.createDeleteEventForResourceDeletion(this, resourceid, ContextStorage.getInstance().getContext(so.getContextId()));
 
         final CalendarAdministration ca = new CalendarAdministration();
         ca.deletePerformed(delEvent, readcon, writecon);

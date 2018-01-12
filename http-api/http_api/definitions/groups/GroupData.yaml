@@ -18,3 +18,4 @@ properties:
     type: integer
     format: int64
     description: Timestamp of the last modification.
+    readOnly: true

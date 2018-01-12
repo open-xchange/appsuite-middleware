@@ -49,16 +49,21 @@
 
 package com.openexchange.tools;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -89,6 +94,42 @@ public final class Collections {
         }
 
         return v;
+    }
+
+    /**
+     * Generates consecutive subsets of a set, each of the same size (the final list may be smaller).
+     *
+     * @param original The set to return consecutive subsets of
+     * @param partitionSize The desired size for each subset
+     * @return A list of consecutive subsets
+     * @throws IllegalArgumentException if {@code partitionSize} is not positive
+     */
+    public static <T> List<Collection<T>> partition(Collection<T> original, int partitionSize) {
+        checkNotNull(original, "Set must not be null");
+        checkArgument(partitionSize > 0);
+        int total = original.size();
+        if (partitionSize >= total) {
+            return java.util.Collections.singletonList(original);
+        }
+
+        // Create a list of collections to return.
+        List<Collection<T>> result = new LinkedList<Collection<T>>();
+
+        // Create an iterator for the original collection.
+        Iterator<T> it = original.iterator();
+
+        // Create each new collection.
+        Collection<T> s = new ArrayList<T>(partitionSize);
+        s.add(it.next());
+        for (int i = 1; i < total; i++) {
+            if ((i % partitionSize) == 0) {
+                result.add(s);
+                s = new ArrayList<T>(partitionSize);
+            }
+            s.add(it.next());
+        }
+        result.add(s);
+        return result;
     }
 
     /**

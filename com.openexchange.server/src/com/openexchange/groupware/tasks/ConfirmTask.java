@@ -74,6 +74,8 @@ import com.openexchange.session.Session;
  */
 public final class ConfirmTask {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfirmTask.class);
+
     private static final TaskStorage storage = TaskStorage.getInstance();
     private static final FolderStorage foldStor = FolderStorage.getInstance();
     private static final ParticipantStorage partStor = ParticipantStorage.getInstance();
@@ -113,12 +115,7 @@ public final class ConfirmTask {
             this.participants = partStor.selectParticipants(ctx, taskId, StorageType.ACTIVE);
             this.folders = foldStor.selectFolder(ctx, taskId, StorageType.ACTIVE);
         } catch (OXException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        this.origParticipant = ParticipantStorage.getParticipant(ParticipantStorage.extractInternal(this.participants), userId);
-        if (null == origParticipant) {
-            //            throw TaskExceptionCode.PARTICIPANT_NOT_FOUND.create(I(userId), I(taskId));
+            LOG.error("Unable to init task: {}", e.getMessage(), e);
         }
     }
 
@@ -129,6 +126,10 @@ public final class ConfirmTask {
      * the database.
      */
     void prepare() throws OXException {
+        this.origParticipant = ParticipantStorage.getParticipant(ParticipantStorage.extractInternal(this.participants), userId);
+        if (null == origParticipant) {
+            throw TaskExceptionCode.PARTICIPANT_NOT_FOUND.create(I(userId), I(taskId));
+        }
         // Load full task.
         fillParticipants();
         fillTask();

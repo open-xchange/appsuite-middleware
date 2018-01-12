@@ -68,6 +68,8 @@ import org.json.JSONException;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
+import com.openexchange.context.ContextService;
+import com.openexchange.context.PoolAndSchema;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.Info;
@@ -91,6 +93,7 @@ import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.report.appsuite.serialization.Report.JsonObjectType;
 import com.openexchange.report.appsuite.storage.ChunkingUtilities;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * The {@link CapabilityHandler} analyzes a users capabilities and filestore quota. It sums up unique combinations of capabilities and quota and gives counts for
@@ -113,6 +116,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     public void runContextReport(ContextReport contextReport) {
         // Grab the file store quota from the context and save them in the report
         Context ctx = contextReport.getContext();
+        LOG.trace("Process context: {} of report with uuid: {}", ctx.getContextId(), contextReport.getUUID());
         try {
             QuotaFileStorageService storageService = FileStorages.getQuotaFileStorageService();
             if (null == storageService) {
@@ -307,7 +311,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
 
     // A little cleanup. We don't need the unwieldly mapping of capability String + quota to counts anymore.
     @Override
-    public void finish(Report report) {
+    public void finish(Report report) throws OXException {
         Map<String, Object> macdetail = report.getNamespace(Report.MACDETAIL);
 
         ArrayList<Object> values = new ArrayList(macdetail.values());
@@ -327,7 +331,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         report.set(Report.MACDETAIL, Report.CAPABILITY_SETS, values);
     }
 
-    private void addDriveMetricsToReport(Report report) {
+    private void addDriveMetricsToReport(Report report) throws OXException {
         Map<String, Object> macdetail = report.getNamespace(Report.MACDETAIL);
         for (Entry<String, LinkedHashMap<String, Object>> currentTenant : report.getTenantMap().entrySet()) {
             for (Entry<String, Object> currentCapS : currentTenant.getValue().entrySet()) {
@@ -480,32 +484,36 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
      * @param consideredTimeframeStart, beginning of potential timeframe for calculating file count
      * @param consideredTimeframeEnd, end of potential timeframe for calculating file count
      * @param report, the report with all values
+     * @throws OXException
      */
-    private void addDriveMetricsToCapS(Map<String, Object> capSMap, Map<Integer, List<Integer>> usersInContext, Date consideredTimeframeStart, Date consideredTimeframeEnd, Report report, List<String> compositionCapS) {
+    private void addDriveMetricsToCapS(Map<String, Object> capSMap, Map<Integer, List<Integer>> usersInContext, Date consideredTimeframeStart, Date consideredTimeframeEnd, Report report, List<String> compositionCapS) throws OXException {
+
+        Map<PoolAndSchema, Map<Integer, List<Integer>>> dbContextToUsersBash = this.getDbContextToUsersBash(usersInContext);
+
         InfostoreInformationService informationService = Services.getService(InfostoreInformationService.class);
         LinkedHashMap<String, Integer> driveUserMetrics = new LinkedHashMap<>();
         LinkedHashMap<String, Integer> driveMetrics = new LinkedHashMap<>();
 
         try {
-            for (Entry<String, Integer> fileSizes : informationService.getFileSizeMetrics(usersInContext).entrySet()) {
+            for (Entry<String, Integer> fileSizes : informationService.getFileSizeMetrics(dbContextToUsersBash).entrySet()) {
                 driveUserMetrics.put("file-size-" + fileSizes.getKey(), fileSizes.getValue());
             }
-            for (Entry<String, Integer> mimeTypes : informationService.getFileCountMimetypeMetrics(usersInContext).entrySet()) {
+            for (Entry<String, Integer> mimeTypes : informationService.getFileCountMimetypeMetrics(dbContextToUsersBash).entrySet()) {
                 driveMetrics.put("mime-type-" + mimeTypes.getKey(), mimeTypes.getValue());
             }
-            for (Entry<String, Integer> storageUse : informationService.getStorageUseMetrics(usersInContext).entrySet()) {
+            for (Entry<String, Integer> storageUse : informationService.getStorageUseMetrics(dbContextToUsersBash).entrySet()) {
                 driveUserMetrics.put("storage-use-" + storageUse.getKey(), storageUse.getValue());
             }
-            for (Entry<String, Integer> fileCount : informationService.getFileCountMetrics(usersInContext).entrySet()) {
+            for (Entry<String, Integer> fileCount : informationService.getFileCountMetrics(dbContextToUsersBash).entrySet()) {
                 driveUserMetrics.put("file-count-overall-" + fileCount.getKey(), fileCount.getValue());
             }
-            for (Entry<String, Integer> fileCountTimeRange : informationService.getFileCountInTimeframeMetrics(usersInContext, consideredTimeframeStart, consideredTimeframeEnd).entrySet()) {
+            for (Entry<String, Integer> fileCountTimeRange : informationService.getFileCountInTimeframeMetrics(dbContextToUsersBash, consideredTimeframeStart, consideredTimeframeEnd).entrySet()) {
                 driveUserMetrics.put("file-count-in-timerange-" + fileCountTimeRange.getKey(), fileCountTimeRange.getValue());
             }
-            for (Entry<String, Integer> fileExternalSorages : informationService.getExternalStorageMetrics(usersInContext).entrySet()) {
+            for (Entry<String, Integer> fileExternalSorages : informationService.getExternalStorageMetrics(dbContextToUsersBash).entrySet()) {
                 driveUserMetrics.put("external-storages-" + fileExternalSorages.getKey(), fileExternalSorages.getValue());
             }
-            for (Entry<String, Integer> fileCount : informationService.getFileCountNoVersions(usersInContext).entrySet()) {
+            for (Entry<String, Integer> fileCount : informationService.getFileCountNoVersions(dbContextToUsersBash).entrySet()) {
                 driveUserMetrics.put("distinct-files-" + fileCount.getKey(), fileCount.getValue());
             }
             for (Entry<String, Integer> quotaUsage : informationService.getQuotaUsageMetrics(usersInContext).entrySet()) {
@@ -515,8 +523,8 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             LOG.error("Unable to execute SQL for drive metric gathering.", e);
         } catch (OXException e) {
             LOG.error("Unable to gather drive metrics.", e);
-        } 
-        
+        }
+
         driveUserMetrics.put("users", driveUserMetrics.get("file-count-overall-users") == null ? 0 : driveUserMetrics.get("file-count-overall-users"));
         driveUserMetrics.remove("file-count-overall-users");
         capSMap.put(Report.DRIVE_USER, driveUserMetrics);
@@ -532,7 +540,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             if (value == null) {
                 totalDrive.put(entry.getKey(), newValue);
             } else {
-                if (entry.getKey().contains("min") && newValue < value) {
+                if (entry.getKey().contains("min") && newValue < value && newValue != 0) {
                     totalDrive.put(entry.getKey(), newValue);
                 } else if (entry.getKey().contains("max") && newValue > value) {
                     totalDrive.put(entry.getKey(), newValue);
@@ -561,6 +569,22 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             report.get(Report.MACDETAIL, Report.CAPABILITY_SETS, new ArrayList<>(), ArrayList.class).add(capSMap);
             storeAndMergeReportParts(report);
         }
+    }
+
+    private Map<PoolAndSchema, Map<Integer,List<Integer>>> getDbContextToUsersBash(Map<Integer, List<Integer>> usersInContext) throws OXException {
+        ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class);
+        Map<PoolAndSchema, List<Integer>> schemaToCids = contextService.getSchemaAssociationsFor(new ArrayList<>(usersInContext.keySet()));
+
+        Map<PoolAndSchema, Map<Integer,List<Integer>>> resultMap = new LinkedHashMap<>(schemaToCids.size());
+        for (Entry<PoolAndSchema, List<Integer>> schemaCids : schemaToCids.entrySet()) {
+            List<Integer> cidsInSameSchema = schemaCids.getValue();
+            Map<Integer,List<Integer>> cidToUsers = new HashMap<>(cidsInSameSchema.size());
+            for (Integer cid : cidsInSameSchema) {
+                cidToUsers.put(cid, usersInContext.get(cid));
+            }
+            resultMap.put(schemaCids.getKey(), cidToUsers);
+        }
+        return resultMap;
     }
 
     private void addNewValuesToExistingValues(Map<String, Object> existingValues, Map<String, Object> newValues) {

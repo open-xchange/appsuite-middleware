@@ -86,8 +86,7 @@ public class SproxydCreateTableTask extends UpdateTaskAdapter {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
         }
 
-        int contextId = params.getContextId();
-        Connection writeCon = dbService.getForUpdateTask(contextId);
+        Connection writeCon = params.getConnection();
         boolean rollback = false;
         boolean restoreAutoCommit = false;
         try {
@@ -110,7 +109,6 @@ public class SproxydCreateTableTask extends UpdateTaskAdapter {
             if (restoreAutoCommit) {
                 Databases.autocommit(writeCon);
             }
-            dbService.backForUpdateTask(contextId, writeCon);
         }
     }
 

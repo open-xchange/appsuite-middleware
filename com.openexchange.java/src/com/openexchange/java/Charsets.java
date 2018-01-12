@@ -56,12 +56,17 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * Class for storing character sets.
@@ -94,6 +99,39 @@ public final class Charsets {
      * The charset cache.
      */
     private static final ConcurrentMap<String, Charset> CACHE = new ConcurrentHashMap<String, Charset>();
+
+    private static final Map<Integer, Charset> CODE_PAGES;
+
+    static {
+        Pattern patternCodePage = Pattern.compile("[^\\d]*(\\d+)");
+        SortedMap<String, Charset> availableCharsets = Charset.availableCharsets();
+        SortedMap<Integer, Charset> codePages = new TreeMap<>();
+        for (Entry<String, Charset> entry : availableCharsets.entrySet()) {
+            Charset charset = entry.getValue();
+
+            // First, check display name
+            Matcher matcher = patternCodePage.matcher(entry.getKey());
+            if (matcher.matches()) {
+                Integer numericCode = Integer.valueOf(matcher.group(1));
+                if (false == codePages.containsKey(numericCode)) {
+                    codePages.put(numericCode, charset);
+                }
+            } else {
+                // Then, check aliases
+                Set<String> aliases = charset.aliases();
+                for (String alias : aliases) {
+                    matcher = patternCodePage.matcher(alias);
+                    if (matcher.matches()) {
+                        Integer numericCode = Integer.valueOf(matcher.group(1));
+                        if (false == codePages.containsKey(numericCode)) {
+                            codePages.put(numericCode, charset);
+                        }
+                    }
+                }
+            }
+        }
+        CODE_PAGES = ImmutableMap.copyOf(codePages);
+    }
 
     /**
      * Prevent instantiation
@@ -195,7 +233,7 @@ public final class Charsets {
         }
     }
 
-    private static final Set<String> SET_ASCII_NAMES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("US-ASCII", "ASCII")));
+    private static final Set<String> SET_ASCII_NAMES = ImmutableSet.of("US-ASCII", "ASCII");
 
     /**
      * Checks if specified charset name denotes ASCII charset.
@@ -208,6 +246,20 @@ public final class Charsets {
             return false;
         }
         return SET_ASCII_NAMES.contains(charset.toUpperCase());
+    }
+
+    /**
+     * Gets the {@link Charset charset} object associated with specified code page.
+     *
+     * @param codePage The code page
+     * @return The {@link Charset charset} object or <code>null</code>
+     */
+    public static Charset forCodePage(int codePage) {
+        if (codePage <= 0) {
+            return null;
+        }
+
+        return CODE_PAGES.get(Integer.valueOf(codePage));
     }
 
     /**

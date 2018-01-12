@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import com.openexchange.cluster.timer.ClusterTimerService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
@@ -71,7 +72,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
-import com.openexchange.file.storage.FileStorageUtility;
+import com.openexchange.file.storage.NameBuilder;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.file.storage.composition.FilenameValidationUtils.ValidityResult;
@@ -104,7 +105,6 @@ import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.TimerService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tx.TransactionAware;
 import com.openexchange.tx.TransactionAwares;
@@ -132,26 +132,50 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
     /**
      * Initializes this attachment storage.
      *
-     * @param configService The config service
-     * @param timerService The timer service
      * @return The initialized instance
-     * @throws OXException If instance cannot be returned
      */
-    public static synchronized void startInstance(ConfigurationService configService, TimerService timerService) throws OXException {
+    public static synchronized void startInstance() {
         DefaultAttachmentStorage tmp = instance;
         if (null == tmp) {
             tmp = new DefaultAttachmentStorage("default");
-
-            long cleanerInterval = Utilities.parseTimespanProperty("com.openexchange.mail.compose.share.periodicCleanerInterval", DAYS.toMillis(1), HOURS.toMillis(1), true, configService);
-            if (0 < cleanerInterval) {
-                DefaultAttachmentStoragePeriodicCleaner cleaner = new DefaultAttachmentStoragePeriodicCleaner(tmp.id);
-                long shiftMillis = TimeUnit.MILLISECONDS.convert((long)(Math.random() * 100), TimeUnit.MINUTES);
-                ScheduledTimerTask timerTask = timerService.scheduleWithFixedDelay(cleaner, cleanerInterval + shiftMillis, cleanerInterval);
-                tmp.setCleanerInfo(cleaner, timerTask);
-            }
-
             instance = tmp;
         }
+    }
+
+    /**
+     * Initializes the periodic cleaner.
+     *
+     * @param configService The config service
+     * @param timerService The timer service
+     * @throws OXException If cleaner cannot be initialized
+     */
+    public static synchronized void initiateCleaner(ConfigurationService configService, ClusterTimerService timerService) throws OXException {
+        DefaultAttachmentStorage tmp = instance;
+        if (null == tmp) {
+            throw new IllegalStateException("DefaultAttachmentStorage not yet started");
+        }
+
+        long cleanerInterval = Utilities.parseTimespanProperty("com.openexchange.mail.compose.share.periodicCleanerInterval", DAYS.toMillis(1), HOURS.toMillis(1), true, configService);
+        if (0 < cleanerInterval) {
+            DefaultAttachmentStoragePeriodicCleaner cleaner = new DefaultAttachmentStoragePeriodicCleaner(tmp.id);
+            long shiftMillis = TimeUnit.MILLISECONDS.convert((long)(Math.random() * 100), TimeUnit.MINUTES);
+            ScheduledTimerTask timerTask = timerService.scheduleWithFixedDelay(DefaultAttachmentStoragePeriodicCleaner.class.getName(), cleaner, cleanerInterval + shiftMillis, cleanerInterval);
+            tmp.setCleanerInfo(cleaner, timerTask);
+        }
+    }
+
+    /**
+     * Drops the periodic cleaner.
+     *
+     * @throws OXException If cleaner cannot be dropped
+     */
+    public static synchronized void dropCleaner() {
+        DefaultAttachmentStorage tmp = instance;
+        if (null == tmp) {
+            return;
+        }
+
+        tmp.halt();
     }
 
     /**
@@ -468,14 +492,17 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
         // Create folder, pre-shared to an anonymous recipient, for this message
         DefaultFileStorageFolder folder = prepareFolder(source, parentFolderID, password, expiry, autoDelete, session, locale);
         IDBasedFolderAccess folderAccess = storageContext.folderAccess;
-        int counter = 1;
+        NameBuilder name = null;
         do {
             try {
                 return new Item(folderAccess.createFolder(folder), folder.getName());
             } catch (OXException e) {
                 if (e.equalsCode(1014, "FLD") || e.equalsCode(12, "FLD")) {
                     // A duplicate folder exists
-                    folder.setName(FileStorageUtility.enhance(folder.getName(), counter++));
+                    if (null == name) {
+                        name = new NameBuilder(folder.getName());
+                    }
+                    folder.setName(name.advance().toString());
                     continue;
                 }
                 throw e;

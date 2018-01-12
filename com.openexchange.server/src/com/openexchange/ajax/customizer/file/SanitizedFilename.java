@@ -77,7 +77,8 @@ public class SanitizedFilename implements AdditionalFileField {
 
     @Override
     public Object getValue(File item, ServerSession session) {
-        return FileNameTools.sanitizeFilename(item.getFileName());
+        String fileName = item.getFileName();
+        return null == fileName ? "" : FileNameTools.sanitizeFilename(fileName);
     }
 
     @Override

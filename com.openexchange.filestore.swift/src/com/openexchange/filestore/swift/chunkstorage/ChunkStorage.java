@@ -79,6 +79,15 @@ public interface ChunkStorage {
     List<Chunk> getChunks(UUID documentId) throws OXException;
 
     /**
+     * Gets the chunks optionally available for the denoted document.
+     *
+     * @param documentId The document identifier
+     * @return The document's chunks
+     * @throws OXException If chunks cannot be returned
+     */
+    List<Chunk> optChunks(UUID documentId) throws OXException;
+
+    /**
      * Gets the chunk for the denoted document.
      *
      * @param chunkId The chunk's identifier in Swift system

@@ -136,6 +136,16 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
             }
         }
         Properties smtpProperties = getSMTPProperties(leanConfig);
+        String smtpUser = leanConfig.getProperty(UserFeedbackMailProperty.username);
+        String smtpPass = leanConfig.getProperty(UserFeedbackMailProperty.password);
+        if (Strings.isEmpty(smtpUser) || Strings.isEmpty(smtpPass)) {
+            smtpProperties.put("mail.smtp.auth", "false");
+            smtpUser = null;
+            smtpPass = null;
+        } else {
+            // setting mail.smtp.auth to true enables attempts to use AUTH
+            smtpProperties.put("mail.smtp.auth", "true");
+        }
         Session smtpSession = Session.getInstance(smtpProperties);
         Transport transport = null;
         JSONObject result = new JSONObject();
@@ -155,7 +165,9 @@ public class FeedbackMailServiceSMTP implements FeedbackMailService {
             mail.addRecipients(RecipientType.TO, recipients);
 
             transport = smtpSession.getTransport("smtp");
-            transport.connect(leanConfig.getProperty(UserFeedbackMailProperty.hostname), leanConfig.getIntProperty(UserFeedbackMailProperty.port), leanConfig.getProperty(UserFeedbackMailProperty.username), leanConfig.getProperty(UserFeedbackMailProperty.password));
+            String smtpHost = leanConfig.getProperty(UserFeedbackMailProperty.hostname);
+            int smtpPort = leanConfig.getIntProperty(UserFeedbackMailProperty.port);
+            transport.connect(smtpHost, smtpPort, smtpUser, smtpPass);
 
             if (encrypt && null != pgpRecipients && pgpRecipients.size() > 0) {
                 MimeMessage pgpMail = null;

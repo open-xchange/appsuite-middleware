@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -58,6 +58,7 @@ public class message_rfc822 extends handler_base {
 	new ActivationDataFlavor(Message.class, "message/rfc822", "Message")
     };
 
+    @Override
     protected ActivationDataFlavor[] getDataFlavors() {
 	return ourDataFlavor;
     }
@@ -65,6 +66,7 @@ public class message_rfc822 extends handler_base {
     /**
      * Return the content.
      */
+    @Override
     public Object getContent(DataSource ds) throws IOException {
 	// create a new MimeMessage
 	try {
@@ -92,6 +94,7 @@ public class message_rfc822 extends handler_base {
     /**
      * Write the object as a byte stream.
      */
+    @Override
     public void writeTo(Object obj, String mimeType, OutputStream os) 
 			throws IOException {
 	// if the object is a message, we know how to write that out

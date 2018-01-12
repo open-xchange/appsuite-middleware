@@ -53,6 +53,8 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.Collection;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -126,7 +128,8 @@ public class StarRatingV1ExportResultConverter implements ExportResultConverter 
 
             for (Feedback feedback : feedbacks) {
                 // Write entry line
-                writer.write(convertToLine(jsonFields, (JSONObject) feedback.getContent(), bob));
+                String convertToLine = convertToLine(jsonFields, (JSONObject) feedback.getContent(), bob);
+                writer.write(convertToLine);
             }
             writer.flush();
             exportResult.setCSV(sink.getClosingStream());
@@ -161,8 +164,9 @@ public class StarRatingV1ExportResultConverter implements ExportResultConverter 
         } else {
             for (StarRatingV1Fields token : jsonFields) {
                 bob.append(TEXT_QUALIFIER);
-                String content = object.getString(token.name());
-                String sanitizedValue = sanitize(content.replace("\n", "\r\n"));
+                String sanitizedLineBreaks = correctLineBreaks(object, token);
+                String replaced = useSingleQuotes(sanitizedLineBreaks);
+                String sanitizedValue = sanitize(replaced);
                 bob.append(sanitizedValue);
                 bob.append(TEXT_QUALIFIER);
                 bob.append(this.delimiter);
@@ -170,6 +174,24 @@ public class StarRatingV1ExportResultConverter implements ExportResultConverter 
         }
         bob.setCharAt(bob.length() - 1, CARRIAGE_RETURN);
         return bob.toString();
+    }
+
+    private String useSingleQuotes(String sanitizedLineBreaks) {
+        return sanitizedLineBreaks.replace("\"", "'");
+    }
+
+    private final Pattern p = Pattern.compile("\r?\n");
+
+    private String correctLineBreaks(JSONObject object, StarRatingV1Fields token) throws JSONException {
+        String content = object.getString(token.name());
+
+        Matcher m = p.matcher(content);
+        StringBuffer buffer = new StringBuffer(content.length());
+        while (m.find()) {
+            m.appendReplacement(buffer, "\r\n");
+        }
+        m.appendTail(buffer);
+        return buffer.toString();
     }
 
     private String sanitize(String value) {
@@ -189,7 +211,7 @@ public class StarRatingV1ExportResultConverter implements ExportResultConverter 
         for (int i = 1; i < length; i++) {
             char c = value.charAt(i);
             if (null == builder) {
-                if (c == '"' || c == '\'' || c == '|') {
+                if (c == '|') {
                     builder = new StringBuilder(length);
                     if (i > 0) {
                         builder.append(value, 0, i);
@@ -197,7 +219,7 @@ public class StarRatingV1ExportResultConverter implements ExportResultConverter 
                     builder.append("\\").append(c);
                 }
             } else {
-                if (c == '"' || c == '\'' || c == '|') {
+                if (c == '|') {
                     builder.append("\\").append(c);
                 } else {
                     builder.append(c);
@@ -218,8 +240,6 @@ public class StarRatingV1ExportResultConverter implements ExportResultConverter 
             case '@':
                 return true;
             case '|':
-                return true;
-            case '\'':
                 return true;
             default:
                 return false;

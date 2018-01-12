@@ -103,6 +103,7 @@ import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StorageParametersUtility;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
+import com.openexchange.folderstorage.SubfolderListingFolderStorage;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.database.DatabaseFolderStorage.ConnectionMode;
 import com.openexchange.folderstorage.database.DatabaseFolderType;
@@ -177,7 +178,7 @@ import gnu.trove.map.hash.TObjectIntHashMap;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OutlookFolderStorage implements FolderStorage {
+public final class OutlookFolderStorage implements FolderStorage, SubfolderListingFolderStorage {
 
     static final String PROTOCOL_UNIFIED_INBOX = UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX;
 
@@ -757,7 +758,6 @@ public final class OutlookFolderStorage implements FolderStorage {
 
     @Override
     public void createFolder(final Folder folder, final StorageParameters storageParameters) throws OXException {
-        TCM.clear();
         /*
          * Create only if folder could not be stored in real storage
          */
@@ -793,6 +793,7 @@ public final class OutlookFolderStorage implements FolderStorage {
              */
             return;
         }
+        TCM.clear();
         final int userId = storageParameters.getUserId();
         if (null == realFolder.getLastModified()) {
             /*
@@ -1535,6 +1536,41 @@ public final class OutlookFolderStorage implements FolderStorage {
     @Override
     public StoragePriority getStoragePriority() {
         return StoragePriority.NORMAL;
+    }
+
+    @Override
+    public Folder[] getSubfolderObjects(String treeId, String parentId, StorageParameters storageParameters) throws OXException {
+        if (com.openexchange.folderstorage.internal.Tools.isGlobalId(parentId)) {
+            return null;
+        }
+        if (PREPARED_FULLNAME_INBOX.equals(parentId)) {
+            return null;
+        }
+
+        FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, parentId);
+        if (null == folderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, parentId);
+        }
+        if (!(folderStorage instanceof SubfolderListingFolderStorage)) {
+            return null;
+        }
+
+        SubfolderListingFolderStorage listingStorage = (SubfolderListingFolderStorage) folderStorage;
+        boolean started = listingStorage.startTransaction(storageParameters, false);
+        try {
+            Folder[] folders = listingStorage.getSubfolderObjects(realTreeId, parentId, storageParameters);
+
+            if (started) {
+                listingStorage.commitTransaction(storageParameters);
+                started = false;
+            }
+
+            return folders;
+        } finally {
+            if (started) {
+                listingStorage.rollback(storageParameters);
+            }
+        }
     }
 
     @Override

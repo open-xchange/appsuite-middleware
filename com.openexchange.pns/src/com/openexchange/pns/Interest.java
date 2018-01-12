@@ -239,7 +239,7 @@ public class Interest {
         StartsWithChecker(String prefix) {
             super();
             if (false == prefix.endsWith(":")) {
-                throw new IllegalArgumentException("No a valid wild-card topic: " + prefix);
+                throw new IllegalArgumentException("Not a valid wild-card topic: " + prefix);
             }
             this.prefix = prefix;
         }

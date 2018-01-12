@@ -617,7 +617,7 @@ public class ReportClientBase extends AbstractJMXTools {
      */
     private void runAndDeliverASReport(ReportMode mode, boolean silent, boolean savereport, MBeanServerConnection server, ReportConfigs reportConfig) {
         try {
-            String uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportConfig.getType(), reportConfig.isSingleDeployment(), reportConfig.isConfigTimerange(), reportConfig.getConsideredTimeframeStart(), reportConfig.getConsideredTimeframeEnd() }, new String[] { String.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Long.class.getCanonicalName(), Long.class.getCanonicalName()});
+            String uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportConfig.getType(), reportConfig.isSingleDeployment(), reportConfig.isConfigTimerange(), reportConfig.getConsideredTimeframeStart(), reportConfig.getConsideredTimeframeEnd() }, new String[] { String.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Long.class.getCanonicalName(), Long.class.getCanonicalName() });
 
             // Start polling
             boolean done = false;
@@ -627,12 +627,14 @@ public class ReportClientBase extends AbstractJMXTools {
                 CompositeData[] reports = (CompositeData[]) server.invoke(getAppSuiteReportingName(), "retrievePendingReports", new Object[] { reportConfig.getType() }, new String[] { String.class.getCanonicalName() });
 
                 boolean found = false;
-                for (CompositeData report : reports) {
-                    if (report.get("uuid").equals(uuid)) {
-                        found = true;
-                        if (!silent) {
-                            eraseStatusLine(charNum);
-                            charNum = printStatusLine(report);
+                if (reports != null) {
+                    for (CompositeData report : reports) {
+                        if (report.get("uuid").equals(uuid)) {
+                            found = true;
+                            if (!silent) {
+                                eraseStatusLine(charNum);
+                                charNum = printStatusLine(report);
+                            }
                         }
                     }
                 }
@@ -721,8 +723,9 @@ public class ReportClientBase extends AbstractJMXTools {
         try {
             CompositeData[] reports = (CompositeData[]) server.invoke(getAppSuiteReportingName(), "retrievePendingReports", new Object[] { reportType }, new String[] { String.class.getCanonicalName() });
             System.out.println("");
-            if (reports.length == 0) {
+            if (reports == null || reports.length == 0) {
                 System.out.println("Nothing to cancel, there are no reports currently pending.");
+                return;
             }
             for (CompositeData report : reports) {
                 Object uuid = report.get("uuid");
@@ -749,8 +752,9 @@ public class ReportClientBase extends AbstractJMXTools {
         try {
             CompositeData[] reports = (CompositeData[]) server.invoke(getAppSuiteReportingName(), "retrievePendingReports", new Object[] { reportType }, new String[] { String.class.getCanonicalName() });
             System.out.println("");
-            if (reports.length == 0) {
+            if (reports == null || reports.length == 0) {
                 System.out.println("There are no reports currently pending.");
+                return;
             }
             for (CompositeData report : reports) {
                 printASDiagnostics(report);
@@ -776,7 +780,7 @@ public class ReportClientBase extends AbstractJMXTools {
         }
         try {
             String uuid = "";
-            uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportConfig.getType(), reportConfig.isSingleDeployment(), reportConfig.isConfigTimerange(), reportConfig.getConsideredTimeframeStart(), reportConfig.getConsideredTimeframeEnd() }, new String[] { String.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Long.class.getCanonicalName(), Long.class.getCanonicalName()});
+            uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportConfig.getType(), reportConfig.isSingleDeployment(), reportConfig.isConfigTimerange(), reportConfig.getConsideredTimeframeStart(), reportConfig.getConsideredTimeframeEnd() }, new String[] { String.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Long.class.getCanonicalName(), Long.class.getCanonicalName() });
             System.out.println("\nRunning report with uuid: " + uuid);
         } catch (Exception e) {
             e.printStackTrace();
@@ -844,16 +848,21 @@ public class ReportClientBase extends AbstractJMXTools {
             JSONObject data = new JSONObject((String) report.get("data"));
             if (data.getBoolean("needsComposition")) {
                 System.out.println("{");
+                int counter = 0;
+                int attributeCount = data.keySet().size();
                 for (String string : data.keySet()) {
+                    counter++;
+                    boolean endReached = counter == attributeCount;
                     if (data.get(string) instanceof String) {
-                        System.out.println("  \"" + string + "\" : \"" + data.get(string) + "\",");
+                        System.out.println("  \"" + string + "\" : \"" + data.get(string) + "\"" + (endReached ? "" : ","));
                     } else if (data.get(string) instanceof Boolean) {
-                        System.out.println("  \"" + string + "\" : " + data.get(string) + ",");
+                        System.out.println("  \"" + string + "\" : " + data.get(string) + (endReached ? "" : ","));
                     } else if (string.equals("macdetail") || string.equals("oxaas")) {
                         ReportPrinting.printStoredReportContentToConsole((String) report.get("storageFolderPath"), (String) report.get("uuid"));
+                        System.out.println((endReached ? "" : ","));
                     } else {
                         JSONObject obj = (JSONObject) data.get(string);
-                        System.out.println("  \"" + string + "\" : " + obj.toString(2, 1) + ",");
+                        System.out.println("  \"" + string + "\" : " + obj.toString(2, 1) + (endReached ? "" : ","));
                     }
                 }
                 System.out.println("}");

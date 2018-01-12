@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -59,8 +59,28 @@ import com.sun.mail.imap.ModifiedSinceTerm;
  * support for additional product-specific search terms.
  *
  * @author	John Mani
+ * @author	Bill Shannon
  */
 public class SearchSequence {
+
+    private IMAPProtocol protocol;	// for hasCapability checks; may be null
+
+    /**
+     * Create a SearchSequence for this IMAPProtocol.
+     *
+     * @param	p	the IMAPProtocol object for the server
+     * @since	JavaMail 1.6.0
+     */
+    public SearchSequence(IMAPProtocol p) {
+	protocol = p;
+    }
+
+    /**
+     * Create a SearchSequence.
+     */
+    @Deprecated
+    public SearchSequence() {
+    }
 
     /**
      * Generate the IMAP search sequence for the given search expression. 
@@ -406,7 +426,7 @@ public class SearchSequence {
     protected Calendar cal = new GregorianCalendar();
 
     protected String toIMAPDate(Date date) {
-	StringBuffer s = new StringBuffer();
+	StringBuilder s = new StringBuilder();
 
 	cal.setTime(date);
 
@@ -488,6 +508,8 @@ public class SearchSequence {
      * @since	JavaMail 1.5.1
      */
     protected Argument older(OlderTerm term) throws SearchException {
+	if (protocol != null && !protocol.hasCapability("WITHIN"))
+	    throw new SearchException("Server doesn't support OLDER searches");
 	Argument result = new Argument();
 	result.writeAtom("OLDER");
 	result.writeNumber(term.getInterval());
@@ -503,6 +525,8 @@ public class SearchSequence {
      * @since	JavaMail 1.5.1
      */
     protected Argument younger(YoungerTerm term) throws SearchException {
+	if (protocol != null && !protocol.hasCapability("WITHIN"))
+	    throw new SearchException("Server doesn't support YOUNGER searches");
 	Argument result = new Argument();
 	result.writeAtom("YOUNGER");
 	result.writeNumber(term.getInterval());
@@ -519,6 +543,8 @@ public class SearchSequence {
      */
     protected Argument modifiedSince(ModifiedSinceTerm term)
 				throws SearchException {
+	if (protocol != null && !protocol.hasCapability("CONDSTORE"))
+	    throw new SearchException("Server doesn't support MODSEQ searches");
 	Argument result = new Argument();
 	result.writeAtom("MODSEQ");
 	result.writeNumber(term.getModSeq());

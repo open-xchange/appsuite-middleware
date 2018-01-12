@@ -58,7 +58,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 import com.openexchange.database.Databases;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -84,12 +83,14 @@ public class UserSettingServerAddPrimaryKeyUpdateTask extends UpdateTaskAdapter 
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int cid = params.getContextId();
-        Connection con = Database.getNoTimeout(cid, true);
-        Column column = new Column("uuid", "BINARY(16) NOT NULL");
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
             con.setAutoCommit(false);
+            rollback = true;
+
             setUUID(con);
+            Column column = new Column("uuid", "BINARY(16) NOT NULL");
             Tools.modifyColumns(con, "user_setting_server", column);
 
             dropDuplicates(con);
@@ -108,15 +109,16 @@ public class UserSettingServerAddPrimaryKeyUpdateTask extends UpdateTaskAdapter 
             // Tools.createForeignKey(con, "user_setting_server", new String[] {"cid", "user"}, "user", new String[] {"cid", "id"});
 
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            DBUtils.rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            DBUtils.rollback(con);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                DBUtils.rollback(con);
+            }
             DBUtils.autocommit(con);
-            Database.backNoTimeout(cid, true, con);
         }
     }
 

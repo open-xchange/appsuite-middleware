@@ -71,6 +71,7 @@ import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -118,7 +119,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageUtility;
+import com.openexchange.file.storage.NameBuilder;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorage;
@@ -126,6 +127,7 @@ import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
@@ -330,18 +332,21 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             rollback = false;
 
             // Invalidate cache
-            {
-                CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-                if (null != cacheService) {
-                    try {
+            try {
+                MailAccountStorageService mass = AdminServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+                if (null != mass) {
+                    mass.invalidateMailAccount(0, userId, contextId);
+                } else {
+                    CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+                    if (null != cacheService) {
                         Cache cache = cacheService.getCache("MailAccount");
                         cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(0), Integer.toString(userId)));
                         cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(userId)));
                         cache.invalidateGroup(ctx.getId().toString());
-                    } catch (final OXException e) {
-                        log.error("", e);
                     }
                 }
+            } catch (final OXException e) {
+                log.error("", e);
             }
 
         } catch (final SQLException e) {
@@ -652,10 +657,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         PreparedStatement stmt = null;
         PreparedStatement folder_update = null;
 
-        PreparedStatement stmtupdateattribute = null;
-        PreparedStatement stmtinsertattribute = null;
-        PreparedStatement stmtdelattribute = null;
-
         boolean rollback = false;
 
         try {
@@ -810,63 +811,61 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // Change storage data
             changeStorageDataImpl(usrdata, ctx, con);
 
-            // update user aliases
+            // Update user's E-Mail aliases
             UserAliasStorage aliasStorage = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class);
-            final HashSet<String> alias = usrdata.getAliases();
-            if (null != alias) {
-                Set<String> storedAliases = new HashSet<>(aliasStorage.getAliases(contextId, userId));
-                for (final String elem : alias) {
-                    if (elem != null && elem.trim().length() > 0) {
-                        if (!containsAndRemove(elem, storedAliases)) {
-                            aliasStorage.createAlias(con, contextId, userId, elem);
-                        }
-                    }
+            {
+                Set<String> aliases = usrdata.getAliases();
+                if (null != aliases) {
+                    aliasStorage.setAliases(con, contextId, userId, aliases);
+                } else if (usrdata.isAliasesset()) {
+                    aliasStorage.deleteAliases(con, contextId, userId);
                 }
-                for (String storedAlias : storedAliases) {
-                    aliasStorage.deleteAlias(con, contextId, userId, storedAlias);
-                }
-            } else if (usrdata.isAliasesset()) {
-                aliasStorage.deleteAliases(con, contextId, userId);
             }
 
             if (usrdata.isUserAttributesset()) {
-
-                stmtupdateattribute = con.prepareStatement("UPDATE user_attribute SET value = ? WHERE cid=? AND id=? AND name=?");
-                stmtupdateattribute.setInt(2, contextId);
-                stmtupdateattribute.setInt(3, userId);
-
-                stmtinsertattribute = con.prepareStatement("INSERT INTO user_attribute (value, cid, id, name, uuid) VALUES (?, ?, ?, ?, ?)");
-                stmtinsertattribute.setInt(2, contextId);
-                stmtinsertattribute.setInt(3, userId);
-
-                stmtdelattribute = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?");
-                stmtdelattribute.setInt(1, contextId);
-                stmtdelattribute.setInt(2, userId);
-
-                for (final Map.Entry<String, Map<String, String>> ns : usrdata.getUserAttributes().entrySet()) {
-                    final String namespace = ns.getKey();
-                    for (final Map.Entry<String, String> pair : ns.getValue().entrySet()) {
-                        final String name = namespace + "/" + pair.getKey();
-                        final String value = pair.getValue();
-                        if (value != null) {
-                            stmtupdateattribute.setString(1, value);
-                            stmtupdateattribute.setString(4, name);
-
-                            final int changedRows = stmtupdateattribute.executeUpdate();
-                            if (changedRows == 0) {
-                                stmtinsertattribute.setString(1, value);
-                                stmtinsertattribute.setString(4, name);
-                                byte[] uuidBinary = UUIDs.toByteArray(UUID.randomUUID());
-                                stmtinsertattribute.setBytes(5, uuidBinary);
+                PreparedStatement stmtinsertattribute = null;
+                PreparedStatement stmtdelattribute = null;
+                try {
+                    for (Map.Entry<String, Map<String, String>> ns : usrdata.getUserAttributes().entrySet()) {
+                        String namespace = ns.getKey();
+                        for (Map.Entry<String, String> pair : ns.getValue().entrySet()) {
+                            String name = namespace + "/" + pair.getKey();
+                            String value = pair.getValue();
+                            if (value == null) {
+                                if (null == stmtdelattribute) {
+                                    stmtdelattribute = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?");
+                                    stmtdelattribute.setInt(1, contextId);
+                                    stmtdelattribute.setInt(2, userId);
+                                }
+                                stmtdelattribute.setString(3, name);
+                                stmtdelattribute.addBatch();
+                            } else {
+                                if (null == stmtinsertattribute) {
+                                    stmtinsertattribute = con.prepareStatement("INSERT INTO user_attribute (cid, id, name, value, uuid) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE value=?");
+                                    stmtinsertattribute.setInt(1, contextId);
+                                    stmtinsertattribute.setInt(2, userId);
+                                }
+                                stmtinsertattribute.setString(3, name);
+                                stmtinsertattribute.setString(4, value);
+                                stmtinsertattribute.setBytes(5, UUIDs.toByteArray(UUID.randomUUID()));
+                                stmtinsertattribute.setString(6, value);
                                 stmtinsertattribute.executeUpdate();
+                                stmtinsertattribute.addBatch();
                             }
-                        } else {
-                            stmtdelattribute.setString(3, name);
-                            stmtdelattribute.executeUpdate();
                         }
                     }
-                }
 
+                    if (null != stmtdelattribute) {
+                        stmtdelattribute.executeBatch();
+                    }
+                    if (null != stmtinsertattribute) {
+                        stmtinsertattribute.executeBatch();
+                    }
+
+                } finally {
+                    Databases.closeSQLStuff(stmtinsertattribute);
+                    Databases.closeSQLStuff(stmtdelattribute);
+                }
             }
 
             // update prg_contacts ONLY if needed ( see
@@ -1303,9 +1302,19 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         cache.remove(key);
                         cache = cacheService.getCache("Capabilities");
                         cache.removeFromGroup(Integer.valueOf(userId), ctx.getId().toString());
-                        cache = cacheService.getCache("MailAccount");
-                        cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(0), Integer.toString(userId)));
-                        cache.invalidateGroup(ctx.getId().toString());
+
+                        {
+                            MailAccountStorageService mass = AdminServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+                            if (null != mass) {
+                                mass.invalidateMailAccount(0, userId, contextId);
+                            } else {
+                                cache = cacheService.getCache("MailAccount");
+                                cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(0), Integer.toString(userId)));
+                                cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(userId)));
+                                cache.invalidateGroup(ctx.getId().toString());
+                            }
+                        }
+
                         cache = cacheService.getCache("QuotaFileStorages");
                         cache.invalidateGroup(Integer.toString(contextId));
                         if (displayNameUpdate) {
@@ -1378,10 +1387,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             closeSQLStuff(folder_update);
             closeSQLStuff(stmt);
-
-            Databases.closeSQLStuff(stmtupdateattribute);
-            Databases.closeSQLStuff(stmtinsertattribute);
-            Databases.closeSQLStuff(stmtdelattribute);
 
             if (con != null) {
                 try {
@@ -2121,11 +2126,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             log.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, dt);
             throw AdminCache.parseDataTruncation(dt);
         } catch (final SQLException e) {
-            log.error("SQL Error", e);
-            throw new StorageException(e.toString());
+            throw new StorageException(e.toString(), e);
         } catch (final OXException e) {
-            log.error("OX Error", e);
-            throw new StorageException(e.toString());
+            throw new StorageException(e.toString(), e);
         } catch (final NoSuchAlgorithmException e) {
             // Here we throw without rollback, because at the point this
             // exception is thrown
@@ -2223,7 +2226,11 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     ConfigView view = viewFactory.getView(userId, ctx.getId());
                     check = view.get("com.openexchange.mail.useStaticDefaultFolders", Boolean.class);
                 } catch (OXException e) {
-                    log.warn("Unable to load com.openexchange.mail.useStaticDefaultFolders property.");
+                    if (ContextExceptionCodes.NOT_FOUND.equals(e)) {
+                        // Context is about being created...
+                    } else {
+                        log.warn("Unable to load com.openexchange.mail.useStaticDefaultFolders property.");
+                    }
                 }
             }
 
@@ -2281,9 +2288,21 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
         try {
             mass.insertMailAccount(account, userId, context, null, con);
+            lockTable("updateTask", con);
         } catch (final OXException e) {
-            log.error("Problem storing the primary mail account.", e);
-            throw new StorageException(e.toString());
+            throw new StorageException("Problem storing the primary mail account.", e);
+        } catch (SQLException e) {
+            throw new StorageException("Problem storing the primary mail account.", e);
+        }
+    }
+
+    private void lockTable(String table, Connection con) throws SQLException {
+        Statement stmt = null;
+        try {
+            stmt = con.createStatement();
+            stmt.execute("SELECT 1 FROM " + table + " FOR UPDATE");
+        } finally {
+            closeSQLStuff(stmt);
         }
     }
 
@@ -2407,39 +2426,16 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public int[] getAll(final Context ctx) throws StorageException {
+    public int[] getAll(Context ctx) throws StorageException {
         int context_id = ctx.getId().intValue();
         Connection read_ox_con = null;
-        PreparedStatement stmt = null;
         try {
-            List<Integer> list = new LinkedList<>();
             read_ox_con = cache.getConnectionForContext(context_id);
-            stmt = read_ox_con.prepareStatement("SELECT con.userid,con.field01,con.field02,con.field03,lu.uid FROM prg_contacts con JOIN login2user lu  ON con.userid = lu.id WHERE con.cid = ? AND con.cid = lu.cid AND (lu.uid LIKE '%' OR con.field01 LIKE '%');");
-
-            stmt.setInt(1, context_id);
-            final ResultSet rs3 = stmt.executeQuery();
-            while (rs3.next()) {
-                list.add(Integer.valueOf(rs3.getInt("userid")));
-            }
-            rs3.close();
-
-            int[] retval = new int[list.size()];
-            for (int i = 0; i < list.size(); i++) {
-                retval[i] = list.get(i).intValue();
-            }
-
-            return retval;
-        } catch (final SQLException e) {
-            log.error("SQL Error", e);
-            throw new StorageException(e.toString());
+            return getAll(ctx, read_ox_con);
         } catch (final PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        } catch (final RuntimeException e) {
-            log.error("", e);
-            throw e;
         } finally {
-            Databases.closeSQLStuff(stmt);
             if (read_ox_con != null) {
                 try {
                     cache.pushConnectionForContextAfterReading(context_id, read_ox_con);
@@ -2447,6 +2443,41 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     log.error("Pool Error pushing ox read connection to pool!", exp);
                 }
             }
+        }
+    }
+
+    @Override
+    public int[] getAll(Context ctx, Connection read_ox_con) throws StorageException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = read_ox_con.prepareStatement("SELECT con.userid FROM prg_contacts con JOIN login2user lu ON con.userid = lu.id WHERE con.cid = ? AND con.cid = lu.cid AND (lu.uid LIKE '%' OR con.field01 LIKE '%')");
+            stmt.setInt(1, ctx.getId().intValue());
+            rs = stmt.executeQuery();
+
+            List<Integer> list = new LinkedList<>();
+            while (rs.next()) {
+                list.add(Integer.valueOf(rs.getInt(1)));
+            }
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            Iterator<Integer> iter = list.iterator();
+            int size = list.size();
+            int[] retval = new int[size];
+            for (int i = 0; i < size; i++) {
+                retval[i] = iter.next().intValue();
+            }
+            return retval;
+        } catch (final SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e.toString());
+        } catch (final RuntimeException e) {
+            log.error("", e);
+            throw e;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -2931,7 +2962,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     /**
      * Parses a dynamic attribute from the user_attribute table
      * Returns a String[] with retval[0] being the namespace and retval[1] being the name
-     * 
+     *
      * @throws StorageException
      */
     private String[] parseDynamicAttribute(final String name) throws StorageException {
@@ -2959,7 +2990,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 int userId = user.getId().intValue();
 
                 {
-                    DeleteEvent delev = new DeleteEvent(this, userId, DeleteEvent.TYPE_USER, 0, ContextStorage.getInstance().getContext(contextId), destUser);
+                    DeleteEvent delev = DeleteEvent.createDeleteEventForUserDeletion(this, userId, 0, ContextStorage.getInstance().getContext(contextId), destUser);
                     DeleteRegistry.getInstance().fireDeleteEvent(delev, write_ox_con, write_ox_con);
                 }
 
@@ -3572,11 +3603,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 UserConfigurationStorage.getInstance().invalidateCache(user.getUserId(), gwCtx);
             }
         } catch (final SQLException e) {
-            log.error("SQL Error", e);
-            throw new StorageException(e.toString());
+            throw new StorageException(e.toString(), e);
         } catch (final OXException e) {
-            log.error("UserConfiguration Error", e);
-            throw new StorageException(e.toString());
+            throw new StorageException(e.toString(), e);
         }
     }
 
@@ -3698,12 +3727,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         try {
             FolderCacheManager cache = FolderCacheManager.getInstance();
             List<Pair<Integer, String>> folderIds = prepareFolders(contextId, userId, con);
-            Date now = new Date();
+            long now = System.currentTimeMillis();
             StringBuilder sb = new StringBuilder("UPDATE oxfolder_tree SET default_flag = 0, type = 2, fname = ?, changing_date = ? WHERE cid = ? AND fuid = ?");
             stmt = con.prepareStatement(sb.toString());
             for (Pair<Integer, String> pair : folderIds) {
                 stmt.setString(1, pair.getSecond());
-                stmt.setLong(2, now.getTime());
+                stmt.setLong(2, now);
                 stmt.setInt(3, contextId);
                 stmt.setInt(4, pair.getFirst());
                 stmt.addBatch();
@@ -3747,9 +3776,12 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 if (needTranslation) {
                     int parent = rs.getInt(3);
                     translatedName = helper.getString(name);
-                    int i = 1;
+                    NameBuilder nb = null;
                     while (existsFolder(contextId, parent, folderId, translatedName, con)) {
-                        translatedName = FileStorageUtility.enhance(translatedName, i++);
+                        if (null == nb) {
+                            nb = new NameBuilder(translatedName);
+                        }
+                        translatedName = nb.advance().toString();
                     }
                 }
                 result.add(new Pair<Integer, String>(folderId, translatedName));

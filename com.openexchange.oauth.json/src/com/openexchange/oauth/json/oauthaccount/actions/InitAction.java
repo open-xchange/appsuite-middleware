@@ -74,6 +74,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.oauth.HostInfo;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
@@ -222,7 +223,7 @@ public final class InitAction extends AbstractOAuthTokenAction {
         /*
          * Invoke
          */
-        final String currentHost = determineHost(request, session);
+        final HostInfo currentHost = determineHost(request, session);
         final OAuthInteraction interaction = oauthService.initOAuth(serviceId, callbackUrl, currentHost, session, scopes);
         final OAuthToken requestToken = interaction.getRequestToken();
         /*
@@ -240,7 +241,8 @@ public final class InitAction extends AbstractOAuthTokenAction {
         }
         oauthState.put(OAuthConstants.ARGUMENT_SECRET, requestToken.getSecret());
         oauthState.put(OAuthConstants.ARGUMENT_CALLBACK, callbackUrl);
-        oauthState.put(OAuthConstants.ARGUMENT_CURRENT_HOST, currentHost);
+        oauthState.put(OAuthConstants.ARGUMENT_CURRENT_HOST, currentHost.getHost());
+        oauthState.put(OAuthConstants.ARGUMENT_ROUTE, currentHost.getRoute());
         oauthState.put(OAuthConstants.ARGUMENT_AUTH_URL, interaction.getAuthorizationURL());
         session.setParameter(uuid, oauthState);
         session.setParameter(Session.PARAM_TOKEN, oauthSessionToken);
@@ -268,6 +270,10 @@ public final class InitAction extends AbstractOAuthTokenAction {
          * Return appropriate result
          */
         return new AJAXRequestResult(jsonInteraction);
+    }
+
+    private HostInfo determineHost(AJAXRequestData request, ServerSession session) {
+        return new HostInfo(determineHostName(request, session), request.getRoute());
     }
 
     /**
@@ -331,7 +337,7 @@ public final class InitAction extends AbstractOAuthTokenAction {
      * @param session The groupware {@link Session}
      * @return The hostname
      */
-    private String determineHost(AJAXRequestData requestData, ServerSession session) {
+    private String determineHostName(AJAXRequestData requestData, ServerSession session) {
         String hostName = null;
         /*
          * Ask hostname service if available

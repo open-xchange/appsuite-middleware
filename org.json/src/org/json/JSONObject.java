@@ -90,6 +90,9 @@ public class JSONObject extends AbstractJSONValue {
 
     private static final long serialVersionUID = 3666538885751033341L;
 
+    /** The (immutable) empty JSON object */
+    public static final JSONObject EMPTY_OBJECT = ImmutableJSONObject.immutableFor(new JSONObject(0));
+
     /**
      * The logger reference.
      */
@@ -660,7 +663,41 @@ public class JSONObject extends AbstractJSONValue {
      * @return true if the key exists in the JSONObject.
      */
     public boolean has(final String key) {
-        return this.myHashMap.containsKey(key);
+        return null != key && this.myHashMap.containsKey(key);
+    }
+
+    /**
+     * Determine if the JSONObject contains any of the specified keys.
+     *
+     * @param keys A list of keys to check
+     * @return true if one key exist in the JSONObject
+     */
+    public boolean hasAny(String... keys) {
+        if (keys != null) {
+            for (String key : keys) {
+                if (null != key && this.myHashMap.containsKey(key)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Determine if the JSONObject contains any of the specified keys.
+     *
+     * @param keys A list of keys to check
+     * @return true if one key exist in the JSONObject
+     */
+    public boolean hasAny(Collection<String> keys) {
+        if (keys != null) {
+            for (String key : keys) {
+                if (null != key && this.myHashMap.containsKey(key)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**

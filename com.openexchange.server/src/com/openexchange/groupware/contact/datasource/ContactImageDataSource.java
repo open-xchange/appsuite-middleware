@@ -206,6 +206,15 @@ public final class ContactImageDataSource implements ImageDataSource {
             LOG.warn("Requested a non-existing image in contact: object-id={} folder={} context={} session-user={}. Returning an empty image as fallback.", objectId, folder, session.getContextId(), session.getUserId());
             properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
             properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
+            properties.put(DataProperties.PROPERTY_NAME, "image.jpg");
+            return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
+        }
+
+        if (false == com.openexchange.ajax.helper.ImageUtils.isValidImage(imageBytes)) {
+            LOG.warn("Detected non-image data in contact: object-id={} folder={} context={} session-user={}. Returning an empty image as fallback.", objectId, folder, session.getContextId(), session.getUserId());
+            properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
+            properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
+            properties.put(DataProperties.PROPERTY_NAME, "image.jpg");
             return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
         }
 
@@ -213,6 +222,7 @@ public final class ContactImageDataSource implements ImageDataSource {
             LOG.warn("Detected a possibly harmful SVG image in contact: object-id={} folder={} context={} session-user={}. Returning an empty image as fallback.", objectId, folder, session.getContextId(), session.getUserId());
             properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
             properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
+            properties.put(DataProperties.PROPERTY_NAME, "image.jpg");
             return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
         }
 

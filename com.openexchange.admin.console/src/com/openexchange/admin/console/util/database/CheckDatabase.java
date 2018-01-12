@@ -53,6 +53,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.Naming;
 import java.util.ArrayList;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.LockSupport;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -63,7 +67,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CheckDatabase extends DatabaseAbstraction {
+public final class CheckDatabase extends DatabaseAbstraction {
 
     public CheckDatabase(final String[] args2) {
 
@@ -78,7 +82,47 @@ public class CheckDatabase extends DatabaseAbstraction {
 
             // get rmi ref
             final OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME +OXUtilInterface.RMI_NAME);
-            final Database[][] databases = oxutil.checkDatabase(auth);
+
+            // Trigger checkdatabase
+            final AtomicReference<Database[][]> checkedDatabases = new AtomicReference<>(null);
+            final AtomicReference<Exception> errorRef = new AtomicReference<Exception>();
+            Runnable runnbable = new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        checkedDatabases.set(oxutil.checkDatabase(auth));
+                    } catch (Exception e) {
+                        errorRef.set(e);
+                    }
+                }
+            };
+            FutureTask<Void> ft = new FutureTask<Void>(runnbable, null);
+            new Thread(ft, "Open-Xchange Database Checker").start();
+
+            // Await termination
+            String infoMessage = "Checking database schemas";
+            System.out.print(infoMessage);
+            int c = infoMessage.length();
+            while (false == ft.isDone()) {
+                System.out.print(".");
+                if (c++ >= 76) {
+                    c = 0;
+                    System.out.println();
+                }
+                LockSupport.parkNanos(TimeUnit.NANOSECONDS.convert(500L, TimeUnit.MILLISECONDS));
+            }
+            System.out.println();
+
+            // Check for error
+            Exception error = errorRef.get();
+            if (null != error) {
+                throw error;
+            }
+
+            // Success..
+            System.out.println();
+            Database[][] databases = checkedDatabases.get();
 
             if (null != parser.getOptionValue(this.csvOutputOption)) {
                 precsvinfos(databases);

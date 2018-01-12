@@ -49,6 +49,7 @@
 
 package com.openexchange.push.impl;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -477,10 +478,18 @@ public final class PushManagerRegistry implements PushListenerService {
 
     @Override
     public boolean registerPermanentListenerFor(Session session, String clientId) throws OXException {
-        if (!hasWebMail(session) || !PushUtility.allowedClient(clientId, null, true)) {
+        if (false == hasWebMail(session)) {
+            /*
+             * No "webmail" permission granted
+             */
+            LOG.info("Denied registration of a permanent push listener for client {} from user {} in context {}: Missing \"webmail\" permission.", clientId, I(session.getUserId()), I(session.getContextId()));
+            return false;
+        }
+        if (false == PushUtility.allowedClient(clientId, null, true)) {
             /*
              * No permanent push listener for the client.
              */
+            LOG.info("Denied registration of a permanent push listener for client {} from user {} in context {}: Not allowed for specified client.", clientId, I(session.getUserId()), I(session.getContextId()));
             return false;
         }
 
@@ -562,6 +571,7 @@ public final class PushManagerRegistry implements PushListenerService {
             /*
              * No permanent push listener for the client.
              */
+            LOG.info("Denied unregistration of a permanent push listener for client {} from user {} in context {}: Not allowed for specified client.", clientId, I(userId), I(contextId));
             return false;
         }
 
@@ -792,10 +802,18 @@ public final class PushManagerRegistry implements PushListenerService {
         /*
          * Check session's client identifier
          */
-        if (!hasWebMail(session) || !PushUtility.allowedClient(session.getClient(), session, true)) {
+        if (false == hasWebMail(session)) {
+            /*
+             * No "webmail" permission granted
+             */
+            LOG.debug("Denied registration of a push listener for client {} from user {} in context {}: Missing \"webmail\" permission.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
+            return null;
+        }
+        if (false == PushUtility.allowedClient(session.getClient(), null, true)) {
             /*
              * No push listener for the client associated with current session.
              */
+            LOG.debug("Denied registration of a push listener for client {} from user {} in context {}: Not allowed for specified client.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
             return null;
         }
         /*
@@ -826,6 +844,7 @@ public final class PushManagerRegistry implements PushListenerService {
             /*
              * No push listener for the client associated with current session.
              */
+            LOG.debug("Denied unregistration of a push listener for client {} from user {} in context {}: Not allowed for specified client.", session.getClient(), I(session.getUserId()), I(session.getContextId()));
             return false;
         }
         /*

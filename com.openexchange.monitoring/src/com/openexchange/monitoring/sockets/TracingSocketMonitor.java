@@ -74,6 +74,7 @@ import com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder;
 import com.openexchange.net.HostList;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
+import com.planetj.math.rabinhash.RabinHashFunction32;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
@@ -595,41 +596,69 @@ public class TracingSocketMonitor implements SocketMonitor {
     // ------------------------------------------------------------------------------
 
     /**
-     * Puts socket-specific log properties.
+     * Puts socket-specific log properties.<br>
+     * Example:
+     * <pre>
+     *  com.openexchange.monitoring.sockets.166120149.accumulatedWaitMillis=523
+     *  com.openexchange.monitoring.sockets.166120149.host=imap.domain.tld
+     *  com.openexchange.monitoring.sockets.166120149.port=143
+     *  com.openexchange.monitoring.sockets.166120149.status=OK
+     * </pre>
      *
      * @param name The property name
      * @param value The property value
      */
     static void putLogProperties(Socket socket, long duration, SocketStatus socketStatus) {
         // Build log property prefix for specified socket
-        StringBuilder sb = new StringBuilder("com.openexchange.monitoring.sockets.");
-        {
-            InetAddress address = socket.getInetAddress();
-            String host = address.getHostName();
-            if (Strings.isEmpty(host)) {
-                host = address.getHostAddress();
-            }
-            sb.append('[').append(host).append(':').append(socket.getPort()).append("].").append(socket.hashCode()).append('.');
+        InetAddress address = socket.getInetAddress();
+        String host = address.getHostName();
+        if (Strings.isEmpty(host)) {
+            host = address.getHostAddress();
         }
-        int len = sb.length();
+        int port = socket.getPort();
+
+        StringBuilder keyBuilder = new StringBuilder(76);
+        {
+            // Calculate hash from <host> + ":" + <port> + "-" + <hashcode>
+            keyBuilder.append(host).append(':').append(port).append('-').append(socket.hashCode());
+            int hash = Math.abs(RabinHashFunction32.DEFAULT_HASH_FUNCTION.hash(keyBuilder.toString()));
+            // Build key prefix
+            keyBuilder.setLength(0);
+            keyBuilder.append("com.openexchange.monitoring.sockets.").append(hash).append('.');
+        }
+        int resetLen = keyBuilder.length();
+
+        // Host
+        {
+            String key = keyBuilder.append("host").toString();
+            MDC.put(key, host);
+        }
+
+        // Port
+        keyBuilder.setLength(resetLen);
+        {
+            String key = keyBuilder.append("port").toString();
+            MDC.put(key, Integer.toString(port));
+        }
 
         // Duration
+        keyBuilder.setLength(resetLen);
         {
-            String name = sb.append("accumulatedWaitMillis").toString();
-            String sDuration = MDC.get(name);
+            String key = keyBuilder.append("accumulatedWaitMillis").toString();
+            String sDuration = MDC.get(key);
             if (null == sDuration) {
-                MDC.put(name, Long.toString(duration));
+                MDC.put(key, Long.toString(duration));
             } else {
                 long prevDur = parseLong(sDuration);
-                MDC.put(name, Long.toString(prevDur >= 0 ? prevDur + duration : duration));
+                MDC.put(key, Long.toString(prevDur > 0 ? prevDur + duration : duration));
             }
         }
 
         // Status
-        sb.setLength(len);
+        keyBuilder.setLength(resetLen);
         {
-            String name = sb.append("status").toString();
-            MDC.put(name, socketStatus.getId());
+            String key = keyBuilder.append("status").toString();
+            MDC.put(key, socketStatus.getId());
         }
     }
 

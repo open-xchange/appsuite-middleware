@@ -137,6 +137,8 @@ public class SieveHandler {
 
     private final static String SIEVE_LIST = "LISTSCRIPTS" + CRLF;
 
+    private final static String SIEVE_CAPABILITY = "CAPABILITY" + CRLF;
+
     private final static String SIEVE_GET_SCRIPT = "GETSCRIPT ";
 
     private final static String SIEVE_LOGOUT = "LOGOUT" + CRLF;
@@ -146,6 +148,13 @@ public class SieveHandler {
     protected static final int OK = 0;
 
     protected static final int NO = 1;
+
+    /**
+     * {@link WelcomeKeyword} - The server welcome keywords
+     */
+    private static enum WelcomeKeyword {
+        STARTTLS, IMPLEMENTATION, SIEVE, SASL, MAXREDIRECTS
+    }
 
     /**
      * Remembers timed out servers for 10 seconds. Any further attempts to connect to such
@@ -478,8 +487,46 @@ public class SieveHandler {
             if (!selectAuth(saslMech, commandBuilder, configuredAuthTimeout)) {
                 throw new OXSieveHandlerInvalidCredentialsException("Authentication failed");
             }
+
+            /*
+             * Fetch capabilities again
+             */
+            fetchCapabilities();
+
             log.debug("Authentication to sieve successful");
             measureEnd("selectAuth");
+        }
+    }
+
+    /**
+     * @throws OXSieveHandlerException
+     * @throws IOException
+     *
+     */
+    private void fetchCapabilities() throws OXSieveHandlerException, IOException {
+        if (!(AUTH)) {
+            throw new OXSieveHandlerException("Capability not possible. Auth first.", sieve_host, sieve_host_port, null);
+        }
+
+        final String capability = SIEVE_CAPABILITY;
+        bos_sieve.write(capability.getBytes(com.openexchange.java.Charsets.UTF_8));
+        bos_sieve.flush();
+
+        // Forget previous capabilities
+        capa = new Capabilities();
+
+        while (true) {
+            final String temp = bis_sieve.readLine();
+            if (null == temp) {
+                throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, null);
+            }
+            if (temp.startsWith(SIEVE_OK)) {
+                return;
+            }
+            if (temp.startsWith(SIEVE_NO)) {
+                throw new OXSieveHandlerException("Unable to retrieve sieve capability", sieve_host, sieve_host_port, parseSIEVEResponse(temp, null));
+            }
+            parseCapabilities(temp);
         }
     }
 
@@ -940,7 +987,7 @@ public class SieveHandler {
                 AUTH = false;
                 throw new OXSieveHandlerException("Communication to SIEVE server aborted. ", sieve_host, sieve_host_port, parseSIEVEResponse(test, null));
             } else {
-                parseCAPA(test);
+                parseCapabilities(test);
             }
         }
     }
@@ -1356,7 +1403,7 @@ public class SieveHandler {
                         return authXOAUTH2(commandBuilder);
                     default:
                         return false;
-                        
+
                 }
             } catch (SocketTimeoutException e) {
                 // Read timeout while doing auth
@@ -1371,41 +1418,71 @@ public class SieveHandler {
         }
     }
 
-    private void parseCAPA(final String line) {
-        final String starttls = "\"STARTTLS\"";
-        final String implementation = "\"IMPLEMENTATION\"";
-        final String sieve = "\"SIEVE\"";
-        final String sasl = "\"SASL\"";
+    /**
+     * Parses the server capabilities
+     *
+     * @param line The server line
+     */
+    private void parseCapabilities(String line) {
+        int index = line.indexOf(' ');
+        if (index < 0) {
+            index = line.length();
+        }
+        String key = line.substring(0, index).trim();
+        String value = line.substring(index).trim();
+        String token = Strings.unquote(key);
+        if (null == token) {
+            return;
+        }
+        WelcomeKeyword keyword;
+        try {
+            keyword = WelcomeKeyword.valueOf(token);
+        } catch (IllegalArgumentException e) {
+            log.debug("Unknown keyword '{}'", token);
+            return;
+        }
 
-        String temp = line;
+        parseWelcomeKeyword(keyword, value);
+    }
 
-        if (temp.startsWith(starttls)) {
-            temp = temp.substring(starttls.length());
-            capa.setStarttls(Boolean.TRUE);
-        } else if (temp.startsWith(implementation)) {
-            temp = temp.substring(implementation.length());
-            temp = temp.substring(temp.indexOf('\"') + 1);
-            temp = temp.substring(0, temp.indexOf('\"'));
-
-            capa.setImplementation(temp);
-        } else if (temp.startsWith(sieve)) {
-            temp = temp.substring(sieve.length());
-            temp = temp.substring(temp.indexOf("\"") + 1);
-            temp = temp.substring(0, temp.indexOf("\""));
-
-            final StringTokenizer st = new StringTokenizer(temp);
-            while (st.hasMoreTokens()) {
-                capa.addSieve(st.nextToken());
+    /**
+     * Parses the {@link WelcomeKeyword} and the specified value
+     * 
+     * @param keyword The {@link WelcomeKeyword} to parse
+     * @param value The optional value of the keyword
+     */
+    private void parseWelcomeKeyword(WelcomeKeyword keyword, String value) {
+        String unquoted = Strings.unquote(value);
+        switch (keyword) {
+            case IMPLEMENTATION:
+                capa.setImplementation(unquoted);
+                return;
+            case MAXREDIRECTS:
+                try {
+                    capa.addExtendedProperty(keyword.name(), Integer.valueOf(unquoted));
+                } catch (NumberFormatException ex) {
+                    log.error("Unable to parse '{}' capability value: {}", keyword, unquoted);
+                }
+                return;
+            case SASL: {
+                StringTokenizer st = new StringTokenizer(unquoted);
+                while (st.hasMoreTokens()) {
+                    capa.addSasl(st.nextToken().toUpperCase());
+                }
+                return;
             }
-        } else if (temp.startsWith(sasl)) {
-            temp = temp.substring(sasl.length());
-            temp = temp.substring(temp.indexOf("\"") + 1);
-            temp = temp.substring(0, temp.indexOf("\""));
-
-            final StringTokenizer st = new StringTokenizer(temp);
-            while (st.hasMoreTokens()) {
-                capa.addSasl(st.nextToken().toUpperCase());
+            case SIEVE: {
+                StringTokenizer st = new StringTokenizer(unquoted);
+                while (st.hasMoreTokens()) {
+                    capa.addSieve(st.nextToken());
+                }
+                return;
             }
+            case STARTTLS:
+                capa.setStarttls(Boolean.TRUE);
+                return;
+            default:
+                return;
         }
     }
 

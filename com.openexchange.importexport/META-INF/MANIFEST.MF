@@ -2,10 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Importexport
 Bundle-SymbolicName: com.openexchange.importexport
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Activator: com.openexchange.importexport.osgi.ImportExportActivator
 Bundle-Vendor: OPENEXCHANGE
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
  com.fasterxml.jackson.core.format,
@@ -17,6 +17,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.ajax,
  com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
+ com.openexchange.ajax.helper,
  com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.ajax.writer,
@@ -32,6 +33,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.data.conversion.ical,
  com.openexchange.documentation,
  com.openexchange.exception,
+ com.openexchange.file.storage.composition,
  com.openexchange.folder,
  com.openexchange.groupware,
  com.openexchange.groupware.calendar,
@@ -41,6 +43,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.generic,
+ com.openexchange.groupware.i18n,
  com.openexchange.groupware.importexport,
  com.openexchange.groupware.importexport.csv,
  com.openexchange.groupware.ldap,
@@ -73,6 +76,7 @@ Import-Package: com.fasterxml.jackson.core,
  gnu.trove.map.hash,
  gnu.trove.procedure,
  org.apache.commons.io,
+ org.apache.commons.lang,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework,

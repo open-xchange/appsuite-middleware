@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.API;
+import com.openexchange.oauth.HostInfo;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthInteractionType;
@@ -181,7 +182,7 @@ public class MockOAuthService implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#initOAuth(java.lang.String, java.lang.String)
      */
     @Override
-    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl, String currentHost, Session session, Set<OAuthScope> scopes) throws OXException {
+    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl, HostInfo currentHost, Session session, Set<OAuthScope> scopes) throws OXException {
         // Nothing to do
         return null;
     }

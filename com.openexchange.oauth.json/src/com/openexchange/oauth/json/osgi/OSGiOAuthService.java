@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.API;
+import com.openexchange.oauth.HostInfo;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthInteractionType;
@@ -120,7 +121,7 @@ public final class OSGiOAuthService extends AbstractOSGiDelegateService<OAuthSer
     }
 
     @Override
-    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl, final String host, final Session session, Set<OAuthScope> scopes) throws OXException {
+    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl, final HostInfo host, final Session session, Set<OAuthScope> scopes) throws OXException {
         return getService0().initOAuth(serviceMetaData, callbackUrl, host, session, scopes);
     }
 

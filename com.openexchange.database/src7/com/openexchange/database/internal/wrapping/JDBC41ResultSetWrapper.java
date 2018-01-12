@@ -59,11 +59,8 @@ import java.sql.SQLException;
  */
 public class JDBC41ResultSetWrapper extends JDBC4ResultSetWrapper {
 
-    private final ResultSet delegate;
-
     public JDBC41ResultSetWrapper(ResultSet delegate, JDBC4StatementWrapper stmt) {
         super(delegate, stmt);
-        this.delegate = delegate;
     }
 
     @Override

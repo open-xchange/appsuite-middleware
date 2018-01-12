@@ -140,6 +140,7 @@ import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.EmptyStringMimeMultipart;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
@@ -1055,7 +1056,10 @@ public final class MimeMessageUtility {
 
                     boolean doEncode = true;
                     int start = m.start();
-                    if (lastMatch == start) {
+                    if (lastMatch == 0 || lastMatch == start) {
+                        if (lastMatch != start) {
+                            sb.append(hdrVal.substring(lastMatch, start));
+                        }
                         if ("b".equalsIgnoreCase(encoding)) {
                             Base64EncodedValue ev = new Base64EncodedValue(charset, encodedValue);
                             if (null == prev) {
@@ -1075,13 +1079,16 @@ public final class MimeMessageUtility {
                                 }
                                 doEncode = false;
                             }
+                        } else if (null != prev) {
+                            sb.append(decodeEncodedWord(prev.charset, "B", prev.value.toString()));
+                            prev = null;
                         }
                     } else {
                         if (null != prev) {
                             sb.append(decodeEncodedWord(prev.charset, "B", prev.value.toString()));
                             prev = null;
                         }
-                        sb.append(hdrVal.substring(lastMatch, m.start()));
+                        sb.append(hdrVal.substring(lastMatch, start));
                     }
 
                     // Decode encoded-word
@@ -1140,20 +1147,26 @@ public final class MimeMessageUtility {
     private static String decodeEncodedWord(String charset, String encoding, String encodedValue) throws ParseException, UnsupportedTransferEncodingException {
         if (MessageUtility.isBig5(charset)) {
             String decodeWord = doDecodeEncodedWord(charset, encoding, encodedValue);
-            if (decodeWord.indexOf(MessageUtility.UNKNOWN) >= 0) {
+            if (MessageUtility.containsUnknown(decodeWord)) {
                 decodeWord = doDecodeEncodedWord("Big5-HKSCS", encoding, encodedValue);
             }
             return decodeWord;
         } else if (MessageUtility.isGB2312(charset)) {
             String decodeWord = doDecodeEncodedWord(charset, encoding, encodedValue);
-            if (decodeWord.indexOf(MessageUtility.UNKNOWN) >= 0) {
+            if (MessageUtility.containsUnknown(decodeWord)) {
                 decodeWord = doDecodeEncodedWord("GB18030", encoding, encodedValue);
             }
             return decodeWord;
         } else if (MessageUtility.isShiftJis(charset)) {
             String decodeWord = doDecodeEncodedWord("MS932", encoding, encodedValue);
-            if (decodeWord.indexOf(MessageUtility.UNKNOWN) >= 0) {
+            if (MessageUtility.containsUnknown(decodeWord)) {
                 decodeWord = CP932EmojiMapping.getInstance().replaceIn(doDecodeEncodedWord("MS932", encoding, encodedValue));
+            }
+            return decodeWord;
+        } else if (MessageUtility.isISO2022JP(charset)) {
+            String decodeWord = doDecodeEncodedWord("ISO-2022-JP", encoding, encodedValue);
+            if (MessageUtility.containsUnknown(decodeWord)) {
+                decodeWord = doDecodeEncodedWord("x-windows-iso2022jp", encoding, encodedValue);
             }
             return decodeWord;
         } else {
@@ -1356,11 +1369,11 @@ public final class MimeMessageUtility {
                     }
                     lastMatch = m.end();
                 } catch (final UnsupportedEncodingException e) {
-                    LOG.warn("Unsupported character-encoding in encoded-word: {}", m.group(), e);
+                    LOG.debug("Unsupported character-encoding in encoded-word: {}", m.group(), e);
                     sb.append(m.group());
                     lastMatch = m.end();
                 } catch (final ParseException e) {
-                    LOG.warn("String is not an encoded-word as per RFC 2047: {}", m.group(), e);
+                    LOG.debug("String is not an encoded-word as per RFC 2047: {}", m.group(), e);
                     sb.append(m.group());
                     lastMatch = m.end();
                 }
@@ -2205,7 +2218,7 @@ public final class MimeMessageUtility {
             /*
              * Write headers
              */
-            @SuppressWarnings("unchecked") final Enumeration<Header> headers = p.getAllHeaders();
+            Enumeration<Header> headers = p.getAllHeaders();
             final StringBuilder sb = new StringBuilder(256);
             while (headers.hasMoreElements()) {
                 final Header header = headers.nextElement();
@@ -2913,9 +2926,14 @@ public final class MimeMessageUtility {
                 return getMultipartContentFrom((Message) content);
             }
             if (content instanceof String) {
-                return new MimeMultipart(new MessageDataSource(Streams.newByteArrayInputStream(((String) content).getBytes(Charsets.ISO_8859_1)), null == contentType ? getHeader("Content-Type", null, part) : contentType));
+                String stringContent = (String) content;
+                if (Strings.isEmpty(stringContent)) {
+                    return new EmptyStringMimeMultipart(new MessageDataSource(new byte[0], null == contentType ? getHeader("Content-Type", null, part) : contentType));
+                }
+                return new MimeMultipart(new MessageDataSource(Streams.newByteArrayInputStream(stringContent.getBytes(Charsets.ISO_8859_1)), null == contentType ? getHeader("Content-Type", null, part) : contentType));
             }
-            LOG.warn("Unable to retrieve multipart content fromt part with Content-Type={}. Content signals to be {}.", null == contentType ? getHeader("Content-Type", null, part) : contentType, null == content ? "null" : content.getClass().getName());
+
+            LOG.warn("Unable to retrieve multipart content from part with Content-Type={}. Content signals to be {}.", null == contentType ? getHeader("Content-Type", null, part) : contentType, null == content ? "null" : content.getClass().getName());
             return null;
         } catch (MessageRemovedIOException e) {
             String message = e.getMessage();

@@ -55,6 +55,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -80,6 +81,9 @@ import com.openexchange.ajax.request.MailRequest;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
+import com.openexchange.ajax.requesthandler.jobqueue.JobInfo;
+import com.openexchange.ajax.requesthandler.jobqueue.JobQueueExceptionCodes;
 import com.openexchange.ajax.requesthandler.AJAXState;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.Dispatchers;
@@ -89,6 +93,7 @@ import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailServletInterface;
@@ -96,6 +101,7 @@ import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.PathAware;
 import com.openexchange.multiple.internal.MultipleHandlerRegistry;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.BoundedCompletionService;
@@ -424,6 +430,15 @@ public class Multiple extends SessionServlet {
             jsonObj.put(ROUTE, Tools.getRoute(req.getSession(true).getId()));
             jsonObj.put(REMOTE_ADDRESS, req.getRemoteAddr());
             final Dispatcher dispatcher = getDispatcher();
+            if (null == dispatcher) {
+                // Most likely currently shutting down
+                OXException oxe = ServiceExceptionCode.absentService(Dispatcher.class);
+                logError(oxe.getMessage(), session, oxe);
+                jsonWriter.object();
+                ResponseWriter.writeException(oxe, jsonWriter, localeFrom(session), false);
+                jsonWriter.endObject();
+                return state;
+            }
             final StringBuilder moduleCandidate = new StringBuilder(32);
             boolean handles = false;
             for (final String component : SPLIT.split(module, 0)) {
@@ -454,9 +469,10 @@ public class Multiple extends SessionServlet {
                 jsonWriter.object();
                 AJAXRequestResult requestResult = null;
                 Exception exc = null;
+                boolean enqueued = false;
                 try {
                     if (action == null || action.length() == 0) {
-                    	request.setAction("GET"); // Backwards Compatibility
+                        request.setAction("GET"); // Backwards Compatibility
                     }
                     if (state == null) {
                         state = dispatcher.begin();
@@ -470,34 +486,55 @@ public class Multiple extends SessionServlet {
                     }
 
                     jsonWriter.key(ResponseFields.DATA);
-                    jsonWriter.value(requestResult.getResultObject());
+                    if (ResultType.ENQUEUED == requestResult.getType()) {
+                        enqueued = true;
+                        JobInfo jobInfo = (JobInfo) requestResult.getResultObject();
+                        JSONObject jData = new JSONObject(2);
+                        jData.put("job", UUIDs.getUnformattedString(jobInfo.getId()));
+                        jsonWriter.value(jData);
 
-                    if (null != requestResult.getException()) {
-                        boolean includeStackTraceOnError = AJAXRequestDataTools.parseBoolParameter("includeStackTraceOnError", request);
-                        ResponseWriter.writeException(requestResult.getException(), jsonWriter, localeFrom(session), includeStackTraceOnError);
-                    }
+                        OXException warning = JobQueueExceptionCodes.LONG_RUNNING_OPERATION.create(session.getUserId(), session.getContextId());
+                        {
+                            boolean includeStackTraceOnError = AJAXRequestDataTools.parseBoolParameter(PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR, request);
+                            ResponseWriter.writeException(warning, jsonWriter, localeFrom(session), includeStackTraceOnError);
+                        }
 
-                    if (false == requestResult.getWarnings().isEmpty()) {
-                        ResponseWriter.writeWarnings(new ArrayList<OXException>(requestResult.getWarnings()), jsonWriter, localeFrom(session));
+                        {
+                            ResponseWriter.writeWarnings(Collections.singletonList(warning), jsonWriter, localeFrom(session));
+                        }
+                    } else {
+                        jsonWriter.value(requestResult.getResultObject());
+                        if (null != requestResult.getException()) {
+                            boolean includeStackTraceOnError = AJAXRequestDataTools.parseBoolParameter(PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR, request);
+                            ResponseWriter.writeException(requestResult.getException(), jsonWriter, localeFrom(session), includeStackTraceOnError);
+                        }
+
+                        if (false == requestResult.getWarnings().isEmpty()) {
+                            ResponseWriter.writeWarnings(new ArrayList<OXException>(requestResult.getWarnings()), jsonWriter, localeFrom(session));
+                        }
                     }
                 } catch (OXException e) {
                     exc = e;
                     logError(e.getMessage(), session, e);
-                    ResponseWriter.writeException(e, jsonWriter, localeFrom(session), AJAXRequestDataTools.parseBoolParameter("includeStackTraceOnError", request));
+                    ResponseWriter.writeException(e, jsonWriter, localeFrom(session), AJAXRequestDataTools.parseBoolParameter(PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR, request));
                     return state;
                 } catch (RuntimeException rte) {
                     exc = rte;
                     logError(rte.getMessage(), session, rte);
                     final OXException e = AjaxExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
-                    ResponseWriter.writeException(e, jsonWriter, localeFrom(session), AJAXRequestDataTools.parseBoolParameter("includeStackTraceOnError", request));
+                    ResponseWriter.writeException(e, jsonWriter, localeFrom(session), AJAXRequestDataTools.parseBoolParameter(PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR, request));
                     return state;
                 } finally {
-                	jsonWriter.endObject();
-                	Dispatchers.signalDone(requestResult, exc);
+                    jsonWriter.endObject();
+                    if (enqueued) {
+                        state = null;
+                    } else {
+                        Dispatchers.signalDone(requestResult, exc);
+                    }
                 }
                 return state;
             }
-            boolean includeStackTraceOnError = jsonObj.optBoolean("includeStackTraceOnError", false);
+            boolean includeStackTraceOnError = jsonObj.optBoolean(PARAMETER_INCLUDE_STACK_TRACE_ON_ERROR, false);
             final MultipleHandler multipleHandler = lookUpMultipleHandler(module);
             if (null != multipleHandler) {
                 try {
@@ -603,7 +640,13 @@ public class Multiple extends SessionServlet {
                     final MailServletInterface mi;
                     tmp = req.getAttribute(ATTRIBUTE_MAIL_INTERFACE);
                     if (tmp == null) {
-                        mi = MailServletInterface.getInstance(session);
+                        final boolean decrypt = jsonObj.optBoolean("decrypt", false);
+                        if(decrypt) {
+                            mi = MailServletInterface.getInstanceWithDecryptionSupport(session, null /* by now only using session attached auth */);
+                        }
+                        else {
+                            mi = MailServletInterface.getInstance(session);
+                        }
                         req.setAttribute(ATTRIBUTE_MAIL_INTERFACE, mi);
                     } else {
                         mi = ((MailServletInterface) tmp);

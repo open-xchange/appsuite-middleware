@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
+import org.json.JSONException;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -71,6 +72,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.SortableConcurrentList;
 import com.openexchange.osgi.util.RankedService;
+import com.openexchange.pns.ApnsConstants;
 import com.openexchange.pns.DefaultPushSubscription;
 import com.openexchange.pns.EnabledKey;
 import com.openexchange.pns.KnownTransport;
@@ -91,7 +93,6 @@ import javapns.communication.exceptions.CommunicationException;
 import javapns.communication.exceptions.KeystoreException;
 import javapns.devices.Device;
 import javapns.devices.exceptions.InvalidDeviceTokenFormatException;
-import javapns.json.JSONException;
 import javapns.notification.Payload;
 import javapns.notification.PayloadPerDevice;
 import javapns.notification.PushNotificationPayload;
@@ -113,8 +114,6 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
     private static final int STATUS_INVALID_TOKEN_SIZE = 5;
 
     private static final int STATUS_INVALID_TOKEN = 8;
-
-    private static final int MAX_PAYLOAD_SIZE = 256;
 
     /** The maximum number of simultaneously transported payloads per request */
     private static final int TRANSPORT_CHUNK_SIZE = 100;
@@ -174,6 +173,14 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
     // ---------------------------------------------------------------------------------------------------------
 
     private ApnOptions getHighestRankedApnOptionsFor(String client) throws OXException {
+        ApnOptions options = optHighestRankedApnOptionsFor(client);
+        if (null == options) {
+            throw PushExceptionCodes.UNEXPECTED_ERROR.create("No options found for client: " + client);
+        }
+        return options;
+    }
+
+    private ApnOptions optHighestRankedApnOptionsFor(String client) {
         List<RankedService<ApnOptionsProvider>> list = trackedProviders.getSnapshot();
         for (RankedService<ApnOptionsProvider> rankedService : list) {
             ApnOptions options = rankedService.service.getOptions(client);
@@ -181,7 +188,7 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
                 return options;
             }
         }
-        throw PushExceptionCodes.UNEXPECTED_ERROR.create("No options found for client: " + client);
+        return null;
     }
 
     private Map<String, ApnOptions> getAllHighestRankedApnOptions() {
@@ -200,9 +207,7 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
     @Override
     public boolean servesClient(String client) throws OXException {
         try {
-            return null != getHighestRankedApnOptionsFor(client);
-        } catch (OXException x) {
-            return false;
+            return null != optHighestRankedApnOptionsFor(client);
         } catch (RuntimeException e) {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -395,8 +400,8 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
     private PayloadPerDevice getPayloadPerDevice(Payload payload, PushMatch match) throws OXException {
         int payloadLength = PushNotifications.getPayloadLength(payload.toString());
         // Check payload length
-        if (payloadLength > MAX_PAYLOAD_SIZE) {
-            throw PushExceptionCodes.MESSAGE_TOO_BIG.create(MAX_PAYLOAD_SIZE, payloadLength);
+        if (payloadLength > ApnsConstants.APNS_MAX_PAYLOAD_SIZE) {
+            throw PushExceptionCodes.MESSAGE_TOO_BIG.create(ApnsConstants.APNS_MAX_PAYLOAD_SIZE, payloadLength);
         }
         try {
             return new PayloadPerDevice(payload, match.getToken());

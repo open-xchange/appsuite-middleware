@@ -116,7 +116,9 @@ public class UserPermissionBits implements Serializable, Cloneable {
 
     /**
      * The permission bit for WebDAV/XML access.
+     * @deprecated
      */
+    @Deprecated
     public static final int WEBDAV_XML = 1 << 8;
 
     /**
@@ -429,7 +431,9 @@ public class UserPermissionBits implements Serializable, Cloneable {
      * Detects if user configuration allows WebDAV XML.
      *
      * @return <code>true</code> if enabled; otherwise <code>false</code>
+     * @deprecated
      */
+    @Deprecated
     public boolean hasWebDAVXML() {
         return hasPermission(WEBDAV_XML);
     }
@@ -438,7 +442,9 @@ public class UserPermissionBits implements Serializable, Cloneable {
      * Enables/Disables WebDAV XML access in user configuration.
      *
      * @param enableWebDAVXML
+     * @deprecated
      */
+    @Deprecated
     public void setWebDAVXML(final boolean enableWebDAVXML) {
         setPermission(enableWebDAVXML, WEBDAV_XML);
     }

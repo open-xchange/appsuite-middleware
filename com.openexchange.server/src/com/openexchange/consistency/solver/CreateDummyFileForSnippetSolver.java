@@ -53,10 +53,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import com.openexchange.consistency.Entity;
-import com.openexchange.consistency.Entity.EntityType;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
@@ -78,51 +77,45 @@ public class CreateDummyFileForSnippetSolver extends CreateDummyFileSolver imple
 
     @Override
     public void solve(final Entity entity, final Set<String> problems) {
-        if (entity.getType().equals(EntityType.Context)) {
-            /*
-             * Here we operate in two stages. First we create a dummy entry in the filestore. Second we update the Entries in the database
-             */
-            final int size = problems.size();
-            final Iterator<String> it = problems.iterator();
-            for (int k = 0; k < size; k++) {
-                Connection con = null;
-                PreparedStatement stmt = null;
-                try {
-                    con = Database.get(entity.getContext(), true);
-                    final String old_identifier = it.next();
-                    // Not recoverable
-                    if (DBUtils.tableExists(con, "snippet")) {
-                        stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND refId=? AND refType=1");
-                        int pos = 0;
-                        stmt.setInt(++pos, entity.getContext().getContextId());
-                        stmt.setString(++pos, old_identifier);
-                        stmt.executeUpdate();
-                        DBUtils.closeSQLStuff(stmt);
-                        stmt = null;
-                    }
-                    // Partly recoverable
-                    if (DBUtils.tableExists(con, "snippetAttachment")) {
-                        final String identifier = createDummyFile(storage);
-                        stmt = con.prepareStatement("UPDATE snippetAttachment SET referenceId=? WHERE cid=? AND referenceId=?");
-                        int pos = 0;
-                        stmt.setString(++pos, identifier);
-                        stmt.setInt(++pos, entity.getContext().getContextId());
-                        stmt.setString(++pos, old_identifier);
-                        stmt.executeUpdate();
-                        DBUtils.closeSQLStuff(stmt);
-                        stmt = null;
-                    }
-                } catch (final SQLException e) {
-                    LOG.error("", e);
-                } catch (final OXException e) {
-                    LOG.error("", e);
-                } catch (final RuntimeException e) {
-                    LOG.error("", e);
-                } finally {
-                    DBUtils.closeSQLStuff(stmt);
-                    if (null != con) {
-                        Database.back(entity.getContext(), true, con);
-                    }
+        /*
+         * Here we operate in two stages. First we create a dummy entry in the filestore. Second we update the Entries in the database
+         */
+        final int size = problems.size();
+        final Iterator<String> it = problems.iterator();
+        for (int k = 0; k < size; k++) {
+            Connection con = null;
+            PreparedStatement stmt = null;
+            try {
+                con = Database.get(entity.getContext(), true);
+                final String old_identifier = it.next();
+                // Not recoverable
+                if (DBUtils.tableExists(con, "snippet")) {
+                    stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND refId=? AND refType=1");
+                    int pos = 0;
+                    stmt.setInt(++pos, entity.getContext().getContextId());
+                    stmt.setString(++pos, old_identifier);
+                    stmt.executeUpdate();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
+                }
+                // Partly recoverable
+                if (DBUtils.tableExists(con, "snippetAttachment")) {
+                    final String identifier = createDummyFile(storage);
+                    stmt = con.prepareStatement("UPDATE snippetAttachment SET referenceId=? WHERE cid=? AND referenceId=?");
+                    int pos = 0;
+                    stmt.setString(++pos, identifier);
+                    stmt.setInt(++pos, entity.getContext().getContextId());
+                    stmt.setString(++pos, old_identifier);
+                    stmt.executeUpdate();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
+                }
+            } catch (SQLException | OXException | RuntimeException e) {
+                LOG.error("{}", e.getMessage(), e);
+            } finally {
+                Databases.closeSQLStuff(stmt);
+                if (null != con) {
+                    Database.back(entity.getContext(), true, con);
                 }
             }
         }

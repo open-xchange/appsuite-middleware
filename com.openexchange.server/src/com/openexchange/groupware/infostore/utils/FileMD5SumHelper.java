@@ -125,7 +125,7 @@ public class FileMD5SumHelper {
      */
     public Map<Integer, List<DocumentMetadata>> listMissingInDatabase(int databaseId) throws OXException {
         Map<Integer, List<DocumentMetadata>> documentsPerContext = new HashMap<Integer, List<DocumentMetadata>>();
-        for (int contextId : dbSerivce.listContexts(databaseId)) {
+        for (int contextId : dbSerivce.listContexts(databaseId, -1, -1)) {
             documentsPerContext.put(I(contextId), listMissingInContext(contextId));
         }
         return documentsPerContext;
@@ -138,15 +138,18 @@ public class FileMD5SumHelper {
      */
     public Map<Integer, List<DocumentMetadata>> listAllMissing() throws OXException {
         Collection<Integer> databaseIds;
-        Connection connection = dbSerivce.getReadOnly();
-        try {
-            databaseIds = dbSerivce.getAllSchemata(connection).values();
-        } finally {
-            dbSerivce.backReadOnly(connection);
+        {
+            Connection connection = dbSerivce.getReadOnly();
+            try {
+                databaseIds = dbSerivce.getAllSchemata(connection).values();
+            } finally {
+                dbSerivce.backReadOnly(connection);
+            }
         }
+
         Map<Integer, List<DocumentMetadata>> documentsPerContext = new HashMap<Integer, List<DocumentMetadata>>();
         for (Integer databaseId : databaseIds) {
-            for (int contextId : dbSerivce.listContexts(databaseId)) {
+            for (int contextId : dbSerivce.listContexts(databaseId.intValue(), -1, -1)) {
                 documentsPerContext.put(I(contextId), listMissingInContext(contextId));
             }
         }
@@ -218,7 +221,7 @@ public class FileMD5SumHelper {
      */
     public Map<Integer, List<DocumentMetadata>> calculateMissingInDatabase(int databaseId) throws OXException {
         Map<Integer, List<DocumentMetadata>> documentsPerContext = new HashMap<Integer, List<DocumentMetadata>>();
-        for (int contextId : dbSerivce.listContexts(databaseId)) {
+        for (int contextId : dbSerivce.listContexts(databaseId, -1, -1)) {
             documentsPerContext.put(I(contextId), calculateMissingInContext(contextId));
         }
         return documentsPerContext;

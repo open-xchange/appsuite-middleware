@@ -56,8 +56,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
-import com.openexchange.ajax.sessionmanagement.actions.GetSessionsRequest;
-import com.openexchange.ajax.sessionmanagement.actions.GetSessionsResponse;
+import com.openexchange.ajax.sessionmanagement.actions.AllRequest;
+import com.openexchange.ajax.sessionmanagement.actions.AllResponse;
 import com.openexchange.session.management.ManagedSession;
 
 /**
@@ -82,14 +82,15 @@ public class GetSessionsTest extends AbstractSessionManagementTest {
 
     @Test
     public void testGetSessions() throws Exception {
-        GetSessionsRequest req = new GetSessionsRequest();
-        GetSessionsResponse resp = testClient1.execute(req);
+        AllRequest req = new AllRequest();
+        AllResponse resp = getClient().execute(req);
         Collection<ManagedSession> sessions = resp.getSessions();
         assertEquals(2, sessions.size());
         for (ManagedSession session : sessions) {
             String sessionId = session.getSessionId();
-            assertTrue(sessionId.equals(testClient1.getSession().getId()) || sessionId.equals(testClient2.getSession().getId()));
+            assertTrue(sessionId.equals(getClient().getSession().getId()) || sessionId.equals(getSecondClient().getSession().getId()));
         }
+        saveLogout(getClient2());
     }
 
 }

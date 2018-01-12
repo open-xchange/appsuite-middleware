@@ -55,6 +55,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringWriter;
+import java.util.Map;
+import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -77,10 +80,14 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.w3c.dom.Comment;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import com.openexchange.configuration.clt.scr.Logback;
+import com.openexchange.configuration.clt.scr.SCRException;
 
 /**
  * {@link XMLModifierCLT} is a command line tool to maintain XML configuration files. Currently it only allows to add new XML fragments at
@@ -91,8 +98,8 @@ import org.xml.sax.SAXException;
 public class XMLModifierCLT {
 
     private static final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-    private static final TransformerFactory tf = TransformerFactory.newInstance();
-    private static final XPathFactory xf = XPathFactory.newInstance();
+    private static final TransformerFactory     tf  = TransformerFactory.newInstance();
+    private static final XPathFactory           xf  = XPathFactory.newInstance();
 
     public XMLModifierCLT() {
         super();
@@ -112,6 +119,8 @@ public class XMLModifierCLT {
         options.addOption(createOption("r", "replace", true, "XML file that should replace the elements denoted by the XPath. - can be used to read from STDIN.", false));
         options.addOption(createOption("d", "id", true, "Defines the identifying attribute as XPath (relative to \"-x\") to determine if an element should be replaced (-r). If omitted all matches will be replaced.", false));
         options.addOption(createOption("z", "zap", false, "Defines if duplicate matching elements should be removed(zapped) instead of only being replaced (-r).", false));
+        options.addOption(createOption("s", "scr", true, "Specifies which scr should be executed on the xml document selected via -i", false));
+
         CommandLineParser parser = new PosixParser();
         final CommandLine cmd;
         try {
@@ -138,13 +147,26 @@ public class XMLModifierCLT {
             return 1;
         }
         try {
-            XPath path = xf.newXPath();
-            String xPath = cmd.getOptionValue('x');
-            XPathExpression expression = path.compile(xPath);
-            if (cmd.hasOption('a')) {
+            if (cmd.hasOption('s')) {
+                String scr = cmd.getOptionValue('s');
+                scr = scr == null ? "" : scr.trim();
+                switch (scr) {
+                    case "4249":
+                        scr_4249(document);
+                        break;
+                    default:
+                        throw new SCRException("Unable to find specified Software Change Request: " + scr);
+                }
+            } else if (cmd.hasOption('a')) {
+                XPath path = xf.newXPath();
+                String xPath = cmd.getOptionValue('x');
+                XPathExpression expression = path.compile(xPath);
                 Document add = parseInput("-".equals(cmd.getOptionValue('a')), cmd.getOptionValue('a'));
                 doAdd(document, expression, add);
             } else if (cmd.hasOption('r')) {
+                XPath path = xf.newXPath();
+                String xPath = cmd.getOptionValue('x');
+                XPathExpression expression = path.compile(xPath);
                 Document replace = parseInput("-".equals(cmd.getOptionValue('r')), cmd.getOptionValue('r'));
                 doReplace(cmd.getOptionValue('d'), cmd.hasOption('z'), document, expression, replace);
             } else {
@@ -170,6 +192,10 @@ public class XMLModifierCLT {
             return 1;
         } catch (IOException e) {
             System.err.println("Can not read XML file: " + e.getMessage());
+            e.printStackTrace();
+            return 1;
+        } catch (SCRException e) {
+            System.err.println("Error whily trying to apply Software Change Request: " + e.getMessage());
             e.printStackTrace();
             return 1;
         }
@@ -236,16 +262,14 @@ public class XMLModifierCLT {
                     Node imported = document.importNode(toReplace, true);
                     Node parent = original.getParentNode();
                     if (!found) {
-                     parent.replaceChild(imported, original);
-                     found = true;
+                        parent.replaceChild(imported, original);
+                        found = true;
                     } else {
                         //already seen it, should we remove duplicates? 
                         if (removeDuplicates) {
                             //indentation is a text node which has to be removed
                             Node prev = original.getPreviousSibling();
-                            if (prev != null && 
-                                prev.getNodeType() == Node.TEXT_NODE &&
-                                prev.getNodeValue().trim().isEmpty()) {
+                            if (prev != null && prev.getNodeType() == Node.TEXT_NODE && prev.getNodeValue().trim().isEmpty()) {
                                 parent.removeChild(prev);
                             }
                             parent.removeChild(original);
@@ -269,6 +293,22 @@ public class XMLModifierCLT {
         }
     }
 
+    /**
+     * Transform a node into plain text
+     * 
+     * @param tf {@link TransformerFactory} to use for transformer creation
+     * @param node The {@link Node} to transform to plain text
+     * @return The transformed node
+     * @throws TransformerException If an unrecoverable error occurs during the course of the transformation.
+     */
+    private static String transformToString(TransformerFactory tf, Node node) throws TransformerException {
+        StringWriter sWriter = new StringWriter();
+        Transformer transformer = tf.newTransformer();
+        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+        transformer.transform(new DOMSource(node), new StreamResult(sWriter));
+        return sWriter.toString();
+    }
+
     private static String getIdentifier(String identifier, Node node) throws XPathExpressionException {
         String retval = "";
         if (null != identifier) {
@@ -279,8 +319,18 @@ public class XMLModifierCLT {
         return retval;
     }
 
-    static Option createOption(String shortArg, String longArg, boolean hasArg, String description, boolean required) {
-        Option option = new Option(shortArg, longArg, hasArg, description);
+    /**
+     * Creates a commandline option
+     * 
+     * @param shortOpt The short version of the argumente e.g.: -h
+     * @param longOpt The long version of the argument e.g.: --help
+     * @param hasArg true If the option needs an argument or not e.g. --input /tmp/somefile
+     * @param description The description of the command option
+     * @param required If the command option is mandatory or optional
+     * @return The new option
+     */
+    static Option createOption(String shortOpt, String longOpt, boolean hasArg, String description, boolean required) {
+        Option option = new Option(shortOpt, longOpt, hasArg, description);
         option.setRequired(required);
         return option;
     }
@@ -340,5 +390,66 @@ public class XMLModifierCLT {
             is = System.in;
         }
         return is;
+    }
+
+    /**
+     * Apply SCR 4249: Dropped alternative file logger specification in logback
+     * configuration file as only one of FILE and FILE_COMPAT can be configured
+     * as they both would use the same log file which causes error logging to
+     * open-xchange-console.log
+     * 
+     * @param doc The document to which the SCR should be applied
+     * @throws SCRException if applying the Software Change Request fails
+     */
+    static void scr_4249(Document doc) throws SCRException {
+        try {
+            Map<String, Element> allAppenders = Logback.nodeListToNamedElementMap(doc.getElementsByTagName("appender"));
+
+            // Get the appender-refs and associated appenders defined below the root logger
+            Set<Element> rootAppenderRefs = Logback.getAppenderRefs(doc.getElementsByTagName("root"));
+            Map<String, Element> activeAppenders = Logback.getMatchingAppenders(allAppenders, rootAppenderRefs);
+
+            // Get appenders referenced by loggers besides the root logger and add them to the already found ones
+            Map<String, Element> loggerMap = Logback.nodeListToNamedElementMap(doc.getElementsByTagName("logger"));
+            for (Element logger : loggerMap.values()) {
+                Set<Element> appenderRefs = Logback.getAppenderRefs(logger);
+                activeAppenders.putAll(Logback.getMatchingAppenders(allAppenders, appenderRefs));
+            }
+
+            final String FILE = "FILE", FILEC = "FILE_COMPAT";
+            /*
+             * Comment either the FILE or FILE_COMPAT appender if both exists but one:
+             * - is an existing appender
+             * - isn't in use below the root logger
+             * - isn't in use in any other logger
+             * - has the same logfile configured as the other FILE or FILE_COMPAT appender
+             * But error out if both appenders are still in active use
+             */
+            // Do both appenders still exist uncommented?
+            if (allAppenders.containsKey(FILE) && allAppenders.containsKey(FILEC)) {
+                String logfile = Logback.getLogFileFromAppender(allAppenders.get(FILE));
+                String logfileCompact = Logback.getLogFileFromAppender(allAppenders.get(FILEC));
+                // Will logback complain as both still use the same logfile?
+                if (logfile.equals(logfileCompact)) {
+                    if (activeAppenders.containsKey(FILE) && activeAppenders.containsKey(FILEC)) {
+                        throw new Exception(String.format("Can't apply SCR 4249 as both the FILE and FILE_COMPAT appender are in use. Please deactivate one of them manually."));
+                    } else if (!activeAppenders.containsKey(FILEC)) {
+                        Element fileCompactAppender = allAppenders.get(FILEC);
+                        Node parentNode = fileCompactAppender.getParentNode();
+                        Comment commentedCompactAppender = doc.createComment(transformToString(tf, fileCompactAppender));
+                        parentNode.replaceChild(commentedCompactAppender, fileCompactAppender);
+                        System.out.println("Commented the FILE_COMPAT appender based on Software Change Request 4249");
+                    } else if (!activeAppenders.containsKey(FILE)) {
+                        Element fileAppender = allAppenders.get(FILE);
+                        Node parentNode = fileAppender.getParentNode();
+                        Comment commentedAppender = doc.createComment(transformToString(tf, fileAppender));
+                        parentNode.replaceChild(commentedAppender, fileAppender);
+                        System.out.println("Commented the FILE appender based on Software Change Request 4249");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new SCRException(e);
+        }
     }
 }

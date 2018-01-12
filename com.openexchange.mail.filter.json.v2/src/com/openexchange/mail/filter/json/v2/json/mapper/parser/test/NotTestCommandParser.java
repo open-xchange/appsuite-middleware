@@ -90,33 +90,16 @@ public class NotTestCommandParser extends AbstractTestCommandParser {
         if (null != innerJsonObject) {
             CommandParserRegistry<TestCommand, TestCommandParser<TestCommand>> parserRegistry = services.getService(TestCommandParserRegistry.class);
             CommandParser<TestCommand> parser = parserRegistry.get(innerJsonObject.optString(GeneralField.id.name()));
-            if (null != parser) {
-                testcommands.add(parser.parse(innerJsonObject, session));
-            }
+            testcommands.add(parser.parse(innerJsonObject, session));
         }
         return new TestCommand(TestCommand.Commands.NOT, argList, testcommands);
     }
 
     @Override
     public void parse(JSONObject jsonObject, TestCommand command, boolean transformToNotMatcher) throws JSONException, OXException {
-        jsonObject.put(GeneralField.id.name(), Commands.NOT.getCommandName());
-        final JSONObject testobject = new JSONObject();
-
         TestCommand nestedTestCommand = command.getTestCommands().get(0);
-
-        String matchType = nestedTestCommand.getMatchType();
         CommandParserRegistry<TestCommand, TestCommandParser<TestCommand>> parserRegistry = services.getService(TestCommandParserRegistry.class);
         TestCommandParser<TestCommand> parser = parserRegistry.get(nestedTestCommand.getCommand().getCommandName());
-        if(matchType!= null){
-            parser.parse(jsonObject, nestedTestCommand, transformToNotMatcher==false);
-        } else {
-
-            if (null != parser) {
-                parser.parse(testobject, nestedTestCommand);
-            }
-
-            jsonObject.put(NotTestField.test.name(), testobject);
-        }
-
+        parser.parse(jsonObject, nestedTestCommand, transformToNotMatcher == false);
     }
 }

@@ -111,6 +111,10 @@ public enum QuotaExceptionCodes implements DisplayableOXExceptionCode {
      */
     QUOTA_EXCEEDED_SNIPPETS("Quota exceeded for snippets. Quota used: %1$s. Quota limit: %2$s.", QuotaExceptionMessages.QUOTA_EXCEEDED_SNIPPETS_MSG, CATEGORY_USER_INPUT, 3), // Yes, the same error code number as "QUOTA_EXCEEDED"
     /**
+     * The storage limit for signatures is %1$s MB. Delete old signatures to be able to store a new one.
+     */
+    QUOTA_EXCEEDED_SIGNATURES("The storage limit for signatures is %1$s. Delete old signatures to be able to store a new one.", QuotaExceptionMessages.QUOTA_EXCEEDED_SIGNATURES_MSG, CATEGORY_USER_INPUT, 3), // Yes, the same error code number as "QUOTA_EXCEEDED"
+    /**
      * No account %1$s exists for module %2$s.
      */
     UNKNOWN_ACCOUNT("No account $1%s exists for module %2$s.", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 4),

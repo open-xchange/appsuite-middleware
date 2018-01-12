@@ -52,8 +52,11 @@ package com.openexchange.ajax.helper;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.java.Charsets;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 
@@ -71,6 +74,59 @@ public class ImageUtils {
         super();
     }
 
+    private static final boolean CHECK_IMAGE_BY_READER = true;
+
+    /**
+     * Checks if specified bytes contains valid image data
+     *
+     * @param inputData The bytes to check for valid image data
+     * @return <code>true</code> if specified bytes contains valid image data; otherwise <code>false</code>
+     */
+    public static boolean isValidImage(byte[] bytes) {
+        return isValidImage(Streams.newByteArrayInputStream(bytes));
+    }
+
+    /**
+     * Checks if specified input stream contains valid image data
+     *
+     * @param inputStream The input stream to check for valid image data
+     * @return <code>true</code> if specified input stream contains valid image data; otherwise <code>false</code>
+     */
+    public static boolean isValidImage(InputStream inputStream) {
+        return CHECK_IMAGE_BY_READER ? isValidImageByImageReader(inputStream) : isValidImageByBufferedImage(inputStream);
+    }
+
+    private static boolean isValidImageByBufferedImage(InputStream inputStream) {
+        try {
+            final java.awt.image.BufferedImage bimg = javax.imageio.ImageIO.read(inputStream);
+            return (bimg != null && bimg.getHeight() > 0 && bimg.getWidth() > 0);
+        } catch (final Exception e) {
+            return false;
+        }
+    }
+
+    private static boolean isValidImageByImageReader(InputStream inputStream) {
+        ImageInputStream imageInputStream = null;
+        try {
+            imageInputStream = ImageIO.createImageInputStream(inputStream);
+            return isValidImageInputStream(imageInputStream);
+        } catch (final Exception e) {
+            return false;
+        } finally {
+            Streams.close(imageInputStream, inputStream);
+        }
+    }
+
+    private static boolean isValidImageInputStream(ImageInputStream imageInputStream) {
+        if (null == imageInputStream) {
+            return false;
+        }
+        Iterator<ImageReader> readers = ImageIO.getImageReaders(imageInputStream);
+        return null != readers && readers.hasNext();
+    }
+
+    private static final PatternAndFailure[] PATTERNS_SVG_START = new PatternAndFailure[] {new PatternAndFailure(new byte[] { '<', 's' }), new PatternAndFailure(new byte[] { '<', 'S' })};
+
     /**
      * Checks if specified image data indicate an SVG image.
      *
@@ -78,13 +134,46 @@ public class ImageUtils {
      * @return <code>true</code> if SVG data; otherwise <code>false</code>
      */
     public static boolean isSvg(byte[] bytes) {
-        byte[] pattern = new byte[] { '<', 's', 'v', 'g', ' ' };
-        int pos = indexOf(bytes, pattern, 0, bytes.length);
-        if (pos >= 0) {
-            return true;
+        PatternAndFailure[] sequences = PATTERNS_SVG_START;
+        int i = indexOfAny(bytes, 0, sequences);
+        while (i >= 0) {
+            int pos = i + 2;
+            if (pos < bytes.length) {
+                if (characterContainedIn((char) (bytes[pos] & 0xff), 'v', 'V')) {
+                    pos += 1;
+                    if (pos < bytes.length && characterContainedIn((char) (bytes[pos] & 0xff), 'g', 'G')) {
+                        pos += 1;
+                        if (pos < bytes.length && Strings.isWhitespace((char) (bytes[pos] & 0xff))) {
+                            return true;
+                        }
+                    }
+                }
+                i = indexOfAny(bytes, i + 2, sequences);
+            } else {
+                i = -1;
+            }
         }
+        return false;
+    }
 
-        return Strings.asciiLowerCase(new String(bytes, Charsets.ISO_8859_1)).indexOf("<svg ") >= 0;
+    private static int indexOfAny(byte[] bytes, int beginIndex, PatternAndFailure... sequences) {
+        for (int i = sequences.length; i-- > 0;) {
+            int pos = indexOf(bytes, sequences[i].pattern, beginIndex, bytes.length, sequences[i].failure);
+            if (pos >= 0) {
+                return pos;
+            }
+        }
+        return -1;
+    }
+
+    private static boolean characterContainedIn(char charToTest, char... chars) {
+        for (int i = chars.length; i-- > 0;) {
+            if (chars[i] == charToTest) {
+                return true;
+            }
+        }
+        // Not contained
+        return false;
     }
 
     /**
@@ -160,12 +249,12 @@ public class ImageUtils {
                     checkStartsWithMagic23 = false;
                 }
                 // Check for further frames
-                int pos = indexOf(buf, frameStart, start, read);
+                int pos = indexOf(buf, frameStart, start, read, null);
                 if (pos >= 0) {
                     frames++;
                     // Check for more frames in byte range
                     do {
-                        pos = indexOf(buf, frameStart, pos + 1, read);
+                        pos = indexOf(buf, frameStart, pos + 1, read, null);
                         if (pos >= 0) {
                             if (null != newStreamRef && null != sink) {
                                 newStreamRef.set(new CombinedInputStream(sink.toByteArray(), in));
@@ -201,12 +290,13 @@ public class ImageUtils {
      * @param pattern The byte pattern to search for
      * @param beginIndex The beginning index, inclusive.
      * @param endIndex The ending index, exclusive.
+     * @param optFailure The optional pre-computed failure pattern
      * @return The index of the first occurrence of the pattern in the byte array starting from given index or <code>-1</code> if none
      *         found.
      * @throws IndexOutOfBoundsException If <code>beginIndex</code> and/or <code>endIndex</code> is invalid
      * @throws IllegalArgumentException If given pattern is <code>null</code>
      */
-    private static int indexOf(final byte[] data, final byte[] pattern, final int beginIndex, final int endIndex) {
+    private static int indexOf(byte[] data, byte[] pattern, int beginIndex, int endIndex, int[] optFailure) {
         if ((beginIndex < 0) || (beginIndex > data.length)) {
             throw new IndexOutOfBoundsException(String.valueOf(beginIndex));
         }
@@ -217,7 +307,7 @@ public class ImageUtils {
             throw new IndexOutOfBoundsException(String.valueOf(endIndex - beginIndex));
         }
 
-        final int[] failure = computeFailure(pattern);
+        int[] failure = null == optFailure ? computeFailure(pattern) : optFailure;
         if (failure == null) {
             throw new IllegalArgumentException("pattern is null");
         }
@@ -264,6 +354,18 @@ public class ImageUtils {
             failure[i] = j;
         }
         return failure;
+    }
+
+    private static final class PatternAndFailure {
+
+        final byte[] pattern;
+        final int[] failure;
+
+        PatternAndFailure(byte[] pattern) {
+            super();
+            this.pattern = pattern;
+            this.failure = computeFailure(pattern);
+        }
     }
 
 }

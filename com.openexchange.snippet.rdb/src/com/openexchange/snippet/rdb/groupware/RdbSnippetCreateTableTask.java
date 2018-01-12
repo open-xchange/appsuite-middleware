@@ -55,7 +55,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -97,16 +96,26 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
 
     @Override
     public void perform(final PerformParameters params) throws com.openexchange.exception.OXException {
-        final int contextId = params.getContextId();
-        final DatabaseService ds = getService(DatabaseService.class);
-        final Connection writeCon = ds.getForUpdateTask(contextId);
+        Connection writeCon = params.getConnection();
+        boolean rollback = false;
         try {
+            writeCon.setAutoCommit(false);
+            rollback = true;
+
             createTable(Tables.getSnippetName(), Tables.getSnippetTable(), writeCon);
             createTable(RdbSnippetTables.getSnippetContentName(), RdbSnippetTables.getSnippetContentTable(), writeCon);
             createTable(RdbSnippetTables.getSnippetAttachmentName(), RdbSnippetTables.getSnippetAttachmentTable(), writeCon);
             createTable(RdbSnippetTables.getSnippetMiscName(), RdbSnippetTables.getSnippetMiscTable(), writeCon);
+
+            writeCon.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            ds.backForUpdateTask(contextId, writeCon);
+            if (rollback) {
+                DBUtils.rollback(writeCon);
+            }
+            DBUtils.autocommit(writeCon);
         }
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RdbSnippetCreateTableTask.class);
         logger.info("UpdateTask ''{}'' successfully performed!", RdbSnippetCreateTableTask.class.getSimpleName());
@@ -130,14 +139,12 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
     private boolean tableExists(final Connection con, final String table) throws SQLException {
         final DatabaseMetaData metaData = con.getMetaData();
         ResultSet rs = null;
-        boolean retval = false;
         try {
             rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
-            retval = (rs.next() && rs.getString("TABLE_NAME").equals(table));
+            return (rs.next() && rs.getString("TABLE_NAME").equals(table));
         } finally {
             DBUtils.closeSQLStuff(rs);
         }
-        return retval;
     }
 
     @Override

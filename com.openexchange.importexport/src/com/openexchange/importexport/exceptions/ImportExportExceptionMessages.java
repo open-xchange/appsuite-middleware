@@ -143,6 +143,8 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
     public static final String TRUNCATED_RESULTS_MSG = "Not all of the objects could be imported due to a configured limitation";
 
     public static final String WARNINGS_AND_TRUNCATED_RESULTS_MSG = "%1$sd warnings when importing file and not all of the objects could be imported due to a configured limitation";
+    
+    public static final String COULD_NOT_PARSE_JSON_BODY_MSG = "Could not parse json body parameters for folders and objects.";
 
     private ImportExportExceptionMessages() {
         super();

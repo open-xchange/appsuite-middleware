@@ -49,12 +49,10 @@
 
 package com.openexchange.oauth.provider.impl.groupware;
 
-import static com.openexchange.osgi.Tools.requireService;
 import static com.openexchange.tools.update.Tools.tableExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -84,15 +82,14 @@ public class CreateOAuthGrantTableTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        DatabaseService dbService = requireService(DatabaseService.class, services);
-        int contextId = params.getContextId();
-
-        Connection con = dbService.getForUpdateTask(contextId);
+        Connection con = params.getConnection();
         boolean rollback = false;
         try {
             DBUtils.startTransaction(con); // BEGIN
             rollback = true;
+
             perform(con);
+
             con.commit(); // COMMIT
             rollback = false;
         } catch (SQLException e) {
@@ -102,7 +99,6 @@ public class CreateOAuthGrantTableTask extends UpdateTaskAdapter {
                 DBUtils.rollback(con);
             }
             DBUtils.autocommit(con);
-            dbService.backForUpdateTask(contextId, con);
         }
     }
 

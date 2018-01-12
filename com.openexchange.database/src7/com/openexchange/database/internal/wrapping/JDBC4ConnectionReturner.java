@@ -57,6 +57,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.NClob;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
@@ -66,27 +67,135 @@ import java.sql.Statement;
 import java.sql.Struct;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import com.openexchange.database.Databases;
+import com.openexchange.database.Heartbeat;
 import com.openexchange.database.internal.AssignmentImpl;
 import com.openexchange.database.internal.ConnectionState;
+import com.openexchange.database.internal.Initialization;
 import com.openexchange.database.internal.Pools;
 import com.openexchange.database.internal.ReplicationMonitor;
 import com.openexchange.database.internal.StateAware;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link JDBC4ConnectionReturner}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public abstract class JDBC4ConnectionReturner implements Connection, StateAware {
+public abstract class JDBC4ConnectionReturner implements Connection, StateAware, Heartbeat {
+
+    private static final class HeartBeatHelper {
+
+        private final long timeoutMillis;
+        private final Lock readLock;
+        final Lock writeLock;
+        final AtomicLong lastAccessed;
+        final Connection con;
+        private volatile ScheduledTimerTask timerTask;
+
+        HeartBeatHelper(Connection con) {
+            super();
+            this.con = con;
+            this.timeoutMillis = getSocketTimeout(con);
+            lastAccessed = new AtomicLong(System.currentTimeMillis());
+            ReadWriteLock readWriteLock = new ReentrantReadWriteLock(false);
+            readLock = readWriteLock.readLock();
+            writeLock = readWriteLock.writeLock();
+        }
+
+        /**
+         * Touches this connection; updates its last-accessed time stanp
+         */
+        public void touch() {
+            readLock.lock();
+            try {
+                lastAccessed.set(System.currentTimeMillis());
+            } finally {
+                readLock.unlock();
+            }
+        }
+
+        /**
+         * Starts the hear-beat using given timer service
+         *
+         * @param timer The timer service to use
+         */
+        public void startHeartbeat(TimerService timer) {
+            final long timeoutMillis = this.timeoutMillis > 0 ? this.timeoutMillis : 15000;
+            Runnable keepAliveTask = new Runnable() {
+
+                @Override
+                public void run() {
+                    long idleTime = System.currentTimeMillis() - lastAccessed.get();
+                    if (idleTime > timeoutMillis) {
+                        writeLock.lock();
+                        try {
+                            Statement statement = null;
+                            ResultSet rs = null;
+                            try {
+                                statement = con.createStatement();
+                                rs = statement.executeQuery("SELECT 1 AS keep_alive_test");
+                                System.out.println("Performed \"SELECT 1 AS keep_alive_test\" to keep connection alive");
+                                while (rs.next()) {
+                                    // Discard
+                                }
+                            } finally {
+                                Databases.closeSQLStuff(rs, statement);
+                            }
+                        } catch (Exception e) {
+                            // Ignore
+                        } finally {
+                            writeLock.unlock();
+                        }
+                    }
+                }
+            };
+            timerTask = timer.scheduleWithFixedDelay(keepAliveTask, timeoutMillis, timeoutMillis, TimeUnit.MILLISECONDS);
+        }
+
+        /**
+         * Stops the heart-beat
+         */
+        public void stopHeartbeat() {
+            ScheduledTimerTask timerTask = this.timerTask;
+            if (null != timerTask) {
+                this.timerTask = null;
+                timerTask.cancel(true);
+            }
+        }
+    }
+
+    static long getSocketTimeout(Connection con) {
+        if (!(con instanceof com.mysql.jdbc.ConnectionProperties)) {
+            return 0L;
+        }
+
+        com.mysql.jdbc.ConnectionProperties connectionProperties = (com.mysql.jdbc.ConnectionProperties) con;
+        int socketTimeout = connectionProperties.getSocketTimeout();
+        return socketTimeout <= 0 ? 0L : socketTimeout;
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------
 
     private final Pools pools;
     private final ReplicationMonitor monitor;
     private final AssignmentImpl assign;
     private final boolean noTimeout;
     private final boolean write;
-    protected final ConnectionState state;
+    private final AtomicBoolean closed;
 
-    protected Connection delegate;
+    protected final ConnectionState state;
+    protected final Connection delegate;
+
+    private final AtomicReference<HeartBeatHelper> heartBeatReference;
 
     public JDBC4ConnectionReturner(Pools pools, ReplicationMonitor monitor, AssignmentImpl assign, Connection delegate, boolean noTimeout, boolean write, boolean usedAsRead) {
         super();
@@ -96,7 +205,43 @@ public abstract class JDBC4ConnectionReturner implements Connection, StateAware 
         this.delegate = delegate;
         this.noTimeout = noTimeout;
         this.write = write;
+        closed = new AtomicBoolean(false);
         state = new ConnectionState(usedAsRead);
+        heartBeatReference = new AtomicReference<>(null);
+    }
+
+    @Override
+    public boolean startHeartbeat() {
+        if (noTimeout) {
+            // No need for heart beat
+            return false;
+        }
+
+        if (closed.get()) {
+            return false;
+        }
+
+        TimerService timer = Initialization.getInstance().getTimer().getTimer();
+        if (null == timer) {
+            return false;
+        }
+
+        HeartBeatHelper heartBeat = new HeartBeatHelper(delegate);
+        if (false == heartBeatReference.compareAndSet(null, heartBeat)) {
+            return false;
+        }
+
+        heartBeat.startHeartbeat(timer);
+        state.setHeartbeatEnabled(true);
+        return true;
+    }
+
+    @Override
+    public void stopHeartbeat() {
+        HeartBeatHelper heartBeat = heartBeatReference.getAndSet(null);
+        if (null != heartBeat) {
+            heartBeat.stopHeartbeat();
+        }
     }
 
     @Override
@@ -119,13 +264,12 @@ public abstract class JDBC4ConnectionReturner implements Connection, StateAware 
 
     @Override
     public void close() throws SQLException {
-        if (null == delegate) {
+        if (false == closed.compareAndSet(false, true)) {
             throw new SQLException("Connection is already closed.");
         }
 
-        final Connection toReturn = delegate;
-        delegate = null;
-        monitor.backAndIncrementTransaction(pools, assign, toReturn, noTimeout, write, state);
+        stopHeartbeat();
+        monitor.backAndIncrementTransaction(pools, assign, delegate, noTimeout, write, state);
     }
 
     @Override
@@ -409,15 +553,29 @@ public abstract class JDBC4ConnectionReturner implements Connection, StateAware 
 
     public void updatePerformed() {
         state.setUsedForUpdate(true);
+        touch();
     }
 
     public void setUsedAsRead(boolean usedAsRead) {
         state.setUsedAsRead(usedAsRead);
+        touch();
     }
 
     protected void checkForAlreadyClosed() throws SQLException {
-        if (null == delegate) {
+        if (closed.get()) {
             throw new SQLException("Connection was already closed.");
+        }
+
+        touch();
+    }
+
+    /**
+     * Touches this connection; updates its last-accessed time stamp
+     */
+    public void touch() {
+        HeartBeatHelper heartBeat = heartBeatReference.get();
+        if (null != heartBeat) {
+            heartBeat.touch();
         }
     }
 

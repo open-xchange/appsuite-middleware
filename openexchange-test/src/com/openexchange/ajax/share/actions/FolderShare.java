@@ -54,11 +54,11 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.folder.actions.Parser;
 import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.webdav.xml.fields.FolderFields;
 
 /**
  * {@link FolderShare}

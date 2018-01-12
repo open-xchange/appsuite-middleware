@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -104,7 +104,7 @@ public class BODYSTRUCTURE implements Item {
 		System.out.println("DEBUG IMAP: parsing multipart");
 	    type = "multipart";
 	    processedType = MULTI;
-	    List<BODYSTRUCTURE> v = new ArrayList<BODYSTRUCTURE>(1);
+	    List<BODYSTRUCTURE> v = new ArrayList<>(1);
 	    int i = 1;
 	    do {
 		v.add(new BODYSTRUCTURE(r));
@@ -124,7 +124,7 @@ public class BODYSTRUCTURE implements Item {
 	    if (parseDebug)
 		System.out.println("DEBUG IMAP: subtype " + subtype);
 
-	    if (r.readByte() == ')') { // done
+	    if (r.isNextNonSpace(')')) { // done
 		if (parseDebug)
 		    System.out.println("DEBUG IMAP: parse DONE");
 		return;
@@ -136,23 +136,24 @@ public class BODYSTRUCTURE implements Item {
 		System.out.println("DEBUG IMAP: parsing extension data");
 	    // Body parameters
 	    cParams = parseParameters(r);
-	    if (r.readByte() == ')') { // done
+	    if (r.isNextNonSpace(')')) { // done
 		if (parseDebug)
 		    System.out.println("DEBUG IMAP: body parameters DONE");
 		return;
 	    }
 	    
 	    // Disposition
-	    byte b = r.readByte();
+	    byte b = r.peekByte();
 	    if (b == '(') {
 		if (parseDebug)
 		    System.out.println("DEBUG IMAP: parse disposition");
+		r.readByte();
 		disposition = r.readString();
 		if (parseDebug)
 		    System.out.println("DEBUG IMAP: disposition " +
 							disposition);
 		dParams = parseParameters(r);
-		if (r.readByte() != ')') // eat the end ')'
+		if (!r.isNextNonSpace(')')) // eat the end ')'
 		    throw new ParsingException(
 			"BODYSTRUCTURE parse error: " +
 			"missing ``)'' at end of disposition in multipart");
@@ -161,26 +162,35 @@ public class BODYSTRUCTURE implements Item {
 	    } else if (b == 'N' || b == 'n') {
 		if (parseDebug)
 		    System.out.println("DEBUG IMAP: disposition NIL");
-		r.skip(2); // skip 'NIL'
+		r.skip(3); // skip 'NIL'
 	    } else {
+	    /*
 		throw new ParsingException(
 		    "BODYSTRUCTURE parse error: " +
 		    type + "/" + subtype + ": " +
 		    "bad multipart disposition, b " + b);
-	    }
+	    */
+        if (parseDebug)
+            System.out.println("DEBUG IMAP: bad multipart disposition" +
+                    ", applying Exchange bug workaround");
+        description = r.readString();
+        if (parseDebug)
+            System.out.println("DEBUG IMAP: multipart description " +
+                    description);
+        // Throw away whatever comes after it, since we have no
+        // idea what it's supposed to be
+        while (r.readByte() == ' ')
+            parseBodyExtension(r);
+        return;
+        }
 
 	    // RFC3501 allows no body-fld-lang after body-fld-disp,
 	    // even though RFC2060 required it
-	    if ((b = r.readByte()) == ')') {
+	    if (r.isNextNonSpace(')')) {
 		if (parseDebug)
 		    System.out.println("DEBUG IMAP: no body-fld-lang");
 		return; // done
 	    }
-
-	    if (b != ' ')
-		throw new ParsingException(
-		    "BODYSTRUCTURE parse error: " +
-		    "missing space after disposition");
 
 	    // Language
 	    if (r.peekByte() == '(') { // a list follows
@@ -245,7 +255,7 @@ public class BODYSTRUCTURE implements Item {
                 // setup bodies.
                 bodies = new BODYSTRUCTURE[0];
 
-                if (r.readByte() == ')') { // done
+                if (r.isNextNonSpace(')')) { // done
                     if (parseDebug)
                         System.out.println("DEBUG IMAP: parse DONE");
                     return;
@@ -257,7 +267,7 @@ public class BODYSTRUCTURE implements Item {
                     System.out.println("DEBUG IMAP: parsing extension data");
                 // Body parameters
                 cParams = parseParameters(r);
-                if (r.readByte() == ')') { // done
+                if (r.isNextNonSpace(')')) { // done
                     if (parseDebug)
                         System.out.println("DEBUG IMAP: body parameters DONE");
                     return;
@@ -273,7 +283,7 @@ public class BODYSTRUCTURE implements Item {
                         System.out.println("DEBUG IMAP: disposition " +
                                            disposition);
                     dParams = parseParameters(r);
-                    if (r.readByte() != ')') // eat the end ')'
+                    if (!r.isNextNonSpace(')')) // eat the end ')'
                         throw new ParsingException(
                                                    "BODYSTRUCTURE parse error: " +
                                                    "missing ``)'' at end of disposition in multipart");
@@ -292,16 +302,11 @@ public class BODYSTRUCTURE implements Item {
 
                 // RFC3501 allows no body-fld-lang after body-fld-disp,
                 // even though RFC2060 required it
-                if ((b = r.readByte()) == ')') {
+                if (r.isNextNonSpace(')')) {
                     if (parseDebug)
                         System.out.println("DEBUG IMAP: no body-fld-lang");
                     return; // done
                 }
-
-                if (b != ' ')
-                    throw new ParsingException(
-                                               "BODYSTRUCTURE parse error: " +
-                                               "missing space after disposition");
 
                 // Language
                 if (r.peekByte() == '(') { // a list follows
@@ -401,8 +406,7 @@ public class BODYSTRUCTURE implements Item {
 				type + "/" + subtype);
 	    }
 
-	    if (r.peekByte() == ')') {
-		r.readByte();
+	    if (r.isNextNonSpace(')')) {
 		if (parseDebug)
 		    System.out.println("DEBUG IMAP: parse DONE");
 		return; // done
@@ -412,7 +416,7 @@ public class BODYSTRUCTURE implements Item {
 
 	    // MD5
 	    md5 = r.readString();
-	    if (r.readByte() == ')') {
+	    if (r.isNextNonSpace(')')) {
 		if (parseDebug)
 		    System.out.println("DEBUG IMAP: no MD5 DONE");
 		return; // done
@@ -428,7 +432,7 @@ public class BODYSTRUCTURE implements Item {
 		dParams = parseParameters(r);
 		if (parseDebug)
 		    System.out.println("DEBUG IMAP: dParams " + dParams);
-		if (r.readByte() != ')') // eat the end ')'
+		if (!r.isNextNonSpace(')')) // eat the end ')'
 		    throw new ParsingException(
 			"BODYSTRUCTURE parse error: " +
 			"missing ``)'' at end of disposition");
@@ -443,7 +447,7 @@ public class BODYSTRUCTURE implements Item {
 		    "bad single part disposition, b " + b);
 	    }
 
-	    if (r.readByte() == ')') {
+	    if (r.isNextNonSpace(')')) {
 		if (parseDebug)
 		    System.out.println("DEBUG IMAP: disposition DONE");
 		return; // done
@@ -511,7 +515,7 @@ public class BODYSTRUCTURE implements Item {
 		if (value == null)	// work around buggy servers
 		    value = "";
 		list.set(name, value);
-	    } while (r.readByte() != ')');
+	    } while (!r.isNextNonSpace(')'));
 	    list.combineSegments();
 	} else if (b == 'N' || b == 'n') {
 	    if (parseDebug)
@@ -531,7 +535,7 @@ public class BODYSTRUCTURE implements Item {
 	    r.skip(1); // skip '('
 	    do {
 		parseBodyExtension(r);
-	    } while (r.readByte() != ')');
+	    } while (!r.isNextNonSpace(')'));
 	} else if (Character.isDigit((char)b)) // number
 	    r.readNumber();
 	else // nstring

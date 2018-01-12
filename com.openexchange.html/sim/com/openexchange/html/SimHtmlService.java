@@ -54,6 +54,7 @@ import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.osgi.HTMLServiceActivator;
+import com.openexchange.html.whitelist.Whitelist;
 
 /**
  * {@link SimHtmlService}
@@ -77,6 +78,11 @@ public class SimHtmlService implements HtmlService {
         htmlEntityMap.put("apos", Character.valueOf('\''));
 
         htmlService = new HtmlServiceImpl(htmlCharMap, htmlEntityMap);
+    }
+
+    @Override
+    public Whitelist getWhitelist(boolean withCss) {
+        return htmlService.getWhitelist(withCss);
     }
 
     @Override

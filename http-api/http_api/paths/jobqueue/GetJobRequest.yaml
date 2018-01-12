@@ -1,0 +1,27 @@
+/jobs?action=get:
+  get:
+    operationId: getJob
+    tags:
+      - Jobqueue
+    summary: Gets the result of a certain job
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: string
+        description: The identifier for the job
+        required: true
+    responses:
+      200:
+        description: |
+          The regular response appropriate for submitted job. In case of errors the responsible fields in the response are
+          filled (see [Error handling](#error-handling)).
+        schema:
+          type: string
+          description: The response of the originating request that was submitted as a job
+      202:
+        description: |
+          The operation did not complete in time and was added to job queue providing the job identifier. In case of errors the responsible fields in the response are
+          filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/GetJobResponse"

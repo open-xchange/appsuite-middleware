@@ -2,9 +2,9 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: CalDAV- and CardDAV push
 Bundle-SymbolicName: com.openexchange.dav.push
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.google.common.io,
  com.openexchange.capabilities,
  com.openexchange.config,
@@ -37,7 +37,6 @@ Import-Package: com.google.common.io,
  com.openexchange.webdav.action,
  com.openexchange.webdav.protocol,
  com.openexchange.webdav.protocol.helpers,
- javapns.json,
  javapns.notification,
  javax.mail.internet,
  javax.mail.internet.idn,

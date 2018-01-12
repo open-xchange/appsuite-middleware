@@ -1,5 +1,5 @@
 #!/bin/bash
-# postinst script for open-xchange-guard
+# postinst script for open-xchange-client-onboarding
 #
 # see: dh_installdeb(1)
 
@@ -18,12 +18,6 @@ set -e
 # the debian-policy package
 
 . /opt/open-xchange/lib/oxfunctions.sh
-
-postInstall() {
-    # prevent bash from expanding, see bug 13316
-    GLOBIGNORE='*'
-
-}
 
 postFix() {
     local version=${1%-*}
@@ -91,9 +85,6 @@ case "$1" in
         if [ -n "$2" ]; then
             # we are in update mode, run postFix to apply fixes
             postFix "$2"
-        else
-            # we are in install mode
-            postInstall
         fi
     ;;
 

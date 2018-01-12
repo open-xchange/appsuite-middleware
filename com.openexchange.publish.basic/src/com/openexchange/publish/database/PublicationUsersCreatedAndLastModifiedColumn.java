@@ -49,7 +49,6 @@
 
 package com.openexchange.publish.database;
 
-import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.ExtendedColumnCreationTask;
 import com.openexchange.tools.update.Column;
 
@@ -60,8 +59,8 @@ import com.openexchange.tools.update.Column;
  */
 public class PublicationUsersCreatedAndLastModifiedColumn extends ExtendedColumnCreationTask {
 
-    public PublicationUsersCreatedAndLastModifiedColumn(DatabaseService dbService) {
-        super(dbService);
+    public PublicationUsersCreatedAndLastModifiedColumn() {
+        super();
     }
 
     @Override

@@ -55,7 +55,7 @@ import java.util.Vector;
 
 /**
  * A simple POJO that holds metadata information about an SQL table
- * 
+ *
  * @author cutmasta
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
@@ -69,6 +69,12 @@ public class TableObject implements Comparable<String> {
     private Vector<TableColumnObject> columns = null;
     // all rows in table
     private Vector<TableRowObject> table_rows = null;
+
+    // Holds all infos about a table
+    public TableObject(String tableName) {
+        this();
+        this.name = tableName;
+    }
 
     // Holds all infos about a table
     public TableObject() {

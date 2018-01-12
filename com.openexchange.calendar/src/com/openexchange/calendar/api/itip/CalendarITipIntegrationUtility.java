@@ -51,15 +51,14 @@ package com.openexchange.calendar.api.itip;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.itip.ITipIntegrationUtility;
@@ -142,7 +141,7 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
         return conflicts;
     }
 
-    private static final Set<Integer> EXEMPT = new HashSet<Integer>(Arrays.asList(
+    private static final Set<Integer> EXEMPT = ImmutableSet.of(
         Appointment.RECURRENCE_START,
         Appointment.ALARM,
         Appointment.RECURRENCE_DATE_POSITION,
@@ -154,7 +153,7 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
         Appointment.NOTIFICATION,
         Appointment.RECURRENCE_COUNT,
 //        Appointment.NUMBER_OF_LINKS,
-        Appointment.LAST_MODIFIED_UTC));
+        Appointment.LAST_MODIFIED_UTC);
 
     private static final int[] EXCEPTION_FIELDS = new int[Appointment.ALL_COLUMNS.length - EXEMPT.size()];
 

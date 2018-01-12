@@ -73,6 +73,7 @@ public class WebdavGetAction extends WebdavHeadAction {
 	public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
 		final WebdavResource resource = req.getResource();
 		res.setContentType(resource.getContentType());
+		res.setHeader("Content-Disposition", "attachment");
 		if(!resource.exists()) {
 			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_NOT_FOUND);
 		}

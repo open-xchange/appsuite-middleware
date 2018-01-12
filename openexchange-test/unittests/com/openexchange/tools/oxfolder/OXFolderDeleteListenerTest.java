@@ -88,7 +88,7 @@ public class OXFolderDeleteListenerTest {
     }
 
     public void simulateUserDelete(final int deleteMe) throws OXException, OXException, OXException, SQLException, OXException {
-        final DeleteEvent delEvent = new DeleteEvent(this, deleteMe, DeleteEvent.TYPE_USER, ContextStorage.getInstance().getContext(session.getContextId()));
+        final DeleteEvent delEvent = DeleteEvent.createDeleteEventForUserDeletion(this, deleteMe, ContextStorage.getInstance().getContext(session.getContextId()));
 
         Connection con = null;
         try {

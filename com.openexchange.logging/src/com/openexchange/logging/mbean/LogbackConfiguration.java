@@ -69,7 +69,6 @@ import com.openexchange.log.LogProperties.Name;
 import com.openexchange.logback.extensions.logstash.LogstashSocketAppender;
 import com.openexchange.logging.filter.ExceptionCategoryFilter;
 import com.openexchange.logging.filter.ExtendedMDCFilter;
-import com.openexchange.logging.filter.MDCEnablerTurboFilter;
 import com.openexchange.logging.filter.RankingAwareTurboFilterList;
 import com.openexchange.logging.filter.TurboFilterCache;
 import com.openexchange.logging.mbean.LogbackMBeanResponse.MessageType;
@@ -116,8 +115,6 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
 
     private final IncludeStackTraceServiceImpl traceServiceImpl;
 
-    private final MDCEnablerTurboFilter mdcEnablerTurboFilter;
-
     /**
      * Initialises a new {@link LogbackConfiguration}. Reads the MBean annotations and adds those to the method* maps.
      *
@@ -138,11 +135,9 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
 
         // Set the ranking aware turbo filter and initialise the turbo filter cache
         turboFilterCache = new TurboFilterCache();
-        mdcEnablerTurboFilter = new MDCEnablerTurboFilter();
 
         // Add turbo filter cache to list
         rankingAwareTurboFilterList.addTurboFilter(turboFilterCache);
-        rankingAwareTurboFilterList.addTurboFilter(mdcEnablerTurboFilter);
 
         configurator.setContext(loggerContext);
 

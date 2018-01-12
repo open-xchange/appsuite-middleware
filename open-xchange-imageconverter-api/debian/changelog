@@ -1,0 +1,11 @@
+open-xchange-imageconverter-api (7.10.0-0) unstable; urgency=medium
+
+  * prepare for 7.10.0 release
+
+ -- Kai Ahrens <kai.ahrens@open-xchange.com>  Thu, 12 Oct 2017 14:38:48 +0200
+
+open-xchange-imageconverter-api (7.8.4-1) stable; urgency=medium
+
+  * Initial release
+
+ -- Kai Ahrens <kai.ahrens@open-xchange.com>  Wed, 09 Aug 2017 18:38:00 +0200

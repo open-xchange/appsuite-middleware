@@ -2,17 +2,16 @@
 
 Name:          open-xchange-geoip
 BuildArch:     noarch
-#!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
 %else
 BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-core
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+%if 0%{?suse_version}
+BuildRequires: java-1_8_0-openjdk-devel
 %else
-BuildRequires: java-devel >= 1.7.0
+BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
 %define        ox_release 0
@@ -54,5 +53,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
-* Wed Feb 08 2016 Thorben Betten <thorben.betten@open-xchange.com>
+* Thu Oct 12 2017 Thorben Betten <thorben.betten@open-xchange.com>
+prepare for 7.10.0 release
+* Mon Feb 08 2016 Thorben Betten <thorben.betten@open-xchange.com>
 Initial release

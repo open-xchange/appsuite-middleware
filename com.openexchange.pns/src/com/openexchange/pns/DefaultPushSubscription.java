@@ -96,13 +96,11 @@ public class DefaultPushSubscription implements PushSubscription {
         String transportId;
         String token;
         String client;
-        Nature nature;
         Date expires;
 
         /** Creates a new builder */
         Builder() {
             super();
-            nature = Nature.PERSISTENT; // Persistent nature by default
         }
 
         /**
@@ -179,16 +177,6 @@ public class DefaultPushSubscription implements PushSubscription {
         }
 
         /**
-         * Sets the nature
-         * @param nature The nature
-         * @return This builder
-         */
-        public Builder nature(Nature nature) {
-            this.nature = null == nature ? Nature.PERSISTENT : nature;
-            return this;
-        }
-
-        /**
          * Sets the expires
          * @param expires The expires
          * @return This builder
@@ -215,7 +203,6 @@ public class DefaultPushSubscription implements PushSubscription {
     private final List<String> topics;
     private final String transportId;
     private final String token;
-    private final Nature nature;
     private final Date expires;
 
     /**
@@ -229,7 +216,6 @@ public class DefaultPushSubscription implements PushSubscription {
         this.transportId = builder.transportId;
         this.userId = builder.userId;
         this.client = builder.client;
-        this.nature = builder.nature;
         this.expires = builder.expires;
     }
 
@@ -261,11 +247,6 @@ public class DefaultPushSubscription implements PushSubscription {
     @Override
     public String getClient() {
         return client;
-    }
-
-    @Override
-    public Nature getNature() {
-        return nature;
     }
 
     @Override
@@ -331,9 +312,6 @@ public class DefaultPushSubscription implements PushSubscription {
         }
         if (token != null) {
             sb.append("token=").append(token).append(", ");
-        }
-        if (nature != null) {
-            sb.append("nature=").append(nature);
         }
         sb.append("}");
         return sb.toString();

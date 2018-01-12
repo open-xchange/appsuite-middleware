@@ -254,7 +254,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 }
 
                 // Create the HttpService factory. Each distinct bundle will get its own instance of HttpServiceImpl.
-                httpServiceFactory = new HttpServiceFactory(grizzly, builder.build(), context.getBundle());
+                httpServiceFactory = new HttpServiceFactory(grizzly, builder.build(), grizzlyConfig.isSupportHierachicalLookupOnNotFound(), context.getBundle());
             }
 
             // Initialize the filter tracker

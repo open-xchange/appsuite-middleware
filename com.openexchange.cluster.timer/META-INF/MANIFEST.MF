@@ -2,17 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Cluster Timer Bundle
 Bundle-SymbolicName: com.openexchange.cluster.timer
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.hazelcast.core,
- com.openexchange.exception,
- com.openexchange.hazelcast.configuration,
- com.openexchange.osgi,
- com.openexchange.server,
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.exception,
  com.openexchange.timer,
- org.osgi.framework,
- org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.cluster.timer
-Bundle-Activator: com.openexchange.cluster.timer.osgi.ClusterTimerActivator

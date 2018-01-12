@@ -232,6 +232,9 @@ public final class Databases {
      * @throws SQLException if starting the transaction fails.
      */
     public static void startTransaction(Connection con) throws SQLException {
+        if (null == con) {
+            return;
+        }
         Statement stmt = null;
         try {
             con.setAutoCommit(false);
@@ -252,9 +255,7 @@ public final class Databases {
             return;
         }
         try {
-            if (!con.isClosed()) {
-                con.rollback();
-            }
+            con.rollback();
         } catch (SQLException e) {
             LOG.error("", e);
         }
@@ -270,9 +271,7 @@ public final class Databases {
             return;
         }
         try {
-            if (!con.isClosed()) {
-                con.setAutoCommit(true);
-            }
+            con.setAutoCommit(true);
         } catch (SQLException e) {
             LOG.error("", e);
         }
@@ -300,15 +299,22 @@ public final class Databases {
     }
 
     /**
-     * Extends a SQL statement with enough ? characters in the last IN argument.
+     * Extends an SQL statement with enough <code>'?'</code> characters in the last <code>IN</code> argument.
      *
-     * @param sql SQL statement ending with "IN (";
-     * @param length number of entries.
-     * @return the ready to use SQL statement.
+     * @param sql The SQL statement ending with <code>"IN ("</code>
+     * @param length The number of entries.
+     * @return The ready to use SQL statement.
+     * @throws IllegalArgumentException If <code>sql</code> is <code>null</code> <i>OR</i> <code>length</code> is less than or equal to <code>0</code> (zero)
      */
     public static String getIN(String sql, int length) {
+        if (null == sql) {
+            throw new IllegalArgumentException("SQL statement must not be null");
+        }
+        if (length <= 0) {
+            throw new IllegalArgumentException("length must be positive");
+        }
         StringBuilder retval = new StringBuilder(sql);
-        for (int i = 0; i < length; i++) {
+        for (int i = length; i-- > 0;) {
             retval.append("?,");
         }
         retval.setCharAt(retval.length() - 1, ')');

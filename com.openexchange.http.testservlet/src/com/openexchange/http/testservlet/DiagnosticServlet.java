@@ -91,13 +91,6 @@ public class DiagnosticServlet extends HttpServlet {
         this.defaultCipherSuites = l;
     }
 
-    @Override
-    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        // Create a new HttpSession if it's missing
-        req.getSession(true);
-        super.service(req, resp);
-    }
-
     /**
      * {@inheritDoc}
      */

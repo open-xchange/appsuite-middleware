@@ -49,21 +49,18 @@
 
 package com.openexchange.advertisement.internal;
 
-import java.util.Iterator;
-import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.AdvertisementPackageService;
-import com.openexchange.advertisement.osgi.Services;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadables;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.reseller.ResellerExceptionCodes;
 import com.openexchange.reseller.ResellerService;
@@ -80,29 +77,69 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
     private static final Logger LOG = LoggerFactory.getLogger(AdvertisementConfigService.class);
     private static final String CONFIG_SUFFIX = ".packageScheme";
 
-    private final List<AdvertisementConfigService> services = new CopyOnWriteArrayList<>();
-    private volatile ConcurrentMap<String, AdvertisementConfigService> map;
-    private volatile AdvertisementConfigService global;
+    private final ResellerService resellerService;
+    private final AtomicReference<AdvertisementConfigService> globalReference;
+    private final AtomicReference<Map<String, String>> reseller2Scheme;
+    private final ConcurrentMap<String, AdvertisementConfigService> configServices;
 
     /**
      * Initializes a new {@link AdvertisementPackageServiceImpl}.
      *
+     * @param resellerService The reseller service to use
      * @param configService The configuration service to use
+     * @throws OXException If initialization fails
      */
-    public AdvertisementPackageServiceImpl(ConfigurationService configService) {
+    public AdvertisementPackageServiceImpl(ResellerService resellerService, ConfigurationService configService) throws OXException {
         super();
-        reloadConfiguration(configService);
+        this.resellerService = resellerService;
+        reseller2Scheme = new AtomicReference<Map<String,String>>(computeReseller2SchemeMapping(configService));
+        configServices = new ConcurrentHashMap<>(8, 0.9F, 1);
+        globalReference = new AtomicReference<AdvertisementConfigService>(null);
+    }
+
+    private Map<String, String> computeReseller2SchemeMapping(ConfigurationService configService) throws OXException {
+        ImmutableMap.Builder<String, String> map = ImmutableMap.builder();
+        StringBuilder propNameBuilder = new StringBuilder(AdvertisementConfigService.CONFIG_PREFIX);
+        int reslen = propNameBuilder.length();
+        boolean containsDefault = false;
+        for (ResellerAdmin res: resellerService.getAll()){
+            propNameBuilder.setLength(reslen);
+            String packageScheme = configService.getProperty(propNameBuilder.append(res.getName()).append(CONFIG_SUFFIX).toString());
+            if (packageScheme == null) {
+                // Fall-back to reseller identifier
+                propNameBuilder.setLength(reslen);
+                packageScheme = configService.getProperty(propNameBuilder.append(res.getId()).append(CONFIG_SUFFIX).toString());
+
+                if (packageScheme == null) {
+                    // Fall-back to global as last resort
+                    packageScheme = DEFAULT_SCHEME_ID;
+                }
+            }
+            if(res.getName().equals(DEFAULT_RESELLER)){
+                containsDefault=true;
+            }
+            map.put(res.getName(), packageScheme);
+        }
+
+        if (!containsDefault) {
+            // Add 'default' as a default reseller
+            String oxall = DEFAULT_RESELLER;
+
+            propNameBuilder.setLength(reslen);
+            String packageScheme = configService.getProperty(propNameBuilder.append(oxall).append(CONFIG_SUFFIX).toString());
+            if (packageScheme == null) {
+                //fallback to global
+                packageScheme = DEFAULT_SCHEME_ID;
+            }
+            map.put(oxall, packageScheme);
+        }
+        return map.build();
     }
 
     @Override
     public AdvertisementConfigService getScheme(int contextId) {
-        ConcurrentMap<String, AdvertisementConfigService> map = this.map;
-        if (map == null) {
-            return null;
-        }
-
+        // Resolve context tom its reseller name
         String reseller;
-        ResellerService resellerService = Services.getService(ResellerService.class);
         try {
             ResellerAdmin admin = resellerService.getReseller(contextId);
             reseller = admin.getName();
@@ -110,64 +147,32 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
             if (ResellerExceptionCodes.NO_RESELLER_FOUND.equals(e) || ResellerExceptionCodes.NO_RESELLER_FOUND_FOR_CTX.equals(e)) {
                 reseller = DEFAULT_RESELLER;
             } else {
-                return global;
+                return globalReference.get();
             }
         }
 
-        AdvertisementConfigService result = map.get(reseller);
+        String scheme = reseller2Scheme.get().get(reseller);
+        if (null == scheme) {
+            // No such reseller known... Assume global
+            return globalReference.get();
+        }
+
+        AdvertisementConfigService result = configServices.get(scheme);
         if (result == null) {
-            result = global;
+            result = globalReference.get();
         }
         return result;
     }
 
     @Override
     public AdvertisementConfigService getDefaultScheme() {
-        return map == null ? null : global;
+        return globalReference.get();
     }
 
     @Override
-    public synchronized void reloadConfiguration(ConfigurationService configService) {
+    public void reloadConfiguration(ConfigurationService configService) {
         try {
-            ResellerService resellerService = Services.getService(ResellerService.class);
-            List<ResellerAdmin> reseller = resellerService.getAll();
-            ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
-            ConfigView view = factory.getView();
-
-            ConcurrentHashMap<String, AdvertisementConfigService> map = new ConcurrentHashMap<>(reseller.size());
-            for (ResellerAdmin res: reseller){
-                String packageScheme = view.get(AdvertisementConfigService.CONFIG_PREFIX + res.getName() + CONFIG_SUFFIX, String.class);
-                if (packageScheme == null) {
-                    //fallback to reseller id
-                    packageScheme = view.get(AdvertisementConfigService.CONFIG_PREFIX + res.getId() + CONFIG_SUFFIX, String.class);
-
-                    if (packageScheme == null) {
-                        //fallback to global
-                        packageScheme = DEFAULT_SCHEME_ID;
-                    }
-                }
-
-                AdvertisementConfigService adsService = getConfigServiceByScheme(packageScheme);
-                if (adsService != null) {
-                    map.put(res.getName(), adsService);
-                }
-            }
-
-            // Add 'default' as a default reseller
-            String oxall = DEFAULT_RESELLER;
-
-            String packageScheme = view.get(AdvertisementConfigService.CONFIG_PREFIX + oxall + CONFIG_SUFFIX, String.class);
-            if (packageScheme == null) {
-                //fallback to global
-                packageScheme = DEFAULT_SCHEME_ID;
-            }
-
-            AdvertisementConfigService adsService = getConfigServiceByScheme(packageScheme);
-            if (adsService != null) {
-                map.put(oxall, adsService);
-            }
-
-            this.map = map;
+            reseller2Scheme.set(computeReseller2SchemeMapping(configService));
         } catch (OXException e) {
             LOG.error("Error while reloading configuration: " + e.getMessage());
         }
@@ -177,49 +182,32 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
      * Adds newly appeared advertisement configuration and reloads this advertisement package service.
      *
      * @param advertisementConfig The advertisement configuration to add
-     * @param configService The configuration service to use for reload
+     * @return <code>true</code> if successfully added; otherwise <code>false</code>
      */
-    public synchronized void addServiceAndReload(AdvertisementConfigService advertisementConfig, ConfigurationService configService) {
-        services.add(advertisementConfig);
-        reloadConfiguration(configService);
+    public boolean addServiceAndReload(AdvertisementConfigService advertisementConfig) {
+        if (null == advertisementConfig || (null != configServices.putIfAbsent(advertisementConfig.getSchemeId(), advertisementConfig))) {
+            // Either null or there is already such an AdvertisementConfigService
+            return false;
+        }
+
+        if (DEFAULT_SCHEME_ID.equals(advertisementConfig.getSchemeId())) {
+            globalReference.set(advertisementConfig);
+        }
+        return true;
     }
 
     /**
      * Removes disappeared advertisement configuration and reloads this advertisement package service.
      *
      * @param advertisementConfig The advertisement configuration to remove
-     * @param configService The configuration service to use for reload
      */
-    public synchronized void removeServiceAndReload(AdvertisementConfigService advertisementConfig, ConfigurationService configService) {
-        services.remove(advertisementConfig);
-        reloadConfiguration(configService);
-    }
-
-    private AdvertisementConfigService getConfigServiceByScheme(String scheme) {
-        AdvertisementConfigService global = this.global;
-        if (null == global) {
-            // Initialize global; may be concurrently executed. it does not harm if default scheme gets detected twice...
-            AdvertisementConfigService result = null;
-            for (Iterator<AdvertisementConfigService> iter = services.iterator(); (null == result) && (global == null) && iter.hasNext();) {
-                AdvertisementConfigService service = iter.next();
-                if (service.getSchemeId().equals(DEFAULT_SCHEME_ID)) {
-                    global = service;
-                    this.global = global;
-                }
-                if (service.getSchemeId().equals(scheme)) {
-                    result = service;
-                }
-            }
-
-            return result == null ? global : result;
-        }
-
-        for (AdvertisementConfigService service : services) {
-            if (service.getSchemeId().equals(scheme)) {
-                return service;
+    public void removeServiceAndReload(AdvertisementConfigService advertisementConfig) {
+        if (null != advertisementConfig) {
+            AdvertisementConfigService removed = configServices.remove(advertisementConfig.getSchemeId());
+            if (null != removed && DEFAULT_SCHEME_ID.equals(removed.getSchemeId())) {
+                globalReference.set(null);
             }
         }
-        return global;
     }
 
     @Override

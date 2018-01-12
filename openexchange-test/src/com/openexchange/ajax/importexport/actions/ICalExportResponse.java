@@ -50,6 +50,7 @@
 package com.openexchange.ajax.importexport.actions;
 
 import java.util.Date;
+import org.apache.http.HttpResponse;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.ProblematicAttribute;
@@ -61,12 +62,15 @@ import com.openexchange.exception.OXException.ProblematicAttribute;
 public final class ICalExportResponse extends AbstractAJAXResponse {
 
     private String iCal;
+    
+    private final HttpResponse response;
 
     /**
      * @param response
      */
-    public ICalExportResponse() {
+    public ICalExportResponse(HttpResponse response) {
         super(null);
+        this.response = response;
     }
 
     /**
@@ -122,4 +126,8 @@ public final class ICalExportResponse extends AbstractAJAXResponse {
     public boolean hasError() {
         throw new UnsupportedOperationException();
     }
+    
+    public HttpResponse getHttpResponse() {
+        return response;
+    }  
 }

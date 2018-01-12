@@ -50,6 +50,8 @@
 package com.openexchange.groupware.contexts.impl;
 
 import java.util.List;
+import java.util.Map;
+import com.openexchange.context.PoolAndSchema;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
@@ -182,6 +184,31 @@ public abstract class ContextStorage {
      * @throws OXException if reading the contexts fails.
      */
     public abstract List<Integer> getAllContextIds() throws OXException;
+
+    /**
+     * Gets a listing of exactly one context per database schema
+     *
+     * @return A listing of distinct contexts per schema
+     * @throws OXException If contexts cannot be returned
+     */
+    public abstract List<Integer> getDistinctContextsPerSchema() throws OXException;
+
+    /**
+     * Groups all context identifiers by their schema associations.
+     *
+     * @return A mapping of a representative schema-associated context identifier to other contexts residing in that schema taken from specified context identifiers
+     * @throws OXException If the mapping cannot be returned
+     */
+    public abstract Map<PoolAndSchema, List<Integer>> getSchemaAssociations() throws OXException;
+
+    /**
+     * Groups specified context identifiers by their schema associations.
+     *
+     * @param contextIds The context identifiers to group by schema association
+     * @return A mapping of a representative schema-associated context identifier to other contexts residing in that schema taken from specified context identifiers
+     * @throws OXException If the mapping cannot be returned
+     */
+    public abstract Map<PoolAndSchema, List<Integer>> getSchemaAssociationsFor(List<Integer> contextIds) throws OXException;
 
     /**
      * Get a list of all context ids that are bound to the specified filestore id

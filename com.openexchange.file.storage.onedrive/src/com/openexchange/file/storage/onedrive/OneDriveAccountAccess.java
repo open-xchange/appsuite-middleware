@@ -155,7 +155,7 @@ public final class OneDriveAccountAccess implements FileStorageAccountAccess, Ca
         if (null == oneDriveAccess) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }
-        return new OneDriveFileAccess((OneDriveOAuthAccess) oneDriveAccess, account, session, this);
+        return new OneDriveFileAccess((OneDriveOAuthAccess) oneDriveAccess, account, session, this, (OneDriveFolderAccess) getFolderAccess());
     }
 
     @Override

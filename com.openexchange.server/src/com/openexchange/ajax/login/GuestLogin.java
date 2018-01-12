@@ -172,7 +172,7 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
                 throw LoginExceptionCodes.INVALID_GUEST_PASSWORD.create();
             }
         }
-        if (!loginInfo.getUsername().equals(user.getMail())) {
+        if (!loginInfo.getUsername().equals(new StringBuilder(16).append(user.getId()).append('@').append(context.getContextId()).toString())) {
             throw INVALID_CREDENTIALS.create();
         }
     }

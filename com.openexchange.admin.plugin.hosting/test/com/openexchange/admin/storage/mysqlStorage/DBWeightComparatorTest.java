@@ -14,7 +14,7 @@ import org.junit.Test;
 
 /**
  * Unit tests for DBWeightComparator
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4.2
  */
@@ -23,8 +23,8 @@ public class DBWeightComparatorTest {
      @Test
      public void testLowValues() {
         List<DatabaseHandle> dbList = new ArrayList<DatabaseHandle>();
-        dbList.add(db(1, 100, 2, 1000));
-        dbList.add(db(2, 100, 1, 1000));
+        dbList.add(db(1, 2, 1000));
+        dbList.add(db(2, 1, 1000));
         sort(dbList, reverseOrder(new DBWeightComparator(totalUnits(dbList), totalWeight(dbList))));
         assertEquals("Algorithm did not sort correctly.", 2, i(first(dbList).getId()));
     }
@@ -32,8 +32,8 @@ public class DBWeightComparatorTest {
      @Test
      public void testDevPrototyp() {
         List<DatabaseHandle> dbList = new ArrayList<DatabaseHandle>();
-        dbList.add(db(1, 100, 67909, 150000));
-        dbList.add(db(2, 100, 2044, 150000));
+        dbList.add(db(1, 67909, 150000));
+        dbList.add(db(2, 2044, 150000));
         sort(dbList, reverseOrder(new DBWeightComparator(totalUnits(dbList), totalWeight(dbList))));
         assertEquals("Algorithm did not sort correctly.", 2, i(first(dbList).getId()));
     }
@@ -41,8 +41,8 @@ public class DBWeightComparatorTest {
      @Test
      public void testLargeValues() {
         List<DatabaseHandle> dbList = new ArrayList<DatabaseHandle>();
-        dbList.add(db(1, 100, 999999999, 1000000000));
-        dbList.add(db(2, 100, 999999998, 1000000000));
+        dbList.add(db(1, 999999999, 1000000000));
+        dbList.add(db(2, 999999998, 1000000000));
         sort(dbList, reverseOrder(new DBWeightComparator(totalUnits(dbList), totalWeight(dbList))));
         assertEquals("Algorithm did not sort correctly.", 2, i(first(dbList).getId()));
     }
@@ -50,8 +50,8 @@ public class DBWeightComparatorTest {
      @Test
      public void testOneZero() {
         List<DatabaseHandle> dbList = new ArrayList<DatabaseHandle>();
-        dbList.add(db(1, 100, 1, 1000));
-        dbList.add(db(2, 100, 0, 1000));
+        dbList.add(db(1, 1, 1000));
+        dbList.add(db(2, 0, 1000));
         sort(dbList, reverseOrder(new DBWeightComparator(totalUnits(dbList), totalWeight(dbList))));
         assertEquals("Algorithm did not sort correctly.", 2, i(first(dbList).getId()));
     }
@@ -59,16 +59,15 @@ public class DBWeightComparatorTest {
      @Test
      public void testOneFull() {
         List<DatabaseHandle> dbList = new ArrayList<DatabaseHandle>();
-        dbList.add(db(1, 100, 1000000000, 1000000000));
-        dbList.add(db(2, 100, 999999999, 1000000000));
+        dbList.add(db(1, 1000000000, 1000000000));
+        dbList.add(db(2, 999999999, 1000000000));
         sort(dbList, reverseOrder(new DBWeightComparator(totalUnits(dbList), totalWeight(dbList))));
         assertEquals("Algorithm did not sort correctly.", 2, i(first(dbList).getId()));
     }
 
-    private DatabaseHandle db(final int id, final int weight, final int currentUnits, final int maxUnits) {
+    private DatabaseHandle db(final int id, final int currentUnits, final int maxUnits) {
         final DatabaseHandle retval = new DatabaseHandle();
         retval.setId(I(id));
-        retval.setClusterWeight(I(weight));
         retval.setCount(currentUnits);
         retval.setMaxUnits(I(maxUnits));
         return retval;
@@ -85,7 +84,7 @@ public class DBWeightComparatorTest {
     private int totalWeight(final Collection<DatabaseHandle> list) {
         int retval = 0;
         for (final DatabaseHandle db : list) {
-            retval += i(db.getClusterWeight());
+            retval += 100;
         }
         return retval;
     }

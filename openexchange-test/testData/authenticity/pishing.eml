@@ -1,0 +1,62 @@
+Delivered-To: foo@bar.com
+Received: by 10.157.43.51 with SMTP id o48csp1092833otb;
+        Fri, 10 Nov 2017 00:18:11 -0800 (PST)
+X-Google-Smtp-Source: ABhQp+Ru8i3sIybR/vyC+NzfIBJH911JbTofPK8K4C2jiW6kFeT1KIqatRIzaAo04fKuIdQvEvEd
+X-Received: by 10.13.222.133 with SMTP id h127mr2102512ywe.351.1510301891577;
+        Fri, 10 Nov 2017 00:18:11 -0800 (PST)
+ARC-Seal: i=1; a=rsa-sha256; t=1510301891; cv=none;
+        d=google.com; s=arc-20160816;
+        b=w213WrgQI/SYOpwJ3Kocyb6bqJRx2S/mHR9CKHvrlSD7lsgyS4FT2uHfS0uWL/iONS
+         to0MpUqyGR+5mUVVbo5MGZkYURgR6ff8x7MMAtx6wTIgKTZccG3h/1jRU0IhgWbkBF83
+         D4hEF8FJqsdeQ1DT0TZLxOj2hWXRabJjajoqZO+9K0lMwcA135bOKhdUXlKT9nmzyQqy
+         Oqwk9ZyqiHuIUdqmy84gmWq0gImYYxg3EojneqZBAKswe4rANSUWnwrLz9kf5y1pv9ho
+         5LI84OrPkbdYXXYcxWLaQJ0rMv6EvCx6Loni4ZKpds+r7ZzftOQsqLuX84eR6zJ0jMi6
+         /vSg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20160816;
+        h=message-id:reply-to:date:from:to:subject:content-description
+         :content-transfer-encoding:mime-version:arc-authentication-results;
+        bh=QQdEjKgmI/DzWXKqW6rYQEZtXE2RoRyq+dmVQmBpnVU=;
+        b=LeRX+DRQnFImTYeV62tfUvY8UsxUighVz47hWRIeAva5M8iY9Y3BiI5GMYwvhLQQzO
+         YKQUpgiOE4kfU+DxtRk8eYhBMprzvICCPFlzSOYosjPg3jx9yhDkEhuF17/FGP+hXXZ4
+         nFm2HHmwQQSItQTUoVD9VTN3M+K6+VCk64xcBUl+cq1HYwPnNULEWZe/4wj6P/jpVq3Y
+         fjJTV79PT4G4kQ7tqGK59Qn00oCUAuND2aAlLZ6IYDqqql4aiPPYg7yz4TlBK6lDZkY1
+         hxDlGDRfKC3tPCqpgW2xbKIkfOeBErmZ7I2IjP24c2SDz3GsVenS7xCX5Z1j363qGwnn
+         LF1Q==
+ARC-Authentication-Results: i=1; mx.google.com;
+       spf=fail (google.com: domain of wyn.lasco@sts-int.net does not designate 67.211.237.215 as permitted sender) smtp.mailfrom=wyn.lasco@sts-int.net
+Return-Path: <wyn.lasco@sts-int.net>
+Received: from sophos.office.local (mail.dkonikoff.com. [67.211.237.215])
+        by mx.google.com with ESMTP id o4si2209200ywa.239.2017.11.10.00.18.11
+        for <foo@bar.com>;
+        Fri, 10 Nov 2017 00:18:11 -0800 (PST)
+Received-SPF: fail (google.com: domain of wyn.lasco@sts-int.net does not designate 67.211.237.215 as permitted sender) client-ip=67.211.237.215;
+Authentication-Results: open-xchange.authenticity.test;
+       spf=fail (google.com: domain of wyn.lasco@sts-int.net does not designate 67.211.237.215 as permitted sender) smtp.mailfrom=wyn.lasco@sts-int.net
+Received: from sophos.office.local (localhost.localdomain [127.0.0.1]) by localhost (Email Security Appliance) with SMTP id 04D5933735CF_A0560C3B for <foo@bar.com>; Fri, 10 Nov 2017 08:18:11 +0000 (GMT)
+Received: from [104.254.245.146] (unknown [104.254.245.146]) by sophos.office.local (Sophos Email Appliance) with ESMTPA id B66E1336EDEA_A0556E4F for <foo@bar.com>; Fri, 10 Nov 2017 07:36:04 +0000 (GMT)
+Content-Type: text/plain; charset="iso-8859-1"
+MIME-Version: 1.0
+Content-Transfer-Encoding: quoted-printable
+Content-Description: Mail message body
+Subject: Investment Partnership !foo@bar.com
+To: foo@bar.com
+From: Ryan Roger <wyn.lasco@sts-int.net>
+Date: Fri, 10 Nov 2017 08:35:58 +0100
+Reply-To: ryanroger668@gmail.com
+Message-Id: <20171110073604.B66E1336EDEA_A0556E4F@sophos.office.local>
+
+Greetings,
+We are contacting you with reference to your post/comment on the internet c=
+oncerning funding of your business project .My names are Mr. Ryan Rogers th=
+e Independent Financial Consultant We are interested to partnership with yo=
+ur company as we are seeking to diversify our financial portfolio into viab=
+le and lucrative business projects that worth it,
+We are most interested in partnerships business ventures such as Medical an=
+d Health care projects, Real estate projects, mining projects, agricultural=
+ projects renewable energy projects, start-up projects and business expansi=
+ons / Loan with lower rate,
+
+Your swift response is highly needed.
+
+Best Regard,
+Ryan Roger

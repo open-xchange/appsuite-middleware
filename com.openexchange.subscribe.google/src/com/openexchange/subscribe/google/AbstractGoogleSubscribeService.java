@@ -55,6 +55,7 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.AbstractSubscribeService;
@@ -116,48 +117,51 @@ public abstract class AbstractGoogleSubscribeService extends AbstractSubscribeSe
 
     @Override
     public void modifyIncoming(final Subscription subscription) throws OXException {
-        if(subscription != null) {
-            super.modifyIncoming(subscription);
-            if (subscription.getConfiguration() != null){
-                if (subscription.getConfiguration().get("account") != null && !subscription.getConfiguration().get("account").toString().equals("null")){
-                    subscription.getConfiguration().put("account", subscription.getConfiguration().get("account").toString());
-                }else {
-                    throw SubscriptionErrorMessage.MISSING_ARGUMENT.create("account");
-                }
-            } else {
-                LOG.error("subscription.getConfiguration() is null");
-            }
-        } else {
+        if (subscription == null) {
             LOG.error("subscription is null");
+            return;
+        }
+
+        super.modifyIncoming(subscription);
+        Map<String, Object> configuration = subscription.getConfiguration();
+        if (configuration != null) {
+            Object oAccount = configuration.get("account");
+            if (oAccount == null || oAccount.toString().equals("null")) {
+                throw SubscriptionErrorMessage.MISSING_ARGUMENT.create("account");
+            }
+
+            configuration.put("account", oAccount.toString());
+        } else {
+            LOG.error("subscription.getConfiguration() is null");
         }
     }
 
     @Override
     public void modifyOutgoing(final Subscription subscription) throws OXException {
-        final String accountId = (String) subscription.getConfiguration().get("account");
-        if (null != accountId){
+        String accountId = (String) subscription.getConfiguration().get("account");
+        if (null != accountId) {
             try {
-                final Integer accountIdInt = Integer.valueOf(accountId);
+                Integer accountIdInt = Integer.valueOf(accountId);
                 if (null != accountIdInt) {
-                    subscription.getConfiguration().put("account",accountIdInt);
+                    subscription.getConfiguration().put("account", accountIdInt);
                 }
             } catch (final NumberFormatException x) {
                 // Invalid account, but at least allow people to delete it.
             }
             String displayName = null;
-            if(subscription.getSecret() != null) {
+            if (subscription.getSecret() != null) {
                 displayName = googleMetaData.getDisplayName();
             }
-            if (null != displayName && !"".equals(displayName)){
-                subscription.setDisplayName(displayName);
-            } else {
+            if (Strings.isEmpty(displayName)) {
                 subscription.setDisplayName("Google");
+            } else {
+                subscription.setDisplayName(displayName);
             }
 
         }
         super.modifyOutgoing(subscription);
     }
-    
+
     public void deleteAllUsingOAuthAccount(final Context context, final int id) throws OXException {
         final Map<String, Object> query = new HashMap<String, Object>();
         query.put("account", String.valueOf(id));

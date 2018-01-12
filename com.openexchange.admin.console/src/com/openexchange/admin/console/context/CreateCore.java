@@ -276,7 +276,8 @@ public abstract class CreateCore extends ContextAbstraction {
             if (schemaStrategy.equals("automatic")) {
                 retval = SchemaSelectStrategy.automatic();
             } else if (schemaStrategy.equals("in-memory")) {
-                retval = SchemaSelectStrategy.inMemory();
+                // Fall-back to "automatic"
+                retval = SchemaSelectStrategy.automatic();
             } else {
                 throw new InvalidDataException(SCHEMA_NAME_ERROR);
             }

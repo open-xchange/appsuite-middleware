@@ -318,9 +318,9 @@ public class RdbUserStorage extends UserStorage {
             DeleteEvent deleteEvent;
             if (0 < guestCreatedBy) {
                 int subType = Strings.isEmpty(mail) ? DeleteEvent.SUBTYPE_ANONYMOUS_GUEST : DeleteEvent.SUBTYPE_INVITED_GUEST;
-                deleteEvent = new DeleteEvent(this, userId, DeleteEvent.TYPE_USER, subType, context, null);
+                deleteEvent = DeleteEvent.createDeleteEventForUserDeletion(this, userId, subType, context, null);
             } else {
-                deleteEvent = new DeleteEvent(this, userId, DeleteEvent.TYPE_USER, context);
+                deleteEvent = DeleteEvent.createDeleteEventForUserDeletion(this, userId, context);
             }
             DeleteRegistry.getInstance().fireDeleteEvent(deleteEvent, con, con);
             /*

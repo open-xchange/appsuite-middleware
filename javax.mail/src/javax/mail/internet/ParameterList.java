@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -88,7 +88,8 @@ public class ParameterList {
      * position of the first seen segment and orphan segments
      * will all move to the end.
      */
-    private Map<String, Object> list = new LinkedHashMap<String, Object>();	// keep parameters in order
+    // keep parameters in order
+    private Map<String, Object> list = new LinkedHashMap<>();
 
     /**
      * A set of names for multi-segment parameters that we
@@ -204,10 +205,12 @@ public class ParameterList {
 	    this.it = it;
 	}
 
+	@Override
 	public boolean hasMoreElements() {
 	    return it.hasNext();
 	}
 
+	@Override
 	public String nextElement() {
 	    return it.next();
 	}
@@ -219,8 +222,8 @@ public class ParameterList {
     public ParameterList() { 
 	// initialize other collections only if they'll be needed
 	if (decodeParameters) {
-	    multisegmentNames = new HashSet<String>();
-	    slist = new HashMap<String, Object>();
+	    multisegmentNames = new HashSet<>();
+	    slist = new HashMap<>();
 	}
     }
 
@@ -257,6 +260,10 @@ public class ParameterList {
 		// tolerate trailing semicolon, even though it violates the spec
 		if (tk.getType() == HeaderTokenizer.Token.EOF)
 		    break;
+		if (null != tk.getValue() && ";".equals(tk.getValue().trim())) {
+		    prevValue = ";";
+            continue;
+        }
 		// parameter name must be a MIME Atom
 		if (tk.getType() != HeaderTokenizer.Token.ATOM)
 		    throw new ParseException("In parameter list <" + s + ">" +
@@ -645,6 +652,7 @@ public class ParameterList {
      *
      * @return		String
      */
+    @Override
     public String toString() {
 	return toString(0);
     }
@@ -738,14 +746,13 @@ public class ParameterList {
      */
     private static class ToStringBuffer {
 	private int used;	// keep track of how much used on current line
-	private StringBuffer sb = new StringBuffer();
+	private StringBuilder sb = new StringBuilder();
 
 	public ToStringBuffer(int used) {
 	    this.used = used;
 	}
 
 	public void addNV(String name, String value) {
-	    // value = quote(value);
 	    sb.append("; ");
 	    used += 2;
 	    int len = name.length() + value.length() + 1;
@@ -770,6 +777,7 @@ public class ParameterList {
 	    }
 	}
 
+	@Override
 	public String toString() {
 	    return sb.toString();
 	}

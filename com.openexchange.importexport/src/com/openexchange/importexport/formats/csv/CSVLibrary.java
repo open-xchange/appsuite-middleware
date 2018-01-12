@@ -81,7 +81,7 @@ public final class CSVLibrary {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSVLibrary.class);
     public static final char CELL_DELIMITER = ',';
-    public static final char ROW_DELIMITER = '\n';
+    public static final String ROW_DELIMITER = "\r\n";
 
     /** The special readable title for <b>"Mark as distribution list"</b> */
     public static final String READABLE_TITLE_MARK_AS_DISTRIBUTION_LIST = "Mark as distribution list";

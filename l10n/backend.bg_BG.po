@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: l 10n\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-04-12 12:48+0000\n"
-"PO-Revision-Date: 2016-05-24 23:13+0000\n"
+"POT-Creation-Date: 2017-07-18 16:24+0000\n"
+"PO-Revision-Date: 2017-05-17 22:59+0000\n"
 "Last-Translator: martimarkov <marti.markov@icloud.com>\n"
 "Language-Team: Bulgarian\n"
 "Language: bg_BG\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1464131608.000000\n"
+"X-POOTLE-MTIME: 1495061997.000000\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/ContextSensitiveMessages.java:82
@@ -28,94 +28,99 @@ msgstr "прие"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/ContextSensitiveMessages.java:85
 msgctxt "adjective"
 msgid "accepted"
-msgstr ""
+msgstr "приет"
 
 #. The verb "declined", like "User A has declined an appointment."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/ContextSensitiveMessages.java:101
 msgctxt "verb"
 msgid "declined"
-msgstr ""
+msgstr "отказа"
 
 #. The adjective "declined", like "The users status is 'declined'."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/ContextSensitiveMessages.java:104
 msgctxt "adjective"
 msgid "declined"
-msgstr ""
+msgstr "отказан"
 
 #. The verb "tentatively accepted", like "User A has tentatively accepted an appointment."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/ContextSensitiveMessages.java:120
 msgctxt "verb"
 msgid "tentatively accepted"
-msgstr ""
+msgstr "условно прие"
 
 #. The adjective "tentatively accepted", like "The users status is 'tentatively accepted'."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/ContextSensitiveMessages.java:123
 msgctxt "adjective"
 msgid "tentatively accepted"
-msgstr ""
+msgstr "условно приет"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.apps.manifests.json/src/com/openexchange/apps/manifests/json/exception/ManifestsExceptionStrings.java:61
 msgid ""
 "The server configuration cannot be retrieved due to an internal server "
 "error. Please try again later."
 msgstr ""
+"Сървърната конфигурация не беше получена заради вътрешна грешка на сървъра. "
+"Моля опитайте по-късно."
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:62
 msgid "Verification of client ticket failed."
-msgstr ""
+msgstr "Проверката на клиентския билет се провали."
 
 #. The Kerberos ticket granting service denied to issue a delegate ticket for the client.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:65
 msgid "Failed to get a delegate ticket."
-msgstr ""
+msgstr "Не можa да се получи делегат билет."
 
 #. Some problem occurred while talking to Kerberos server.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:68
 msgid "Communication to Kerberos server failed."
-msgstr ""
+msgstr "Съобщението до сървъра на Kerberos не бе успешно."
 
 #. Initial login of this service on the Kerberos server failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:71
 msgid "Authenticating this service against the Kerberos server failed."
 msgstr ""
+"Удостоверяването на тази услуга срещу сървъра на Kerberos не бе успешно."
 
 #. When shutting down this service the termination of the service ticket failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:74
 msgid "Problem while terminating service ticket."
-msgstr ""
+msgstr "Проблем при прекратяване на сервизен билет."
 
 #. Written to the log file if the session contains a Kerberos subject that does not contain any ticket that needs a renewal.
 #. %1$s is replaced with the subjects principal name.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:78
 msgid "Can not find credentials in subject %1$s that need a renewal."
 msgstr ""
+"Не може да се открият идентификационни данни в %1$s, които се нуждаят от "
+"подновяване."
 
 #. Written to the log file if the session does not contain a Kerberos subject for the delegation.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:81
 msgid "No Kerberos delegation ticket found in session."
-msgstr ""
+msgstr "В сесията не се намери билет за делегация на Kerberos."
 
 #. Application 'xyz' requires following permissions:
 #. - Synchronize your calendars and appointments.
 #. - ...
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/OAuthStrings.java:61
 msgid "Synchronize your calendars and appointments."
-msgstr ""
+msgstr "Синхронизиране на календари и задачи."
 
 #. Application 'xyz' requires following permissions:
 #. - Read all your appointments.
 #. - ...
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/OAuthScopeDescription.java:58
 msgid "Read all your appointments."
-msgstr ""
+msgstr "Четене на всичките ви събития."
 
 #. Application 'xyz' requires following permissions:
 #. - Create, modify and delete appointments.
 #. - ...
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/OAuthScopeDescription.java:63
 msgid "Create, modify and delete appointments."
-msgstr ""
+msgstr "Създаване, променяне и изтриване срещи."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:94
@@ -128,11 +133,11 @@ msgstr "Седмица"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:65
 msgid "All-day events"
-msgstr ""
+msgstr "Целодневни събития"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:67
 msgid "Events"
-msgstr ""
+msgstr "Събития"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:62
@@ -162,20 +167,20 @@ msgstr "Отказан"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:64
 msgid "Tentatively accepted"
-msgstr ""
+msgstr "Условно приета"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:65
 msgid "Undecided"
-msgstr ""
+msgstr "Нерешен"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:273
 msgid "Resources"
-msgstr ""
+msgstr "Ресурси"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:61
 msgid "No recurrence"
-msgstr ""
+msgstr "Няма повторение"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:63
 msgid "Every %1$s day"
@@ -187,11 +192,11 @@ msgstr "Всяка седмица на %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:67
 msgid "Every %1$s weeks on %2$s"
-msgstr ""
+msgstr "Всеки %1$s седмици на %2$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:69
 msgid "On %1$s. day every %2$s. month"
-msgstr ""
+msgstr "На %1$s. ден всеки %2$s. месец"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:71
 msgid "On %1$s %2$s every %3$s. month"
@@ -206,7 +211,7 @@ msgstr ""
 #. E.g. "Every 2. February"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:76
 msgid "Every %1$s. %2$s"
-msgstr ""
+msgstr "Всеки %1$s. %2$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:78
 msgid "Work day"
@@ -350,48 +355,48 @@ msgstr "Декември"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:122
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:925
 msgid "first"
-msgstr ""
+msgstr "първи"
 
 #. second
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:124
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:928
 msgid "second"
-msgstr ""
+msgstr "втори"
 
 #. third
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:126
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:931
 msgid "third"
-msgstr ""
+msgstr "трети"
 
 #. fourth
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:128
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:934
 msgid "fourth"
-msgstr ""
+msgstr "четвърти"
 
 #. last
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:130
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:937
 msgid "last"
-msgstr ""
+msgstr "последен"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:132
 msgid "Occurs %1$s times"
-msgstr ""
+msgstr "Случва се %1$s пъти"
 
 #. E.g. "Until Wednesday, July 11, 2012"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:135
 msgid "Until %1$s"
-msgstr ""
+msgstr "До %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:137
 msgid "No end"
-msgstr ""
+msgstr "Без край"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:61
 msgid "An attendee would like to be brought up to date about this appointment."
-msgstr ""
+msgstr "Участник би искал да бъде актуализиран за това събитие."
 
 #. *
 #. * Example: "This appointment has attachments, please see the appointment at http://ox.superhoster.invalid/index.html#m=calendar&f=bla&i=bla to retrieve them"
@@ -401,6 +406,8 @@ msgid ""
 "This appointment has attachments. Click on the following link to view the "
 "appointment and to retrieve the attachments: %1$s."
 msgstr ""
+"Тази среща има прикачени файлове. Кликнете върху следната връзка, за да "
+"видите срещата и да изтеглите прикачените файлове: %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:69
 msgid ""
@@ -483,7 +490,7 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:86
 msgid "Reserved"
-msgstr ""
+msgstr "Резервиран"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:88
 msgid "Temporary"
@@ -614,35 +621,35 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:174
 msgid "When:"
-msgstr ""
+msgstr "Кога:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:176
 msgid "Direct link:"
-msgstr ""
+msgstr "Директен линк:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:178
 msgid "Where:"
-msgstr ""
+msgstr "Къде:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:180
 msgid "Participants:"
-msgstr ""
+msgstr "Участници:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:182
 msgid "Details:"
-msgstr ""
+msgstr "Детайли:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:184
 msgid "Show as:"
-msgstr ""
+msgstr "Покажи като:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:186
 msgid "Created:"
-msgstr ""
+msgstr "Създадена:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:188
 msgid "Modified:"
-msgstr ""
+msgstr "Редактирана:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:190
 msgid ""
@@ -662,11 +669,11 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:196
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:198
 msgid "Change the subject to %1$s."
-msgstr ""
+msgstr "Смени заглавието на %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:200
 msgid "The appointment has a new subject: %1$s."
-msgstr ""
+msgstr "Събитието има нова тема: %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:202
 msgid "The appointment will now be shown as: \"%1$s\"."
@@ -679,7 +686,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:206
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:208
 msgid "Change the location to %1$s."
-msgstr ""
+msgstr "Смени местоположението на %1$s."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:210
 msgid "The appointment takes place in a new location: %1$s."
@@ -700,11 +707,11 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:220
 msgid "Add %1$s to the appointment."
-msgstr ""
+msgstr "Добави %1$s към събитието."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:222
 msgid "%1$s has been invited to the appointment."
-msgstr ""
+msgstr "%1$s е поканен на събитието."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:224
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:226
@@ -733,7 +740,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:239
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:696
 msgid "waiting"
-msgstr ""
+msgstr "изчакване"
 
 #.
 #. public static final String TENTATIVELY_ACCEPT = "tentatively accept";
@@ -793,15 +800,15 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:275
 msgid "The entire day"
-msgstr ""
+msgstr "Целодневно"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:277
 msgid "New appointment: %1$s"
-msgstr ""
+msgstr "Ново събитие: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:279
 msgid "Appointment changed: %1$s"
-msgstr ""
+msgstr "Променено събитие: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:281
 msgid "Appointment canceled: %1$s"
@@ -903,60 +910,60 @@ msgstr ""
 #. The display name for Apple platform
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:71
 msgid "Apple"
-msgstr ""
+msgstr "Apple"
 
 #. The display name for Windows platform
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:75
 msgid "Windows"
-msgstr ""
+msgstr "Windows"
 
 #. The display name for Android/Google platform
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:79
 msgid "Android"
-msgstr ""
+msgstr "Android"
 
 #. ----------------------------------------------------------------------------------------------------------------------
 #. The display name for an Apple Mac
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:84
 msgid "Mac"
-msgstr ""
+msgstr "Mac"
 
 #. The display name for an Apple iPad
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:88
 msgid "iPad"
-msgstr ""
+msgstr "iPad"
 
 #. The display name for an Apple iPhone
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:92
 msgid "iPhone"
-msgstr ""
+msgstr "iPhone"
 
 #. The display name for an Android/Google tablet
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:96
 msgid "Tablet"
-msgstr ""
+msgstr "Таблет"
 
 #. The display name for an Android/Google phone
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:100
 msgid "Smartphone"
-msgstr ""
+msgstr "Смартфон"
 
 #. The display name for a Windows Desktop
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:104
 msgid "Laptop + PC"
-msgstr ""
+msgstr "Компютър"
 
 #. ----------------------------------------------------------------------------------------------------------------------
 #. Mail successfully sent
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:109
 msgid "Mail successfully sent"
-msgstr ""
+msgstr "Мейлът е изпратен успешно"
 
 #. ----------------------------------------------------------------------------------------------------------------------
 #. SMS successfully sent
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:114
 msgid "SMS successfully sent"
-msgstr ""
+msgstr "СМСът е изпратен успешно"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:71
@@ -968,7 +975,7 @@ msgstr ""
 #. The user salutation; e.g. "Dear John Doe,"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/notification/OnboardingNotificationStrings.java:68
 msgid "Dear %1$s,"
-msgstr ""
+msgstr "Скъпи %1$s,"
 
 #. The content of the E-Mail providing the profile attachment
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/notification/OnboardingNotificationStrings.java:71
@@ -995,23 +1002,23 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:64
 msgid "LDAP contacts cannot be deleted."
-msgstr ""
+msgstr "LDAP контактите не могат да бъдат изтрити."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:65
 msgid "Contacts cannot be inserted in LDAP."
-msgstr ""
+msgstr "Контатите не могат да бъдат вкарани в LDAP."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:66
 msgid "Error while trying to create connection to LDAP server."
-msgstr ""
+msgstr "Грешка при опит за създаване на връзка към LDAP сървър."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:67
 msgid "The LDAP search for the user contains too many results."
-msgstr ""
+msgstr "LDAP търсенето за потребителя съдържа твърде много резултати."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:68
 msgid "The LDAP search for the user object \"%s\" gave no results."
-msgstr ""
+msgstr "LDAP търсенето за потребителския обект \"%s\" върна 0 резултата."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:69
 msgid ""
@@ -1021,27 +1028,27 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:62
 msgid "Display name"
-msgstr ""
+msgstr "Показвано име"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:63
 msgid "Name"
-msgstr ""
+msgstr "Име"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:64
 msgid "Last name"
-msgstr ""
+msgstr "Фамилия"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:65
 msgid "First name"
-msgstr ""
+msgstr "Лично име"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:66
 msgid "Middle name"
-msgstr ""
+msgstr "Бащино име"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:67
 msgid "Suffix"
-msgstr ""
+msgstr "Суфикс"
 
 #. A document's title
 #. Task attribute name
@@ -1054,51 +1061,51 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:69
 msgid "Street (home)"
-msgstr ""
+msgstr "Улица (дом)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:70
 msgid "Postcode (home)"
-msgstr ""
+msgstr "Пощенски код (дом)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:71
 msgid "Town (home)"
-msgstr ""
+msgstr "Град (дом)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:72
 msgid "State (home)"
-msgstr ""
+msgstr "Област (дом)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:73
 msgid "Country (home)"
-msgstr ""
+msgstr "Държава (дом)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:74
 msgid "Marital status"
-msgstr ""
+msgstr "Семейно положение"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:75
 msgid "Children"
-msgstr ""
+msgstr "Деца"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:76
 msgid "Profession"
-msgstr ""
+msgstr "Професия"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:77
 msgid "Nickname"
-msgstr ""
+msgstr "Прякор"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:78
 msgid "Spouse's name"
-msgstr ""
+msgstr "Име на съпруга"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:79
 msgid "Comment"
-msgstr ""
+msgstr "Коментар"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:80
 msgid "Company"
-msgstr ""
+msgstr "Компания"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:81
 msgid "Department"
@@ -1106,7 +1113,7 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:82
 msgid "Position"
-msgstr ""
+msgstr "Позиция"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:83
 msgid "Employee type"
@@ -1114,83 +1121,83 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:84
 msgid "Room number"
-msgstr ""
+msgstr "Стая номер"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:85
 msgid "Street (business)"
-msgstr ""
+msgstr "Улица (бизнес)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:86
 msgid "Postcode (business)"
-msgstr ""
+msgstr "Пощенски код (бизнес)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:87
 msgid "Town (business)"
-msgstr ""
+msgstr "Град (бизнес)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:88
 msgid "State (business)"
-msgstr ""
+msgstr "Област (бизнес)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:89
 msgid "Country (business)"
-msgstr ""
+msgstr "Държава (бизнес)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:90
 msgid "Employee ID"
-msgstr ""
+msgstr "Идент. № на служителя"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:91
 msgid "Sales volume"
-msgstr ""
+msgstr "Обем на продажбите"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:92
 msgid "Tax id"
-msgstr ""
+msgstr "Данъчен номер"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:93
 msgid "Commercial register"
-msgstr ""
+msgstr "Търговския регистър"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:94
 msgid "Branches"
-msgstr ""
+msgstr "Клонове"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:95
 msgid "Business category"
-msgstr ""
+msgstr "Бизнес категория"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:96
 msgid "Info"
-msgstr ""
+msgstr "Инфо"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:97
 msgid "Manager"
-msgstr ""
+msgstr "Мениджър"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:98
 msgid "Assistant"
-msgstr ""
+msgstr "Асистент"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:99
 msgid "Street (other)"
-msgstr ""
+msgstr "Улица (друг)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:100
 msgid "Postcode (other)"
-msgstr ""
+msgstr "Пощенски код (друг)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:101
 msgid "Town (other)"
-msgstr ""
+msgstr "Град (друг)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:102
 msgid "State (other)"
-msgstr ""
+msgstr "Област (друг)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:103
 msgid "Country (other)"
-msgstr ""
+msgstr "Държава (друг)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:104
 msgid "Telephone assistant"
@@ -1198,15 +1205,15 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:105
 msgid "Phone (business)"
-msgstr ""
+msgstr "Телефон (бизнес)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:106
 msgid "Phone (business alt)"
-msgstr ""
+msgstr "Телефон (бизнес алт)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:107
 msgid "Fax"
-msgstr ""
+msgstr "Факс"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:108
 msgid "Telephone callback"
@@ -1222,15 +1229,15 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:111
 msgid "Phone (home)"
-msgstr ""
+msgstr "Телефон (дом)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:112
 msgid "Phone (home alt)"
-msgstr ""
+msgstr "Телефон (дом алт)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:113
 msgid "FAX (home)"
-msgstr ""
+msgstr "Факс (дом)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:114
 msgid "Telephone ISDN"
@@ -1238,19 +1245,19 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:115
 msgid "Cell phone"
-msgstr ""
+msgstr "Моб. телефон"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:116
 msgid "Cell phone (alt)"
-msgstr ""
+msgstr "Моб. телефон (алт)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:117
 msgid "Phone (other)"
-msgstr ""
+msgstr "Телефон (друг)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:118
 msgid "FAX other"
-msgstr ""
+msgstr "Факс (друг)"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:119
 msgid "Pager"
@@ -1286,15 +1293,15 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:127
 msgid "Email 1"
-msgstr ""
+msgstr "Мейл 1"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:128
 msgid "Email 2"
-msgstr ""
+msgstr "Мейл 2"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:129
 msgid "Email 3"
-msgstr ""
+msgstr "Мейл 3"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:130
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.rss/src/com/openexchange/messaging/rss/FormStrings.java:61
@@ -1393,7 +1400,7 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:152
 msgid "Date of birth"
-msgstr ""
+msgstr "Дата на раждане"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:153
 msgid "Anniversary"
@@ -1430,7 +1437,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:76
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:87
 msgid "File name"
-msgstr ""
+msgstr "Име на файл"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:160
 msgid "Address (home)"
@@ -2498,7 +2505,7 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:87
 msgid "Participant"
-msgstr ""
+msgstr "Участници"
 
 #. Range
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:90
@@ -3112,6 +3119,11 @@ msgstr ""
 msgid "The HTML content cannot be safely displayed"
 msgstr ""
 
+#. Thrown when parser failed or timed-out while processing HTML, and plain-text is returned instead
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.html/src/com/openexchange/html/HtmlExceptionMessages.java:72
+msgid "This message can only be displayed as plain text"
+msgstr ""
+
 #. *
 #. * No connection available to access mailbox
 #.
@@ -3350,6 +3362,11 @@ msgid ""
 "login %2$s. Please try again."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:166
+msgid ""
+"Update of folder failed. Owner is required to keep administrative rights."
+msgstr ""
+
 #. The specified group \"%4$s\" is not supported.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/entity2acl/Entity2ACLExceptionMessages.java:71
 msgid "The specified group \"%4$s\" is not supported."
@@ -3516,6 +3533,20 @@ msgstr ""
 msgid ""
 "The contact with uid %1$s is too similar to the existing contact with uid "
 "%2$s in folder %3$s"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:141
+msgid "Could not create a proper name for the export file."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:143
+msgid "Not all of the objects could be imported due to a configured limitation"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:145
+msgid ""
+"%1$sd warnings when importing file and not all of the objects could be "
+"imported due to a configured limitation"
 msgstr ""
 
 #. Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.
@@ -3957,7 +3988,12 @@ msgstr ""
 
 #. Thrown in case an OAuth provider is requested to access certain data, but such data is not available at all. For instance Dropbox is requested to access E-Mails.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:115
-msgid "The scope %1$s is not supported by the provider"
+msgid "The scope %1$s is not supported by the provider or has been disabled"
+msgstr ""
+
+#. Thrown in case OAuth for a certain provider access has been disabled for a user
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:118
+msgid "'%1$s' OAuth service is not enabled for you."
 msgstr ""
 
 #. *
@@ -4778,6 +4814,10 @@ msgid ""
 "folder for tasks."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:106
+msgid "The object could not be stored due to a configured limitation"
+msgstr ""
+
 #. You do not have a valid session. Please login again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:62
 msgid "You do not have a valid session. Please login again."
@@ -4988,11 +5028,12 @@ msgid "Appointments must have at least one participant."
 msgstr ""
 
 #. *
-#. * You do not have the appropriate permissions to read appointments that folder.
+#. * You do not have the appropriate permissions to read appointments in that folder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:77
 msgid ""
-"You do not have the appropriate permissions to read appointments that folder."
+"You do not have the appropriate permissions to read appointments in that "
+"folder."
 msgstr ""
 
 #. *
@@ -5404,6 +5445,10 @@ msgstr ""
 msgid "The pattern \"%1$s\" has been ignored during search."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:143
+msgid "Invalid number of properties for distribution list."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:62
 msgid "The account %1$d was not found."
 msgstr ""
@@ -5600,7 +5645,7 @@ msgstr "Потвърден спам"
 #. The alternative internationalized name for the confirmed-spam mail folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:101
 msgid "confirmed-spam"
-msgstr ""
+msgstr "потвърден-спам"
 
 #. The internationalized name for the confirmed-spam mail folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:105
@@ -6266,7 +6311,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:672
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:699
 msgid "accepted"
-msgstr ""
+msgstr "приет"
 
 #. declined
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:674
@@ -6276,7 +6321,7 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:676
 msgid "tentatively accepted"
-msgstr ""
+msgstr "условно приет"
 
 #. -
 #. * TASK PRIORITIES
@@ -6284,17 +6329,17 @@ msgstr ""
 #. low
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:683
 msgid "Low"
-msgstr ""
+msgstr "Нисък"
 
 #. normal
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:686
 msgid "Normal"
-msgstr ""
+msgstr "Нормален"
 
 #. high
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:689
 msgid "High"
-msgstr ""
+msgstr "Висок"
 
 #. tentative
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:705
@@ -6322,7 +6367,7 @@ msgstr ""
 #. Folder: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:721
 msgid "Folder: %1$s"
-msgstr ""
+msgstr "Папка: %1$s"
 
 #. Start date: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:724
@@ -6410,22 +6455,22 @@ msgstr ""
 #. The appendix to indicate the first ordinal; e.g for EN it would be "1st", for DE it would be "1.".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:789
 msgid "st"
-msgstr ""
+msgstr "ви"
 
 #. The appendix to indicate the second ordinal; e.g for EN it would be "2nd", for DE it would be "2.".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:792
 msgid "nd"
-msgstr ""
+msgstr "ри"
 
 #. The appendix to indicate the third ordinal; e.g for EN it would be "3rd", for DE it would be "3.".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:795
 msgid "rd"
-msgstr ""
+msgstr "ти"
 
 #. The appendix to indicate an ordinal greater than 3rd; e.g for EN it would be "4th", for DE it would be "4.".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:798
 msgid "th"
-msgstr ""
+msgstr "ти"
 
 #. -
 #. * Recurrence templates
@@ -6433,22 +6478,22 @@ msgstr ""
 #. and
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:805
 msgid "and"
-msgstr ""
+msgstr "и"
 
 #. Each day
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:808
 msgid "Each day"
-msgstr ""
+msgstr "Всеки ден"
 
 #. Each %1$s days; e.g. "Each 2 days"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:811
 msgid "Each %1$s days"
-msgstr ""
+msgstr "Всеки %1$s ден"
 
 #. Each week on %1$s; e.g. "Each week on Monday"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:814
 msgid "Each week on %1$s"
-msgstr ""
+msgstr "Всяка седмица на %1$s"
 
 #. Each %1$s weeks on %2$s; e.g. "Each 2 weeks on Monday and Tuesday"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:817
@@ -6498,95 +6543,99 @@ msgstr ""
 #. Weekday
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:915
 msgid "Weekday"
-msgstr ""
+msgstr "Работен ден"
 
 #. Display name of the anonymous guest user.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Users.java:69
 msgid "Guest"
-msgstr ""
+msgstr "Гост"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/importexport/csv/CsvExceptionMessages.java:57
 msgid "Broken CSV file."
+msgstr "Повреден CSV файл."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/importexport/csv/CsvExceptionMessages.java:59
+msgid "Error at row %1$s: %2$s"
 msgstr ""
 
 #. The document you requested does not exist.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:98
 msgid "The document you requested does not exist."
-msgstr ""
+msgstr "Поисканият от вас документ не съществува."
 
 #. Unable to load the document(s). Please try again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:65
 msgid "Unable to load the document(s). Please try again."
-msgstr ""
+msgstr "Невъзможно е да заредите документа (ите). Моля, опитайте отново."
 
 #. The folder %1$s you requested is not an Infostore folder.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:68
 msgid "The folder %1$s you requested is not an Infostore folder."
-msgstr ""
+msgstr "Папката %1$s, която поискахте, не е Infostore папка."
 
 #. You do not have the appropriate permissions to read the document.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:71
 msgid "You do not have the appropriate permissions to read the document."
-msgstr ""
+msgstr "Нямате подходящите разрешения за четене на документа."
 
 #. You do not have the appropriate permissions to create a document in this folder.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:74
 msgid ""
 "You do not have the appropriate permissions to create a document in this "
 "folder."
-msgstr ""
+msgstr "Нямате съответните права за създаване на документ в тази папка."
 
 #. You do not have the appropriate permissions to update the document.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:77
 msgid "You do not have the appropriate permissions to update the document."
-msgstr ""
+msgstr "Нямате съответните права за актуализиране на документа."
 
 #. Unable to delete all documents. Please try again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:80
 msgid "Unable to delete all documents. Please try again."
-msgstr ""
+msgstr "Невъзможно е да се изтрият всички документи. Моля, опитайте отново."
 
 #. You do not have the appropriate permissions to delete this version.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:83
 msgid "You do not have the appropriate permissions to delete this version."
-msgstr ""
+msgstr "Нямате подходящите права за изтриване на тази версия."
 
 #. The document is already locked. Please try again later.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:86
 msgid "The document is currently locked. Please try again later."
-msgstr ""
+msgstr "Понастоящем документът е заключен. Моля, опитайте отново по-късно."
 
 #. You do not have the appropriate permissions to unlock the document.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:89
 msgid "You do not have the appropriate permissions to unlock the document."
-msgstr ""
+msgstr "Нямате съответните права за отключване на документа."
 
 #. You do not have the appropriate permissions to lock a document.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:92
 msgid "You do not have the appropriate permissions to lock a document."
-msgstr ""
+msgstr "Нямате подходящите права за заключване на документ."
 
 #. You do not have the appropriate permissions to move the document.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:95
 msgid "You do not have the appropriate permissions to move the document."
-msgstr ""
+msgstr "Нямате съответните права за преместване на документа."
 
 #. The document name \"%1$s\" already exists. Please choose another.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:101
 msgid "The document name \"%1$s\" already exists. Please choose another."
-msgstr ""
+msgstr "Документът \"%1$s\" вече съществува. Моля, изберете друго име."
 
 #. You do not have the appropriate permissions to delete a document.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:104
 msgid "You do not have the appropriate permissions to delete a document."
-msgstr ""
+msgstr "Нямате подходящите права за изтриване на документ."
 
 #. In order to accomplish the search, %1$s or more characters are required.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:107
 msgid ""
 "In order to accomplish the search, %1$s or more characters are required."
-msgstr ""
+msgstr "За да се извърши търсенето, се изискват %1$s или повече знаци."
 
 #. The document could not be updated because it was modified. Please try again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:110
@@ -6597,17 +6646,17 @@ msgstr ""
 #. The file name must not contain slashes.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:113
 msgid "The file name must not contain slashes."
-msgstr ""
+msgstr "Името на файла не може да съдържа наклонени черти."
 
 #. The file name contains invalid characters.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:116
 msgid "The file name contains invalid characters."
-msgstr ""
+msgstr "Името на файла съдържа невалидни знаци."
 
 #. New file versions can't be saved with an offset.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:119
 msgid "New file versions can't be saved with an offset."
-msgstr ""
+msgstr "Нова версия на файл не може да бъде запазена с отместване."
 
 #. This folder is a virtual folder that cannot contain documents. Please choose another folder.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:122
@@ -6615,6 +6664,8 @@ msgid ""
 "This folder is a virtual folder that cannot contain documents. Please choose "
 "another folder."
 msgstr ""
+"Тази папка е виртуална папка, която не може да съдържа документи. Моля, "
+"изберете друга папка."
 
 #. Unsupported character "%1$s" in field "%2$s". Please remove that character.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:125
@@ -6622,13 +6673,13 @@ msgstr ""
 msgid ""
 "Unsupported character \"%1$s\" in field \"%2$s\". Please remove that "
 "character."
-msgstr ""
+msgstr "Неподдържан знак \"%1$s\" в поле \"%2$s\". Моля, премахнете този знак."
 
 #. Unsupported character. Please correct your input.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:128
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:127
 msgid "Unsupported character. Please correct your input."
-msgstr ""
+msgstr "Неподдържан знак. Моля, коригирайте въведените от вас данни."
 
 #. Due to limited capabilities of user \"%1$s\", it is not possible to apply the permission changes.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:131
@@ -6652,14 +6703,14 @@ msgstr ""
 #. Your search took too long in order to be accomplished.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:140
 msgid "Your search took too long in order to be accomplished."
-msgstr ""
+msgstr "Търсенето ви отне твърде време, за да бъде извършено."
 
 #. A document's description
 #. Task attribute name
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:73
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:84
 msgid "Description"
-msgstr ""
+msgstr "Описание"
 
 #. A document's version comment
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:79
@@ -6714,7 +6765,7 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:75
 msgid "Cannot find user with E-Mail \"%s\"."
-msgstr ""
+msgstr "Потребител с мейл \"%s\" не може да бъде намерен."
 
 #. *
 #. * Cannot find user with identifier %1$s in context %2$d.
@@ -6761,7 +6812,7 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:111
 msgid "New password contains invalid characters."
-msgstr ""
+msgstr "Новата парола съдържа невалидни знаци."
 
 #. *
 #. * Attributes of user %1$d in context %2$d have been erased.
@@ -6775,7 +6826,7 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:121
 msgid "Loading one or more users failed."
-msgstr ""
+msgstr "Зареждането на един или повече потребители е неуспешно."
 
 #. * Alias entries are missing for user %1$d in context %2$d.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:124
@@ -6794,6 +6845,7 @@ msgstr ""
 msgid ""
 "Invalid password length. The password must have a minimum length of %1$d."
 msgstr ""
+"Невалидна дължина на паролата. Паролата трябва да има минимална дължина %1$d."
 
 #. *
 #. * Invalid password length. The password must be of maximum length %1$d.
@@ -6802,13 +6854,15 @@ msgstr ""
 msgid ""
 "Invalid password length. The password must have a maximum length of %1$d."
 msgstr ""
+"Невалидна дължина на паролата. Паролата трябва да има максимална дължина "
+"%1$d."
 
 #. *
 #. * The parameter %s for this user is missing.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:142
 msgid "The parameter \"%s\" for this user is missing."
-msgstr ""
+msgstr "Параметърът \"%s\" за този потребител липсва."
 
 #. *
 #. * %s is not a valid locale.
@@ -6822,7 +6876,7 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:152
 msgid "\"%s\" is not a valid timezone."
-msgstr ""
+msgstr "\"%s\" не е валидна часова зона."
 
 #. This is an internal exception to detect coding problems. A user will never see this exception.
 #. %1$d is replaced with the number of users that attributes should be locked in the database for updating them.
@@ -6840,6 +6894,8 @@ msgid ""
 "The entered password is illegal and can't be saved. Allowed characters are: "
 "%1$s"
 msgstr ""
+"Въведената парола е невалидна и не може да бъде запазена. Позволените знаци "
+"са: %1$s"
 
 #. *
 #. * The current password is incorrect. Please enter your correct current password and try again.
@@ -6849,6 +6905,8 @@ msgid ""
 "The current password is incorrect. Please enter your correct current "
 "password and try again."
 msgstr ""
+"Текущата парола е неправилна. Моля, въведете правилната си текуща парола и "
+"опитайте отново."
 
 #. *
 #. * The current password is missing. Please enter your current password and try again.
@@ -6858,6 +6916,7 @@ msgid ""
 "The current password is missing. Please enter your current password and try "
 "again."
 msgstr ""
+"Текущата парола липсва. Моля, въведете текущата си парола и опитайте отново."
 
 #. *
 #. * The new password is missing. Please enter your new password and try again.
@@ -6866,6 +6925,7 @@ msgstr ""
 msgid ""
 "The new password is missing. Please enter your new password and try again."
 msgstr ""
+"Новата парола липсва. Моля, въведете новата си парола и опитайте отново."
 
 #. *
 #. * User is missing for the reminder.
@@ -7858,7 +7918,9 @@ msgstr ""
 #. * Folder "%1$s" has been closed. Probably your request took too long.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:90
-msgid "Folder \"%1$s\" has been closed. Probably your request took too long."
+msgid ""
+"Lost connection to mail server. Probably your request took too long. Please "
+"try again later."
 msgstr ""
 
 #. *
@@ -7866,8 +7928,8 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:95
 msgid ""
-"Folder \"%1$s\" has been closed on mail server %2$s. Probably your request "
-"took too long."
+"Connection closed to mail server %2$s. Probably your request took too long. "
+"Please try again later."
 msgstr ""
 
 #. *
@@ -7958,14 +8020,14 @@ msgstr ""
 #. * Lost connection to mail server.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:155
-msgid "Lost connection to mail server."
+msgid "Lost connection to mail server. Please try again later."
 msgstr ""
 
 #. *
 #. * Connection closed to mail server %1$s.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:160
-msgid "Connection closed to mail server %1$s."
+msgid "Connection closed to mail server %1$s. Please try again later."
 msgstr ""
 
 #. *
@@ -7974,7 +8036,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:165
 msgid ""
 "The connection to remote server %1$s was refused or timed out while "
-"attempting to connect."
+"attempting to connect. Please try again later."
 msgstr ""
 
 #. *
@@ -7982,14 +8044,16 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:170
 msgid ""
-"The connection to remote server %1$s timed out while awaiting the response."
+"The connection to remote server %1$s timed out while awaiting the response. "
+"Please try again later."
 msgstr ""
 
 #. *
 #. * Mail server %1$s unexpectedly closed connection for user %2$s.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:175
-msgid "Mail server %1$s unexpectedly closed connection."
+msgid ""
+"Mail server %1$s unexpectedly closed connection. Please try again later."
 msgstr ""
 
 #. *
@@ -8040,7 +8104,9 @@ msgstr ""
 
 #. Timeout while trying to send to the following recipient: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:206
-msgid "Timeout while trying to send to the following recipient: %1$s"
+msgid ""
+"Timeout while trying to send to the following recipient: %1$s. Please try "
+"again later."
 msgstr ""
 
 #. The message advertising that everything is fine with checked account
@@ -8581,6 +8647,16 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/webdav/WebdavExceptionMessages.java:82
 msgid "Authentication failed for user name: %1$s"
+msgstr ""
+
+#. * The string constant for unknown location; <code>"unknown location"</code>
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.session.management/src/com/openexchange/session/management/SessionManagementStrings.java:64
+msgid "unknown location"
+msgstr ""
+
+#. Session not found.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.session.management/src/com/openexchange/session/management/exception/SessionManagementExceptionMessages.java:64
+msgid "Session not found."
 msgstr ""
 
 #. No session found for identifier: %1$s
@@ -9577,12 +9653,12 @@ msgstr ""
 
 #. The provided feedback does not contain required key "score".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:70
-msgid "The provided feedback does not contain required key \"%s\"."
+msgid "The provided feedback does not contain required key '%s'."
 msgstr ""
 
 #. The provided feedback for key "score" cannot be parsed..
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.userfeedback.starrating/src/com/openexchange/userfeedback/starrating/exception/StarRatingExceptionMessages.java:73
-msgid "The provided feedback for key \"%s\" cannot be parsed."
+msgid "The provided feedback for key '%s' cannot be parsed."
 msgstr ""
 
 #. The value given in the property %1$s is no integer value
@@ -9612,7 +9688,7 @@ msgstr ""
 
 #. A XING error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:62
-msgid "A XING error occurred: %1$s"
+msgid "Unexpected error returned by XING service."
 msgstr ""
 
 #. The XING resource does not exist: %1$s

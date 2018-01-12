@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.context;
 
 import java.rmi.Naming;
@@ -80,7 +81,7 @@ public class GetModuleAccess extends ContextAbstraction {
             final Credentials auth = credentialsparsing(parser);
 
             // get rmi ref
-            final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
+            final OXContextInterface oxres = (OXContextInterface) Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME);
 
             // Fetch access object
             final UserModuleAccess access = oxres.getModuleAccess(ctx, auth);
@@ -125,7 +126,7 @@ public class GetModuleAccess extends ContextAbstraction {
         datarow.add(String.valueOf(access.isGlobalAddressBookDisabled()));
         datarow.add(String.valueOf(access.isPublicFolderEditable()));
         data.add(datarow);
-        doCSVOutput(getAccessColums(),data);
+        doCSVOutput(getAccessColums(), false, data);
     }
 
     private static ArrayList<String> getAccessColums() {

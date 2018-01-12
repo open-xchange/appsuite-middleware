@@ -3,6 +3,14 @@ properties:
     - key: com.openexchange.mailaccount.failedAuth.limit
       description: |
         Specifies the max. number of failed authentication attempts until the associated mail account is disabled.
+
+        Disabled accounts are unable to peform any requests (instead an error is thrown). Those accounts can be reactivated by updating the account (e.g. correcting the password).
+        This feature only effects external accounts. In case of an unified account environment only mails for enabled accounts are retrieved. 
+
+        Note:  
+        This feature prevents unnecessary requests to external mail servers and therefore protects the own server to be blacklisted by those external servers because of 
+        too many failing authentication attempts. This feature should therefore never be disabled by choosing a too big limit or a too short timespan.
+
       defaultValue: 5
       version: 7.8.4
       reloadable: true

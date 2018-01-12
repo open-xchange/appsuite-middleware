@@ -50,7 +50,9 @@
 package com.openexchange.dav.osgi;
 
 import org.osgi.service.http.HttpService;
+import com.openexchange.clientinfo.ClientInfoProvider;
 import com.openexchange.contact.ContactService;
+import com.openexchange.dav.DAVClientInfoProvider;
 import com.openexchange.dav.DAVServlet;
 import com.openexchange.dav.attachments.AttachmentPerformer;
 import com.openexchange.dav.mixins.AddressbookHomeSet;
@@ -108,6 +110,10 @@ public class DAVActivator extends HousekeepingActivator {
         registerService(PropertyMixin.class, new PrincipalCollectionSet());
         registerService(PropertyMixin.class, new CalendarHomeSet());
         registerService(PropertyMixin.class, new AddressbookHomeSet());
+        /*
+         * DAV client info
+         */
+        registerService(ClientInfoProvider.class, new DAVClientInfoProvider(), 0);
         openTrackers();
     }
 

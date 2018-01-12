@@ -55,13 +55,13 @@ import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link CalendarExtendDNColumnTaskV2}
@@ -94,55 +94,71 @@ public class CalendarExtendDNColumnTaskV2 implements UpdateTaskV2 {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
-        LOG.info("Starting {}", CalendarExtendDNColumnTaskV2.class.getSimpleName());
-        modifyColumnInTable("prg_date_rights", contextId);
-        modifyColumnInTable("del_date_rights", contextId);
-        LOG.info("{} finished.", CalendarExtendDNColumnTaskV2.class.getSimpleName());
+        Connection con = params.getConnection();
+        boolean rollback = false;
+        try {
+            con.setAutoCommit(false);
+            rollback = true;
+
+            LOG.info("Starting {}", CalendarExtendDNColumnTaskV2.class.getSimpleName());
+            modifyColumnInTable("prg_date_rights", con);
+            modifyColumnInTable("del_date_rights", con);
+            LOG.info("{} finished.", CalendarExtendDNColumnTaskV2.class.getSimpleName());
+
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                DBUtils.rollback(con);
+            }
+            DBUtils.autocommit(con);
+        }
     }
 
     private static final String SQL_MODIFY = "ALTER TABLE #TABLE# MODIFY dn varchar(" + DESIRED_SIZE + ") collate utf8_unicode_ci default NULL";
 
-    private void modifyColumnInTable(final String tableName, final int contextId) throws OXException {
+    private void modifyColumnInTable(String tableName, Connection con) throws OXException {
         LOG.info("{}: Going to extend size of column `dn` in table `{}`.", CalendarExtendDNColumnTaskV2.class.getSimpleName(), tableName);
-        final Connection con = Database.getNoTimeout(contextId, true);
+
+        // Check if size needs to be increased
+        ResultSet rs = null;
         try {
-            // Check if size needs to be increased
-            ResultSet rs = null;
-            try {
-                final DatabaseMetaData metadata = con.getMetaData();
-                rs = metadata.getColumns(null, null, tableName, null);
-                final String columnName = "dn";
-                while (rs.next()) {
-                    final String name = rs.getString("COLUMN_NAME");
-                    if (columnName.equals(name)) {
-                        // A column whose VARCHAR size shall possibly be changed
-                        final int size = rs.getInt("COLUMN_SIZE");
-                        if (size >= DESIRED_SIZE) {
-                            LOG.info("{}: Column {}.{} with size {} is already equal to/greater than {}", CalendarExtendDNColumnTaskV2.class.getSimpleName(), tableName, name, size, DESIRED_SIZE);
-                            return;
-                        }
+            final DatabaseMetaData metadata = con.getMetaData();
+            rs = metadata.getColumns(null, null, tableName, null);
+            final String columnName = "dn";
+            while (rs.next()) {
+                final String name = rs.getString("COLUMN_NAME");
+                if (columnName.equals(name)) {
+                    // A column whose VARCHAR size shall possibly be changed
+                    final int size = rs.getInt("COLUMN_SIZE");
+                    if (size >= DESIRED_SIZE) {
+                        LOG.info("{}: Column {}.{} with size {} is already equal to/greater than {}", CalendarExtendDNColumnTaskV2.class.getSimpleName(), tableName, name, size, DESIRED_SIZE);
+                        return;
                     }
                 }
-            } catch (final SQLException e) {
-                throw wrapSQLException(e);
-            } finally {
-                closeSQLStuff(rs);
-                rs = null;
             }
-            // ALTER TABLE...
-            PreparedStatement stmt = null;
-            try {
-                stmt = con.prepareStatement(SQL_MODIFY.replaceFirst("#TABLE#", tableName));
-                stmt.executeUpdate();
-            } catch (final SQLException e) {
-                throw wrapSQLException(e);
-            } finally {
-                closeSQLStuff(stmt);
-            }
+        } catch (final SQLException e) {
+            throw wrapSQLException(e);
         } finally {
-            Database.backNoTimeout(contextId, true, con);
+            closeSQLStuff(rs);
+            rs = null;
         }
+
+        // ALTER TABLE...
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(SQL_MODIFY.replaceFirst("#TABLE#", tableName));
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw wrapSQLException(e);
+        } finally {
+            closeSQLStuff(stmt);
+        }
+
         LOG.info("{}: Size of column `dn` in table `{}` successfully extended.", CalendarExtendDNColumnTaskV2.class.getSimpleName(), tableName);
     }
 

@@ -82,8 +82,9 @@ import com.openexchange.utils.propertyhandling.PropertyInterface;
  * This class aims to help keep away the OSGi complexity from bundle implementing parties
  *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
- *
+ * @deprecated The use of this class is strongly discouraged. In case multiple classes are loaded which inherit from this abstract class, unexpected errors might occur
  */
+@Deprecated
 public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
 
     private class Entry<T> extends SimpleEntry<T> {

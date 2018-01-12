@@ -135,6 +135,11 @@ public enum UpdateExceptionCodes implements DisplayableOXExceptionCode {
      * An error occurred: %1$s.
      */
     UNEXPECTED_ERROR("An error occurred: %1$s", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 26),
+
+    /**
+     * Found multiple schemas for name "%1$s": %2$s
+     */
+    FOUND_MULTIPLE_SCHEMAS("Found multiple schemas for name \"%1$s\": %2$s", UpdateExceptionMessages.FOUND_MULTIPLE_SCHEMAS_DISPLAY, Category.CATEGORY_USER_INPUT, 16),
     ;
 
     final String message;

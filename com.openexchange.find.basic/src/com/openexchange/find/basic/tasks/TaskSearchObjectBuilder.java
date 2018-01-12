@@ -49,12 +49,11 @@
 
 package com.openexchange.find.basic.tasks;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.Module;
@@ -102,11 +101,11 @@ public class TaskSearchObjectBuilder {
         private static final Map<String, SupportedField> MAPPING;
         static {
             SupportedField[] values = SupportedField.values();
-            Map<String, SupportedField> m = new HashMap<String, SupportedField>(values.length);
+            ImmutableMap.Builder<String, SupportedField> m = ImmutableMap.builder();
             for (SupportedField value : values) {
                 m.put(value.fieldName, value);
             }
-            MAPPING = Collections.unmodifiableMap(m);
+            MAPPING = m.build();
         }
 
         /**

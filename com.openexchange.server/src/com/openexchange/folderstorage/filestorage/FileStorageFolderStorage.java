@@ -67,6 +67,7 @@ import com.openexchange.file.storage.FileStorageAccounts;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.file.storage.IdAndName;
 import com.openexchange.file.storage.WarningsAware;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
@@ -83,13 +84,16 @@ import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StorageParametersUtility;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
+import com.openexchange.folderstorage.SubfolderListingFolderStorage;
 import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.UpdateOperation;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.tx.TransactionManager;
 import com.openexchange.folderstorage.type.FileStorageType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Collators;
+import com.openexchange.java.Reference;
 import com.openexchange.messaging.MessagingPermission;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -101,7 +105,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FileStorageFolderStorage implements FolderStorage {
+public final class FileStorageFolderStorage implements SubfolderListingFolderStorage {
 
     /**
      * <code>"infostore"</code>
@@ -332,8 +336,17 @@ public final class FileStorageFolderStorage implements FolderStorage {
             }
         }
 
-        final String fullName = folderAccess.createFolder(fsFolder);
-        folder.setID(fullName);
+        try {
+            String fullName = folderAccess.createFolder(fsFolder);
+            folder.setID(fullName);
+        } catch (OXException e) {
+            if (FileStorageExceptionCodes.DUPLICATE_FOLDER.equals(e)) {
+                Throwable cause = e.getCause();
+                Object[] args = e.getLogArgs();
+                throw FolderExceptionErrorMessage.EQUAL_NAME.create(cause, args[0], args[1], folder.getTreeID());
+            }
+            throw e;
+        }
     }
 
     @Override
@@ -396,9 +409,27 @@ public final class FileStorageFolderStorage implements FolderStorage {
 
     @Override
     public List<Folder> getFolders(final String treeId, final List<String> folderIds, final StorageType storageType, final StorageParameters storageParameters) throws OXException {
-        final List<Folder> ret = new ArrayList<Folder>(folderIds.size());
-        for (final String folderId : folderIds) {
-            ret.add(getFolder(treeId, folderId, storageType, storageParameters));
+        if (StorageType.BACKUP.equals(storageType)) {
+            throw FolderExceptionErrorMessage.UNSUPPORTED_STORAGE_TYPE.create(storageType);
+        }
+
+        IDBasedFolderAccess folderAccess = getFolderAccess(storageParameters);
+        boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
+        Session session = storageParameters.getSession();
+
+        List<Folder> ret = new ArrayList<Folder>(folderIds.size());
+        for (String folderId : folderIds) {
+            FolderID fid = new FolderID(folderId);
+            FileStorageFolder fsFolder = folderAccess.getFolder(fid);
+            String accountID = FileStorageAccounts.getQualifiedID(fid.getService(), fid.getAccountId());
+            FileStorageFolderImpl folder;
+            if (session == null) {
+                folder = new FileStorageFolderImpl(fsFolder, accountID, storageParameters.getUserId(), storageParameters.getContextId(), altNames, folderAccess);
+            } else {
+                folder = new FileStorageFolderImpl(fsFolder, accountID, session, altNames, folderAccess);
+            }
+            folder.setTreeID(treeId);
+            ret.add(folder);
         }
         return ret;
     }
@@ -425,9 +456,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
         } else {
             retval = new FileStorageFolderImpl(fsFolder, accountID, session, altNames, folderAccess);
         }
-        boolean hasSubfolders = fsFolder.hasSubfolders();
         retval.setTreeID(treeId);
-        retval.setSubfolderIDs(hasSubfolders ? null : new String[0]);
         return retval;
     }
 
@@ -438,10 +467,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
 
     @Override
     public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws OXException {
-        final IDBasedFolderAccess folderAccess = storageParameters.getParameter(FileStorageFolderType.getInstance(), PARAM);
-        if (null == folderAccess) {
-            throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(PARAM);
-        }
+        final IDBasedFolderAccess folderAccess = getFolderAccess(storageParameters);
 
         final boolean isRealTree = REAL_TREE_ID.equals(treeId);
         if (isRealTree ? PRIVATE_FOLDER_ID.equals(parentId) : INFOSTORE.equals(parentId)) {
@@ -486,7 +512,7 @@ public final class FileStorageFolderStorage implements FolderStorage {
         }
 
         // A file storage folder denoted by full name
-        final List<FileStorageFolder> children = Arrays.asList(folderAccess.getSubfolders(parentId, true));
+        List<FileStorageFolder> children = Arrays.asList(folderAccess.getSubfolders(parentId, true));
         /*
          * Sort
          */
@@ -498,6 +524,101 @@ public final class FileStorageFolderStorage implements FolderStorage {
             list.add(new FileStorageId(cur.getId(), j, cur.getName()));
         }
         return list.toArray(new SortableId[list.size()]);
+    }
+
+    @Override
+    public Folder[] getSubfolderObjects(final String treeId, final String parentId, final StorageParameters storageParameters) throws OXException {
+        IDBasedFolderAccess folderAccess = getFolderAccess(storageParameters);
+
+        Session session = storageParameters.getSession();
+        boolean isRealTree = REAL_TREE_ID.equals(treeId);
+        if (isRealTree ? PRIVATE_FOLDER_ID.equals(parentId) : INFOSTORE.equals(parentId)) {
+            /*-
+             * TODO:
+             * 1. Check for file storage permission; e.g. session.getUserPermissionBits().isMultipleMailAccounts()
+             *    Add primary only if not enabled
+             * 2. Strip Unified-FileStorage account from obtained list
+             */
+            Locale userLocale = null;
+            if (session != null) {
+                User user = ServerSessionAdapter.valueOf(session).getUser();
+                if (user != null) {
+                    userLocale = user.getLocale();
+                }
+            }
+            if (null == userLocale) {
+                userLocale = storageParameters.getUser().getLocale();
+            }
+
+            FileStorageFolder[] rootFolders = folderAccess.getRootFolders(userLocale);
+            int size = rootFolders.length;
+            if (size <= 0) {
+                return new Folder[0];
+            }
+
+            boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
+            List<Folder> list = new ArrayList<Folder>(size);
+            if (isRealTree) {
+                for (int j = 0; j < size; j++) {
+                    FileStorageFolder fsFolder = rootFolders[j];
+                    String id = fsFolder.getId();
+                    if (id.length() != 0) {
+                        FolderID fid = new FolderID(id);
+                        if (!INFOSTORE_ACCOUNT_ID.equals(fid.getAccountId())) {
+                            String accountID = FileStorageAccounts.getQualifiedID(fid.getService(), fid.getAccountId());
+                            FileStorageFolderImpl folder;
+                            if (session == null) {
+                                folder = new FileStorageFolderImpl(fsFolder, accountID, storageParameters.getUserId(), storageParameters.getContextId(), altNames, folderAccess);
+                            } else {
+                                folder = new FileStorageFolderImpl(fsFolder, accountID, session, altNames, folderAccess);
+                            }
+                            folder.setTreeID(treeId);
+                            list.add(folder);
+                        }
+                    }
+                }
+            } else {
+                for (int j = 0; j < size; j++) {
+                    FileStorageFolder fsFolder = rootFolders[j];
+                    FolderID fid = new FolderID(fsFolder.getId());
+                    String accountID = FileStorageAccounts.getQualifiedID(fid.getService(), fid.getAccountId());
+                    FileStorageFolderImpl folder;
+                    if (session == null) {
+                        folder = new FileStorageFolderImpl(fsFolder, accountID, storageParameters.getUserId(), storageParameters.getContextId(), altNames, folderAccess);
+                    } else {
+                        folder = new FileStorageFolderImpl(fsFolder, accountID, session, altNames, folderAccess);
+                    }
+                    folder.setTreeID(treeId);
+                    list.add(folder);
+                }
+            }
+            return list.toArray(new Folder[list.size()]);
+        }
+
+        // Get subfolders
+        List<FileStorageFolder> children = Arrays.asList(folderAccess.getSubfolders(parentId, true));
+
+        // Sort
+        Collections.sort(children, new SimpleFileStorageFolderComparator(storageParameters.getUser().getLocale()));
+
+        // Return listing
+        boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
+        List<Folder> list = new ArrayList<Folder>(children.size());
+        int size = children.size();
+        for (int j = 0; j < size; j++) {
+            FileStorageFolder fsFolder = children.get(j);
+            FolderID fid = new FolderID(fsFolder.getId());
+            String accountID = FileStorageAccounts.getQualifiedID(fid.getService(), fid.getAccountId());
+            FileStorageFolderImpl folder;
+            if (session == null) {
+                folder = new FileStorageFolderImpl(fsFolder, accountID, storageParameters.getUserId(), storageParameters.getContextId(), altNames, folderAccess);
+            } else {
+                folder = new FileStorageFolderImpl(fsFolder, accountID, session, altNames, folderAccess);
+            }
+            folder.setTreeID(treeId);
+            list.add(folder);
+        }
+        return list.toArray(new Folder[list.size()]);
     }
 
     @Override
@@ -543,46 +664,74 @@ public final class FileStorageFolderStorage implements FolderStorage {
         return ret.toArray(new String[ret.size()]);
     }
 
+    private FileStorageFolder getFolder(Reference<FileStorageFolder> folderReference, String folderId, IDBasedFolderAccess folderAccess) throws OXException {
+        FileStorageFolder folder = folderReference.getValue();
+        if (null == folder) {
+            folder = folderAccess.getFolder(folderId);
+            folderReference.setValue(folder);
+        }
+        return folder;
+    }
+
     @Override
     public void updateFolder(Folder folder, StorageParameters storageParameters) throws OXException {
-        /*
-         * convert supplied folder & determine required updates in storage
-         */
-        IDBasedFolderAccess folderAccess = getFolderAccess(storageParameters);
-        DefaultFileStorageFolder folderToUpdate = getFileStorageFolder(folder);
-        FileStorageFolder originalFolder = folderAccess.getFolder(folder.getID());
-        boolean move = null != folderToUpdate.getParentId() && false == originalFolder.getParentId().equals(folderToUpdate.getParentId());
-        boolean rename = null != folderToUpdate.getName() && false == originalFolder.getName().equals(folderToUpdate.getName());
-        boolean permissions = null != folderToUpdate.getPermissions() && 0 < folderToUpdate.getPermissions().size() &&
-            false == folderToUpdate.getPermissions().equals(originalFolder.getPermissions());
-        /*
-         * perform move and/or rename operation
-         */
-        if (move) {
-            boolean ignoreWarnings = StorageParametersUtility.getBoolParameter("ignoreWarnings", storageParameters);
-            String newName = rename ? folderToUpdate.getName() : null;
-            String newID = folderAccess.moveFolder(folderToUpdate.getId(), folderToUpdate.getParentId(), newName, ignoreWarnings);
-            folderToUpdate.setId(newID);
-        } else if (rename) {
-            String newID = folderAccess.renameFolder(folderToUpdate.getId(), folderToUpdate.getName());
-            folderToUpdate.setId(newID);
-        }
-        /*
-         * update permissions separately if needed
-         */
-        if (permissions) {
-            String newID = folderAccess.updateFolder(folderToUpdate.getId(), folderToUpdate);
-            folderToUpdate.setId(newID);
-            if (StorageParametersUtility.isHandDownPermissions(storageParameters)) {
-                handDown(folderToUpdate.getId(), folderToUpdate.getPermissions(), folderAccess);
+        try {
+            /*
+             * convert supplied folder & determine required updates in storage
+             */
+            IDBasedFolderAccess folderAccess = getFolderAccess(storageParameters);
+            DefaultFileStorageFolder folderToUpdate = getFileStorageFolder(folder);
+            boolean move;
+            boolean rename;
+            boolean permissions;
+            {
+                Reference<FileStorageFolder> originalFolder = new Reference<FileStorageFolder>(null);
+                UpdateOperation updateOperation = UpdateOperation.optUpdateOperation(storageParameters);
+                if (null != updateOperation) {
+                    move = UpdateOperation.MOVE == updateOperation;
+                    rename = UpdateOperation.RENAME == updateOperation;
+                } else {
+                    move = null != folderToUpdate.getParentId() && false == getFolder(originalFolder, folder.getID(), folderAccess).getParentId().equals(folderToUpdate.getParentId());
+                    rename = null != folderToUpdate.getName() && false == getFolder(originalFolder, folder.getID(), folderAccess).getName().equals(folderToUpdate.getName());
+                }
+                permissions = null != folderToUpdate.getPermissions() && 0 < folderToUpdate.getPermissions().size() && false == folderToUpdate.getPermissions().equals(getFolder(originalFolder, folder.getID(), folderAccess).getPermissions());
             }
+            /*
+             * perform move and/or rename operation
+             */
+            if (move) {
+                boolean ignoreWarnings = StorageParametersUtility.getBoolParameter("ignoreWarnings", storageParameters);
+                String newName = rename ? folderToUpdate.getName() : null;
+                String newID = folderAccess.moveFolder(folderToUpdate.getId(), folderToUpdate.getParentId(), newName, ignoreWarnings);
+                folderToUpdate.setId(newID);
+            } else if (rename) {
+                String newID = folderAccess.renameFolder(folderToUpdate.getId(), folderToUpdate.getName());
+                folderToUpdate.setId(newID);
+            }
+            /*
+             * update permissions separately if needed
+             */
+            if (permissions) {
+                String newID = folderAccess.updateFolder(folderToUpdate.getId(), folderToUpdate);
+                folderToUpdate.setId(newID);
+                if (StorageParametersUtility.isHandDownPermissions(storageParameters)) {
+                    handDown(folderToUpdate.getId(), folderToUpdate.getPermissions(), folderAccess);
+                }
+            }
+            /*
+             * take over updated identifiers in passed folder reference
+             */
+            folder.setID(folderToUpdate.getId());
+            folder.setParentID(folderToUpdate.getParentId());
+            folder.setLastModified(folderToUpdate.getLastModifiedDate());
+        } catch (OXException e) {
+            if (FileStorageExceptionCodes.DUPLICATE_FOLDER.equals(e)) {
+                Throwable cause = e.getCause();
+                Object[] args = e.getLogArgs();
+                throw FolderExceptionErrorMessage.EQUAL_NAME.create(cause, args[0], args[1], folder.getTreeID());
+            }
+            throw e;
         }
-        /*
-         * take over updated identifiers in passed folder reference
-         */
-        folder.setID(folderToUpdate.getId());
-        folder.setParentID(folderToUpdate.getParentId());
-        folder.setLastModified(folderToUpdate.getLastModifiedDate());
     }
 
     private static void handDown(final String parentId, final List<FileStoragePermission> fsPermissions, final IDBasedFolderAccess folderAccess) throws OXException {
@@ -626,6 +775,21 @@ public final class FileStorageFolderStorage implements FolderStorage {
 
         @Override
         public int compare(final FileStorageFolder o1, final FileStorageFolder o2) {
+            return collator.compare(o1.getName(), o2.getName());
+        }
+    } // End of SimpleFileStorageFolderComparator
+
+    private static final class SimpleIdAndNameComparator implements Comparator<IdAndName> {
+
+        private final Collator collator;
+
+        SimpleIdAndNameComparator(final Locale locale) {
+            super();
+            collator = Collators.getSecondaryInstance(locale);
+        }
+
+        @Override
+        public int compare(final IdAndName o1, final IdAndName o2) {
             return collator.compare(o1.getName(), o2.getName());
         }
     } // End of SimpleFileStorageFolderComparator

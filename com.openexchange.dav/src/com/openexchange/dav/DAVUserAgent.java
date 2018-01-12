@@ -57,16 +57,38 @@ package com.openexchange.dav;
  */
 public enum DAVUserAgent {
 
-    MAC_CALENDAR,
-    MAC_CONTACTS,
-    IOS,
-    THUNDERBIRD_LIGHTNING,
-    EM_CLIENT,
-    SMOOTH_SYNC,
-    WINDOWS_PHONE,
-    WINDOWS,
-    UNKNOWN
+    MAC_CALENDAR("Mac OS Calendar (CalDAV)"),
+    MAC_CONTACTS("Mac OS Addressbook (CardDAV)"),
+    IOS("iOS Addressbook and Calendar (CalDAV/CardDAV)"),
+    THUNDERBIRD_LIGHTNING("Mozilla Thunderbird / Lightning (CalDAV)"),
+    EM_CLIENT("eM Client (CalDAV/CardDAV)"),
+    EM_CLIENT_FOR_APPSUITE("eM Client for OX App Suite (CalDAV/CardDAV)"),
+    OX_SYNC("OX Sync on Android (CalDAV/CardDAV)"),
+    CALDAV_SYNC("CalDAV-Sync on Android (CalDAV)"),
+    CARDDAV_SYNC("CardDAV-Sync on Android (CardDAV)"),
+    SMOOTH_SYNC("SmoothSync on Android (CalDAV/CardDAV)"),
+    DAVDROID("DAVdroid on Android (CalDAV/CardDAV)"),
+    WINDOWS_PHONE("Windows Phone Contacts and Calendar (CalDAV/CardDAV)"),
+    WINDOWS("Windows Contacts and Calendar (CalDAV/CardDAV)"),
+    GENERIC_CALDAV("Sync Client (CalDAV)"),
+    GENERIC_CARDDAV("Sync Client (CardDAV)"),
+    UNKNOWN("CalDAV/CardDAV")
     ;
+
+    private final String readableName;
+
+    private DAVUserAgent(String readableName) {
+        this.readableName = readableName;
+    }
+
+    /**
+     * Gets a readable name for the user agent.
+     *
+     * @return The readable name
+     */
+    public String getReadableName() {
+        return readableName;
+    }
 
     /**
      * Parses a user-agent string from a HTTP request and tries to map it to a known *DAV client.
@@ -76,6 +98,21 @@ public enum DAVUserAgent {
      */
     public static DAVUserAgent parse(String userAgent) {
         if (null != userAgent) {
+            if (userAgent.contains("com.openexchange.mobile.syncapp.enterprise")) {
+                return OX_SYNC;
+            }
+            if (userAgent.contains("org.dmfs.carddav.sync")) {
+                return CARDDAV_SYNC;
+            }
+            if (userAgent.contains("org.dmfs.caldav.sync")) {
+                return CALDAV_SYNC;
+            }
+            if (userAgent.contains("SmoothSync")) {
+                return SMOOTH_SYNC;
+            }
+            if (userAgent.contains("DAVdroid")) {
+                return DAVUserAgent.DAVDROID;
+            }
             if (userAgent.contains("Lightning") && userAgent.contains("Thunderbird") && userAgent.contains("Mozilla")) {
                 return THUNDERBIRD_LIGHTNING;
             }
@@ -96,11 +133,11 @@ public enum DAVUserAgent {
                 (userAgent.contains("AddressBook"))) {
                 return MAC_CONTACTS;
             }
+            if (userAgent.contains("eM Client for OX App Suite")) {
+                return EM_CLIENT_FOR_APPSUITE;
+            }
             if (userAgent.contains("eM Client")) {
                 return EM_CLIENT;
-            }
-            if (userAgent.contains("SmoothSync")) {
-                return SMOOTH_SYNC;
             }
         }
         return UNKNOWN;

@@ -81,4 +81,24 @@ public final class Sessions {
         return null == lock ? Session.EMPTY_LOCK : lock;
     }
 
+    /**
+     * Tests if specified session is annotated to be an OAuth session; means it is marked as being created through
+     * <a href="https://documentation.open-xchange.com/7.8.4/middleware/components/oauth_provider/developer_guide.html">Open-Xchange Middleware OAuth authentication flow</a>.
+     *
+     * @param session The session to check
+     * @return <code>true</code> if session was initialized through OAuth provider; otherwise <code>false</code>
+     */
+    public static boolean isOAuthSession(Session session) {
+        Object obj = session.getParameter(Session.PARAM_IS_OAUTH);
+        if (null == obj) {
+            return false;
+        }
+
+        if (obj instanceof Boolean) {
+            return ((Boolean) obj).booleanValue();
+        }
+
+        return "true".equalsIgnoreCase(obj.toString().trim());
+    }
+
 }

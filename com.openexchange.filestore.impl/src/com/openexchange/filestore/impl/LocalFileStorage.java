@@ -57,13 +57,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.java.Streams;
@@ -153,14 +153,7 @@ public class LocalFileStorage extends DefaultFileStorage {
     /**
      * Set of Filenames that will not appear in the getFileList
      */
-    protected static final Set<String> SPECIAL_FILENAMES;
-
-    static {
-        final Set<String> tmp = new HashSet<String>();
-        tmp.add(LOCK_FILENAME);
-        tmp.add(STATEFILENAME);
-        SPECIAL_FILENAMES = Collections.unmodifiableSet(tmp);
-    }
+    protected static final Set<String> SPECIAL_FILENAMES = ImmutableSet.of(LOCK_FILENAME, STATEFILENAME);
 
     /**
      * Initializes a new {@link LocalFileStorage}.

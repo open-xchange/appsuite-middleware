@@ -65,6 +65,13 @@ import com.openexchange.tools.session.ServerSession;
 @DispatcherNotes(noSession = true)
 public class PingAction implements AJAXActionService {
 
+    /**
+     * Initializes a new {@link PingAction}.
+     */
+    public PingAction() {
+        super();
+    }
+
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         return new AJAXRequestResult(Boolean.TRUE, "json");

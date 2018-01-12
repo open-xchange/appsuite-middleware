@@ -54,9 +54,7 @@ import static com.openexchange.tools.sql.DBUtils.tableExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.drive.DriveExceptionCodes;
-import com.openexchange.drive.events.subscribe.internal.SubscribeServiceLookup;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -79,14 +77,12 @@ public class DriveEventSubscriptionsCreateTableTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        DatabaseService dbService = SubscribeServiceLookup.getService(DatabaseService.class, true);
-        final int contextId = params.getContextId();
-        final Connection writeCon = dbService.getForUpdateTask(contextId);
+        Connection writeCon = params.getConnection();
+        boolean rollback = false;
         PreparedStatement stmt = null;
-        boolean transactional = false;
         try {
             writeCon.setAutoCommit(false); // BEGIN
-            transactional = true;
+            rollback = true;
             final String[] tableNames = DriveEventSubscriptionsCreateTableService.getTablesToCreate();
             final String[] createStmts = DriveEventSubscriptionsCreateTableService.getCreateStmts();
             for (int i = 0; i < tableNames.length; i++) {
@@ -101,22 +97,17 @@ public class DriveEventSubscriptionsCreateTableTask extends UpdateTaskAdapter {
                 }
             }
             writeCon.commit(); // COMMIT
+            rollback = false;
         } catch (final OXException e) {
-            if (transactional) {
-                DBUtils.rollback(writeCon);
-            }
             throw e;
         } catch (final Exception e) {
-            if (transactional) {
-                DBUtils.rollback(writeCon);
-            }
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
-            if (transactional) {
-                DBUtils.autocommit(writeCon);
+            if (rollback) {
+                DBUtils.rollback(writeCon);
             }
-            dbService.backForUpdateTask(contextId, writeCon);
+            DBUtils.autocommit(writeCon);
         }
     }
 

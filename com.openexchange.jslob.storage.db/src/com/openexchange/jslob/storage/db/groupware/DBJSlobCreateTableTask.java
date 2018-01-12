@@ -54,13 +54,10 @@ import static com.openexchange.tools.sql.DBUtils.tableExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -70,31 +67,24 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class DBJSlobCreateTableTask extends UpdateTaskAdapter {
 
-    private final ServiceLookup services;
-
     /**
      * Initializes a new {@link DBJSlobCreateTableTask}.
      *
      * @param services The service look-up
      */
-    public DBJSlobCreateTableTask(final ServiceLookup services) {
+    public DBJSlobCreateTableTask() {
         super();
-        this.services = services;
     }
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final DatabaseService dbService = services.getService(DatabaseService.class);
-        if (dbService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
-        }
-        final int contextId = params.getContextId();
-        final Connection writeCon = dbService.getForUpdateTask(contextId);
+        Connection writeCon = params.getConnection();
         PreparedStatement stmt = null;
         boolean rollback = false;
         try {
             writeCon.setAutoCommit(false); // BEGIN
             rollback = true;
+
             final String[] tableNames = DBJSlobCreateTableService.getTablesToCreate();
             final String[] createStmts = DBJSlobCreateTableService.getCreateStmts();
             for (int i = 0; i < tableNames.length; i++) {
@@ -108,6 +98,7 @@ public class DBJSlobCreateTableTask extends UpdateTaskAdapter {
                     throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
                 }
             }
+
             writeCon.commit(); // COMMIT
             rollback = false;
         } catch (final SQLException e) {
@@ -119,7 +110,6 @@ public class DBJSlobCreateTableTask extends UpdateTaskAdapter {
                 DBUtils.autocommit(writeCon);
             }
             closeSQLStuff(stmt);
-            dbService.backForUpdateTask(contextId, writeCon);
         }
     }
 

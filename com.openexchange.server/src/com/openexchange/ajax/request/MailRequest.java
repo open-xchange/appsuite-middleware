@@ -562,7 +562,7 @@ public final class MailRequest {
             final JSONObject bodyObj = JSONUtil.requireDataObject(dataObject);
             flagInt = JSONUtil.requireInt(MailJSONField.FLAGS.getKey(), bodyObj);
             flagValue = JSONUtil.requireBoolean(MailJSONField.VALUE.getKey(), bodyObj);
-            collectAddresses = dataObject.optBoolean("collect_addresses", false);
+            collectAddresses = bodyObj.optBoolean("collect_addresses", false);
         }
 
         @Override

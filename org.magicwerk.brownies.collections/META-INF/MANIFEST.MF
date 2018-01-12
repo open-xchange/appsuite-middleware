@@ -4,7 +4,7 @@ Bundle-Name: Brownies Collections - High Performance Collections for Java
 Bundle-SymbolicName: org.magicwerk.brownies.collections
 Bundle-Version: 0.9.10
 Bundle-Vendor: Magicwerk.org
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Bundle-ClassPath: .,
  lib/brownies-collections-0.9.13.jar
 Export-Package: org.magicwerk.brownies.collections;version="0.9.13",

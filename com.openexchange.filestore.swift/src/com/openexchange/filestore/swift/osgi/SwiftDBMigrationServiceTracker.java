@@ -93,7 +93,15 @@ public class SwiftDBMigrationServiceTracker implements ServiceTrackerCustomizer<
         try {
             // Get the connection/service to use
             final DatabaseService databaseService = services.getService(DatabaseService.class);
-            final Connection con = databaseService.getWritable();
+            String configDbSchemaName;
+            {
+                Connection con = databaseService.getWritable();
+                try {
+                    configDbSchemaName = con.getCatalog();
+                } finally {
+                    databaseService.backWritableAfterReading(con);
+                }
+            }
 
             // Initialize resource accessor
             ResourceAccessor resourceAccessor = new BundleResourceAccessor(context.getBundle());
@@ -103,7 +111,7 @@ public class SwiftDBMigrationServiceTracker implements ServiceTrackerCustomizer<
 
                 @Override
                 public Connection get() throws OXException {
-                    return con;
+                    return databaseService.getWritable();
                 }
 
                 @Override
@@ -120,7 +128,7 @@ public class SwiftDBMigrationServiceTracker implements ServiceTrackerCustomizer<
             };
 
             // Schedule the migration
-            migrationService.scheduleDBMigration(new DBMigration(connectionProvider, changeSetLocaltion, resourceAccessor, con.getCatalog()));
+            migrationService.scheduleDBMigration(new DBMigration(connectionProvider, changeSetLocaltion, resourceAccessor, configDbSchemaName));
 
             // Return tracked service
             return migrationService;

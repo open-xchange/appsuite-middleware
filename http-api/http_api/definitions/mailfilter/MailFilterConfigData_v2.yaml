@@ -5,13 +5,16 @@ properties:
     description: Array of available test-objects.
     items:
       $ref: "#/definitions/MailFilterConfigTestv2"
-  actioncommands:
+  actioncmds:
     type: array
     description: Array of available action-objects.
     items:
       $ref: "#/definitions/MailFilterConfigAction"
-  capabilities:
-    type: array
-    description: Array of supported imap capabilities
-    items:
-      type: string
+  options:
+    type: object
+    title: Options
+    description: A options object containing additional information for the client.
+    properties:
+      allowNestedTests:
+        type: boolean
+        description: Defines if nested rules should be allowed by the client or not.

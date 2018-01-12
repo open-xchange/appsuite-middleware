@@ -174,7 +174,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
 
     /**
      * Initialises a new {@link MailFilterServiceImpl}.
-     * 
+     *
      * @param services The {@link ServiceLookup} instance
      * @throws OXException
      */
@@ -187,7 +187,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
 
     /**
      * This method checks for a valid properties' file and throws and exception if none is there or one of the properties is missing
-     * 
+     *
      * @throws OXException If the properties' file is invalid
      */
     private void checkConfigfile() throws OXException {
@@ -286,6 +286,29 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
                             throw MailFilterExceptionCode.DUPLICATE_VACATION_RULE.create();
                         }
                     }
+                } else {
+                    // Check for redirect rule
+                    int newSize = getRedirectRuleSize(rule);
+                    if (newSize > 0) {
+                        List<Rule> clientrules = clientrulesandrequire.getRules();
+                        Object maxRedirectObj = getExtendedProperties(credentials).get("MAXREDIRECTS");
+                        if (maxRedirectObj != null) {
+                            Integer maxRedirects = (Integer) maxRedirectObj;
+
+                            int sizeOfRedirectRules = 0;
+                            for (Rule r : clientrules) {
+                                if( r.isCommented()){
+                                    // Skip commented rules
+                                    continue;
+                                }
+                                sizeOfRedirectRules += getRedirectRuleSize(r);
+                            }
+
+                            if (sizeOfRedirectRules + newSize > maxRedirects) {
+                                throw MailFilterExceptionCode.TOO_MANY_REDIRECT.create();
+                            }
+                        }
+                    }
                 }
 
                 changeIncomingVacationRule(credentials.getUserid(), credentials.getContextid(), rule);
@@ -333,6 +356,34 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
 
                 ClientRulesAndRequire clientRulesAndReq = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), null, rules.isError());
                 RuleAndPosition rightRule = getRightRuleForUniqueId(clientRulesAndReq.getRules(), uid);
+
+                // Check redirect limit
+                int newSize = getRedirectRuleSize(rule);
+                if (newSize > 0) {
+                    List<Rule> clientrules = clientRulesAndReq.getRules();
+                    Object maxRedirectObj = getExtendedProperties(credentials).get("MAXREDIRECTS");
+                    if (maxRedirectObj != null) {
+                        Integer maxRedirects = (Integer) maxRedirectObj;
+
+                        int sizeOfRedirectRules = 0;
+                        for (Rule r : clientrules) {
+                            if(rightRule.rule.getUniqueId() == r.getUniqueId()){
+                                // Skip updated rule
+                                continue;
+                            }
+                            if( r.isCommented()){
+                                // Skip commented rules
+                                continue;
+                            }
+                            sizeOfRedirectRules += getRedirectRuleSize(r);
+                        }
+
+                        if (sizeOfRedirectRules + newSize > maxRedirects) {
+                            throw MailFilterExceptionCode.TOO_MANY_REDIRECT.create();
+                        }
+                    }
+                }
+
                 changeIncomingVacationRule(credentials.getUserid(), credentials.getContextid(), rightRule.rule);
                 if (rightRule.position == rule.getPosition()) {
                     clientRulesAndReq.getRules().set(rightRule.position, rule);
@@ -712,7 +763,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
      */
     @Override
@@ -726,7 +777,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.Reloadable#getInterests()
      */
     @Override
@@ -743,7 +794,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
 
     /**
      * Get the script name for the specified user in the specified context
-     * 
+     *
      * @param userId The user identifier
      * @param contextId the context identifier
      * @return The script name
@@ -754,7 +805,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     }
 
     /**
-     * 
+     *
      * @param userId
      * @param contextId
      * @return
@@ -942,6 +993,24 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     private boolean isVacationRule(Rule rule) {
         RuleComment ruleComment = rule.getRuleComment();
         return (null != ruleComment) && (null != ruleComment.getFlags()) && ruleComment.getFlags().contains("vacation") && rule.getIfCommand() != null && ActionCommand.Commands.VACATION.equals(rule.getIfCommand().getFirstCommand());
+    }
+
+    /**
+     * Determine the amount of redirect action commands in the given rule
+     *
+     * @param rule The rule
+     * @return the amount of redirect commands
+     */
+    private int getRedirectRuleSize(Rule rule) {
+        int result = 0;
+        if(rule.getIfCommand() != null ){
+            for(ActionCommand command : rule.getIfCommand().getActionCommands()){
+                if(ActionCommand.Commands.REDIRECT.equals(command.getCommand())){
+                    result++;
+                }
+            }
+        }
+        return result;
     }
 
     /**
@@ -1161,6 +1230,23 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
                 return false;
             }
             return true;
+        }
+    }
+
+    @Override
+    public Map<String, Object> getExtendedProperties(Credentials credentials) throws OXException {
+        Object lock = lockFor(credentials);
+        synchronized (lock) {
+            SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
+            try {
+                handlerConnect(sieveHandler, credentials.getSubject());
+                Capabilities capabilities = sieveHandler.getCapabilities();
+                return capabilities.getExtendedProperties();
+            } catch (OXSieveHandlerException e) {
+                throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes(credentials.getUserid(), credentials.getContextid()));
+            } finally {
+                closeSieveHandler(sieveHandler);
+            }
         }
     }
 }

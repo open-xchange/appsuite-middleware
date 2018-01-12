@@ -14,7 +14,7 @@ properties:
       related: com.openexchange.mail.filter.server
       file: mailfilter.properties
       packageName: open-xchange-mailfilter
-      tags: ["Mail Filter", "Mail", "SIEVE"]
+      tags: ["Mail Filter", "Mail", "Sieve"]
     - key: com.openexchange.mail.filter.credentialSource
       description: |
         Specifies which sieve credentials should be use. Four options are allowed here:
@@ -31,7 +31,7 @@ properties:
       related: 
       file: mailfilter.properties
       packageName: open-xchange-mailfilter
-      tags: ["Mail Filter", "Mail", "SIEVE"]
+      tags: ["Mail Filter", "Mail", "Sieve"]
     - key: com.openexchange.mail.filter.server
       description: |
         Specifies a default value for the sieve server.
@@ -42,13 +42,13 @@ properties:
       related: 
       file: mailfilter.properties
       packageName: open-xchange-mailfilter
-      tags: ["Mail Filter", "Mail", "Host", "SIEVE"]
+      tags: ["Mail Filter", "Mail", "Host", "Sieve"]
     - key: com.openexchange.mail.filter.port
       description: |
-        Specifies the SIEVE port.
+        Specifies the Sieve port.
 
         Note:  
-        <code>2000</code> is the deprecated port number for SIEVE (now assigned to some Cisco SCCP protocol by the IANA).  
+        <code>2000</code> is the deprecated port number for Sieve (now assigned to some Cisco SCCP protocol by the IANA).  
         <code>4190</code> is the new one used with most recent Linux and IMAP implementations.  
         Please check your system's default port defined at /etc/services.  
       defaultValue: 4190
@@ -58,7 +58,7 @@ properties:
       related: 
       file: mailfilter.properties
       packageName: open-xchange-mailfilter
-      tags: ["Mail Filter", "Mail", "Port", "SIEVE"]
+      tags: ["Mail Filter", "Mail", "Port", "Sieve"]
     - key: com.openexchange.mail.filter.scriptName
       description: |
         Specifies the name of the script, which will be generated.
@@ -71,7 +71,7 @@ properties:
       related: 
       file: mailfilter.properties
       packageName: open-xchange-mailfilter
-      tags: ["Mail Filter", "Mail", "SIEVE"]
+      tags: ["Mail Filter", "Mail", "Sieve"]
     - key: com.openexchange.mail.filter.authenticationEncoding
       description: |
         Define the charset encoding to use for authentication to sieve server.
@@ -82,7 +82,7 @@ properties:
       related: 
       file: mailfilter.properties
       packageName: open-xchange-mailfilter
-      tags: ["Mail Filter", "Mail", "SIEVE"]
+      tags: ["Mail Filter", "Mail", "Sieve"]
     - key: com.openexchange.mail.filter.nonRFCCompliantTLSRegex
       description: |
         Define the regex which recognizes servers with incorrect sieve TLS implementation.
@@ -93,7 +93,7 @@ properties:
       related: 
       file: mailfilter.properties
       packageName: open-xchange-mailfilter
-      tags: ["Mail Filter", "Mail", "SIEVE"]
+      tags: ["Mail Filter", "Mail", "Sieve"]
     - key: com.openexchange.mail.filter.tls
       description: |
         Whether to use TLS if available.
@@ -104,7 +104,7 @@ properties:
       related: 
       file: mailfilter.properties
       packageName: open-xchange-mailfilter
-      tags: ["Mail Filter", "Mail", "SIEVE", "Security"]
+      tags: ["Mail Filter", "Mail", "Sieve", "Security"]
     - key: com.openexchange.mail.filter.vacationDomains
       description: |
         Specifies if a vacation messages should only be sent to specific domains.
@@ -118,7 +118,7 @@ properties:
       related: 
       file: mailfilter.properties
       packageName: open-xchange-mailfilter
-      tags: ["Mail Filter", "Mail", "SIEVE"]
+      tags: ["Mail Filter", "Mail", "Sieve"]
     - key: com.openexchange.mail.filter.connectionTimeout
       description: |
         Specifies when the connection should time out (value in milliseconds).
@@ -129,7 +129,7 @@ properties:
       related: 
       file: mailfilter.properties
       packageName: open-xchange-mailfilter
-      tags: ["Mail Filter", "Mail", "SIEVE", "Timeout"]
+      tags: ["Mail Filter", "Mail", "Sieve", "Timeout"]
     - key: com.openexchange.mail.filter.authTimeout
       description: |
         Specifies when the connection should time out (value in milliseconds) when performing SASL authentication against Sieve end-point.
@@ -140,7 +140,7 @@ properties:
       related: 
       file: mailfilter.properties
       packageName: open-xchange-mailfilter
-      tags: ["Mail Filter", "Mail", "SIEVE", "Timeout"]
+      tags: ["Mail Filter", "Mail", "Sieve", "Timeout"]
     - key: com.openexchange.mail.filter.passwordSource
       description: |
         Set the password source; meaning which source is taken to determine a user's password to login into mail filter system.  
@@ -154,7 +154,7 @@ properties:
       related: com.openexchange.mail.filter.masterPassword
       file: mailfilter.properties
       packageName: open-xchange-mailfilter
-      tags: ["Mail Filter", "Mail", "SIEVE"]
+      tags: ["Mail Filter", "Mail", "Sieve"]
     - key: com.openexchange.mail.filter.masterPassword
       description: |
         The master password for mail/transport server. Only takes effect when property
@@ -166,7 +166,7 @@ properties:
       related: com.openexchange.mail.filter.passwordSource
       file: mailfilter.properties
       packageName: open-xchange-mailfilter
-      tags: ["Mail Filter", "Mail", "SIEVE", "Credential"]
+      tags: ["Mail Filter", "Mail", "Sieve", "Credential"]
     - key: com.openexchange.mail.filter.useUTF7FolderEncoding
       description: |
         This property defines if mailbox names shall be UTF-7 encoded as specified in RFC2060; section 5.1.3. "Mailbox International Naming Convention".
@@ -182,7 +182,7 @@ properties:
       related: 
       file: mailfilter.properties
       packageName: open-xchange-mailfilter
-      tags: ["Mail Filter", "Mail", "SIEVE"]
+      tags: ["Mail Filter", "Mail", "Sieve"]
     - key: com.openexchange.mail.filter.punycode
       description: |
         Enable punycode encoding for the username used in authentication against the managesieve server.
@@ -193,10 +193,10 @@ properties:
       related: 
       file: mailfilter.properties
       packageName: open-xchange-mailfilter
-      tags: ["Mail Filter", "Mail", "SIEVE"]
-    - key: com.openexchange.mail.filter.useSIEVEResponseCodes
+      tags: ["Mail Filter", "Mail", "Sieve"]
+    - key: com.openexchange.mail.filter.useSieveResponseCodes
       description: |
-        Interpret SIEVE Response Codes, see [[https://tools.ietf.org/html/rfc5804#section-1.3]].
+        Interpret Sieve Response Codes, see [[https://tools.ietf.org/html/rfc5804#section-1.3]].
         In most cases, this option must be kept to <code>false</code>.
       defaultValue: false
       version:
@@ -205,7 +205,7 @@ properties:
       related:
       file: mailfilter.properties
       packageName: open-xchange-mailfilter
-      tags: ["Mail Filter", "Mail", "SIEVE"]
+      tags: ["Mail Filter", "Mail", "Sieve"]
     - key: com.openexchange.mail.filter.redirectWhitelist
       description: |
         Specifies a comma-separated list of domains (wild-card syntax supported) that are allowed for redirect rules.
@@ -216,7 +216,7 @@ properties:
       related:
       file: mailfilter.properties
       packageName: open-xchange-mailfilter
-      tags: ["Mail Filter", "Mail", "SIEVE", "White List"]
+      tags: ["Mail Filter", "Mail", "Sieve", "White List"]
     - key: com.openexchange.mail.filter.preferredSaslMech
       description: |
         Specifies the preferred SASL authentication mechanism.
@@ -230,4 +230,75 @@ properties:
       related:
       file: mailfilter.properties
       packageName: open-xchange-mailfilter
-      tags: ["Mail Filter", "Mail", "SIEVE"]
+    - key: com.openexchange.mail.filter.options.allowNestedTests
+      description: |
+        A flag announced to clients via the config action to indicate if they should allow nested tests.
+
+        Note:  
+        This flag is only announced via the new v2 mailfilter api.
+      defaultValue: true
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: mailfilter.properties
+      packageName: open-xchange-mailfilter
+      tags: ["Mail Filter", "Mail", "Sieve"]    
+    - key: com.openexchange.mail.filter.blacklist.[base]
+      description: |
+        Defines a comma separated list of elements. Each elements is either a test name, an action name or a comparison depending on the [base].  
+        [base] must be one of:
+        <ul>
+        	<li>tests</li>
+        	<li>actions</li>
+        	<li>comparisons</li>
+        </ul>
+        e.g.:
+        <pre>
+        com.openexchange.mail.filter.blacklist.actions = keep, discard
+        </pre>
+        	
+        This will blacklist the actions 'keep' and 'discard' and will not show it to clients.
+
+        Note:  
+        1. Invalid elements will be ignored.  
+        2. This blacklist is only applicable for the new v2 mailfilter api.
+      defaultValue: 
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: mailfilter.properties
+      packageName: open-xchange-mailfilter
+      tags: ["Mail Filter", "Mail", "Sieve", "Black List"]
+    - key: com.openexchange.mail.filter.blacklist.[base].[element].[field]
+      description: |
+        Defines a comma separated list of strings. Each string represents a value which should be blacklisted from the corresponding field of the element.
+          
+        [base] must be one of:
+        <ul>
+        	<li>tests</li>
+        	<li>actions</li>
+        </ul>
+        Currently only <code>tests</code> contains sub fields.
+
+        [element] must be a valid element of the base group. E.g. <code>address</code> for <code>tests</code> or <code>keep</code> for <code>actions</code>.
+
+        [field] must be a valid field of the element. E.g. <code>comparisons</code>
+
+        e.g.:
+        <pre>
+        com.openexchange.mail.filter.blacklist.tests.from.comparisons = is
+        </pre>
+        This will blacklist the <code>is</code> comparator from the <code>from</code> action.
+
+        Note:  
+        This blacklist is only applicable for the new v2 mailfilter api.
+      defaultValue: 
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: mailfilter.properties
+      packageName: open-xchange-mailfilter
+      tags: ["Mail Filter", "Mail", "Sieve", "Black List"]

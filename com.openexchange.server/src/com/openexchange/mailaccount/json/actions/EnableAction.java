@@ -61,6 +61,7 @@ import com.openexchange.mailaccount.KnownStatus;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.json.ActiveProviderDetector;
 import com.openexchange.mailaccount.json.MailAccountFields;
 import com.openexchange.mailaccount.json.MailAccountOAuthConstants;
@@ -91,8 +92,11 @@ public final class EnableAction extends AbstractValidateMailAccountAction implem
         try {
             int id = requireIntParameter(AJAXServlet.PARAMETER_ID, requestData);
 
-            if (!session.getUserPermissionBits().isMultipleMailAccounts() && MailAccount.DEFAULT_ID != id) {
-                throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+            if (MailAccount.DEFAULT_ID != id && !session.getUserPermissionBits().isMultipleMailAccounts()) {
+                UnifiedInboxManagement unifiedInboxManagement = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class);
+                if ((null == unifiedInboxManagement) || (id != unifiedInboxManagement.getUnifiedINBOXAccountID(session))) {
+                    throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                }
             }
 
             MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);

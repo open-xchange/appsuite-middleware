@@ -53,8 +53,10 @@ import static com.openexchange.java.Autoboxing.I;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
+import com.openexchange.context.PoolAndSchema;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.update.UpdateStatus;
@@ -130,6 +132,21 @@ public class CachingContextStorage extends ContextStorage {
     @Override
     public List<Integer> getAllContextIds() throws OXException {
         return persistantImpl.getAllContextIds();
+    }
+
+    @Override
+    public List<Integer> getDistinctContextsPerSchema() throws OXException {
+        return persistantImpl.getDistinctContextsPerSchema();
+    }
+
+    @Override
+    public Map<PoolAndSchema, List<Integer>> getSchemaAssociations() throws OXException {
+        return persistantImpl.getSchemaAssociations();
+    }
+
+    @Override
+    public Map<PoolAndSchema, List<Integer>> getSchemaAssociationsFor(List<Integer> contextIds) throws OXException {
+        return persistantImpl.getSchemaAssociationsFor(contextIds);
     }
 
     @Override

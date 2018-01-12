@@ -51,6 +51,8 @@ package com.openexchange.logging.osgi;
 
 import javax.management.ObjectName;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
@@ -74,11 +76,12 @@ public class LogbackConfigurationMBeanRegisterer implements ServiceTrackerCustom
 
     protected static Logger LOGGER = LoggerFactory.getLogger(LogbackConfigurationMBeanRegisterer.class);
 
-    private BundleContext context;
-    private volatile ObjectName logbackConfObjName;
-    private volatile LogbackConfiguration logbackConfiguration;
+    private final BundleContext context;
+    private ObjectName logbackConfObjName; // guarded by synchronized
+    private LogbackConfiguration logbackConfiguration; // guarded by synchronized
+    ObjectName logstashConfName; // guarded by synchronized
 
-    private RankingAwareTurboFilterList rankingAwareTurboFilterList;
+    private final RankingAwareTurboFilterList rankingAwareTurboFilterList;
     private final IncludeStackTraceServiceImpl stackTraceService;
 
     /**
@@ -93,55 +96,126 @@ public class LogbackConfigurationMBeanRegisterer implements ServiceTrackerCustom
 
     @Override
     public synchronized ManagementService addingService(ServiceReference<ManagementService> reference) {
-        ManagementService managementService = context.getService(reference);
+        final ManagementService managementService = context.getService(reference);
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+
+        // Initialize logback configuration instance
+        LogbackConfiguration logbackConfiguration;
         try {
-            final ObjectName logbackConfObjName = new ObjectName(LogbackConfigurationMBean.DOMAIN, LogbackConfigurationMBean.KEY, LogbackConfigurationMBean.VALUE);
-            this.logbackConfObjName = logbackConfObjName;
-
-            // Register MBean
-            final LogbackConfiguration logbackConfiguration = new LogbackConfiguration(loggerContext, rankingAwareTurboFilterList, stackTraceService);
+            logbackConfiguration = new LogbackConfiguration(loggerContext, rankingAwareTurboFilterList, stackTraceService);
             this.logbackConfiguration = logbackConfiguration;
-            managementService.registerMBean(logbackConfObjName, logbackConfiguration);
+        } catch (Exception e) {
+            LOGGER.error("Could not register LogbackConfigurationMBean", e);
+            context.ungetService(reference);
+            return null;
+        }
 
-            // Register Logstash Appender MBean
-            {
-                boolean logstash = Boolean.parseBoolean(loggerContext.getProperty("com.openexchange.logback.extensions.logstash.enabled"));
-                if (logstash) {
-                    final ObjectName logstashConfName = new ObjectName(LogstashSocketAppenderMBean.DOMAIN, LogstashSocketAppenderMBean.KEY, LogstashSocketAppenderMBean.VALUE);
-                    managementService.registerMBean(logstashConfName, LogstashSocketAppender.getInstance());
+        // Register optional LogbackConfigurationMBean
+        try {
+            ObjectName logbackConfObjName = new ObjectName(LogbackConfigurationMBean.DOMAIN, LogbackConfigurationMBean.KEY, LogbackConfigurationMBean.VALUE);
+            this.logbackConfObjName = logbackConfObjName;
+            managementService.registerMBean(logbackConfObjName, logbackConfiguration);
+        } catch (Exception e) {
+            LOGGER.error("Could not register LogbackConfigurationMBean", e);
+            context.ungetService(reference);
+            return null;
+        }
+
+        // Register optional LogstashSocketAppenderMBean
+        boolean logstashEnabled = Boolean.parseBoolean(loggerContext.getProperty("com.openexchange.logback.extensions.logstash.enabled"));
+        if (logstashEnabled) {
+            LogstashSocketAppender logstashSocketAppender = LogstashSocketAppender.getInstance();
+            if (null == logstashSocketAppender) {
+                // "com.openexchange.java-commons.logback-extensions" bundle not yet started... Add a listener for it to register its MBean later on
+                context.addBundleListener(new LogbackExtensionsBundleListener(this, managementService));
+            } else {
+                try {
+                    ObjectName logstashConfName = new ObjectName(LogstashSocketAppenderMBean.DOMAIN, LogstashSocketAppenderMBean.KEY, LogstashSocketAppenderMBean.VALUE);
+                    managementService.registerMBean(logstashConfName, logstashSocketAppender);
+                    this.logstashConfName = logstashConfName;
+                } catch (Exception e) {
+                    LOGGER.error("Could not register LogstashSocketAppenderMBean", e);
                 }
             }
-            return managementService;
-        } catch (final Exception e) {
-            LOGGER.error("Could not register LogbackConfigurationMBean", e);
         }
-        context.ungetService(reference);
-        return null;
+
+        return managementService;
     }
 
     @Override
-    public synchronized void modifiedService(ServiceReference<ManagementService> reference, ManagementService service) {
+    public synchronized void modifiedService(ServiceReference<ManagementService> reference, ManagementService managementService) {
         // Nothing
     }
 
     @Override
-    public synchronized void removedService(ServiceReference<ManagementService> reference, ManagementService service) {
-        if (service != null) {
-            try {
-                final ObjectName logbackConfObjName = this.logbackConfObjName;
-                if (logbackConfObjName != null) {
-                    service.unregisterMBean(logbackConfObjName);
-                    LOGGER.info("LoggingConfigurationMBean successfully unregistered.");
+    public synchronized void removedService(ServiceReference<ManagementService> reference, ManagementService managementService) {
+        if (null == managementService) {
+            return;
+        }
+
+        LogbackConfiguration logbackConfiguration = this.logbackConfiguration;
+        if (null != logbackConfiguration) {
+            this.logbackConfiguration = null;
+
+            ObjectName logstashConfName = this.logstashConfName;
+            if (logstashConfName != null) {
+                try {
+                    managementService.unregisterMBean(logstashConfName);
+                    LOGGER.info("LogstashSocketAppenderMBean successfully unregistered.");
+                } catch (Exception e) {
+                    LOGGER.warn("Could not unregister LogstashSocketAppenderMBean", e);
                 }
-                final LogbackConfiguration logbackConfiguration = this.logbackConfiguration;
-                if (null != logbackConfiguration) {
-                    logbackConfiguration.dispose();
-                    this.logbackConfiguration = null;
-                }
-            } catch (OXException e) {
-                LOGGER.warn("Could not unregister LogbackConfigurationMBean", e);
             }
+
+            ObjectName logbackConfObjName = this.logbackConfObjName;
+            if (logbackConfObjName != null) {
+                try {
+                    managementService.unregisterMBean(logbackConfObjName);
+                    LOGGER.info("LoggingConfigurationMBean successfully unregistered.");
+                } catch (OXException e) {
+                    LOGGER.warn("Could not unregister LoggingConfigurationMBean", e);
+                }
+            }
+
+            logbackConfiguration.dispose();
         }
     }
+
+    // -------------------------------------------------------------------------------------------------------------------
+
+    private static final class LogbackExtensionsBundleListener implements BundleListener {
+
+        private final LogbackConfigurationMBeanRegisterer registerer;
+        private final ManagementService managementService;
+
+        /**
+         * Initializes a new {@link BundleListenerImplementation}.
+         */
+        LogbackExtensionsBundleListener(LogbackConfigurationMBeanRegisterer registerer, ManagementService managementService) {
+            super();
+            this.registerer = registerer;
+            this.managementService = managementService;
+        }
+
+        @Override
+        public void bundleChanged(BundleEvent event) {
+            if (BundleEvent.STARTED == event.getType() && "com.openexchange.java-commons.logback-extensions".equals(event.getBundle().getSymbolicName())) {
+                synchronized (registerer) {
+                    LogstashSocketAppender logstashSocketAppender = LogstashSocketAppender.getInstance();
+                    if (null == logstashSocketAppender) {
+                        LOGGER.warn("Logstash socket appender has been enabled, but not initialized. Please ensure bundle \"com.openexchange.java-commons.logback-extensions\" ('logback-extensions') is orderly started");
+                    } else {
+                        try {
+                            ObjectName logstashConfName = new ObjectName(LogstashSocketAppenderMBean.DOMAIN, LogstashSocketAppenderMBean.KEY, LogstashSocketAppenderMBean.VALUE);
+                            managementService.registerMBean(logstashConfName, logstashSocketAppender);
+                            registerer.logstashConfName = logstashConfName;
+                        } catch (Exception e) {
+                            LOGGER.warn("Failed to register MBean for logstash socket appender.", e);
+                        }
+                    }
+                }
+            }
+        }
+    } // End of LogbackExtensionsBundleListener class
+
 }

@@ -104,11 +104,7 @@ public class ShareTool {
      */
     public static String getUserAttribute(User user, String name) {
         Map<String, String> attributes = user.getAttributes();
-        if (attributes == null) {
-            return null;
-        }
-
-        return attributes.get(name);
+        return attributes == null ? null : attributes.get(name);
     }
 
     /**
@@ -120,12 +116,7 @@ public class ShareTool {
      */
     public static void assignUserAttribute(UserImpl user, String name, String value) {
         Map<String, String> existingAttributes = user.getAttributes();
-        Map<String, String> attributes;
-        if (null != existingAttributes) {
-            attributes = new HashMap<String, String>(existingAttributes);
-        } else {
-            attributes = new HashMap<String, String>();
-        }
+        Map<String, String> attributes = null == existingAttributes ? new HashMap<String, String>() : new HashMap<String, String>(existingAttributes);
         attributes.put(name, value);
         user.setAttributes(attributes);
     }
@@ -168,14 +159,17 @@ public class ShareTool {
      * </code>
      * @param target The target
      * @return The JSON object
-     * @throws JSONException
      */
-    public static JSONObject targetToJSON(ShareTarget target) throws JSONException {
-        JSONObject jTarget = new JSONObject();
-        jTarget.put("m", target.getModule());
-        jTarget.put("f", target.getFolder());
-        jTarget.put("i", target.getItem());
-        return jTarget;
+    public static JSONObject targetToJSON(ShareTarget target) throws OXException {
+        try {
+            JSONObject jTarget = new JSONObject();
+            jTarget.put("m", target.getModule());
+            jTarget.put("f", target.getFolder());
+            jTarget.put("i", target.getItem());
+            return jTarget;
+        } catch (JSONException e) {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     /**

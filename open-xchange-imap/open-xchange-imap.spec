@@ -9,17 +9,13 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-core
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+%if 0%{?suse_version}
+BuildRequires: java-1_8_0-openjdk-devel
 %else
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires: java-1_7_0-openjdk-devel
-%else
-BuildRequires: java-devel >= 1.7.0
-%endif
+BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -56,42 +52,7 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc imap.properties
-
     PFILE=/opt/open-xchange/etc/imap.properties
-
-    # SoftwareChange_Request-1142
-    ox_add_property com.openexchange.imap.umlautFilterThreshold 50 $PFILE
-
-    # SoftwareChange_Request-1215
-    ox_add_property com.openexchange.imap.maxMailboxNameLength 60 $PFILE
-
-    # SoftwareChange_Request-1470
-    if ox_exists_property com.openexchange.imap.maxIMAPConnectionIdleTime $PFILE; then
-        ox_remove_property com.openexchange.imap.maxIMAPConnectionIdleTime $PFILE
-    fi
-
-    # SoftwareChange_Request-1566
-    ox_add_property com.openexchange.imap.invalidMailboxNameCharacters "" $PFILE
-
-    # SoftwareChange_Request-1586
-    ox_add_property com.openexchange.imap.allowFolderCaches true $PFILE
-
-    # SoftwareChange_Request-1668
-    ox_add_property com.openexchange.imap.storeContainerType boundary-aware $PFILE
-
-    # SoftwareChange_Request-1931
-    ox_add_property com.openexchange.imap.ssl.protocols "" $PFILE
-
-    # SoftwareChange_Request-1953
-    VALUE=$(ox_read_property com.openexchange.imap.imapSearch $PFILE)
-    ox_set_property com.openexchange.imap.imapSearch "$VALUE" $PFILE
-
-    # SoftwareChange_Request-2016
-    ox_add_property com.openexchange.imap.ssl.ciphersuites "" $PFILE
-
-    # SoftwareChange_Request-2093
-    ox_add_property com.openexchange.imap.namespacePerUser "true" $PFILE
 
     # SoftwareChange_Request-2820
     ox_add_property com.openexchange.imap.allowSORTDISPLAY false $PFILE
@@ -134,6 +95,8 @@ fi
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Thu Oct 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.10.0 release
 * Fri May 19 2017 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Marcus Klein <marcus.klein@open-xchange.com>

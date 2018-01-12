@@ -2,13 +2,14 @@ Source: open-xchange-osgi
 Section: web
 Priority: optional
 Maintainer: Marcus Klein <marcus.klein@open-xchange.com>
-Build-Depends: cdbs (>= 0.4.53), debhelper (>= 7.0.1), ant-optional (>= 1.7.0), java7-jdk | java7-sdk
-Standards-Version: 3.8.4
+Build-Depends: cdbs (>= 0.4.53), debhelper (>= 7.0.1), ant-optional (>= 1.7.0), openjdk-8-jdk-headless
+Standards-Version: 3.9.8
 Homepage: http://www.open-xchange.com
 
 Package: open-xchange-osgi
 Architecture: all
-Pre-Depends: java7-runtime-headless
+Pre-Depends: openjdk-8-jre-headless
+Depends: ${misc:Depends}
 Replaces: open-xchange-common, open-xchange-activation
 Conflicts: open-xchange-common, open-xchange-activation
 Provides: open-xchange-common, open-xchange-activation

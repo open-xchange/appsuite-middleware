@@ -106,12 +106,6 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
          * ... and connect it
          */
         doIMAPConnect(imapSession, imapStore, server, port, login, pw, accountId, session, false);
-
-        String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
-        if (null != sessionInformation) {
-            LogProperties.put(LogProperties.Name.MAIL_SESSION, sessionInformation);
-        }
-
         return imapStore;
     }
 

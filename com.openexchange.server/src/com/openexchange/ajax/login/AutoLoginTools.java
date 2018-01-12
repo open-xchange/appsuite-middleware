@@ -169,15 +169,6 @@ public class AutoLoginTools {
 
                     LOG.debug("No session- & secret-cookie pair for hash {} found, aborting auto-login procedure.", hash);
                 } catch (OXException e) {
-                    if (SessionExceptionCodes.WRONG_CLIENT_IP.equals(e)) {
-                        /*
-                         * session found, but IP changed -> discard session & cancel auto-login,
-                         * invalidate session-cookie (public- and secret-cookies are re-written later)
-                         */
-                        SessionUtility.removeOXCookies(request, response, Collections.singletonList(expectedSessionCookieName));
-                        logout(sessionID);
-                        return null;
-                    }
                     if (SessionExceptionCodes.SESSION_EXPIRED.equals(e)) {
                         /*
                          * session explicitly marked as absent -> discard session (if not yet performed) & cancel auto-login,

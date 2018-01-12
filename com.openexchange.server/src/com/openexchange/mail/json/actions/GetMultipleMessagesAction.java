@@ -70,6 +70,7 @@ import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.IOs;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
@@ -259,8 +260,7 @@ public final class GetMultipleMessagesAction extends AbstractMailAction {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             OXException oxe = MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-            String msg = Strings.asciiLowerCase(e.getMessage());
-            if (null != msg && msg.indexOf("connection reset by peer") >= 0) {
+            if (IOs.isConnectionReset(e)) {
                 /*-
                  * A "java.io.IOException: Connection reset by peer" is thrown when the other side has abruptly aborted the connection in midst of a transaction.
                  *

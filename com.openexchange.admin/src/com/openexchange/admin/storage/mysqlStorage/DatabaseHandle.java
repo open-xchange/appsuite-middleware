@@ -59,6 +59,7 @@ public class DatabaseHandle extends Database {
     private static final long serialVersionUID = -4816706296673058930L;
 
     private int count;
+    private int schemaCount;
 
     public DatabaseHandle() {
         super();
@@ -72,4 +73,13 @@ public class DatabaseHandle extends Database {
     public void setCount(int count) {
         this.count = count;
     }
+
+    public int getSchemaCount() {
+        return schemaCount;
+    }
+
+    public void setSchemaCount(int schemaCount) {
+        this.schemaCount = schemaCount;
+    }
+
 }

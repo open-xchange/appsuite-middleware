@@ -56,17 +56,20 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.database.Databases;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -90,7 +93,8 @@ public final class ContactDeleteListener implements DeleteListener {
 
     @Override
     public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws OXException {
-        if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
+        int type = deleteEvent.getType();
+        if (type == DeleteEvent.TYPE_USER) {
 
             Integer destUser = deleteEvent.getDestinationUserID();
             if(destUser == null){
@@ -105,6 +109,26 @@ public final class ContactDeleteListener implements DeleteListener {
              * Proceed
              */
             trashAllUserContacts(deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getSession(), destUser, readCon, writeCon);
+        } else if (type == DeleteEvent.TYPE_CONTEXT) {
+            handleContextDeletion(writeCon, deleteEvent.getContext());
+        }
+    }
+
+    private void handleContextDeletion(Connection writeCon, Context ctx) throws OXException {
+        Statement stmt = null;
+        try {
+            stmt = writeCon.createStatement();
+
+            stmt.addBatch("DELETE FROM del_dlist WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM del_contacts WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM prg_dlist WHERE cid=" + ctx.getContextId());
+            stmt.addBatch("DELETE FROM prg_contacts WHERE cid=" + ctx.getContextId());
+
+            stmt.executeBatch();
+        } catch (final SQLException e) {
+            throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(stmt);
         }
     }
 

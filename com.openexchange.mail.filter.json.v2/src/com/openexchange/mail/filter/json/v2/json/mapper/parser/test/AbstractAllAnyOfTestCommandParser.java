@@ -99,7 +99,7 @@ abstract class AbstractAllAnyOfTestCommandParser extends AbstractTestCommandPars
         return new TestCommand(command, new ArrayList<Object>(), commandlist);
     }
 
-    void parse(JSONObject jsonObject, TestCommand testCommand, Commands command, @SuppressWarnings("unused") boolean transformToNotMatcher) throws JSONException, OXException {
+    void parse(JSONObject jsonObject, TestCommand testCommand, Commands command, boolean transformToNotMatcher) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), command.getCommandName());
         CommandParserRegistry<TestCommand, TestCommandParser<TestCommand>> parserRegistry = services.getService(TestCommandParserRegistry.class);
         List<TestCommand> testCommands = testCommand.getTestCommands();

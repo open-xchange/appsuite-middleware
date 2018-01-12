@@ -51,16 +51,16 @@ package com.openexchange.drive.impl.checksum;
 
 import static com.openexchange.java.Autoboxing.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.context.ContextService;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.context.PoolAndSchema;
 import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
 import com.openexchange.drive.impl.internal.DriveServiceLookup;
 import com.openexchange.exception.Category;
@@ -68,7 +68,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
-import com.openexchange.java.Autoboxing;
 
 /**
  * {@link PeriodicChecksumCleaner}
@@ -98,16 +97,17 @@ public class PeriodicChecksumCleaner implements Runnable {
     public void run() {
         long start = System.currentTimeMillis();
         try {
-            List<Integer> allContextIDs = DriveServiceLookup.getService(ContextService.class).getAllContextIds();
-            LOG.info("Periodic checksum cleanup task starting, going to check {} contexts...", I(allContextIDs.size()));
-            List<Integer> contextIDs = getEligibleContextIDs(allContextIDs);
-            if (allContextIDs.size() != contextIDs.size()) {
-                LOG.info("Skipping {} contexts due to not up-to-date database schemas.", I(allContextIDs.size() - contextIDs.size()));
+            LOG.info("Periodic checksum cleanup task starting, going to check all contexts...");
+            EligibleContextsResult eligibleContextsResult = getEligibleContextIDs();
+            if (eligibleContextsResult.numOfUnUpdatedContexts > 0) {
+                LOG.info("Skipping {} contexts due to not up-to-date database schemas.", I(eligibleContextsResult.numOfUnUpdatedContexts));
             }
+            List<Integer> contextIDs = eligibleContextsResult.upToDateContextIDs;
             long logTimeDistance = TimeUnit.SECONDS.toMillis(10);
             long lastLogTime = start;
-            for (int i = 0; i < contextIDs.size(); i++) {
-                int contextID = contextIDs.get(i).intValue();
+            int i = 0;
+            for (Integer ctxID : contextIDs) {
+                int contextID = ctxID.intValue();
                 for (int retry = 0; retry < 3; retry++) {
                     if (false == active.get()) {
                         LOG.info("Periodic checksum cleanup task stopping.");
@@ -133,6 +133,7 @@ public class PeriodicChecksumCleaner implements Runnable {
                         }
                     }
                 }
+                i++;
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -196,29 +197,33 @@ public class PeriodicChecksumCleaner implements Runnable {
      * Gets the identifiers of all contexts eligible for a checksum cleaner run, i.e. contexts from non-up-to-date schemas are filtered
      * out beforehand.
      *
-     * @param allContextIDs All possible context identifiers
      * @return The context identifiers
      */
-    private static List<Integer> getEligibleContextIDs(List<Integer> allContextIDs) throws OXException {
-        Set<Integer> upToDateContextIDs = new HashSet<Integer>();
-        Set<Integer> unUpdatedContextIDs = new HashSet<Integer>();
-        DatabaseService databaseService = DriveServiceLookup.getService(DatabaseService.class);
+    private static EligibleContextsResult getEligibleContextIDs() throws OXException {
+        Map<PoolAndSchema, List<Integer>> schemaAssociations = DriveServiceLookup.getService(ContextService.class).getSchemaAssociations();
         Updater updater = Updater.getInstance();
-        for (Integer contextID : allContextIDs) {
-            if (upToDateContextIDs.contains(contextID) || unUpdatedContextIDs.contains(contextID)) {
-                continue;
-            }
-            List<Integer> contextsInSchema = Arrays.asList(Autoboxing.i2I(databaseService.getContextsInSameSchema(contextID)));
-            UpdateStatus status = updater.getStatus(contextID);
+        Set<Integer> upToDateContextIDs = new HashSet<Integer>();
+        int numOfUnUpdatedContexts = 0;
+        for (List<Integer> contextsInSchema : schemaAssociations.values()) {
+            UpdateStatus status = updater.getStatus(contextsInSchema.get(0).intValue());
             if (status.needsBackgroundUpdates() || status.needsBlockingUpdates() || status.backgroundUpdatesRunning() || status.blockingUpdatesRunning()) {
-                unUpdatedContextIDs.addAll(contextsInSchema);
-                unUpdatedContextIDs.add(contextID);
+                numOfUnUpdatedContexts += contextsInSchema.size();
             } else {
                 upToDateContextIDs.addAll(contextsInSchema);
-                upToDateContextIDs.add(contextID);
             }
         }
-        return new ArrayList<Integer>(upToDateContextIDs);
+        return new EligibleContextsResult(new ArrayList<Integer>(upToDateContextIDs), numOfUnUpdatedContexts);
+    }
+
+    private static class EligibleContextsResult {
+        final List<Integer> upToDateContextIDs;
+        final int numOfUnUpdatedContexts;
+
+        EligibleContextsResult(List<Integer> upToDateContextIDs, int numOfUnUpdatedContexts) {
+            super();
+            this.upToDateContextIDs = upToDateContextIDs;
+            this.numOfUnUpdatedContexts = numOfUnUpdatedContexts;
+        }
     }
 
 }

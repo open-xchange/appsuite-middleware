@@ -66,6 +66,8 @@ public interface OXAdminPoolInterface {
 
     Connection getReadConnectionForConfigDB() throws PoolException;
 
+    Connection getWriteConnectionForConfigDBNoTimeout() throws PoolException;
+
     Connection getConnectionForContext(int contextId) throws PoolException;
 
     Connection getConnectionForContextNoTimeout(int contextId) throws PoolException;
@@ -78,6 +80,8 @@ public interface OXAdminPoolInterface {
     boolean pushWriteConnectionForConfigDB(Connection con) throws PoolException;
 
     boolean pushReadConnectionForConfigDB(Connection con) throws PoolException;
+
+    boolean pushWriteConnectionForConfigDBNoTimeout(Connection con) throws PoolException;
 
     boolean pushConnectionForContext(int contextId, Connection con) throws PoolException;
 
@@ -99,7 +103,7 @@ public interface OXAdminPoolInterface {
 
     int[] getContextInSchema(Connection con, int poolId, String schema) throws PoolException;
 
-    int[] listContexts(int poolId) throws PoolException;
+    int[] listContexts(int poolId, int offset, int length) throws PoolException;
 
     int getWritePool(int contextId) throws PoolException;
 
@@ -118,5 +122,17 @@ public interface OXAdminPoolInterface {
      */
     Map<String, Integer> getContextCountPerSchema(Connection con, int poolId, int maxContexts) throws PoolException;
 
+    /**
+     * Acquires a global lock for specified database
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * <b>Note</b>: Given connection is required to be in transaction mode.
+     * </div>
+     * <p>
+     *
+     * @param con The connection (in transaction mode)
+     * @param writePoolId The identifier of the (read-write) database for which to acquire a lock
+     * @throws PoolException If lock cannot be acquired
+     */
     void lock(Connection con, int writePoolId) throws PoolException;
 }

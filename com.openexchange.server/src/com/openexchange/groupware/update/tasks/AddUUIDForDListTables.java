@@ -50,7 +50,6 @@
 package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -60,7 +59,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.ProgressState;
@@ -88,24 +86,29 @@ public class AddUUIDForDListTables extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        int ctxId = params.getContextId();
         ProgressState progress = params.getProgressState();
-        Connection con = Database.getNoTimeout(ctxId, true);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
             startTransaction(con);
+            rollback = true;
+
             progress.setTotal(getTotalRows(con));
             Tools.checkAndAddColumns(con, TABLE, new Column("uuid", "BINARY(16) DEFAULT NULL"));
             fillUUIDs(con, TABLE, progress);
 
             Tools.checkAndAddColumns(con, DEL_TABLE, new Column("uuid", "BINARY(16) DEFAULT NULL"));
             fillUUIDs(con, DEL_TABLE, progress);
+
             con.commit();
+            rollback = false;
         } catch (SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                DBUtils.rollback(con);
+            }
             DBUtils.autocommit(con);
-            Database.backNoTimeout(ctxId, true, con);
         }
     }
 

@@ -60,6 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
@@ -68,6 +69,7 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParametersUtility;
+import com.openexchange.folderstorage.UpdateOperation;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
@@ -75,6 +77,7 @@ import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.folderstorage.tx.TransactionManager;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
@@ -174,6 +177,8 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
              * Load storage folder
              */
             final Folder storageFolder = storage.getFolder(treeId, folderId, storageParameters);
+            boolean ignoreCase = supportsCaseInsensitive(storageFolder);
+            boolean supportsAutoRename = supportsAutoRename(storageFolder);
             final String oldParentId = storageFolder.getParentID();
 
             final boolean move;
@@ -186,12 +191,13 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         folder.setName(storageFolder.getName());
                         checkForReservedName = false;
                     }
-                    if (null != checkForEqualName(treeId, newParentId, folder, storageFolder.getContentType(), true)) {
+                    if (false == supportsAutoRename && null != checkForEqualName(treeId, newParentId, folder, storageFolder.getContentType(), CheckOptions.builder().allowAutorename(true).ignoreCase(ignoreCase).build())) {
                         throw FolderExceptionErrorMessage.EQUAL_NAME.create(folder.getName(), getFolderNameSave(storage, newParentId), treeId);
                     }
-                    if (checkForReservedName && !folder.getName().equals(storageFolder.getName()) && null != checkForReservedName(treeId, newParentId, folder, storageFolder.getContentType(), true)) {
+                    if (checkForReservedName && !folder.getName().equals(storageFolder.getName()) && null != checkForReservedName(treeId, newParentId, folder, storageFolder.getContentType(), CheckOptions.builder().allowAutorename(true).ignoreCase(ignoreCase).build())) {
                         throw FolderExceptionErrorMessage.RESERVED_NAME.create(folder.getName());
                     }
+                    UpdateOperation.markAsMove(storageParameters);
                 }
             }
 
@@ -200,16 +206,14 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 final String newName = folder.getName();
                 rename = (null != newName && !newName.equals(storageFolder.getName()));
                 if (rename && false == move) {
-                    if (null != checkForEqualName(treeId, storageFolder.getParentID(), folder, storageFolder.getContentType(), false)) {
-                        throw FolderExceptionErrorMessage.EQUAL_NAME.create(folder.getName(), getFolderNameSave(storage, storageFolder.getParentID()), treeId);
-                    }
-                    if (null != checkForReservedName(treeId, storageFolder.getParentID(), folder, storageFolder.getContentType(), false)) {
+                    if (null != checkForReservedName(treeId, storageFolder.getParentID(), folder, storageFolder.getContentType(), CheckOptions.builder().allowAutorename(false).ignoreCase(ignoreCase).build())) {
                         throw FolderExceptionErrorMessage.RESERVED_NAME.create(folder.getName());
                     }
                     if (InfostoreContentType.getInstance().equals(storageFolder.getContentType()) && Strings.isNotEmpty(newName)) {
                         FilenameValidationUtils.checkCharacters(newName);
                         FilenameValidationUtils.checkName(newName);
                     }
+                    UpdateOperation.markAsRename(storageParameters);
                 }
             }
             boolean changeSubscription = false;
@@ -283,12 +287,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         realStorage = newRealParentStorage;
                     }
                     /*
-                     * Check for a folder with the same name below parent
-                     */
-                    if (equallyNamedSibling(folder.getName(), treeId, newParentId, openedStorages)) {
-                        throw FolderExceptionErrorMessage.EQUAL_NAME.create(folder.getName(), getFolderNameSave(newRealParentStorage, newParentId), treeId);
-                    }
-                    /*
                      * Check for forbidden public mail folder
                      */
                     if (CONTENT_TYPE_MAIL.equals(storageFolder.getContentType().toString())) {
@@ -317,15 +315,12 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     MovePerformer movePerformer = newMovePerformer();
                     movePerformer.setStorageParameters(storageParameters);
                     if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
-                        movePerformer.doMoveReal(folder, storage, realParentStorage, newRealParentStorage);
+                        movePerformer.doMoveReal(folder, storage, realParentStorage, newRealParentStorage, storageFolder);
                     } else {
                         movePerformer.doMoveVirtual(folder, storage, realStorage, realParentStorage, newRealParentStorage, storageFolder, openedStorages);
                     }
                 } else if (rename) {
                     folder.setParentID(oldParentId);
-                    if (equallyNamedSibling(folder.getName(), treeId, oldParentId, openedStorages)) {
-                        throw FolderExceptionErrorMessage.EQUAL_NAME.create(folder.getName(), oldParentId, treeId);
-                    }
 
                     /*
                      * Perform rename either in real or in virtual storage
@@ -362,6 +357,14 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                          */
                         decorator.put("cascadePermissions", Boolean.FALSE);
                     }
+
+                    /*
+                     * Properly inherit permissions
+                     */
+                    if ((storageFolder.getContentType().getModule() == FolderObject.INFOSTORE && folder.getContentType() == null) || (folder.getContentType() != null && folder.getContentType().getModule() == FolderObject.INFOSTORE)) {
+                        addParentLinkPermission(folder, oldParentId, storage);
+                    }
+
                     /*
                      * Change permissions either in real or in virtual storage
                      */
@@ -516,6 +519,42 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
     } // End of doUpdate()
 
     /**
+     * Add missing permissions to the folder which must be inherited from the parent folder
+     *
+     * @param folder The folder to check
+     * @param newRealParentStorage The storage of the folder
+     * @return A list of {@link Permission}s
+     * @throws OXException
+     */
+    private void addParentLinkPermission(Folder folder, String parentId, FolderStorage newRealParentStorage) throws OXException {
+        List<Permission> result = new ArrayList<>(folder.getPermissions().length);
+        for (Permission perm : folder.getPermissions()) {
+            result.add(perm);
+        }
+        Folder parent = newRealParentStorage.getFolder(folder.getTreeID(), parentId, storageParameters);
+        for (Permission perm : parent.getPermissions()) {
+            if (perm.getType() == FolderPermissionType.INHERITED || perm.getType() == FolderPermissionType.LEGATOR) {
+                boolean exists = false;
+                for (Permission tmp : folder.getPermissions()) {
+                    if (tmp.getEntity() == perm.getEntity() && tmp.isGroup() == perm.isGroup() && tmp.getType() == FolderPermissionType.INHERITED) {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (!exists) {
+                    Permission cloned = (Permission) perm.clone();
+                    cloned.setType(FolderPermissionType.INHERITED);
+                    if(perm.getType() == FolderPermissionType.LEGATOR) {
+                        cloned.setPermissionLegator(parentId);
+                    }
+                    result.add(cloned);
+                }
+            }
+        }
+        folder.setPermissions(result.toArray(new Permission[result.size()]));
+    }
+
+    /**
      * Gather all sub-folders that the current user has administrative rights.
      *
      * @param folder The folder
@@ -590,10 +629,8 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             virtualStorage.updateFolder(folder, storageParameters);
         } else {
             checkOpenedStorage(realStorage, openedStorages);
-            final Folder realFolder = realStorage.getFolder(FolderStorage.REAL_TREE_ID, folder.getID(), storageParameters);
-            final Folder clone4Real = (Folder) folder.clone();
+            Folder clone4Real = (Folder) folder.clone();
             clone4Real.setParentID(null);
-            clone4Real.setName(nonExistingName(clone4Real.getName(), FolderStorage.REAL_TREE_ID, realFolder.getParentID(), openedStorages));
             realStorage.updateFolder(clone4Real, storageParameters);
             // Update name in virtual tree
             folder.setNewID(clone4Real.getID());

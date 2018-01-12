@@ -10,6 +10,9 @@
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/gblQueryParamMailFolder"
       - $ref: "#/parameters/gblQueryParamMailColumns"
+      - $ref: "#/parameters/gblQueryParamMailHeaders"
+      - $ref: "#/parameters/gblQueryParamMailUnseen"
+      - $ref: "#/parameters/gblQueryParamMailDeleted"
       - in: query
         name: sort
         type: string
@@ -23,7 +26,7 @@
       - in: body
         name: body
         description: |
-          A JSON object describing the search term as introducted in [Advanced search](https://documentation.open-xchange.com/latest/middleware/http_api/5_advanced_search.html). Example:
+          A JSON object describing the search term as described in [Advanced search](#advanced-search). Example:
           `{"filter":["and",["=", {"field":"to"},"test1@example.com"],["not",["=",{"attachment":"name"},"document.pdf"]]]}`
           which represents 'to = "test1@example.com" AND NOT from = "test2@example.com"'. Available field names are
           `from`, `to`, `cc`, `bcc`, `subject`, `received_date`, `sent_date`, `size`, `flags`, `content`, `content_type`, `disp`, and `priority`.

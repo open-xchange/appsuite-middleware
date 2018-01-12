@@ -70,6 +70,7 @@ import org.glassfish.grizzly.http.HttpContent;
 import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.HttpResponsePacket;
 import org.glassfish.grizzly.http.Protocol;
+import org.glassfish.grizzly.http.util.HttpStatus;
 import org.glassfish.grizzly.http.util.Parameters;
 import org.glassfish.grizzly.websockets.DataFrame;
 import org.glassfish.grizzly.websockets.HandshakeException;
@@ -408,23 +409,31 @@ public abstract class AbstractGrizzlyWebSocketApplication<S extends SessionBound
     }
 
     /**
-     * Handles the specified <code>HandshakeException</code>.
+     * Handles the specified <code>HandshakeException</code>, which describes the error, occurred during the WebSocket handshake phase
      *
      * @param e The exception to handle
      * @param handler The associated protocol handler
      * @param requestPacket The request package
      */
     protected void handleHandshakeException(HandshakeException e, ProtocolHandler handler, HttpRequestPacket requestPacket) {
+        LOGGER.debug("Failed to establish Web Socket connection", e);
         FilterChainContext ctx = handler.getFilterChainContext();
         HttpResponsePacket response = requestPacket.getResponse();
         response.setProtocol(Protocol.HTTP_1_1);
-        response.setStatus(401);
-        response.setReasonPhrase("Authorization Required");
+
+        HttpStatus httpStatus = HttpStatus.getHttpStatus(e.getCode());
+        if (null == httpStatus) {
+            // No such HTTP status known...
+            httpStatus = HttpStatus.BAD_REQUEST_400;
+        }
+        response.setStatus(httpStatus.getStatusCode());
+        response.setReasonPhrase(httpStatus.getReasonPhrase());
+
         ctx.write(HttpContent.builder(response).build());
     }
 
     /**
-     * Handles the specified <code>HandshakeException</code>.
+     * Handles the specified <code>WebSocketException</code>.
      *
      * @param e The exception to handle
      * @param handler The associated protocol handler

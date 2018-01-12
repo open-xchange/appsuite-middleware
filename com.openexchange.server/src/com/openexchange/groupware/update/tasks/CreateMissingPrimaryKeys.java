@@ -51,7 +51,6 @@ package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -59,7 +58,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -510,10 +508,12 @@ public final class CreateMissingPrimaryKeys extends UpdateTaskAdapter {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        final int contextId = params.getContextId();
-        final Connection con = Database.getNoTimeout(contextId, true);
+        Connection con = params.getConnection();
+        boolean rollback = false;
         try {
             DBUtils.startTransaction(con);
+            rollback = true;
+
             /*
              * Gather tasks to perform
              */
@@ -527,19 +527,22 @@ public final class CreateMissingPrimaryKeys extends UpdateTaskAdapter {
                     log.warn("ALTER TABLE failed with: >>{}<<\nStatement: >>{}<<", e.getMessage(), task);
                 }
             }
+
             con.commit();
+            rollback = false;
+        } catch (final OXException e) {
+            throw e;
         } catch (final SQLException e) {
-            rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (final RuntimeException e) {
-            rollback(con);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } catch (final Exception e) {
-            rollback(con);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                DBUtils.rollback(con);
+            }
             autocommit(con);
-            Database.backNoTimeout(contextId, true, con);
         }
     }
 }

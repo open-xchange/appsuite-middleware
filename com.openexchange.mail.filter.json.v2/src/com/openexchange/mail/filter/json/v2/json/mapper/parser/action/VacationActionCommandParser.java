@@ -71,7 +71,6 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSON
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.exceptions.CommandParserExceptionCodes;
 import com.openexchange.mail.filter.json.v2.mapper.ArgumentUtil;
 import com.openexchange.mail.json.parser.MessageParser;
-import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -132,7 +131,7 @@ public class VacationActionCommandParser extends AbstractActionCommandParser {
                 // Get string
                 String fromStr = jsonObject.getString(fromFieldName);
                 try {
-                    new QuotedInternetAddress(fromStr, strict);
+                    InternetAddressUtil.validateInternetAddress(fromStr, strict);
                     from = fromStr;
                 } catch (AddressException e) {
                     throw OXJSONExceptionCodes.INVALID_VALUE.create(from, VacationActionField.from.getFieldName());
@@ -190,7 +189,7 @@ public class VacationActionCommandParser extends AbstractActionCommandParser {
      * @throws OXException if the string cannot be decoded
      */
     private String encode(String string, VacationActionField field) throws OXException {
-        if (CharMatcher.ASCII.matchesAllOf(string)) {
+        if (CharMatcher.ascii().matchesAllOf(string)) {
             return string;
         }
         try {

@@ -50,6 +50,7 @@
 package com.openexchange.context;
 
 import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.osgi.annotation.SingletonService;
@@ -145,5 +146,30 @@ public interface ContextService {
      *             if reading the contexts fails.
      */
     List<Integer> getAllContextIds() throws OXException;
+
+    /**
+     * Gets a listing of exactly one context per database schema
+     *
+     * @return A listing of distinct contexts per schema
+     * @throws OXException If contexts cannot be returned
+     */
+    List<Integer> getDistinctContextsPerSchema() throws OXException;
+
+    /**
+     * Groups all context identifiers by their schema associations.
+     *
+     * @return A mapping of a schema to contexts residing in that schema
+     * @throws OXException If the mapping cannot be returned
+     */
+    Map<PoolAndSchema, List<Integer>> getSchemaAssociations() throws OXException;
+
+    /**
+     * Groups specified context identifiers by their schema associations.
+     *
+     * @param contextIds The context identifiers to group by schema association
+     * @return A mapping of a schema to contexts residing in that schema taken from specified context identifiers
+     * @throws OXException If the mapping cannot be returned
+     */
+    Map<PoolAndSchema, List<Integer>> getSchemaAssociationsFor(List<Integer> contextIds) throws OXException;
 
 }

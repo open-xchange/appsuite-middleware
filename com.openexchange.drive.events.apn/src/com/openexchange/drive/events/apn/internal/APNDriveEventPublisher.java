@@ -51,23 +51,23 @@ package com.openexchange.drive.events.apn.internal;
 
 import java.util.ArrayList;
 import java.util.List;
-import javapns.Push;
-import javapns.communication.exceptions.CommunicationException;
-import javapns.communication.exceptions.KeystoreException;
-import javapns.devices.Device;
-import javapns.devices.exceptions.InvalidDeviceTokenFormatException;
-import javapns.json.JSONException;
-import javapns.json.JSONObject;
-import javapns.notification.PayloadPerDevice;
-import javapns.notification.PushNotificationPayload;
-import javapns.notification.PushedNotification;
-import javapns.notification.PushedNotifications;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.events.DriveEventPublisher;
 import com.openexchange.drive.events.apn.APNAccess;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.events.subscribe.Subscription;
 import com.openexchange.exception.OXException;
+import javapns.Push;
+import javapns.communication.exceptions.CommunicationException;
+import javapns.communication.exceptions.KeystoreException;
+import javapns.devices.Device;
+import javapns.devices.exceptions.InvalidDeviceTokenFormatException;
+import javapns.notification.PayloadPerDevice;
+import javapns.notification.PushNotificationPayload;
+import javapns.notification.PushedNotification;
+import javapns.notification.PushedNotifications;
 
 /**
  * {@link APNDriveEventPublisher}

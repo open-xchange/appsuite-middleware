@@ -49,9 +49,7 @@
 
 package com.openexchange.mailfilter.json.ajax.actions;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -60,8 +58,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.JSONMatchType;
 import com.openexchange.jsieve.commands.Rule;
@@ -207,7 +205,7 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
         return jsonObject;
     }
 
-    private static final Set<String> MUST_NOT_BE_EMPTY = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("values")));
+    private static final Set<String> MUST_NOT_BE_EMPTY = ImmutableSet.of("values");
 
     private void checkJsonValue(final JSONValue jValue, final String name, final JSONValue parent) throws OXException {
         if (null != jValue) {
@@ -296,12 +294,15 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
     private JSONArray getActionArray(final Set<String> capabilities) {
         final JSONArray actionarray = new JSONArray();
         for (final ActionCommand.Commands command : ActionCommand.Commands.values()) {
-            final String required = command.getRequired();
-            if (Strings.isEmpty(required)) {
+            final List<String> required = command.getRequired();
+            if (required.isEmpty()) {
                 actionarray.put(command.getJsonName());
             } else {
-                if (capabilities.contains(required)) {
-                    actionarray.put(command.getJsonName());
+                for (final String req : required) {
+                    if (capabilities.contains(req)) {
+                        actionarray.put(command.getJsonName());
+                        break;
+                    }
                 }
             }
         }
@@ -324,30 +325,48 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
 
     private JSONArray getTestArray(final Set<String> capabilities) throws JSONException {
         TestCommandRegistry testCommandRegistry = Services.getService(TestCommandRegistry.class);
-        final JSONArray testarray = new JSONArray();
-        for (final ITestCommand command : testCommandRegistry.getCommands()) {
-            final JSONObject object = new JSONObject();
-            if (null == command.getRequired() || capabilities.contains(command.getRequired())) {
-                final JSONArray comparison = new JSONArray();
-                object.put("test", command.getCommandName());
-                final List<JSONMatchType> jsonMatchTypes = command.getJsonMatchTypes();
+        Collection<ITestCommand> commands = testCommandRegistry.getCommands();
+        JSONArray jTestArray = new JSONArray(commands.size());
+        for (ITestCommand command : commands) {
+            if (isSupported(command, capabilities)) {
+                JSONObject jTestObject = new JSONObject(4);
+                jTestObject.put("test", command.getCommandName());
+                List<JSONMatchType> jsonMatchTypes = command.getJsonMatchTypes();
+                JSONArray jComparisons;
                 if (null != jsonMatchTypes) {
-                    for (final JSONMatchType matchtype : jsonMatchTypes) {
-                        final String value = matchtype.getRequired();
-                        if (matchtype.getVersionRequirement()<=1 && ("".equals(value) || capabilities.contains(value))) {
-                            comparison.put(matchtype.getJsonName());
+                    jComparisons = new JSONArray(jsonMatchTypes.size());
+                    for (JSONMatchType matchtype : jsonMatchTypes) {
+                        String value = matchtype.getRequired();
+                        if (matchtype.getVersionRequirement() <= 1 && ("".equals(value) || capabilities.contains(value))) {
+                            jComparisons.put(matchtype.getJsonName());
                         }
                     }
+                } else {
+                    jComparisons = JSONArray.EMPTY_ARRAY;
                 }
-                object.put("comparison", comparison);
-                testarray.put(object);
+                jTestObject.put("comparison", jComparisons);
+                jTestArray.put(jTestObject);
             }
         }
-        return testarray;
+        return jTestArray;
+    }
+
+    private boolean isSupported(ITestCommand command, Set<String> capabilities) {
+        List<String> requiredCapabilities = command.getRequired();
+        if (null == requiredCapabilities || requiredCapabilities.isEmpty()) {
+            return true;
+        }
+
+        for (String requiredCapability : requiredCapabilities) {
+            if (false == capabilities.contains(requiredCapability)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private Integer getUniqueId(final JSONObject json) throws OXException {
-        if (json.has("id") && !json.isNull("id")) {
+        if (json.hasAndNotNull("id")) {
             try {
                 return Integer.valueOf(json.getInt("id"));
             } catch (final JSONException e) {

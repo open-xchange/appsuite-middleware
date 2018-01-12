@@ -9,4 +9,4 @@ With v7.10.0 the Open-Xchange Server offers the user a way to check what other s
 This feature is included in ``open-xchange-core`` package. Thus, no additional packages are required being installed.
 
 # Configuration
-The session management feature is active by default. It is possible to enable/disable a global session lookup in session storage and to define a client blacklist, to exclude clients from session listing (e.g. administrative sessions created by monitoring or other tools). The new properties are explained in the [configuration section](http://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#mode=features&feature=Sessionmanagement).
+The session management feature is active by default. It is possible to enable/disable a global session lookup in session storage and to define a client blacklist, to exclude clients from session listing (e.g. administrative sessions created by monitoring or other tools). The new properties are explained in the [configuration section](/components/middleware/config{{ site.baseurl }}/index.html#mode=features&feature=Sessionmanagement).

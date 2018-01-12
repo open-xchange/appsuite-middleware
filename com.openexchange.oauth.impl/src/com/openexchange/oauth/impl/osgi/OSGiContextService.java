@@ -50,7 +50,9 @@
 package com.openexchange.oauth.impl.osgi;
 
 import java.util.List;
+import java.util.Map;
 import com.openexchange.context.ContextService;
+import com.openexchange.context.PoolAndSchema;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
@@ -76,6 +78,21 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
     @Override
     public List<Integer> getAllContextIds() throws OXException {
         return getService().getAllContextIds();
+    }
+
+    @Override
+    public List<Integer> getDistinctContextsPerSchema() throws OXException {
+        return getService().getDistinctContextsPerSchema();
+    }
+
+    @Override
+    public Map<PoolAndSchema, List<Integer>> getSchemaAssociations() throws OXException {
+        return getService().getSchemaAssociations();
+    }
+
+    @Override
+    public Map<PoolAndSchema, List<Integer>> getSchemaAssociationsFor(List<Integer> contextIds) throws OXException {
+        return getService().getSchemaAssociationsFor(contextIds);
     }
 
     @Override

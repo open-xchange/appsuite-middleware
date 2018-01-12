@@ -431,7 +431,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             // Initialize mover instance
-            FilestoreDataMover fsdm = FilestoreDataMover.newUserMover(oxu.getFilestore(srcStore_id), dstFilestore, storageUser, ctx);
+            FilestoreDataMover fsdm = FilestoreDataMover.newUserMover(oxu.getFilestore(srcStore_id, false), dstFilestore, storageUser, ctx);
 
             // Enable user after processing
             fsdm.addPostProcessTask(new PostProcessTask() {

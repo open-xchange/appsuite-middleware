@@ -82,13 +82,6 @@ public class PingServlet extends HttpServlet {
         this.output = page.toString().getBytes(com.openexchange.java.Charsets.UTF_8);
     }
 
-    @Override
-    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        // Create a new HttpSession if it's missing
-        req.getSession(true);
-        super.service(req, resp);
-    }
-
     /**
      * {@inheritDoc}
      */

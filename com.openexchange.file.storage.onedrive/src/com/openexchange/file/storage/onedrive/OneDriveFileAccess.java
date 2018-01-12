@@ -62,6 +62,7 @@ import java.util.Map;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -72,7 +73,6 @@ import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.InputStreamBody;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
@@ -86,6 +86,8 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageAutoRenameFoldersAccess;
+import com.openexchange.file.storage.FileStorageCaseInsensitiveAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -115,9 +117,10 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implements ThumbnailAware, FileStorageSequenceNumberProvider {
+public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implements ThumbnailAware, FileStorageSequenceNumberProvider, FileStorageCaseInsensitiveAccess, FileStorageAutoRenameFoldersAccess {
 
     private final OneDriveAccountAccess accountAccess;
+    private final OneDriveFolderAccess folderAccess;
     final int userId;
 
     /**
@@ -128,10 +131,21 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
      * @param session The session The account access
      * @param accountAccess The account access
      */
-    public OneDriveFileAccess(OneDriveOAuthAccess oneDriveAccess, FileStorageAccount account, Session session, OneDriveAccountAccess accountAccess) {
+    public OneDriveFileAccess(OneDriveOAuthAccess oneDriveAccess, FileStorageAccount account, Session session, OneDriveAccountAccess accountAccess, OneDriveFolderAccess folderAccess) {
         super(oneDriveAccess, account, session);
         this.accountAccess = accountAccess;
+        this.folderAccess = folderAccess;
         this.userId = session.getUserId();
+    }
+
+    @Override
+    public String createFolder(FileStorageFolder toCreate, boolean autoRename) throws OXException {
+        return folderAccess.createFolder(toCreate, autoRename);
+    }
+
+    @Override
+    public String moveFolder(String folderId, String newParentId, String newName, boolean autoRename) throws OXException {
+        return folderAccess.moveFolder(folderId, newParentId, newName, autoRename);
     }
 
     @Override
@@ -189,7 +203,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         return perform(new OneDriveClosure<File>() {
 
             @Override
-            protected File doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+            protected File doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpGet request = null;
                 try {
                     request = new HttpGet(buildUri(id, initiateQueryString()));
@@ -216,7 +230,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         return perform(new OneDriveClosure<IDTuple>() {
 
             @Override
-            protected IDTuple doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+            protected IDTuple doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpPut request = null;
                 try {
                     if (FileStorageFileAccess.NEW == file.getId()) {
@@ -281,7 +295,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         IDTuple result = perform(new OneDriveClosure<IDTuple>() {
 
             @Override
-            protected IDTuple doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+            protected IDTuple doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpCopy request = null;
                 try {
                     request = new HttpCopy(buildUri(source.getId(), initiateQueryString()));
@@ -315,7 +329,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         IDTuple result = perform(new OneDriveClosure<IDTuple>() {
 
             @Override
-            protected IDTuple doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+            protected IDTuple doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpMove request = null;
                 try {
                     request = new HttpMove(buildUri(source.getId(), initiateQueryString()));
@@ -346,7 +360,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         return perform(new OneDriveClosure<InputStream>() {
 
             @Override
-            protected InputStream doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+            protected InputStream doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpGet request = null;
                 boolean error = true;
                 try {
@@ -373,7 +387,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         return perform(new OneDriveClosure<InputStream>() {
 
             @Override
-            protected InputStream doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+            protected InputStream doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpGet request = null;
                 boolean error = true;
                 try {
@@ -423,7 +437,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         return perform(new OneDriveClosure<IDTuple>() {
 
             @Override
-            protected IDTuple doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+            protected IDTuple doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 try {
                     List<NameValuePair> queryParameters = initiateQueryString();
@@ -490,7 +504,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         perform(new OneDriveClosure<Void>() {
 
             @Override
-            protected Void doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+            protected Void doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 try {
                     String fid = toOneDriveFolderId(folderId);
@@ -551,7 +565,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         return perform(new OneDriveClosure<List<IDTuple>>() {
 
             @Override
-            protected List<IDTuple> doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+            protected List<IDTuple> doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 try {
                     for (IDTuple idTuple : ids) {
@@ -582,7 +596,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         return perform(new OneDriveClosure<TimedResult<File>>() {
 
             @Override
-            protected TimedResult<File> doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+            protected TimedResult<File> doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 try {
                     String fid = toOneDriveFolderId(folderId);
@@ -633,7 +647,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         return perform(new OneDriveClosure<TimedResult<File>>() {
 
             @Override
-            protected TimedResult<File> doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+            protected TimedResult<File> doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 try {
                     String fid = toOneDriveFolderId(folderId);
@@ -683,7 +697,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         return perform(new OneDriveClosure<TimedResult<File>>() {
 
             @Override
-            protected TimedResult<File> doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+            protected TimedResult<File> doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 try {
                     List<File> files = new LinkedList<File>();
@@ -739,7 +753,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
         return perform(new OneDriveClosure<SearchIterator<File>>() {
 
             @Override
-            protected SearchIterator<File> doPerform(DefaultHttpClient httpClient) throws OXException, JSONException, IOException {
+            protected SearchIterator<File> doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 try {
                     List<File> files = new LinkedList<File>();

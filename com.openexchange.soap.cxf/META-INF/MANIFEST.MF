@@ -2,10 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: SOAP Plugin based on Apache CXF
 Bundle-SymbolicName: com.openexchange.soap.cxf
-Bundle-Version: 7.8.4
+Bundle-Version: 7.10.0
 Bundle-Activator: com.openexchange.soap.cxf.osgi.CXFActivator
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.ctc.wstx.api;version="4.2.0",
  com.ctc.wstx.cfg;version="4.2.0",
  com.ctc.wstx.dom;version="4.2.0",
@@ -145,6 +145,7 @@ Bundle-ClassPath: .,
  lib/neethi-3.0.2.jar
 Export-Package: com.openexchange.soap.cxf,
  org.apache.cxf,
+ org.apache.cxf.annotations,
  org.apache.cxf.databinding,
  org.apache.cxf.headers,
  org.apache.cxf.jaxb

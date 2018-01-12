@@ -56,13 +56,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCacheExtended;
+import com.openexchange.database.Databases;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadRenamer;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * Executes some SQL statements searching for context identifier with a separate thread.
@@ -77,6 +78,13 @@ public class ContextSearcher extends AbstractTask<Collection<Integer>> {
     private final String sql;
     private final String pattern;
 
+    /**
+     * Initializes a new {@link ContextSearcher}.
+     *
+     * @param cache The cache reference used to acquire/release a connection
+     * @param sql The SQL statement to execute
+     * @param pattern The search pattern to use
+     */
     public ContextSearcher(AdminCacheExtended cache, String sql, String pattern) {
         super();
         this.cache = cache;
@@ -91,32 +99,46 @@ public class ContextSearcher extends AbstractTask<Collection<Integer>> {
 
     @Override
     public Collection<Integer> call() throws StorageException {
-        final Connection con;
-        try {
-            con = cache.getReadConnectionForConfigDB();
-        } catch (PoolException e) {
-            throw new StorageException(e);
-        }
+        Connection con = acquireConnection();
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        List<Integer> cids = new ArrayList<Integer>();
         try {
             stmt = con.prepareStatement(sql);
-            stmt.setString(1, pattern);
-            rs = stmt.executeQuery();
-            while (rs.next()) {
-                cids.add(I(rs.getInt(1)));
+            if (null != pattern) {
+                stmt.setString(1, pattern);
             }
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                return Collections.emptyList();
+            }
+
+            List<Integer> cids = new ArrayList<>();
+            do {
+                cids.add(I(rs.getInt(1)));
+            } while (rs.next());
+            return cids;
         } catch (SQLException e) {
             throw new StorageException(e);
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
-            try {
-                cache.pushReadConnectionForConfigDB(con);
-            } catch (PoolException e1) {
-                LOG.error("", e1);
-            }
+            Databases.closeSQLStuff(rs, stmt);
+            releaseConnection(con);
         }
-        return cids;
     }
+
+    private void releaseConnection(Connection con) {
+        try {
+            cache.pushReadConnectionForConfigDB(con);
+        } catch (Exception x) {
+            LOG.error("Failed to push ConfigDB connection back to pool.", x);
+        }
+    }
+
+    private Connection acquireConnection() throws StorageException {
+        try {
+            return cache.getReadConnectionForConfigDB();
+        } catch (PoolException e) {
+            throw new StorageException(e);
+        }
+    }
+
 }

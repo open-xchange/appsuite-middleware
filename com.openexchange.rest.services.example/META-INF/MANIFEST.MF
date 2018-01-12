@@ -5,7 +5,7 @@ Bundle-SymbolicName: com.openexchange.rest.services.example
 Bundle-Version: 7.6.0
 Bundle-Activator: com.openexchange.rest.services.example.osgi.Activator
 Bundle-Vendor: OX Software GmbH
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: 
  com.openexchange.ajax.requesthandler,
  com.openexchange.annotation,

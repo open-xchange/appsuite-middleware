@@ -59,6 +59,7 @@ import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.capabilities.DependentCapabilityChecker;
+import com.openexchange.cluster.timer.ClusterTimerService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -80,7 +81,10 @@ import com.openexchange.mail.json.compose.share.internal.MessageGeneratorRegistr
 import com.openexchange.mail.json.compose.share.internal.ShareLinkGeneratorRegistry;
 import com.openexchange.mail.json.compose.share.internal.ShareLinkGeneratorRegistryImpl;
 import com.openexchange.mail.json.compose.share.settings.AbstractShareComposeSetting;
+import com.openexchange.mail.json.compose.share.settings.DefaultExpiryDateShareComposeSetting;
+import com.openexchange.mail.json.compose.share.settings.DriveLimitShareComposeSetting;
 import com.openexchange.mail.json.compose.share.settings.EnabledShareComposeSetting;
+import com.openexchange.mail.json.compose.share.settings.ExpiryDatesShareComposeSetting;
 import com.openexchange.mail.json.compose.share.settings.ForceAutoDeleteShareComposeSetting;
 import com.openexchange.mail.json.compose.share.settings.NameShareComposeSetting;
 import com.openexchange.mail.json.compose.share.settings.RequiredExpirationShareComposeSetting;
@@ -94,7 +98,6 @@ import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.templating.TemplateService;
-import com.openexchange.timer.TimerService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -116,11 +119,14 @@ public class ShareComposeActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, TimerService.class, DatabaseService.class };
+        return new Class<?>[] { ConfigurationService.class, DatabaseService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        // Initialize DefaultAttachmentStorage
+        DefaultAttachmentStorage.startInstance();
+
         RankingAwareNearRegistryServiceTracker<ShareLinkGenerator> shareLinkGeneratorTracker = new RankingAwareNearRegistryServiceTracker<>(context, ShareLinkGenerator.class);
         rememberTracker(shareLinkGeneratorTracker);
 
@@ -132,6 +138,8 @@ public class ShareComposeActivator extends HousekeepingActivator {
 
         RankingAwareNearRegistryServiceTracker<EnabledChecker> enabledCheckerTracker = new RankingAwareNearRegistryServiceTracker<>(context, EnabledChecker.class);
         rememberTracker(enabledCheckerTracker);
+
+        track(ClusterTimerService.class, new DefaultAttachmentStorageStarter(context, this));
 
         // Tracker for CapabilityService that declares "publish_mail_attachments" capability
         final BundleContext context = this.context;
@@ -242,9 +250,6 @@ public class ShareComposeActivator extends HousekeepingActivator {
 
         openTrackers();
 
-        // Initialize DefaultAttachmentStorage
-        DefaultAttachmentStorage.startInstance(getService(ConfigurationService.class), getService(TimerService.class));
-
         ShareLinkGeneratorRegistryImpl shareLinkGeneratorRegistry = new ShareLinkGeneratorRegistryImpl(shareLinkGeneratorTracker);
         registerService(ShareLinkGeneratorRegistry.class, shareLinkGeneratorRegistry);
 
@@ -266,6 +271,9 @@ public class ShareComposeActivator extends HousekeepingActivator {
         registerSetting(new RequiredExpirationShareComposeSetting(handler));
         registerSetting(new ForceAutoDeleteShareComposeSetting(handler));
         registerSetting(new ThresholdShareComposeSetting(handler));
+        registerSetting(new DriveLimitShareComposeSetting(handler));
+        registerSetting(new ExpiryDatesShareComposeSetting(handler));
+        registerSetting(new DefaultExpiryDateShareComposeSetting(handler));
     }
 
     private <V> void registerSetting(AbstractShareComposeSetting<V> setting) {

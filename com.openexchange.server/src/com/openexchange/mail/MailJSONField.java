@@ -217,11 +217,13 @@ public enum MailJSONField {
     ACCOUNT_ID("account_id"),
     /**
      * The original mail ID.
+     *
      * @since v7.8.0
      */
     ORIGINAL_ID("original_id"),
     /**
      * The original folder ID
+     *
      * @since v7.8.0
      */
     ORIGINAL_FOLDER_ID("original_folder_id"),
@@ -252,9 +254,19 @@ public enum MailJSONField {
     /**
      * If the E-Mail contains encryption or signatures
      */
-    SECURITY_INFO("security_info")
-    ;
+    SECURITY_INFO("security_info"),
+    /**
+     * A message's text preview
+     *
+     * @since v7.10.0
+     */
+    TEXT_PREVIEW("text_preview"),
+    /**
+     * The message's authenticity results.
+     */
+    AUTHENTICITY("authenticity"),
 
+    ;
 
     private final String key;
 

@@ -79,6 +79,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -381,6 +382,35 @@ public final class MessageUtility {
     public static final char UNKNOWN = '\ufffd';
 
     /**
+     * The unknown character (Japanese): <code>'&#58067;'</code>
+     */
+    public static final char UNKNOWN2 = '\uE2D3';
+
+    /**
+     * Checks if given string contains an unmapped character
+     *
+     * @param str The string to check
+     * @return <code>true</code> if string contains an unmapped character; otherwise <code>false</code>
+     */
+    public static boolean containsUnknown(String str) {
+        if (null == str) {
+            return false;
+        }
+
+        return str.indexOf(UNKNOWN) >= 0 || str.indexOf(UNKNOWN2) >= 0;
+    }
+
+    /**
+     * Checks if given string does <b>not</b> contain an unmapped character
+     *
+     * @param str The string to check
+     * @return <code>true</code> if string does <b>not</b> contain an unmapped character; otherwise <code>false</code>
+     */
+    public static boolean containsNoUnknown(String str) {
+        return !containsUnknown(str);
+    }
+
+    /**
      * Reads a string from given input stream using direct buffering.
      *
      * @param streamProvider The input stream provider
@@ -429,11 +459,11 @@ public final class MessageUtility {
                 return STR_EMPTY;
             }
             String retval = new String(bytes, Charsets.forName("GB2312"));
-            if (retval.indexOf(UNKNOWN) < 0) {
+            if (containsNoUnknown(retval)) {
                 return retval;
             }
             retval = new String(bytes, Charsets.forName("GB18030"));
-            if (retval.indexOf(UNKNOWN) < 0) {
+            if (containsNoUnknown(retval)) {
                 return retval;
             }
             /*
@@ -454,12 +484,13 @@ public final class MessageUtility {
             if (bytes.length == 0) {
                 return STR_EMPTY;
             }
-            String retval = new String(bytes, Charsets.forName("cp932".equalsIgnoreCase(charset) ? "MS932" : charset));
-            if (retval.indexOf(UNKNOWN) < 0) {
-                return retval;
-            }
-            // MS932
-            return CP932EmojiMapping.getInstance().replaceIn(new String(bytes, Charsets.forName("MS932")));
+            return readShiftJis(bytes, charset);
+        }
+        if (isISO2022JP(charset)) {
+            /*
+             * Special treatment for possible ISO-2022-JP encoded stream
+             */
+            return readIso2022JpBytes(getBytesFrom(streamProvider.getInputStream(), maxSize));
         }
         return readStream0(streamProvider.getInputStream(), charset, errorOnNoContent, maxSize);
     }
@@ -513,11 +544,11 @@ public final class MessageUtility {
                 return STR_EMPTY;
             }
             String retval = new String(bytes, Charsets.forName("GB2312"));
-            if (retval.indexOf(UNKNOWN) < 0) {
+            if (containsNoUnknown(retval)) {
                 return retval;
             }
             retval = new String(bytes, Charsets.forName("GB18030"));
-            if (retval.indexOf(UNKNOWN) < 0) {
+            if (containsNoUnknown(retval)) {
                 return retval;
             }
             /*
@@ -538,14 +569,32 @@ public final class MessageUtility {
             if (bytes.length == 0) {
                 return STR_EMPTY;
             }
-            String retval = new String(bytes, Charsets.forName("cp932".equalsIgnoreCase(charset) ? "MS932" : charset));
-            if (retval.indexOf(UNKNOWN) < 0) {
-                return retval;
-            }
-            // MS932
-            return CP932EmojiMapping.getInstance().replaceIn(new String(bytes, Charsets.forName("MS932")));
+            return readShiftJis(bytes, charset);
+        }
+        if (isISO2022JP(charset)) {
+            return readIso2022JpBytes(getBytesFrom(inStream, maxSize));
         }
         return readStream0(inStream, charset, errorOnNoContent, maxSize);
+    }
+
+    /**
+     * Reads the SHIFT-JIS string from specified bytes.
+     *
+     * @param bytes The bytes to read from
+     * @param charset The indicated charset
+     * @return The SHIFT-JIS string
+     */
+    private static String readShiftJis(byte[] bytes, String charset) {
+        if (null == bytes) {
+            return null;
+        }
+
+        String retval = new String(bytes, Charsets.forName("cp932".equalsIgnoreCase(charset) ? "MS932" : charset));
+        if (containsNoUnknown(retval)) {
+            return retval;
+        }
+        // MS932
+        return CP932EmojiMapping.getInstance().replaceIn(new String(bytes, Charsets.forName("MS932")));
     }
 
     private static String readGB18030Bytes(final byte[] bytes) throws Error {
@@ -553,7 +602,7 @@ public final class MessageUtility {
             return STR_EMPTY;
         }
         final String retval = new String(bytes, Charsets.forName("GB18030"));
-        if (retval.indexOf(UNKNOWN) < 0) {
+        if (containsNoUnknown(retval)) {
             return retval;
         }
         /*
@@ -572,7 +621,7 @@ public final class MessageUtility {
             return STR_EMPTY;
         }
         final String retval = new String(bytes, Charsets.forName("big5"));
-        if (retval.indexOf(UNKNOWN) < 0) {
+        if (containsNoUnknown(retval)) {
             return retval;
         }
         /*
@@ -580,6 +629,32 @@ public final class MessageUtility {
          */
         try {
             return new String(bytes, Charsets.forName("Big5-HKSCS"));
+        } catch (final Error error) {
+            // Huh..?
+            final Throwable cause = error.getCause();
+            if ((cause instanceof java.io.CharConversionException) || (cause instanceof java.nio.charset.CharacterCodingException)) {
+                /*
+                 * Retry with auto-detected charset
+                 */
+                return new String(bytes, Charsets.forName(CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes))));
+            }
+            throw error;
+        }
+    }
+
+    private static String readIso2022JpBytes(final byte[] bytes) throws Error {
+        if (bytes.length == 0) {
+            return STR_EMPTY;
+        }
+        final String retval = new String(bytes, Charsets.forName("ISO-2022-JP"));
+        if (containsNoUnknown(retval)) {
+            return retval;
+        }
+        /*
+         * Expect the charset to be x-windows-iso2022jp
+         */
+        try {
+            return new String(bytes, Charsets.forName("x-windows-iso2022jp"));
         } catch (final Error error) {
             // Huh..?
             final Throwable cause = error.getCause();
@@ -699,6 +774,9 @@ public final class MessageUtility {
         if (isShiftJis(charset)) {
             return true;
         }
+        if (isISO2022JP(charset)) {
+            return true;
+        }
         return false;
     }
 
@@ -741,6 +819,21 @@ public final class MessageUtility {
         return GB2312.equals(com.openexchange.java.Strings.asciiLowerCase(charset));
     }
 
+    private static final Set<String> ISO_2022_JP = ImmutableSet.of("iso-2022-jp", "csjisencoding", "iso2022jp", "jis_encoding", "jis", "csISO2022JP");
+
+    /**
+     * Checks if specified charset name can be considered as ISO-2022-JP.
+     *
+     * @param charset The charset name to check
+     * @return <code>true</code> if charset name can be considered as ISO-2022-JP; otherwise <code>false</code>
+     */
+    public static boolean isISO2022JP(final String charset) {
+        if (null == charset) {
+            return false;
+        }
+        return ISO_2022_JP.contains(com.openexchange.java.Strings.asciiLowerCase(charset));
+    }
+
     private static final Set<String> SHIFT_JIS = ImmutableSet.of("shift_jis", "shift-jis", "sjis", "cp932");
 
     /**
@@ -768,6 +861,10 @@ public final class MessageUtility {
     public static byte[] getBytesFrom(InputStream input, long maxSize) throws IOException {
         if (null == input) {
             return new byte[0];
+        }
+
+        if (input instanceof UnsynchronizedByteArrayInputStream) {
+            return Streams.stream2bytes(input);
         }
 
         // Check first byte

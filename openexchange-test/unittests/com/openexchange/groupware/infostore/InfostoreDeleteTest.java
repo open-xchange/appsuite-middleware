@@ -56,7 +56,7 @@ public class InfostoreDeleteTest {
     @Test
     public void testDeleteUser() throws Exception {
         final DocumentMetadata metadata = createMetadata();
-        final DeleteEvent delEvent = new DeleteEvent(this, session.getUserId(), DeleteEvent.TYPE_USER, ContextStorage.getInstance().getContext(session.getContextId()));
+        final DeleteEvent delEvent = DeleteEvent.createDeleteEventForUserDeletion(this, session.getUserId(), ContextStorage.getInstance().getContext(session.getContextId()));
 
         Connection con = null;
         try {

@@ -56,7 +56,6 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -76,7 +75,7 @@ public class DropDuplicateEntryFromUpdateTaskTable extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        Connection con = Database.getNoTimeout(params.getContextId(), true);
+        Connection con = params.getConnection();
         boolean rb = false;
         try {
             startTransaction(con);
@@ -95,7 +94,6 @@ public class DropDuplicateEntryFromUpdateTaskTable extends UpdateTaskAdapter {
                 rollback(con);
             }
             autocommit(con);
-            Database.backNoTimeout(params.getContextId(), true, con);
         }
     }
 

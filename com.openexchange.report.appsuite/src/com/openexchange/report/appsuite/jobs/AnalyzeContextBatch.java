@@ -107,6 +107,7 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
 
     @Override
     public Integer call() throws Exception {
+        LOG.debug("Starting context processing ot one schema, for report with uuid: " + this.uuid + " and context amount: " + this.contextIds.size());
         Thread currentThread = Thread.currentThread();
         int previousPriority = currentThread.getPriority();
         currentThread.setPriority(ReportProperties.getThreadPriority());

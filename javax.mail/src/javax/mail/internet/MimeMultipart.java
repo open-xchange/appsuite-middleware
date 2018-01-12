@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -293,7 +293,8 @@ public class MimeMultipart extends Multipart {
      * boundary and creates MimeBodyParts for each part of the stream.
      *
      * @param	ds	DataSource, can be a MultipartDataSource
-     * @exception	MessagingException for failures
+     * @exception	ParseException for failures parsing the message
+     * @exception	MessagingException for other failures
      */
     public MimeMultipart(DataSource ds) throws MessagingException {
 	super();
@@ -360,6 +361,7 @@ public class MimeMultipart extends Multipart {
      *
      * @return		number of parts
      */
+    @Override
     public synchronized int getCount() throws MessagingException {
 	parse();
 	return super.getCount();
@@ -372,7 +374,8 @@ public class MimeMultipart extends Multipart {
      * @return		the Part
      * @exception       MessagingException if no such BodyPart exists
      */
-    public synchronized BodyPart getBodyPart(int index)
+    @Override
+    public synchronized BodyPart getBodyPart(int index) 
 			throws MessagingException {
 	parse();
 	return super.getBodyPart(index);
@@ -411,6 +414,7 @@ public class MimeMultipart extends Multipart {
      *			implementation does not support modification
      *			of existing values
      */
+    @Override
     public boolean removeBodyPart(BodyPart part) throws MessagingException {
 	parse();
 	return super.removeBodyPart(part);
@@ -428,6 +432,7 @@ public class MimeMultipart extends Multipart {
      *			of existing values
      * @exception	MessagingException for other failures
      */
+    @Override
     public void removeBodyPart(int index) throws MessagingException {
 	parse();
 	super.removeBodyPart(index);
@@ -443,6 +448,7 @@ public class MimeMultipart extends Multipart {
      *			of existing values
      * @exception       MessagingException for other failures
      */
+    @Override
     public synchronized void addBodyPart(BodyPart part)
 		throws MessagingException {
 	parse();
@@ -463,6 +469,7 @@ public class MimeMultipart extends Multipart {
      *			of existing values
      * @exception       MessagingException for other failures
      */
+    @Override
     public synchronized void addBodyPart(BodyPart part, int index)
 				throws MessagingException {
 	parse();
@@ -559,13 +566,24 @@ public class MimeMultipart extends Multipart {
 
 	// if there's a preamble, write it out
 	if (preamble != null) {
-	    byte[] pb = ASCIIUtility.getBytes(preamble);
+	    String p = preamble;
+	    if (!p.endsWith("\r\n")) {
+            char c = p.charAt(p.length() - 1);
+            if (c == '\n') {
+                p = p.substring(0, p.length()-1) + "\r\n";
+            } else if (c == '\r') {
+                p = p.substring(0, p.length()-1) + "\r\n";
+            } else {
+                p = p + "\r\n";
+            }
+        }
+        byte[] pb = ASCIIUtility.getBytes(p);
 	    los.write(pb);
 	    // make sure it ends with a newline
-	    if (pb.length > 0 &&
-		    !(pb[pb.length-1] == '\r' || pb[pb.length-1] == '\n')) {
+	    //if (pb.length > 0 &&
+		//    !(pb[pb.length-1] == '\r' || pb[pb.length-1] == '\n')) {
 		los.writeln();
-	    }
+	    //}
 	    // XXX - could force a blank line before start boundary
 	}
 
@@ -599,7 +617,8 @@ public class MimeMultipart extends Multipart {
      * The {@link #initializeProperties} method is called before
      * parsing the data.
      *
-     * @exception	MessagingException for failures
+     * @exception	ParseException for failures parsing the message
+     * @exception	MessagingException for other failures
      * @since	JavaMail 1.2
      */
     protected synchronized void parse() throws MessagingException {
@@ -633,12 +652,12 @@ public class MimeMultipart extends Multipart {
 	}
 	if (boundary == null && !ignoreMissingBoundaryParameter &&
 		!ignoreExistingBoundaryParameter)
-	    throw new MessagingException("Missing boundary parameter");
+	    throw new ParseException("Missing boundary parameter");
 
 	try {
 	    // Skip and save the preamble
 	    LineInputStream lin = new LineInputStream(in);
-	    StringBuffer preamblesb = null;
+	    StringBuilder preamblesb = null;
 	    String line;
 	    String lineSeparator = null;
 	    while ((line = lin.readLine()) != null) {
@@ -698,7 +717,7 @@ public class MimeMultipart extends Multipart {
 		    }
 		    // accumulate the preamble
 		    if (preamblesb == null)
-			preamblesb = new StringBuffer(line.length() + 2);
+			preamblesb = new StringBuilder(line.length() + 2);
 		    preamblesb.append(line).append(lineSeparator);
 		}
 	    }
@@ -710,7 +729,7 @@ public class MimeMultipart extends Multipart {
 		if (allowEmpty)
 		    return;
 		else
-		    throw new MessagingException("Missing start boundary");
+		    throw new ParseException("Missing start boundary");
 	    }
 
 	    // save individual boundary bytes for comparison later
@@ -762,7 +781,7 @@ public class MimeMultipart extends Multipart {
 			;
 		    if (line == null) {
 			if (!ignoreMissingEndBoundary)
-			    throw new MessagingException(
+			    throw new ParseException(
 					"missing multipart end boundary");
 			// assume there's just a missing end boundary
 			complete = false;
@@ -810,7 +829,7 @@ public class MimeMultipart extends Multipart {
 		    if (inSize < bl) {
 			// hit EOF
 			if (!ignoreMissingEndBoundary)
-			    throw new MessagingException(
+			    throw new ParseException(
 					"missing multipart end boundary");
 			if (sin != null)
 			    end = sin.getPosition();

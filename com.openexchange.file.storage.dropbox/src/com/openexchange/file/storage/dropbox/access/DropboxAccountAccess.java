@@ -151,11 +151,15 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess, Cap
         if (null == dropboxOAuthAccess) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }
-        return new DropboxFileAccess((AbstractOAuthAccess) dropboxOAuthAccess, account, session, this);
+        return new DropboxFileAccess((AbstractOAuthAccess) dropboxOAuthAccess, account, session, this, getDropboxFolderAccess());
     }
 
     @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
+        return getDropboxFolderAccess();
+    }
+
+    private DropboxFolderAccess getDropboxFolderAccess() throws OXException {
         OAuthAccess dropboxOAuthAccess = this.dropboxOAuthAccess;
         if (null == dropboxOAuthAccess) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();

@@ -84,14 +84,43 @@ public class ListContextByDatabase extends ContextAbstraction {
             successtext = nameOrIdSetInt(db.getId(), db.getName(), "database");
 
             final Credentials auth = credentialsparsing(parser);
+            boolean csv = null != parser.getOptionValue(this.csvOutputOption);
 
-            final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME);
-            final Context[] ctxs = oxctx.listByDatabase(db, auth);
+            OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME);
 
-            if (null != parser.getOptionValue(this.csvOutputOption)) {
-                precsvinfos(ctxs, parser);
+            boolean first = true;
+            int offset = 0;
+            int length = 10000;
+            Context[] ctxs;
+            for (; (ctxs = oxctx.listByDatabase(db, offset, length, auth)).length == length; offset = offset + length) {
+                if (first) {
+                    if (csv) {
+                        precsvinfos(ctxs, parser);
+                    } else {
+                        sysoutOutput(ctxs, parser);
+                    }
+                    first = false;
+                } else {
+                    if (csv) {
+                        precsvinfos(ctxs, true, parser);
+                    } else {
+                        sysoutOutput(ctxs, true, parser);
+                    }
+                }
+            }
+            if (first) {
+                if (csv) {
+                    precsvinfos(ctxs, parser);
+                } else {
+                    sysoutOutput(ctxs, parser);
+                }
+                first = false;
             } else {
-                sysoutOutput(ctxs, parser);
+                if (csv) {
+                    precsvinfos(ctxs, true, parser);
+                } else {
+                    sysoutOutput(ctxs, true, parser);
+                }
             }
 
             sysexit(0);

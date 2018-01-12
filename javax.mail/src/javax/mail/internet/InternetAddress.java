@@ -1,19 +1,19 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2016 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
  * and Distribution License("CDDL") (collectively, the "License").  You
  * may not use this file except in compliance with the License.  You can
  * obtain a copy of the License at
- * https://glassfish.dev.java.net/public/CDDL+GPL_1_1.html
- * or packager/legal/LICENSE.txt.  See the License for the specific
+ * https://oss.oracle.com/licenses/CDDL+GPL-1.1
+ * or LICENSE.txt.  See the License for the specific
  * language governing permissions and limitations under the License.
  *
  * When distributing the software, include this License Header Notice in each
- * file and include the License file at packager/legal/LICENSE.txt.
+ * file and include the License file at LICENSE.txt.
  *
  * GPL Classpath Exception:
  * Oracle designates this particular file as subject to the "Classpath"
@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.Locale;
+import java.nio.charset.StandardCharsets;
 import javax.mail.*;
 import com.sun.mail.util.PropUtil;
 
@@ -88,6 +89,9 @@ public class InternetAddress extends Address implements Cloneable {
     private static final boolean useCanonicalHostName =
 	PropUtil.getBooleanSystemProperty(
 			    "mail.mime.address.usecanonicalhostname", true);
+
+    private static final boolean allowUtf8 =
+	PropUtil.getBooleanSystemProperty("mail.mime.allowutf8", false);
 
     /**
      * Default constructor.
@@ -183,6 +187,7 @@ public class InternetAddress extends Address implements Cloneable {
      * Return a copy of this InternetAddress object.
      * @since		JavaMail 1.2
      */
+    @Override
     public Object clone() {
 	InternetAddress a = null;
 	try {
@@ -195,6 +200,7 @@ public class InternetAddress extends Address implements Cloneable {
      * Return the type of this address. The type of an InternetAddress
      * is "rfc822".
      */
+    @Override
     public String getType() {
 	return "rfc822";
     }
@@ -291,6 +297,7 @@ public class InternetAddress extends Address implements Cloneable {
      *
      * @return		possibly encoded address string
      */
+    @Override
     public String toString() {
 	String a = address == null ? "" : address;
 	if (encodedPersonal == null && personal != null)
@@ -362,8 +369,8 @@ public class InternetAddress extends Address implements Cloneable {
                 sb.append('"');
                 return sb.toString();
             } else if ((c < 040 && c != '\r' && c != '\n' && c != '\t') || 
-			c >= 0177 || rfc822phrase.indexOf(c) >= 0)
-               // These characters cause the string to be quoted
+		    (c >= 0177 && !allowUtf8) || rfc822phrase.indexOf(c) >= 0)
+		// These characters cause the string to be quoted
                 needQuoting = true;
         }
 
@@ -396,6 +403,7 @@ public class InternetAddress extends Address implements Cloneable {
     /**
      * The equality operator.
      */
+    @Override
     public boolean equals(Object a) {
 	if (!(a instanceof InternetAddress))
 	    return false;
@@ -412,6 +420,7 @@ public class InternetAddress extends Address implements Cloneable {
     /**
      * Compute a hash code for the address.
      */
+    @Override
     public int hashCode() {
 	if (address == null)
 	    return 0;
@@ -433,6 +442,22 @@ public class InternetAddress extends Address implements Cloneable {
      */
     public static String toString(Address[] addresses) {
 	return toString(addresses, 0);
+    }
+
+    /**
+     * Convert the given array of InternetAddress objects into
+     * a comma separated sequence of address strings. The
+     * resulting string contains Unicode characters. <p>
+     *
+     * @param addresses	array of InternetAddress objects
+     * @exception 	ClassCastException if any address object in the 
+     *			given array is not an InternetAddress object. Note
+     *			that this is a RuntimeException.
+     * @return		comma separated string of addresses
+     * @since		JavaMail 1.6
+     */
+    public static String toUnicodeString(Address[] addresses) {
+	return toUnicodeString(addresses, 0);
     }
 
     /**
@@ -483,6 +508,78 @@ public class InternetAddress extends Address implements Cloneable {
 	}
 
 	return sb.toString();
+    }
+
+    /**
+     * Convert the given array of InternetAddress objects into
+     * a comma separated sequence of address strings. The
+     * resulting string contains Unicode characters. <p>
+     *
+     * The 'used' parameter specifies the number of character positions
+     * already taken up in the field into which the resulting address 
+     * sequence string is to be inserted. It is used to determine the 
+     * line-break positions in the resulting address sequence string.
+     *
+     * @param addresses	array of InternetAddress objects
+     * @param used	number of character positions already used, in
+     *			the field into which the address string is to
+     *			be inserted.
+     * @exception 	ClassCastException if any address object in the 
+     *			given array is not an InternetAddress object. Note
+     *			that this is a RuntimeException.
+     * @return		comma separated string of addresses
+     * @since		JavaMail 1.6
+     */
+    /*
+     * XXX - This is exactly the same as the above, except it uses
+     *	     toUnicodeString instead of toString.
+     * XXX - Since the line length restrictions are in bytes, not characters,
+     *	     we convert all non-ASCII addresses to UTF-8 byte strings,
+     *	     which we then convert to ISO-8859-1 Strings where every
+     *	     character respresents one UTF-8 byte.  At the end we reverse
+     *	     the conversion to get back to a correct Unicode string.
+     *	     This is a hack to allow all the other character-based methods
+     *	     to work properly with UTF-8 bytes.
+     */
+    public static String toUnicodeString(Address[] addresses, int used) {
+	if (addresses == null || addresses.length == 0)
+	    return null;
+
+	StringBuilder sb = new StringBuilder();
+
+	boolean sawNonAscii = false;
+	for (int i = 0; i < addresses.length; i++) {
+	    if (i != 0) { // need to append comma
+		sb.append(", ");
+		used += 2;
+	    }
+
+	    // prefer not to split a single address across lines so used=0 below
+	    String as = ((InternetAddress)addresses[i]).toUnicodeString();
+	    if (MimeUtility.checkAscii(as) != MimeUtility.ALL_ASCII) {
+		sawNonAscii = true;
+		as = new String(as.getBytes(StandardCharsets.UTF_8),
+	    			StandardCharsets.ISO_8859_1);
+	    }
+	    String s = MimeUtility.fold(0, as);
+	    int len = lengthOfFirstSegment(s); // length till CRLF
+	    if (used + len > 76) { // overflows ...
+		// smash trailing space from ", " above
+		int curlen = sb.length();
+		if (curlen > 0 && sb.charAt(curlen - 1) == ' ')
+		    sb.setLength(curlen - 1);
+		sb.append("\r\n\t"); // .. start new continuation line
+		used = 8; // account for the starting <tab> char
+	    }
+	    sb.append(s);
+	    used = lengthOfLastSegment(s, used);
+	}
+
+	String ret = sb.toString();
+	if (sawNonAscii)
+	    ret = new String(ret.getBytes(StandardCharsets.ISO_8859_1),
+				StandardCharsets.UTF_8);
+    	return ret;
     }
 
     /*
@@ -688,6 +785,7 @@ public class InternetAddress extends Address implements Cloneable {
      *
      * XXX - Deal with encoded Headers too.
      */
+    @SuppressWarnings("fallthrough")
     private static InternetAddress[] parse(String s, boolean strict,
 				    boolean parseHdr) throws AddressException {
 	int start, end, index, nesting;
@@ -1153,8 +1251,8 @@ public class InternetAddress extends Address implements Cloneable {
 	    checkAddress(getAddress(), true, true);
     }
 
-    private static final String specialsNoDotNoAt = "()<>,;:\\\"[]";
-    private static final String specialsNoDot = specialsNoDotNoAt + "@";
+    private static final String specialsNoDotNoAtNoQuote = "()<>,;:\\[]";
+    private static final String specialsNoDot = specialsNoDotNoAtNoQuote + "@\"";
 
     /**
      * Check that the address is a valid "mailbox" per RFC822.
@@ -1251,7 +1349,7 @@ public class InternetAddress extends Address implements Cloneable {
 		    throw new AddressException("Missing local name", addr);
 		break;		// done with local part
 	    }
-	    if (c <= 040 || c >= 0177)
+	    if (c <= 040 || c == 0177)
 		throw new AddressException(
 			"Local address contains control or whitespace", addr);
 	    if (specialsNoDot.indexOf(c) >= 0)
@@ -1300,7 +1398,7 @@ public class InternetAddress extends Address implements Cloneable {
 		    throw new AddressException(
 			    "Domain literal end not at end of domain", addr);
 		inliteral = false;
-	    } else if (c <= 040 || c >= 0177) {
+	    } else if (c <= 040 || c == 0177) {
 		throw new AddressException(
 				"Domain contains control or whitespace", addr);
 	    } else {
@@ -1337,7 +1435,7 @@ public class InternetAddress extends Address implements Cloneable {
      * or any RFC822 special characters other than '@' and '.'.
      */
     private boolean isSimple() {
-	return address == null || indexOfAny(address, specialsNoDotNoAt) < 0;
+	return address == null || indexOfAny(address, specialsNoDotNoAtNoQuote) < 0;
     }
 
     /**

@@ -345,12 +345,22 @@ public enum ResponseCode {
         if (null == chars) {
             return null;
         }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
+        int length = chars.length();
+        StringBuilder builder = null;
         for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
+            char c = chars.charAt(i);
+            if (null == builder) {
+                if ((c >= 'a') && (c <= 'z')) {
+                    builder = new StringBuilder(length);
+                    if (i > 0) {
+                        builder.append(chars, 0, i);
+                    }
+                    builder.append((char) (c & 0x5f));
+                }
+            } else {
+                builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
+            }
         }
-        return builder.toString();
+        return null == builder ? chars.toString() : builder.toString();
     }
 }

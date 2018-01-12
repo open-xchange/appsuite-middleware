@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.TimeZone;
 import org.json.JSONException;
-import org.junit.Assert;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXSession;
@@ -61,6 +60,7 @@ import com.openexchange.ajax.framework.CommonAllResponse;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.MultipleResponse;
+import com.openexchange.ajax.participant.ParticipantTools;
 import com.openexchange.ajax.task.actions.AllRequest;
 import com.openexchange.ajax.task.actions.DeleteRequest;
 import com.openexchange.ajax.task.actions.GetRequest;
@@ -79,11 +79,7 @@ import com.openexchange.groupware.tasks.Task;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class TaskTools extends Assert {
-
-    private TaskTools() {
-        super();
-    }
+public final class TaskTools extends ParticipantTools {
 
     /**
      * This method implements storing of a task through the AJAX interface.
@@ -215,5 +211,39 @@ public final class TaskTools extends Assert {
         retval.setParentFolderID(folderId);
         retval.setLastModified(task.getLastModified());
         return retval;
+    }
+
+    /**
+     * Compares the specified objects
+     * 
+     * @param taskObj1 The expected {@link Task}
+     * @param taskObj2 The actual {@link Task}
+     * @throws Exception if an error is occurred
+     */
+    public static void compareObject(final Task taskObj1, final Task taskObj2) throws Exception {
+        assertEquals("id is not equals", taskObj1.getObjectID(), taskObj2.getObjectID());
+        assertEqualsAndNotNull("title is not equals", taskObj1.getTitle(), taskObj2.getTitle());
+        assertEqualsAndNotNull("start is not equals", taskObj1.getStartDate(), taskObj2.getStartDate());
+        assertEqualsAndNotNull("end is not equals", taskObj1.getEndDate(), taskObj2.getEndDate());
+        assertEquals("folder id is not equals", taskObj1.getParentFolderID(), taskObj2.getParentFolderID());
+        assertEquals("private flag is not equals", taskObj1.getPrivateFlag(), taskObj2.getPrivateFlag());
+        assertEquals("alarm is not equals", taskObj1.getAlarm(), taskObj2.getAlarm());
+        assertEqualsAndNotNull("note is not equals", taskObj1.getNote(), taskObj2.getNote());
+        assertEqualsAndNotNull("categories is not equals", taskObj1.getCategories(), taskObj2.getCategories());
+        assertEqualsAndNotNull("actual costs is not equals", taskObj1.getActualCosts(), taskObj2.getActualCosts());
+        assertEqualsAndNotNull("actual duration", taskObj1.getActualDuration(), taskObj2.getActualDuration());
+        assertEqualsAndNotNull("billing information", taskObj1.getBillingInformation(), taskObj2.getBillingInformation());
+        assertEqualsAndNotNull("companies", taskObj1.getCompanies(), taskObj2.getCompanies());
+        assertEqualsAndNotNull("currency", taskObj1.getCurrency(), taskObj2.getCurrency());
+        assertEqualsAndNotNull("date completed", taskObj1.getDateCompleted(), taskObj2.getDateCompleted());
+        assertEqualsAndNotNull("percent complete", taskObj1.getPercentComplete(), taskObj2.getPercentComplete());
+        assertEqualsAndNotNull("priority", taskObj1.getPriority(), taskObj2.getPriority());
+        assertEqualsAndNotNull("status", taskObj1.getStatus(), taskObj2.getStatus());
+        assertEqualsAndNotNull("target costs", taskObj1.getTargetCosts(), taskObj2.getTargetCosts());
+        assertEqualsAndNotNull("target duration", taskObj1.getTargetDuration(), taskObj2.getTargetDuration());
+        assertEqualsAndNotNull("trip meter", taskObj1.getTripMeter(), taskObj2.getTripMeter());
+
+        assertEqualsAndNotNull("participants are not equals", participants2String(taskObj1.getParticipants()), participants2String(taskObj2.getParticipants()));
+        assertEqualsAndNotNull("users are not equals", users2String(taskObj1.getUsers()), users2String(taskObj2.getUsers()));
     }
 }

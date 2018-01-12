@@ -469,7 +469,11 @@ public class CachingUserStorage extends UserStorage {
             }
         } else {
             // Regular way
-            delegate.setAttribute(name, value, userId, context);
+            if (null == con) {
+                delegate.setAttribute(name, value, userId, context);
+            } else {
+                delegate.setAttribute(con, name, value, userId, context);
+            }
             invalidateUserCache(context, userId);
         }
     }

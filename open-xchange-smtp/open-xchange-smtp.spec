@@ -2,24 +2,19 @@
 
 Name:          open-xchange-smtp
 BuildArch:     noarch
-#!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
 %else
 BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-core
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+%if 0%{?suse_version}
+BuildRequires: java-1_8_0-openjdk-devel
 %else
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires: java-1_7_0-openjdk-devel
-%else
-BuildRequires: java-devel >= 1.7.0
-%endif
+BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -56,18 +51,6 @@ if [ ${1:-0} -eq 2 ]; then
 
     PFILE=/opt/open-xchange/etc/smtp.properties
 
-    # SoftwareChange_Request-1795
-    ox_add_property com.openexchange.smtp.logTransport false /opt/open-xchange/etc/smtp.properties
-
-    # SoftwareChange_Request-1931
-    ox_add_property com.openexchange.smtp.ssl.protocols "" $PFILE
-
-    # SoftwareChange_Request-2016
-    ox_add_property com.openexchange.smtp.ssl.ciphersuites "" $PFILE
-
-    # SoftwareChange_Request-2553
-    ox_add_property com.openexchange.smtp.sendPartial false $PFILE
-
     ox_update_permissions /opt/open-xchange/etc/noreply.properties root:open-xchange 640
 
     # SoftwareChange_Request-3636
@@ -91,6 +74,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Thu Oct 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.10.0 release
 * Fri May 19 2017 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Marcus Klein <marcus.klein@open-xchange.com>

@@ -68,6 +68,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimePart;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
@@ -301,7 +302,7 @@ public class MimeMessagingPart implements MessagingPart {
         name = "Resent-Bcc";
         m.put(HeaderName.valueOf(name), new AddressHeaderHandler(name));
 
-        HHANDLERS = Collections.unmodifiableMap(m);
+        HHANDLERS = ImmutableMap.copyOf(m);
     }
 
     /*-
@@ -479,8 +480,8 @@ public class MimeMessagingPart implements MessagingPart {
             // No synchronization
             try {
                 tmp = new ConcurrentHashMap<String, Collection<MessagingHeader>>();
-                for (final Enumeration<?> allHeaders = part.getAllHeaders(); allHeaders.hasMoreElements();) {
-                    final Header header = (Header) allHeaders.nextElement();
+                for (final Enumeration<Header> allHeaders = part.getAllHeaders(); allHeaders.hasMoreElements();) {
+                    final Header header = allHeaders.nextElement();
                     final String name = header.getName();
                     Collection<MessagingHeader> collection = tmp.get(name);
                     if (null == collection) {
@@ -764,8 +765,8 @@ public class MimeMessagingPart implements MessagingPart {
          * Drop all existing headers
          */
         try {
-            for (final Enumeration<?> allHeaders = part.getAllHeaders(); allHeaders.hasMoreElements();) {
-                part.removeHeader(((Header) allHeaders.nextElement()).getName());
+            for (final Enumeration<Header> allHeaders = part.getAllHeaders(); allHeaders.hasMoreElements();) {
+                part.removeHeader(allHeaders.nextElement().getName());
             }
         } catch (final javax.mail.MessagingException e) {
             throw MessagingExceptionCodes.MESSAGING_ERROR.create(e, e.getMessage());

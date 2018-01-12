@@ -66,7 +66,9 @@ import java.util.regex.Pattern;
 import javax.mail.FetchProfile;
 import javax.mail.Header;
 import javax.mail.MessagingException;
+import javax.mail.UIDFolder;
 import javax.mail.internet.InternetHeaders;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
@@ -90,6 +92,8 @@ import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPTextPreviewProvider;
+import com.sun.mail.imap.IMAPTextPreviewProvider.Mode;
 import com.sun.mail.imap.protocol.BODY;
 import com.sun.mail.imap.protocol.ENVELOPE;
 import com.sun.mail.imap.protocol.FetchResponse;
@@ -253,7 +257,7 @@ public final class Threadables {
                 threadable.inReplyTo = MimeMessageUtility.decodeMultiEncodedHeader(hdr.getValue());
             }
         });
-        HANDLERS = Collections.unmodifiableMap(m);
+        HANDLERS = ImmutableMap.copyOf(m);
     }
 
     /**
@@ -282,7 +286,19 @@ public final class Threadables {
             public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                 final String command;
                 final Response[] r;
+                final IMAPTextPreviewProvider textPreviewProvider = Services.optService(IMAPTextPreviewProvider.class);
+                final Mode textPreviewMode;
                 {
+                    if (fetchProfile.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
+                        textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.ONLY_IF_AVAILABLE;
+                    } else if (fetchProfile.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS)) {
+                        textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.REQUIRE;
+                    } else {
+                        textPreviewMode = null;
+                    }
+                    if (null != textPreviewMode) {
+                        fetchProfile.add(UIDFolder.FetchProfileItem.UID);
+                    }
                     StringBuilder sb = new StringBuilder(128).append("FETCH ");
                     if (1 == messageCount) {
                         sb.append("1");
@@ -320,6 +336,9 @@ public final class Threadables {
                                     if (null != inReplyTo) {
                                         message.setHeader(sReferences, inReplyTo);
                                     }
+                                }
+                                if (null != textPreviewMode) {
+                                    message.setTextPreview(textPreviewProvider.getTextPreview(Long.parseLong(message.getMailId()), textPreviewMode));
                                 }
                                 mails.add(message);
                                 r[j] = null;

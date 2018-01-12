@@ -136,7 +136,7 @@ public class HzImapIdleClusterLock extends AbstractImapIdleClusterLock {
             return true;
         }
 
-        long now = System.nanoTime();
+        long now = System.currentTimeMillis();
         String previous = map.putIfAbsent(key, generateValue(now, sessionInfo));
 
         if (null == previous) {
@@ -170,7 +170,7 @@ public class HzImapIdleClusterLock extends AbstractImapIdleClusterLock {
             return;
         }
 
-        map.put(generateKey(sessionInfo), generateValue(System.nanoTime(), sessionInfo));
+        map.put(generateKey(sessionInfo), generateValue(System.currentTimeMillis(), sessionInfo));
     }
 
     @Override

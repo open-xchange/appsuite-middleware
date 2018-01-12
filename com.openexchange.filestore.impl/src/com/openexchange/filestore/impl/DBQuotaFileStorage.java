@@ -689,7 +689,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         SortedSet<String> filenames = fileStorage.getFileList();
         long entireFileSize = 0;
         for (String filename : filenames) {
-            if (!filesToIgnore.contains(filename)) {
+            if (null == filesToIgnore || !filesToIgnore.contains(filename)) {
                 try {
                     entireFileSize += fileStorage.getFileSize(filename);
                 } catch (OXException e) {

@@ -199,8 +199,7 @@ public final class Delete {
 
     private void propagateDelete(final Connection con) throws OXException {
         // Delete all references to that group.
-        final DeleteEvent event = new DeleteEvent(getOrig(), groupId,
-            DeleteEvent.TYPE_GROUP, ctx);
+        final DeleteEvent event = DeleteEvent.createDeleteEventForGroupDeletion(getOrig(), groupId, ctx);
         DeleteRegistry.getInstance().fireDeleteEvent(event, con, con);
     }
 

@@ -100,8 +100,9 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
-import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.API;
+import com.openexchange.oauth.DefaultOAuthAccount;
+import com.openexchange.oauth.HostInfo;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthEventConstants;
@@ -283,7 +284,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     }
 
     @Override
-    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl, final String currentHost, final Session session, Set<OAuthScope> scopes) throws OXException {
+    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl, final HostInfo currentHost, final Session session, Set<OAuthScope> scopes) throws OXException {
         try {
             final int contextId = session.getContextId();
             final int userId = session.getUserId();
@@ -324,7 +325,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 if (isDeferrerAvailable(ds, userId, contextId)) {
                     String deferredURL = ds.getDeferredURL(cbUrl, userId, contextId);
                     if (deferredURL != null) {
-                        cbUrl = deferredURL;
+                        cbUrl = currentHost.injectRoute(deferredURL);
                         deferred = true;
                     }
                 }
@@ -353,7 +354,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                     }
 
                     String prevCbUrl = cbUrl;
-                    cbUrl = new StringBuilder(uri.getScheme()).append("://").append(uri.getHost()).append(path).toString();
+                    cbUrl = currentHost.injectRoute(new StringBuilder(uri.getScheme()).append("://").append(uri.getHost()).append(path).toString());
 
                     org.scribe.oauth.OAuthService service = getScribeService(metaData, cbUrl, session, scopes);
                     scribeToken = service.getRequestToken();
@@ -541,7 +542,10 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                     } catch (URISyntaxException e) {
                         // will not happen here
                     }
-                    throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(x.getCause(), url);
+                    List<Object> displayArgs = new ArrayList<>(2);
+                    displayArgs.add(SSLExceptionCode.extractArgument(x, "fingerprint"));
+                    displayArgs.add(url);
+                    throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(x.getCause(), displayArgs.toArray(new Object[] {}));
                 }
             }
             throw x;

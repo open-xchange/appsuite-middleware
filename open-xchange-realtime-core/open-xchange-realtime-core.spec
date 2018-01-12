@@ -2,24 +2,19 @@
 
 Name:          open-xchange-realtime-core
 BuildArch:     noarch
-#!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
 %else
 BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-core
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+%if 0%{?suse_version}
+BuildRequires: java-1_8_0-openjdk-devel
 %else
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires: java-1_7_0-openjdk-devel
-%else
-BuildRequires: java-devel >= 1.7.0
-%endif
+BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -46,37 +41,6 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
-%post
-if [ ${1:-0} -eq 2 ]; then
-    # only when updating
-    . /opt/open-xchange/lib/oxfunctions.sh
-
-    # prevent bash from expanding, see bug 13316
-    GLOBIGNORE='*'
-
-    # SoftwareChange_Request-1539
-    # updated by SoftwareChange_Request-1721
-    # updated by SoftwareChange_Request-1730
-    pfile=/opt/open-xchange/etc/hazelcast/rtResourceDirectory.properties
-    VALUE=$(ox_read_property com.openexchange.hazelcast.configuration.map.name $pfile)
-    if [ "$VALUE" == "rtResourceDirectory-0" ] || [ "$VALUE" == "rtResourceDirectory-1" ]; then
-        ox_set_property com.openexchange.hazelcast.configuration.map.name rtResourceDirectory-2 $pfile
-    fi
-    VALUE=$(ox_read_property com.openexchange.hazelcast.configuration.map.maxIdleSeconds $pfile)
-    if [ "$VALUE" == "0" ] || [ "$VALUE" == "3600" ]; then
-        ox_set_property com.openexchange.hazelcast.configuration.map.maxIdleSeconds 86400 $pfile
-    fi
-
-    # SoftwareChange_Request-1721
-    pfile=/opt/open-xchange/etc/hazelcast/rtIDMapping.properties
-    if ox_exists_property com.openexchange.hazelcast.configuration.map.maxIdleSeconds $pfile; then
-       ox_remove_property com.openexchange.hazelcast.configuration.map.maxIdleSeconds $pfile
-    fi
-
-    # SoftwareChange_Request-2393
-    ox_add_property com.openexchange.realtime.numberOfRunLoops 16 /opt/open-xchange/etc/realtime.properties
-fi
-
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -96,6 +60,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/realtime.properties
 
 %changelog
+* Thu Oct 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.10.0 release
 * Fri May 19 2017 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Marcus Klein <marcus.klein@open-xchange.com>

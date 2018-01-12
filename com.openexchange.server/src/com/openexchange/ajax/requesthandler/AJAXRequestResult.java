@@ -176,19 +176,38 @@ public class AJAXRequestResult {
         /**
          * A common request result which should be further processed.
          */
-        @NonNull COMMON,
+        @NonNull COMMON("common"),
         /**
          * An <i>ETag</i> request result.
          */
-        @NonNull ETAG,
+        @NonNull ETAG("etag"),
         /**
          * The special result directly responded to client.
          */
-        @NonNull DIRECT,
+        @NonNull DIRECT("direct"),
         /**
          * Signals a HTTP error
          */
-        @NonNull HTTP_ERROR;
+        @NonNull HTTP_ERROR("http_error"),
+        /**
+         * Signals that request processing has been enqueued
+         */
+        @NonNull ENQUEUED("enqueued");
+
+        private final String id;
+
+        private ResultType(String id) {
+            this.id = id;
+        }
+
+        /**
+         * Gets the identifier
+         *
+         * @return The identifier
+         */
+        public String getId() {
+            return id;
+        }
     }
 
     /**
@@ -290,9 +309,12 @@ public class AJAXRequestResult {
         postProcessors = new LinkedList<AJAXRequestResultPostProcessor>();
         this.timestamp = null == timestamp ? null : new Date(timestamp.getTime());
         this.format = null == format ? JSON : format;
-        if ("direct".equals(format)) {
+        if (ResultType.DIRECT.getId().equals(format)) {
             resultType = ResultType.DIRECT;
             this.resultObject = DIRECT_OBJECT;
+        } else if (ResultType.ENQUEUED.getId().equals(format)) {
+            resultType = ResultType.ENQUEUED;
+            this.resultObject = resultObject;
         } else {
             resultType = ResultType.COMMON;
             this.resultObject = resultObject;

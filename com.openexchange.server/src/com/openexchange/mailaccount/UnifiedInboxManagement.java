@@ -50,10 +50,8 @@
 package com.openexchange.mailaccount;
 
 import java.sql.Connection;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
@@ -94,7 +92,7 @@ public interface UnifiedInboxManagement {
     /**
      * A set containing all known default folders for an Unified Mail account.
      */
-    public static final Set<String> KNOWN_FOLDERS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(new String[] { INBOX, DRAFTS, SENT, SPAM, TRASH })));
+    public static final Set<String> KNOWN_FOLDERS = ImmutableSet.of(INBOX, DRAFTS, SENT, SPAM, TRASH);
 
     /**
      * The Unified Mail protocol name.

@@ -108,8 +108,10 @@ public final class KerberosTicketReload extends SessionServlet implements LoginR
         try {
             doAuthHeaderTicketReload(req, resp);
         } catch (OXException e) {
-            if(false == SessionExceptionCodes.WRONG_SESSION_SECRET.equals(e)) {
-                // MW-810 Don't log SES-206 as error
+            if (SessionExceptionCodes.hasPrefix(e)) {
+                // Is a session exception
+                LOG.debug(e.getMessage(), e);
+            } else {
                 LOG.error(e.getMessage(), e);
             }
             notAuthorized(resp, e.getMessage());

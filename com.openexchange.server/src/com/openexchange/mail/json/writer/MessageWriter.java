@@ -71,6 +71,7 @@ import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.dataobjects.Delegatized;
+import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeFilter;
@@ -521,6 +522,59 @@ public final class MessageWriter {
                         jsonContainer.toObject().put(MailJSONField.ORIGINAL_FOLDER_ID.getKey(), originalFolder);
                     } else {
                         jsonContainer.toArray().put(originalFolder);
+                    }
+                } catch (JSONException e) {
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                }
+            }
+        });
+        {
+            MailFieldWriter writer = new MailFieldWriter() {
+
+                @Override
+                public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
+                    try {
+                        if (withKey) {
+                            jsonContainer.toObject().put(MailJSONField.TEXT_PREVIEW.getKey(), mail.getTextPreview());
+                        } else {
+                            jsonContainer.toArray().put(mail.getTextPreview());
+                        }
+                    } catch (JSONException e) {
+                        throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                    }
+                }
+            };
+            writers.put(MailListField.TEXT_PREVIEW_IF_AVAILABLE, writer);
+            writers.put(MailListField.TEXT_PREVIEW, writer);
+        }
+        writers.put(MailListField.AUTHENTICATION_OVERALL_RESULT, new MailFieldWriter() {
+
+            @Override
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
+                try {
+                    MailAuthenticityResult mailAuthenticityResult = mail.getAuthenticityResult();
+                    Object value = null == mailAuthenticityResult ? JSONObject.EMPTY_OBJECT : JsonMessageHandler.authenticityOverallResultToJson(mailAuthenticityResult);
+                    if (withKey) {
+                        jsonContainer.toObject().put(MailJSONField.AUTHENTICITY.getKey(), value);
+                    } else {
+                        jsonContainer.toArray().put(value);
+                    }
+                } catch (JSONException e) {
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                }
+            }
+        });
+        writers.put(MailListField.AUTHENTICATION_MECHANISM_RESULTS, new MailFieldWriter() {
+
+            @Override
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
+                try {
+                    MailAuthenticityResult mailAuthenticityResult = mail.getAuthenticityResult();
+                    Object value = null == mailAuthenticityResult ? JSONObject.EMPTY_OBJECT : JsonMessageHandler.authenticationMechanismResultsToJson(mailAuthenticityResult);
+                    if (withKey) {
+                        jsonContainer.toObject().put(MailJSONField.AUTHENTICITY.getKey(), value);
+                    } else {
+                        jsonContainer.toArray().put(value);
                     }
                 } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());

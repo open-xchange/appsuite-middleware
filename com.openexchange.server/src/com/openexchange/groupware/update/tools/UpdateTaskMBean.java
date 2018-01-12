@@ -75,7 +75,7 @@ import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
-import com.openexchange.databaseold.Database;
+import com.openexchange.database.SchemaInfo;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.ExecutedTask;
 import com.openexchange.groupware.update.SchemaStore;
@@ -283,10 +283,16 @@ public final class UpdateTaskMBean implements DynamicMBean {
                     if (param instanceof Integer) {
                         updateProcess = new UpdateProcess(((Integer) param).intValue());
                     } else {
-                        final String sParam = param.toString();
-                        final int parsed = parsePositiveInt(sParam);
-
-                        updateProcess = parsed >= 0 ? new UpdateProcess(parsed, true, false) : new UpdateProcess(UpdateTaskToolkit.getContextIdBySchema(param.toString()), true, false);
+                        String contextOrSchemaName = param.toString();
+                        int optContextId = parsePositiveInt(contextOrSchemaName);
+                        if (optContextId > 0) {
+                            // Assume context identifier is given
+                            updateProcess = new UpdateProcess(optContextId, true, false);
+                        } else {
+                            // Assume schema name is given
+                            SchemaInfo schema = UpdateTaskToolkit.getInfoBySchemaName(contextOrSchemaName);
+                            updateProcess = new UpdateProcess(schema.getPoolId(), schema.getSchema(), true, false);
+                        }
                     }
                 }
 
@@ -304,7 +310,8 @@ public final class UpdateTaskMBean implements DynamicMBean {
                         } else {
                             sb.append("\\R");
                         }
-                        sb.append(' ').append(taskInfo.getTaskName()).append(" (schema=").append(taskInfo.getSchema()).append(')');
+                        sb.append(' ').append(taskInfo.getTaskName()).append(" (class=").append(taskInfo.getClass().getName()).append(')');
+                        sb.append(" (schema=").append(taskInfo.getSchema()).append(')');
                     }
                     return sb.toString();
                 }
@@ -432,24 +439,24 @@ public final class UpdateTaskMBean implements DynamicMBean {
 
     private TabularDataSupport getExecutedTasksList(final String schemaName) throws OXException {
         final SchemaStore store = SchemaStore.getInstance();
-        final TabularDataSupport retval;
         try {
-            final int contextId = UpdateTaskToolkit.getContextIdBySchema(schemaName);
-            final int poolId = Database.resolvePool(contextId, true);
-            ExecutedTask[] tasks = store.getExecutedTasks(poolId, schemaName);
+            SchemaInfo schemaInfo = UpdateTaskToolkit.getInfoBySchemaName(schemaName);
+            ExecutedTask[] tasks = store.getExecutedTasks(schemaInfo.getPoolId(), schemaName);
             if (null == tasks) {
                 tasks = new ExecutedTask[0];
+            } else {
+                Arrays.sort(tasks);
             }
-            Arrays.sort(tasks);
-            retval = new TabularDataSupport(taskListType, tasks.length, 1);
-            for (final ExecutedTask task : tasks) {
-                final CompositeDataSupport data = new CompositeDataSupport(taskType, taskTypeNames, new Object[] { task.getTaskName(), B(task.isSuccessful()), task.getLastModified() });
+
+            TabularDataSupport retval = new TabularDataSupport(taskListType, tasks.length, 1);
+            for (ExecutedTask task : tasks) {
+                CompositeDataSupport data = new CompositeDataSupport(taskType, taskTypeNames, new Object[] { task.getTaskName(), B(task.isSuccessful()), task.getLastModified() });
                 retval.put(data);
             }
+            return retval;
         } catch (final OpenDataException e) {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         }
-        return retval;
     }
 
 }

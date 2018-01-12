@@ -42,6 +42,8 @@ FolderBodyNotification:
   $ref: ./folders/FolderBodyNotification.yaml
 FolderBody:
   $ref: ./folders/FolderBody.yaml
+NewFolderBody:
+  $ref: ./folders/NewFolderBody.yaml
 FolderUpdateResponse:
   $ref: ./folders/FolderUpdateResponse.yaml
 FoldersCleanUpResponse:
@@ -602,15 +604,25 @@ GuardSignatureResult:
   $ref: ./guard/GuardSignatureResult.yaml
 GuardSendSecurity:
   $ref: ./guard/GuardSendSecurity.yaml
-GetSessionsResponse:
-  $ref: ./sessionmanagement/GetSessionsResponse.yaml
-RemoveSessionBody:
-  $ref: ./sessionmanagement/RemoveSessionBody.yaml
-RemoveAllOtherSessionsBody:
-  $ref: ./sessionmanagement/RemoveAllOtherSessionsBody.yaml
+# Module: Sessionmanagement
+AllSessionsResponse:
+  $ref: ./sessionmanagement/AllSessionsResponse.yaml
+DeviceInfo:
+  $ref: ./sessionmanagement/DeviceInfo.yaml
+# Module: Export
+InfoItemExport:
+  $ref: ./export/InfoItemExport.yaml
+# Module Job Queue
+InfoJobData:
+  $ref: ./jobqueue/InfoJobData.yaml
+AllJobsResponse:
+  $ref: ./jobqueue/AllJobsResponse.yaml
+InfoJobResponse:
+  $ref: ./jobqueue/InfoJobResponse.yaml
+GetJobResponse:
+  $ref: ./jobqueue/GetJobResponse.yaml
+CancelJobResponse:
+  $ref: ./jobqueue/CancelJobResponse.yaml
 # Module: OpenId
 InitResponse:
   $ref: ./openid/InitRequest.yaml
-
-
-

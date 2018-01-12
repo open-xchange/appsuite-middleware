@@ -59,6 +59,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -1327,6 +1328,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                                 }
 
                                 // Append log properties from the Thread to logBuilder
+                                List<Object> args = new LinkedList<>();
                                 {
                                     Map<String, String> logProperties = taskInfo.logProperties;
                                     if (null != logProperties) {
@@ -1338,7 +1340,8 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                                                 sorted.put(propertyName, value.toString());
                                             }
                                         }
-                                        logBuilder.append(" Worker's properties:").append(lineSeparator);
+                                        logBuilder.append(" Worker's properties:{}");
+                                        args.add(lineSeparator);
 
                                         // And add them to the logBuilder
                                         Iterator<Entry<String, String>> it = sorted.entrySet().iterator();
@@ -1348,13 +1351,15 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                                             logBuilder.append(prefix).append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue());
                                             while (it.hasNext()) {
                                                 propertyEntry = it.next();
-                                                logBuilder.append(lineSeparator).append(prefix).append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue());
+                                                logBuilder.append("{}").append(prefix).append(propertyEntry.getKey()).append('=').append(propertyEntry.getValue());
+                                                args.add(lineSeparator);
                                             }
                                         }
                                     }
                                 }
 
-                                LOG.info(logBuilder.toString(), trace);
+                                args.add(trace);
+                                LOG.info(logBuilder.toString(), args.toArray(new Object[args.size()]));
                             }
                         }
                         if (poisoned) {

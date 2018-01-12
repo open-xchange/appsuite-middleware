@@ -55,6 +55,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
+import com.openexchange.database.Heartbeat;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.AfterReadAwareFolderStorage.Mode;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -183,6 +184,9 @@ public class TransactionManager {
         if (connectionMode == null && !initConnectionViaDecorator()) {
             dbService = FolderStorageServices.requireService(DatabaseService.class);
             connection = dbService.getWritable(storageParameters.getContext());
+            if (connection instanceof Heartbeat) {
+                ((Heartbeat) connection).startHeartbeat();
+            }
             connectionMode = new ConnectionMode(new ResilientConnection(connection), Mode.WRITE);
             storageParameters.putParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_CONNECTION, connectionMode);
             ownsConnection = true;
@@ -199,12 +203,15 @@ public class TransactionManager {
         if (decorator != null) {
             Object connectionProperty = decorator.getProperty(Connection.class.getName());
             try {
-                if (connectionProperty != null && connectionProperty instanceof Connection && !((Connection) connectionProperty).isReadOnly()) {
-                    connection = (Connection) connectionProperty;
-                    ConnectionMode connectionMode = new ConnectionMode(new ResilientConnection((Connection) connectionProperty), Mode.WRITE);
-                    storageParameters.putParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_CONNECTION, connectionMode);
-                    ownsConnection = false;
-                    return true;
+                if (connectionProperty instanceof Connection) {
+                    Connection con = (Connection) connectionProperty;
+                    if (!con.isReadOnly()) {
+                        connection = con;
+                        ConnectionMode connectionMode = new ConnectionMode(new ResilientConnection((Connection) connectionProperty), Mode.WRITE);
+                        storageParameters.putParameter(DatabaseFolderType.getInstance(), DatabaseParameterConstants.PARAM_CONNECTION, connectionMode);
+                        ownsConnection = false;
+                        return true;
+                    }
                 }
             } catch (SQLException e) {
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e.getMessage());
@@ -246,6 +253,9 @@ public class TransactionManager {
             if (ownsConnection && connection != null) {
                 Databases.rollback(connection);
                 Databases.autocommit(connection);
+                if (connection instanceof Heartbeat) {
+                    ((Heartbeat) connection).stopHeartbeat();
+                }
                 dbService.backWritableAfterReading(storageParameters.getContext(), connection);
             }
 

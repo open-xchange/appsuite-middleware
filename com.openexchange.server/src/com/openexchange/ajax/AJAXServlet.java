@@ -395,6 +395,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     public static final String PARAMETER_AUTH_TOKEN = "cryptoauth";
 
+    public static final String PARAMETER_ALLOW_ENQUEUE = "allow_enqueue";
+
     /**
      * The parameter 'ids' delivers a comma-separated list of identifiers
      */

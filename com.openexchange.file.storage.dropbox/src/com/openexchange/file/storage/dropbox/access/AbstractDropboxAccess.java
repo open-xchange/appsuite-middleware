@@ -83,7 +83,7 @@ abstract class AbstractDropboxAccess {
 
     /**
      * Initialises a new {@link AbstractDropboxAccess}.
-     * 
+     *
      * @throws OXException
      */
     AbstractDropboxAccess(AbstractOAuthAccess dropboxOAuthAccess, FileStorageAccount account, Session session) throws OXException {
@@ -96,7 +96,7 @@ abstract class AbstractDropboxAccess {
 
     /**
      * Determines whether the specified folder identifier denotes the root folder
-     * 
+     *
      * @param folderId The folder identifier
      * @return true if the specified folder identifier denotes a root folder; false otherwise
      */
@@ -107,7 +107,7 @@ abstract class AbstractDropboxAccess {
 
     /**
      * Retrieves the parent folder path from the specified full path.
-     * 
+     *
      * @param path The path
      * @return The parent folder path
      */
@@ -145,7 +145,7 @@ abstract class AbstractDropboxAccess {
 
     /**
      * Returns the metadata for a file ({@link FileMetadata}) or a folder ({@link FolderMetadata})
-     * 
+     *
      * @param id The resource identifier
      * @return The metadata of the file or folder
      * @throws OXException If the resource is not found
@@ -162,7 +162,7 @@ abstract class AbstractDropboxAccess {
 
     /**
      * Returns the {@link FileMetadata} of the specified file
-     * 
+     *
      * @param folderId The folder identifier
      * @param fileId The file identifier
      * @return The {@link FileMetadata}
@@ -181,7 +181,7 @@ abstract class AbstractDropboxAccess {
 
     /**
      * Gets the {@link FolderMetadata} of the specified folder.
-     * 
+     *
      * @param folderId The folder identifier
      * @return The {@link FolderMetadata}
      * @throws GetMetadataErrorException If a metadata error is occurred
@@ -198,7 +198,7 @@ abstract class AbstractDropboxAccess {
 
     /**
      * Lists the contents of the specified folder and Returns a {@link List} with {@link Metadata}
-     * 
+     *
      * @param folderId The folder identifier
      * @return A {@link List} with {@link Metadata}
      * @throws ListFolderErrorException if a list folder error is occurred
@@ -211,6 +211,35 @@ abstract class AbstractDropboxAccess {
         do {
             hasMore = result.getHasMore();
             results.addAll(result.getEntries());
+            if (hasMore) {
+                String cursor = result.getCursor();
+                result = client.files().listFolderContinue(cursor);
+            }
+        } while (hasMore);
+
+        return results;
+    }
+
+    /**
+     * Lists the contents of the specified folder and Returns a {@link List} with {@link Metadata}
+     *
+     * @param folderId The folder identifier
+     * @return A {@link List} with {@link Metadata}
+     * @throws ListFolderErrorException if a list folder error is occurred
+     * @throws DbxException if a generic Dropbox error is occurred
+     */
+    List<String> listSubfolderIds(String folderId) throws ListFolderErrorException, DbxException {
+        List<String> results = new ArrayList<String>();
+        boolean hasMore = false;
+        ListFolderResult result = client.files().listFolder(folderId);
+        do {
+            hasMore = result.getHasMore();
+            for (Metadata m : result.getEntries()) {
+                if (m instanceof FolderMetadata) {
+                    results.add(m.getPathDisplay());
+                }
+            }
+
             if (hasMore) {
                 String cursor = result.getCursor();
                 result = client.files().listFolderContinue(cursor);

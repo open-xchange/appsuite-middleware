@@ -87,6 +87,20 @@ public class Strings {
     }
 
     /**
+     * Checks if given string starts with specified prefix
+     *
+     * @param s The string to check
+     * @param prefix The prefix
+     * @return <code>true</code> if given string starts with specified prefix; otherwise <code>false</code>
+     */
+    public static boolean startsWithAny(String s, String prefix) {
+        if (null == s) {
+            return false;
+        }
+        return null != prefix && s.startsWith(prefix, 0) ? true : false;
+    }
+
+    /**
      * Checks if given string starts with any of specified prefixes
      *
      * @param s The string to check
@@ -100,6 +114,40 @@ public class Strings {
         for (int i = prefixes.length; i-- > 0;) {
             String prefix = prefixes[i];
             if (null != prefix && s.startsWith(prefix, 0)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if given string contains sequence
+     *
+     * @param s The string to check
+     * @param sequence The sequence that might be contained
+     * @return <code>true</code> if given string contains specified sequence; otherwise <code>false</code>
+     */
+    public static boolean containsAny(String s, String sequence) {
+        if (null == s) {
+            return false;
+        }
+        return null != sequence && s.indexOf(sequence, 0) >= 0 ? true : false;
+    }
+
+    /**
+     * Checks if given string contains any of specified sequences
+     *
+     * @param s The string to check
+     * @param sequences The sequences that might be contained
+     * @return <code>true</code> if given string contains any of specified sequences; otherwise <code>false</code>
+     */
+    public static boolean containsAny(String s, String... sequences) {
+        if (null == s) {
+            return false;
+        }
+        for (int i = sequences.length; i-- > 0;) {
+            String sequence = sequences[i];
+            if (null != sequence && s.indexOf(sequence, 0) >= 0) {
                 return true;
             }
         }
@@ -448,7 +496,7 @@ public class Strings {
         return splitByDelimNotInQuotes(str, ',');
     }
 
-    private static final Pattern P_SPLIT_COMMA = Pattern.compile("\\s*,\\s*");
+    // private static final Pattern P_SPLIT_COMMA = Pattern.compile("\\s*,\\s*");
 
     /**
      * Splits given string by comma separator.
@@ -457,13 +505,10 @@ public class Strings {
      * @return The split string
      */
     public static String[] splitByComma(final String s) {
-        if (null == s) {
-            return null;
-        }
-        return P_SPLIT_COMMA.split(s, 0);
+        return splitBy(s, ',', true);
     }
 
-    private static final Pattern P_SPLIT_COLON = Pattern.compile("\\s*\\:\\s*");
+   // private static final Pattern P_SPLIT_COLON = Pattern.compile("\\s*\\:\\s*");
 
     /**
      * Splits given string by colon separator.
@@ -472,13 +517,20 @@ public class Strings {
      * @return The split string
      */
     public static String[] splitByColon(final String s) {
-        if (null == s) {
-            return null;
-        }
-        return P_SPLIT_COLON.split(s, 0);
+        return splitBy(s, ':', true);
     }
 
-    private static final Pattern P_SPLIT_DOT = Pattern.compile("\\s*\\.\\s*");
+    /**
+     * Splits given string by semi-colon separator.
+     *
+     * @param s The string to split
+     * @return The split string
+     */
+    public static String[] splitBySemiColon(final String s) {
+        return splitBy(s, ';', true);
+    }
+
+    // private static final Pattern P_SPLIT_DOT = Pattern.compile("\\s*\\.\\s*");
 
     /**
      * Splits given string by dots.
@@ -487,13 +539,37 @@ public class Strings {
      * @return The split string
      */
     public static String[] splitByDots(final String s) {
+        return splitBy(s, '.', true);
+    }
+
+    private static String[] splitBy(String s, char delim, boolean trimMatches) {
         if (null == s) {
             return null;
         }
-        return P_SPLIT_DOT.split(s, 0);
+        int length = s.length();
+        if (length == 0) {
+            return new String[] { trimMatches ? s.trim() : s };
+        }
+
+        int pos = s.indexOf(delim, 0);
+        if (pos < 0) {
+            return new String[] { trimMatches ? s.trim() : s };
+        }
+
+        List<String> matchList = new ArrayList<>();
+        int prevPos = 0;
+        do {
+            matchList.add(trimMatches ? s.substring(prevPos, pos).trim() : s.substring(prevPos, pos));
+            prevPos = pos + 1;
+            pos = prevPos < length ? s.indexOf(delim, prevPos) : -1;
+        } while (pos >= 0);
+        if (prevPos <= length) {
+            matchList.add(trimMatches ? s.substring(prevPos).trim() : s.substring(prevPos));
+        }
+        return matchList.toArray(new String[matchList.size()]);
     }
 
-    private static final Pattern P_SPLIT_AMP = Pattern.compile("&");
+    // private static final Pattern P_SPLIT_AMP = Pattern.compile("&");
 
     /**
      * Splits given string by ampersands <code>'&'</code>.
@@ -502,10 +578,7 @@ public class Strings {
      * @return The split string
      */
     public static String[] splitByAmps(final String s) {
-        if (null == s) {
-            return null;
-        }
-        return P_SPLIT_AMP.split(s, 0);
+        return splitBy(s, '&', false);
     }
 
     private static final Pattern P_SPLIT_CRLF = Pattern.compile("\r?\n");
@@ -696,12 +769,15 @@ public class Strings {
         }
     }
 
-    private static final CharsetDecoder UTF8_CHARSET_DECODER;
-    static {
-        final CharsetDecoder utf8Decoder = Charsets.UTF_8.newDecoder();
-        utf8Decoder.onMalformedInput(CodingErrorAction.REPORT);
-        utf8Decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
-        UTF8_CHARSET_DECODER = utf8Decoder;
+    /* In a holder class to defer initialization until needed. */
+    private static class Holder {
+        static final CharsetDecoder UTF8_CHARSET_DECODER;
+        static {
+            final CharsetDecoder utf8Decoder = Charsets.UTF_8.newDecoder();
+            utf8Decoder.onMalformedInput(CodingErrorAction.REPORT);
+            utf8Decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+            UTF8_CHARSET_DECODER = utf8Decoder;
+        }
     }
 
     /**
@@ -712,7 +788,7 @@ public class Strings {
      */
     public static boolean isUTF8Bytes(final byte[] bytes) {
         try {
-            UTF8_CHARSET_DECODER.decode(ByteBuffer.wrap(bytes));
+            Holder.UTF8_CHARSET_DECODER.decode(ByteBuffer.wrap(bytes));
             return true;
         } catch (final CharacterCodingException e) {
             return false;

@@ -9,17 +9,13 @@ BuildRequires: ant
 BuildRequires: ant-nodeps
 %endif
 BuildRequires: open-xchange-core
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+%if 0%{?suse_version}
+BuildRequires: java-1_8_0-openjdk-devel
 %else
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires: java-1_7_0-openjdk-devel
-%else
-BuildRequires: java-devel >= 1.7.0
-%endif
+BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -84,114 +80,6 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    ##
-    ## start update from < 6.21
-    ##
-    CONFFILES="AdminDaemon.properties Group.properties ModuleAccessDefinitions.properties RMI.properties Resource.properties Sql.properties mpasswd plugin/hosting.properties"
-    for FILE in ${CONFFILES}; do
-	ox_move_config_file /opt/open-xchange/etc/admindaemon /opt/open-xchange/etc $FILE
-    done
-    ox_move_config_file /opt/open-xchange/etc/admindaemon /opt/open-xchange/etc User.properties AdminUser.properties
-
-    ofile=/opt/open-xchange/etc/admindaemon/ox-admin-scriptconf.sh
-    pfile=/opt/open-xchange/etc/ox-scriptconf.sh
-    if [ -e $ofile ]; then
-        oval=$(ox_read_property JAVA_OXCMD_OPTS $ofile)
-        if [ -n "$oval" ]; then
-           ox_set_property JAVA_OXCMD_OPTS "$oval" $pfile
-        else
-           ox_set_property JAVA_OXCMD_OPTS "-Djava.net.preferIPv4Stack=true" $pfile
-        fi
-        rm -f $ofile
-    fi
-
-    # SoftwareChange_Request-1118
-    # -----------------------------------------------------------------------
-    pfile=/opt/open-xchange/etc/AdminDaemon.properties
-    ox_remove_property TOOL_STORAGE $pfile
-
-    ofile=/opt/open-xchange/etc/AdminDaemon.properties
-    pfile=/opt/open-xchange/etc/rmi.properties
-    if ox_exists_property BIND_ADDRESS $ofile; then
-	oval=$(ox_read_property BIND_ADDRESS $ofile)
-	if [ -n "$oval" ]; then
-	   ox_set_property com.openexchange.rmi.host $oval $pfile
-	fi
-	ox_remove_property BIND_ADDRESS $ofile
-    fi
-
-    ofile=/opt/open-xchange/etc/RMI.properties
-    if [ -e $ofile ]; then
-	oval=$(ox_read_property RMI_PORT $ofile)
-	if [ -n "$oval" ]; then
-	   ox_set_property com.openexchange.rmi.port $oval $pfile
-	fi
-	rm -f $ofile
-    fi
-
-    # SoftwareChange_Request-1091
-    # -----------------------------------------------------------------------
-    pfile=/opt/open-xchange/etc/AdminUser.properties
-    ox_remove_property CREATE_HOMEDIRECTORY $pfile
-    ox_remove_property HOME_DIR_ROOT $pfile
-    pfile=/opt/open-xchange/etc/AdminDaemon.properties
-    ox_remove_property USER_PROP $pfile
-    ox_remove_property GROUP_PROP $pfile
-    ox_remove_property RESOURCE_PROP $pfile
-    ox_remove_property RMI_PROP $pfile
-    ox_remove_property SQL_PROP $pfile
-    ox_remove_property MASTER_AUTH_FILE $pfile
-    ox_remove_property ACCESS_COMBINATIONS_FILE $pfile
-
-    # SoftwareChange_Request-1100
-    # -----------------------------------------------------------------------
-    pfile=/opt/open-xchange/etc/AdminDaemon.properties
-    ox_remove_property SERVER_NAME $pfile
-    ##
-    ## end update from < 6.21
-    ##
-
-    # SoftwareChange_Request-1846
-    # -----------------------------------------------------------------------
-    pfile=/opt/open-xchange/etc/AdminUser.properties
-    ox_add_property SENT_MAILFOLDER_EN_GB SentMail $pfile
-    ox_add_property TRASH_MAILFOLDER_EN_GB Trash $pfile
-    ox_add_property DRAFTS_MAILFOLDER_EN_GB Drafts $pfile
-    ox_add_property SPAM_MAILFOLDER_EN_GB Spam $pfile
-    ox_add_property CONFIRMED_SPAM_MAILFOLDER_EN_GB confirmed-spam $pfile
-    ox_add_property CONFIRMED_HAM_MAILFOLDER_EN_GB confirmed-ham $pfile
-
-    # SoftwareChange_Request-1831
-    # -----------------------------------------------------------------------
-    pfile=/opt/open-xchange/etc/ModuleAccessDefinitions.properties
-
-	if grep -E "projects" $pfile > /dev/null; then
-	   ptmp=${pfile}.$$
-
-	   sed -e 's;projects *,;;g' -e 's;, *projects;;g' $pfile > $ptmp
-
-	   if [ -s $ptmp ]; then
-	      cp $ptmp $pfile
-	   fi
-	   rm -f $ptmp
-	fi
-
-    # SoftwareChange_Request-2074
-    # -----------------------------------------------------------------------
-    pfile=/opt/open-xchange/etc/ModuleAccessDefinitions.properties
-    for key in rssbookmarks rssportal forum pinboardwrite; do
-        if grep -E $key $pfile > /dev/null; then
-            ptmp=${pfile}.$$
-
-            sed -e "s;$key *,;;g" -e "s;, *$key;;g" $pfile > $ptmp
-
-            if [ -s $ptmp ]; then
-                cp $ptmp $pfile
-            fi
-            rm -f $ptmp
-        fi
-    done
-
     # SoftwareChange_Request-2197
     ox_add_property SCHEMA_MOVE_MAINTENANCE_REASON 1431655765 /opt/open-xchange/etc/plugin/hosting.properties
 
@@ -225,16 +113,8 @@ if [ ${1:-0} -eq 2 ]; then
     fi
     rm $TMPFILE
 
-    # SoftwareChange_Request-2323
-    VALUE=$(ox_read_property SENT_MAILFOLDER_EN_GB /opt/open-xchange/etc/AdminUser.properties)
-    if [ "SentMail" == "$VALUE" ]; then
-        ox_set_property SENT_MAILFOLDER_EN_GB "Sent Mail" /opt/open-xchange/etc/AdminUser.properties
-    fi
-
     # SoftwareChange_Request-2382
     ox_add_property MASTER_ACCOUNT_OVERRIDE false /opt/open-xchange/etc/AdminDaemon.properties
-
-    ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 
     # SoftwareChange_Request-2535
     # ox_add_property drive globaladdressbookdisabled,infostore,deniedportal /opt/open-xchange/etc/ModuleAccessDefinitions.properties
@@ -268,6 +148,11 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-4170
     ox_add_property LOCK_ON_WRITE_CONTEXT_INTO_PAYLOAD_DB false /opt/open-xchange/etc/plugin/hosting.properties
+
+    # SoftwareChange_Request-4351
+    sed -i 's/# webdavxml (interface for OXtender for Microsoft Outlook, used by KDE for synchronization)$/# webdavxml (interface for OXtender for Microsoft Outlook, used by KDE for synchronization) [DEPRECATED]/' /opt/open-xchange/etc/plugin/ModuleAccessDefinitions.properties
+
+    ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 fi
 
 %clean
@@ -292,6 +177,8 @@ fi
 %doc com.openexchange.admin.rmi/javadoc
 
 %changelog
+* Thu Oct 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.10.0 release
 * Fri May 19 2017 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Marcus Klein <marcus.klein@open-xchange.com>

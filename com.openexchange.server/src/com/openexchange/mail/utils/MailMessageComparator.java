@@ -74,8 +74,6 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailMessageComparator.class);
 
-    private static final String STR_EMPTY = "";
-
     // ------------------------------------------------------------------------------------------------------------------------ //
 
     /**
@@ -229,7 +227,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
             }
             return IDNA.toIDN(ia1.getAddress()).toLowerCase(locale);
         } else {
-            return STR_EMPTY;
+            return "";
         }
     }
 
@@ -301,15 +299,15 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                     if (msg2.isAnswered()) {
                         return compareByReceivedDate(msg1, msg2, false);
                     }
-                    return 1;
+                    return -1;
                 }
                 if (msg2.isAnswered()) {
-                    return -1;
+                    return 1;
                 }
                 return compareByReceivedDate(msg1, msg2, false);
             }
         });
-        COMPARERS.put(MailSortField.FLAG_ANSWERED, new FieldComparer() {
+        COMPARERS.put(MailSortField.FLAG_FORWARDED, new FieldComparer() {
 
             @Override
             public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
@@ -317,10 +315,10 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                     if (msg2.isForwarded()) {
                         return compareByReceivedDate(msg1, msg2, false);
                     }
-                    return 1;
+                    return -1;
                 }
                 if (msg2.isForwarded()) {
-                    return -1;
+                    return 1;
                 }
                 return compareByReceivedDate(msg1, msg2, false);
             }
@@ -333,10 +331,10 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                     if (msg2.isDraft()) {
                         return compareByReceivedDate(msg1, msg2, false);
                     }
-                    return 1;
+                    return -1;
                 }
                 if (msg2.isDraft()) {
-                    return -1;
+                    return 1;
                 }
                 return compareByReceivedDate(msg1, msg2, false);
             }
@@ -349,10 +347,10 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                     if (msg2.isFlagged()) {
                         return compareByReceivedDate(msg1, msg2, false);
                     }
-                    return 1;
+                    return -1;
                 }
                 if (msg2.isFlagged()) {
-                    return -1;
+                    return 1;
                 }
                 return compareByReceivedDate(msg1, msg2, false);
             }
@@ -447,7 +445,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                 public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
                     final String sub1 = msg1.getSubject();
                     final String sub2 = msg2.getSubject();
-                    return collator.compare(sub1 == null ? STR_EMPTY : sub1, sub2 == null ? STR_EMPTY : sub2);
+                    return collator.compare(sub1 == null ? "" : sub1, sub2 == null ? "" : sub2);
                 }
             };
         case ACCOUNT_NAME:
@@ -457,7 +455,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                 public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
                     final String name1 = msg1.getAccountName();
                     final String name2 = msg2.getAccountName();
-                    return collator.compare(name1 == null ? STR_EMPTY : name1, name2 == null ? STR_EMPTY : name2);
+                    return collator.compare(name1 == null ? "" : name1, name2 == null ? "" : name2);
                 }
             };
         default:

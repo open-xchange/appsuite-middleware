@@ -518,7 +518,7 @@ public final class IMAPFolderConverter {
                 } else {
                     addOwnACL(mailFolder);
                 }
-                if (imapConfig.getIMAPProperties().isUserFlagsEnabled() && exists && selectable && imapConfig.getACLExtension().canRead(
+                if (imapConfig.getIMAPProperties().isUserFlagsEnabled() && exists && (false == mailFolder.isNonExistent()) && selectable && imapConfig.getACLExtension().canRead(
                     ownRights) && UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId)) {
                     mailFolder.setSupportsUserFlags(true);
                 } else {

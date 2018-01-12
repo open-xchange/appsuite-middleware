@@ -59,20 +59,17 @@ import java.sql.SQLException;
  */
 public class JDBC41PreparedStatementWrapper extends JDBC4PreparedStatementWrapper {
 
-    private final PreparedStatement delegate;
-
     public JDBC41PreparedStatementWrapper(PreparedStatement delegate, JDBC4ConnectionReturner con) {
         super(delegate, con);
-        this.delegate = delegate;
     }
 
     @Override
     public void closeOnCompletion() throws SQLException {
-        delegate.closeOnCompletion();
+        preparedStatementDelegate.closeOnCompletion();
     }
 
     @Override
     public boolean isCloseOnCompletion() throws SQLException {
-        return delegate.isCloseOnCompletion();
+        return preparedStatementDelegate.isCloseOnCompletion();
     }
 }

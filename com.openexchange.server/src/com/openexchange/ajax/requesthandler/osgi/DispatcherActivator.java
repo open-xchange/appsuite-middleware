@@ -96,10 +96,14 @@ import com.openexchange.ajax.requesthandler.converters.preview.PreviewImageResul
 import com.openexchange.ajax.requesthandler.converters.preview.PreviewThumbResultConverter;
 import com.openexchange.ajax.requesthandler.converters.preview.TextPreviewResultConverter;
 import com.openexchange.ajax.requesthandler.customizer.ConversionCustomizer;
+import com.openexchange.ajax.requesthandler.jobqueue.JobQueueService;
+import com.openexchange.ajax.requesthandler.jobqueue.impl.ThreadPoolJobQueueService;
 import com.openexchange.ajax.requesthandler.oauth.OAuthAnnotationProcessor;
+import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServlet;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
+import com.openexchange.ajax.requesthandler.responseRenderers.JobInfoResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.PreviewResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.SecureContentAPIResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.StringResponseRenderer;
@@ -110,6 +114,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.continuation.ContinuationRegistryService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.filestore.FileLocationHandler;
+import com.openexchange.imageconverter.api.IImageClient;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.mail.mime.utils.ImageMatcher;
 import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
@@ -135,6 +140,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
     final ConcurrentMap<String, Object> servlets = new ConcurrentHashMap<>(32, 0.9F, 1);
     String prefix;
+    ThreadPoolJobQueueService jobQueue; // Guarded by synchronized
 
     /**
      * Initializes a new {@link DispatcherActivator}.
@@ -145,16 +151,16 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
     @Override
     protected synchronized void startBundle() throws Exception {
-    	DispatcherPrefixService dispatcherPrefixService = getService(DispatcherPrefixService.class);
+        DispatcherPrefixService dispatcherPrefixService = getService(DispatcherPrefixService.class);
         final String prefix = dispatcherPrefixService.getPrefix();
         this.prefix = prefix;
-    	Dispatchers.setDispatcherPrefixService(dispatcherPrefixService);
-    	Dispatcher.PREFIX.set(prefix);
+        Dispatchers.setDispatcherPrefixService(dispatcherPrefixService);
+        Dispatcher.PREFIX.set(prefix);
 
         OSGiDispatcherListenerRegistry dispatcherListenerRegistry = new OSGiDispatcherListenerRegistry(context);
-    	final DefaultDispatcher dispatcher = new DefaultDispatcher(dispatcherListenerRegistry);
+        final DefaultDispatcher dispatcher = new DefaultDispatcher(dispatcherListenerRegistry);
 
-    	/*
+        /*
          * Specify default converters
          */
         final DefaultConverter defaultConverter = new DefaultConverter();
@@ -257,6 +263,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         DispatcherServlet.registerRenderer(fileRenderer);
         DispatcherServlet.registerRenderer(new StringResponseRenderer());
         DispatcherServlet.registerRenderer(new PreviewResponseRenderer());
+        DispatcherServlet.registerRenderer(new JobInfoResponseRenderer());
 
         registerService(AJAXActionAnnotationProcessor.class, new DispatcherNotesProcessor());
         registerService(AJAXActionAnnotationProcessor.class, new OAuthAnnotationProcessor());
@@ -304,7 +311,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
                 if (null == servlets.putIfAbsent(module, PRESENT)) {
                     registerSessionServlet(prefix + module, dispatcherServlet);
                     if (service.getClass().isAnnotationPresent(OAuthModule.class)) {
-                        registerSessionServlet(prefix + "oauth/modules/" + module, oAuthDispatcherServlet);
+                        registerSessionServlet(prefix + OAuthConstants.OAUTH_SERVLET_SUBPREFIX + module, oAuthDispatcherServlet);
                     }
                 }
             }
@@ -315,7 +322,7 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
                 if (null != servlets.remove(module)) {
                     unregisterServlet(prefix + module);
                     if (service.getClass().isAnnotationPresent(OAuthModule.class)) {
-                        unregisterServlet(prefix + "oauth/modules/" + module);
+                        unregisterServlet(prefix + OAuthConstants.OAUTH_SERVLET_SUBPREFIX + module);
                     }
                 }
                 dispatcher.remove(module, service);
@@ -367,18 +374,17 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
         track(AJAXActionCustomizerFactory.class, new SimpleRegistryListener<AJAXActionCustomizerFactory>() {
 
-			@Override
-			public void added(ServiceReference<AJAXActionCustomizerFactory> ref, AJAXActionCustomizerFactory service) {
-				dispatcher.addCustomizer(service);
-			}
+            @Override
+            public void added(ServiceReference<AJAXActionCustomizerFactory> ref, AJAXActionCustomizerFactory service) {
+                dispatcher.addCustomizer(service);
+            }
 
-			@Override
-			public void removed(ServiceReference<AJAXActionCustomizerFactory> ref,
-					AJAXActionCustomizerFactory service) {
-				dispatcher.removeCustomizer(service);
+            @Override
+            public void removed(ServiceReference<AJAXActionCustomizerFactory> ref, AJAXActionCustomizerFactory service) {
+                dispatcher.removeCustomizer(service);
 
-			}
-		});
+            }
+        });
 
         track(DispatcherListener.class, dispatcherListenerRegistry);
 
@@ -396,6 +402,35 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
         });
 
+        track(ConfigurationService.class, new SimpleRegistryListener<ConfigurationService>() {
+
+            @Override
+            public synchronized void added(ServiceReference<ConfigurationService> ref, ConfigurationService service) {
+                ThreadPoolJobQueueService jobQueue = new ThreadPoolJobQueueService(service);
+                DispatcherActivator.this.jobQueue = jobQueue;
+                registerService(JobQueueService.class, jobQueue);
+                ServerServiceRegistry.getInstance().addService(JobQueueService.class, jobQueue);
+            }
+
+            @Override
+            public synchronized void removed(ServiceReference<ConfigurationService> ref, ConfigurationService service) {
+                // Ignore
+            }
+        });
+
+        track(IImageClient.class, new SimpleRegistryListener<IImageClient>() {
+
+            @Override
+            public void added(ServiceReference<IImageClient> ref, IImageClient thing) {
+                fileRenderer.setImageClient(thing);
+            }
+
+            @Override
+            public void removed(ServiceReference<IImageClient> ref, IImageClient thing) {
+                fileRenderer.setImageClient(null);
+            }
+        });
+
         openTrackers();
 
         registerService(Dispatcher.class, dispatcher);
@@ -410,6 +445,12 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
     @Override
     protected synchronized void stopBundle() throws Exception {
         super.stopBundle();
+        ThreadPoolJobQueueService jobQueue = this.jobQueue;
+        if (null != jobQueue) {
+            this.jobQueue = null;
+            ServerServiceRegistry.getInstance().removeService(JobQueueService.class);
+            jobQueue.clear();
+        }
         DispatcherServlet.clearRenderer();
         DispatcherServlet.setDispatcher(null);
         ServerServiceRegistry.getInstance().removeService(AJAXResultDecoratorRegistry.class);
@@ -440,6 +481,18 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         return new Class<?>[] { DispatcherPrefixService.class };
     }
 
+    /**
+     * Gets the classes of the optional services.
+     * <p>
+     * They appear when available in activator's service collection.
+     *
+     * @return The array of {@link Class} instances of optional services
+     */
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class<?>[] { IImageClient.class };
+    }
+
     @Override
     public void registerSessionServlet(String alias, HttpServlet servlet, String... configKeys) {
         super.registerSessionServlet(alias, servlet, configKeys);
@@ -448,6 +501,12 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
     @Override
     public void unregisterServlet(String alias) {
         super.unregisterServlet(alias);
+    }
+
+    @Override
+    public <S> void registerService(Class<S> clazz, S service) {
+        // TODO Auto-generated method stub
+        super.registerService(clazz, service);
     }
 
 }

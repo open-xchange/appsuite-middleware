@@ -132,6 +132,14 @@ public class MimeMessageUtilityTest {
         assertEquals("Subject nor properly unfolded/decoded.", "Potwierdzenie zam\u00f3wienia", s);
     }
 
+     @Test
+     public void testForBug55229() {
+        String s = "=?iso-2022-jp?B?GyRCJE8kNyQ0JEAkKyVGJTklSCEnfGIbKEI=?=";
+        s = MimeMessageUtility.decodeEnvelopeSubject(s);
+
+        assertTrue("Subject nor properly unfolded/decoded", MessageUtility.containsNoUnknown(s));
+     }
+
          @Test
      public void testForBug36072_AddressUnfolding() {
         String s = "=?UTF-8?Q?Wielkoszcz=C4=99ko=C5=9Bciskowiczkiewi?= =?UTF-8?Q?cz=C3=B3wnaOm=C3=B3jbo=C5=BCejestemno=C5=BCemwie?= " + "=?UTF-8?Q?leznacz=C4=85cychznak=C3=B3wsi=C4=99znaczyb?= =?UTF-8?Q?oprzecie=C5=BCniemo=C5=BCeby=C4=87zbyt=C5=82atwo!?= <foo@bar.tld>";

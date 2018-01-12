@@ -286,6 +286,16 @@ public abstract class OXUserStorageInterface {
     public abstract int[] getAll(final Context ctx) throws StorageException;
 
     /**
+     * Retrieves all user identifiers for a given context.
+     *
+     * @param ctx numerical context identifier
+     * @param con The connection to use
+     * @return int[] containing user ids.
+     * @throws StorageException
+     */
+    public abstract int[] getAll(final Context ctx, Connection con) throws StorageException;
+
+    /**
      * Retrieve all user objects for a given context. Which match the given search_pattern
      *
      * @param ctx numerical context identifier

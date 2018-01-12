@@ -113,6 +113,15 @@ public final class Timer {
         }
     }
 
+    /**
+     * Gets the timer
+     *
+     * @return The timer
+     */
+    public TimerService getTimer() {
+        return timer;
+    }
+
     public void setTimerService(TimerService timer) {
         this.timer = timer;
         startAll();

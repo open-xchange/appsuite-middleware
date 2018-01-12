@@ -49,9 +49,6 @@
 
 package com.openexchange.filestore.impl.groupware.unified;
 
-import java.util.concurrent.TimeUnit;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -59,7 +56,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filestore.impl.osgi.Services;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.session.UserAndContext;
 
 /**
  * {@link UnifiedQuotaUtils} - Utility class for Unified Quota.
@@ -76,16 +72,15 @@ public class UnifiedQuotaUtils {
         super();
     }
 
-    private static final Cache<UserAndContext, Boolean> CONFIG_CACHE = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
-
     /**
-     * Invalidates the <i>applicable cache</i>.
+     * Checks if Unified Quota is enabled for specified user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
+     * @throws OXException If check fails
      */
-    public static void invalidateCache() {
-        CONFIG_CACHE.invalidateAll();
-    }
-
-    private static boolean doIsEnabledFor(int userId, int contextId) throws OXException {
+    public static boolean isUnifiedQuotaEnabledFor(int userId, int contextId) throws OXException {
         ConfigViewFactory viewFactory = Services.optService(ConfigViewFactory.class);
         if (null == viewFactory) {
             throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
@@ -101,24 +96,6 @@ public class UnifiedQuotaUtils {
         String value = property.get();
         boolean defaultValue = false;
         return Strings.isEmpty(value) ? defaultValue : ("true".equalsIgnoreCase(value.trim()) ? true : ("false".equalsIgnoreCase(value.trim()) ? false : defaultValue));
-    }
-
-    /**
-     * Checks if Unified Quota is enabled for specified user.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return <code>true</code> if enabled; otherwise <code>false</code>
-     * @throws OXException If check fails
-     */
-    public static boolean isUnifiedQuotaEnabledFor(int userId, int contextId) throws OXException {
-        UserAndContext key = UserAndContext.newInstance(userId, contextId);
-        Boolean enabled = CONFIG_CACHE.getIfPresent(key);
-        if (null == enabled) {
-            enabled = Boolean.valueOf(doIsEnabledFor(userId, contextId));
-            CONFIG_CACHE.put(key, enabled);
-        }
-        return enabled.booleanValue();
     }
 
 }

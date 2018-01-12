@@ -60,18 +60,6 @@ import java.io.Serializable;
 public interface Schema extends Serializable {
 
     /**
-     * @return if this schema can be used with an OX that database version
-     * number is directly before the actual.
-     */
-    boolean isGroupwareCompatible();
-
-    /**
-     * @return if this schema can be used with an OX admin daemon that database
-     * version number is directly before the actual.
-     */
-    boolean isAdminCompatible();
-
-    /**
      * @return <code>true</code> if the schema will currently be updated.
      */
     boolean isLocked();
@@ -87,4 +75,10 @@ public interface Schema extends Serializable {
      */
     String getSchema();
 
+    /**
+     * Gets the identifier of the schema-associated database pool
+     *
+     * @return The pool identifier
+     */
+    int getPoolId();
 }

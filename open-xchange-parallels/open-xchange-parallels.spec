@@ -2,24 +2,19 @@
 
 Name:           open-xchange-parallels
 BuildArch:      noarch
-#!BuildIgnore:  post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires:  ant
 %else
 BuildRequires:  ant-nodeps
 %endif
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires:  java7-devel
+%if 0%{?suse_version}
+BuildRequires: java-1_8_0-openjdk-devel
 %else
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires: java-1_7_0-openjdk-devel
-%else
-BuildRequires: java-devel >= 1.7.0
-%endif
+BuildRequires: java-1.8.0-openjdk-devel
 %endif
 BuildRequires:  open-xchange-admin
 Version:        @OXVERSION@
-%define         ox_release 3
+%define         ox_release 0
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -53,27 +48,16 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %post
-. /opt/open-xchange/lib/oxfunctions.sh
+if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+    . /opt/open-xchange/lib/oxfunctions.sh
 
-ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc parallels.properties
-ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc settings/parallels_gui.properties settings/parallels-ui.properties
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
 
-# SoftwareChange_Request-1207
-pfile=/opt/open-xchange/etc/parallels.properties
-if ox_exists_property com.openexchange.custom.parallels.branding.fallbackurl $pfile; then
-    oval=$(ox_read_property com.openexchange.custom.parallels.branding.fallbackurl $pfile)
-    ox_remove_property com.openexchange.custom.parallels.branding.fallbackurl $pfile
-    ox_set_property com.openexchange.custom.parallels.branding.fallbackhost "$oval" $pfile
+    # SoftwareChange_Request-2723
+    ox_add_property com.openexchange.custom.parallels.branding.guestfallbackhost "" /opt/open-xchange/etc/parallels.properties
 fi
-
-# SoftwareChange_Request-1209
-pfile=/opt/open-xchange/etc/settings/parallels-ui.properties
-if ! ox_exists_property ui/parallels/use_parallels_antispam_features $pfile; then
-    ox_set_property ui/parallels/use_parallels_antispam_features true $pfile
-fi
-
-# SoftwareChange_Request-2723
-ox_add_property com.openexchange.custom.parallels.branding.guestfallbackhost "" /opt/open-xchange/etc/parallels.properties
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -91,6 +75,8 @@ ox_add_property com.openexchange.custom.parallels.branding.guestfallbackhost "" 
 %doc com.openexchange.parallels/ChangeLog
 
 %changelog
+* Thu Oct 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.10.0 release
 * Fri May 19 2017 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Marcus Klein <marcus.klein@open-xchange.com>

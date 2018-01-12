@@ -74,13 +74,15 @@ confirmations:
     $ref: "#/definitions/TaskConfirmation"
 organizerId:
   type: integer
-  description: 'Contains the userIId of the appointment organizer if it is an internal user. **Not implemented for tasks**.'
+  description: 'Contains the userId of the appointment organizer if it is an internal user. **Not implemented for tasks**.'
+  readOnly: true
 principal:
   type: string
   description: 'Contains the email address of the appointment principal which is not necessarily an internal user. **Not implemented for tasks**.'
 principalId:
   type: integer
   description: 'Contains the userIId of the appointment principal if it is an internal user. **Not implemented for tasks**.'
+  readOnly: true
 full_time:
   type: boolean
   description: '`True` if the event is a whole day appointment or task, `false` otherwise.'

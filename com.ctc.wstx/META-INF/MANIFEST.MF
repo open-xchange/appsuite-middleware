@@ -4,7 +4,7 @@ Bundle-Name: Woodstox XML-processor
 Bundle-SymbolicName: com.ctc.wstx
 Bundle-Version: 4.4.1
 Bundle-Vendor: http://woodstox.codehaus.org
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Export-Package: com.ctc.wstx.api;version="4.4.1",
  com.ctc.wstx.cfg;version="4.4.1";uses:="javax.xml.stream",
  com.ctc.wstx.dom;version="4.4.1";

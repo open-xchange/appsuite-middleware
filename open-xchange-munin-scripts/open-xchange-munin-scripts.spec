@@ -3,23 +3,18 @@
 Name:          open-xchange-munin-scripts
 %define use_systemd (0%{?rhel_version} && 0%{?rhel_version} >= 700) || (0%{?suse_version} && 0%{?suse_version} >=1210)
 BuildArch:     noarch
-#!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
 %else
 BuildRequires: ant-nodeps
 %endif
-%if 0%{?rhel_version} && 0%{?rhel_version} == 600
-BuildRequires: java7-devel
+%if 0%{?suse_version}
+BuildRequires: java-1_8_0-openjdk-devel
 %else
-%if (0%{?suse_version} && 0%{?suse_version} >= 1210)
-BuildRequires: java-1_7_0-openjdk-devel
-%else
-BuildRequires: java-devel >= 1.7.0
-%endif
+BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GNU General Public License (GPL)
@@ -29,6 +24,7 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Open-Xchange Munin scripts
 Autoreqprov:   no
 Requires:      munin-node, perl-JSON, perl-libwww-perl
+Requires(pre): open-xchange-system
 Provides:      open-xchange-munin-scripts-jolokia = %{version}
 Obsoletes:     open-xchange-munin-scripts-jolokia < %{version}
 
@@ -110,10 +106,8 @@ systemctl try-restart munin-node >/dev/null 2>&1 || :
 %endif
 exit 0
 
-
 %clean
 %{__rm} -rf %{buildroot}
-
 
 %files
 %defattr(-,root,root)
@@ -124,6 +118,8 @@ exit 0
 %config(noreplace) /etc/munin/plugin-conf.d/ox
 
 %changelog
+* Thu Oct 12 2017 Carsten Hoeger <choeger@open-xchange.com>
+prepare for 7.10.0 release
 * Fri May 19 2017 Carsten Hoeger <choeger@open-xchange.com>
 First candidate for 7.8.4 release
 * Thu May 04 2017 Carsten Hoeger <choeger@open-xchange.com>
@@ -682,14 +678,10 @@ Third candidate for 7.2.1 release
 Build for patch 2013-05-22
 * Wed May 22 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-05-22
-* Wed May 22 2013 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2013-05-22
 * Wed May 15 2013 Carsten Hoeger <choeger@open-xchange.com>
 Second candidate for 7.2.1 release
 * Wed May 15 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-05-10
-* Mon May 13 2013 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2013-05-09
 * Mon May 13 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-05-09
 * Mon May 13 2013 Carsten Hoeger <choeger@open-xchange.com>
@@ -712,8 +704,6 @@ Third candidate for 7.2.0 release
 Second candidate for 7.2.0 release
 * Tue Apr 02 2013 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2013-04-04
-* Tue Apr 02 2013 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2013-04-04
 * Tue Mar 26 2013 Carsten Hoeger <choeger@open-xchange.com>
 First release candidate for 7.2.0
 * Fri Mar 15 2013 Carsten Hoeger <choeger@open-xchange.com>
@@ -728,25 +718,7 @@ Fourth release candidate for 6.22.2/7.0.2
 Third release candidate for 6.22.2/7.0.2
 * Thu Mar 07 2013 Carsten Hoeger <choeger@open-xchange.com>
 Second release candidate for 6.22.2/7.0.2
-* Mon Mar 04 2013 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2013-03-07
 * Wed Feb 27 2013 Carsten Hoeger <choeger@open-xchange.com>
 First release candidate for 6.22.2/7.0.2
 * Tue Feb 19 2013 Carsten Hoeger <choeger@open-xchange.com>
-Fourth release candidate for 7.0.1
-* Tue Feb 19 2013 Carsten Hoeger <choeger@open-xchange.com>
-Third release candidate for 7.0.1
-* Tue Feb 19 2013 Carsten Hoeger <choeger@open-xchange.com>
 prepare for 7.0.2 release
-* Thu Feb 14 2013 Carsten Hoeger <choeger@open-xchange.com>
-Second release candidate for 7.0.1
-* Fri Feb 01 2013 Carsten Hoeger <choeger@open-xchange.com>
-First release candidate for 7.0.1
-* Mon Jan 17 2011 Carsten Hoeger <choeger@open-xchange.com>
-bugfix releaseopen-xchange-munin-scripts (0.1-7) unstable; urgency=low * bugfix releaseopen-xchange-munin-scripts (0.1-6) unstable; urgency=low * bugfix releaseopen-xchange-munin-scripts (0.1-5) unstable; urgency=low * New buildopen-xchange-munin-scripts (0.1-4) unstable; urgency=low * new build including latest changes
-* Fri Oct 08 2010 Carsten Hoeger <choeger@open-xchange.com>
-new build with fix for rpm packages
-* Wed Oct 06 2010 Holger Achtziger <holger.achtziger@open-xchange.com>
-initial public build
-* Wed Aug 04 2010 Holger Achtziger <holger.achtziger@open-xchange.com>
-initial packaging structure

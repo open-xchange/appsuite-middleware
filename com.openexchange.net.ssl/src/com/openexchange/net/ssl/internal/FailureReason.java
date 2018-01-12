@@ -55,13 +55,17 @@ package com.openexchange.net.ssl.internal;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since 7.8.4
  */
-public enum FailureReason {
+enum FailureReason {
     UNTRUSTED_CERTIFICATE(FailureReasonMessage.UNTRUSTED_CERTIFICATE),
     SELF_SIGNED(FailureReasonMessage.SELF_SIGNED),
     UNTRUSTED_ISSUER(FailureReasonMessage.UNTRUSTED_ISSUER),
     EXPIRED(FailureReasonMessage.EXPIRED),
     NOT_TRUSTED_BY_USER(FailureReasonMessage.NOT_TRUSTED_BY_USER),
-    INVALID_COMMON_NAME(FailureReasonMessage.INVALID_COMMON_NAME);
+    INVALID_COMMON_NAME(FailureReasonMessage.INVALID_COMMON_NAME),
+    ALGORITHM_CONSTRAINED(FailureReasonMessage.ALGORITHM_CONSTRAINED),
+    REVOKED(FailureReasonMessage.REVOKED),
+    
+    ;
 
     private final String detail;
 

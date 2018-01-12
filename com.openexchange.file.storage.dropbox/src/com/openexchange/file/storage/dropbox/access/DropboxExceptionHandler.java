@@ -66,6 +66,7 @@ import com.dropbox.core.v2.files.RestoreErrorException;
 import com.dropbox.core.v2.files.SearchErrorException;
 import com.dropbox.core.v2.files.ThumbnailErrorException;
 import com.dropbox.core.v2.files.UploadErrorException;
+import com.dropbox.core.v2.files.WriteConflictError;
 import com.dropbox.core.v2.files.WriteError;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -181,20 +182,27 @@ final class DropboxExceptionHandler {
      * @param e The {@link RelocationErrorException}
      * @param folderId The folder identifier used to trigger the error
      * @param fileId The file identifier used to trigger the error
+     * @param accountDisplayName The display name of the associated account
      * @return The {@link OXException}
      */
-    static final OXException handleRelocationErrorException(RelocationErrorException e, String folderId, String fileId) {
+    static final OXException handleRelocationErrorException(RelocationErrorException e, String folderId, String fileId, String accountDisplayName) {
         switch (e.errorValue.tag()) {
             case FROM_LOOKUP:
                 return mapLookupError(e.errorValue.getFromLookupValue(), folderId, fileId, e);
             case FROM_WRITE:
-                return mapWriteError(e.errorValue.getFromWriteValue(), folderId, e);
+                return mapWriteError(e.errorValue.getFromWriteValue(), folderId, accountDisplayName, e);
             case CANT_COPY_SHARED_FOLDER:
             case CANT_MOVE_FOLDER_INTO_ITSELF:
             case CANT_NEST_SHARED_FOLDER:
             case OTHER:
             case TO:
-                return mapWriteError(e.errorValue.getToValue(), fileId, e);
+                {
+                    WriteError error = e.errorValue.getToValue();
+                    if (WriteConflictError.FILE == error.getConflictValue()) {
+                        return mapWriteError(error, fileId, accountDisplayName, e);
+                    }
+                    return mapWriteError(error, folderId, accountDisplayName, e);
+                }
             case TOO_MANY_FILES:
             default:
                 // Everything else falls through to 'unexpected error'
@@ -208,14 +216,15 @@ final class DropboxExceptionHandler {
      * @param e The {@link RestoreErrorException}
      * @param folderId The folder identifier used to trigger the error
      * @param fileId The file identifier used to trigger the error
+     * @param accountDisplayName The display name of the associated account
      * @return The {@link OXException}
      */
-    static final OXException handleRestoreErrorException(RestoreErrorException e, String folderId, String fileId) {
+    static final OXException handleRestoreErrorException(RestoreErrorException e, String folderId, String fileId, String accountDisplayName) {
         switch (e.errorValue.tag()) {
             case PATH_LOOKUP:
                 return mapLookupError(e.errorValue.getPathLookupValue(), folderId, fileId, e);
             case PATH_WRITE:
-                return mapWriteError(e.errorValue.getPathWriteValue(), folderId, e);
+                return mapWriteError(e.errorValue.getPathWriteValue(), folderId, accountDisplayName, e);
             case INVALID_REVISION:
             case OTHER:
             default:
@@ -229,12 +238,13 @@ final class DropboxExceptionHandler {
      *
      * @param e The {@link UploadErrorException}
      * @param folderId The folder identifier used to trigger the error
+     * @param accountDisplayName The display name of the associated account
      * @return The {@link OXException}
      */
-    static final OXException handleUploadErrorException(UploadErrorException e, String folderId) {
+    static final OXException handleUploadErrorException(UploadErrorException e, String folderId, String accountDisplayName) {
         switch (e.errorValue.tag()) {
             case PATH:
-                return mapWriteError(e.errorValue.getPathValue().getReason(), folderId, e);
+                return mapWriteError(e.errorValue.getPathValue().getReason(), folderId, accountDisplayName, e);
             case OTHER:
             default:
                 // Everything else falls through to 'unexpected error'
@@ -304,14 +314,15 @@ final class DropboxExceptionHandler {
      * @param e The {@link DeleteErrorException}
      * @param folderId The folder identifier used to trigger the error
      * @param fileId The file identifier used to trigger the error
+     * @param accountDisplayName The display name of the associated account
      * @return The {@link OXException}
      */
-    static final OXException handleDeleteErrorException(DeleteErrorException e, String folderId, String fileId) {
+    static final OXException handleDeleteErrorException(DeleteErrorException e, String folderId, String fileId, String accountDisplayName) {
         switch (e.errorValue.tag()) {
             case PATH_LOOKUP:
                 return mapLookupError(e.errorValue.getPathLookupValue(), folderId, fileId, e);
             case PATH_WRITE:
-                return mapWriteError(e.errorValue.getPathWriteValue(), folderId, e);
+                return mapWriteError(e.errorValue.getPathWriteValue(), folderId, accountDisplayName, e);
             case OTHER:
             default:
                 // Everything else falls through to 'unexpected error'
@@ -345,12 +356,13 @@ final class DropboxExceptionHandler {
      *
      * @param e The {@link CreateFolderErrorException}
      * @param folderId The folder identifier used to trigger the error
+     * @param accountDisplayName The display name of the associated account
      * @return The {@link OXException}
      */
-    static final OXException handleCreateFolderErrorException(CreateFolderErrorException e, String folderId) {
+    static final OXException handleCreateFolderErrorException(CreateFolderErrorException e, String folderId, String accountDisplayName) {
         switch (e.errorValue.tag()) {
             case PATH:
-                return mapWriteError(e.errorValue.getPathValue(), folderId, e);
+                return mapWriteError(e.errorValue.getPathValue(), folderId, accountDisplayName, e);
             default:
                 // Everything else falls through to 'unexpected error'
                 return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -386,10 +398,11 @@ final class DropboxExceptionHandler {
      *
      * @param error The {@link WriteError}
      * @param id The object's identifier used to trigger the error
+     * @param accountDisplayName The display name of the associated account
      * @param e The next {@link Exception}
      * @return An {@link OXException}
      */
-    private static final OXException mapWriteError(WriteError error, String id, Exception e) {
+    private static final OXException mapWriteError(WriteError error, String id, String accountDisplayName, Exception e) {
         switch (error.tag()) {
             case DISALLOWED_NAME:
                 return FileStorageExceptionCodes.ILLEGAL_CHARACTERS.create(e, id);
@@ -398,7 +411,29 @@ final class DropboxExceptionHandler {
             case NO_WRITE_PERMISSION:
                 return FileStorageExceptionCodes.NO_CREATE_ACCESS.create(e, id);
             case CONFLICT:
-                return FileStorageExceptionCodes.FILE_ALREADY_EXISTS.create(e, id);
+                {
+                    if (WriteConflictError.FILE == error.getConflictValue()) {
+                        return FileStorageExceptionCodes.FILE_ALREADY_EXISTS.create(e, id);
+                    }
+
+                    int slashPos = id.lastIndexOf('/');
+                    String name;
+                    String parentName;
+                    if (slashPos > 0) {
+                        String parentId = id.substring(0, slashPos);
+
+                        name = id.substring(slashPos + 1);
+                        parentName = parentId.substring(parentId.lastIndexOf('/') + 1);
+                        if (Strings.isEmpty(parentName)) {
+                            parentName = accountDisplayName;
+                        }
+                    } else {
+                        name = id;
+                        parentName = accountDisplayName;
+                    }
+
+                    return FileStorageExceptionCodes.DUPLICATE_FOLDER.create(e, name, parentName);
+                }
             default:
                 return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

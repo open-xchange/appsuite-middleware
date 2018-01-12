@@ -71,6 +71,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService;
+import com.openexchange.ajax.requesthandler.jobqueue.JobKey;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.Category;
@@ -128,8 +130,8 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@DispatcherNotes( preferStream = true )
-public final class NewAction extends AbstractMailAction {
+@DispatcherNotes( preferStream = true, enqueueable = true )
+public final class NewAction extends AbstractMailAction implements EnqueuableAJAXActionService  {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NewAction.class);
 
@@ -149,42 +151,88 @@ public final class NewAction extends AbstractMailAction {
         draftTypes = EnumSet.of(ComposeType.DRAFT, ComposeType.DRAFT_DELETE_ON_TRANSPORT, ComposeType.DRAFT_EDIT, ComposeType.DRAFT_NO_DELETE_ON_TRANSPORT);
     }
 
+    private boolean hasUploads(AJAXRequestData request, ServerSession session) throws OXException {
+        long maxSize;
+        long maxFileSize;
+        {
+            UserSettingMail usm = session.getUserSettingMail();
+            maxFileSize = usm.getUploadQuotaPerFile();
+            if (maxFileSize <= 0) {
+                maxFileSize = -1L;
+            }
+            maxSize = usm.getUploadQuota();
+            if (maxSize <= 0) {
+                if (maxSize == 0) {
+                    maxSize = -1L;
+                } else {
+                    LOG.debug("Upload quota is less than zero. Using global server property \"MAX_UPLOAD_SIZE\" instead.");
+                    long globalQuota;
+                    try {
+                        globalQuota = ServerConfig.getLong(Property.MAX_UPLOAD_SIZE).longValue();
+                    } catch (OXException e) {
+                        LOG.error("", e);
+                        globalQuota = 0L;
+                    }
+                    maxSize = globalQuota <= 0 ? -1L : globalQuota;
+                }
+            }
+        }
+
+        return request.hasUploads(maxFileSize, maxSize);
+    }
+
+    @Override
+    public EnqueuableAJAXActionService.Result isEnqueueable(AJAXRequestData request, ServerSession session) throws OXException {
+        // Only allowed if no JS call-back is expected
+        if (hasUploads(request, session)) {
+            if (false == AJAXRequestDataTools.parseBoolParameter(PLAIN_JSON, request)) {
+                return EnqueuableAJAXActionService.resultFor(false);
+            }
+
+            UploadEvent uploadEvent = request.getUploadEvent();
+            String json0 = uploadEvent.getFormField(UPLOAD_FORMFIELD_MAIL);
+            if (json0 == null || json0.trim().length() == 0) {
+                throw MailExceptionCode.PROCESSING_ERROR.create(MailExceptionCode.MISSING_PARAM.create(UPLOAD_FORMFIELD_MAIL), new Object[0]);
+            }
+
+            try {
+                JSONObject jMail = new JSONObject(json0);
+
+                JSONObject jKeyDesc = new JSONObject(6);
+                jKeyDesc.put("module", "mail");
+                jKeyDesc.put("action", "new");
+                jKeyDesc.put("uploads", true);
+                {
+                    Object from = jMail.opt(FROM);
+                    jKeyDesc.put("from", null == from ? JSONObject.NULL : from);
+                }
+                {
+                    Object to = jMail.opt(MailJSONField.RECIPIENT_TO.getKey());
+                    jKeyDesc.put("to", null == to ? JSONObject.NULL : to);
+                }
+                {
+                    Object subject = jMail.opt(MailJSONField.SUBJECT.getKey());
+                    jKeyDesc.put("subject", null == subject ? JSONObject.NULL : subject);
+                }
+                jKeyDesc.put("draft", (jMail.optInt(FLAGS, 0) & MailMessage.FLAG_DRAFT) > 0);
+
+                return EnqueuableAJAXActionService.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()));
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+            }
+        }
+
+        return EnqueuableAJAXActionService.resultFor(true);
+    }
+
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         try {
-            long maxSize;
-            long maxFileSize;
-            {
-                UserSettingMail usm = req.getSession().getUserSettingMail();
-                maxFileSize = usm.getUploadQuotaPerFile();
-                if (maxFileSize <= 0) {
-                    maxFileSize = -1L;
-                }
-                maxSize = usm.getUploadQuota();
-                if (maxSize <= 0) {
-                    if (maxSize == 0) {
-                        maxSize = -1L;
-                    } else {
-                        LOG.debug("Upload quota is less than zero. Using global server property \"MAX_UPLOAD_SIZE\" instead.");
-                        long globalQuota;
-                        try {
-                            globalQuota = ServerConfig.getLong(Property.MAX_UPLOAD_SIZE).longValue();
-                        } catch (OXException e) {
-                            LOG.error("", e);
-                            globalQuota = 0L;
-                        }
-                        maxSize = globalQuota <= 0 ? -1L : globalQuota;
-                    }
-                }
-            }
-
             AJAXRequestData request = req.getRequest();
-            List<OXException> warnings = new ArrayList<OXException>();
-
-            if (request.hasUploads(maxFileSize, maxSize) || request.getParameter(UPLOAD_FORMFIELD_MAIL) != null) {
-                return performWithUploads(req, request, warnings);
+            if (hasUploads(request, req.getSession()) || request.getParameter(UPLOAD_FORMFIELD_MAIL) != null) {
+                return performWithUploads(req, request);
             }
-            return performWithoutUploads(req, warnings);
+            return performWithoutUploads(req);
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final MessagingException e) {
@@ -194,10 +242,11 @@ public final class NewAction extends AbstractMailAction {
         }
     }
 
-    private AJAXRequestResult performWithUploads(MailRequest req, AJAXRequestData request, List<OXException> warnings) throws OXException, JSONException {
+    private AJAXRequestResult performWithUploads(MailRequest req, AJAXRequestData request) throws OXException, JSONException {
         ServerSession session = req.getSession();
         String csid = req.getParameter(AJAXServlet.PARAMETER_CSID);
         UploadEvent uploadEvent = request.getUploadEvent();
+        List<OXException> warnings = new ArrayList<OXException>();
         String msgIdentifier = null;
         UserSettingMail userSettingMail = null;
         {
@@ -525,7 +574,7 @@ public final class NewAction extends AbstractMailAction {
      * @param warnings The warnings to fill
      * @return The request result
      */
-    protected AJAXRequestResult performWithoutUploads(final MailRequest req, final List<OXException> warnings) throws OXException, MessagingException, JSONException {
+    protected AJAXRequestResult performWithoutUploads(final MailRequest req) throws OXException, MessagingException, JSONException {
         /*
          * Non-POST
          */
@@ -594,9 +643,7 @@ public final class NewAction extends AbstractMailAction {
         responseObj.put(FolderChildFields.FOLDER_ID, folder);
         responseObj.put(DataFields.ID, ids[0]);
 
-        AJAXRequestResult result = new AJAXRequestResult(responseObj, "json");
-        result.addWarnings(warnings);
-        return result;
+        return new AJAXRequestResult(responseObj, "json");
     }
 
     private MimeMessage loadMimeMessageFrom(final MailRequest req) throws OXException {

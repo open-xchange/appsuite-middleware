@@ -60,6 +60,7 @@ import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.internal.reloadable.GlobalDbConfigsReloadable;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.exception.OXException;
+import com.openexchange.lock.LockService;
 
 /**
  * Contains the code to startup the complete database connection pooling and replication monitor.
@@ -69,7 +70,17 @@ import com.openexchange.exception.OXException;
 public final class Initialization {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Initialization.class);
+
     private static final Initialization SINGLETON = new Initialization();
+
+    /**
+     * Gets the instance.
+     *
+     * @return The instance
+     */
+    public static final Initialization getInstance() {
+        return SINGLETON;
+    }
 
     private static final AtomicReference<ConfigurationService> CONF_REF = new AtomicReference<ConfigurationService>();
 
@@ -91,6 +102,26 @@ public final class Initialization {
         return CONF_REF.get();
     }
 
+    private static final AtomicReference<LockService> LOCKSERV_REF = new AtomicReference<LockService>();
+
+    /**
+     * Sets the lock service.
+     *
+     * @param configurationService The lock service
+     */
+    public static void setLockService(final LockService configurationService) {
+        LOCKSERV_REF.set(configurationService);
+    }
+
+    /**
+     * Gets the lock service.
+     *
+     * @return The lock service or <code>null</code> if absent
+     */
+    public static LockService getLockService() {
+        return LOCKSERV_REF.get();
+    }
+
     // -------------------------------------------------------------------------------------------------------------- //
 
     private final Timer timer = new Timer();
@@ -108,11 +139,7 @@ public final class Initialization {
         super();
     }
 
-    public static final Initialization getInstance() {
-        return SINGLETON;
-    }
-
-    public boolean isStarted() {
+    public synchronized boolean isStarted() {
         return null != databaseService;
     }
 
@@ -124,7 +151,7 @@ public final class Initialization {
      * @param migrationService The database migration service, or <code>null</code> if not available
      * @return The database service
      */
-    public DatabaseServiceImpl start(ConfigurationService configurationService, ConfigViewFactory configViewFactory, DBMigrationExecutorService migrationService) throws OXException {
+    public synchronized DatabaseServiceImpl start(ConfigurationService configurationService, ConfigViewFactory configViewFactory, DBMigrationExecutorService migrationService) throws OXException {
         if (null != databaseService) {
             throw DBPoolingExceptionCodes.ALREADY_INITIALIZED.create(Initialization.class.getName());
         }
@@ -141,7 +168,7 @@ public final class Initialization {
         final ConfigDatabaseLifeCycle configDBLifeCycle = new ConfigDatabaseLifeCycle(configuration, management, timer);
         pools.addLifeCycle(configDBLifeCycle);
         // Configuration database connection pool service.
-        configDatabaseService = new ConfigDatabaseServiceImpl(new ConfigDatabaseAssignmentImpl(), pools, monitor);
+        configDatabaseService = new ConfigDatabaseServiceImpl(new ConfigDatabaseAssignmentImpl(), pools, monitor, LockMech.lockMechFor(configuration.getProperty(Configuration.Property.LOCK_MECH, LockMech.ROW_LOCK.getId())));
         if (null != cacheService) {
             configDatabaseService.setCacheService(cacheService);
         }
@@ -167,7 +194,7 @@ public final class Initialization {
         return databaseService;
     }
 
-    public void stop() {
+    public synchronized void stop() {
         databaseService = null;
         configDatabaseService.removeCacheService();
         configDatabaseService = null;
@@ -177,25 +204,25 @@ public final class Initialization {
         configuration.clear();
     }
 
-    public void setCacheService(final CacheService service) {
+    public synchronized void setCacheService(final CacheService service) {
         this.cacheService = service;
         if (null != configDatabaseService) {
             configDatabaseService.setCacheService(service);
         }
     }
 
-    public void removeCacheService() {
+    public synchronized void removeCacheService() {
         this.cacheService = null;
         if (null != configDatabaseService) {
             configDatabaseService.removeCacheService();
         }
     }
 
-    public Management getManagement() {
+    public synchronized Management getManagement() {
         return management;
     }
 
-    public Timer getTimer() {
+    public synchronized Timer getTimer() {
         return timer;
     }
 

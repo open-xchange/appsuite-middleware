@@ -59,25 +59,25 @@ import com.openexchange.exception.OXExceptionStrings;
  * {@link UserAliasStorageExceptionCodes} - The error messages for mail account exceptions.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  */
 public enum UserAliasStorageExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
      * Unexpected error: %1$s.
      */
-    UNEXPECTED_ERROR(UserAliasStorageExceptionCodes.UNEXPECTED_ERROR_MSG, CATEGORY_ERROR, 1),
+    UNEXPECTED_ERROR("Unexpected error: %1$s.", CATEGORY_ERROR, 1),
     /**
      * A SQL error occurred: %1$s.
      */
-    SQL_ERROR(UserAliasStorageExceptionCodes.SQL_ERROR_MSG, CATEGORY_ERROR, 2, OXExceptionStrings.SQL_ERROR_MSG),
-
+    SQL_ERROR("An SQL error occurred: %1$s.", CATEGORY_ERROR, 2, OXExceptionStrings.SQL_ERROR_MSG),
+    /**
+     * {@value #DUPLICATE_ALIAS_MSG}
+     */
+    DUPLICATE_ALIAS("The alias %1$s already exists. Please note that the alias is case insensitive!", CATEGORY_ERROR, 3)
     ;
 
     private static final String PREFIX = "USER_ALIAS";
-
-    private static final String UNEXPECTED_ERROR_MSG = "Unexpected error: %1$s.";
-
-    private static final String SQL_ERROR_MSG = "A SQL error occurred: %1$s.";
 
     /**
      * Checks if specified {@code OXException}'s prefix is equal to this {@code OXExceptionCode} enumeration.
@@ -115,9 +115,9 @@ public enum UserAliasStorageExceptionCodes implements DisplayableOXExceptionCode
     /**
      * Default constructor.
      *
-     * @param message message.
-     * @param category category.
-     * @param number number.
+     * @param message The message
+     * @param category The {@link Category}
+     * @param number The unique number
      */
     private UserAliasStorageExceptionCodes(final String message, final Category category, final int number) {
         this(message, category, number, null);
@@ -126,10 +126,10 @@ public enum UserAliasStorageExceptionCodes implements DisplayableOXExceptionCode
     /**
      * Default constructor.
      *
-     * @param message
-     * @param category
-     * @param number
-     * @param displayMessage
+     * @param message The message
+     * @param category The {@link Category}
+     * @param number The unique number
+     * @param displayMessage The display message
      */
     private UserAliasStorageExceptionCodes(final String message, final Category category, final int number, final String displayMessage) {
         this.message = message;

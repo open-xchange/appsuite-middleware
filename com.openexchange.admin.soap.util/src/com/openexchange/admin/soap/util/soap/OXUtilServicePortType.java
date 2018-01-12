@@ -155,6 +155,10 @@ public interface OXUtilServicePortType {
     public com.openexchange.admin.soap.util.dataobjects.Database registerDatabase(
         @WebParam(name = "db", targetNamespace = "http://soap.admin.openexchange.com")
         com.openexchange.admin.soap.util.dataobjects.Database db,
+        @WebParam(name = "createSchemas", targetNamespace = "http://soap.admin.openexchange.com")
+        java.lang.Boolean createSchemas,
+        @WebParam(name = "optNumberOfSchemas", targetNamespace = "http://soap.admin.openexchange.com")
+        java.lang.Integer optNumberOfSchemas,
         @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com")
         com.openexchange.admin.soap.util.dataobjects.Credentials auth
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception;

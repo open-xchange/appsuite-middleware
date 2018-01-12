@@ -61,4 +61,10 @@ import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
  */
 public abstract class OXUtilSQLStorage extends OXUtilStorageInterface {
 
+    /**
+     * Initialises a new {@link OXUtilSQLStorage}.
+     */
+    protected OXUtilSQLStorage() {
+        super();
+    }
 }
