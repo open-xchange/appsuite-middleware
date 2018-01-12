@@ -611,8 +611,6 @@ RemoveAllOtherSessionsBody:
 # Module: OpenId
 InitResponse:
   $ref: ./openid/InitRequest.yaml
-LogoutResponse:
-  $ref: ./openid/LogoutRequest.yaml
 
 
 

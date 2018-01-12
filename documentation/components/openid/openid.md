@@ -5,9 +5,10 @@ Available since version: 7.10.0
 
 
 # Introduction
-Kurze Zusammenfassung was das überhaupt ist und welche specs umgesetzt wurden. Ab 7.8.4 verfügbar
 
 With version 7.10.0 Appsuite introduces the support for Single Sign On (SSO) with OpenID which is also compatible with version 7.8.4. OpenID Connect 1.0 is a simple identity layer on top of the OAuth 2.0 protocol. It enables Clients to verify the identity of the End-User based on the authentication performed by an Authorization Server, as well as to obtain basic profile information about the End-User in an interoperable and REST-like manner. The implementation supports handling of multiple OpenID providers (OP) for different hosts from one single instance. Logout with termination of the OPs session is available alongside an autologin mechanism which checks for a valid OP session before login. So far only the code flow for login and a third party initiated login are supported. There is also no possibility to gather additional user information from an OP after authorization so far. The session status mechanism with two comunicating IFrames like suggested by the standard is also not supported.
+
+The full OpenID specification can be found [here](http://openid.net/specs/openid-connect-core-1_0.html).
 
 # Feature overview
 * Code flow authorization

@@ -1,10 +1,10 @@
-feature_name: OpenId
+feature_name: OpenID
 feature_description: |
   The properties for the oidc module
 properties:
     - key: com.openexchange.oidc.enabled
       description: |
-        Switch to enable disable the core OpenId feature.
+        Switch to enable disable the core OpenID feature.
       defaultValue: false
       version: 7.10.0
       reloadable: true
@@ -12,11 +12,11 @@ properties:
       related: 
       file: 
       packageName: open-xchange-oidc
-      tags: ["OpenId"]
+      tags: ["OpenID"]
       
     - key: com.openexchange.oidc.startDefaultBackend
       description: |
-         Start the default core OpenId backend.
+         Start the default core OpenID backend.
       defaultValue: false
       version: 7.10.0
       reloadable: true
@@ -24,7 +24,7 @@ properties:
       related: 
       file: 
       packageName: open-xchange-oidc
-      tags: ["OpenId"]
+      tags: ["OpenID"]
       
     - key: com.openexchange.oidc.clientId
       description: |
@@ -37,7 +37,7 @@ properties:
       related: 
       file: 
       packageName: open-xchange-oidc
-      tags: ["OpenId"]
+      tags: ["OpenID"]
     - key: com.openexchange.oidc.rpRedirectURIInit
       description: |
         The path to the init servlet of this backend
@@ -48,7 +48,7 @@ properties:
       related: 
       file: 
       packageName: open-xchange-oidc
-      tags: ["OpenId"]
+      tags: ["OpenID"]
       
 - key: com.openexchange.oidc.rpRedirectURIAuth
       description: |
@@ -60,7 +60,7 @@ properties:
       related: 
       file: 
       packageName: open-xchange-oidc
-      tags: ["OpenId"]
+      tags: ["OpenID"]
       
 - key: com.openexchange.oidc.opAuthorizationEndpoint
       description: |
@@ -72,7 +72,7 @@ properties:
       related: 
       file: 
       packageName: open-xchange-oidc
-      tags: ["OpenId"]
+      tags: ["OpenID"]
       
 - key: com.openexchange.oidc.opTokenEndpoint
       description: |
@@ -84,7 +84,7 @@ properties:
       related: 
       file: 
       packageName: open-xchange-oidc
-      tags: ["OpenId"]
+      tags: ["OpenID"]
       
 - key: com.openexchange.oidc.clientSecret
       description: |
@@ -97,7 +97,7 @@ properties:
       related: 
       file: 
       packageName: open-xchange-oidc
-      tags: ["OpenId"]
+      tags: ["OpenID"]
       
 - key: com.openexchange.oidc.opJwkSetEndpoint
       description: |
@@ -109,7 +109,7 @@ properties:
       related: 
       file: 
       packageName: open-xchange-oidc
-      tags: ["OpenId"]
+      tags: ["OpenID"]
       
 - key: com.openexchange.oidc.jwsAlgorithm
       description: |
@@ -121,19 +121,19 @@ properties:
       related: 
       file: 
       packageName: open-xchange-oidc
-      tags: ["OpenId"]
+      tags: ["OpenID"]
       
 - key: com.openexchange.oidc.scope
       description: |
         The used scope
-      defaultValue: openid
+      defaultValue: OpenID
       version: 7.10.0
       reloadable: true
       configcascadeAware: false
       related: 
       file: 
       packageName: open-xchange-oidc
-      tags: ["OpenId"]
+      tags: ["OpenID"]
       
 - key: com.openexchange.oidc.opIssuer
       description: |
@@ -145,7 +145,7 @@ properties:
       related: 
       file: 
       packageName: open-xchange-oidc
-      tags: ["OpenId"]
+      tags: ["OpenID"]
       
 - key: com.openexchange.oidc.responseType
       description: |
@@ -157,7 +157,7 @@ properties:
       related: 
       file: 
       packageName: open-xchange-oidc
-      tags: ["OpenId"]
+      tags: ["OpenID"]
       
 - key: com.openexchange.oidc.opLogoutEndpoint
       description: |
@@ -169,7 +169,7 @@ properties:
       related: 
       file: 
       packageName: open-xchange-oidc
-      tags: ["OpenId"]
+      tags: ["OpenID"]
       
 - key: com.openexchange.oidc.rpRedirectURIPostSSOLogout
       description: |
@@ -182,7 +182,7 @@ properties:
       related: 
       file: 
       packageName: open-xchange-oidc
-      tags: ["OpenId"]
+      tags: ["OpenID"]
       
 - key: com.openexchange.oidc.ssoLogout
       description: |
@@ -194,7 +194,7 @@ properties:
       related: 
       file: 
       packageName: open-xchange-oidc
-      tags: ["OpenId"]
+      tags: ["OpenID"]
       
 - key: com.openexchange.oidc.rpRedirectURILogout
       description: |
@@ -206,7 +206,7 @@ properties:
       related: 
       file: 
       packageName: open-xchange-oidc
-      tags: ["OpenId"]
+      tags: ["OpenID"]
       
 - key: com.openexchange.oidc.autologinCookieMode
       description: |
@@ -223,7 +223,7 @@ properties:
       related: 
       file: 
       packageName: open-xchange-oidc
-      tags: ["OpenId"]
+      tags: ["OpenID"]
       
 - key: com.openexchange.oidc.oauthRefreshTime
       description: |
@@ -237,7 +237,7 @@ properties:
       related: 
       file: 
       packageName: open-xchange-oidc
-      tags: ["OpenId"]
+      tags: ["OpenID"]
       
 - key: com.openexchange.oidc.uiWebPath
       description: |
@@ -249,7 +249,7 @@ properties:
       related: 
       file: 
       packageName: open-xchange-oidc
-      tags: ["OpenId"]
+      tags: ["OpenID"]
       
 - key: com.openexchange.oidc.backendPath
       description: |
@@ -261,4 +261,4 @@ properties:
       related: 
       file: 
       packageName: open-xchange-oidc
-      tags: ["OpenId"]
+      tags: ["OpenID"]

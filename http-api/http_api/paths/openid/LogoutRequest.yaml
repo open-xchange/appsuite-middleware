@@ -2,8 +2,8 @@
   get:
     operationId: logout
     tags:
-      - OpenId
-    summary: Initiate the communication with the OpenId module
+      - OpenID
+    summary: Initiate the communication with the OpenID module
     description: |
       The logout request will terminate everx session for the current user and redirect him to the 
       configured after logout page.
