@@ -67,7 +67,6 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.ExtendedPropertyParameter;
 import com.openexchange.chronos.FreeBusyData;
@@ -347,39 +346,13 @@ public class ICalUtils {
         try {
             writer = new FoldingWriter(new OutputStreamWriter(outputStream, Charsets.UTF_8), FoldingWriter.REDUCED_FOLD_LENGTH);
             for (Iterator<?> componentIiterator = components.iterator(); componentIiterator.hasNext();) {
-                PropertyList properties = ((Component) componentIiterator.next()).getProperties();
-                for (Iterator<?> iterator = properties.iterator(); iterator.hasNext();) {
-                    writer.write(iterator.next().toString());
-                }
+                writer.write(((Component) componentIiterator.next()).toString());
             }
         } catch (IOException e) {
             throw new OXException(e);
         } finally {
             Streams.close(writer);
         }
-    }
-
-    /**
-     * Exports a collection of extended properties to the target calendar component.
-     *
-     * @param extendedProperties The extended properties to export
-     * @param component The component to export the properties to
-     */
-    private static void exportProperties(ExtendedProperties extendedProperties, Component component) {
-        for (Property property : exportProperties(extendedProperties)) {
-            component.getProperties().add(property);
-        }
-    }
-
-    private static List<Property> exportProperties(List<ExtendedProperty> extendedProperties) {
-        if (null == extendedProperties || 0 == extendedProperties.size()) {
-            return Collections.emptyList();
-        }
-        List<Property> properties = new ArrayList<Property>(extendedProperties.size());
-        for (ExtendedProperty extendedProperty : extendedProperties) {
-            properties.add(exportProperty(extendedProperty));
-        }
-        return properties;
     }
 
     static Property exportProperty(ExtendedProperty extendedProperty) {
