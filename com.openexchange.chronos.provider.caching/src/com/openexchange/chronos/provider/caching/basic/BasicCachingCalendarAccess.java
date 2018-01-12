@@ -186,8 +186,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      */
     @Override
     public long getSequenceNumber() throws OXException {
-        // TODO Auto-generated method stub
-        return 0;
+        return new SyncHandler(session, account, parameters).getSequenceNumber();
     }
 
     /*

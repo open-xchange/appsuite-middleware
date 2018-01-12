@@ -112,12 +112,22 @@ public class SyncHandler extends AbstractExtensionHandler {
      * Gets the sequence number, which is the highest last-modification timestamp of the account itself and its contents.
      * 
      * @return The sequence number
+     * @throws OXException
      */
-    public long getSequenceNumber() {
+    public long getSequenceNumber() throws OXException {
+        long timestamp = getAccount().getLastModified().getTime();
+
         SearchOptions searchOptions = new SearchOptions().addOrder(SortOrder.getSortOrder(EventField.TIMESTAMP, SortOrder.Order.DESC)).setLimits(0, 1);
         EventField[] fields = { EventField.TIMESTAMP };
-        //getEventStorage().searchEvents(searchTerm, searchOptions, fields);
-        return 0;
+        List<Event> events = getEventStorage().searchEvents(createSearchTerm(0), searchOptions, fields);
+        if (false == events.isEmpty() && timestamp < events.get(0).getTimestamp()) {
+            timestamp = events.get(0).getTimestamp();
+        }
+        List<Event> tombstoneEvents = getEventStorage().searchEventTombstones(createSearchTerm(0), searchOptions, fields);
+        if (false == tombstoneEvents.isEmpty() && timestamp < tombstoneEvents.get(0).getTimestamp()) {
+            timestamp = tombstoneEvents.get(0).getTimestamp();
+        }
+        return timestamp;
     }
 
     /**
