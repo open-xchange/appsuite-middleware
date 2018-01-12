@@ -50,10 +50,7 @@
 package com.openexchange.chronos.provider.caching.basic.handlers;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
