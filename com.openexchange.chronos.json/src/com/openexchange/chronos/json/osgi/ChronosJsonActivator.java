@@ -105,7 +105,7 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            IDBasedCalendarAccessFactory.class, CalendarUtilities.class, CalendarService.class, LeanConfigurationService.class, CalendarAccountService.class, ConversionService.class
+            IDBasedCalendarAccessFactory.class, CalendarUtilities.class, CalendarService.class, LeanConfigurationService.class, CalendarAccountService.class, ConversionService.class, ITipActionPerformerFactoryService.class
         };
     }
 
@@ -119,7 +119,7 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
             registerModule(new ChronosActionFactory(this), "chronos");
             registerModule(new ChronosAccountActionFactory(this), "chronos/account");
             registerModule(new AlarmActionFactory(this), "chronos/alarm");
-            
+
             /*
              * ITip stuff
              */
@@ -129,7 +129,7 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
             rememberTracker(factoryTracker);
             openTrackers();
             registerModule(new ITipActionFactory(this, analyzerTracker, factoryTracker), "chronos/itip");
-            
+
             // Availability disabled until further notice
             //registerModule(new AvailabilityActionFactory(this), "chronos/availability");
             /*
@@ -162,15 +162,15 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
             /*
              * register data handlers
              */
-            registerService(DataHandler.class, new Json2ObjectDataHandler<Event, EventField>(
+            registerService(DataHandler.class, new Json2ObjectDataHandler<>(
                 EventMapper.getInstance()), singletonDictionary("identifier", DataHandlers.JSON2EVENT));
-            registerService(DataHandler.class, new Json2ObjectDataHandler<Alarm, AlarmField>(
+            registerService(DataHandler.class, new Json2ObjectDataHandler<>(
                 AlarmMapper.getInstance()), singletonDictionary("identifier", DataHandlers.JSON2ALARM));
-            registerService(DataHandler.class, new Object2JsonDataHandler<Alarm, AlarmField>(
+            registerService(DataHandler.class, new Object2JsonDataHandler<>(
                 AlarmMapper.getInstance(), Alarm.class, Alarm[].class), singletonDictionary("identifier", DataHandlers.ALARM2JSON));
-            registerService(DataHandler.class, new Json2ObjectDataHandler<Available, AvailableField>(
+            registerService(DataHandler.class, new Json2ObjectDataHandler<>(
                 AvailableMapper.getInstance()), singletonDictionary("identifier", DataHandlers.JSON2AVAILABLE));
-            registerService(DataHandler.class, new Object2JsonDataHandler<Available, AvailableField>(
+            registerService(DataHandler.class, new Object2JsonDataHandler<>(
                 AvailableMapper.getInstance(), Available.class, Available[].class), singletonDictionary("identifier", DataHandlers.AVAILABLE2JSON));
             registerService(DataHandler.class, new XProperties2JsonDataHandler(), singletonDictionary("identifier", DataHandlers.XPROPERTIES2JSON));
             registerService(DataHandler.class, new Json2XPropertiesDataHandler(), singletonDictionary("identifier", DataHandlers.JSON2XPROPERTIES));
