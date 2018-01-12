@@ -115,10 +115,6 @@ public class EventResultConverter implements ResultConverter {
         result.setResultObject(resultObject, getOutputFormat());
     }
 
-    protected JSONObject convertEve1nt(Event event, String timeZoneID, Session session) throws OXException {
-        return convertEvent(event, timeZoneID, session, null);
-    }
-
     protected JSONObject convertEvent(Event event, String timeZoneID, Session session, EventField[] fields) throws OXException {
         if (null == event) {
             return null;
@@ -131,10 +127,6 @@ public class EventResultConverter implements ResultConverter {
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
-    }
-
-    protected JSONArray convertEvent1s(List<Event> events, String timeZoneID, Session session) throws OXException {
-        return convertEvents(events, timeZoneID, session, null);
     }
 
     protected JSONArray convertEvents(List<Event> events, String timeZoneID, Session session, EventField[] fields) throws OXException {
