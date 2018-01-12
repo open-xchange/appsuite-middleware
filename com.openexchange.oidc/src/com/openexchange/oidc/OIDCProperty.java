@@ -59,11 +59,11 @@ import com.openexchange.config.lean.Property;
  */
 public enum OIDCProperty implements Property {
     /**
-     * enabled - Switch to enable disable the core OpenId feature.
+     * enabled - Switch to enable disable the core OpenID feature.
      */
     enabled(OIDCProperty.PREFIX, false),
     /**
-     * startDefaultBackend - Start the default core OpenId backend.
+     * startDefaultBackend - Start the default core OpenID backend.
      */
     startDefaultBackend(OIDCProperty.PREFIX, false);
     
