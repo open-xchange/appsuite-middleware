@@ -296,9 +296,7 @@ public class EventUpdateProcessor implements EventUpdate {
          * adjust attendee-dependent fields (ignore for change exceptions)
          */
         if (isSeriesException(originalEvent)) {
-            updatedEvent.removeOrganizer();
-            updatedEvent.removeFolderId();
-            updatedEvent.removeCalendarUser();
+            EventMapper.getInstance().copy(originalEvent, updatedEvent, EventField.ORGANIZER, EventField.FOLDER_ID, EventField.CALENDAR_USER);
         } else if (isNullOrEmpty(updatedEvent.getAttendees())) {
             adjustForNonGroupScheduled(originalEvent, updatedEvent);
         } else {
@@ -717,39 +715,43 @@ public class EventUpdateProcessor implements EventUpdate {
      * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.2.8">RFC 6638, section 3.2.8</a>
      */
     private boolean needsParticipationStatusReset(Event originalEvent, Event updatedEvent) throws OXException {
-        if (CalendarUtils.isOrganizer(updatedEvent, calendarUser.getEntity())) {
-            if (false == EventMapper.getInstance().get(EventField.RECURRENCE_RULE).equals(originalEvent, updatedEvent)) {
-                /*
-                 * reset if there are 'new' occurrences (caused by a modified or extended rule)
-                 */
-                if (hasFurtherOccurrences(originalEvent.getRecurrenceRule(), updatedEvent.getRecurrenceRule())) {
-                    return true;
-                }
+        if (false == CalendarUtils.isOrganizer(originalEvent, calendarUser.getEntity())) {
+            /*
+             * only reset if event is modified by organizer
+             */
+            return false;
+        }
+        if (false == EventMapper.getInstance().get(EventField.RECURRENCE_RULE).equals(originalEvent, updatedEvent)) {
+            /*
+             * reset if there are 'new' occurrences (caused by a modified or extended rule)
+             */
+            if (hasFurtherOccurrences(originalEvent.getRecurrenceRule(), updatedEvent.getRecurrenceRule())) {
+                return true;
             }
-            if (false == EventMapper.getInstance().get(EventField.DELETE_EXCEPTION_DATES).equals(originalEvent, updatedEvent)) {
-                /*
-                 * reset if there are 'new' occurrences (caused by the reinstatement of previous delete exceptions)
-                 */
-                SimpleCollectionUpdate<RecurrenceId> exceptionDateUpdates = getExceptionDateUpdates(originalEvent.getDeleteExceptionDates(), updatedEvent.getDeleteExceptionDates());
-                if (false == exceptionDateUpdates.getRemovedItems().isEmpty()) {
-                    return true;
-                }
+        }
+        if (false == EventMapper.getInstance().get(EventField.DELETE_EXCEPTION_DATES).equals(originalEvent, updatedEvent)) {
+            /*
+             * reset if there are 'new' occurrences (caused by the reinstatement of previous delete exceptions)
+             */
+            SimpleCollectionUpdate<RecurrenceId> exceptionDateUpdates = getExceptionDateUpdates(originalEvent.getDeleteExceptionDates(), updatedEvent.getDeleteExceptionDates());
+            if (false == exceptionDateUpdates.getRemovedItems().isEmpty()) {
+                return true;
             }
-            if (false == EventMapper.getInstance().get(EventField.START_DATE).equals(originalEvent, updatedEvent)) {
-                /*
-                 * reset if updated start is before the original start
-                 */
-                if (updatedEvent.getStartDate().before(originalEvent.getStartDate())) {
-                    return true;
-                }
+        }
+        if (false == EventMapper.getInstance().get(EventField.START_DATE).equals(originalEvent, updatedEvent)) {
+            /*
+             * reset if updated start is before the original start
+             */
+            if (updatedEvent.getStartDate().before(originalEvent.getStartDate())) {
+                return true;
             }
-            if (false == EventMapper.getInstance().get(EventField.END_DATE).equals(originalEvent, updatedEvent)) {
-                /*
-                 * reset if updated end is after the original end
-                 */
-                if (updatedEvent.getEndDate().after(originalEvent.getEndDate())) {
-                    return true;
-                }
+        }
+        if (false == EventMapper.getInstance().get(EventField.END_DATE).equals(originalEvent, updatedEvent)) {
+            /*
+             * reset if updated end is after the original end
+             */
+            if (updatedEvent.getEndDate().after(originalEvent.getEndDate())) {
+                return true;
             }
         }
         /*
