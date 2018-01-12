@@ -255,9 +255,10 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     @Override
     public boolean setFullNamesForMailAccount(int id, int[] indexes, String[] fullNames, int userId, int contextId) throws OXException {
         boolean modified = delegate.setFullNamesForMailAccount(id, indexes, fullNames, userId, contextId);
-        invalidateMailAccount(id, userId, contextId);
-
-        postChangedDefaultFolders(id, indexes, fullNames, true, true, userId, contextId);
+        if (modified) {
+            invalidateMailAccount(id, userId, contextId);
+            postChangedDefaultFolders(id, indexes, fullNames, true, true, userId, contextId);
+        }
 
         return modified;
     }
@@ -265,9 +266,10 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     @Override
     public boolean setNamesForMailAccount(int id, int[] indexes, String[] names, int userId, int contextId) throws OXException {
         boolean modified = delegate.setNamesForMailAccount(id, indexes, names, userId, contextId);
-        invalidateMailAccount(id, userId, contextId);
-
-        postChangedDefaultFolders(id, indexes, names, false, true, userId, contextId);
+        if (modified) {
+            invalidateMailAccount(id, userId, contextId);
+            postChangedDefaultFolders(id, indexes, names, false, true, userId, contextId);
+        }
 
         return modified;
     }
