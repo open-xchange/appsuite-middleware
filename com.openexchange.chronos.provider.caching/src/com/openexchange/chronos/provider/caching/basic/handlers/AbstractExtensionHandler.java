@@ -80,13 +80,18 @@ abstract class AbstractExtensionHandler {
     /** 
      * Fields that are always included when searching for events 
      */
-    static final List<EventField> DEFAULT_FIELDS = Arrays.asList(
+    static final List<EventField> DEFAULT_FIELDS_LIST = Arrays.asList(
         EventField.ID, EventField.SUMMARY, EventField.DESCRIPTION, EventField.SERIES_ID, EventField.FOLDER_ID, 
         EventField.RECURRENCE_ID, EventField.TIMESTAMP, EventField.CREATED_BY, EventField.CALENDAR_USER, 
         EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE,
         EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.ORGANIZER
     );
     //@formatter:on
+
+    /**
+     * Fields that are always included when searching for events
+     */
+    private static final EventField[] DEFAULT_FIELDS_ARRAY = DEFAULT_FIELDS_LIST.toArray(new EventField[DEFAULT_FIELDS_LIST.size()]);
 
     private final CalendarParameters parameters;
     private final Session session;
@@ -155,9 +160,9 @@ abstract class AbstractExtensionHandler {
     }
 
     /**
-     * Returns the {@link #DEFAULT_FIELDS}
+     * Returns the {@link #DEFAULT_FIELDS_LIST}
      * 
-     * @return the {@link #DEFAULT_FIELDS}
+     * @return the {@link #DEFAULT_FIELDS_LIST}
      */
     EventField[] getDefaultEventFields() {
         return getEventFields(null);
@@ -166,7 +171,7 @@ abstract class AbstractExtensionHandler {
     /**
      * <p>Prepares the event fields to request from the storage.</p>
      * 
-     * <p>If the requested fields is empty or <code>null</code>, then all {@link #DEFAULT_FIELDS} are included.
+     * <p>If the requested fields is empty or <code>null</code>, then all {@link #DEFAULT_FIELDS_LIST} are included.
      * The client may also define additional fields.
      * </p>
      * 
@@ -176,11 +181,11 @@ abstract class AbstractExtensionHandler {
      */
     EventField[] getEventFields(EventField[] requestedFields, EventField... additionalFields) {
         if (null == requestedFields || requestedFields.length == 0) {
-            return getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class, DEFAULT_FIELDS.toArray(new EventField[DEFAULT_FIELDS.size()]));
+            return getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class, DEFAULT_FIELDS_ARRAY);
         }
 
         Set<EventField> eventFields = new HashSet<>();
-        eventFields.addAll(DEFAULT_FIELDS);
+        eventFields.addAll(DEFAULT_FIELDS_LIST);
         eventFields.addAll(Arrays.asList(requestedFields));
         if (null != additionalFields && additionalFields.length > 0) {
             eventFields.addAll(Arrays.asList(additionalFields));
