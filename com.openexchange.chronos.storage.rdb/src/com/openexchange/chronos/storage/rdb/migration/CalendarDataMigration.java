@@ -151,6 +151,12 @@ public class CalendarDataMigration {
         LOG.info("Starting calendar migration task in context {}.", I(contextId));
         try {
             /*
+             * empty destination storage as preparation
+             */
+            LOG.trace("Emptying destination storage...");
+            destinationStorage.getUtilities().deleteAllData();
+            LOG.info("Destination storage emptied successfully.");
+            /*
              * probe total number of events to migrate
              */
             long eventCount = sourceStorage.getEventStorage().countEvents();
@@ -164,6 +170,9 @@ public class CalendarDataMigration {
              * init progress
              */
             totalEventsToCopy = eventCount + tombstoneCount;
+            if (0 < totalEventsToCopy) {
+                LOG.info("Found a total of {} events and {} event tombstones to copy.", L(eventCount), L(tombstoneCount));
+            }
             /*
              * copy calendar data in batches & update progress
              */
@@ -202,11 +211,17 @@ public class CalendarDataMigration {
             throw e;
         } finally {
             long millis = System.currentTimeMillis() - startTime;
+            float eventsPerSecond = 0 < millis ? totalEventsToCopy / (millis / 1000f) : 0;
             long seconds = TimeUnit.MILLISECONDS.toSeconds(millis);
             if (0 < seconds) {
                 millis -= TimeUnit.MILLISECONDS.convert(seconds, TimeUnit.SECONDS);
             }
-            LOG.info("Finished calendar migration task in context {}, {}.{} seconds elapsed.", I(contextId), L(seconds), L(millis));
+            if (0 < totalEventsToCopy) {
+                LOG.info("Finished calendar migration task in context {}, {}.{} seconds elapsed for a total of {} events, at a rate of {} events per second.",
+                    I(contextId), L(seconds), L(millis), L(totalEventsToCopy), I((int) eventsPerSecond));
+            } else {
+                LOG.info("Finished calendar migration task in context {}, {}.{} seconds elapsed.", I(contextId), L(seconds), L(millis));
+            }
             Map<String, List<OXException>> warnings = collectWarnings(sourceStorage, destinationStorage);
             if (null == warnings || 0 == warnings.size()) {
                 LOG.info("No warnings occurred during execution of calendar migration task in context {}.", I(contextId));
