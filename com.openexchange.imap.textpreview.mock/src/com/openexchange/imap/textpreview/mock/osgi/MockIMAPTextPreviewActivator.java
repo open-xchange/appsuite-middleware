@@ -76,9 +76,27 @@ public class MockIMAPTextPreviewActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        boolean enabled = getService(ConfigurationService.class).getBoolProperty("com.openexchange.imap.textpreview.mock.enabled", true);
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MockIMAPTextPreviewActivator.class);
+        logger.info("Starting bundle: {}", context.getBundle().getSymbolicName());
+
+        ConfigurationService configService = getService(ConfigurationService.class);
+        String enabledPropName = "com.openexchange.imap.textpreview.mock.enabled";
+        boolean enabled = configService.getBoolProperty(enabledPropName, true);
         if (enabled) {
-            registerService(IMAPTextPreviewProvider.class, new MockIMAPTextPreviewProvider());
+            String percentPropName = "com.openexchange.imap.textpreview.mock.percent";
+            int def = 50;
+            int percentProbability = configService.getIntProperty(percentPropName, def);
+            if (percentProbability <= 0 || percentProbability > 100) {
+                logger.warn("Invalid value specified for '{}'. Only values from 1 to 100 (inclusive) are allowed. Assuming default value of {} instead.", percentPropName, def);
+                percentProbability = def;
+            }
+            float probability = (float) percentProbability / 100;
+            String pseudoTextPropName = "com.openexchange.imap.textpreview.mock.text";
+            String pseudoText = configService.getProperty(pseudoTextPropName, "Awesome! Great! Fantastic! Yeeezzzz! Welcome to the Open-Xchange Cheering Team!");
+            registerService(IMAPTextPreviewProvider.class, new MockIMAPTextPreviewProvider(pseudoText, probability));
+            logger.info("Registered mock for IMAP text preview");
+        } else {
+            logger.info("Mock IMAP text preview is disabled through option '{}'", enabledPropName);
         }
     }
 

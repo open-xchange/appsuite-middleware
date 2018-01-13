@@ -49,10 +49,9 @@
 
 package com.openexchange.imap.textpreview.mock;
 
-import javax.mail.MessagingException;
+import java.util.Random;
 import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.IMAPTextPreviewProvider;
-
 
 /**
  * {@link MockIMAPTextPreviewProvider}
@@ -61,32 +60,46 @@ import com.sun.mail.imap.IMAPTextPreviewProvider;
  * @since v7.10.0
  */
 public class MockIMAPTextPreviewProvider implements IMAPTextPreviewProvider {
-    
+
     private final String pseudoTextPreview;
+    private final Random random;
+    private final float probability;
 
     /**
      * Initializes a new {@link MockIMAPTextPreviewProvider}.
      */
-    public MockIMAPTextPreviewProvider() {
+    public MockIMAPTextPreviewProvider(String pseudoTextPreview, float probability) {
         super();
-        pseudoTextPreview = "Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.";
+        random = new Random();
+        this.probability = probability;
+        this.pseudoTextPreview = pseudoTextPreview;
     }
 
     @Override
-    public String getTextPreview(IMAPMessage message, Mode mode) throws MessagingException {
+    public String getTextPreview(IMAPMessage message, Mode mode) {
         return getTextPreview(message.getUID(), mode);
     }
 
     @Override
-    public String getTextPreview(long uid, Mode mode) throws MessagingException {
+    public String getTextPreview(long uid, Mode mode) {
         switch (mode) {
             case ONLY_IF_AVAILABLE:
-                return (uid % 3) == 0 ? null : pseudoTextPreview;
+                return hasTextPreview() ? pseudoTextPreview : null;
             case REQUIRE:
                 // fall-through
             default:
                 return pseudoTextPreview;
         }
+    }
+
+    private boolean hasTextPreview() {
+        return probability > 1.0F ? true : random.nextFloat() < probability;
+    }
+
+    public static void main(String[] args) {
+        String percent = "40";
+        float p = (float) Integer.parseInt(percent) / 100;
+        System.out.println(p);
     }
 
 }
