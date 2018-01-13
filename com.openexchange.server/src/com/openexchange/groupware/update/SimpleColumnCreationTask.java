@@ -76,19 +76,25 @@ public abstract class SimpleColumnCreationTask extends UpdateTaskAdapter {
         Connection con = params.getConnection();
         boolean rollback = false;
         try {
-            con.setAutoCommit(false);
-            rollback = true;
-
             String columnName = getColumnName();
             Column columnToAdd = new Column(columnName, getColumnDefinition());
             for (String table : getTableNames()) {
                 if (false == Tools.columnExists(con, table, columnName)) {
+                    if (false == rollback) {
+                        // Transaction not yet started
+                        con.setAutoCommit(false);
+                        rollback = true;
+                    }
+
                     Tools.addColumns(con, table, columnToAdd);
                 }
             }
 
-            con.commit();
-            rollback = false;
+            if (rollback) {
+                // Transaction has been started
+                con.commit();
+                rollback = false;
+            }
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
