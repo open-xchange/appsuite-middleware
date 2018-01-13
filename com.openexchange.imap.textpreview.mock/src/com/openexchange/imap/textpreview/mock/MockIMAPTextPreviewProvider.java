@@ -93,6 +93,6 @@ public class MockIMAPTextPreviewProvider implements IMAPTextPreviewProvider {
     }
 
     private boolean hasTextPreview() {
-        return probability > 1.0F ? true : random.nextFloat() < probability;
+        return probability >= 1.0F ? true : random.nextFloat() < probability;
     }
 }
