@@ -54,7 +54,6 @@ import java.io.Closeable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -296,7 +295,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @return Possible warnings.
      */
     public Collection<OXException> getWarnings() {
-        return Collections.unmodifiableCollection(warnings);
+        return new ArrayList<>(warnings);
     }
 
     /**

@@ -68,7 +68,6 @@ import javax.mail.FetchProfile;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.search.SearchException;
-import com.google.common.collect.ImmutableList;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
@@ -109,7 +108,6 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.ProtocolException;
@@ -369,35 +367,8 @@ public final class IMAPConversationWorker {
 
                     if (false == sentMessages.isEmpty()) {
                         // Add to conversation if references or referenced-by
-                        final List<MailMessage> toMergeWith = ImmutableList.copyOf(sentMessages);
+                        Conversations.foldAndMergeWithList(conversations, sentMessages);
                         sentMessages = null;
-                        boolean hasNext = true;
-                        for (Iterator<Conversation> iter = conversations.iterator(); hasNext;) {
-                            final Conversation conversation = iter.next();
-                            hasNext = iter.hasNext();
-                            if (hasNext) {
-                                // Not the last one...
-                                AbstractTask<Void> merge = new AbstractTask<Void>() {
-
-                                    @Override
-                                    public Void call() throws Exception {
-                                        for (MailMessage sentMessage : toMergeWith) {
-                                            if (conversation.referencesOrIsReferencedBy(sentMessage)) {
-                                                conversation.addMessage(sentMessage);
-                                            }
-                                        }
-                                        return null;
-                                    }
-                                };
-                                ThreadPools.getThreadPool().submit(merge, CallerRunsBehavior.<Void> getInstance());
-                            } else {
-                                for (MailMessage sentMessage : toMergeWith) {
-                                    if (conversation.referencesOrIsReferencedBy(sentMessage)) {
-                                        conversation.addMessage(sentMessage);
-                                    }
-                                }
-                            }
-                        }
                     }
                 }
                 // Switch back folder
@@ -712,12 +683,27 @@ public final class IMAPConversationWorker {
             {
                 // Switch folder
                 imapMessageStorage.openReadOnly(sentFullName);
-                final List<MailMessage> sentMessages = Conversations.messagesFor(imapMessageStorage.getImapFolder(), lookAhead, order, fp, imapMessageStorage.getImapServerInfo(), byEnvelope);
-                for (final Conversation conversation : conversations) {
-                    for (final MailMessage sentMessage : sentMessages) {
-                        if (conversation.referencesOrIsReferencedBy(sentMessage)) {
-                            conversation.addMessage(sentMessage);
+                List<MailMessage> sentMessages = Conversations.messagesFor(imapMessageStorage.getImapFolder(), lookAhead, order, fp, imapMessageStorage.getImapServerInfo(), byEnvelope);
+                if (false == sentMessages.isEmpty()) {
+                    // Filter messages already contained in conversations
+                    {
+                        Set<String> allMessageIds = new HashSet<>(conversations.size());
+                        for (final Conversation conversation : conversations) {
+                            conversation.addMessageIdsTo(allMessageIds);
                         }
+                        for (Iterator<MailMessage> iter = sentMessages.iterator(); iter.hasNext();) {
+                            MailMessage sentMessage = iter.next();
+                            if (allMessageIds.contains(sentMessage.getMessageId())) {
+                                // Already contained
+                                iter.remove();
+                            }
+                        }
+                    }
+
+                    if (false == sentMessages.isEmpty()) {
+                        // Add to conversation if references or referenced-by
+                        Conversations.foldAndMergeWithList(conversations, sentMessages);
+                        sentMessages = null;
                     }
                 }
                 // Switch back folder

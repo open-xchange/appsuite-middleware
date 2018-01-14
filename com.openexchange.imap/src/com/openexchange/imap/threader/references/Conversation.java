@@ -333,6 +333,14 @@ public final class Conversation {
         return ret;
     }
 
+    public Set<String> getReferences() {
+        return references;
+    }
+
+    public Set<String> getMessageIds() {
+        return messageIds;
+    }
+
     /**
      * Simple wrapper class for having a message as hash key.
      * <p>

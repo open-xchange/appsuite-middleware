@@ -43,7 +43,8 @@ Import-Package: com.google.common.annotations,
  org.osgi.framework,
  org.osgi.service.event,
  org.osgi.util.tracker,
- org.slf4j
+ org.slf4j,
+ sun.misc
 Bundle-Activator: com.openexchange.caching.osgi.CacheActivator
 Bundle-ClassPath: .,
  lib/concurrent-1.3.4.jar,

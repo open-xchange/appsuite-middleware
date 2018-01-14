@@ -785,7 +785,8 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @return The first category.
      */
     public Category getCategory() {
-        return getCategories().get(0);
+        List<Category> categories = getCategories();
+        return categories.isEmpty() ? CATEGORY_ERROR : categories.get(0);
     }
 
     /**
@@ -794,18 +795,19 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @return The (sorted) categories
      */
     public List<Category> getCategories() {
-        if (categories.isEmpty()) {
-            /*
-             * No category specified. Fall back to default one.
-             */
-            return Collections.<Category> singletonList(CATEGORY_ERROR);
+        List<Category> categories = new ArrayList<>(this.categories);
+        int size = categories.size();
+        switch (size) {
+            case 0:
+                // No category specified. Fall back to default one.
+                return Collections.<Category> singletonList(CATEGORY_ERROR);
+            case 1:
+                return categories;
+            default:
+                // Sort before return
+                sortCategories(categories);
+                return categories;
         }
-        if (1 == categories.size()) {
-            return Collections.unmodifiableList(categories);
-        }
-        // Sort before return
-        sortCategories(categories);
-        return Collections.unmodifiableList(categories);
     }
 
     /**
