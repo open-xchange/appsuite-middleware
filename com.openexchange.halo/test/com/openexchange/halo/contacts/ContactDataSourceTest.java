@@ -113,6 +113,7 @@ public class ContactDataSourceTest {
         Contact c = new Contact();
         c.setImage1(new byte[]{1,2,3});
         c.setImageContentType("image/jpeg");
+        c.setLastModified(new Date());
 
         query.withMergedContacts(Arrays.asList(c));
 
@@ -136,11 +137,13 @@ public class ContactDataSourceTest {
         c.setImage1(new byte[]{1,2,3});
         c.setImageContentType("image/jpeg");
         c.setParentFolderID(6); // This is the global address folder, and should be preferred
+        c.setLastModified(new Date());
 
         Contact c2 = new Contact();
         c2.setImage1(new byte[]{3,2,1});
         c2.setImageContentType("image/jpeg");
         c2.setParentFolderID(37);
+        c2.setLastModified(new Date());
 
         query.withMergedContacts(Arrays.asList(c2, c));
 
@@ -195,12 +198,14 @@ public class ContactDataSourceTest {
         Contact c = new Contact();
         c.setObjectID(12);
         c.setParentFolderID(37);
+        c.setLastModified(new Date());
 
         Contact c2 = new Contact();
         c2.setObjectID(12);
         c2.setParentFolderID(37);
         c2.setImage1(new byte[]{1,2,3});
         c2.setImageContentType("image/jpeg");
+        c2.setLastModified(new Date());
 
         query.withMergedContacts(Arrays.asList(c));
 
@@ -229,12 +234,14 @@ public class ContactDataSourceTest {
         c.setEmail1("email1");
         c.setEmail2("email2");
         c.setEmail3("email3");
+        c.setLastModified(new Date());
 
         Contact c2 = new Contact();
         c2.setObjectID(12);
         c2.setParentFolderID(37);
         c2.setImage1(new byte[]{1,2,3});
         c2.setImageContentType("image/jpeg");
+        c2.setLastModified(new Date());
 
         query.withContact(c);
         query.withMergedContacts(Arrays.asList(c));
