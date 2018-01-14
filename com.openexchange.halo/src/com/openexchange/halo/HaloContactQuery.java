@@ -60,10 +60,16 @@ import com.openexchange.groupware.ldap.User;
  */
 public class HaloContactQuery {
 
+    /**
+     * Creates a new builder instance.
+     *
+     * @return The new builder instance
+     */
     public static Builder builder() {
         return new Builder();
     }
 
+    /** Builds an instance of <code>HaloContactQuery</code> */
     public static class Builder {
 
         private Contact contact;
@@ -74,21 +80,44 @@ public class HaloContactQuery {
             super();
         }
 
+        /**
+         * Sets the user to apply to <code>HaloContactQuery</code> instance.
+         *
+         * @param user The user
+         * @return This builder
+         */
         public Builder withUser(User user) {
             this.user = user;
             return this;
         }
 
+        /**
+         * Sets the contact to apply to <code>HaloContactQuery</code> instance.
+         *
+         * @param contact The contact
+         * @return This builder
+         */
         public Builder withContact(Contact contact) {
             this.contact = contact;
             return this;
         }
 
+        /**
+         * Sets the list of contacts to merge to apply to <code>HaloContactQuery</code> instance.
+         *
+         * @param contactsToMerge The contacts to merge
+         * @return This builder
+         */
         public Builder withMergedContacts(List<Contact> contactsToMerge) {
             this.merged = contactsToMerge;
             return this;
         }
 
+        /**
+         * Builds the resulting instance of <code>HaloContactQuery</code> from this builder's arguments.
+         *
+         * @return The <code>HaloContactQuery</code> instance
+         */
         public HaloContactQuery build() {
             return new HaloContactQuery(contact, user, merged);
         }
@@ -110,7 +139,7 @@ public class HaloContactQuery {
     /**
      * Gets the user
      *
-     * @return The user
+     * @return The user or <code>null</code> (if not set)
      */
     public User getUser() {
         return user;
@@ -119,16 +148,16 @@ public class HaloContactQuery {
     /**
      * Gets the contact
      *
-     * @return The contact
+     * @return The contact or <code>null</code> (if not set)
      */
     public Contact getContact() {
         return contact;
     }
 
     /**
-     * Gets the (immutable) list of merged contacts
+     * Gets the (<b>immutable</b>) list of merged contacts
      *
-     * @return The merged contacts or <code>null</code>
+     * @return The merged contacts or <code>null</code> (if not set)
      */
     public List<Contact> getMergedContacts() {
         return merged;
@@ -137,7 +166,7 @@ public class HaloContactQuery {
     /**
      * Gets a copy for the list of merged contacts
      *
-     * @return The merged contacts' copy or <code>null</code>
+     * @return The merged contacts' copy or <code>null</code> (if not set)
      */
     public List<Contact> getCopyOfMergedContacts() {
         return null == merged ? null : new ArrayList<>(merged);
