@@ -89,173 +89,173 @@ public class ContactDataSourceTest {
     private MockingServiceLookup services = null;
     private ServerSession session = null;
     private ContactDataSource dataSource = null;
-    
+
     @Before
     public void initialize() {
         services = new MockingServiceLookup();
         UserImpl user = new UserImpl();
         user.setId(42);
         user.setContactId(44);
-        
+
         Context context = new SimContext(23);
-        
+
         session = new SimServerSession(context, user, null);
-    
+
         dataSource = new ContactDataSource(services);
     }
-    
+
     // Picture Halo
-    
+
     @Test
     public void shouldTakeAPictureFromTheMergedContacts() throws OXException, IOException {
-        HaloContactQuery query = new HaloContactQuery();
-        
+        HaloContactQuery.Builder query = HaloContactQuery.builder();
+
         Contact c = new Contact();
         c.setImage1(new byte[]{1,2,3});
         c.setImageContentType("image/jpeg");
-        
-        query.setMergedContacts(Arrays.asList(c));
-        
-        Picture picture = dataSource.getPicture(query, session);
-        
+
+        query.withMergedContacts(Arrays.asList(c));
+
+        Picture picture = dataSource.getPicture(query.build(), session);
+
         assertNotNull(picture);
         InputStream stream = picture.getFileHolder().getStream();
         assertEquals(1, stream.read());
         assertEquals(2, stream.read());
         assertEquals(3, stream.read());
         assertEquals(-1, stream.read());
-        
+
         stream.close();
     }
-    
+
     @Test
     public void shouldPreferGlobalAddressBook() throws IOException, OXException {
-        HaloContactQuery query = new HaloContactQuery();
-        
+        HaloContactQuery.Builder query = HaloContactQuery.builder();
+
         Contact c = new Contact();
         c.setImage1(new byte[]{1,2,3});
         c.setImageContentType("image/jpeg");
         c.setParentFolderID(6); // This is the global address folder, and should be preferred
-        
+
         Contact c2 = new Contact();
         c2.setImage1(new byte[]{3,2,1});
         c2.setImageContentType("image/jpeg");
         c2.setParentFolderID(37);
-        
-        query.setMergedContacts(Arrays.asList(c2, c));
-        
-        Picture picture = dataSource.getPicture(query, session);
-        
+
+        query.withMergedContacts(Arrays.asList(c2, c));
+
+        Picture picture = dataSource.getPicture(query.build(), session);
+
         assertNotNull(picture);
         InputStream stream = picture.getFileHolder().getStream();
         assertEquals(1, stream.read());
         assertEquals(2, stream.read());
         assertEquals(3, stream.read());
         assertEquals(-1, stream.read());
-        
+
         stream.close();
-        
+
     }
-    
+
     @Test
     public void shouldPreferMoreRecentLastModified() throws OXException, IOException {
-        HaloContactQuery query = new HaloContactQuery();
-        
+        HaloContactQuery.Builder query = HaloContactQuery.builder();
+
         Contact c = new Contact();
         c.setImage1(new byte[]{1,2,3});
         c.setImageContentType("image/jpeg");
-        c.setParentFolderID(37); 
+        c.setParentFolderID(37);
         c.setLastModified(new Date(10));
-        
-        
+
+
         Contact c2 = new Contact();
         c2.setImage1(new byte[]{3,2,1});
         c2.setImageContentType("image/jpeg");
         c2.setParentFolderID(37);
         c2.setLastModified(new Date(5));
-        
-        query.setMergedContacts(Arrays.asList(c2, c));
-        
-        Picture picture = dataSource.getPicture(query, session);
-        
+
+        query.withMergedContacts(Arrays.asList(c2, c));
+
+        Picture picture = dataSource.getPicture(query.build(), session);
+
         assertNotNull(picture);
         InputStream stream = picture.getFileHolder().getStream();
         assertEquals(1, stream.read());
         assertEquals(2, stream.read());
         assertEquals(3, stream.read());
         assertEquals(-1, stream.read());
-        
+
         stream.close();
     }
-    
+
     @Test
     public void shouldTryToReloadContacts() throws OXException, IOException {
-        HaloContactQuery query = new HaloContactQuery();
-        
+        HaloContactQuery.Builder query = HaloContactQuery.builder();
+
         Contact c = new Contact();
         c.setObjectID(12);
         c.setParentFolderID(37);
-        
+
         Contact c2 = new Contact();
         c2.setObjectID(12);
         c2.setParentFolderID(37);
         c2.setImage1(new byte[]{1,2,3});
         c2.setImageContentType("image/jpeg");
-        
-        query.setMergedContacts(Arrays.asList(c));
-        
+
+        query.withMergedContacts(Arrays.asList(c));
+
         ContactService cs = services.mock(ContactService.class);
         when(cs.getContact(session, "37", "12")).thenReturn(c2);
-        
-        Picture picture = dataSource.getPicture(query, session);
-        
+
+        Picture picture = dataSource.getPicture(query.build(), session);
+
         assertNotNull(picture);
         InputStream stream = picture.getFileHolder().getStream();
         assertEquals(1, stream.read());
         assertEquals(2, stream.read());
         assertEquals(3, stream.read());
         assertEquals(-1, stream.read());
-        
+
         stream.close();
     }
-    
+
     @Test
     public void shouldFallBackToOwnSearch() throws IOException, OXException {
-        HaloContactQuery query = new HaloContactQuery();
-        
+        HaloContactQuery.Builder query = HaloContactQuery.builder();
+
         Contact c = new Contact();
         c.setObjectID(12);
         c.setParentFolderID(37);
         c.setEmail1("email1");
         c.setEmail2("email2");
         c.setEmail3("email3");
-        
+
         Contact c2 = new Contact();
         c2.setObjectID(12);
         c2.setParentFolderID(37);
         c2.setImage1(new byte[]{1,2,3});
         c2.setImageContentType("image/jpeg");
-        
-        query.setContact(c);
-        query.setMergedContacts(Arrays.asList(c));
-        
+
+        query.withContact(c);
+        query.withMergedContacts(Arrays.asList(c));
+
         ContactService cs = services.mock(ContactService.class);
         when(cs.getContact(session, "37", "12")).thenReturn(c);
-        
+
         when(cs.searchContacts(eq(session), searchFor("email1"), (ContactField[]) any())).thenReturn(SearchIteratorAdapter.createArrayIterator(new Contact[]{c}));
         when(cs.searchContacts(eq(session), searchFor("email2"), (ContactField[]) any())).thenReturn(SearchIteratorAdapter.createArrayIterator(new Contact[]{c}));
         when(cs.searchContacts(eq(session), searchFor("email3"), (ContactField[]) any())).thenReturn(SearchIteratorAdapter.createArrayIterator(new Contact[]{c, c2}));
-        
-        
-        Picture picture = dataSource.getPicture(query, session);
-        
+
+
+        Picture picture = dataSource.getPicture(query.build(), session);
+
         assertNotNull(picture);
         InputStream stream = picture.getFileHolder().getStream();
         assertEquals(1, stream.read());
         assertEquals(2, stream.read());
         assertEquals(3, stream.read());
         assertEquals(-1, stream.read());
-        
+
         stream.close();
     }
 
@@ -267,7 +267,7 @@ public class ContactDataSourceTest {
                 if (!(item instanceof ContactSearchObject)) {
                     return false;
                 }
-                
+
                 ContactSearchObject cso = (ContactSearchObject) item;
                 if (!cso.isOrSearch()) {
                     return false;
@@ -277,10 +277,9 @@ public class ContactDataSourceTest {
 
             @Override
             public void describeTo(Description description) {
+                // Nothing
             }
-            
-            
         });
     }
-    
+
 }
