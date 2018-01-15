@@ -51,6 +51,7 @@ package com.openexchange.chronos.provider.caching.basic.handlers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -253,11 +254,7 @@ abstract class AbstractExtensionHandler {
         }
         List<Event> processedEvents = new ArrayList<>(events.size());
         for (Event event : events) {
-            if (CalendarUtils.isSeriesMaster(event)) {
-                processedEvents.addAll(resolveOccurrences(event));
-            } else {
-                processedEvents.add(event);
-            }
+            processedEvents.addAll(CalendarUtils.isSeriesMaster(event) ? resolveOccurrences(event) : Collections.singletonList(event));
         }
         selfProtection.checkEventCollection(processedEvents);
         return processedEvents;
