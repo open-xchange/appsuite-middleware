@@ -89,16 +89,16 @@ public class CancelPerformer extends AbstractActionPerformer {
         List<Event> deleted = new ArrayList<Event>();
 
         for (ITipChange change : changes) {
-            Event appointment = change.getDeletedEvent();
-            if (appointment == null) {
+            Event event = change.getDeletedEvent();
+            if (event == null) {
                 continue;
             }
             // TODO: appointment.setNotification(true);
             if (change.getType() == ITipChange.Type.CREATE_DELETE_EXCEPTION) {
-                appointment = change.getCurrentEvent();
+                event = change.getCurrentEvent();
             }
-            deleted.add(appointment);
-            util.deleteEvent(appointment, session, new Date(Long.MAX_VALUE));
+            deleted.add(event);
+            util.deleteEvent(event, session, new Date(Long.MAX_VALUE));
         }
         return deleted;
     }

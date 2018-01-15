@@ -54,7 +54,6 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.EventUpdateImpl;
 import com.openexchange.chronos.itip.analyzers.AbstractITipAnalyzer;
 import com.openexchange.chronos.itip.osgi.Services;
@@ -128,14 +127,11 @@ public class ITipChange {
                     RecurrenceIterator<Event> recurrenceIterator = recurrenceService.iterateEventOccurrences(master, null, null);
                     int count = 1; // calculateRecurrencePosition is 1-based
                     while (recurrenceIterator.hasNext()) {
-                        count++;
                         Event next = recurrenceIterator.next();
                         if (count == position) {
-                            if (CalendarUtils.contains(master.getChangeExceptionDates(), next.getRecurrenceId()) || CalendarUtils.contains(master.getDeleteExceptionDates(), next.getRecurrenceId())) {
-                                return next;
-                            }
-                            break;
+                            return next;
                         }
+                        count++;
                     }
                 }
             }
