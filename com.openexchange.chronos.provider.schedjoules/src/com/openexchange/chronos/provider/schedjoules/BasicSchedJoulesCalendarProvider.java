@@ -157,15 +157,10 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
         if (null == userConfig) {
             throw SchedJoulesProviderExceptionCodes.MISSING_ITEM_ID_FROM_CONFIG.create(-1, session.getUserId(), session.getContextId());
         }
-        String locale = userConfig.optString(LOCALE, ServerSessionAdapter.valueOf(session).getUser().getLocale().getLanguage());
-        int itemId = userConfig.optInt(ITEM_ID, 0);
-        long refreshInterval = userConfig.optLong(REFRESH_INTERVAL, MINIMUM_REFRESH_INTERVAL);
-        if (MINIMUM_REFRESH_INTERVAL > refreshInterval) {
-            throw SchedJoulesProviderExceptionCodes.INVALID_REFRESH_MINIMUM_INTERVAL.create(-1, session.getUserId(), session.getContextId());
-        }
-        if (0 == itemId) {
-            throw SchedJoulesProviderExceptionCodes.MISSING_ITEM_ID_FROM_CONFIG.create(-1, session.getUserId(), session.getContextId());
-        }
+        String locale = getLocale(session, userConfig);
+        int itemId = getItemId(session, userConfig);
+        long refreshInterval = getRefreshInterval(session, userConfig);
+
         JSONObject calendarMetadata = fetchItem(session.getContextId(), itemId, locale);
         String color = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL, String.class);
         String name = settings.containsName() && null != settings.getName() ? settings.getName() : calendarMetadata.optString(NAME, "Calendar");
