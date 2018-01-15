@@ -47,3 +47,7 @@ properties:
   com.openexchange.calendar.provider:
     type: string
     description: Denotes the identifier of the underlying calendar provider.
+  title:
+    type: string
+    description: The title of the calendar
+    
