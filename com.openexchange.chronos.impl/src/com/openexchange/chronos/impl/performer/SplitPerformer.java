@@ -140,6 +140,9 @@ public class SplitPerformer extends AbstractUpdatePerformer {
         /*
          * check the supplied split point for validity & derive next recurrence
          */
+        if (splitPoint.before(originalEvent.getStartDate())) {
+            throw CalendarExceptionCodes.INVALID_SPLIT.create(originalEvent.getId(), splitPoint);
+        }
         TimeZone timeZone = isFloating(originalEvent) ? TimeZones.UTC : originalEvent.getStartDate().getTimeZone();
         DefaultRecurrenceData originalRecurrenceData = new DefaultRecurrenceData(originalEvent.getRecurrenceRule(), originalEvent.getStartDate(), null);
         RecurrenceIterator<RecurrenceId> iterator = session.getRecurrenceService().iterateRecurrenceIds(originalRecurrenceData, new Date(splitPoint.getTimestamp()), null);
