@@ -202,12 +202,10 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
         JSONObject userConfig = settings.getConfig();
 
         String locale = getLocale(session, userConfig);
-        int itemId = getItemId(session, userConfig);
-
         userConfig.putSafe(SchedJoulesFields.LOCALE, locale);
         userConfig.putSafe(SchedJoulesFields.REFRESH_INTERVAL, getRefreshInterval(session, userConfig));
 
-        JSONObject item = fetchItem(session.getContextId(), itemId, locale);
+        JSONObject item = fetchItem(session.getContextId(), getItemId(session, userConfig), locale);
         /*
          * prepare & return internal configuration for new account, taking over client-supplied values if set
          */
@@ -243,7 +241,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
     @Override
     protected JSONObject reconfigureAccountOpt(Session session, CalendarAccount account, CalendarSettings settings, CalendarParameters parameters) throws OXException {
         JSONObject internalConfig = null != account.getInternalConfiguration() ? new JSONObject(account.getInternalConfiguration()) : new JSONObject();
-        boolean changed = applyLocaleChange(session, settings, internalConfig);
+        boolean changed = applyLocaleChange(session, account, settings, internalConfig);
         // Check & apply changes to extended properties
         Object colorValue = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL);
         if (null != colorValue && String.class.isInstance(colorValue) && false == colorValue.equals(internalConfig.opt(SchedJoulesFields.COLOR))) {
@@ -271,18 +269,18 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
      * Checks if the locale changed and if so applies that change.
      * 
      * @param session The groupware {@link Session}
+     * @param account The {@link CalendarAccount}
      * @param settings The {@link CalendarSettings}
      * @param internalConfig The internal configuration
      * @return <code>true</code> if the locale was changed and the change was applied successfully, <code>false</code> otherwise
      * @throws OXException if the internal configuration contains a malformed URL, or if any JSON error is occurred
      */
-    private boolean applyLocaleChange(Session session, CalendarSettings settings, JSONObject internalConfig) throws OXException {
+    private boolean applyLocaleChange(Session session, CalendarAccount account, CalendarSettings settings, JSONObject internalConfig) throws OXException {
         JSONObject userConfig = settings.getConfig();
         if (userConfig == null) {
             return false;
         }
         getRefreshInterval(session, userConfig);
-        int itemId = getItemId(session, userConfig);
         String locale = getLocale(session, userConfig);
         try {
             String url = internalConfig.optString(SchedJoulesFields.URL);
@@ -292,13 +290,13 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
             int endIndex = path.indexOf("&", startIndex);
             String l = path.substring(startIndex + 2, endIndex);
             if (false == l.equals(locale)) {
-                JSONObject item = fetchItem(session.getContextId(), itemId, locale);
+                JSONObject item = fetchItem(session.getContextId(), getItemId(session, account, userConfig), locale);
                 internalConfig.putSafe(SchedJoulesFields.URL, item.getString(SchedJoulesFields.URL));
                 internalConfig.putSafe(SchedJoulesFields.NAME, item.getString(SchedJoulesFields.NAME));
                 return true;
             }
         } catch (MalformedURLException e) {
-            throw SchedJoulesProviderExceptionCodes.INVALID_URL.create(itemId, e);
+            throw SchedJoulesProviderExceptionCodes.INVALID_URL.create(account.getAccountId(), e);
         } catch (JSONException e) {
             throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
         }
@@ -316,6 +314,24 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
      */
     private String getLocale(Session session, JSONObject userConfig) throws OXException {
         return userConfig.optString(SchedJoulesFields.LOCALE, ServerSessionAdapter.valueOf(session).getUser().getLocale().getLanguage());
+    }
+
+    /**
+     * Retrieves the item identifier form the specified {@link JSONObject}. If not present it tries to retrieve it
+     * from the already existing user configuration of the specified {@link CalendarAccount}
+     * 
+     * @param session The groupware {@link Session}
+     * @param account The {@link CalendarAccount}
+     * @param userConfig The user configuration
+     * @return The item identifier
+     * @throws OXException if the item identifier is missing from the user configuration
+     */
+    private int getItemId(Session session, CalendarAccount account, JSONObject userConfig) throws OXException {
+        int itemId = userConfig.optInt(SchedJoulesFields.ITEM_ID, 0);
+        if (0 == itemId) {
+            return getItemId(session, account.getUserConfiguration());
+        }
+        return itemId;
     }
 
     /**

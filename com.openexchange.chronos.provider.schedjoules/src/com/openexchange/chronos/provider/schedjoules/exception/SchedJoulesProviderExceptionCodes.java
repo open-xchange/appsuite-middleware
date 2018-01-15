@@ -78,9 +78,9 @@ public enum SchedJoulesProviderExceptionCodes implements DisplayableOXExceptionC
     JSON_ERROR("A JSON error occurred: %1$s", CATEGORY_ERROR, 3),
     /**
      * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
-     * <li>The page with id '%1$s' does not contain a valid URL.</li>
+     * <li>The account with id '%1$s' does not contain a valid URL.</li>
      */
-    INVALID_URL("The page with id '%1$s' does not contain a valid URL.", CATEGORY_ERROR, 4),
+    INVALID_URL("The account with id '%1$s' does not contain a valid URL.", CATEGORY_ERROR, 4),
     /**
      * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
      * <li>No user configuration found [account %1$s, user %2$s, context %3$s]</li>
