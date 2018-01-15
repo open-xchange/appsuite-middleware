@@ -180,10 +180,10 @@ AlarmTriggerData:
 # Module: chronos-accounts
 CalendarAccountData:
   $ref: ./chronos-accounts/CalendarAccountData.yaml
-CalendarAccountResponse:
-  $ref: ./chronos-accounts/CalendarAccountResponse.yaml
 CalendarAccountProbeData:
   $ref: ./chronos-accounts/CalendarAccountProbeData.yaml
+CalendarAccountProbeResponse:
+  $ref: ./chronos-accounts/CalendarAccountProbeResponse.yaml
 # Module: chronos-availability
 AvailabilityData:
   $ref: ./chronos-availability/AvailabilityData.yaml

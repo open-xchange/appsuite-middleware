@@ -1,0 +1,15 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  title:
+    type: string
+    description: Possible title for given account
+  com.openexchange.calendar.config:
+    type: object
+    description: Holds arbitrary, provider-specific configuration data for calendar accounts.
+  com.openexchange.calendar.extendedProperties:
+    type: object
+    description: Contains the extended properties for calendar folders
+  com.openexchange.calendar.provider:
+    type: string
+    description: Denotes the identifier of the underlying calendar provider.
