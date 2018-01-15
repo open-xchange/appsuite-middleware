@@ -75,8 +75,6 @@ import com.openexchange.java.Strings;
  */
 public class ICal4JITipParser {
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICal4JITipParser.class);
-
     public List<ITipMessage> parseMessage(InputStream ical, TimeZone defaultTZ, int owner, CalendarSession session) throws OXException {
         List<ITipMessage> messages = new ArrayList<ITipMessage>();
         Map<String, ITipMessage> messagesPerUID = new HashMap<String, ITipMessage>();
@@ -101,19 +99,18 @@ public class ICal4JITipParser {
                 if (owner > 0) {
                     message.setOwner(owner);
                 }
-
-                resolveAttendees(event, session);
-                resolveOrganizer(event, session);
-
-                if (event.containsRecurrenceId()) {
-                    message.addException(event);
-                } else {
-                    message.setEvent(event);
-                }
-                messages.add(message);
-                // TODO: Comment
             }
+            resolveAttendees(event, session);
+            resolveOrganizer(event, session);
+            
+            if (event.containsRecurrenceId()) {
+                message.addException(event);
+            } else {
+                message.setEvent(event);
+            }
+            // TODO: Comment
         }
+        messages.addAll(messagesPerUID.values());
 
         return messages;
     }
