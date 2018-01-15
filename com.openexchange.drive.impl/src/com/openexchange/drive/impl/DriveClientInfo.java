@@ -52,6 +52,7 @@ package com.openexchange.drive.impl;
 import java.util.Locale;
 import com.openexchange.clientinfo.ClientInfo;
 import com.openexchange.clientinfo.ClientInfoType;
+import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 
@@ -65,7 +66,6 @@ public class DriveClientInfo implements ClientInfo {
 
     private final String platform;
     private final String platformVersion;
-    private final String app = "Drive Client";
     private final String appVersion;
 
     public DriveClientInfo(String platform, String platformVersion, String appVersion) {
@@ -81,42 +81,23 @@ public class DriveClientInfo implements ClientInfo {
     }
 
     @Override
-    public String getPlatform() {
-        return platform;
-    }
-
-    @Override
-    public String getPlatformVersion() {
-        return platformVersion;
-    }
-
-    @Override
-    public String getApp() {
-        return app;
-    }
-
-    @Override
-    public String getAppVersion() {
-        return appVersion;
-    }
-
-    @Override
     public String toString(Locale locale) {
+        String app = DriveConfig.getInstance().getShortProductName();
         StringHelper helper = StringHelper.valueOf(locale);
         if (Strings.isNotEmpty(appVersion) && Strings.isNotEmpty(platform) && Strings.isNotEmpty(platformVersion)) {
-            return String.format(helper.getString(DriveClientInfoStrings.DRIVE_CLIENT_INFO_WITH_PLATFORM_VERSION), appVersion, platform, platformVersion);
+            return String.format(helper.getString(DriveClientInfoStrings.DRIVE_CLIENT_INFO_WITH_PLATFORM_VERSION), app, appVersion, platform, platformVersion);
         }
         if (Strings.isNotEmpty(appVersion) && Strings.isNotEmpty(platform)) {
-            return String.format(helper.getString(DriveClientInfoStrings.DRIVE_CLIENT_INFO_WITH_PLATFORM), appVersion, platform);
+            return String.format(helper.getString(DriveClientInfoStrings.DRIVE_CLIENT_INFO_WITH_PLATFORM), app, appVersion, platform);
         }
         if (Strings.isEmpty(appVersion) && Strings.isNotEmpty(platform)) {
-            return String.format(helper.getString(DriveClientInfoStrings.DRIVE_CLIENT_INFO_WITHOUT_VERSION), platform);
+            return String.format(helper.getString(DriveClientInfoStrings.DRIVE_CLIENT_INFO_WITHOUT_VERSION), app, platform);
         }
         if (Strings.isNotEmpty(appVersion) && Strings.isEmpty(platform)) {
-            return String.format(helper.getString(DriveClientInfoStrings.DRIVE_CLIENT_INFO_WITH_VERSION), appVersion);
+            return String.format(helper.getString(DriveClientInfoStrings.DRIVE_CLIENT_INFO_WITH_VERSION), app, appVersion);
         }
         if (Strings.isEmpty(platform)) {
-            return String.format(helper.getString(DriveClientInfoStrings.DRIVE_CLIENT));
+            return String.format(helper.getString(DriveClientInfoStrings.DRIVE_CLIENT), app);
         }
         return app;
     }

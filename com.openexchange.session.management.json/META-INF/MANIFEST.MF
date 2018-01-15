@@ -5,14 +5,18 @@ Bundle-SymbolicName: com.openexchange.session.management.json
 Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.openexchange.ajax,
+Import-Package: com.google.common.base,
+ com.google.common.collect,
+ com.openexchange.ajax,
  com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,
+ com.openexchange.annotation,
  com.openexchange.clientinfo,
  com.openexchange.config.lean,
  com.openexchange.documentation,
  com.openexchange.exception,
  com.openexchange.groupware.ldap,
+ com.openexchange.i18n.tools,
  com.openexchange.java,
  com.openexchange.osgi,
  com.openexchange.server,

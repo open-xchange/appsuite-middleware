@@ -60,12 +60,13 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.clientinfo.ClientInfo;
 import com.openexchange.clientinfo.ClientInfoService;
 import com.openexchange.exception.OXException;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.management.ManagedSession;
 import com.openexchange.session.management.SessionManagementService;
 import com.openexchange.session.management.SessionManagementStrings;
-import com.openexchange.session.management.json.osgi.Services;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
@@ -77,24 +78,28 @@ import com.openexchange.user.UserService;
  */
 public class AllAction implements AJAXActionService {
 
-    public AllAction() {
+    private final ServiceLookup services;
+
+    public AllAction(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        SessionManagementService service = Services.getService(SessionManagementService.class);
+        SessionManagementService service = services.getService(SessionManagementService.class);
         if (null == service) {
             throw ServiceExceptionCode.absentService(SessionManagementService.class);
         }
-        UserService userService = Services.getService(UserService.class);
+        UserService userService = services.getService(UserService.class);
         Locale locale = Locale.getDefault();
         if (null != userService) {
             locale = userService.getUser(session.getUserId(), session.getContextId()).getLocale();
         }
-        boolean extendedInfo = false;
-        if ("true".equalsIgnoreCase(requestData.getParameter("extendedInfo"))) {
-            extendedInfo = true;
+        String unknownLocation = SessionManagementStrings.UNKNOWN_LOCATION;
+        StringHelper helper = StringHelper.valueOf(locale);
+        if (null != helper) {
+            unknownLocation = helper.getString(SessionManagementStrings.UNKNOWN_LOCATION);
         }
         Collection<ManagedSession> sessions = service.getSessionsForUser(session);
         JSONArray browsers = new JSONArray();
@@ -110,7 +115,7 @@ public class AllAction implements AJAXActionService {
                 json.put("client", s.getClient());
                 json.put("userAgent", s.getUserAgent());
                 String location = s.getLocation();
-                if (Strings.isNotEmpty(location) && !SessionManagementStrings.UNKNOWN_LOCATION.equals(location)) {
+                if (Strings.isNotEmpty(location) && !unknownLocation.equals(location)) {
                     json.put("location", s.getLocation());
                 }
                 long loginTime = s.getLoginTime();
@@ -125,7 +130,7 @@ public class AllAction implements AJAXActionService {
                         json.put("lastActive", loginTime);
                     }
                 }
-                JSONObject deviceInfo = getDeviceInfo(s, locale, extendedInfo);
+                JSONObject deviceInfo = getDeviceInfo(s, locale);
                 if (null != deviceInfo) {
                     json.put("device", deviceInfo);
                     String type = deviceInfo.getString("type");
@@ -163,41 +168,25 @@ public class AllAction implements AJAXActionService {
         return new AJAXRequestResult(result, "json");
     }
 
-    private JSONObject getDeviceInfo(ManagedSession session, Locale locale, boolean extendedInfo) {
-        ClientInfoService service = Services.getService(ClientInfoService.class);
-        if (null == service) {
-            return null;
-        }
-        ClientInfo info = service.getClientInfo(session);
-        if (null != info) {
-            JSONObject deviceInfo = new JSONObject(5);
-            try {
-                deviceInfo.put("info", info.toString(locale));
-                deviceInfo.put("type", info.getType().getName());
-                if (extendedInfo) {
-                    String app = info.getApp();
-                    if (Strings.isNotEmpty(app)) {
-                        deviceInfo.put("client", app);
-                    }
-                    String appVersion = info.getAppVersion();
-                    if (Strings.isNotEmpty(appVersion)) {
-                        deviceInfo.put("clientVersion", appVersion);
-                    }
-                    String platform = info.getPlatform();
-                    if (Strings.isNotEmpty(platform)) {
-                        deviceInfo.put("platform", platform);
-                    }
-                    String platformVersion = info.getPlatformVersion();
-                    if (Strings.isNotEmpty(platformVersion)) {
-                        deviceInfo.put("platformVersion", platformVersion);
-                    }
+    private JSONObject getDeviceInfo(ManagedSession session, Locale locale) {
+        JSONObject deviceInfo = new JSONObject(2);
+        try {
+            ClientInfoService service = services.getService(ClientInfoService.class);
+            if (null != service) {
+                ClientInfo info = service.getClientInfo(session.getSession());
+                if (null != info) {
+                    deviceInfo.put("info", info.toString(locale));
+                    deviceInfo.put("type", info.getType().getName());
+                    return deviceInfo;
                 }
-                return deviceInfo;
-            } catch (JSONException e) {
-                // will not happen
             }
+            deviceInfo.put("info", "unknown");
+            deviceInfo.put("type", "other");
+            return deviceInfo;
+        } catch (JSONException e) {
+            // will not happen
         }
-        return null;
+        return deviceInfo;
     }
 
 }

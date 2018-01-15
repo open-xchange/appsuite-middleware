@@ -102,10 +102,6 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
 
     protected final static String OPT_NAME_MASTER_ID_LONG = "masterid";
 
-    protected final static char OPT_NAME_WEIGHT_SHORT = 'w';
-
-    protected final static String OPT_NAME_WEIGHT_LONG = "dbweight";
-
     protected final static char OPT_NAME_MAX_UNITS_SHORT = 'x';
 
     protected final static String OPT_NAME_MAX_UNITS_LONG = "maxunit";
@@ -139,8 +135,6 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
     protected CLIOption databaseIsMasterOption = null;
 
     protected CLIOption databaseMasterIDOption = null;
-
-    protected CLIOption databaseWeightOption = null;
 
     protected CLIOption databaseNameOption = null;
 
@@ -310,13 +304,6 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
         final String maxunits = (String) parser.getOptionValue(this.maxUnitsOption);
         if (maxunits != null) {
             db.setMaxUnits(Integer.parseInt(maxunits));
-        }
-    }
-
-    private void parseAndSetDatabaseWeight(final AdminParser parser, final Database db) {
-        final String databaseweight = (String) parser.getOptionValue(this.databaseWeightOption);
-        if (databaseweight != null) {
-            db.setClusterWeight(Integer.parseInt(databaseweight));
         }
     }
 
@@ -503,27 +490,6 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
             convertBooleantoTriState(required));
     }
 
-    protected void setDatabaseWeightOption(final AdminParser parser, final String defaultvalue, final boolean required) {
-        if (null != defaultvalue) {
-            this.databaseWeightOption = setShortLongOptWithDefault(
-                parser,
-                OPT_NAME_WEIGHT_SHORT,
-                OPT_NAME_WEIGHT_LONG,
-                "The db weight for this database",
-                defaultvalue,
-                true,
-                convertBooleantoTriState(required));
-        } else {
-            this.databaseWeightOption = setShortLongOpt(
-                parser,
-                OPT_NAME_WEIGHT_SHORT,
-                OPT_NAME_WEIGHT_LONG,
-                "The db weight for this database",
-                true,
-                convertBooleantoTriState(required));
-        }
-    }
-
     protected void setDatabaseMaxUnitsOption(final AdminParser parser, final String defaultvalue, final boolean required) {
         if (null != defaultvalue) {
             this.maxUnitsOption = setShortLongOptWithDefault(
@@ -596,7 +562,5 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
         parseAndSetPoolInitial(parser, db);
 
         parseAndSetPoolmax(parser, db);
-
-        parseAndSetDatabaseWeight(parser, db);
     }
 }

@@ -113,6 +113,7 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -354,8 +355,9 @@ public class GuestClient extends AJAXClient {
     private LoginResponse login(ResolveShareResponse shareResponse, ClientConfig config) throws Exception {
         LoginRequest loginRequest = null;
         if ("guest".equals(shareResponse.getLoginType()) || "guest_password".equals(shareResponse.getLoginType())) {
-            GuestCredentials credentials = new GuestCredentials(config.username, config.password);
-            loginRequest = LoginRequest.createGuestLoginRequest(shareResponse.getShare(), shareResponse.getTarget(), credentials, config.client, false);
+            String loginName = Strings.isNotEmpty(shareResponse.getLoginName()) ? shareResponse.getLoginName() : config.username;
+            GuestCredentials credentials = new GuestCredentials(loginName, config.password);
+            loginRequest = LoginRequest.createGuestLoginRequest(shareResponse.getShare(), shareResponse.getTarget(),  credentials, config.client, false);
         } else if ("anonymous_password".equals(shareResponse.getLoginType())) {
             loginRequest = LoginRequest.createAnonymousLoginRequest(shareResponse.getShare(), shareResponse.getTarget(), config.password, false);
         } else {

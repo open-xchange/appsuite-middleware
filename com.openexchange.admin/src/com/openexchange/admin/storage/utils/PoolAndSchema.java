@@ -50,7 +50,6 @@
 package com.openexchange.admin.storage.utils;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -62,6 +61,7 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.database.Databases;
 import com.openexchange.java.Strings;
 
 /**
@@ -97,7 +97,7 @@ public class PoolAndSchema {
         } catch (SQLException e) {
             throw new StorageException(e);
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
         }
@@ -117,7 +117,7 @@ public class PoolAndSchema {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = configDbCon.prepareStatement("SELECT c.write_db_pool_id,s.schemaname,db.url,db.driver,db.login,db.password,db.name,c.read_db_pool_id,c.weight,c.max_units FROM db_cluster AS c LEFT JOIN contexts_per_dbschema AS s ON c.write_db_pool_id=s.db_pool_id JOIN db_pool AS db ON db.db_pool_id = c.write_db_pool_id");
+            stmt = configDbCon.prepareStatement("SELECT c.write_db_pool_id,s.schemaname,db.url,db.driver,db.login,db.password,db.name,c.read_db_pool_id,c.max_units FROM db_cluster AS c LEFT JOIN contexts_per_dbschema AS s ON c.write_db_pool_id=s.db_pool_id JOIN db_pool AS db ON db.db_pool_id = c.write_db_pool_id");
             rs = stmt.executeQuery();
             if (false == rs.next()) {
                 return Collections.emptyList();
@@ -141,7 +141,6 @@ public class PoolAndSchema {
                     if (slaveId > 0) {
                         db.setRead_id(I(slaveId));
                     }
-                    db.setClusterWeight(I(rs.getInt(pos++)));
                     db.setMaxUnits(I(rs.getInt(pos++)));
                     db.setScheme(schema);
                     databases.add(db);
@@ -151,7 +150,7 @@ public class PoolAndSchema {
         } catch (SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -168,7 +167,7 @@ public class PoolAndSchema {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = configDbCon.prepareStatement("SELECT s.schemaname,db.url,db.driver,db.login,db.password,db.name,c.read_db_pool_id,c.weight,c.max_units FROM db_cluster AS c LEFT JOIN contexts_per_dbschema AS s ON c.write_db_pool_id=s.db_pool_id JOIN db_pool AS db ON db.db_pool_id = c.write_db_pool_id WHERE c.write_db_pool_id=?");
+            stmt = configDbCon.prepareStatement("SELECT s.schemaname,db.url,db.driver,db.login,db.password,db.name,c.read_db_pool_id,c.max_units FROM db_cluster AS c LEFT JOIN contexts_per_dbschema AS s ON c.write_db_pool_id=s.db_pool_id JOIN db_pool AS db ON db.db_pool_id = c.write_db_pool_id WHERE c.write_db_pool_id=?");
             stmt.setInt(1, databaseId);
             rs = stmt.executeQuery();
             if (false == rs.next()) {
@@ -192,7 +191,6 @@ public class PoolAndSchema {
                     if (slaveId > 0) {
                         db.setRead_id(I(slaveId));
                     }
-                    db.setClusterWeight(I(rs.getInt(pos++)));
                     db.setMaxUnits(I(rs.getInt(pos++)));
                     db.setScheme(schema);
                     databases.add(db);
@@ -202,7 +200,7 @@ public class PoolAndSchema {
         } catch (SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

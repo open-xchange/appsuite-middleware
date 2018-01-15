@@ -65,8 +65,6 @@ public interface IImageConverter {
      * Creates a new image group with the given key and context. If a group with the same key
      * already exists, its single target images will be overwritten based on the source image from
      * the given {@link InputStream}
-     * {@link InputStream}
-
      * @param key
      * @param srcImageStm
      * @param context (optional, default <code>null</code>)
@@ -160,7 +158,16 @@ public interface IImageConverter {
      * @param context (optional, default <code>null</code>)
      * @return The contained keys as array of {@link String}, which might be of length 0.
      */
-    public String[] getKeys(final String... context)throws ImageConverterException;
+    public String[] getKeys(final String... context) throws ImageConverterException;
+
+    /**
+     * Querying the size of all images.</br>
+     * The size is defined as summed up size of all images stored for each cached key.
+     *
+     * @param context (optional, default <code>null</code>)
+     * @return The summed up size of all images.
+     */
+    public long getTotalImagesSize(final String... context) throws ImageConverterException;
 }
 
 

@@ -57,8 +57,10 @@ import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.tasks.AddOAuthColumnToMailAccountTableTask;
 import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardIdsTask;
 import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardPrincipalTask;
+import com.openexchange.groupware.update.tasks.AddSharedParentFolderToFolderPermissionTableUpdateTask;
 import com.openexchange.groupware.update.tasks.AddSnippetAttachmentPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.AddStartTLSColumnForMailAccountTablesTask;
+import com.openexchange.groupware.update.tasks.AddTypeToFolderPermissionTableUpdateTask;
 import com.openexchange.groupware.update.tasks.AddUUIDForDListTables;
 import com.openexchange.groupware.update.tasks.AddUUIDForInfostoreReservedPaths;
 import com.openexchange.groupware.update.tasks.AddUUIDForUpdateTaskTable;
@@ -645,6 +647,15 @@ public final class InternalList {
 
         // Extends uidl column of the pop3_storage_ids and pop3_storage_deleted tables
         list.add(new com.openexchange.groupware.update.tasks.POP3ExtendUidlTask());
+
+        // Adds the column "type" to the oxfolder_permissions table
+        list.add(new AddTypeToFolderPermissionTableUpdateTask());
+
+        // Adds the column "sharedParentFolder" to the oxfolder_permissions table
+        list.add(new AddSharedParentFolderToFolderPermissionTableUpdateTask());
+
+        // Drops rather needless foreign key from "object_use_count" table
+        list.add(new com.openexchange.groupware.update.tasks.DropForeignKeyFromObjectUseCountTable());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

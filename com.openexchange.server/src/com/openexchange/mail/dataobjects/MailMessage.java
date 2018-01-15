@@ -251,6 +251,20 @@ public abstract class MailMessage extends MailPart {
      */
     private static final Set<String> ALL_COLOR_LABELS = ImmutableSet.of("$cl_0", "$cl_1", "$cl_2", "$cl_3", "$cl_4", "$cl_5", "$cl_6", "$cl_7", "$cl_8", "$cl_9", "$cl_10", "cl_0", "cl_1", "cl_2", "cl_3", "cl_4", "cl_5", "cl_6", "cl_7", "cl_8", "cl_9", "cl_10");
 
+    /*-
+     * ------------------- Attachment Label ------------------------------
+     */
+
+    /**
+     * Marks if the mail has an attachment
+     */
+    public static final String HAS_ATTACHMENT_LABEL = "$HasAttachment";
+
+    /**
+     * Marks if the mail has no attachment
+     */
+    public static final String HAS_NO_ATTACHMENT_LABEL = "$HasNoAttachment";
+
     /**
      * Determines the corresponding <code>int</code> value of a given color label's string representation.
      * <p>
@@ -325,6 +339,26 @@ public abstract class MailMessage extends MailPart {
      */
     public static String getColorLabelStringValue(final int cl) {
         return new StringBuilder(COLOR_LABEL_PREFIX).append(cl).toString();
+    }
+
+    /**
+     * Returns if the provided custom user flag is '$HasAttachment'
+     * 
+     * @param userFlag the flag to check
+     * @return <code>true</code> if the flag is '$HasAttachment'; otherwise <code>false</code>
+     */
+    public static boolean isHasAttachment(String userFlag) {
+        return (userFlag != null && (userFlag.equalsIgnoreCase(MailMessage.HAS_ATTACHMENT_LABEL)));
+    }
+
+    /**
+     * Returns if the provided custom user flag is '$HasNoAttachment'
+     * 
+     * @param userFlag the flag to check
+     * @return <code>true</code> if the flag is '$HasNoAttachment'; otherwise <code>false</code>
+     */
+    public static boolean isHasNoAttachment(String userFlag) {
+        return (userFlag != null && (userFlag.equalsIgnoreCase(MailMessage.HAS_NO_ATTACHMENT_LABEL)));
     }
 
     private static final InternetAddress[] EMPTY_ADDRS = new InternetAddress[0];
@@ -518,6 +552,12 @@ public abstract class MailMessage extends MailPart {
      */
     private SecurityResult securityResult;
     private boolean b_securityResult;
+
+    /**
+     * Email authenticity results
+     */
+    private MailAuthenticityResult authenticityResult;
+    private boolean b_authenticityResult;
 
     /**
      * The text preview
@@ -2140,6 +2180,51 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
+     * Sets the given authentication result for this mail.
+     *
+     * @param result The authentication result to set
+     */
+    public void setAuthenticityResult(MailAuthenticityResult authenticationResult) {
+        this.authenticityResult = authenticationResult;
+        b_authenticityResult = true;
+    }
+
+    /**
+     * Gets the authentication result for this mail.
+     *
+     * @return The authentication result or <code>null</code> if not set
+     */
+    public MailAuthenticityResult getAuthenticityResult() {
+        return this.authenticityResult;
+    }
+
+    /**
+     * Checks if authentication result is available.
+     *
+     * @return <code>true</code> if available; otherwise <code>false</code>
+     */
+    public boolean hasAuthenticityResult() {
+        return authenticityResult != null;
+    }
+
+    /**
+     * Checks if authentication result has been set for this mail.
+     *
+     * @return <code>true</code> if set; otherwise <code>false</code>
+     */
+    public boolean containsAuthenticityResult() {
+        return b_authenticityResult;
+    }
+
+    /**
+     * Removes the authentication result from this mail.
+     */
+    public void removeAuthenticityResult() {
+        this.authenticityResult = null;
+        b_authenticityResult = false;
+    }
+
+    /**
      * Gets the implementation-specific unique ID of this mail in its mail folder. The ID returned by this method is used in storages to
      * refer to a mail.
      *
@@ -2168,5 +2253,4 @@ public abstract class MailMessage extends MailPart {
      * @param unreadMessages The number of unread messages
      */
     public abstract void setUnreadMessages(int unreadMessages);
-
 }

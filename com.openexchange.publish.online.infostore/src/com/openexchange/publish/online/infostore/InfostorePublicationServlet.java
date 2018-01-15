@@ -80,6 +80,7 @@ import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import com.openexchange.tx.TransactionAwares;
 
 
 /**
@@ -186,7 +187,11 @@ public class InfostorePublicationServlet extends HttpServlet {
 
     private void destroy(final ServerSession session, final DocumentMetadata document) throws OXException {
         IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
-        fileAccess.removeDocument(String.valueOf(document.getId()), Long.MAX_VALUE);
+        try {
+            fileAccess.removeDocument(String.valueOf(document.getId()), Long.MAX_VALUE);
+        } finally {
+            TransactionAwares.finishSafe(fileAccess);
+        }
     }
 
     private boolean hasMorePublications(final Context ctx, final DocumentMetadata document) throws OXException {

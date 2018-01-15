@@ -132,7 +132,6 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailMessageStorageThreadReferences;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageBatch;
 import com.openexchange.mail.api.IMailMessageStorageBatchCopyMove;
@@ -140,6 +139,7 @@ import com.openexchange.mail.api.IMailMessageStorageDelegator;
 import com.openexchange.mail.api.IMailMessageStorageEnhancedDeletion;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.IMailMessageStorageMimeSupport;
+import com.openexchange.mail.api.IMailMessageStorageThreadReferences;
 import com.openexchange.mail.api.ISimplifiedThreadStructureEnhanced;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.IDMailMessage;
@@ -775,7 +775,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         fullName,
                         valids,
                         valids.length,
-                        getFetchProfile(fields, headerNames, null, null, getIMAPProperties().isFastFetch()),
+                        getFetchProfile(fields, headerNames, null, null, getIMAPProperties().isFastFetch(), getIMAPProperties().isAttachmentSearchEnabled()),
                         imapConfig.getImapCapabilities().hasIMAP4rev1(),
                         false);
                 /*
@@ -793,7 +793,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         fullName,
                         seqNumsMap.values(),
                         seqNumsMap.size(),
-                        getFetchProfile(fields, headerNames, null, null, getIMAPProperties().isFastFetch()),
+                        getFetchProfile(fields, headerNames, null, null, getIMAPProperties().isFastFetch(), getIMAPProperties().isAttachmentSearchEnabled()),
                         imapConfig.getImapCapabilities().hasIMAP4rev1(),
                         true);
                 /*
@@ -1820,9 +1820,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              * Fetch (possibly) filtered and sorted sequence numbers
              */
             boolean fetchBody = fields.contains(MailField.BODY) || fields.contains(MailField.FULL);
+            boolean attachmentSearchEnabled = getIMAPProperties().isAttachmentSearchEnabled();
             MailMessage[] mailMessages;
             if (fetchBody) {
-                FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, getIMAPProperties().isFastFetch());
+                FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, getIMAPProperties().isFastFetch(), attachmentSearchEnabled);
                 List<MailMessage> list = fetchMessages(msgIds, fetchProfile);
                 mailMessages = list.toArray(new MailMessage[list.size()]);
             } else {
@@ -1830,7 +1831,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Body content not requested, we simply return IDMailMessage objects filled with requested fields
                  */
                 boolean isRev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
-                FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, getIMAPProperties().isFastFetch());
+                FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, getIMAPProperties().isFastFetch(), attachmentSearchEnabled);
                 MailMessage[] tmp = fetchMessages(msgIds, fetchProfile, isRev1);
                 mailMessages = setAccountInfo(tmp);
             }
@@ -1954,9 +1955,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
 
             boolean fetchBody = fields.contains(MailField.BODY) || fields.contains(MailField.FULL);
+            boolean attachmentSearchEnabled = getIMAPProperties().isAttachmentSearchEnabled();
             MailMessage[] mailMessages;
             if (fetchBody) {
-                FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, getIMAPProperties().isFastFetch());
+                FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, getIMAPProperties().isFastFetch(), attachmentSearchEnabled);
                 List<MailMessage> list = fetchMessages(seqNumsToFetch, fetchProfile);
                 mailMessages = list.toArray(new MailMessage[list.size()]);
             } else {
@@ -1964,7 +1966,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Body content not requested, we simply return IDMailMessage objects filled with requested fields
                  */
                 boolean isRev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
-                FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, getIMAPProperties().isFastFetch());
+                FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, getIMAPProperties().isFastFetch(), attachmentSearchEnabled);
                 MailMessage[] tmp = fetchMessages(seqNumsToFetch, fetchProfile, isRev1);
                 mailMessages = setAccountInfo(tmp);
             }
@@ -2031,10 +2033,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     private MailMessage[] fetchSortAndSlice(int[] seqnums, MailSortField sortField, OrderDirection order, MailFields fields, IndexRange indexRange, String[] headerNames) throws OXException, MessagingException {
         boolean fastFetch = getIMAPProperties().isFastFetch();
         boolean hasIMAP4rev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
+        boolean attachmentSearchEnabled = getIMAPProperties().isAttachmentSearchEnabled();
 
         if (null == indexRange) {
             // Fetch them all
-            FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, fastFetch);
+            FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, fastFetch, attachmentSearchEnabled);
             List<MailMessage> list;
             boolean fetchBody = fields.contains(MailField.BODY) || fields.contains(MailField.FULL);
             if (fetchBody) {
@@ -2064,7 +2067,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         // A certain range is requested, thus grab messages only with ID and sort field information
         List<MailMessage> list;
         {
-            FetchProfile fp = getFetchProfile(new MailField[] { MailField.ID, MailField.toField(sortField.getListField()) }, fastFetch);
+            FetchProfile fp = getFetchProfile(new MailField[] { MailField.ID, MailField.toField(sortField.getListField()) }, fastFetch, attachmentSearchEnabled);
             MailMessage[] mailMessages = fetchMessages(seqnums, fp, hasIMAP4rev1);
 
             list = new ArrayList<>(mailMessages.length);
@@ -2093,7 +2096,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
 
         // Fetch with proper attributes by UID
-        FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, fastFetch);
+        FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, fastFetch, attachmentSearchEnabled);
         MailMessage[] mailMessages;
         boolean fetchBody = fields.contains(MailField.BODY) || fields.contains(MailField.FULL);
         if (fetchBody) {
@@ -2488,7 +2491,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Get ( & fetch) new messages
                  */
-                Message[] msgs = IMAPCommandsCollection.getUnreadMessages(imapFolder, fields, sortField, order, getIMAPProperties().isFastFetch(), limit, imapServerInfo, session);
+                Message[] msgs = IMAPCommandsCollection.getUnreadMessages(imapFolder, fields, sortField, order, getIMAPProperties().isFastFetch(), limit, imapServerInfo, session, imapConfig);
                 if ((msgs == null) || (msgs.length == 0) || limit == 0) {
                     return EMPTY_RETVAL;
                 }

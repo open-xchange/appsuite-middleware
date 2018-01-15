@@ -117,6 +117,7 @@ public class GrizzlyConfig {
         private int sessionExpiryCheckInterval = 60;
         private boolean checkTrackingIdInRequestParameters = false;
         private int maxNumberOfConcurrentRequests = 0;
+        private boolean supportHierachicalLookupOnNotFound = false;
 
         /**
          * Initializes a new {@link GrizzlyConfig.Builder}.
@@ -192,6 +193,8 @@ public class GrizzlyConfig {
             this.isSessionAutologin = configService.getBoolProperty("com.openexchange.sessiond.autologin", false);
 
             this.enabledCiphers = configService.getProperty("com.openexchange.http.grizzly.enabledCipherSuites", "", ",");
+
+            this.supportHierachicalLookupOnNotFound = configService.getBoolProperty("com.openexchange.http.grizzly.supportHierachicalLookupOnNotFound", false);
 
             return this;
         }
@@ -386,8 +389,13 @@ public class GrizzlyConfig {
             return this;
         }
 
+        public Builder setSupportHierachicalLookupOnNotFound(boolean supportHierachicalLookupOnNotFound) {
+            this.supportHierachicalLookupOnNotFound = supportHierachicalLookupOnNotFound;
+            return this;
+        }
+
         public GrizzlyConfig build() {
-            return new GrizzlyConfig(httpHost, httpPort, httpsPort, isJMXEnabled, isWebsocketsEnabled, isCometEnabled, maxRequestParameters, backendRoute, isAbsoluteRedirect, shutdownFast, awaitShutDownSeconds, maxHttpHeaderSize, isSslEnabled, keystorePath, keystorePassword, sessionExpiryCheckInterval, maxNumberOfConcurrentRequests, checkTrackingIdInRequestParameters, cookieMaxAge, cookieMaxInactivityInterval, isForceHttps, isCookieHttpOnly, contentSecurityPolicy, defaultEncoding, isConsiderXForwards, knownProxies, forHeader, protocolHeader, httpsProtoValue, httpProtoPort, httpsProtoPort, echoHeader, robotsMetaTag, maxBodySize, maxNumberOfHttpSessions, isSessionAutologin, enabledCiphers, wsTimeoutMillis);
+            return new GrizzlyConfig(httpHost, httpPort, httpsPort, isJMXEnabled, isWebsocketsEnabled, isCometEnabled, maxRequestParameters, backendRoute, isAbsoluteRedirect, shutdownFast, awaitShutDownSeconds, maxHttpHeaderSize, isSslEnabled, keystorePath, keystorePassword, sessionExpiryCheckInterval, maxNumberOfConcurrentRequests, checkTrackingIdInRequestParameters, cookieMaxAge, cookieMaxInactivityInterval, isForceHttps, isCookieHttpOnly, contentSecurityPolicy, defaultEncoding, isConsiderXForwards, knownProxies, forHeader, protocolHeader, httpsProtoValue, httpProtoPort, httpsProtoPort, echoHeader, robotsMetaTag, maxBodySize, maxNumberOfHttpSessions, isSessionAutologin, enabledCiphers, wsTimeoutMillis, supportHierachicalLookupOnNotFound);
         }
     }
 
@@ -515,7 +523,10 @@ public class GrizzlyConfig {
     /** Checks if the special "trackingId" parameter is supposed to be looked-up or always newly created */
     private final boolean checkTrackingIdInRequestParameters;
 
-    GrizzlyConfig(String httpHost, int httpPort, int httpsPort, boolean isJMXEnabled, boolean isWebsocketsEnabled, boolean isCometEnabled, int maxRequestParameters, String backendRoute, boolean isAbsoluteRedirect, boolean shutdownFast, int awaitShutDownSeconds, int maxHttpHeaderSize, boolean isSslEnabled, String keystorePath, String keystorePassword, int sessionExpiryCheckInterval, int maxNumberOfConcurrentRequests, boolean checkTrackingIdInRequestParameters, int cookieMaxAge, int cookieMaxInactivityInterval, boolean isForceHttps, boolean isCookieHttpOnly, String contentSecurityPolicy, String defaultEncoding, boolean isConsiderXForwards, List<IPRange> knownProxies, String forHeader, String protocolHeader, String httpsProtoValue, int httpProtoPort, int httpsProtoPort, String echoHeader, String robotsMetaTag, int maxBodySize, int maxNumberOfHttpSessions, boolean isSessionAutologin, List<String> enabledCiphers, long wsTimeoutMillis) {
+    /** Checks if hierarchical look-up of "parent" servlets should be supported. */
+    private final boolean supportHierachicalLookupOnNotFound;
+
+    GrizzlyConfig(String httpHost, int httpPort, int httpsPort, boolean isJMXEnabled, boolean isWebsocketsEnabled, boolean isCometEnabled, int maxRequestParameters, String backendRoute, boolean isAbsoluteRedirect, boolean shutdownFast, int awaitShutDownSeconds, int maxHttpHeaderSize, boolean isSslEnabled, String keystorePath, String keystorePassword, int sessionExpiryCheckInterval, int maxNumberOfConcurrentRequests, boolean checkTrackingIdInRequestParameters, int cookieMaxAge, int cookieMaxInactivityInterval, boolean isForceHttps, boolean isCookieHttpOnly, String contentSecurityPolicy, String defaultEncoding, boolean isConsiderXForwards, List<IPRange> knownProxies, String forHeader, String protocolHeader, String httpsProtoValue, int httpProtoPort, int httpsProtoPort, String echoHeader, String robotsMetaTag, int maxBodySize, int maxNumberOfHttpSessions, boolean isSessionAutologin, List<String> enabledCiphers, long wsTimeoutMillis, boolean supportHierachicalLookupOnNotFound) {
         super();
         this.httpHost = httpHost;
         this.httpPort = httpPort;
@@ -555,6 +566,7 @@ public class GrizzlyConfig {
         this.isSessionAutologin = isSessionAutologin;
         this.enabledCiphers = enabledCiphers;
         this.wsTimeoutMillis = wsTimeoutMillis;
+        this.supportHierachicalLookupOnNotFound = supportHierachicalLookupOnNotFound;
     }
 
     /**
@@ -875,6 +887,15 @@ public class GrizzlyConfig {
      */
     public boolean isCheckTrackingIdInRequestParameters() {
         return checkTrackingIdInRequestParameters;
+    }
+
+    /**
+     * Checks if hierarchical look-up of "parent" servlets should be supported.
+     *
+     * @return <code>true</code> to support hierarchical look-up of "parent" servlets; otherwise <code>false</code>
+     */
+    public boolean isSupportHierachicalLookupOnNotFound() {
+        return supportHierachicalLookupOnNotFound;
     }
 
 }

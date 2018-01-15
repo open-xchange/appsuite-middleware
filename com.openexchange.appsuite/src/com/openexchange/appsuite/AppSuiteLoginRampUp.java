@@ -72,6 +72,11 @@ public class AppSuiteLoginRampUp extends DefaultAppSuiteLoginRampUp {
     }
 
     @Override
+    protected String getConfigInfix() {
+        return "open-xchange-appsuite";
+    }
+
+    @Override
     public boolean contributesTo(String client) {
         return "open-xchange-appsuite".equals(client);
     }

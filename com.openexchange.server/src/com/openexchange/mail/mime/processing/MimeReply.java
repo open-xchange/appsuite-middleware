@@ -671,6 +671,8 @@ public final class MimeReply extends AbstractMimeProcessing {
             }
             // Copy security setting
             replyMail.setSecurityResult(originalMsg.getSecurityResult());
+            // Copy authenticity setting
+            replyMail.setAuthenticityResult(originalMsg.getAuthenticityResult());
 
             return replyMail;
         } catch (final MessagingException e) {

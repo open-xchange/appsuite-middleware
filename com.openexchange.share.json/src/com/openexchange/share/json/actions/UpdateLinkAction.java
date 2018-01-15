@@ -101,6 +101,9 @@ public class UpdateLinkAction extends AbstractShareAction {
                 String newPassword = json.isNull("password") ? null : json.getString("password");
                 linkUpdate.setPassword(newPassword);
             }
+            if (json.has("includeSubfolders")) {
+                linkUpdate.setIncludeSubfolders(json.optBoolean("includeSubfolders"));
+            }
             shareLink = getShareService().updateLink(session, target, linkUpdate, clientTimestamp);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());

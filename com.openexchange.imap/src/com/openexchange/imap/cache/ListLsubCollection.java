@@ -75,6 +75,7 @@ import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
+import com.openexchange.java.ConcurrentHashSet;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.mime.MimeMailException;
@@ -2301,7 +2302,7 @@ final class ListLsubCollection implements Serializable {
                 return;
             }
             if (null == children) {
-                children = new HashSet<ListLsubEntryImpl>(8);
+                children = new ConcurrentHashSet<ListLsubEntryImpl>(8);
                 children.add(child);
             } else {
                 if (!children.add(child)) {

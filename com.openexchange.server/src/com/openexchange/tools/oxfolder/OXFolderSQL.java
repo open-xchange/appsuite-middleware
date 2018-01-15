@@ -49,9 +49,7 @@
 
 package com.openexchange.tools.oxfolder;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -72,6 +70,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderEventConstants;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -83,7 +82,6 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
-import com.openexchange.tools.sql.DBUtils;
 import gnu.trove.TIntCollection;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.TIntList;
@@ -149,14 +147,14 @@ public final class OXFolderSQL {
             stmt.executeQuery();
 
             if (backupTable) {
-                closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
                 stmt = con.prepareStatement(SQL_LOCK_BACKUP);
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, folderId);
                 stmt.executeQuery();
             }
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -206,7 +204,7 @@ public final class OXFolderSQL {
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -555,7 +553,7 @@ public final class OXFolderSQL {
                     }
                     updated += executeUpdate(stmt);
                 } finally {
-                    closeSQLStuff(stmt);
+                    Databases.closeSQLStuff(stmt);
                 }
             }
             /*
@@ -642,7 +640,7 @@ public final class OXFolderSQL {
                     }
                     updated += executeUpdate(stmt);
                 } finally {
-                    closeSQLStuff(stmt);
+                    Databases.closeSQLStuff(stmt);
                 }
             }
             /*
@@ -945,7 +943,7 @@ public final class OXFolderSQL {
                 }
                 return false;
             }
-            closeSQLStuff(null, stmt);
+            Databases.closeSQLStuff(stmt);
             stmt = null;
 
             // Update last-modified to propagate changes to clients
@@ -981,13 +979,15 @@ public final class OXFolderSQL {
      * @param objectDeletePermission The object delete permission to set
      * @param isAdmin <code>true</code> if permission ID is a folder administrator; otherwise <code>false</code>
      * @param system The system bit mask
+     * @param type The permission type
+     * @param legator The permission legator or null
      * @param writeCon A connection with write capability; may be <code>null</code> to fetch from pool
      * @param ctx The context
      * @return <code>true</code> if corresponding entry was successfully inserted; otherwise <code>false</code>
      * @throws OXException If a pooling error occurred
      * @throws SQLException If a SQL error occurred
      */
-    public static boolean addSinglePermission(final int folderId, final int permissionId, final boolean isGroup, final int folderPermission, final int objectReadPermission, final int objectWritePermission, final int objectDeletePermission, final boolean isAdmin, final int system, final Connection writeCon, final Context ctx) throws OXException, SQLException {
+    public static boolean addSinglePermission(final int folderId, final int permissionId, final boolean isGroup, final int folderPermission, final int objectReadPermission, final int objectWritePermission, final int objectDeletePermission, final boolean isAdmin, final int system, final FolderPermissionType type, final String legator, final Connection writeCon, final Context ctx) throws OXException, SQLException {
         Connection wc = writeCon;
         boolean closeWriteCon = false;
         PreparedStatement stmt = null;
@@ -1016,7 +1016,7 @@ public final class OXFolderSQL {
             stmt.setInt(pos++, system);
             rs = stmt.executeQuery();
             final boolean alreadyExists = rs.next();
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
 
@@ -1025,7 +1025,7 @@ public final class OXFolderSQL {
             if (alreadyExists) {
                 success = true;
             } else {
-                stmt = wc.prepareStatement("INSERT INTO oxfolder_permissions (cid, fuid, permission_id, group_flag, fp, orp, owp, odp, admin_flag, system) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                stmt = wc.prepareStatement("INSERT INTO oxfolder_permissions (cid, fuid, permission_id, group_flag, fp, orp, owp, odp, admin_flag, system, type, sharedParentFolder) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 pos = 1;
                 stmt.setInt(pos++, ctx.getContextId());
                 stmt.setInt(pos++, folderId);
@@ -1037,6 +1037,12 @@ public final class OXFolderSQL {
                 stmt.setInt(pos++, objectDeletePermission);
                 stmt.setInt(pos++, isAdmin ? 1 : 0);
                 stmt.setInt(pos++, system);
+                stmt.setInt(pos++, type.getTypeNumber());
+                if(legator != null) {
+                    stmt.setInt(pos++, Integer.valueOf(legator));
+                } else {
+                    stmt.setNull(pos++, java.sql.Types.INTEGER);
+                }
                 try {
                     success = executeUpdate(stmt) == 1;
                 } catch (SQLException e) {
@@ -1216,7 +1222,7 @@ public final class OXFolderSQL {
                         parentFolderIDs.add(folderID);
                     }
                 } finally {
-                    closeSQLStuff(rs, stmt);
+                    Databases.closeSQLStuff(rs, stmt);
                 }
             } while (recursive && false == parentFolderIDs.isEmpty());
         } finally {
@@ -1314,7 +1320,7 @@ public final class OXFolderSQL {
                     rs = executeQuery(stmt);
                     currentID = rs.next() ? Integer.valueOf(rs.getInt(1)) : 0;
                 } finally {
-                    closeSQLStuff(rs, stmt);
+                    Databases.closeSQLStuff(rs, stmt);
                 }
                 subfolderIDs.add(Integer.valueOf(currentID));
             }
@@ -1473,10 +1479,7 @@ public final class OXFolderSQL {
         return 0;
     }
 
-    private static final String SQL_INSERT_NEW_FOLDER = "INSERT INTO oxfolder_tree (fuid, cid, parent, fname, module, type, creating_date,"
-        + " created_from, changing_date, changed_from, permission_flag, subfolder_flag, default_flag) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
-
-    private static final String SQL_INSERT_NEW_PERMISSIONS = "INSERT INTO oxfolder_permissions " + "(cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag) " + "VALUES (?,?,?,?,?,?,?,?,?)";
+    private static final String SQL_INSERT_NEW_PERMISSIONS = "INSERT INTO oxfolder_permissions " + "(cid, fuid, permission_id, fp, orp, owp, odp, admin_flag, group_flag, type, sharedParentFolder) " + "VALUES (?,?,?,?,?,?,?,?,?,?,?)";
 
     private static final String SQL_UPDATE_PARENT_SUBFOLDER_FLAG = "UPDATE oxfolder_tree " + "SET subfolder_flag = 1, changing_date = ? WHERE cid = ? AND fuid = ?";
 
@@ -1574,6 +1577,13 @@ public final class OXFolderSQL {
                         stmt.setInt(7, ocl.getDeletePermission());
                         stmt.setInt(8, ocl.isFolderAdmin() ? 1 : 0);
                         stmt.setInt(9, ocl.isGroupPermission() ? 1 : 0);
+                        stmt.setInt(10, ocl.getType().getTypeNumber());
+                        String legator = ocl.getPermissionLegator();
+                        if(legator != null) {
+                            stmt.setInt(11, Integer.valueOf(legator));
+                        } else {
+                            stmt.setNull(11, java.sql.Types.INTEGER);
+                        }
                         stmt.addBatch();
                     }
                     executeBatch(stmt);
@@ -1783,6 +1793,13 @@ public final class OXFolderSQL {
                     stmt.setInt(pos++, oclPerm.getDeletePermission());
                     stmt.setInt(pos++, oclPerm.isFolderAdmin() ? 1 : 0);
                     stmt.setInt(pos++, oclPerm.isGroupPermission() ? 1 : 0);
+                    stmt.setInt(pos++, oclPerm.getType().getTypeNumber());
+                    String legator = oclPerm.getPermissionLegator();
+                    if(legator != null) {
+                        stmt.setInt(11, Integer.valueOf(legator));
+                    } else {
+                        stmt.setNull(11, java.sql.Types.INTEGER);
+                    }
                     stmt.addBatch();
                 }
                 executeBatch(stmt);
@@ -1915,7 +1932,7 @@ public final class OXFolderSQL {
                 writeCon.setAutoCommit(true);
             }
         } finally {
-            closeSQLStuff(subFolderRS, pst);
+            Databases.closeSQLStuff(subFolderRS, pst);
             if (closeWriteCon && writeCon != null) {
                 DBPool.closeWriterSilent(ctx, writeCon);
             }
@@ -2105,13 +2122,13 @@ public final class OXFolderSQL {
             }
         } catch (final SQLException e) {
             if (isAuto) {
-                DBUtils.rollback(writeCon);
+                Databases.rollback(writeCon);
             }
             throw e;
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             if (isAuto) {
-                DBUtils.autocommit(writeCon);
+                Databases.autocommit(writeCon);
             }
             if (closeWriteCon) {
                 DBPool.closeWriterSilent(ctx, writeCon);
@@ -2182,13 +2199,13 @@ public final class OXFolderSQL {
             }
         } catch (final SQLException e) {
             if (isAuto) {
-                DBUtils.rollback(writeCon);
+                Databases.rollback(writeCon);
             }
             throw e;
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             if (isAuto) {
-                DBUtils.autocommit(writeCon);
+                Databases.autocommit(writeCon);
             }
             if (closeWriteCon) {
                 DBPool.closeWriterSilent(ctx, writeCon);
@@ -2252,13 +2269,13 @@ public final class OXFolderSQL {
             }
         } catch (final SQLException e) {
             if (isAuto) {
-                DBUtils.rollback(writeCon);
+                Databases.rollback(writeCon);
             }
             throw e;
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             if (isAuto) {
-                DBUtils.autocommit(writeCon);
+                Databases.autocommit(writeCon);
             }
             if (closeWriteCon) {
                 DBPool.closeWriterSilent(ctx, writeCon);
@@ -2317,7 +2334,7 @@ public final class OXFolderSQL {
             throw e;
         } finally {
             if (isAuto) {
-                autocommit(writeCon);
+                Databases.autocommit(writeCon);
             }
             closeResources(null, stmt, closeWrite ? writeCon : null, false, ctx);
         }
@@ -3109,7 +3126,7 @@ public final class OXFolderSQL {
                 stmt.setInt(6, folder);
                 stmt.setInt(7, userId);
                 stmt.execute();
-                closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
             }
         } finally {
             closeResources(null, stmt, null, true, ctx);

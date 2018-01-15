@@ -106,6 +106,8 @@ public class CreateVirtualFolderTables extends AbstractCreateTableImpl {
         + "adminFlag tinyint(3) unsigned NOT NULL,"
         + "groupFlag tinyint(3) unsigned NOT NULL,"
         + "system tinyint(3) unsigned NOT NULL default '0',"
+        + "`type` INT4 UNSIGNED NOT NULL default '0',"
+        + "`sharedParentFolder` INT4 UNSIGNED,"
         + "PRIMARY KEY (cid, tree, user, folderId, entity)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
@@ -173,6 +175,8 @@ public class CreateVirtualFolderTables extends AbstractCreateTableImpl {
         + "adminFlag tinyint(3) unsigned NOT NULL,"
         + "groupFlag tinyint(3) unsigned NOT NULL,"
         + "system tinyint(3) unsigned NOT NULL default '0',"
+        + "`type` INT4 UNSIGNED NOT NULL default '0',"
+        + "`sharedParentFolder` INT4 UNSIGNED,"
         + "PRIMARY KEY (cid, tree, user, folderId, entity)"
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 

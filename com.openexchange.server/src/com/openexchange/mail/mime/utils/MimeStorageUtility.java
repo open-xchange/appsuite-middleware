@@ -96,7 +96,6 @@ public final class MimeStorageUtility {
         CACHE_FETCH_PROFILE.add(FetchProfile.Item.SIZE);
         CACHE_FETCH_PROFILE.add(MessageHeaders.HDR_IMPORTANCE);
         CACHE_FETCH_PROFILE.add(MessageHeaders.HDR_X_PRIORITY);
-        CACHE_FETCH_PROFILE.add(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY);
         // CACHE_FETCH_PROFILE.add(IMAPFolder.FetchProfileItem.HEADERS);
 
         // Cache fields
@@ -213,10 +212,12 @@ public final class MimeStorageUtility {
         }
         if (fetchProfile.contains(FetchProfile.Item.CONTENT_INFO)) {
             set.add(MailField.CONTENT_TYPE);
+            set.add(MailField.ATTACHMENT);
         }
         if (fetchProfile.contains(FetchProfile.Item.FLAGS)) {
             set.add(MailField.FLAGS);
             set.add(MailField.COLOR_LABEL);
+            set.add(MailField.ATTACHMENT); // for imap attachment search enabled
         }
         if (fetchProfile.contains(IMAPFolder.FetchProfileItem.HEADERS)) {
             set.add(MailField.HEADERS);
@@ -299,10 +300,11 @@ public final class MimeStorageUtility {
      *
      * @param fields The fields
      * @param preferEnvelope <code>true</code> to prefer ENVELOPE instead of single fetch items; otherwise <code>false</code>
+     * @param useIMAPAttachmentSearch <code>true</code> to signal that IMAPs attachment search should be used and therefore flags have to be requested.
      * @return The appropriate IMAP fetch profile
      */
-    public static FetchProfile getFetchProfile(MailField[] fields, boolean preferEnvelope) {
-        return getFetchProfile(fields, null, preferEnvelope);
+    public static FetchProfile getFetchProfile(MailField[] fields, boolean preferEnvelope, boolean useIMAPAttachmentSearch) {
+        return getFetchProfile(fields, null, preferEnvelope, useIMAPAttachmentSearch);
     }
 
     /**
@@ -314,10 +316,11 @@ public final class MimeStorageUtility {
      * @param fields The fields
      * @param sortField The sort field
      * @param preferEnvelope <code>true</code> to prefer ENVELOPE instead of single fetch items; otherwise <code>false</code>
+     * @param useIMAPAttachmentSearch <code>true</code> to signal that IMAPs attachment search should be used and therefore flags have to be requested.
      * @return The appropriate IMAP fetch profile
      */
-    public static FetchProfile getFetchProfile(MailField[] fields, MailField sortField, boolean preferEnvelope) {
-        return getFetchProfile(fields, null, sortField, preferEnvelope);
+    public static FetchProfile getFetchProfile(MailField[] fields, MailField sortField, boolean preferEnvelope, boolean useIMAPAttachmentSearch) {
+        return getFetchProfile(fields, null, sortField, preferEnvelope, useIMAPAttachmentSearch);
     }
 
     private static final EnumSet<MailField> ENV_FIELDS;
@@ -351,11 +354,9 @@ public final class MimeStorageUtility {
         return ENV_FIELDS.contains(field);
     }
 
-    private static final EnumSet<MailField> ENUM_SET_FULL =
-        EnumSet.complementOf(EnumSet.of(MailField.BODY, MailField.FULL, MailField.ACCOUNT_NAME));
+    private static final EnumSet<MailField> ENUM_SET_FULL = EnumSet.complementOf(EnumSet.of(MailField.BODY, MailField.FULL, MailField.ACCOUNT_NAME));
 
-    private static final List<HeaderName> ENV_LIST =
-        Arrays.asList(HeaderName.valuesOf("From", "To", "Cc", "Bcc", "Subject", "Date", "ReplyTo"));
+    private static final List<HeaderName> ENV_LIST = Arrays.asList(HeaderName.valuesOf("From", "To", "Cc", "Bcc", "Subject", "Date", "ReplyTo"));
 
     /**
      * Gets the appropriate fetch profile
@@ -367,10 +368,11 @@ public final class MimeStorageUtility {
      * @param searchFields The search fields
      * @param sortField The sort field
      * @param preferEnvelope <code>true</code> to prefer ENVELOPE instead of single fetch items; otherwise <code>false</code>
+     * @param useIMAPAttachmentSearch <code>true</code> to signal that IMAPs attachment search should be used and therefore flags have to be requested.
      * @return The appropriate IMAP fetch profile
      */
-    public static FetchProfile getFetchProfile(MailField[] fields, MailField[] searchFields, MailField sortField, boolean preferEnvelope) {
-        return getFetchProfile(fields, null, searchFields, sortField, preferEnvelope);
+    public static FetchProfile getFetchProfile(MailField[] fields, MailField[] searchFields, MailField sortField, boolean preferEnvelope, boolean useIMAPAttachmentSearch) {
+        return getFetchProfile(fields, null, searchFields, sortField, preferEnvelope, useIMAPAttachmentSearch);
     }
 
     /**
@@ -384,9 +386,10 @@ public final class MimeStorageUtility {
      * @param searchFields The search fields
      * @param sortField The sort field
      * @param preferEnvelope <code>true</code> to prefer ENVELOPE instead of single fetch items; otherwise <code>false</code>
+     * @param useIMAPAttachmentSearch <code>true</code> to signal that IMAPs attachment search should be used and therefore flags have to be requested.
      * @return The appropriate IMAP fetch profile
      */
-    public static FetchProfile getFetchProfile(MailField[] fields, String[] headerNames, MailField[] searchFields, MailField sortField, boolean preferEnvelope) {
+    public static FetchProfile getFetchProfile(MailField[] fields, String[] headerNames, MailField[] searchFields, MailField sortField, boolean preferEnvelope, boolean useIMAPAttachmentSearch) {
         MailField[] arr;
         {
             List<MailField> list = Arrays.asList(fields);
@@ -414,7 +417,7 @@ public final class MimeStorageUtility {
         /*
          * Set of header names
          */
-        Set<HeaderName> names = null == headerNames ? Collections.<HeaderName>emptySet() : new HashSet<HeaderName>(Arrays.asList(HeaderName.valuesOf(headerNames)));
+        Set<HeaderName> names = null == headerNames ? Collections.<HeaderName> emptySet() : new HashSet<HeaderName>(Arrays.asList(HeaderName.valuesOf(headerNames)));
         /*
          * Check which fields are contained in fetch profile item "ENVELOPE"
          */
@@ -474,6 +477,9 @@ public final class MimeStorageUtility {
                 fetchProfile.add(headerName.toString());
             }
         }
+        if (useIMAPAttachmentSearch) {
+            fetchProfile.add(FetchProfile.Item.FLAGS);
+        }
         return fetchProfile;
     }
 
@@ -508,16 +514,17 @@ public final class MimeStorageUtility {
     // ---------------------------------------------------------------------------------------------------------------------------------
 
     private static final EnumMap<MailField, FetchProfile.Item> FIELD2ITEM;
-    private static final EnumMap<MailField, List<String>> FIELD2STRING;
+    private static final EnumMap<MailField, List<String>> FIELD2HEADERNAMES;
 
     static {
         /*
-         * Item map
+         * (Fetch) Item map
          */
         final EnumMap<MailField, FetchProfile.Item> field2item = new EnumMap<MailField, FetchProfile.Item>(MailField.class);
         field2item.put(MailField.HEADERS, IMAPFolder.FetchProfileItem.HEADERS);
         field2item.put(MailField.ID, UIDFolder.FetchProfileItem.UID);
         field2item.put(MailField.CONTENT_TYPE, FetchProfile.Item.CONTENT_INFO);
+        field2item.put(MailField.ATTACHMENT, FetchProfile.Item.FLAGS); // or has_attachment?!
         field2item.put(MailField.MIME_TYPE, FetchProfile.Item.CONTENT_INFO);
         field2item.put(MailField.SIZE, FetchProfile.Item.SIZE);
         field2item.put(MailField.FLAGS, FetchProfile.Item.FLAGS);
@@ -528,7 +535,7 @@ public final class MimeStorageUtility {
         field2item.put(MailField.TEXT_PREVIEW, IMAPFolder.SnippetFetchProfileItem.SNIPPETS);
         FIELD2ITEM = field2item;
         /*
-         * String map
+         * Header name map
          */
         final EnumMap<MailField, List<String>> field2string = new EnumMap<MailField, List<String>>(MailField.class);
         field2string.put(MailField.FROM, Collections.singletonList(MessageHeaders.HDR_FROM));
@@ -539,7 +546,9 @@ public final class MimeStorageUtility {
         field2string.put(MailField.SENT_DATE, Collections.singletonList(MessageHeaders.HDR_DATE));
         field2string.put(MailField.DISPOSITION_NOTIFICATION_TO, Collections.singletonList(MessageHeaders.HDR_DISP_NOT_TO));
         field2string.put(MailField.PRIORITY, Arrays.asList(MessageHeaders.HDR_IMPORTANCE, MessageHeaders.HDR_X_PRIORITY));
-        FIELD2STRING = field2string;
+        field2string.put(MailField.AUTHENTICATION_OVERALL_RESULT, Collections.singletonList(MessageHeaders.HDR_AUTHENTICATION_RESULTS));
+        field2string.put(MailField.AUTHENTICATION_MECHANISM_RESULTS, Collections.singletonList(MessageHeaders.HDR_AUTHENTICATION_RESULTS));
+        FIELD2HEADERNAMES = field2string;
     }
 
     /**
@@ -555,10 +564,10 @@ public final class MimeStorageUtility {
             return;
         }
 
-        List<String> strings = FIELD2STRING.get(field);
-        if (null != strings) {
-            for (final String string : strings) {
-                fp.add(string);
+        List<String> headerNames = FIELD2HEADERNAMES.get(field);
+        if (null != headerNames) {
+            for (final String headerName : headerNames) {
+                fp.add(headerName);
             }
         }
     }

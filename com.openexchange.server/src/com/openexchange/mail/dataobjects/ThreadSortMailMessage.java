@@ -1165,6 +1165,31 @@ public final class ThreadSortMailMessage extends MailMessage {
         delegatee.removeSecurityResult();
     }
 
+    @Override
+    public void setAuthenticityResult(MailAuthenticityResult authenticationResult) {
+        delegatee.setAuthenticityResult(authenticationResult);
+    }
+
+    @Override
+    public MailAuthenticityResult getAuthenticityResult() {
+        return delegatee.getAuthenticityResult();
+    }
+
+    @Override
+    public boolean hasAuthenticityResult() {
+        return delegatee.hasAuthenticityResult();
+    }
+
+    @Override
+    public boolean containsAuthenticityResult() {
+        return delegatee.containsAuthenticityResult();
+    }
+
+    @Override
+    public void removeAuthenticityResult() {
+        delegatee.removeAuthenticityResult();
+    }
+
     /**
      * Sets specified child messages.
      *

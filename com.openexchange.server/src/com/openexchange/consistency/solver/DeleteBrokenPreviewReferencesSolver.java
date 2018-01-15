@@ -52,7 +52,6 @@ package com.openexchange.consistency.solver;
 import java.util.Set;
 import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadataStore;
 import com.openexchange.consistency.Entity;
-import com.openexchange.consistency.Entity.EntityType;
 import com.openexchange.exception.OXException;
 
 /**
@@ -67,13 +66,13 @@ public class DeleteBrokenPreviewReferencesSolver implements ProblemSolver {
 
     @Override
     public void solve(Entity entity, Set<String> problems) throws OXException {
-        if (entity.getType().equals(EntityType.Context)) {
-            if (problems.size() > 0) {
-                ResourceCacheMetadataStore metadataStore = ResourceCacheMetadataStore.getInstance();
-                metadataStore.removeByRefId(entity.getContext().getContextId(), problems);
-                LOG.info("Deleted {} broken preview cache references.", problems.size());
-            }
+        if (problems.size() <= 0) {
+            return;
         }
+
+        ResourceCacheMetadataStore metadataStore = ResourceCacheMetadataStore.getInstance();
+        metadataStore.removeByRefId(entity.getContext().getContextId(), problems);
+        LOG.info("Deleted {} broken preview cache references.", problems.size());
     }
 
     @Override

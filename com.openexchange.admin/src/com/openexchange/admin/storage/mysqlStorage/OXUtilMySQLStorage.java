@@ -385,16 +385,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 params.add(db.getUrl());
             }
 
-            if (db.getClusterWeight() != null) {
-                if (first) {
-                    first = false;
-                } else {
-                    sqlBuilder.append(", ");
-                }
-                sqlBuilder.append("db_cluster.weight = ?");
-                params.add(db.getClusterWeight());
-            }
-
             if (db.getMaxUnits() != null) {
                 if (first) {
                     first = false;
@@ -1477,10 +1467,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         int clusterWeight = 0;
         if (master) {
             clusterWeight = 100;
-            Integer tmp = db.getClusterWeight();
-            if (null != tmp && tmp.intValue() != 100) {
-                throw new StorageException("Cluster weight is required to be set to 100!");
-            }
         }
 
         int numberOfSchemas = 0;
@@ -1641,9 +1627,15 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 prep = null;
 
                 prep = con.prepareStatement("UPDATE db_cluster SET read_db_pool_id=? WHERE cluster_id=?;");
-
                 prep.setInt(1, databaseId);
                 prep.setInt(2, cluster_id);
+                prep.executeUpdate();
+                prep.close();
+                prep = null;
+
+                prep = con.prepareStatement("UPDATE context_server2db_pool SET read_db_pool_id = ? WHERE write_db_pool_id = ?");
+                prep.setInt(1, databaseId);
+                prep.setInt(2, db.getMasterId().intValue());
                 prep.executeUpdate();
                 prep.close();
                 prep = null;
@@ -2251,7 +2243,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             connection = cache.getWriteConnectionForConfigDB();
             connection.setAutoCommit(false);
             rollback = true;
-            
+
             isSchemaDisabled(connection, schemaName);
 
             int parameterIndex = 1;
@@ -2298,9 +2290,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             con = cache.getReadConnectionForConfigDB();
 
             if ("%".equals(searchPatternToUse)) {
-                pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count,s.schemaname,s.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id LEFT JOIN contexts_per_dbschema AS s ON d.db_pool_id=s.db_pool_id WHERE (c.max_units <> 0)" + (onlyEmptySchemas ? " AND s.count=0" : ""));
+                pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count,s.schemaname,s.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id LEFT JOIN contexts_per_dbschema AS s ON d.db_pool_id=s.db_pool_id WHERE (c.max_units <> 0)" + (onlyEmptySchemas ? " AND s.count=0" : ""));
             } else {
-                pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count,s.schemaname,s.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id LEFT JOIN contexts_per_dbschema AS s ON d.db_pool_id=s.db_pool_id WHERE (c.max_units <> 0) AND (d.name LIKE ? OR s.schemaname LIKE ? OR d.db_pool_id LIKE ? OR d.url LIKE ?)" + (onlyEmptySchemas ? " AND s.count=0" : ""));
+                pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count,s.schemaname,s.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id LEFT JOIN contexts_per_dbschema AS s ON d.db_pool_id=s.db_pool_id WHERE (c.max_units <> 0) AND (d.name LIKE ? OR s.schemaname LIKE ? OR d.db_pool_id LIKE ? OR d.url LIKE ?)" + (onlyEmptySchemas ? " AND s.count=0" : ""));
                 pstmt.setString(1, searchPatternToUse);
                 pstmt.setString(2, searchPatternToUse);
                 pstmt.setString(3, searchPatternToUse);
@@ -2321,7 +2313,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 if (false == rs.wasNull()) {
                     Database db = new Database();
                     db.setCurrentUnits(I(nrcontexts));
-                    db.setClusterWeight(I(rs.getInt("c.weight")));
                     db.setName(rs.getString("d.name"));
                     db.setDriver(rs.getString("d.driver"));
                     db.setId(I(id));
@@ -2369,9 +2360,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             String my_search_pattern = search_pattern.replace('*', '%');
 
             if (onlyEmptySchemas) {
-                pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,p.count,s.schemaname,s.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id LEFT JOIN contexts_per_dbschema AS s ON d.db_pool_id=s.db_pool_id WHERE (d.name LIKE ? OR d.db_pool_id LIKE ? OR d.url LIKE ?) AND s.count=0");
+                pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.max_units,c.read_db_pool_id,p.count,s.schemaname,s.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id LEFT JOIN contexts_per_dbschema AS s ON d.db_pool_id=s.db_pool_id WHERE (d.name LIKE ? OR d.db_pool_id LIKE ? OR d.url LIKE ?) AND s.count=0");
             } else {
-                pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,p.count,s.schemaname,s.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id LEFT JOIN contexts_per_dbschema AS s ON d.db_pool_id=s.db_pool_id WHERE d.name LIKE ? OR d.db_pool_id LIKE ? OR d.url LIKE ?");
+                pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.max_units,c.read_db_pool_id,p.count,s.schemaname,s.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id LEFT JOIN contexts_per_dbschema AS s ON d.db_pool_id=s.db_pool_id WHERE d.name LIKE ? OR d.db_pool_id LIKE ? OR d.url LIKE ?");
             }
             pstmt.setString(1, my_search_pattern);
             pstmt.setString(2, my_search_pattern);
@@ -2412,7 +2403,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                         if (null == db) {
                             db = new Database();
                             int nrcontexts = rs.getInt("p.count");
-                            db.setClusterWeight(I(rs.getInt("c.weight")));
                             db.setName(rs.getString("d.name"));
                             db.setDriver(rs.getString("d.driver"));
                             db.setId(I(id));
@@ -2472,9 +2462,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         try {
             con = cache.getReadConnectionForConfigDB();
             if ("%".equals(searchPatternToUse)) {
-                pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count FROM db_pool AS d JOIN db_cluster AS c ON (c.write_db_pool_id=d.db_pool_id OR c.read_db_pool_id=d.db_pool_id) LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id");
+                pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count FROM db_pool AS d JOIN db_cluster AS c ON (c.write_db_pool_id=d.db_pool_id OR c.read_db_pool_id=d.db_pool_id) LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id");
             } else {
-                pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.weight,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count FROM db_pool AS d JOIN db_cluster AS c ON (c.write_db_pool_id=d.db_pool_id OR c.read_db_pool_id=d.db_pool_id) LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id WHERE (d.name LIKE ? OR d.db_pool_id LIKE ? OR d.url LIKE ?)");
+                pstmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.hardlimit,d.max,d.initial,d.name,c.max_units,c.read_db_pool_id,c.write_db_pool_id,p.count FROM db_pool AS d JOIN db_cluster AS c ON (c.write_db_pool_id=d.db_pool_id OR c.read_db_pool_id=d.db_pool_id) LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id WHERE (d.name LIKE ? OR d.db_pool_id LIKE ? OR d.url LIKE ?)");
                 pstmt.setString(1, searchPatternToUse);
                 pstmt.setString(2, searchPatternToUse);
                 pstmt.setString(3, searchPatternToUse);
@@ -2506,7 +2496,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                         throw new StorageException("Unable to count contexts. Consider running 'checkcountsconsistency' command-line tool to correct it.");
                     }
                 }
-                db.setClusterWeight(I(rs.getInt("c.weight")));
                 db.setName(rs.getString("d.name"));
                 db.setDriver(rs.getString("d.driver"));
                 db.setId(I(id));
@@ -2648,7 +2637,13 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     stmt = null;
                 }
             } else {
-                stmt = con.prepareStatement("UPDATE db_cluster SET read_db_pool_id=0 WHERE read_db_pool_id=?");
+                stmt = con.prepareStatement("UPDATE context_server2db_pool SET read_db_pool_id = write_db_pool_id  WHERE read_db_pool_id = ?");
+                stmt.setInt(1, dbId);
+                stmt.executeUpdate();
+                closeSQLStuff(stmt);
+                stmt = null;
+
+                stmt = con.prepareStatement("UPDATE db_cluster SET read_db_pool_id = write_db_pool_id WHERE read_db_pool_id=?");
                 stmt.setInt(1, dbId);
                 stmt.executeUpdate();
                 closeSQLStuff(stmt);
@@ -4148,9 +4143,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     boolean preferSchemaCount = true;
                     if (preferSchemaCount) {
                         // Prefer non-exceeded databases having less filled schemas available
-                        stmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.name,c.read_db_pool_id,c.weight,c.max_units,p.count,s.schemaname,s.count FROM contexts_per_dbpool AS p JOIN db_cluster AS c ON p.db_pool_id=c.write_db_pool_id LEFT JOIN contexts_per_dbschema AS s ON p.db_pool_id=s.db_pool_id JOIN db_pool AS d ON p.db_pool_id=d.db_pool_id WHERE (c.max_units < 0 OR (c.max_units > 0 AND c.max_units > p.count)) ORDER BY p.count, s.count ASC");
+                        stmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.name,c.read_db_pool_id,c.max_units,p.count,s.schemaname,s.count FROM contexts_per_dbpool AS p JOIN db_cluster AS c ON p.db_pool_id=c.write_db_pool_id LEFT JOIN contexts_per_dbschema AS s ON p.db_pool_id=s.db_pool_id JOIN db_pool AS d ON p.db_pool_id=d.db_pool_id WHERE (c.max_units < 0 OR (c.max_units > 0 AND c.max_units > p.count)) ORDER BY p.count, s.count ASC");
                     } else {
-                        stmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.name,c.read_db_pool_id,c.weight,c.max_units,p.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id WHERE (c.max_units < 0 OR (c.max_units > 0 AND c.max_units > p.count)) ORDER BY p.count ASC");
+                        stmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.name,c.read_db_pool_id,c.max_units,p.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id WHERE (c.max_units < 0 OR (c.max_units > 0 AND c.max_units > p.count)) ORDER BY p.count ASC");
                     }
                     rs = stmt.executeQuery();
                     if (false == rs.next()) {
@@ -4181,7 +4176,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                             if (slaveId > 0) {
                                 db.setRead_id(I(slaveId));
                             }
-                            db.setClusterWeight(I(rs.getInt(pos++)));
                             db.setMaxUnits(I(rs.getInt(pos++)));
                             db.setCount(rs.getInt(pos++));
                             if (rs.wasNull()) {
@@ -4286,7 +4280,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         int totalWeight = 0;
         for (final DatabaseHandle db : list) {
             totalUnits += db.getCount();
-            totalWeight += i(db.getClusterWeight());
+            totalWeight += 100;
         }
 
         // Remove the ones, which are already fully occupied
@@ -4333,7 +4327,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         ResultSet rs = null;
         try {
             if (this.USE_UNIT == UNIT_CONTEXT) {
-                stmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.name,c.read_db_pool_id,c.weight,c.max_units,p.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id");
+                stmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.name,c.read_db_pool_id,c.max_units,p.count FROM db_pool AS d JOIN db_cluster AS c ON c.write_db_pool_id=d.db_pool_id LEFT JOIN contexts_per_dbpool AS p ON d.db_pool_id=p.db_pool_id");
                 rs = stmt.executeQuery();
                 if (false == rs.next()) {
                     // No databases at all...
@@ -4354,7 +4348,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     if (slaveId > 0) {
                         db.setRead_id(I(slaveId));
                     }
-                    db.setClusterWeight(I(rs.getInt(pos++)));
                     db.setMaxUnits(I(rs.getInt(pos++)));
                     db.setCount(rs.getInt(pos++));
                     if (rs.wasNull()) {
@@ -4366,7 +4359,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
 
             // Load databases and then determine counters
-            stmt = con.prepareStatement("SELECT db_pool_id,url,driver,login,password,name,read_db_pool_id,weight,max_units FROM db_pool JOIN db_cluster ON write_db_pool_id=db_pool_id");
+            stmt = con.prepareStatement("SELECT db_pool_id,url,driver,login,password,name,read_db_pool_id,max_units FROM db_pool JOIN db_cluster ON write_db_pool_id=db_pool_id");
             rs = stmt.executeQuery();
             if (false == rs.next()) {
                 // No databases at all...
@@ -4387,7 +4380,6 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 if (slaveId > 0) {
                     db.setRead_id(I(slaveId));
                 }
-                db.setClusterWeight(I(rs.getInt(pos++)));
                 db.setMaxUnits(I(rs.getInt(pos++)));
                 retval.add(db);
             } while (rs.next());
@@ -4507,7 +4499,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     /**
      * Checks if the specified schema and all its contexts are disabled.
-     * 
+     *
      * @param schemaName The schema to check
      * @throws StorageException if at least one of the contexts that reside within the specified schema
      *             is not disabled, or any other error occurs.

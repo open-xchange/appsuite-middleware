@@ -124,6 +124,10 @@ public class InsertExample {
 
 	private static Connection getConnection() throws Exception {
 	    Class.forName("com.mysql.jdbc.Driver");
-        return DriverManager.getConnection("jdbc:mysql://localhost/ox_sandbox", "openexchange", "secret");
+        java.util.Properties defaults = new java.util.Properties();
+        defaults.put("user", "openexchange");
+        defaults.put("password", "secret");
+        defaults.setProperty("useSSL", "false");
+        return DriverManager.getConnection("jdbc:mysql://localhost/ox_sandbox", defaults);
 	}
 }

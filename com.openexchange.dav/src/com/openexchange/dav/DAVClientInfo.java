@@ -62,46 +62,16 @@ import com.openexchange.clientinfo.ClientInfoType;
  */
 public class DAVClientInfo implements ClientInfo {
 
-    private final String platform;
-    private final String platformVersion;
     private final String app;
-    private final String appVersion;
-
-    public DAVClientInfo(String platform, String platformVersion, String app, String appVersion) {
-        super();
-        this.platform = platform;
-        this.platformVersion = platformVersion;
-        this.app = app;
-        this.appVersion = appVersion;
-    }
 
     public DAVClientInfo(String app) {
-        this(null, null, app, null);
+        super();
+        this.app = app;
     }
 
     @Override
     public ClientInfoType getType() {
         return ClientInfoType.SYNC;
-    }
-
-    @Override
-    public String getPlatform() {
-        return platform;
-    }
-
-    @Override
-    public String getPlatformVersion() {
-        return platformVersion;
-    }
-
-    @Override
-    public String getApp() {
-        return app;
-    }
-
-    @Override
-    public String getAppVersion() {
-        return appVersion;
     }
 
     @Override

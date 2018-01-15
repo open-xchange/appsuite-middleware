@@ -403,6 +403,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private HostExtractingGreetingListener hostExtractingGreetingListener;
 
+    private boolean enableAttachmentSearch;
+
     /**
      * Initializes a new {@link IMAPProperties}
      */
@@ -419,6 +421,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         allowFetchSingleHeaders = true;
         allowFolderCaches = true;
         hostExtractingGreetingListener = null;
+        enableAttachmentSearch = false;
     }
 
     @Override
@@ -694,6 +697,12 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                     logBuilder.append("\tHost name regular expression: Invalid value \"").append(tmp).append("\". Using no host name extraction\n");
                 }
             }
+        }
+
+        {
+            final String tmp = configuration.getProperty(IMAPPropertiesConstants.ATTACHMENT_SEARCH_ENABLED, STR_FALSE).trim();
+            enableAttachmentSearch = Boolean.parseBoolean(tmp);
+            logBuilder.append("\tEnable attachment search: ").append(enableAttachmentSearch).append('\n');
         }
 
         logBuilder.append("Global IMAP properties successfully loaded!");
@@ -1098,6 +1107,11 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     @Override
     public String getSSLCipherSuites() {
         return cipherSuites;
+    }
+
+    @Override
+    public boolean isAttachmentSearchEnabled() {
+        return enableAttachmentSearch;
     }
 
 }

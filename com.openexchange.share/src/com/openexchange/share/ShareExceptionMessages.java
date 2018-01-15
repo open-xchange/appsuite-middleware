@@ -95,6 +95,8 @@ public final class ShareExceptionMessages implements LocalizableStrings {
 
     public static final String INVALID_LINK_PERMISSIONS_MSG = "The set permissions for the link are invalid.";
 
+    public static final String SHARE_NOT_AVAILABLE_MSG = "The share you are looking for is currently not available. Please try again later.";
+
     /**
      * Prevent instantiation.
      */

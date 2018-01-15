@@ -241,6 +241,16 @@ public interface Session {
     public static final String PARAM_LAST_ACTIVE = "__session.lastactive".intern();
 
     /**
+     * The parameter for optional OAuth flag associated with a session.
+     * <p>
+     * If present, the session is marked as being created through
+     * <a href="https://documentation.open-xchange.com/7.8.4/middleware/components/oauth_provider/developer_guide.html">Open-Xchange Middleware OAuth authentication flow</a>.
+     *
+     * @type <code>java.lang.Boolean</code>
+     */
+    public static final String PARAM_IS_OAUTH = "__session.oauth".intern();
+
+    /**
      * @return the context identifier.
      */
     public int getContextId();

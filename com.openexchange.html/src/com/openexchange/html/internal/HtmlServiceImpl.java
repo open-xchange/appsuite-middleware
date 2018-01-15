@@ -558,7 +558,10 @@ public final class HtmlServiceImpl implements HtmlService {
         try {
             String html = htmlContent;
 
-            boolean useJericho = /*Jericho parser is not yet prepared for non-sanitizing*/ options.isSanitize() && HtmlServices.useJericho();
+            // Check if input is a full HTML document or a fragment of HTML to parse
+            boolean hasBody = html.indexOf("<body") >= 0 || html.indexOf("<BODY") >= 0;
+
+            boolean useJericho = options.isSanitize() && (HtmlSanitizeOptions.ParserPreference.JERICHO == options.getParserPreference() || HtmlServices.useJericho());
             if (useJericho) {
                 // Normalize the string
                 {
@@ -572,8 +575,8 @@ public final class HtmlServiceImpl implements HtmlService {
                         html = sb.toString();
                     }
                 }
-                
-                html = removeComments(html);
+
+                html = removeComments(html, hasBody);
 
                 // Perform one-shot sanitizing
                 html = replacePercentTags(html);
@@ -624,9 +627,6 @@ public final class HtmlServiceImpl implements HtmlService {
                     LOG.info("HTML content is too big: max. '{}', but is '{}'.", I(maxLength), I(html.length()));
                     throw HtmlExceptionCodes.TOO_BIG.create(I(maxLength), I(html.length()));
                 }
-
-                // Check if input is a full HTML document or a fragment of HTML to parse
-                boolean hasBody = html.indexOf("<body") >= 0 || html.indexOf("<BODY") >= 0;
 
                 if (options.isSanitize()) {
                     boolean[] sanitized = new boolean[] { true };
@@ -707,16 +707,16 @@ public final class HtmlServiceImpl implements HtmlService {
         }
     }
 
-    private static String removeComments(String html) {
+    private static String removeComments(String html, boolean hasBody) {
         Document document = Jsoup.parse(html);
         final Set<Node> removedNodes = new HashSet<>(16, 0.9F);
         document.traverse(new NodeVisitor() {
-            
+
             @Override
-            public void tail(Node node, int depth) {                
+            public void tail(Node node, int depth) {
                 // Ignore
             }
-            
+
             @Override
             public void head(Node node, int depth) {
                 if (node instanceof Comment) {
@@ -727,7 +727,7 @@ public final class HtmlServiceImpl implements HtmlService {
         for (Node node : removedNodes) {
             node.remove();
         }
-        return document.outerHtml();
+        return hasBody ? document.outerHtml() : document.body().html();
     }
 
     private FilterJerichoHandler getHandlerFor(int initialCapacity, String optionalConfigName) {
@@ -2188,7 +2188,7 @@ public final class HtmlServiceImpl implements HtmlService {
      */
     private static String asHex(final byte[] hash) {
         final int length = hash.length;
-        final char[] buf = new char[length * 2];
+        final char[] buf = new char[length << 1];
         for (int i = 0, x = 0; i < length; i++) {
             buf[x++] = HEX_CHARS[(hash[i] >>> 4) & 0xf];
             buf[x++] = HEX_CHARS[hash[i] & 0xf];

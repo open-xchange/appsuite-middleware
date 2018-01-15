@@ -65,7 +65,7 @@ import org.apache.http.auth.AuthState;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.protocol.ClientContext;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
 import com.openexchange.config.ConfigurationService;
@@ -115,17 +115,17 @@ public class HttpDoveAdmEndpointManager {
     }
 
     private static class EndpointListing {
-        final DefaultHttpClient httpClient;
+        final CloseableHttpClient httpClient;
         final EndpointManager endpointManager;
 
-        EndpointListing(DefaultHttpClient httpClient, EndpointManager endpointManager) {
+        EndpointListing(CloseableHttpClient httpClient, EndpointManager endpointManager) {
             super();
             this.httpClient = httpClient;
             this.endpointManager = endpointManager;
         }
     }
 
-    private static DefaultHttpClient newHttpClient(int totalConnections, int maxConnectionsPerRoute, int readTimeout, int connectTimeout) {
+    private static CloseableHttpClient newHttpClient(int totalConnections, int maxConnectionsPerRoute, int readTimeout, int connectTimeout) {
         ClientConfig clientConfig = ClientConfig.newInstance()
             .setUserAgent("OX Dovecot Http Client v" + Version.getInstance().getVersionString())
             .setMaxTotalConnections(totalConnections)
@@ -156,7 +156,7 @@ public class HttpDoveAdmEndpointManager {
         int checkInterval = configService.getIntProperty(propPrefix.append("checkInterval").toString(), 60000);
 
         // Initialize HTTP client for the listing
-        DefaultHttpClient httpClient = newHttpClient(totalConnections, maxConnectionsPerRoute, readTimeout, connectTimeout);
+        CloseableHttpClient httpClient = newHttpClient(totalConnections, maxConnectionsPerRoute, readTimeout, connectTimeout);
 
         // Setup end-point manager for the listing
         EndpointManager endpointManager = factory.createEndpointManager(l, httpClient, availableStrategy, checkInterval, TimeUnit.MILLISECONDS);

@@ -172,6 +172,10 @@ public class HostList {
      * @return <code>true</code> if contained; otherwise <code>false</code>
      */
     public boolean contains(InetAddress hostAddress) {
+        if (null == hostAddress) {
+            return false;
+        }
+
         byte[] octets = hostAddress.getAddress();
         if (null != octets) {
             if (INADDR4SZ == octets.length) {
@@ -222,6 +226,15 @@ public class HostList {
 
         octets = IPAddressUtil.textToNumericFormatV6(toCheck);
         if (octets != null) {
+            if (octets.length == 4) {
+                // IPv4 mapped IPv6 address
+                for (IPRange ipRange : this.ipRanges) {
+                    if (ipRange.containsIPv4(octets, toCheck)) {
+                        return true;
+                    }
+                }
+            }
+
             // IPv6
             for (IPRange ipRange : this.ipRanges) {
                 if (ipRange.containsIPv6(octets, toCheck)) {

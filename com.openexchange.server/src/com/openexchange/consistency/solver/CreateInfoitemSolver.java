@@ -52,7 +52,6 @@ package com.openexchange.consistency.solver;
 import java.text.MessageFormat;
 import java.util.Set;
 import com.openexchange.consistency.Entity;
-import com.openexchange.consistency.Entity.EntityType;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorages;
@@ -99,60 +98,58 @@ public class CreateInfoitemSolver implements ProblemSolver {
 
     @Override
     public void solve(final Entity entity, final Set<String> problems) {
-        if (entity.getType().equals(EntityType.Context)) {
-            final DocumentMetadata document = new DocumentMetadataImpl();
-            document.setDescription(description);
-            document.setTitle(title);
-            document.setFileName(fileName);
-            document.setVersionComment(versioncomment);
-            document.setCategories(categories);
+        final DocumentMetadata document = new DocumentMetadataImpl();
+        document.setDescription(description);
+        document.setTitle(title);
+        document.setFileName(fileName);
+        document.setVersionComment(versioncomment);
+        document.setCategories(categories);
 
-            for (final String identifier : problems) {
-                try {
-                    Context context = entity.getContext();
-                    int fsOwner = database.getDocumentHolderFor(identifier, context);
-                    if (fsOwner < 0) {
-                        fsOwner = admin.getId();
-                        LOG.warn("No document holder found for identifier {} in context {}. Assigning to context admin.", identifier, context.getContextId());
-                    }
-
-                    QuotaFileStorage storage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(fsOwner, context.getContextId(), Info.drive());
-                    try {
-                        document.setFileSize(storage.getFileSize(identifier));
-                        document.setFileMIMEType(storage.getMimeType(identifier));
-                        database.startTransaction();
-                        final int[] numbers = database.saveDocumentMetadata(identifier, document, admin, context);
-                        database.commit();
-                        if (numbers[2] == 1) {
-                            LOG.info(MessageFormat.format("Dummy entry for {0} in database created. The admin of this context has now a new document", identifier));
-                        }
-                    } catch (final OXException e) {
-                        LOG.error("", e);
-                        try {
-                            database.rollback();
-                            return;
-                        } catch (final OXException e1) {
-                            LOG.debug("", e1);
-                        }
-                    } catch (final RuntimeException e) {
-                        LOG.error("", e);
-                        try {
-                            database.rollback();
-                            return;
-                        } catch (final OXException e1) {
-                            LOG.debug("", e1);
-                        }
-                    } finally {
-                        try {
-                            database.finish();
-                        } catch (final OXException e) {
-                            LOG.debug("", e);
-                        }
-                    }
-
-                } catch (OXException e) {
-                    LOG.error("", e);
+        for (final String identifier : problems) {
+            try {
+                Context context = entity.getContext();
+                int fsOwner = database.getDocumentHolderFor(identifier, context);
+                if (fsOwner < 0) {
+                    fsOwner = admin.getId();
+                    LOG.warn("No document holder found for identifier {} in context {}. Assigning to context admin.", identifier, context.getContextId());
                 }
+
+                QuotaFileStorage storage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(fsOwner, context.getContextId(), Info.drive());
+                try {
+                    document.setFileSize(storage.getFileSize(identifier));
+                    document.setFileMIMEType(storage.getMimeType(identifier));
+                    database.startTransaction();
+                    final int[] numbers = database.saveDocumentMetadata(identifier, document, admin, context);
+                    database.commit();
+                    if (numbers[2] == 1) {
+                        LOG.info(MessageFormat.format("Dummy entry for {0} in database created. The admin of this context has now a new document", identifier));
+                    }
+                } catch (final OXException e) {
+                    LOG.error("{}", e.getMessage(), e);
+                    try {
+                        database.rollback();
+                        return;
+                    } catch (final OXException e1) {
+                        LOG.debug("{}", e1.getMessage(), e1);
+                    }
+                } catch (final RuntimeException e) {
+                    LOG.error("{}", e.getMessage(), e);
+                    try {
+                        database.rollback();
+                        return;
+                    } catch (final OXException e1) {
+                        LOG.debug("{}", e1.getMessage(), e1);
+                    }
+                } finally {
+                    try {
+                        database.finish();
+                    } catch (final OXException e) {
+                        LOG.debug("{}", e.getMessage(), e);
+                    }
+                }
+
+            } catch (OXException e) {
+                LOG.error("{}", e.getMessage(), e);
             }
         }
     }

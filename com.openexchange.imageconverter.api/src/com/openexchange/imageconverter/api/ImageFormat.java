@@ -80,6 +80,8 @@ public class ImageFormat implements Comparable<ImageFormat> {
      */
     public enum ImageType {
 
+        AUTO("auto"),
+
         JPG("jpg"),
 
         PNG("png");
@@ -442,6 +444,9 @@ public class ImageFormat implements Comparable<ImageFormat> {
             int scalePos = curFormatStr.indexOf('~', crossPos);
             int qualityPos = curFormatStr.indexOf('@', scalePos);
             final boolean hasFormat = (extentsPos > -1);
+            final String imageFormatShortName = hasFormat ?
+                curFormatStr.substring(0, extentsPos) :
+                    ImageFormat.ImageType.AUTO.getShortName();
 
             if (scalePos < 0) {
                 scalePos = curFormatStr.length();
@@ -475,14 +480,14 @@ public class ImageFormat implements Comparable<ImageFormat> {
                 // ok, default is taken
             }
 
-            // read scale type, autorotate and shrinkonly, possible values:
-            // scaleType: ["contain", "containforcedimension", "cover", "coverandcrop"]
-            // autorotate: [[auto]rotate]
-            // autorotate: [shrink[only]]
-            // default: "contain"
+            // read scale type, norotate and expand flags:
+            // scaleType: ["~contain", "~containforcedimension", "~cover", "~coverandcrop"]
+            // norotate: "~norotate"
+            // expand: "~expand"
+            // default: "~contain"
             ScaleType scaleType = ScaleType.CONTAIN;
-            boolean autoRotate = false;
-            boolean shrinkOnly = false;
+            boolean autoRotate = true;
+            boolean shrinkOnly = true;
 
             if ((scalePos > -1) && (scalePos < (qualityPos -1))) {
                 final String[] properties = curFormatStr.substring(scalePos + 1, qualityPos).split("~");
@@ -492,12 +497,12 @@ public class ImageFormat implements Comparable<ImageFormat> {
 
                     if (curProp.startsWith("cov")) {
                         scaleType = curProp.contains("crop") ? ScaleType.COVER_AND_CROP : ScaleType.COVER;
-                    } else if (curProp.contains("force") && curProp.contains("dimension")) {
+                    } else if (curProp.contains("force") || curProp.contains("dimension")) {
                         scaleType = ScaleType.CONTAIN_FORCE_DIMENSION;
-                    } else if (curProp.contains("rotate")) {
-                        autoRotate = true;
-                    } else if (curProp.contains("shrink")) {
-                        shrinkOnly = true;
+                    } else if (curProp.contains("norotate") ) {
+                        autoRotate = false;
+                    } else if (curProp.contains("expand")) {
+                        shrinkOnly = false;
                     }
 
                 }
@@ -508,13 +513,14 @@ public class ImageFormat implements Comparable<ImageFormat> {
 
             if (qualityPos < (curFormatStr.length() - 1)) {
                 try {
-                    quality = Integer.valueOf(curFormatStr.substring(qualityPos + 1)).intValue();
+                    // quality is a positive percentage value between 1 and 100 (%)
+                    quality = Math.min(100, Math.max(1, Math.abs(Integer.valueOf(curFormatStr.substring(qualityPos)).intValue())));
                 } catch (@SuppressWarnings("unused") NumberFormatException e) {
                     // ok, default is taken
                 }
             }
 
-            ret = ImageFormat.createFrom(curFormatStr, autoRotate, width, height, scaleType, shrinkOnly, quality);
+            ret = ImageFormat.createFrom(imageFormatShortName, autoRotate, width, height, scaleType, shrinkOnly, quality);
         } else {
             ret = new ImageFormat();
         }
@@ -556,7 +562,6 @@ public class ImageFormat implements Comparable<ImageFormat> {
     final private static Map<ScaleType, Long> SCALETYPE_DISTANCE_VALUE = new HashMap<>(ScaleType.values().length);
 
     static {
-        SCALETYPE_DISTANCE_VALUE.put(ScaleType.CONTAIN, Long.valueOf(1));
         SCALETYPE_DISTANCE_VALUE.put(ScaleType.CONTAIN, Long.valueOf(1));
         SCALETYPE_DISTANCE_VALUE.put(ScaleType.CONTAIN_FORCE_DIMENSION, Long.valueOf(2));
         SCALETYPE_DISTANCE_VALUE.put(ScaleType.COVER, Long.valueOf(4));

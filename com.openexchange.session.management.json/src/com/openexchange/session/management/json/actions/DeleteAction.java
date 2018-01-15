@@ -55,8 +55,8 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.management.SessionManagementService;
-import com.openexchange.session.management.json.osgi.Services;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -69,28 +69,32 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class DeleteAction implements AJAXActionService {
 
+    private final ServiceLookup services;
 
-    public DeleteAction() {
+    public DeleteAction(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         Object data = requestData.getData();
-        if ((data == null) || (false == JSONArray.class.isInstance(data))) {
+        if (false == JSONArray.class.isInstance(data)) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
-        JSONArray dataObject = (JSONArray) data;
+
         try {
-            SessionManagementService service = Services.getService(SessionManagementService.class);
-            for (int i = 0; i < dataObject.length(); i++) {
+            SessionManagementService service = services.getService(SessionManagementService.class);
+            JSONArray dataObject = (JSONArray) data;
+            int length = dataObject.length();
+            for (int i = 0; i < length; i++) {
                 String sessionId = dataObject.getString(i);
                 service.removeSession(session, sessionId);
             }
+            return new AJAXRequestResult();
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
-        return new AJAXRequestResult();
     }
 
 }

@@ -93,7 +93,7 @@ public class OwnerInfo {
          * @return This instance
          */
         public Builder setOwnerId(int ownerId) {
-            this.ownerId = ownerId;
+            this.ownerId = ownerId <= 0 ? 0 : ownerId;
             return this;
         }
 
@@ -128,7 +128,7 @@ public class OwnerInfo {
      */
     protected OwnerInfo(int ownerId, boolean master) {
         super();
-        this.ownerId = ownerId;
+        this.ownerId = ownerId <= 0 ? 0 : ownerId;
         this.master = master;
     }
 

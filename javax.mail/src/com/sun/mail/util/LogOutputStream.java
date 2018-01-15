@@ -144,7 +144,7 @@ public class LogOutputStream extends OutputStream {
      */
     private void expandCapacity(int len) {
 	while (pos + len > buf.length) {
-	    byte[] nb = new byte[buf.length * 2];
+	    byte[] nb = new byte[buf.length << 1];
 	    System.arraycopy(buf, 0, nb, 0, pos);
 	    buf = nb;
 	}

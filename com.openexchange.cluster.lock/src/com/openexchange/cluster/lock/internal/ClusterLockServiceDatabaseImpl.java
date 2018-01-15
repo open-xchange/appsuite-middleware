@@ -81,7 +81,7 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
 
     /**
      * Initialises a new {@link ClusterLockServiceDatabaseImpl}.
-     * 
+     *
      * @param services The {@link ServiceLookup} instance
      */
     public ClusterLockServiceDatabaseImpl(ServiceLookup services) {
@@ -90,7 +90,7 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cluster.lock.ClusterLockService#acquireClusterLock(com.openexchange.cluster.lock.ClusterTask)
      */
     @Override
@@ -104,7 +104,7 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
         ResultSet resultSet = null;
 
         try {
-            long timeNow = System.nanoTime();
+            long timeNow = System.currentTimeMillis();
             if (acquireClusterLock(clusterTask, timeNow, connection)) {
                 return true;
             }
@@ -124,7 +124,7 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cluster.lock.ClusterLockService#releaseClusterLock(com.openexchange.cluster.lock.ClusterTask)
      */
     @Override
@@ -134,7 +134,7 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cluster.lock.ClusterLockService#runClusterTask(com.openexchange.cluster.lock.ClusterTask)
      */
     @Override
@@ -144,7 +144,7 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cluster.lock.ClusterLockService#runClusterTask(com.openexchange.cluster.lock.ClusterTask, com.openexchange.cluster.lock.policies.RetryPolicy)
      */
     @Override
@@ -164,7 +164,7 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
 
         /**
          * Initialises a new {@link RefreshLockTask}.
-         * 
+         *
          * @param clusterTask The {@link ClusterTask} to refresh
          */
         public RefreshLockTask(ClusterTask<T> clusterTask) {
@@ -174,7 +174,7 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.lang.Runnable#run()
          */
         @Override
@@ -192,7 +192,7 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
                 statement = connection.prepareStatement(UPDATE_TIMESTAMP);
 
                 int pos = 1;
-                statement.setString(pos++, Long.toString(System.nanoTime()));
+                statement.setString(pos++, Long.toString(System.currentTimeMillis()));
                 statement.setInt(pos++, contextId);
                 statement.setInt(pos++, userId);
                 statement.setString(pos++, clusterTask.getTaskName());
@@ -210,7 +210,7 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
 
     /**
      * Inserts the specified timestamp in the database using the specified writable {@link Connection}
-     * 
+     *
      * @param clusterTask The {@link ClusterTask}
      * @param now The timestamp to insert
      * @param connection The writable {@link Connection}
@@ -240,7 +240,7 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
 
     /**
      * Returns the already existing timestamp from the database
-     * 
+     *
      * @param clusterTask The {@link ClusterTask}
      * @param connection The {@link Connection}
      * @return The timestamp
@@ -266,7 +266,7 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
 
     /**
      * Updates the timestamp for the specified {@link ClusterTask}
-     * 
+     *
      * @param clusterTask The {@link ClusterTask}
      * @param timeNow The time now
      * @param timeThen The time then
@@ -294,7 +294,7 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
 
     /**
      * Deletes the timestamp for the specified {@link ClusterTask}
-     * 
+     *
      * @param clusterTask The {@link ClusterTask}
      * @throws OXException if an error is occurred
      */

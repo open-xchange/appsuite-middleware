@@ -140,6 +140,7 @@ import com.sun.mail.iap.StarttlsRequiredException;
 import com.sun.mail.imap.GreetingListener;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
+import com.sun.mail.imap.IMAPTextPreviewProvider;
 import com.sun.mail.imap.JavaIMAPStore;
 
 /**
@@ -1069,6 +1070,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * @throws MessagingException If operation fails
      */
     public static void doIMAPConnect(javax.mail.Session imapSession, IMAPStore imapStore, String server, int port, String login, String pw, int accountId, Session session, boolean knownExternal) throws MessagingException {
+        IMAPTextPreviewProvider textPreviewProvider = Services.optService(IMAPTextPreviewProvider.class);
+        if (null != textPreviewProvider) {
+            imapStore.setTextPreviewProvider(textPreviewProvider);
+        }
+        
         Object kerberosSubject = imapSession.getProperties().get("mail.imap.sasl.kerberosSubject");
         if (null == kerberosSubject) {
             imapStore.connect(server, port, login, pw);

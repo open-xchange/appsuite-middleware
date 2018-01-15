@@ -162,16 +162,19 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
     private final OSGiCleanMapper mapper;
     private final HttpStatus shutDownStatus;
     private final ErrorPageGenerator errorPageGenerator;
+    private final boolean supportHierachicalLookupOnNotFound;
 
     /**
      * Constructor.
      *
      * @param initialFilters The initial Servlet filter to apply
+     * @param supportHierachicalLookupOnNotFound <code>true</code> to support hierarchical look-up of "parent" servlets; otherwise <code>false</code>
      * @param bundle Bundle that we create if for, for local data reference.
      */
-    public OSGiMainHandler(List<FilterAndPath> initialFilters, Bundle bundle) {
+    public OSGiMainHandler(List<FilterAndPath> initialFilters, boolean supportHierachicalLookupOnNotFound, Bundle bundle) {
         super();
         this.initialFilters = initialFilters;
+        this.supportHierachicalLookupOnNotFound = supportHierachicalLookupOnNotFound;
         this.bundle = bundle;
         this.mapper = new OSGiCleanMapper();
         this.shutDownStatus = HttpStatus.newHttpStatus(HttpStatus.SERVICE_UNAVAILABLE_503.getStatusCode(), "Server shutting down...");
@@ -189,29 +192,93 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         String alias = request.getDecodedRequestURI();
         String originalAlias = alias;
         LOG.debug("Serviceing URI: {}", alias);
-        // first lookup needs to be done for full match.
-        boolean cutOff = false;
-        while (true) {
-            LOG.debug("CutOff: {}, alias: {}", cutOff, alias);
-            alias = OSGiCleanMapper.map(alias, cutOff);
-            if (alias == null) {
-                if (cutOff) {
-                    // not found
-                    break;
+
+        if (supportHierachicalLookupOnNotFound) {
+            // first lookup needs to be done for full match.
+            boolean cutOff = false;
+            while (true) {
+                LOG.debug("CutOff: {}, alias: {}", cutOff, alias);
+                alias = OSGiCleanMapper.map(alias, cutOff);
+                if (alias == null) {
+                    if (cutOff) {
+                        // not found
+                        break;
+                    }
+                    // switching to reducing mapping mode (removing after last '/' and searching)
+                    LOG.debug("Switching to reducing mapping mode.");
+                    cutOff = true;
+                    alias = originalAlias;
+                } else {
+                    if (SHUTDOWN_REQUESTED.get()) {
+                        // 503 - Service Unavailable
+                        try {
+                            setStatusAndWriteErrorPage(shutDownStatus, null, request, response);
+                        } catch (Exception e) {
+                            LOG.warn("Failed to commit 503 status.", e);
+                        }
+                        return;
+                    }
+
+                    HttpHandler httpHandler = OSGiCleanMapper.getHttpHandler(alias);
+
+                    ReadLock processingLock = ((OSGiHandler) httpHandler).getProcessingLock();
+                    processingLock.lock();
+                    try {
+                        updateMappingInfo(request, alias, originalAlias);
+
+                        OXThreadMarker threadMarker = threadMarker();
+                        threadMarker.setHttpRequestProcessing(true);
+                        try {
+                            httpHandler.service(request, response);
+                        } finally {
+                            threadMarker.setHttpRequestProcessing(false);
+                        }
+                    } catch (Throwable t) {
+                        ExceptionUtils.handleThrowable(t);
+                        StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:\n");
+                        logBuilder.append(LogProperties.getAndPrettyPrint(LogProperties.Name.SESSION_SESSION));
+                        appendRequestInfo(logBuilder, request);
+                        LOG.error(logBuilder.toString(), t);
+                        // 500 - Internal Server Error
+                        response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
+                    } finally {
+                        processingLock.unlock();
+                    }
+                    invoked = true;
+                    if (response.getStatus() != 404) {
+                        break;
+                    } else if ("/".equals(alias)) {
+                        // 404 in "/", cutoff algo will not escape this one.
+                        break;
+                    } else if (!cutOff){
+                        // not found and haven't run in cutoff mode
+                        cutOff = true;
+                    }
                 }
+            }
+        } else {
+            if (SHUTDOWN_REQUESTED.get()) {
+                // 503 - Service Unavailable
+                try {
+                    setStatusAndWriteErrorPage(shutDownStatus, null, request, response);
+                } catch (Exception e) {
+                    LOG.warn("Failed to commit 503 status.", e);
+                }
+                return;
+            }
+
+            // first lookup needs to be done for full match.
+            HttpHandler httpHandler = OSGiCleanMapper.map2HttpHandler(alias);
+            if (httpHandler == null) {
                 // switching to reducing mapping mode (removing after last '/' and searching)
                 LOG.debug("Switching to reducing mapping mode.");
-                cutOff = true;
-                alias = originalAlias;
-            } else {
-                if (SHUTDOWN_REQUESTED.get()) {
-                    // 503 - Service Unavailable
-                    response.setStatus(shutDownStatus);
-                    return;
+                HttpHandlerMatch match = OSGiCleanMapper.map2HttpHandler(alias, true);
+                if (null != match) {
+                    alias = match.alias;
+                    httpHandler = match.httpHandler;
                 }
-
-                HttpHandler httpHandler = OSGiCleanMapper.getHttpHandler(alias);
-
+            }
+            if (null != httpHandler) {
                 ReadLock processingLock = ((OSGiHandler) httpHandler).getProcessingLock();
                 processingLock.lock();
                 try {
@@ -231,26 +298,21 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
                     appendRequestInfo(logBuilder, request);
                     LOG.error(logBuilder.toString(), t);
                     // 500 - Internal Server Error
-                    response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
+                    try {
+                        setStatusAndWriteErrorPage(HttpStatus.INTERNAL_SERVER_ERROR_500, null, request, response);
+                    } catch (Exception e) {
+                        LOG.warn("Failed to commit 500 status.", e);
+                    }
                 } finally {
                     processingLock.unlock();
                 }
                 invoked = true;
-                if (response.getStatus() != 404) {
-                    break;
-                } else if ("/".equals(alias)) {
-                    // 404 in "/", cutoff algo will not escape this one.
-                    break;
-                } else if (!cutOff){
-                    // not found and haven't run in cutoff mode
-                    cutOff = true;
-                }
             }
         }
+
         if (!invoked) {
-            response.setStatus(HttpStatus.NOT_FOUND_404);
             try {
-                writeErrorPage(request, response);
+                setStatusAndWriteErrorPage(HttpStatus.NOT_FOUND_404, "Resource does not exist.", request, response);
             } catch (Exception e) {
                 LOG.warn("Failed to commit 404 status.", e);
             }
@@ -535,9 +597,9 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         ReentrantLock lock = OSGiCleanMapper.getLock();
         lock.lock();
         try {
-            Set<String> aliases = OSGiCleanMapper.getAllAliases();
+            TreeSet<String> aliases = (TreeSet<String>) OSGiCleanMapper.getAllAliases();
             while (!aliases.isEmpty()) {
-                String alias = ((TreeSet<String>) aliases).first();
+                String alias = aliases.first();
                 LOG.debug("Unregistering '{}'", alias);
                 // remember not to call Servlet.destroy() owning bundle might be stopped already.
                 mapper.doUnregister(alias, false);
@@ -705,9 +767,9 @@ public class OSGiMainHandler extends HttpHandler implements OSGiHandler {
         return errorPageGenerator;
     }
 
-    private void writeErrorPage(Request req, Response res) throws Exception {
-        res.setStatus(HttpStatus.NOT_FOUND_404);
-        final ByteBuffer bb = getErrorPage(404, "Not found", "Resource does not exist.");
+    private void setStatusAndWriteErrorPage(HttpStatus status, String optDescription, Request req, Response res) throws Exception {
+        res.setStatus(status);
+        final ByteBuffer bb = getErrorPage(status.getStatusCode(), status.getReasonPhrase(), null == optDescription ? status.getReasonPhrase() : optDescription);
         res.setContentLength(bb.limit());
         res.setContentType("text/html");
         org.glassfish.grizzly.http.io.OutputBuffer out = res.getOutputBuffer();

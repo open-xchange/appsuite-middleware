@@ -14,6 +14,9 @@ expiry_date:
 password:
   type: string
   description: An additional secret / pin number an anonymous user needs to enter when accessing the share.
+includeSubfolders:
+  type: boolean
+  description: An optional flag indicating if subfolders are included or not. Only applicable for shared infostore folders.
 meta:
   type: object
   description: Can be used by the client to save arbitrary JSON data along with the share.

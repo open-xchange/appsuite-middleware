@@ -124,19 +124,25 @@ public class TargetPermission {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         TargetPermission other = (TargetPermission) obj;
-        if (entityId != other.entityId)
+        if (entityId != other.entityId) {
             return false;
-        if (isGroup != other.isGroup)
+        }
+        if (isGroup != other.isGroup) {
             return false;
-        if (permissionBits != other.permissionBits)
+        }
+        if (permissionBits != other.permissionBits) {
             return false;
+        }
         return true;
     }
 

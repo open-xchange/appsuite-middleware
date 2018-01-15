@@ -410,6 +410,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.passwordchange.Regexp.class,
             com.openexchange.groupware.settings.tree.modules.passwordchange.ShowStrength.class,
             com.openexchange.groupware.settings.tree.modules.passwordchange.Special.class,
+            com.openexchange.groupware.settings.tree.modules.passwordchange.EmptyCurrent.class,
             com.openexchange.groupware.settings.tree.modules.personaldata.Module.class,
             com.openexchange.groupware.settings.tree.modules.personaldata.InternalUserEditEnabled.class,
             com.openexchange.groupware.settings.tree.modules.portal.GUI.class,

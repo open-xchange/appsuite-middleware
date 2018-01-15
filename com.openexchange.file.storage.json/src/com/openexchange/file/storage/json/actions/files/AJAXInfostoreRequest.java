@@ -820,8 +820,8 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
                     jFile.remove(File.Field.FILE_MIMETYPE.getName());
                 } else {
                     try {
-                        ContentType contentType = new ContentType(cts);
-                        if (contentType.startsWith("multipart/") || contentType.containsBoundaryParameter()) {
+                        ContentType contentType = new ContentType(cts, true);
+                        if (contentType.contains("multipart/") || contentType.containsBoundaryParameter()) {
                             // deny weird MIME types
                             throw FileStorageExceptionCodes.DENIED_MIME_TYPE.create();
                         }

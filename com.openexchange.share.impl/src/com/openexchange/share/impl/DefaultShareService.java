@@ -68,11 +68,13 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
@@ -105,6 +107,7 @@ import com.openexchange.share.core.ShareConstants;
 import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.groupware.ModuleSupport;
+import com.openexchange.share.groupware.SubfolderAwareTargetPermission;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.TargetUpdate;
@@ -342,12 +345,25 @@ public class DefaultShareService implements ShareService {
                 }
             }
 
-            if (guestUserUpdated) {
+            boolean folderPermissionUpdate = false;
+            if (shareInfo.getTarget().getModule() == FolderObject.INFOSTORE && shareInfo.isIncludeSubfolders() != linkUpdate.isIncludeSubfolders()) {
+                TargetPermission targetPermission = new SubfolderAwareTargetPermission(shareInfo.getGuest().getGuestID(), false, LINK_PERMISSION_BITS, FolderPermissionType.LEGATOR.getTypeNumber(), null);
+                if (shareInfo.isIncludeSubfolders()) {
+                    // Remove permission in case includeSubfolders is changed from 'true' to 'false' so handed down permissions get removed as well
+                    targetProxy.removePermissions(Collections.singletonList(targetPermission));
+                    targetPermission = new SubfolderAwareTargetPermission(shareInfo.getGuest().getGuestID(), false, LINK_PERMISSION_BITS, FolderPermissionType.NORMAL.getTypeNumber(), null);
+                }
+                // Re-apply the link permission
+                targetProxy.applyPermissions(Collections.singletonList(targetPermission));
+                targetProxy.touch();
+                targetUpdate.run();
+                folderPermissionUpdate = true;
+            } else if (guestUserUpdated) {
                 targetProxy.touch();
                 targetUpdate.run();
             }
             connectionHelper.commit();
-            if (guestUserUpdated) {
+            if (guestUserUpdated || folderPermissionUpdate) {
                 userService.invalidateUser(context, guest.getId());
                 return new DefaultShareLink(shareInfo, moduleSupport.load(target, session).getTimestamp(), false);
             }
@@ -403,24 +419,28 @@ public class DefaultShareService implements ShareService {
     /**
      * Optionally gets an existing share link for a specific share target, i.e. a share to an anonymous guest user.
      *
-     * @param connectionHelper A (started) connection helper, or <code>null</code> if not available
+     * @param session The user session
      * @param context The context
-     * @param target The share target
      * @param proxy The target proxy
+     * @param connectionHelper A (started) connection helper, or <code>null</code> if not available
      * @return The share link, if one exists for the target, or <code>null</code>, otherwise
      */
     private DefaultShareInfo optLinkShare(Session session, Context context, TargetProxy proxy, ConnectionHelper connectionHelper) throws OXException {
         List<TargetPermission> permissions = proxy.getPermissions();
         if (null != permissions && 0 < permissions.size()) {
-            List<Integer> entities = new ArrayList<Integer>(permissions.size());
+            Map<Integer, Boolean> entities = new HashMap<Integer, Boolean>(permissions.size());
             for (TargetPermission permission : permissions) {
                 if (false == permission.isGroup() && LINK_PERMISSION_BITS == permission.getBits()) {
-                    entities.add(I(permission.getEntity()));
+                    boolean includeSubfolders = false;
+                    if(permission instanceof SubfolderAwareTargetPermission) {
+                        includeSubfolders = ((SubfolderAwareTargetPermission) permission).getType() == FolderPermissionType.LEGATOR.getTypeNumber();
+                    }
+                    entities.put(I(permission.getEntity()), includeSubfolders);
                 }
             }
             if (0 < entities.size()) {
                 UserService userService = services.getService(UserService.class);
-                for (Integer entity : entities) {
+                for (Integer entity : entities.keySet()) {
                     User user;
                     if (null != connectionHelper) {
                         user = userService.getUser(connectionHelper.getConnection(), entity.intValue(), context);
@@ -429,7 +449,7 @@ public class DefaultShareService implements ShareService {
                     }
                     if (ShareTool.isAnonymousGuest(user)) {
                         ShareTarget dstTarget = services.getService(ModuleSupport.class).adjustTarget(proxy.getTarget(), session, user.getId());
-                        return new DefaultShareInfo(services, context.getContextId(), user, proxy.getTarget(), dstTarget, proxy.getTargetPath());
+                        return new DefaultShareInfo(services, context.getContextId(), user, proxy.getTarget(), dstTarget, proxy.getTargetPath(), entities.get(entity));
                     }
                 }
             }
@@ -458,7 +478,7 @@ public class DefaultShareService implements ShareService {
             for (TargetProxy proxy : proxies) {
                 ShareTargetPath targetPath = proxy.getTargetPath();
                 ShareTarget srcTarget = new ShareTarget(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem());
-                shareInfos.add(new DefaultShareInfo(services, contextID, guest.getUser(), srcTarget, proxy.getTarget(), targetPath));
+                shareInfos.add(new DefaultShareInfo(services, contextID, guest.getUser(), srcTarget, proxy.getTarget(), targetPath, checkForLegatorPermission(proxy.getPermissions(), guest.getGuestID())));
             }
         } else {
             ShareTargetPath targetPath = ShareTargetPath.parse(path);
@@ -469,10 +489,23 @@ public class DefaultShareService implements ShareService {
             shareInfos = new ArrayList<ShareInfo>(1);
             TargetProxy proxy = moduleSupport.resolveTarget(targetPath, contextID, guest.getGuestID());
             ShareTarget srcTarget = new ShareTarget(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem());
-            shareInfos.add(new DefaultShareInfo(services, contextID, guest.getUser(), srcTarget, proxy.getTarget(), proxy.getTargetPath()));
+            shareInfos.add(new DefaultShareInfo(services, contextID, guest.getUser(), srcTarget, proxy.getTarget(), proxy.getTargetPath(), checkForLegatorPermission(proxy.getPermissions(), guest.getGuestID())));
         }
 
         return removeExpired(contextID, shareInfos);
+    }
+
+    private boolean checkForLegatorPermission(List<TargetPermission> permissions, int guestId){
+        for(TargetPermission perm: permissions) {
+            if(perm.isGroup() == false && perm.getBits() == LINK_PERMISSION_BITS && perm.getEntity() == guestId) {
+                if(perm instanceof SubfolderAwareTargetPermission) {
+                    return ((SubfolderAwareTargetPermission) perm).getType() == FolderPermissionType.LEGATOR.getTypeNumber();
+                } else {
+                    return false;
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -497,7 +530,7 @@ public class DefaultShareService implements ShareService {
                         for (TargetProxy proxy : targets) {
                             ShareTargetPath targetPath = proxy.getTargetPath();
                             ShareTarget srcTarget = new ShareTarget(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem());
-                            shareInfos.add(new DefaultShareInfo(services, contextID, guest, srcTarget, proxy.getTarget(), targetPath));
+                            shareInfos.add(new DefaultShareInfo(services, contextID, guest, srcTarget, proxy.getTarget(), targetPath, checkForLegatorPermission(proxy.getPermissions(), guestID)));
                         }
                     }
                 }
@@ -528,7 +561,7 @@ public class DefaultShareService implements ShareService {
         for (TargetProxy proxy : targets) {
             ShareTargetPath targetPath = proxy.getTargetPath();
             ShareTarget srcTarget = new ShareTarget(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem());
-            shareInfos.add(new DefaultShareInfo(services, contextID, guest, srcTarget, proxy.getTarget(), targetPath));
+            shareInfos.add(new DefaultShareInfo(services, contextID, guest, srcTarget, proxy.getTarget(), targetPath, checkForLegatorPermission(proxy.getPermissions(), guestID)));
         }
         return shareInfos;
     }
@@ -852,7 +885,7 @@ public class DefaultShareService implements ShareService {
             } else {
                 dstTarget = moduleSupport.adjustTarget(target, session, members[0]);
             }
-            return new InternalGroupShareInfo(context.getContextId(), group, target, dstTarget);
+            return new InternalGroupShareInfo(context.getContextId(), group, target, dstTarget, false);
         }
         /*
          * prepare guest or internal user shares for other recipient types
@@ -861,10 +894,10 @@ public class DefaultShareService implements ShareService {
         User targetUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient, target);
         ShareTarget dstTarget = moduleSupport.adjustTarget(target, session, targetUser.getId());
         if (false == targetUser.isGuest()) {
-            return new InternalUserShareInfo(context.getContextId(), targetUser, target, dstTarget);
+            return new InternalUserShareInfo(context.getContextId(), targetUser, target, dstTarget, false);
         }
         ShareTargetPath targetPath = moduleSupport.getPath(target, session);
-        return new DefaultShareInfo(services, context.getContextId(), targetUser, target, dstTarget, targetPath);
+        return new DefaultShareInfo(services, context.getContextId(), targetUser, target, dstTarget, targetPath, false);
     }
 
     /**

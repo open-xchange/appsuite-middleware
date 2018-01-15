@@ -4,7 +4,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.java"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.control"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.codec_1.6.0.v201305230611.jar" sourcepath="/com.openexchange.bundles/source/org.apache.commons.codec.source_1.6.0.v201305230611.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.codec_1.9.0.v20170208-1614.jar" sourcepath="/com.openexchange.bundles/source/org.apache.commons.codec.source_1.9.0.v20170208-1614.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/logback-classic-1.2.2.jar" sourcepath="/com.openexchange.bundles/source/logback-classic-1.2.2-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/logback-core-1.2.2.jar" sourcepath="/com.openexchange.bundles/source/logback-core-1.2.2-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jcl-over-slf4j-1.7.25.jar" sourcepath="/com.openexchange.bundles/source/jcl-over-slf4j-1.7.25-sources.jar"/>

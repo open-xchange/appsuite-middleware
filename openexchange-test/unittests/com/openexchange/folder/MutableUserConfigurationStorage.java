@@ -59,17 +59,18 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.session.Session;
 
 /**
  * {@link MutableUserConfigurationStorage}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class MutableUserConfigurationStorage extends UserConfigurationStorage {
 
-    private UserConfigurationStorage delegate;
+    private final UserConfigurationStorage delegate;
 
-    private ConcurrentHashMap<Integer, UserConfiguration> overrides = new ConcurrentHashMap<Integer, UserConfiguration>();
+    private final ConcurrentHashMap<Integer, UserConfiguration> overrides = new ConcurrentHashMap<Integer, UserConfiguration>();
 
     public MutableUserConfigurationStorage(UserConfigurationStorage delegate) {
         this.delegate = delegate;
@@ -80,6 +81,16 @@ public class MutableUserConfigurationStorage extends UserConfigurationStorage {
 
     @Override
     protected void stopInternal() throws OXException {}
+
+    @Override
+    public UserConfiguration getUserConfiguration(Session session, int[] groups) throws OXException {
+        UserConfiguration userConfiguration = overrides.get(session.getUserId());
+        if (userConfiguration != null) {
+            return userConfiguration;
+        }
+
+        return delegate.getUserConfiguration(session, groups);
+    }
 
     @Override
     public UserConfiguration getUserConfiguration(int userId, int[] groups, Context ctx) throws OXException {

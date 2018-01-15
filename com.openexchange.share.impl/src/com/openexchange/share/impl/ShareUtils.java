@@ -200,7 +200,9 @@ public class ShareUtils {
         guestUser.setDisplayName(recipient.getDisplayName());
         guestUser.setMail(emailAddress);
         guestUser.setLoginInfo(emailAddress);
-
+        if (recipient.getPreferredLanguage() != null) {  // If recipient language specified, use rather than use sharingUser's language
+            guestUser.setPreferredLanguage(recipient.getPreferredLanguage());
+        }
         PasswordMechFactory passwordMechFactory = services.getService(PasswordMechFactory.class);
         IPasswordMech iPasswordMech = passwordMechFactory.get(IPasswordMech.BCRYPT);
         guestUser.setPasswordMech(iPasswordMech.getIdentifier());

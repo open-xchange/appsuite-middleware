@@ -59,12 +59,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.AJAXResultDecorator;
@@ -72,7 +69,6 @@ import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.config.ConfigurationService;
@@ -101,12 +97,16 @@ import com.openexchange.groupware.settings.tree.modules.mail.Whitelist;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.jslob.ConfigTreeEquivalent;
+import com.openexchange.mail.MailFetchListener;
+import com.openexchange.mail.MailFetchListenerRegistry;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.crypto.CryptographicAwareMailAccessFactory;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorage;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorageRegistry;
 import com.openexchange.mail.attachment.storage.MailAttachmentStorage;
 import com.openexchange.mail.attachment.storage.MailAttachmentStorageRegistry;
+import com.openexchange.mail.authenticity.CustomPropertyJsonHandler;
+import com.openexchange.mail.authenticity.GenericCustomPropertyJsonHandler;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.internal.MailCategoriesPreferenceItem;
 import com.openexchange.mail.compose.CompositionSpace;
@@ -179,53 +179,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         final BundleContext context = this.context;
 
         // Tracker for CapabilityService that declares "publish_mail_attachments" capability
-        track(CapabilityService.class, new ServiceTrackerCustomizer<CapabilityService, CapabilityService>() {
-
-            private volatile ServiceRegistration<CapabilityChecker> serviceRegistration;
-
-            @Override
-            public CapabilityService addingService(final ServiceReference<CapabilityService> reference) {
-                final CapabilityService service = context.getService(reference);
-                final String sCapability = "publish_mail_attachments";
-
-                // Register CapabilityChecker for "publish_mail_attachments"
-                final Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-                properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
-                final CapabilityChecker capabilityChecker = new CapabilityChecker() {
-
-                    @Override
-                    public boolean isEnabled(final String capability, final Session ses) throws OXException {
-                        if (sCapability.equals(capability)) {
-                            return false;
-                        }
-
-                        return true;
-                    }
-                };
-                serviceRegistration = context.registerService(CapabilityChecker.class, capabilityChecker, properties);
-
-                // Declare "publish_mail_attachments" capability
-                service.declareCapability(sCapability);
-
-                // Return tracked service
-                return service;
-            }
-
-            @Override
-            public void modifiedService(final ServiceReference<CapabilityService> reference, final CapabilityService service) {
-                // Ignore
-            }
-
-            @Override
-            public void removedService(final ServiceReference<CapabilityService> reference, final CapabilityService service) {
-                final ServiceRegistration<CapabilityChecker> serviceRegistration = this.serviceRegistration;
-                if (null != serviceRegistration) {
-                    serviceRegistration.unregister();
-                    this.serviceRegistration = null;
-                }
-                context.ungetService(reference);
-            }
-        });
+        track(CapabilityService.class, new CapabilitiesTracker(context));
 
         ComposeHandlerRegistry composeHandlerRegisty;
         {
@@ -238,8 +192,14 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         rememberTracker(exceptionHandlerTracker);
         MimeMailException.setExceptionHandlers(exceptionHandlerTracker);
 
+        RankingAwareNearRegistryServiceTracker<MailFetchListener> listing = new RankingAwareNearRegistryServiceTracker<MailFetchListener>(context, MailFetchListener.class);
+        MailFetchListenerRegistry.initInstance(listing);
+        rememberTracker(listing);
+        track(CustomPropertyJsonHandler.class);
+
         openTrackers();
 
+        registerService(CustomPropertyJsonHandler.class, new GenericCustomPropertyJsonHandler());
         registerService(ComposeHandlerRegistry.class, composeHandlerRegisty);
 
         DefaultMailAttachmentStorageRegistry.initInstance(context);
@@ -345,6 +305,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         ServerServiceRegistry.getInstance().removeService(ComposeHandlerRegistry.class);
         DefaultMailAttachmentStorageRegistry.dropInstance();
         MailActionFactory.releaseActionFactory();
+        MailFetchListenerRegistry.releaseInstance();
         SERVICES.set(null);
     }
 

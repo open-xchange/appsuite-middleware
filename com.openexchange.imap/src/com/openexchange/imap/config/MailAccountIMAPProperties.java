@@ -518,4 +518,20 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         return lookUpProperty("com.openexchange.imap.ssl.ciphersuites", IMAPProperties.getInstance().getSSLCipherSuites());
     }
 
+    @Override
+    public boolean isAttachmentSearchEnabled() {
+        String tmp = getAccountProperty(IMAPPropertiesConstants.ATTACHMENT_SEARCH_ENABLED);
+        if (null != tmp) {
+            return Boolean.parseBoolean(tmp.trim());
+        }
+
+        if (mailAccountId == PRIMARY) { // only for primary account
+            tmp = lookUpProperty(IMAPPropertiesConstants.ATTACHMENT_SEARCH_ENABLED);
+            if (null != tmp) {
+                return Boolean.parseBoolean(tmp.trim());
+            }
+        }
+        return false;
+    }
+
 }

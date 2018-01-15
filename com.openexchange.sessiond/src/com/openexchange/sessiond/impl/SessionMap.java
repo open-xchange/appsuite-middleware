@@ -49,8 +49,9 @@
 
 package com.openexchange.sessiond.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.session.Session;
@@ -209,25 +210,21 @@ public final class SessionMap {
     // -------------------------------------------------------------------------------
 
     /**
-     * Returns a {@link Collection} view of the sessions contained in this map.
-     * <p>
-     * The collection is <b>NOT</b> backed by the map.
+     * Returns an unmodifable {@link Collection} view of the sessions contained in this map.
      *
-     * @return The {@link Collection} view of the sessions contained in this map
+     * @return The unmodifable {@link Collection} view of the sessions contained in this map
      */
     public Collection<SessionControl> values() {
-        return new ArrayList<SessionControl>(sessionIdMap.values());
+        return Collections.unmodifiableCollection(sessionIdMap.values());
     }
 
     /**
-     * Returns a {@link Collection} view of the session identifiers contained in this map.
-     * <p>
-     * The collection is <b>NOT</b> backed by the map.
+     * Returns an unmodifable {@link Collection} view of the session identifiers contained in this map.
      *
-     * @return The {@link Collection} view of the sessions identifiers contained in this map
+     * @return The unmodifable {@link Collection} view of the sessions identifiers contained in this map
      */
-    public ArrayList<String> keys() {
-        return new ArrayList<String>(sessionIdMap.keySet());
+    public Set<String> keys() {
+        return Collections.unmodifiableSet(sessionIdMap.keySet());
     }
 
 }

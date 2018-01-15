@@ -912,9 +912,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
             LOG.debug("Data delete for context {} completed!", ctx.getId());
 
-            // check if scheme is empty after deleting context data on source db
-            // if yes, drop whole database
-            deleteSchemeFromDatabaseIfEmpty(ox_db_write_con, configdb_write_con, source_database_id, scheme);
             configdb_write_con.commit();
             ox_db_write_con.commit();
         } catch (final TargetDatabaseException tde) {
@@ -1128,37 +1125,35 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         if (null == sqlPattern || "%".equals(sqlPattern)) {
             cids = new ContextSearcher(cache, "SELECT cid FROM context ORDER BY cid", null).execute();
         } else {
+            ThreadPoolService threadPool;
             try {
-                Integer.parseInt(sqlPattern);
-                cids = new ContextSearcher(cache, "SELECT cid FROM context WHERE cid = ?", sqlPattern).execute();
-            } catch (NumberFormatException nfe) {
-                // Ignore and do nothing, because we are not including that query to the searcher
-                // since the specified sqlPattern does not solely consists out of numbers.
-                ThreadPoolService threadPool;
-                try {
-                    threadPool = AdminServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
-                } catch (final OXException e) {
-                    throw new StorageException(e.getMessage(), e);
-                }
-                List<ContextSearcher> searchers = new ArrayList<ContextSearcher>(4);
-                searchers.add(new ContextSearcher(cache, "SELECT cid FROM context WHERE name LIKE ?", sqlPattern));
-                searchers.add(new ContextSearcher(cache, "SELECT cid FROM login2context WHERE login_info LIKE ?", sqlPattern));
+                threadPool = AdminServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
+            } catch (final OXException e) {
+                throw new StorageException(e.getMessage(), e);
+            }
 
-                // Invoke & add into sorted set
-                CompletionFuture<Collection<Integer>> completion = threadPool.invoke(searchers);
-                cids = new TreeSet<Integer>();
-                try {
-                    for (int i = searchers.size(); i-- > 0;) {
-                        cids.addAll(completion.take().get());
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new StorageException(e.getMessage(), e);
-                } catch (CancellationException e) {
-                    throw new StorageException(e.getMessage(), e);
-                } catch (ExecutionException e) {
-                    throw ThreadPools.launderThrowable(e, StorageException.class);
+            List<ContextSearcher> searchers = new ArrayList<ContextSearcher>();
+            searchers.add(new ContextSearcher(cache, "SELECT cid FROM context WHERE name LIKE ?", sqlPattern));
+            searchers.add(new ContextSearcher(cache, "SELECT cid FROM login2context WHERE login_info LIKE ?", sqlPattern));
+            int optContextId = Strings.parsePositiveInt(sqlPattern);
+            if (optContextId > 0) {
+                searchers.add(new NumericContextSearcher(cache, optContextId));
+            }
+
+            // Invoke & add into sorted set
+            CompletionFuture<Collection<Integer>> completion = threadPool.invoke(searchers);
+            cids = new TreeSet<Integer>();
+            try {
+                for (int i = searchers.size(); i-- > 0;) {
+                    cids.addAll(completion.take().get());
                 }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new StorageException(e.getMessage(), e);
+            } catch (CancellationException e) {
+                throw new StorageException(e.getMessage(), e);
+            } catch (ExecutionException e) {
+                throw ThreadPools.launderThrowable(e, StorageException.class);
             }
         }
 
@@ -1583,7 +1578,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                         // Must not be used for a context association
                         throw new StorageException("Database " + givenDatabase.getId() + " must not be used.");
                     }
-                    contextCommon.updateContextsPerDBPoolCount(decrementDatabaseCount, db, configCon);
+                    contextCommon.updateContextsPerDBPoolCount(!decrementDatabaseCount, db, configCon);
                 }
                 decrementDatabaseCount = true;
             }
@@ -2071,42 +2066,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
         LOG.debug("using schema {} it for next context", found);
         return found;
-    }
-
-    private void deleteSchemeFromDatabaseIfEmpty(final Connection ox_db_write_con, final Connection configdb_con, final int source_database_id, final String scheme) throws SQLException {
-        PreparedStatement stmt = null;
-        PreparedStatement dropstmt = null;
-        try {
-            // check if any context is in scheme X on database Y
-            stmt = configdb_con.prepareStatement("SELECT db_schema FROM context_server2db_pool WHERE db_schema = ? AND write_db_pool_id = ?");
-            stmt.setString(1, scheme);
-            stmt.setInt(2, source_database_id);
-            final ResultSet rs = stmt.executeQuery();
-            if (!rs.next()) {
-                // no contexts found on this scheme and db, DROP scheme from db
-                LOG.debug("NO remaining contexts found in scheme {} on pool with id {}!", scheme, source_database_id);
-                LOG.debug("NOW dropping scheme {} on pool with id {}!", scheme, source_database_id);
-                dropstmt = ox_db_write_con.prepareStatement("DROP DATABASE if exists `" + scheme + "`");
-                dropstmt.executeUpdate();
-                LOG.debug("Scheme {} on pool with id {} dropped successfully!", scheme, source_database_id);
-            }
-            rs.close();
-        } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final Exception ex) {
-                LOG.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, ex);
-            }
-            try {
-                if (dropstmt != null) {
-                    dropstmt.close();
-                }
-            } catch (final Exception ex) {
-                LOG.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, ex);
-            }
-        }
     }
 
     private void fillTargetDatabase(List<TableObject> sorted_tables, Connection target_ox_db_con, Connection ox_db_connection, Object criteriaMatch) throws SQLException {
@@ -3112,7 +3071,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 prep = null;
 
                 if (oldFilestoreId != 0) {
-                    prep = configdb_write_con.prepareStatement("UPDATE contexts_per_filestore SET count=count-1 WHERE filestore_id=?");
+                    prep = configdb_write_con.prepareStatement("UPDATE contexts_per_filestore SET count=count-1 WHERE filestore_id=? AND count>0");
                     prep.setInt(1, oldFilestoreId);
                     prep.executeUpdate();
                     closeSQLStuff(prep);

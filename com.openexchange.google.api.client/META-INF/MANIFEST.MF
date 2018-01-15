@@ -5,7 +5,17 @@ Bundle-SymbolicName: com.openexchange.google.api.client
 Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.google.api.client.googleapis.auth.oauth2,
+Import-Package: com.fasterxml.jackson.annotation,
+ com.fasterxml.jackson.core,
+ com.fasterxml.jackson.core.base,
+ com.fasterxml.jackson.core.format,
+ com.fasterxml.jackson.core.io,
+ com.fasterxml.jackson.core.json,
+ com.fasterxml.jackson.core.sym,
+ com.fasterxml.jackson.core.type,
+ com.fasterxml.jackson.core.util,
+ com.fasterxml.jackson.databind,
+ com.google.api.client.googleapis.auth.oauth2,
  com.google.api.client.googleapis.javanet,
  com.google.api.client.http,
  com.google.api.client.http.javanet,

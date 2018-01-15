@@ -78,6 +78,8 @@ public class I18nServiceRegistryImpl implements I18nServiceRegistry {
     /** The special locale for <code>"ja"</code> language */
     private final Locale ja_Locale;
 
+    private static final I18nService NOOP_I18N = new NOOPI18nService(Locale.US);
+
     /**
      * Initializes a new {@link I18nServiceRegistryImpl}.
      */
@@ -150,9 +152,16 @@ public class I18nServiceRegistryImpl implements I18nServiceRegistry {
          *     ...
          */
         if (en_Locale.getLanguage().equals(language)) {
-            return services.get(DEFAULT_LOCALE);
+            I18nService i18nService = services.get(DEFAULT_LOCALE);
+            if(i18nService!=null){
+                return i18nService;
+            }
+            return NOOP_I18N;
         } else if (ja_Locale.getLanguage().equals(language)) {
-            return services.get(Locale.JAPAN);
+            I18nService i18nService = services.get(Locale.JAPAN);
+            if(i18nService!=null){
+                return i18nService;
+            }
         }
 
         // Guess best fit...

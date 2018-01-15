@@ -344,7 +344,7 @@ class Protocol {
      * Convert a byte array to a string of hex digits representing the bytes.
      */
     private static String toHex(byte[] bytes) {
-	char[] result = new char[bytes.length * 2];
+	char[] result = new char[bytes.length << 1];
 
 	for (int index = 0, i = 0; index < bytes.length; index++) {
 	    int temp = bytes[index] & 0xFF;

@@ -66,8 +66,6 @@ import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
-import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * A helper class to create {@link DisplayItem}s for common cases.
@@ -84,11 +82,11 @@ public class DisplayItems {
      * Converts the specified {@link Contact} result into a {@link ComplexDisplayItem}
      *
      * @param contact the {@link Contact} to convert
-     * @param session the groupware {@link Session}
+     * @param locale the user's {@link Locale}
      * @return The {@link ComplexDisplayItem}
      */
-    public static ComplexDisplayItem convert(Contact contact, ServerSession session) {
-        String displayName = formatDisplayName(contact, session.getUser().getLocale());
+    public static ComplexDisplayItem convert(Contact contact, Locale locale) {
+        String displayName = formatDisplayName(contact, locale);
         String primaryAddress = extractPrimaryMailAddress(contact);
         if (Strings.isEmpty(displayName)) {
             displayName = Strings.isEmpty(primaryAddress) ? "" : primaryAddress;
