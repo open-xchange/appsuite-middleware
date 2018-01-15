@@ -102,13 +102,13 @@ public class SyncHandler extends AbstractExtensionHandler {
         String[] ignore = getCalendarSession().get(CalendarParameters.PARAMETER_IGNORE, String[].class);
         if (false == Arrays.contains(ignore, IGNORE_CHANGED)) {
             newAndUpdated = getEventStorage().searchEvents(searchTerm, searchOptions, null);
-            getUtilities().loadAdditionalEventData(getSession().getUserId(), newAndUpdated, eventFields);
+            newAndUpdated = postProcess(getUtilities().loadAdditionalEventData(getSession().getUserId(), newAndUpdated, eventFields));
         }
 
         List<Event> tombstoneEvents = null;
         if (false == Arrays.contains(ignore, IGNORE_DELETED)) {
             tombstoneEvents = getEventStorage().searchEventTombstones(searchTerm, searchOptions, null);
-            getUtilities().loadAdditionalEventTombstoneData(tombstoneEvents, eventFields);
+            tombstoneEvents = postProcess(getUtilities().loadAdditionalEventTombstoneData(tombstoneEvents, eventFields));
         }
 
         return new DefaultUpdatesResult(newAndUpdated, tombstoneEvents);
@@ -157,7 +157,7 @@ public class SyncHandler extends AbstractExtensionHandler {
         events.addAll(getUtilities().loadAdditionalEventData(getSession().getUserId(), resolvedEvents, defaultEventFields));
         events.addAll(getUtilities().loadAdditionalEventTombstoneData(resolvedTombstoneEvents, defaultEventFields));
 
-        return events;
+        return postProcess(events);
     }
 
     /**
