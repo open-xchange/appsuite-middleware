@@ -148,6 +148,11 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
         // nothing to do
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.provider.basic.BasicCalendarProvider#probe(com.openexchange.session.Session, com.openexchange.chronos.provider.basic.CalendarSettings, com.openexchange.chronos.service.CalendarParameters)
+     */
     @Override
     public CalendarSettings probe(Session session, CalendarSettings settings, CalendarParameters parameters) throws OXException {
         /*
@@ -183,6 +188,12 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
         return proposedSettings;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarProvider#configureAccountOpt(com.openexchange.session.Session, com.openexchange.chronos.provider.basic.CalendarSettings,
+     * com.openexchange.chronos.service.CalendarParameters)
+     */
     @Override
     protected JSONObject configureAccountOpt(Session session, CalendarSettings settings, CalendarParameters parameters) throws OXException {
         /*
@@ -223,35 +234,16 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
         return internalConfig;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarProvider#reconfigureAccountOpt(com.openexchange.session.Session, com.openexchange.chronos.provider.CalendarAccount,
+     * com.openexchange.chronos.provider.basic.CalendarSettings, com.openexchange.chronos.service.CalendarParameters)
+     */
     @Override
     protected JSONObject reconfigureAccountOpt(Session session, CalendarAccount account, CalendarSettings settings, CalendarParameters parameters) throws OXException {
-        JSONObject userConfig = settings.getConfig();
-        getRefreshInterval(session, userConfig);
-        int itemId = getItemId(session, userConfig);
-
-        // Check and apply locale change
-        String locale = getLocale(session, userConfig);
-        boolean changed = false;
         JSONObject internalConfig = null != account.getInternalConfiguration() ? new JSONObject(account.getInternalConfiguration()) : new JSONObject();
-        try {
-            String url = internalConfig.optString(SchedJoulesFields.URL);
-            URL u = new URL(url);
-            String path = u.getQuery();
-            int startIndex = path.indexOf("l=");
-            int endIndex = path.indexOf("&", startIndex);
-            String l = path.substring(startIndex + 2, endIndex);
-            if (!l.equals(locale)) {
-                JSONObject item = fetchItem(session.getContextId(), itemId, locale);
-                internalConfig.putSafe(SchedJoulesFields.URL, item.getString(SchedJoulesFields.URL));
-                internalConfig.putSafe(SchedJoulesFields.NAME, item.getString(SchedJoulesFields.NAME));
-                changed = true;
-            }
-        } catch (MalformedURLException e) {
-            throw SchedJoulesProviderExceptionCodes.INVALID_URL.create(itemId, e);
-        } catch (JSONException e) {
-            throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
-        }
-
+        boolean changed = applyLocaleChange(session, settings, internalConfig);
         // Check & apply changes to extended properties
         Object colorValue = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL);
         if (null != colorValue && String.class.isInstance(colorValue) && false == colorValue.equals(internalConfig.opt(SchedJoulesFields.COLOR))) {
@@ -265,8 +257,51 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
         return changed ? internalConfig : null;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarProvider#triggerCacheInvalidation(com.openexchange.session.Session, org.json.JSONObject, org.json.JSONObject)
+     */
     @Override
     public boolean triggerCacheInvalidation(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException {
+        return false;
+    }
+
+    /**
+     * Checks if the locale changed and if so applies that change.
+     * 
+     * @param session The groupware {@link Session}
+     * @param settings The {@link CalendarSettings}
+     * @param internalConfig The internal configuration
+     * @return <code>true</code> if the locale was changed and the change was applied successfully, <code>false</code> otherwise
+     * @throws OXException if the internal configuration contains a malformed URL, or if any JSON error is occurred
+     */
+    private boolean applyLocaleChange(Session session, CalendarSettings settings, JSONObject internalConfig) throws OXException {
+        JSONObject userConfig = settings.getConfig();
+        if (userConfig == null) {
+            return false;
+        }
+        getRefreshInterval(session, userConfig);
+        int itemId = getItemId(session, userConfig);
+        String locale = getLocale(session, userConfig);
+        try {
+            String url = internalConfig.optString(SchedJoulesFields.URL);
+            URL u = new URL(url);
+            String path = u.getQuery();
+            int startIndex = path.indexOf("l=");
+            int endIndex = path.indexOf("&", startIndex);
+            String l = path.substring(startIndex + 2, endIndex);
+            if (false == l.equals(locale)) {
+                JSONObject item = fetchItem(session.getContextId(), itemId, locale);
+                internalConfig.putSafe(SchedJoulesFields.URL, item.getString(SchedJoulesFields.URL));
+                internalConfig.putSafe(SchedJoulesFields.NAME, item.getString(SchedJoulesFields.NAME));
+                return true;
+            }
+        } catch (MalformedURLException e) {
+            throw SchedJoulesProviderExceptionCodes.INVALID_URL.create(itemId, e);
+        } catch (JSONException e) {
+            throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+        }
         return false;
     }
 
