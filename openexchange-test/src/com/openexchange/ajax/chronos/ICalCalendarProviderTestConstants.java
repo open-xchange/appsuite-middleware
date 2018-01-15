@@ -87,10 +87,10 @@ public class ICalCalendarProviderTestConstants {
         "UID:d40uh9ek3j28sqqqkihduok78k@google.com\n" + 
         "CREATED:20170629T201453Z\n" + 
         "DESCRIPTION:Confed Cup 2017 in Russland\\, Endspiel.\\nSieger der 2 Halbfinal\n" + 
-        " e treffen aufeinander\\nLive übertragen im ZDF (Free TV\\, 2. Programm) und a\n" + 
+        " e treffen aufeinander\\nLive \u00fcbertragen im ZDF (Free TV\\, 2. Programm) und a\n" + 
         " ls LiveStream bei https://www.zdf.de/live-tv\n" + 
         "LAST-MODIFIED:20170702T195803Z\n" + 
-        "LOCATION:St. Petersburg\\, Russland. Live-TV-Übertragung im ZDF (2. Programm\n" + 
+        "LOCATION:St. Petersburg\\, Russland. Live-TV-\u00fcbertragung im ZDF (2. Programm\n" + 
         " )\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
@@ -107,7 +107,7 @@ public class ICalCalendarProviderTestConstants {
         " tschland gegen Schweden \\nLive zu sehen im ZDF (2. Programm\\, Free TV) und \n" + 
         " per gratis LiveStream bei https://www.zdf.de/live-tv\n" + 
         "LAST-MODIFIED:20170702T152610Z\n" + 
-        "LOCATION:Krakau\\, Polen. Live-Übertragung im ZDF und per LiveStream bei zdf\n" + 
+        "LOCATION:Krakau\\, Polen. Live-\u00fcbertragung im ZDF und per LiveStream bei zdf\n" + 
         " .de\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
@@ -120,7 +120,7 @@ public class ICalCalendarProviderTestConstants {
         "DTSTAMP:20170817T144059Z\n" + 
         "UID:75hjsi887k9de9n6gfotv5epgc@google.com\n" + 
         "CREATED:20170625T170211Z\n" + 
-        "DESCRIPTION:⚽  Confed Cup 2017 in Russland\\, 2. Halbfinale\\nLive-Übertragun\n" + 
+        "DESCRIPTION:\u26bd  Confed Cup 2017 in Russland\\, 2. Halbfinale\\nLive-\u00fcbertragun\n" + 
         " g in der ARD (1. Programm\\, FREE) und als Free-LiveStream bei daserste.de\n" + 
         "LAST-MODIFIED:20170629T200553Z\n" + 
         "LOCATION:Sotschi\\, Russland. Live im ARD TV und ARD Stream\n" + 
@@ -135,14 +135,14 @@ public class ICalCalendarProviderTestConstants {
         "DTSTAMP:20170817T144059Z\n" + 
         "UID:4l2pshhim64sm7bhpecibn6peo@google.com\n" + 
         "CREATED:20170626T061912Z\n" + 
-        "DESCRIPTION:⚽ U21-Europameisterschaft aus Polen: Halbfinale\\nDie ARD (DasEr\n" + 
-        " ste) überträgt live im FreeTV - zusätzlich gibt es einen Livestream: Dasers\n" + 
+        "DESCRIPTION:\u26bd U21-Europameisterschaft aus Polen: Halbfinale\\nDie ARD (DasEr\n" + 
+        " ste) \u00fcbertr\u00e4gt live im FreeTV - zus\u00e4tzlich gibt es einen Livestream: Dasers\n" + 
         " te.de\n" + 
         "LAST-MODIFIED:20170628T204752Z\n" + 
-        "LOCATION:Tychy\\, Polen. TV-Übertragung im 1. Programm + InternetStream\n" + 
+        "LOCATION:Tychy\\, Polen. TV-\u00fcbertragung im 1. Programm + InternetStream\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:⚽ U21-EM-Halbfinale: Deutschland - England 4:3 i.E.\n" + 
+        "SUMMARY:\u26bd U21-EM-Halbfinale: Deutschland - England 4:3 i.E.\n" + 
         "TRANSP:OPAQUE\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -151,14 +151,14 @@ public class ICalCalendarProviderTestConstants {
         "DTSTAMP:20170817T144059Z\n" + 
         "UID:1ntsjm81ci87tflpe5mb20gmac@google.com\n" + 
         "CREATED:20170616T055647Z\n" + 
-        "DESCRIPTION:Confed Cup 2017 in Russland\\, Gruppenphase\\nDas Länderspiel Deu\n" + 
-        " tschland-Chile im Confed Cup wird live im Fernsehen übertragen. Das Erste z\n" + 
+        "DESCRIPTION:Confed Cup 2017 in Russland\\, Gruppenphase\\nDas L\u00e4nderspiel Deu\n" + 
+        " tschland-Chile im Confed Cup wird live im Fernsehen \u00fcbertragen. Das Erste z\n" + 
         " eigt diese Partie live im Free-TV und im Internet in der Mediathek.\n" + 
         "LAST-MODIFIED:20170622T202449Z\n" + 
-        "LOCATION:Kazan\\, Russland. TV-Übertragung in der ARD\n" + 
+        "LOCATION:Kazan\\, Russland. TV-\u00fcbertragung in der ARD\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:⚽ Deutschland-Chile (Confed Cup) 1:1\n" + 
+        "SUMMARY:\u26bd Deutschland-Chile (Confed Cup) 1:1\n" + 
         "TRANSP:OPAQUE\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -167,15 +167,15 @@ public class ICalCalendarProviderTestConstants {
         "DTSTAMP:20170817T144059Z\n" + 
         "UID:fv5hhhvurecuki2e3ng9pa944k@google.com\n" + 
         "CREATED:20170615T205638Z\n" + 
-        "DESCRIPTION:Confed Cup 2017 in Russland\\, Gruppenphase\\nB3-B4\\nDas Ländersp\n" + 
-        " iel Australien-Deutschland im Confed Cup wird live im Fernsehen übertragen \n" + 
+        "DESCRIPTION:Confed Cup 2017 in Russland\\, Gruppenphase\\nB3-B4\\nDas L\u00e4ndersp\n" + 
+        " iel Australien-Deutschland im Confed Cup wird live im Fernsehen \u00fcbertragen \n" + 
         " und es gibt einen gratis-LiveStream. Live im ZDF Fernsehen und als legaler \n" + 
         " HD LiveStream bei zdf.de zu sehen\\nLive-Reporter: Béla Réthy\n" + 
         "LAST-MODIFIED:20170620T044052Z\n" + 
-        "LOCATION:Sotschi\\, Russland. TV-Übertragung im ZDF (2. Programm)\n" + 
+        "LOCATION:Sotschi\\, Russland. TV-\u00fcbertragung im ZDF (2. Programm)\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:⚽ Australien-Deutschland (Confed Cup) 2:3\n" + 
+        "SUMMARY:\u26bd Australien-Deutschland (Confed Cup) 2:3\n" + 
         "TRANSP:OPAQUE\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -184,14 +184,14 @@ public class ICalCalendarProviderTestConstants {
         "DTSTAMP:20170817T144059Z\n" + 
         "UID:t0ti3ji34u0g1sbccd3gqt95ig@google.com\n" + 
         "CREATED:20170616T055738Z\n" + 
-        "DESCRIPTION:Confed Cup 2017 in Russland\\, Gruppenphase\\nDas Länderspiel Deu\n" + 
-        " tschland-Kamerun im Confed Cup wird live im Fernsehen übertragen. Das ZDF ü\n" + 
-        " berträgt live im Free-TV und per Internetstream.\n" + 
+        "DESCRIPTION:Confed Cup 2017 in Russland\\, Gruppenphase\\nDas L\u00e4nderspiel Deu\n" + 
+        " tschland-Kamerun im Confed Cup wird live im Fernsehen \u00fcbertragen. Das ZDF \u00fc\n" + 
+        " bertr\u00e4gt live im Free-TV und per Internetstream.\n" + 
         "LAST-MODIFIED:20170616T170241Z\n" + 
-        "LOCATION:Sotschi\\, Russland. TV-Übertragung im ZDF\n" + 
+        "LOCATION:Sotschi\\, Russland. TV-\u00fcbertragung im ZDF\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:⚽ Deutschland-Kamerun (Confed Cup)\n" + 
+        "SUMMARY:\u26bd Deutschland-Kamerun (Confed Cup)\n" + 
         "TRANSP:OPAQUE\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -204,16 +204,16 @@ public class ICalCalendarProviderTestConstants {
         " all-spielplan.de';X-NUM-GUESTS=0:mailto:i4aeldvbflqu7u6jpn8uvv9738@group.ca\n" + 
         " lendar.google.com\n" + 
         "CREATED:20161118T071951Z\n" + 
-        "DESCRIPTION:⚽ Confed Cup 2017 in Russland\\, Gruppenphase\\nDas Länderspiel d\n" + 
+        "DESCRIPTION:\u26bd Confed Cup 2017 in Russland\\, Gruppenphase\\nDas L\u00e4nderspiel d\n" + 
         " es Confed Cups zwischen Russland und Neuseeland wird live im Fernsehen bei \n" + 
-        " der ARD (Das Erste) übertragen.\\nLivestream: http://www.daserste.de/live/in\n" + 
+        " der ARD (Das Erste) \u00fcbertragen.\\nLivestream: http://www.daserste.de/live/in\n" + 
         " dex.html\n" + 
         "LAST-MODIFIED:20170616T162902Z\n" + 
-        "LOCATION:St. Petersburg\\, Russland. TV-Übertragung in der ARD + Stream in d\n" + 
+        "LOCATION:St. Petersburg\\, Russland. TV-\u00fcbertragung in der ARD + Stream in d\n" + 
         " er Mediathek\n" + 
         "SEQUENCE:1\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:⚽ Confed Cup Eröffnungsspiel (Russland – Neuseeland)\n" + 
+        "SUMMARY:\u26bd Confed Cup Er\u00f6ffnungsspiel (Russland \u2013 Neuseeland)\n" + 
         "TRANSP:OPAQUE\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -222,8 +222,8 @@ public class ICalCalendarProviderTestConstants {
         "DTSTAMP:20170817T144059Z\n" + 
         "UID:2u8srqjb5h5pll4jrnhl1041sc@google.com\n" + 
         "CREATED:20170503T071426Z\n" + 
-        "DESCRIPTION:Qualifikationsspiel für die Weltmeisterschaft 2018 in Russland.\n" + 
-        " \\nLive Fernseh Übertragung auf RTL und per Internet Livestream bei http://w\n" + 
+        "DESCRIPTION:Qualifikationsspiel f\u00fcr die Weltmeisterschaft 2018 in Russland.\n" + 
+        " \\nLive Fernseh \u00fcbertragung auf RTL und per Internet Livestream bei http://w\n" + 
         " ww.ran.de/\\nhttp://www.fussball-spielplan.de/kalender-fuer-die-deutsche-nat\n" + 
         " ionalmannschaft-und-die-em-wm-endrunden/\n" + 
         "LAST-MODIFIED:20170503T071426Z\n" + 
@@ -240,16 +240,16 @@ public class ICalCalendarProviderTestConstants {
         "UID:kms7112b01f5badee7dkaq26bg@google.com\n" + 
         "CREATED:20170426T070729Z\n" + 
         "DESCRIPTION:25 Jahre nach der Europameisterschaft 1992 in Schweden kommt es\n" + 
-        "  im Rahmen eines Freundschaftsspiels zur Neuauflage des Finales von Götebor\n" + 
-        " g zwischen Dänemark und Deutschland. Anlässlich des 25-jährigen Jubiläums d\n" + 
-        " es EM-Titelgewinns war die deutsche Nationalmannschaft Wunschgegner des Dän\n" + 
-        " ischen Fußball-Verbandes. Das ZDF überträgt live im FreeTV und per Internet\n" + 
+        "  im Rahmen eines Freundschaftsspiels zur Neuauflage des Finales von G\u00f6tebor\n" + 
+        " g zwischen D\u00e4nemark und Deutschland. Anl\u00e4sslich des 25-j\u00e4hrigen Jubil\u00e4ums d\n" + 
+        " es EM-Titelgewinns war die deutsche Nationalmannschaft Wunschgegner des D\u00e4n\n" + 
+        " ischen Fußball-Verbandes. Das ZDF \u00fcbertr\u00e4gt live im FreeTV und per Internet\n" + 
         "  Streaming.\n" + 
         "LAST-MODIFIED:20170426T070729Z\n" + 
-        "LOCATION:Kopenhagen. Live im ZDF übertragen (und per LiveStream)\n" + 
+        "LOCATION:Kopenhagen. Live im ZDF \u00fcbertragen (und per LiveStream)\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:⚽ Dänemark - Deutschland (Freundschaftsspiel)\n" + 
+        "SUMMARY:\u26bd D\u00e4nemark - Deutschland (Freundschaftsspiel)\n" + 
         "TRANSP:OPAQUE\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -259,10 +259,10 @@ public class ICalCalendarProviderTestConstants {
         "UID:bhft6ejt1r0tt02s3gid6rs3bk@google.com\n" + 
         "CREATED:20161021T061533Z\n" + 
         "DESCRIPTION:Freundschaftsspiel der Fußball-Nationalmannschaften von Deutsch\n" + 
-        " land und England.\\nWird live im FreeTV übertragen bei DasErste (ARD) und au\n" + 
+        " land und England.\\nWird live im FreeTV \u00fcbertragen bei DasErste (ARD) und au\n" + 
         " ch in der Internet-Mediathek bei daserste.de live gestreamt.\n" + 
         "LAST-MODIFIED:20170316T082458Z\n" + 
-        "LOCATION:Signal Iduna Park\\, Dortmund. Live auf DasErste im Free TV übertra\n" + 
+        "LOCATION:Signal Iduna Park\\, Dortmund. Live auf DasErste im Free TV \u00fcbertra\n" + 
         " gen \n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
@@ -276,9 +276,9 @@ public class ICalCalendarProviderTestConstants {
         "UID:gbs5ogotqp3l3a1ob0o8kb22e8@google.com\n" + 
         "CREATED:20161203T084256Z\n" + 
         "DESCRIPTION:Testspiel (Freundschaftsspiel) der deutschen Nationalmannschaft\n" + 
-        " .\\nGegner und TV-Übertragungs-Details noch unbekannt.\n" + 
+        " .\\nGegner und TV-\u00fcbertragungs-Details noch unbekannt.\n" + 
         "LAST-MODIFIED:20161203T084256Z\n" + 
-        "LOCATION:RheinEnergieStadion Köln. TV-Sender + LiveStream Website noch unbe\n" + 
+        "LOCATION:RheinEnergieStadion K\u00f6ln. TV-Sender + LiveStream Website noch unbe\n" + 
         " kannt\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
@@ -292,7 +292,7 @@ public class ICalCalendarProviderTestConstants {
         "UID:dcl746sd4jag343bkq6egpqtkg@google.com\n" + 
         "CREATED:20161203T084009Z\n" + 
         "DESCRIPTION:Testspiel (Freundschaftsspiel) der deutschen Nationalmannschaft\n" + 
-        " .\\nOrt und TV-Übertragungs-Details noch unbekannt.\n" + 
+        " .\\nOrt und TV-\u00fcbertragungs-Details noch unbekannt.\n" + 
         "LAST-MODIFIED:20161203T084056Z\n" + 
         "LOCATION:Stadion in Deutschland. TV-Sender + LiveStream Website noch unbeka\n" + 
         " nnt\n" + 
@@ -307,8 +307,8 @@ public class ICalCalendarProviderTestConstants {
         "DTSTAMP:20170817T144059Z\n" + 
         "UID:3hlitmuasnm6q9a5eggf9f60ak@google.com\n" + 
         "CREATED:20160904T080230Z\n" + 
-        "DESCRIPTION:Qualifikationsspiel für die Weltmeisterschaft 2018 in Russland.\n" + 
-        " \\nLive Fernseh Übertragung auf RTL und per Internet Livestream bei http://w\n" + 
+        "DESCRIPTION:Qualifikationsspiel f\u00fcr die Weltmeisterschaft 2018 in Russland.\n" + 
+        " \\nLive Fernseh \u00fcbertragung auf RTL und per Internet Livestream bei http://w\n" + 
         " ww.ran.de/\n" + 
         "LAST-MODIFIED:20161203T083917Z\n" + 
         "LOCATION:Fritz-Walter-Stadion Kaiserslautern. Live im RTL TV.\n" + 
@@ -323,8 +323,8 @@ public class ICalCalendarProviderTestConstants {
         "DTSTAMP:20170817T144059Z\n" + 
         "UID:27eic99tp8rvttbtuv4ul7ddig@google.com\n" + 
         "CREATED:20160904T080327Z\n" + 
-        "DESCRIPTION:Qualifikationsspiel für die Weltmeisterschaft 2018 in Russland.\n" + 
-        " \\nLive Fernseh Übertragung auf RTL und per Internet Livestream bei http://w\n" + 
+        "DESCRIPTION:Qualifikationsspiel f\u00fcr die Weltmeisterschaft 2018 in Russland.\n" + 
+        " \\nLive Fernseh \u00fcbertragung auf RTL und per Internet Livestream bei http://w\n" + 
         " ww.ran.de/\n" + 
         "LAST-MODIFIED:20161203T083825Z\n" + 
         "LOCATION:Mercedes-Benz Arena Stuttgart. Live im RTL TV.\n" + 
@@ -339,11 +339,11 @@ public class ICalCalendarProviderTestConstants {
         "DTSTAMP:20170817T144059Z\n" + 
         "UID:653dj7f98ll36ug0rlpde28qog@google.com\n" + 
         "CREATED:20160904T080308Z\n" + 
-        "DESCRIPTION:Qualifikationsspiel für die Weltmeisterschaft 2018 in Russland.\n" + 
-        " \\nLive Fernseh Übertragung auf RTL und per Internet Livestream bei http://w\n" + 
+        "DESCRIPTION:Qualifikationsspiel f\u00fcr die Weltmeisterschaft 2018 in Russland.\n" + 
+        " \\nLive Fernseh \u00fcbertragung auf RTL und per Internet Livestream bei http://w\n" + 
         " ww.ran.de/\n" + 
         "LAST-MODIFIED:20161203T082934Z\n" + 
-        "LOCATION:Stadion Nürnberg. Live im RTL TV.\n" + 
+        "LOCATION:Stadion N\u00fcrnberg. Live im RTL TV.\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
         "SUMMARY:Deutschland-San Marino (WM Quali)\n" + 
@@ -356,10 +356,10 @@ public class ICalCalendarProviderTestConstants {
         "UID:0p76hukqsdf6jvbql9kt30g1g8@google.com\n" + 
         "CREATED:20161020T074536Z\n" + 
         "DESCRIPTION:Freundschaftsspiel der Nationalmannschaften Italien gegen Deuts\n" + 
-        " chland. Live übertragen auf DasErste (Free TV) und per LiveStream bei http:\n" + 
+        " chland. Live \u00fcbertragen auf DasErste (Free TV) und per LiveStream bei http:\n" + 
         " //www.daserste.de/live/index.html\n" + 
         "LAST-MODIFIED:20161117T075251Z\n" + 
-        "LOCATION:Giuseppe-Meazza-Stadion\\, Mailand. Live Übertragung in der ARD\n" + 
+        "LOCATION:Giuseppe-Meazza-Stadion\\, Mailand. Live \u00fcbertragung in der ARD\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
         "SUMMARY:Italien-Deutschland (Testspiel) 0:0\n" + 
@@ -371,8 +371,8 @@ public class ICalCalendarProviderTestConstants {
         "DTSTAMP:20170817T144059Z\n" + 
         "UID:c0l3hod8jvqnet15bs5pfjl1eg@google.com\n" + 
         "CREATED:20160904T080038Z\n" + 
-        "DESCRIPTION:Qualifikationsspiel für die Weltmeisterschaft 2018 in Russland.\n" + 
-        " \\nLive Fernseh Übertragung auf RTL und per Internet Livestream bei http://w\n" + 
+        "DESCRIPTION:Qualifikationsspiel f\u00fcr die Weltmeisterschaft 2018 in Russland.\n" + 
+        " \\nLive Fernseh \u00fcbertragung auf RTL und per Internet Livestream bei http://w\n" + 
         " ww.ran.de/\n" + 
         "LAST-MODIFIED:20161113T093726Z\n" + 
         "LOCATION:San Marino. Live im RTL TV.\n" + 
@@ -387,8 +387,8 @@ public class ICalCalendarProviderTestConstants {
         "DTSTAMP:20170817T144059Z\n" + 
         "UID:dftp1r9qdvjb45nvhl44kk0hmg@google.com\n" + 
         "CREATED:20160904T080031Z\n" + 
-        "DESCRIPTION:Qualifikationsspiel für die Weltmeisterschaft 2018 in Russland.\n" + 
-        " \\nLive Fernseh Übertragung auf RTL und per Internet Livestream bei http://w\n" + 
+        "DESCRIPTION:Qualifikationsspiel f\u00fcr die Weltmeisterschaft 2018 in Russland.\n" + 
+        " \\nLive Fernseh \u00fcbertragung auf RTL und per Internet Livestream bei http://w\n" + 
         " ww.ran.de/\n" + 
         "LAST-MODIFIED:20161020T073643Z\n" + 
         "LOCATION:Hannover. Live im RTL TV.\n" + 
@@ -403,8 +403,8 @@ public class ICalCalendarProviderTestConstants {
         "DTSTAMP:20170817T144059Z\n" + 
         "UID:s4ptl2n4fmda4l6s0l20a5nmgs@google.com\n" + 
         "CREATED:20160904T080021Z\n" + 
-        "DESCRIPTION:Qualifikationsspiel für die Weltmeisterschaft 2018 in Russland.\n" + 
-        " \\nLive Fernseh Übertragung auf RTL und per Internet Livestream bei http://w\n" + 
+        "DESCRIPTION:Qualifikationsspiel f\u00fcr die Weltmeisterschaft 2018 in Russland.\n" + 
+        " \\nLive Fernseh \u00fcbertragung auf RTL und per Internet Livestream bei http://w\n" + 
         " ww.ran.de/\n" + 
         "LAST-MODIFIED:20161020T073628Z\n" + 
         "LOCATION:Volksparkstadion Hamburg. Live im RTL TV.\n" + 
@@ -419,11 +419,11 @@ public class ICalCalendarProviderTestConstants {
         "DTSTAMP:20170817T144059Z\n" + 
         "UID:7dpcknkqf9u79mukmsstjrgeko@google.com\n" + 
         "CREATED:20160904T075732Z\n" + 
-        "DESCRIPTION:Qualifikationsspiel für die Weltmeisterschaft 2018 in Russland.\n" + 
-        " \\nLive Fernseh Übertragung auf RTL und per Internet Livestream bei http://w\n" + 
+        "DESCRIPTION:Qualifikationsspiel f\u00fcr die Weltmeisterschaft 2018 in Russland.\n" + 
+        " \\nLive Fernseh \u00fcbertragung auf RTL und per Internet Livestream bei http://w\n" + 
         " ww.ran.de/\n" + 
         "LAST-MODIFIED:20161020T073553Z\n" + 
-        "LOCATION:Stadion Ullevål Oslo. Live bei RTL TV übertragen\n" + 
+        "LOCATION:Stadion Ullevål Oslo. Live bei RTL TV \u00fcbertragen\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
         "SUMMARY:Norwegen-Deutschland (WM Quali) 0:3\n" + 
@@ -436,11 +436,11 @@ public class ICalCalendarProviderTestConstants {
         "UID:d5rovddk8bcn9a7dnmuard4j50@google.com\n" + 
         "CREATED:20160803T180643Z\n" + 
         "DESCRIPTION:Freundschaftsspiel der deutschen Nationmannschaft gegen Finnlan\n" + 
-        " d. \\nLive im Fernsehen übertragen im ZDF (2. Programm\\, Free TV) und per In\n" + 
+        " d. \\nLive im Fernsehen \u00fcbertragen im ZDF (2. Programm\\, Free TV) und per In\n" + 
         " ternet LiveStream bei www.zdf.de/ZDFmediathek/beitrag/live/1822600/Das-ZDF-\n" + 
         " im-Livestream\\n\n" + 
         "LAST-MODIFIED:20161020T073539Z\n" + 
-        "LOCATION:Mönchengladbach. Live im TV übertragen im ZDF\n" + 
+        "LOCATION:M\u00f6nchengladbach. Live im TV \u00fcbertragen im ZDF\n" + 
         "SEQUENCE:1\n" + 
         "STATUS:CONFIRMED\n" + 
         "SUMMARY:Deutschland - Finnland (FSP / Testspiel) 2:0\n" + 
@@ -452,8 +452,8 @@ public class ICalCalendarProviderTestConstants {
         "DTSTAMP:20170817T144059Z\n" + 
         "UID:jp58dhvm3aa60eu5r25ljon4ac@google.com\n" + 
         "CREATED:20160904T080220Z\n" + 
-        "DESCRIPTION:Qualifikationsspiel für die Weltmeisterschaft 2018 in Russland.\n" + 
-        " \\nLive Fernseh Übertragung auf RTL und per Internet Livestream bei http://w\n" + 
+        "DESCRIPTION:Qualifikationsspiel f\u00fcr die Weltmeisterschaft 2018 in Russland.\n" + 
+        " \\nLive Fernseh \u00fcbertragung auf RTL und per Internet Livestream bei http://w\n" + 
         " ww.ran.de/\n" + 
         "LAST-MODIFIED:20160904T080220Z\n" + 
         "LOCATION:Stadion in Nordirland (Belfast?). Live auf RTL TV\n" + 
@@ -468,8 +468,8 @@ public class ICalCalendarProviderTestConstants {
         "DTSTAMP:20170817T144059Z\n" + 
         "UID:1d9v3942a4thjbdq5iio3hef18@google.com\n" + 
         "CREATED:20160904T080129Z\n" + 
-        "DESCRIPTION:Qualifikationsspiel für die Weltmeisterschaft 2018 in Russland.\n" + 
-        " \\nLive Fernseh Übertragung auf RTL und per Internet Livestream bei http://w\n" + 
+        "DESCRIPTION:Qualifikationsspiel f\u00fcr die Weltmeisterschaft 2018 in Russland.\n" + 
+        " \\nLive Fernseh \u00fcbertragung auf RTL und per Internet Livestream bei http://w\n" + 
         " ww.ran.de/\n" + 
         "LAST-MODIFIED:20160904T080129Z\n" + 
         "LOCATION:Stadion in Aserbaidschan. Live im RTL TV.\n" + 
@@ -484,14 +484,14 @@ public class ICalCalendarProviderTestConstants {
         "DTSTAMP:20170817T144059Z\n" + 
         "UID:chi6cdpn69j3ib9n6co36b9k64ojeb9o6lhmab9mcoom2e9kcks38e1gcc@google.com\n" + 
         "CREATED:20160819T190829Z\n" + 
-        "DESCRIPTION:⚽ Live-Übertragung im ersten deutschen Fernsehen (ARD). Olympis\n" + 
-        " ches Finale der Herren. Zusätzlich im kostenlosen LiveStream: http://rio.zd\n" + 
+        "DESCRIPTION:\u26bd Live-\u00fcbertragung im ersten deutschen Fernsehen (ARD). Olympis\n" + 
+        " ches Finale der Herren. Zus\u00e4tzlich im kostenlosen LiveStream: http://rio.zd\n" + 
         " f.de/live/\n" + 
         "LAST-MODIFIED:20160819T190829Z\n" + 
-        "LOCATION:Rio de Janeiro - TV-Übertragung in der ARD\n" + 
+        "LOCATION:Rio de Janeiro - TV-\u00fcbertragung in der ARD\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:⚽ Deutschland - Brasilien (FINALE)\n" + 
+        "SUMMARY:\u26bd Deutschland - Brasilien (FINALE)\n" + 
         "TRANSP:OPAQUE\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -500,15 +500,15 @@ public class ICalCalendarProviderTestConstants {
         "DTSTAMP:20170817T144059Z\n" + 
         "UID:fb61s80t9drohvng4q2c6ic434@google.com\n" + 
         "CREATED:20160815T132310Z\n" + 
-        "DESCRIPTION:⚽Halbfinale beim olympischen Fußballturnier in Rio: Deutschland\n" + 
-        "  trifft auf Nigeria.\\nDas zweite deutsche Fernsehen überträgt live im TV (F\n" + 
+        "DESCRIPTION:\u26bdHalbfinale beim olympischen Fußballturnier in Rio: Deutschland\n" + 
+        "  trifft auf Nigeria.\\nDas zweite deutsche Fernsehen \u00fcbertr\u00e4gt live im TV (F\n" + 
         " ree-TV)\\nInternetstream:\\nhttp://rio.zdf.de/live/\n" + 
         "LAST-MODIFIED:20160815T132532Z\n" + 
-        "LOCATION:⚽-Liveübertragung auf dem Sender vom zweiten deutschen Fernsehen (\n" + 
+        "LOCATION:\u26bd-Live\u00fcbertragung auf dem Sender vom zweiten deutschen Fernsehen (\n" + 
         " ZDF). Und auf http://rio.zdf.de/live/\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:Olympia ⚽Fußball (M) Halbfinale: Deutschland - Nigeria\n" + 
+        "SUMMARY:Olympia \u26bdFußball (M) Halbfinale: Deutschland - Nigeria\n" + 
         "TRANSP:OPAQUE\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -518,13 +518,13 @@ public class ICalCalendarProviderTestConstants {
         "UID:msc1j4psqhahig749rlgu2pi44@google.com\n" + 
         "CREATED:20160804T154257Z\n" + 
         "DESCRIPTION:Olympisches Fußball-Turnier mit der deutschen U21-Nationalmanns\n" + 
-        " chaft in Brasilien\\nGruppe C\\nLive Fernseh Übertragung im ZDF (2. Programm)\n" + 
+        " chaft in Brasilien\\nGruppe C\\nLive Fernseh \u00fcbertragung im ZDF (2. Programm)\n" + 
         "  und per Internet LiveStream\n" + 
         "LAST-MODIFIED:20160804T154257Z\n" + 
         "LOCATION:Arena Fonte Nova\\, Salvador\\, Brasilien. Live ausgestrahlt im ZDF\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:U21 Deutschland - U21 Südkorea (Olympia)\n" + 
+        "SUMMARY:U21 Deutschland - U21 S\u00fcdkorea (Olympia)\n" + 
         "TRANSP:OPAQUE\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -534,10 +534,10 @@ public class ICalCalendarProviderTestConstants {
         "UID:k3rhcel7k5uc96cjann1l94u1o@google.com\n" + 
         "CREATED:20160804T154012Z\n" + 
         "DESCRIPTION:Olympisches Fußball-Turnier mit der deutschen U21-Nationalmanns\n" + 
-        " chaft in Brasilien\\nGruppe C\\nLive Fernseh Übertragung im ZDF (Free TV) und\n" + 
+        " chaft in Brasilien\\nGruppe C\\nLive Fernseh \u00fcbertragung im ZDF (Free TV) und\n" + 
         "  per Internet LiveStream in der ZDF-Mediathek\n" + 
         "LAST-MODIFIED:20160804T154012Z\n" + 
-        "LOCATION:Arena Fonte Nova\\, Salvador\\, Brasilien. Live im ZDF übertragen\n" + 
+        "LOCATION:Arena Fonte Nova\\, Salvador\\, Brasilien. Live im ZDF \u00fcbertragen\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
         "SUMMARY:U21 Mexico - U21-Deutschland (Olympia)\n" + 
@@ -553,7 +553,7 @@ public class ICalCalendarProviderTestConstants {
         " e der Europameisterschaft 2016 (Frankreich).\\nPortugal ist der neue Europam\n" + 
         " eister.\\n\n" + 
         "LAST-MODIFIED:20160711T062019Z\n" + 
-        "LOCATION:Saint-Denis. Liveübertragung im Free TV (ARD\\, 1. Programm)\n" + 
+        "LOCATION:Saint-Denis. Live\u00fcbertragung im Free TV (ARD\\, 1. Programm)\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
         "SUMMARY:EM-Endspiel: Portugal - Frankreich. 1:0 (n.V.)\n" + 
@@ -567,11 +567,11 @@ public class ICalCalendarProviderTestConstants {
         "CREATED:20160623T191727Z\n" + 
         "DESCRIPTION:Halbfinale 2 (von 2) der EM 2016\\nSieger Viertelfinale 3 (Deuts\n" + 
         " chland) gegen Sieger Viertelfinale 4 (Frankreich)\\nDas Halbfinale der deuts\n" + 
-        " chen Nationalmannschaft.\\nLive im Fernsehen übertragen im ZDF (Free TV) und\n" + 
+        " chen Nationalmannschaft.\\nLive im Fernsehen \u00fcbertragen im ZDF (Free TV) und\n" + 
         "  als legaler Internet LiveStream in der ZDF Mediathek bei zdf.de/ZDFmediath\n" + 
         " ek/beitrag/live/1822600/Das-ZDF-im-Livestream\n" + 
         "LAST-MODIFIED:20160707T204657Z\n" + 
-        "LOCATION:Marseille. Liveübertragung im ZDF und per Internet LiveStream\n" + 
+        "LOCATION:Marseille. Live\u00fcbertragung im ZDF und per Internet LiveStream\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
         "SUMMARY:Deutschland - Frankreich (HF2). 0:2\n" + 
@@ -587,7 +587,7 @@ public class ICalCalendarProviderTestConstants {
         " (Deutschland) gegen Sieger Achtelfinale 7 (Italien)\\nDas Viertelfinale mit \n" + 
         " der deutschen Nationalmannschaft..\\n\n" + 
         "LAST-MODIFIED:20160702T214909Z\n" + 
-        "LOCATION:Bordeaux. Live Übertragung in der ARD (1. Programm) und als LiveSt\n" + 
+        "LOCATION:Bordeaux. Live \u00fcbertragung in der ARD (1. Programm) und als LiveSt\n" + 
         " ream\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
@@ -617,7 +617,7 @@ public class ICalCalendarProviderTestConstants {
         "DESCRIPTION:Gruppenphase der EM 2016.\\nGruppe C ('deutsche Gruppe'\\n3. Spie\n" + 
         " l der deutschen Nationalmannschaft\\nZeitgleich mit Ukraine - Polen\\n\n" + 
         "LAST-MODIFIED:20160621T174747Z\n" + 
-        "LOCATION:Paris\\, Frankreich. Live-TV-Übertragung auf DasErste und per ARD-L\n" + 
+        "LOCATION:Paris\\, Frankreich. Live-TV-\u00fcbertragung auf DasErste und per ARD-L\n" + 
         " iveStream\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
@@ -633,7 +633,7 @@ public class ICalCalendarProviderTestConstants {
         "DESCRIPTION:Gruppenphase der EM\\, Gruppe C ('deutsche Gruppe')\\n2. Spiel de\n" + 
         " r deutschen Nationalmannschaft bei der Euro 2016\n" + 
         "LAST-MODIFIED:20160618T092240Z\n" + 
-        "LOCATION:Saint-Denis. Live Übertragung im ZDF\n" + 
+        "LOCATION:Saint-Denis. Live \u00fcbertragung im ZDF\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
         "SUMMARY:Deutschland-Polen (C). 0:0\n" + 
@@ -648,7 +648,7 @@ public class ICalCalendarProviderTestConstants {
         "DESCRIPTION:Gruppenphase der EM\\, Gruppe C (Deutsche Gruppe)\\n1. Spiel der \n" + 
         " deutschen Nationalmannschaft\n" + 
         "LAST-MODIFIED:20160614T100659Z\n" + 
-        "LOCATION:Lille. Live übertragen auf DasErste (Free TV)\n" + 
+        "LOCATION:Lille. Live \u00fcbertragen auf DasErste (Free TV)\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
         "SUMMARY:Deutschland-Ukraine (C) 2:0\n" + 
@@ -660,12 +660,12 @@ public class ICalCalendarProviderTestConstants {
         "DTSTAMP:20170817T144059Z\n" + 
         "UID:n0ijg1eqjc3oot2htcte9d3au0@google.com\n" + 
         "CREATED:20160528T145709Z\n" + 
-        "DESCRIPTION:Länderspiel (Freundschaftsspiel) der deutschen Nationalmannscha\n" + 
-        " ft 'Die Mannschaft' vor der Europameisterschaft 2016.\\nLive Fernsehübertrag\n" + 
+        "DESCRIPTION:L\u00e4nderspiel (Freundschaftsspiel) der deutschen Nationalmannscha\n" + 
+        " ft 'Die Mannschaft' vor der Europameisterschaft 2016.\\nLive Fernseh\u00fcbertrag\n" + 
         " ung im ZDF (Free TV) und per gratis Internet LiveStream bei zdf.de/ZDFmedia\n" + 
         " thek/beitrag/live/1822600/Das-ZDF-im-Livestream\n" + 
         "LAST-MODIFIED:20160605T085128Z\n" + 
-        "LOCATION:Veltins-Arena\\, Gelsenkirchen. Live-Übertragung im ZDF (2. Program\n" + 
+        "LOCATION:Veltins-Arena\\, Gelsenkirchen. Live-\u00fcbertragung im ZDF (2. Program\n" + 
         " m)\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
@@ -678,12 +678,12 @@ public class ICalCalendarProviderTestConstants {
         "DTSTAMP:20170817T144059Z\n" + 
         "UID:uf251cb8l2ao8dsmi2qfriuadg@google.com\n" + 
         "CREATED:20160528T145700Z\n" + 
-        "DESCRIPTION:Länderspiel (Testspiel) der deutschen Nationalmannschaft (Herre\n" + 
-        " n) vor dem EM 2016\\nLive im Fernsehen übertragen auf DasErste (ARD\\, Free T\n" + 
+        "DESCRIPTION:L\u00e4nderspiel (Testspiel) der deutschen Nationalmannschaft (Herre\n" + 
+        " n) vor dem EM 2016\\nLive im Fernsehen \u00fcbertragen auf DasErste (ARD\\, Free T\n" + 
         " v) und kostenlosem\\, legalen Internet LiveStream via http://www.daserste.de\n" + 
         " /live/index.html\\n\n" + 
         "LAST-MODIFIED:20160530T064819Z\n" + 
-        "LOCATION:WWK Arena\\, Augsburg. Live Übertragung in der ARD (1. Programm)\n" + 
+        "LOCATION:WWK Arena\\, Augsburg. Live \u00fcbertragung in der ARD (1. Programm)\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
         "SUMMARY:Deutschland - Slowakei (Testspiel) 1:3\n" + 
@@ -723,10 +723,10 @@ public class ICalCalendarProviderTestConstants {
         "CREATED:20160914T222128Z\n" + 
         "DESCRIPTION:DFB-Pokal\\, round 2\n" + 
         "LAST-MODIFIED:20170802T154846Z\n" + 
-        "LOCATION:Max Morlock Stadion\\, Nürnberg\n" + 
+        "LOCATION:Max Morlock Stadion\\, N\u00fcrnberg\n" + 
         "SEQUENCE:6\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:1. FC Nürnberg - FC Schalke 04 (2:3)\n" + 
+        "SUMMARY:1. FC N\u00fcrnberg - FC Schalke 04 (2:3)\n" + 
         "TRANSP:TRANSPARENT\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -767,7 +767,7 @@ public class ICalCalendarProviderTestConstants {
         " tschland gegen Schweden \\nLive zu sehen im ZDF (2. Programm\\, Free TV) und \n" + 
         " per gratis LiveStream bei https://www.zdf.de/live-tv\n" + 
         "LAST-MODIFIED:20170702T152610Z\n" + 
-        "LOCATION:Krakau\\, Polen. Live-Übertragung im ZDF und per LiveStream bei zdf\n" + 
+        "LOCATION:Krakau\\, Polen. Live-\u00fcbertragung im ZDF und per LiveStream bei zdf\n" + 
         " .de\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
@@ -780,7 +780,7 @@ public class ICalCalendarProviderTestConstants {
         "DTSTAMP:20170817T144059Z\n" + 
         "UID:75hjsi887k9de9n6gfotv5epgc@google.com\n" + 
         "CREATED:20170625T170211Z\n" + 
-        "DESCRIPTION:⚽  Confed Cup 2017 in Russland\\, 2. Halbfinale\\nLive-Übertragun\n" + 
+        "DESCRIPTION:\u26bd  Confed Cup 2017 in Russland\\, 2. Halbfinale\\nLive-\u00fcbertragun\n" + 
         " g in der ARD (1. Programm\\, FREE) und als Free-LiveStream bei daserste.de\n" + 
         "LAST-MODIFIED:20170629T200553Z\n" + 
         "LOCATION:Sotschi\\, Russland. Live im ARD TV und ARD Stream\n" + 
@@ -795,14 +795,14 @@ public class ICalCalendarProviderTestConstants {
         "DTSTAMP:20170817T144059Z\n" + 
         "UID:4l2pshhim64sm7bhpecibn6peo@google.com\n" + 
         "CREATED:20170626T061912Z\n" + 
-        "DESCRIPTION:⚽ U21-Europameisterschaft aus Polen: Halbfinale\\nDie ARD (DasEr\n" + 
-        " ste) überträgt live im FreeTV - zusätzlich gibt es einen Livestream: Dasers\n" + 
+        "DESCRIPTION:\u26bd U21-Europameisterschaft aus Polen: Halbfinale\\nDie ARD (DasEr\n" + 
+        " ste) \u00fcbertr\u00e4gt live im FreeTV - zus\u00e4tzlich gibt es einen Livestream: Dasers\n" + 
         " te.de\n" + 
         "LAST-MODIFIED:20170628T204752Z\n" + 
-        "LOCATION:Tychy\\, Polen. TV-Übertragung im 1. Programm + InternetStream\n" + 
+        "LOCATION:Tychy\\, Polen. TV-\u00fcbertragung im 1. Programm + InternetStream\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:⚽ U21-EM-Halbfinale: Deutschland - England 4:3 i.E.\n" + 
+        "SUMMARY:\u26bd U21-EM-Halbfinale: Deutschland - England 4:3 i.E.\n" + 
         "TRANSP:OPAQUE\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -811,14 +811,14 @@ public class ICalCalendarProviderTestConstants {
         "DTSTAMP:20170817T144059Z\n" + 
         "UID:1ntsjm81ci87tflpe5mb20gmac@google.com\n" + 
         "CREATED:20170616T055647Z\n" + 
-        "DESCRIPTION:Confed Cup 2017 in Russland\\, Gruppenphase\\nDas Länderspiel Deu\n" + 
-        " tschland-Chile im Confed Cup wird live im Fernsehen übertragen. Das Erste z\n" + 
+        "DESCRIPTION:Confed Cup 2017 in Russland\\, Gruppenphase\\nDas L\u00e4nderspiel Deu\n" + 
+        " tschland-Chile im Confed Cup wird live im Fernsehen \u00fcbertragen. Das Erste z\n" + 
         " eigt diese Partie live im Free-TV und im Internet in der Mediathek.\n" + 
         "LAST-MODIFIED:20170622T202449Z\n" + 
-        "LOCATION:Kazan\\, Russland. TV-Übertragung in der ARD\n" + 
+        "LOCATION:Kazan\\, Russland. TV-\u00fcbertragung in der ARD\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:⚽ Deutschland-Chile (Confed Cup) 1:1\n" + 
+        "SUMMARY:\u26bd Deutschland-Chile (Confed Cup) 1:1\n" + 
         "TRANSP:OPAQUE\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -1032,7 +1032,7 @@ public class ICalCalendarProviderTestConstants {
         "CREATED:20160629T214523Z\n" + 
         "DESCRIPTION:1. Bundesliga\\, 29. matchday \n" + 
         "LAST-MODIFIED:20170416T173602Z\n" + 
-        "LOCATION:Jonathan-Heimes-Stadion am Böllenfalltor\n" + 
+        "LOCATION:Jonathan-Heimes-Stadion am B\u00f6llenfalltor\n" + 
         "SEQUENCE:6\n" + 
         "STATUS:CONFIRMED\n" + 
         "SUMMARY:SV Darmstadt 98 - FC Schalke 04 (2:1)\n" + 
@@ -1116,10 +1116,10 @@ public class ICalCalendarProviderTestConstants {
         "CREATED:20170224T203633Z\n" + 
         "DESCRIPTION:Europa League\\, eigth-final\n" + 
         "LAST-MODIFIED:20170316T221206Z\n" + 
-        "LOCATION:Borussia-Park\\, Mönchengladbach\n" + 
+        "LOCATION:Borussia-Park\\, M\u00f6nchengladbach\n" + 
         "SEQUENCE:2\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:Bor. Mönchengladbach - FC Schalke 04 (2:2)\n" + 
+        "SUMMARY:Bor. M\u00f6nchengladbach - FC Schalke 04 (2:2)\n" + 
         "TRANSP:TRANSPARENT\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -1147,7 +1147,7 @@ public class ICalCalendarProviderTestConstants {
         "LOCATION:VELTINS-Arena\\, Gelsenkirchen\n" + 
         "SEQUENCE:3\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:FC Schalke 04 - Bor. Mönchengladbach (1:1)\n" + 
+        "SUMMARY:FC Schalke 04 - Bor. M\u00f6nchengladbach (1:1)\n" + 
         "TRANSP:TRANSPARENT\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -1158,10 +1158,10 @@ public class ICalCalendarProviderTestConstants {
         "CREATED:20160914T222137Z\n" + 
         "DESCRIPTION:1. Bundesliga\\, 23. matchday \n" + 
         "LAST-MODIFIED:20170304T193737Z\n" + 
-        "LOCATION:Borussia-Park\\, Mönchengladbach\n" + 
+        "LOCATION:Borussia-Park\\, M\u00f6nchengladbach\n" + 
         "SEQUENCE:4\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:Bor. Mönchengladbach - FC Schalke 04 (4:2)\n" + 
+        "SUMMARY:Bor. M\u00f6nchengladbach - FC Schalke 04 (4:2)\n" + 
         "TRANSP:TRANSPARENT\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -1172,10 +1172,10 @@ public class ICalCalendarProviderTestConstants {
         "CREATED:20170210T202430Z\n" + 
         "DESCRIPTION:DFB-Pokal\\, quarter-final\n" + 
         "LAST-MODIFIED:20170301T214927Z\n" + 
-        "LOCATION:Allianz-Arena\\, München\n" + 
+        "LOCATION:Allianz-Arena\\, M\u00fcnchen\n" + 
         "SEQUENCE:2\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:Bayern München - FC Schalke 04 (3:0)\n" + 
+        "SUMMARY:Bayern M\u00fcnchen - FC Schalke 04 (3:0)\n" + 
         "TRANSP:TRANSPARENT\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -1214,10 +1214,10 @@ public class ICalCalendarProviderTestConstants {
         "CREATED:20160914T222135Z\n" + 
         "DESCRIPTION:1. Bundesliga\\, 21. matchday \n" + 
         "LAST-MODIFIED:20170219T183602Z\n" + 
-        "LOCATION:RheinEnergieStadion\\, Köln\n" + 
+        "LOCATION:RheinEnergieStadion\\, K\u00f6ln\n" + 
         "SEQUENCE:4\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:1. FC Köln - FC Schalke 04 (1:1)\n" + 
+        "SUMMARY:1. FC K\u00f6ln - FC Schalke 04 (1:1)\n" + 
         "TRANSP:TRANSPARENT\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -1270,10 +1270,10 @@ public class ICalCalendarProviderTestConstants {
         "CREATED:20160914T222133Z\n" + 
         "DESCRIPTION:1. Bundesliga\\, 19. matchday \n" + 
         "LAST-MODIFIED:20170204T181928Z\n" + 
-        "LOCATION:Allianz-Arena\\, München\n" + 
+        "LOCATION:Allianz-Arena\\, M\u00fcnchen\n" + 
         "SEQUENCE:4\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:Bayern München - FC Schalke 04 (1:1)\n" + 
+        "SUMMARY:Bayern M\u00fcnchen - FC Schalke 04 (1:1)\n" + 
         "TRANSP:TRANSPARENT\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -1511,7 +1511,7 @@ public class ICalCalendarProviderTestConstants {
         "LOCATION:VELTINS-Arena\\, Gelsenkirchen\n" + 
         "SEQUENCE:3\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:FC Schalke 04 - Bor. Mönchengladbach (4:0)\n" + 
+        "SUMMARY:FC Schalke 04 - Bor. M\u00f6nchengladbach (4:0)\n" + 
         "TRANSP:TRANSPARENT\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -1553,7 +1553,7 @@ public class ICalCalendarProviderTestConstants {
         "LOCATION:VELTINS-Arena\\, Gelsenkirchen\n" + 
         "SEQUENCE:3\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:FC Schalke 04 - 1. FC Köln (1:3)\n" + 
+        "SUMMARY:FC Schalke 04 - 1. FC K\u00f6ln (1:3)\n" + 
         "TRANSP:TRANSPARENT\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -1595,7 +1595,7 @@ public class ICalCalendarProviderTestConstants {
         "LOCATION:VELTINS-Arena\\, Gelsenkirchen\n" + 
         "SEQUENCE:15\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:FC Schalke 04 - Bayern München (0:2)\n" + 
+        "SUMMARY:FC Schalke 04 - Bayern M\u00fcnchen (0:2)\n" + 
         "TRANSP:TRANSPARENT\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -1606,7 +1606,7 @@ public class ICalCalendarProviderTestConstants {
         "CREATED:20150626T130425Z\n" + 
         "DESCRIPTION:1. Bundesliga\\, 19. Spieltag \n" + 
         "LAST-MODIFIED:20160907T092634Z\n" + 
-        "LOCATION:Jonathan-Heimes-Stadion am Böllenfalltor\n" + 
+        "LOCATION:Jonathan-Heimes-Stadion am B\u00f6llenfalltor\n" + 
         "SEQUENCE:8\n" + 
         "STATUS:CONFIRMED\n" + 
         "SUMMARY:SV Darmstadt 98 - FC Schalke 04 (0:2)\n" + 
@@ -1788,10 +1788,10 @@ public class ICalCalendarProviderTestConstants {
         "CREATED:20150626T130433Z\n" + 
         "DESCRIPTION:1. Bundesliga\\, 30. Spieltag \n" + 
         "LAST-MODIFIED:20160416T183605Z\n" + 
-        "LOCATION:Allianz-Arena\\, München\n" + 
+        "LOCATION:Allianz-Arena\\, M\u00fcnchen\n" + 
         "SEQUENCE:8\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:Bayern München - FC Schalke 04 (3:0)\n" + 
+        "SUMMARY:Bayern M\u00fcnchen - FC Schalke 04 (3:0)\n" + 
         "TRANSP:TRANSPARENT\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -1833,7 +1833,7 @@ public class ICalCalendarProviderTestConstants {
         "LOCATION:VELTINS-Arena\\, Gelsenkirchen\n" + 
         "SEQUENCE:9\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:FC Schalke 04 - Bor. Mönchengladbach (2:1)\n" + 
+        "SUMMARY:FC Schalke 04 - Bor. M\u00f6nchengladbach (2:1)\n" + 
         "TRANSP:TRANSPARENT\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -1858,10 +1858,10 @@ public class ICalCalendarProviderTestConstants {
         "CREATED:20150626T130429Z\n" + 
         "DESCRIPTION:1. Bundesliga\\, 25. Spieltag \n" + 
         "LAST-MODIFIED:20160305T163720Z\n" + 
-        "LOCATION:RheinEnergieStadion\\, Köln\n" + 
+        "LOCATION:RheinEnergieStadion\\, K\u00f6ln\n" + 
         "SEQUENCE:6\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:1. FC Köln - FC Schalke 04 (1:3)\n" + 
+        "SUMMARY:1. FC K\u00f6ln - FC Schalke 04 (1:3)\n" + 
         "TRANSP:TRANSPARENT\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -2057,7 +2057,7 @@ public class ICalCalendarProviderTestConstants {
         "LOCATION:VELTINS-Arena\\, Gelsenkirchen\n" + 
         "SEQUENCE:9\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:FC Schalke 04 - Bayern München (1:3)\n" + 
+        "SUMMARY:FC Schalke 04 - Bayern M\u00fcnchen (1:3)\n" + 
         "TRANSP:TRANSPARENT\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -2113,7 +2113,7 @@ public class ICalCalendarProviderTestConstants {
         "LOCATION:VELTINS-Arena\\, Gelsenkirchen\n" + 
         "SEQUENCE:6\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:FC Schalke 04 - Bor. Mönchengladbach (0:2)\n" + 
+        "SUMMARY:FC Schalke 04 - Bor. M\u00f6nchengladbach (0:2)\n" + 
         "TRANSP:TRANSPARENT\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -2124,10 +2124,10 @@ public class ICalCalendarProviderTestConstants {
         "CREATED:20150626T130418Z\n" + 
         "DESCRIPTION:1. Bundesliga\\, 10. Spieltag \n" + 
         "LAST-MODIFIED:20151025T183632Z\n" + 
-        "LOCATION:Borussia-Park\\, Mönchengladbach\n" + 
+        "LOCATION:Borussia-Park\\, M\u00f6nchengladbach\n" + 
         "SEQUENCE:6\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:Bor. Mönchengladbach - FC Schalke 04 (3:1)\n" + 
+        "SUMMARY:Bor. M\u00f6nchengladbach - FC Schalke 04 (3:1)\n" + 
         "TRANSP:TRANSPARENT\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
