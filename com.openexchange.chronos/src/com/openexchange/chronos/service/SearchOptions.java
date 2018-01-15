@@ -79,6 +79,16 @@ public class SearchOptions {
 
     /**
      * Initializes a new {@link SearchOptions} base on the supplied calendar parameters.
+     * 
+     * The following calendar parameters are extracted:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link CalendarParameters#PARAMETER_LEFT_HAND_LIMIT}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RIGHT_HAND_LIMIT}</li>
+     * </ul>
      *
      * @param parameters The calendar parameters to extract the sort options from
      */
