@@ -250,6 +250,11 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         return MailFetchListenerResult.neutral(mails, cacheable);
     }
 
+    @Override
+    public MailMessage onMailFetch(MailMessage mail, Session session) throws OXException {
+        return mail;
+    }
+
     // --------------------------------------------------------------------------------------------------------------
 
     private static class MailAuthenticityTask extends AbstractTask<Void> {

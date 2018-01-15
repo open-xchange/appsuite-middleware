@@ -1514,6 +1514,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     mail.setColorLabel(0);
                 }
             }
+
+            List<MailFetchListener> fetchListeners = MailFetchListenerRegistry.getFetchListeners();
+            if (null != fetchListeners) {
+                for (MailFetchListener listener : fetchListeners) {
+                    mail = listener.onMailFetch(mail, session);
+                }
+            }
         }
 
         return mail;
