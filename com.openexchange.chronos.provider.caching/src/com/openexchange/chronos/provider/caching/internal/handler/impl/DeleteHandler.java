@@ -66,6 +66,7 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
+import com.openexchange.chronos.provider.caching.internal.CachingCalendarAccessConstants;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -196,10 +197,9 @@ public class DeleteHandler extends AbstractHandler {
     @Override
     public void updateLastUpdated(String folderId, long timestamp) {
         JSONObject configuration = this.cachedCalendarAccess.getAccount().getInternalConfiguration();
-        JSONObject lastUpdates = configuration.optJSONObject(CACHING);
+        JSONObject lastUpdates = configuration.optJSONObject(CachingCalendarAccessConstants.CACHING);
         if (null != lastUpdates) {
             lastUpdates.remove(folderId);
         }
     }
-
 }

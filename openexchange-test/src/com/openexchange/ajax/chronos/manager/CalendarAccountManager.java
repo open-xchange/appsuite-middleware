@@ -65,7 +65,6 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.java.Strings;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CalendarAccountData;
-import com.openexchange.testing.httpclient.models.CalendarAccountResponse;
 import com.openexchange.testing.httpclient.models.FolderBody;
 import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalendarConfig;

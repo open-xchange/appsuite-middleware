@@ -51,11 +51,12 @@ package com.openexchange.chronos.provider.ical.result;
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
-import org.apache.http.entity.ContentType;
+import org.apache.http.client.utils.DateUtils;
 import com.openexchange.chronos.Calendar;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperty;
@@ -153,11 +154,23 @@ public class GetResponse {
     }
 
     public String getLastModified() {
-        return getHeader(HttpHeaders.LAST_MODIFIED);
+        String lastModifiedHeader = getHeader(HttpHeaders.LAST_MODIFIED);
+        return getTimestampAsString(lastModifiedHeader);
     }
 
     public String getDate() {
-        return getHeader(HttpHeaders.DATE);
+        String dateHeader = getHeader(HttpHeaders.DATE);
+        return getTimestampAsString(dateHeader);
+    }
+
+    private String getTimestampAsString(String dateString) {
+        if (Strings.isNotEmpty(dateString)) {
+            Date parseDate = DateUtils.parseDate(dateString);
+            if (parseDate != null) {
+                return Long.toString(parseDate.getTime());
+            }
+        }
+        return null;
     }
 
     public String getContentLength() {

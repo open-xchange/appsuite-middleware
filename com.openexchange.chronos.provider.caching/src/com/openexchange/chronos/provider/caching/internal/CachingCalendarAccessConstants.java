@@ -1,6 +1,5 @@
 /*
  *
- *    OPEN-XCHANGE legal information
  *
  *    All intellectual property rights in the Software are protected by
  *    international copyright laws.
@@ -47,52 +46,29 @@
  *
  */
 
-package com.openexchange.chronos.provider.ical.utils;
-
-import java.net.InetAddress;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
-import com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionCodes;
-import com.openexchange.chronos.provider.ical.properties.ICalCalendarProviderProperties;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
+package com.openexchange.chronos.provider.caching.internal;
 
 /**
- * {@link ICalProviderUtils}
+ * 
+ * {@link CachingCalendarAccessConstants}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class ICalProviderUtils {
+public final class CachingCalendarAccessConstants {
 
-    public static void verifyURI(String feedUrl) throws OXException {
-        if (Strings.isEmpty(feedUrl)) {
-            throw ICalProviderExceptionCodes.MISSING_FEED_URI.create();
-        }
-        try {
-            URI uri = new URI(feedUrl);
-            boolean denied = ICalCalendarProviderProperties.isDenied(uri);
+    /**
+     * The general key for persisting the caching information
+     */
+    public static final String CACHING = "folderCaching";
 
-            if (denied || !isValid(uri)) {
-                throw ICalProviderExceptionCodes.FEED_URI_NOT_ALLOWED.create(feedUrl);
-            }
-        } catch (URISyntaxException e) {
-            throw ICalProviderExceptionCodes.BAD_FEED_URI.create(feedUrl, e);
-        }
-    }
+    /**
+     * The key for persisting if the folder is currently blocked by another request
+     */
+    public static final String BLOCKED = "blocked";
 
-    private static boolean isValid(URI uri) {
-        try {
-            InetAddress inetAddress = InetAddress.getByName(uri.getHost());
-            if (inetAddress.isAnyLocalAddress() || inetAddress.isSiteLocalAddress() || inetAddress.isLoopbackAddress() || inetAddress.isLinkLocalAddress()) {
-                org.slf4j.LoggerFactory.getLogger(ICalProviderUtils.class).info("Given feed URL \"" + uri.toString() + "\" appears not to be valid.");
-                return false;
-            }
-        } catch (UnknownHostException e) {
-            org.slf4j.LoggerFactory.getLogger(ICalProviderUtils.class).info("Given feed URL \"" + uri.toString() + "\" appears not to be valid.", e);
-            return false;
-        }
-        return true;
-    }
+    /**
+     * The key for persisting the folders last update information
+     */
+    public static final String LAST_UPDATE = "lastUpdate";
 }

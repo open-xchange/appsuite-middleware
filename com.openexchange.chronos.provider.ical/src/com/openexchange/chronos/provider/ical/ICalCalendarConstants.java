@@ -66,7 +66,7 @@ public class ICalCalendarConstants {
     public static final String NAME = "name";
     public static final String DESCRIPTION = "description";
     public static final String REFRESH_INTERVAL = "refreshInterval";
-
+    public static final String EXTENDED_PROPERTIES = "extendedProperties";
 
     private ICalCalendarConstants() {
         // prevent instantiation

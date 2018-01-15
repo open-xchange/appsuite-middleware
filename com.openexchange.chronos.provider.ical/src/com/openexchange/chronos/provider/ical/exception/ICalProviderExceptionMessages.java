@@ -68,6 +68,8 @@ public class ICalProviderExceptionMessages implements LocalizableStrings {
 
     public static final String NO_FEED_MSG = "The provided URL %1$s does not contain content as expected. Please change the URL and try again.";
 
+    public static final String NOT_ALLOWED_CHANGE_MSG = "The field %1$s cannot be changed.";
+    
     public static final String FEED_SIZE_EXCEEDED_MSG = "Unfortunately your requested feed cannot be subscribed due to size limitations.";
 
     public static final String UNEXPECTED_FEED_ERROR_MSG = "Unfortunately the given feed URL cannot be processed as expected.";

@@ -69,6 +69,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
+import com.openexchange.chronos.provider.caching.internal.CachingCalendarAccessConstants;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.provider.caching.internal.handler.CachingHandler;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.HandlerHelper;
@@ -96,10 +97,6 @@ public abstract class AbstractHandler implements CachingHandler {
 
     private static final List<EventField> IGNORED_FIELDS = Arrays.asList(EventField.ATTACHMENTS);
 
-    protected static final String CACHING = "folderCaching";
-
-    protected static final String LAST_UPDATE = "lastUpdate";
-
     protected final CachingCalendarAccess cachedCalendarAccess;
 
     public AbstractHandler(CachingCalendarAccess cachedCalendarAccess) {
@@ -126,15 +123,15 @@ public abstract class AbstractHandler implements CachingHandler {
     @Override
     public void updateLastUpdated(String folderId, long timestamp) {
         JSONObject folderConfig = getFolderCachingConfiguration(folderId);
-        folderConfig.putSafe(LAST_UPDATE, Long.valueOf(timestamp));
+        folderConfig.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, Long.valueOf(timestamp));
     }
 
     protected JSONObject getFolderCachingConfiguration(String folderId) {
         JSONObject internalConfig = this.cachedCalendarAccess.getAccount().getInternalConfiguration();
-        JSONObject caching = internalConfig.optJSONObject(CACHING);
+        JSONObject caching = internalConfig.optJSONObject(CachingCalendarAccessConstants.CACHING);
         if (caching == null) {
             caching = new JSONObject();
-            internalConfig.putSafe(CACHING, caching);
+            internalConfig.putSafe(CachingCalendarAccessConstants.CACHING, caching);
         }
         JSONObject folderConfig = caching.optJSONObject(folderId);
         if (folderConfig == null) {
@@ -143,7 +140,7 @@ public abstract class AbstractHandler implements CachingHandler {
         }
         return folderConfig;
     }
-
+    
     protected List<Event> getExistingEventsInFolder(String folderId) throws OXException {
         DatabaseService dbService = Services.getService(DatabaseService.class);
         Connection readConnection = null;

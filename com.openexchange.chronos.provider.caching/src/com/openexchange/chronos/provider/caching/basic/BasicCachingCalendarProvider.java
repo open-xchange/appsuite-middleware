@@ -53,7 +53,7 @@ import org.json.JSONObject;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.basic.BasicCalendarProvider;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
-import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.internal.CachingCalendarAccessConstants;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -111,11 +111,11 @@ public abstract class BasicCachingCalendarProvider implements BasicCalendarProvi
     public final JSONObject reconfigureAccount(Session session, CalendarAccount account, CalendarSettings settings, CalendarParameters parameters) throws OXException {
         JSONObject internalConfiguration = account.getInternalConfiguration();
         if (settings.containsConfig() && triggerCacheInvalidation(session, account.getUserConfiguration(), settings.getConfig())) {
-            if (internalConfiguration.hasAndNotNull(CachingCalendarAccess.CACHING)) {
-                JSONObject folders = internalConfiguration.optJSONObject(CachingCalendarAccess.CACHING);
+            if (internalConfiguration.hasAndNotNull(CachingCalendarAccessConstants.CACHING)) {
+                JSONObject folders = internalConfiguration.optJSONObject(CachingCalendarAccessConstants.CACHING);
                 for (String folderId : folders.keySet()) {
                     JSONObject lastUpdate = new JSONObject();
-                    lastUpdate.putSafe(CachingCalendarAccess.LAST_UPDATE, 0);
+                    lastUpdate.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, 0);
                     folders.putSafe(folderId, lastUpdate);
                 }
             }

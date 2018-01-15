@@ -52,8 +52,11 @@ package com.openexchange.chronos.provider.ical;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP_LITERAL;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC_LITERAL;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 import org.dmfs.rfc5545.Duration;
@@ -109,7 +112,7 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
     public ICalCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         super(session, account, parameters, prepareFolder(account));
         JSONObject userConfiguration = new JSONObject(account.getUserConfiguration());
-        this.iCalFeedConfig = new ICalCalendarFeedConfig.DecryptedBuilder(session, userConfiguration, getICalConfiguration()).build();
+        this.iCalFeedConfig = new ICalCalendarFeedConfig.DecryptedBuilder(session, userConfiguration, account.getInternalConfiguration()).build();
         this.feedClient = new ICalFeedClient(session, iCalFeedConfig);
     }
 
@@ -118,29 +121,15 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
 
     @Override
     public long getRefreshInterval() {
-        JSONObject iCalConfiguration = getICalConfiguration();
+        JSONObject internalConfiguration = this.getAccount().getInternalConfiguration();
 
-        if (iCalConfiguration != null && !iCalConfiguration.isEmpty()) {
-            Number calendarProviderInterval = (Number) iCalConfiguration.opt(ICalCalendarConstants.REFRESH_INTERVAL);
+        if (internalConfiguration != null && !internalConfiguration.isEmpty()) {
+            Number calendarProviderInterval = (Number) internalConfiguration.opt(ICalCalendarConstants.REFRESH_INTERVAL);
             if (calendarProviderInterval != null && calendarProviderInterval.longValue() > 0) {
                 return calendarProviderInterval.longValue();
             }
         }
         return Services.getService(LeanConfigurationService.class).getLongProperty(getSession().getUserId(), getSession().getContextId(), ICalCalendarProviderProperties.refreshInterval);
-    }
-
-    protected JSONObject getICalConfiguration() {
-        JSONObject internalConfig = this.getAccount().getInternalConfiguration();
-        return getICalConfigurationFromJSON(internalConfig);
-    }
-
-    private static JSONObject getICalConfigurationFromJSON(JSONObject internalConfig) {
-        JSONObject icalConfig = internalConfig.optJSONObject(ICalCalendarConstants.PROVIDER_ID);
-        if (icalConfig == null) {
-            icalConfig = new JSONObject();
-            internalConfig.putSafe(ICalCalendarConstants.PROVIDER_ID, icalConfig);
-        }
-        return icalConfig;
     }
 
     @Override
@@ -168,30 +157,32 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
         JSONObject internalConfig = getAccount().getInternalConfiguration();
         if (!originalProperties.equals(updatedProperties)) {
             try {
-                internalConfig.put("extendedProperties", SingleFolderCalendarAccessUtils.writeExtendedProperties(Services.getService(ConversionService.class), updatedProperties));
+                internalConfig.put(ICalCalendarConstants.EXTENDED_PROPERTIES, SingleFolderCalendarAccessUtils.writeExtendedProperties(Services.getService(ConversionService.class), updatedProperties));
             } catch (JSONException e) {
                 throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
 
-        JSONObject iCalConfigurationFromJSON = getICalConfigurationFromJSON(internalConfig);
-        iCalConfigurationFromJSON.putSafe(ICalCalendarConstants.NAME, folder.getName());
+        internalConfig.putSafe(ICalCalendarConstants.NAME, folder.getName());
 
         AdministrativeCalendarAccountService service = Services.getService(AdministrativeCalendarAccountService.class);
-        service.updateAccount(getSession().getContextId(), getAccount().getUserId(), getAccount().getAccountId(), iCalConfigurationFromJSON, null, clientTimestamp);
+        service.updateAccount(getSession().getContextId(), getAccount().getUserId(), getAccount().getAccountId(), internalConfig, null, clientTimestamp);
 
         return folder.getId();
     }
 
     private void updateICalConfiguration(GetResponse importResult) {
-        JSONObject iCalConfig = getICalConfiguration();
-        setLastUpdate(iCalConfig);
+        JSONObject iCalConfig = this.getAccount().getInternalConfiguration();
+        setLastUpdate(importResult, iCalConfig);
         setRefreshInterval(importResult, iCalConfig);
         setETag(importResult, iCalConfig);
     }
 
-    private void setLastUpdate(JSONObject iCalConfig) {
-        iCalConfig.putSafe(ICalCalendarConstants.LAST_UPDATE, System.currentTimeMillis());
+    private void setLastUpdate(GetResponse importResult, JSONObject iCalConfig) {
+        String timestamp = importResult.getLastModified() != null ? importResult.getLastModified() : importResult.getDate();
+        if (Strings.isNotEmpty(timestamp)) {
+            iCalConfig.putSafe(ICalCalendarConstants.LAST_UPDATE, timestamp);
+        }
     }
 
     private void setETag(GetResponse importResult, JSONObject iCalConfig) {
@@ -233,32 +224,31 @@ public class ICalCalendarAccess extends SingleFolderCachingCalendarAccess {
     }
 
     private static DefaultCalendarFolder prepareFolder(CalendarAccount account) throws OXException {
-        ExtendedProperties extendedProperties = SingleFolderCalendarAccessUtils.parseExtendedProperties(Services.getService(ConversionService.class), account.getInternalConfiguration().optJSONObject("extendedProperties"));
+        ExtendedProperties extendedProperties = SingleFolderCalendarAccessUtils.parseExtendedProperties(Services.getService(ConversionService.class), account.getInternalConfiguration().optJSONObject(ICalCalendarConstants.EXTENDED_PROPERTIES));
         if (null == extendedProperties) {
             extendedProperties = new ExtendedProperties();
         }
 
-        JSONObject iCalConfigurationFromJSON = getICalConfigurationFromJSON(account.getInternalConfiguration());
+        JSONObject internalConfiguration = account.getInternalConfiguration();
 
-        DefaultCalendarFolder folder = new DefaultCalendarFolder(FOLDER_ID, iCalConfigurationFromJSON.optString(ICalCalendarConstants.NAME, account.getUserConfiguration().optString(ICalCalendarConstants.URI)));
+        DefaultCalendarFolder folder = new DefaultCalendarFolder(FOLDER_ID, internalConfiguration.optString(ICalCalendarConstants.NAME, account.getUserConfiguration().optString(ICalCalendarConstants.URI)));
         folder.setSupportedCapabilites(CalendarCapability.getCapabilities(ICalCalendarAccess.class));
         folder.setLastModified(account.getLastModified());
-        /*
-         * always apply or overwrite protected defaults
-         */
-        extendedProperties.replace(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, false));
-        extendedProperties.replace(USED_FOR_SYNC(Boolean.FALSE, false));
-        extendedProperties.replace(DESCRIPTION(iCalConfigurationFromJSON.optString(ICalCalendarConstants.DESCRIPTION, null), false));
-        /*
-         * insert further defaults if missing
-         */
+
+        if (!extendedProperties.contains(SCHEDULE_TRANSP_LITERAL)) {
+            extendedProperties.replace(SCHEDULE_TRANSP(TimeTransparency.TRANSPARENT, false));
+        }
+        if (!extendedProperties.contains(USED_FOR_SYNC_LITERAL)) {
+            extendedProperties.replace(USED_FOR_SYNC(Boolean.FALSE, false));
+        }
+        if (!extendedProperties.contains(DESCRIPTION_LITERAL)) {
+            extendedProperties.replace(DESCRIPTION(null, false));
+        }
         if (!extendedProperties.contains(COLOR_LITERAL)) {
             extendedProperties.add(COLOR(null, false));
         }
         folder.setExtendedProperties(extendedProperties);
-        /*
-         *
-         */
+
         CalendarPermission permission = new DefaultCalendarPermission(account.getUserId(), CalendarPermission.READ_FOLDER, CalendarPermission.READ_ALL_OBJECTS, CalendarPermission.WRITE_ALL_OBJECTS, CalendarPermission.NO_PERMISSIONS, false, false, CalendarPermission.NO_PERMISSIONS);
         folder.setPermissions(Collections.singletonList(permission));
 

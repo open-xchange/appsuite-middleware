@@ -70,6 +70,7 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
+import com.openexchange.chronos.provider.caching.internal.CachingCalendarAccessConstants;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.provider.caching.internal.handler.CachingExecutor;
 import com.openexchange.chronos.provider.caching.internal.handler.FolderProcessingType;
@@ -99,16 +100,6 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 public abstract class CachingCalendarAccess implements FolderCalendarAccess, WarningsAware {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CachingCalendarAccess.class);
-
-    /**
-     * The general key for persisting the caching information
-     */
-    public static final String CACHING = "folderCaching";
-
-    /**
-     * The key for persisting the folders last update information
-     */
-    public static final String LAST_UPDATE = "lastUpdate";
 
     private final ServerSession session;
     private final CalendarParameters parameters;
@@ -307,7 +298,7 @@ public abstract class CachingCalendarAccess implements FolderCalendarAccess, War
      * @throws OXException
      */
     protected final List<FolderUpdateState> getLatestUpdateStates() throws OXException {
-        JSONObject lastUpdates = getAccount().getInternalConfiguration().optJSONObject(CACHING);
+        JSONObject lastUpdates = getAccount().getInternalConfiguration().optJSONObject(CachingCalendarAccessConstants.CACHING);
         if (lastUpdates == null) {
             return Collections.emptyList();
         }
@@ -317,7 +308,7 @@ public abstract class CachingCalendarAccess implements FolderCalendarAccess, War
         for (Entry<String, Object> folderUpdateState : lastUpdates.asMap().entrySet()) {
             String folderId = folderUpdateState.getKey();
             Map<String, Object> folderConfig = (Map<String, Object>) folderUpdateState.getValue();
-            Number lastFolderUpdate = (Number) folderConfig.get(LAST_UPDATE);
+            Number lastFolderUpdate = (Number) folderConfig.get(CachingCalendarAccessConstants.LAST_UPDATE);
             long refreshInterval = getCascadedRefreshInterval(folderId);
 
             if (lastFolderUpdate == null || lastFolderUpdate.longValue() < 0) {

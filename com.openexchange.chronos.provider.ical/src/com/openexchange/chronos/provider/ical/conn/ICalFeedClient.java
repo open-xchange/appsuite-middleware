@@ -110,19 +110,19 @@ public class ICalFeedClient {
     }
 
     private HttpGet prepareGet() {
-        HttpGet getMethod = new HttpGet(iCalFeedConfig.getFeedUrl());
-        getMethod.addHeader(HttpHeaders.ACCEPT, "text/calendar");
-        getMethod.addHeader(HttpHeaders.ACCEPT_ENCODING, "gzip");
+        HttpGet request = new HttpGet(iCalFeedConfig.getFeedUrl());
+        request.addHeader(HttpHeaders.ACCEPT, "text/calendar");
+        request.addHeader(HttpHeaders.ACCEPT_ENCODING, "gzip");
         if (Strings.isNotEmpty(iCalFeedConfig.getEtag())) {
-            getMethod.addHeader(HttpHeaders.IF_NONE_MATCH, iCalFeedConfig.getEtag());
+            request.addHeader(HttpHeaders.IF_NONE_MATCH, iCalFeedConfig.getEtag());
         }
         String ifModifiedSince = DateUtils.formatDate(new Date(iCalFeedConfig.getLastUpdated()));
         if (Strings.isNotEmpty(ifModifiedSince)) {
-            getMethod.setHeader(HttpHeaders.IF_MODIFIED_SINCE, ifModifiedSince);
+            request.setHeader(HttpHeaders.IF_MODIFIED_SINCE, ifModifiedSince);
         }
 
-        handleAuth(getMethod);
-        return getMethod;
+        handleAuth(request);
+        return request;
     }
 
     protected void handleAuth(HttpRequestBase method) {
@@ -186,10 +186,7 @@ public class ICalFeedClient {
         ICalProviderUtils.verifyURI(this.iCalFeedConfig.getFeedUrl());
         HttpGet request = prepareGet();
 
-        CloseableHttpResponse response = null;
-        try {
-            response = ICalFeedHttpClient.getInstance().execute(request);
-
+        try (CloseableHttpResponse response = ICalFeedHttpClient.getInstance().execute(request)){
             int statusCode = assertStatusCode(response);
             if (statusCode == HttpStatus.SC_NOT_MODIFIED) {
                 // OK, nothing was modified, no response body, return as is
@@ -209,8 +206,7 @@ public class ICalFeedClient {
             LOG.error("Error while processing the retrieved information:{}.", e.getMessage(), e);
             throw ICalProviderExceptionCodes.IO_ERROR.create(e.getMessage(), e);
         } finally {
-            close(request, response);
-            Streams.close(response);
+            reset(request);
         }
     }
 
@@ -226,7 +222,7 @@ public class ICalFeedClient {
 
         long allowedFeedSize = ICalCalendarProviderProperties.allowedFeedSize();
         if (contentLength > allowedFeedSize || (Strings.isNotEmpty(contentLength2) && Long.parseLong(contentLength2) > allowedFeedSize)) {
-            throw ICalProviderExceptionCodes.FEED_SIZE_EXCEEDED.create(iCalFeedConfig.getFeedUrl(), contentLength2 != null ? contentLength2 : contentLength, allowedFeedSize);
+            throw ICalProviderExceptionCodes.FEED_SIZE_EXCEEDED.create(iCalFeedConfig.getFeedUrl(), allowedFeedSize, contentLength2 != null ? contentLength2 : contentLength);
         }
         response.setCalendar(importCalendar(entity));
         return response;
@@ -264,17 +260,6 @@ public class ICalFeedClient {
             throw ICalProviderExceptionCodes.REMOTE_SERVER_ERROR.create(httpResponse.getStatusLine());
         }
         return statusCode;
-    }
-
-    /**
-     * Closes the supplied HTTP request & response resources silently.
-     *
-     * @param request The HTTP request to reset
-     * @param response The HTTP response to consume and close
-     */
-    protected static void close(HttpRequestBase request, HttpResponse response) {
-        consume(response);
-        reset(request);
     }
 
     /**

@@ -54,6 +54,7 @@ import java.sql.SQLException;
 import org.json.JSONObject;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.caching.internal.CachingCalendarAccessConstants;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.provider.folder.FolderCalendarProvider;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -117,13 +118,15 @@ public abstract class CachingCalendarProvider implements FolderCalendarProvider 
 
     @Override
     public final JSONObject reconfigureAccount(Session session, CalendarAccount calendarAccount, JSONObject userConfig, CalendarParameters parameters) throws OXException {
+        checkAllowedUpdate(session, calendarAccount.getUserConfiguration(), userConfig);
+
         JSONObject internalConfiguration = calendarAccount.getInternalConfiguration();
         if (triggerCacheInvalidation(session, calendarAccount.getUserConfiguration(), userConfig)) {
-            if (internalConfiguration.hasAndNotNull(CachingCalendarAccess.CACHING)) {
-                JSONObject folders = internalConfiguration.optJSONObject(CachingCalendarAccess.CACHING);
+            if (internalConfiguration.hasAndNotNull(CachingCalendarAccessConstants.CACHING)) {
+                JSONObject folders = internalConfiguration.optJSONObject(CachingCalendarAccessConstants.CACHING);
                 for (String folderId : folders.keySet()) {
                     JSONObject lastUpdate = new JSONObject();
-                    lastUpdate.putSafe(CachingCalendarAccess.LAST_UPDATE, 0);
+                    lastUpdate.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, 0);
                     folders.putSafe(folderId, lastUpdate);
                 }
             }
@@ -135,6 +138,16 @@ public abstract class CachingCalendarProvider implements FolderCalendarProvider 
         }
         return reconfigureAccountOpt;
     }
+
+    /**
+     * Checks if the desired update contains fields that shouldn't be allowed to change.
+     * 
+     * @param session The user's session
+     * @param originUserConfiguration Previously stored user configuration
+     * @param newUserConfiguration New user configuration
+     * @throws OXException should be thrown when unchangeable fields might be changed
+     */
+    public abstract void checkAllowedUpdate(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException;
 
     /**
      * Returns if a reconfiguration of the account should trigger a cache invalidation (for all folders of the account!) to ensure all associated calendar data will be updated with the next request.

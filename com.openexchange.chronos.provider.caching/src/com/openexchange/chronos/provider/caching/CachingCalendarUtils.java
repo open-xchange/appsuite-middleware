@@ -52,6 +52,7 @@ package com.openexchange.chronos.provider.caching;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.caching.internal.CachingCalendarAccessConstants;
 
 /**
  * {@link CachingCalendarUtils} - provides some useful helper methods
@@ -71,12 +72,12 @@ public class CachingCalendarUtils {
      */
     public static void invalidateFolderCache(CalendarAccount calendarAccount, String folderId) {
         JSONObject internalConfiguration = calendarAccount.getInternalConfiguration();
-        if (internalConfiguration.hasAndNotNull(CachingCalendarAccess.CACHING)) {
+        if (internalConfiguration.hasAndNotNull(CachingCalendarAccessConstants.CACHING)) {
             try {
-                JSONObject caching = internalConfiguration.getJSONObject(CachingCalendarAccess.CACHING);
+                JSONObject caching = internalConfiguration.getJSONObject(CachingCalendarAccessConstants.CACHING);
                 if (caching.hasAndNotNull(folderId)) {
                     JSONObject folderConfig = caching.getJSONObject(folderId);
-                    folderConfig.putSafe(CachingCalendarAccess.LAST_UPDATE, 0);
+                    folderConfig.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, 0);
                 }
             } catch (JSONException e) {
                 LOG.error("Unable to retrieve caching information for calendar account {} with provider {}: {}", calendarAccount.getAccountId(), calendarAccount.getProviderId(), e.getMessage(), e);

@@ -236,7 +236,7 @@ public enum ICalCalendarProviderProperties implements Property {
      * @param port The port number
      * @return <code>true</code> if denied; otherwise <code>false</code>
      */
-    public static boolean isDenied(String scheme, String hostName, int port) {
+    private static boolean isDenied(String scheme, String hostName, int port) {
         return isBlacklisted(hostName) || !isAllowedScheme(scheme);
     }
 

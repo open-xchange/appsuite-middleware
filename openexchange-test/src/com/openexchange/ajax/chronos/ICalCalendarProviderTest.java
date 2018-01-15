@@ -51,6 +51,7 @@ package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -72,8 +73,8 @@ import com.openexchange.chronos.provider.ical.ICalCalendarConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CalendarAccountProbeData;
-import com.openexchange.testing.httpclient.models.CalendarAccountResponse;
-import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalendarConfig;
+import com.openexchange.testing.httpclient.models.CalendarAccountProbeDataComOpenexchangeCalendarConfig;
+import com.openexchange.testing.httpclient.models.CalendarAccountProbeResponse;
 import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
 
 /**
@@ -125,25 +126,75 @@ public class ICalCalendarProviderTest extends AbstractChronosTest {
     
     
     @Test
-    public void testProbe_NotFound() throws Exception {
+    public void testProbe_uriMissing_notFound() throws Exception {
+        CalendarAccountProbeData data = new CalendarAccountProbeData();
+        data.setComOpenexchangeCalendarProvider("ical");
+        
+        CalendarAccountProbeResponse probe = defaultUserApi.getChronosApi().probe(defaultUserApi.getSession(), data);
+
+        assertNotNull(probe.getError());
+        assertEquals("ICAL-PROV-4040", probe.getCode());
+    }
+
+    @Test
+    public void testProbe_badURI_notFound() throws Exception {
+        String externalUri = "http://localhost/files/notFound.ics";
+
+        CalendarAccountProbeData data = new CalendarAccountProbeData();
+        data.setComOpenexchangeCalendarProvider("ical");
+        
+        CalendarAccountProbeDataComOpenexchangeCalendarConfig config = new CalendarAccountProbeDataComOpenexchangeCalendarConfig();
+        config.setUri(externalUri);
+        data.setComOpenexchangeCalendarConfig(config);
+        
+        CalendarAccountProbeResponse probe = defaultUserApi.getChronosApi().probe(defaultUserApi.getSession(), data);
+
+        assertNotNull(probe.getError());
+        assertEquals("ICAL-PROV-4042", probe.getCode());
+    }
+
+    @Test
+    public void testProbe_uriNotFound_notFound() throws Exception {
         String externalUri = "http://example.com/files/notFound.ics";
         mock(externalUri, ICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_NOT_FOUND);
 
         CalendarAccountProbeData data = new CalendarAccountProbeData();
         data.setComOpenexchangeCalendarProvider("ical");
-        FolderDataComOpenexchangeCalendarConfig config = new FolderDataComOpenexchangeCalendarConfig();
-        config.setUri(externalUri);
         
-        CalendarAccountResponse probe = defaultUserApi.getChronosApi().probe(defaultUserApi.getSession(), data);
+        CalendarAccountProbeDataComOpenexchangeCalendarConfig config = new CalendarAccountProbeDataComOpenexchangeCalendarConfig();
+        config.setUri(externalUri);
+        data.setComOpenexchangeCalendarConfig(config);
+        
+        CalendarAccountProbeResponse probe = defaultUserApi.getChronosApi().probe(defaultUserApi.getSession(), data);
 
         assertNotNull(probe.getError());
+        assertEquals("ICAL-PROV-4043", probe.getCode());
+    }
+
+    @Test
+    public void testProbe_everythingFine_ok() throws Exception {
+        String externalUri = "http://example.com/files/myCalendarFile.ics";
+        mock(externalUri, ICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK);
+
+        CalendarAccountProbeData data = new CalendarAccountProbeData();
+        data.setComOpenexchangeCalendarProvider("ical");
+        
+        CalendarAccountProbeDataComOpenexchangeCalendarConfig config = new CalendarAccountProbeDataComOpenexchangeCalendarConfig();
+        config.setUri(externalUri);
+        data.setComOpenexchangeCalendarConfig(config);
+        
+        CalendarAccountProbeResponse probe = defaultUserApi.getChronosApi().probe(defaultUserApi.getSession(), data);
+
+        assertNull(probe.getError());
+        assertEquals("", probe.getTitle());
+        
         assertEquals("ICAL-PROV-4043", probe.getCode());
     }
 
 
 
 //    @Test
-//    public void testEventsCreated() throws JSONException, ApiException, OXException, IOException {
+//    public void testEventsCreated() throws JSONException, ApiException, OXException, IOException, ChronosApiException {
 //        String externalUri = "http://example.com/files/testEventsCreated.ics";
 //        mock(externalUri, ICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK);
 //

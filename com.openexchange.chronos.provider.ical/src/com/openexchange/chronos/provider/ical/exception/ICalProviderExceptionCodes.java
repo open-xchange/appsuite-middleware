@@ -53,6 +53,7 @@ import static com.openexchange.chronos.provider.ical.exception.ICalProviderExcep
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.FEED_SIZE_EXCEEDED_MSG;
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.FEED_URI_NOT_ALLOWED_MSG;
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.MISSING_FEED_URI_MSG;
+import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.NOT_ALLOWED_CHANGE_MSG;
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.NO_FEED_MSG;
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.UNEXPECTED_FEED_ERROR_MSG;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
@@ -90,6 +91,11 @@ public enum ICalProviderExceptionCodes implements DisplayableOXExceptionCode {
      * <li>The provided URI %1$s does not contain an ICal feed</li>
      */
     NO_FEED("The provided URI %1$s does not contain an ICal feed.", NO_FEED_MSG, Category.CATEGORY_USER_INPUT, 4043),
+    /**
+     * <li>Cannot connect to feed with URL: %1$s. Please change URL and try again.</li>
+     * <li>The field %1$s cannot be changed.</li>
+     */
+    NOT_ALLOWED_CHANGE("The field %1$s cannot be changed.", NOT_ALLOWED_CHANGE_MSG, Category.CATEGORY_USER_INPUT, 4044),
     /**
      * <li>Unfortunately your requested feed cannot be used due to size limitations.</li>
      * <li>The requested feed with URI %1$s does exceed the configured maximum size. Allowed %2$s bytes but was %3$s bytes.</li>
