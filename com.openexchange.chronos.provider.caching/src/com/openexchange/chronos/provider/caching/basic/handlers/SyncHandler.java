@@ -140,7 +140,7 @@ public class SyncHandler extends AbstractExtensionHandler {
      * Resolve the specified resource
      * 
      * @param resourceNameThe name of the resource to resolve
-     * @return A {@link List} with the resovled {@link Event}s
+     * @return A {@link List} with the resolved {@link Event}s
      * @throws OXException if an error is occurred
      */
     public List<Event> resolveResource(String resourceName) throws OXException {
