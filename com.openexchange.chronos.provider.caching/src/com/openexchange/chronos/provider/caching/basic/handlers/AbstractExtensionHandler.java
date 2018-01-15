@@ -49,11 +49,17 @@
 
 package com.openexchange.chronos.provider.caching.basic.handlers;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.SelfProtectionFactory;
+import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -64,6 +70,7 @@ import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.chronos.storage.CalendarStorageUtilities;
 import com.openexchange.chronos.storage.EventStorage;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -97,6 +104,8 @@ abstract class AbstractExtensionHandler {
     private final Session session;
     private final CalendarAccount account;
     private final CalendarSession calendarSession;
+    private final SearchOptions searchOptions;
+    private final SelfProtection selfProtection;
 
     /**
      * Initialises a new {@link AbstractExtensionHandler}.
@@ -112,6 +121,9 @@ abstract class AbstractExtensionHandler {
         this.account = account;
         this.parameters = parameters;
         this.calendarSession = Services.getService(CalendarService.class).init(session);
+        this.searchOptions = new SearchOptions(getCalendarSession());
+        LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
+        this.selfProtection = SelfProtectionFactory.createSelfProtection(session, leanConfigurationService);
     }
 
     /**
@@ -156,7 +168,7 @@ abstract class AbstractExtensionHandler {
      * @return the {@link SearchOptions}
      */
     SearchOptions getSearchOptions() {
-        return new SearchOptions(getCalendarSession());
+        return searchOptions;
     }
 
     /**
@@ -226,5 +238,46 @@ abstract class AbstractExtensionHandler {
      */
     CalendarStorageUtilities getUtilities() throws OXException {
         return getStorage().getUtilities();
+    }
+
+    /**
+     * Post process the specified events
+     * 
+     * @param events A {@link List} with {@link Event}s to process
+     * @return The processed {@link Event}s
+     * @throws OXException
+     */
+    List<Event> postProcess(List<Event> events) throws OXException {
+        if (false == parameters.get(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.class)) {
+            return events;
+        }
+        List<Event> processedEvents = new ArrayList<>(events.size());
+        for (Event event : events) {
+            if (CalendarUtils.isSeriesMaster(event)) {
+                processedEvents.addAll(resolveOccurrences(event));
+            } else {
+                processedEvents.add(event);
+            }
+        }
+        selfProtection.checkEventCollection(processedEvents);
+        return processedEvents;
+    }
+
+    /**
+     * Resolves/expands the occurrences of the master event
+     * 
+     * @param event The master {@link Event}
+     * @return The expanded series
+     * @throws OXException if the expanded series contains too many {@link Event}s or
+     *             if there is an error during the iteration of the series
+     */
+    private List<Event> resolveOccurrences(Event event) throws OXException {
+        Iterator<Event> itrerator = calendarSession.getRecurrenceService().iterateEventOccurrences(event, searchOptions.getFrom(), searchOptions.getUntil());
+        List<Event> list = new ArrayList<Event>();
+        while (itrerator.hasNext()) {
+            list.add(itrerator.next());
+            selfProtection.checkEventCollection(list);
+        }
+        return list;
     }
 }

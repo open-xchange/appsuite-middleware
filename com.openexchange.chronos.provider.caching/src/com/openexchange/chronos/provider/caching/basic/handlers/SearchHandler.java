@@ -104,8 +104,7 @@ public class SearchHandler extends AbstractExtensionHandler {
      */
     public List<Event> searchEvents(List<SearchFilter> filters, List<String> queries, EventField... eventFields) throws OXException {
         List<Event> events = getEventStorage().searchEvents(compileSearchTerm(queries), filters, getSearchOptions(), getEventFields(eventFields));
-        // TODO: Maybe post process the events to e.g. resolve occurrences or apply userized versions of change/delete exception dates?
-        return getUtilities().loadAdditionalEventData(getSession().getUserId(), events, eventFields);
+        return postProcess(getUtilities().loadAdditionalEventData(getSession().getUserId(), events, eventFields));
     }
 
     ///////////////////////////////////////////////// HELPERS ////////////////////////////////////////////////////////
