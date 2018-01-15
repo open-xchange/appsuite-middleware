@@ -67,15 +67,12 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RecurrenceRange;
-import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -336,20 +333,6 @@ public class DeletePerformer extends AbstractUpdatePerformer {
     private void updateAlarmTrigger(Event originalMasterEvent, Event updatedMasterEvent) throws OXException {
         storage.getAlarmTriggerStorage().deleteTriggers(originalMasterEvent.getId());
         storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent);
-    }
-
-    /**
-     * Gets a value indicating whether an event series has further occurrences besides the occurrences identified by the supplied
-     * recurrence identifiers or not.
-     *
-     * @param seriesMaster The series master event
-     * @param recurrenceIds The recurrence identifiers to skip
-     * @return <code>true</code> if the event's reucrrence set yields at least one further occurrence, <code>false</code>, otherwise
-     */
-    private boolean hasFurtherOccurrences(Event seriesMaster, SortedSet<RecurrenceId> recurrenceIds) throws OXException {
-        long[] exceptionDates = CalendarUtils.getExceptionDates(recurrenceIds);
-        RecurrenceData recurrenceData = new DefaultRecurrenceData(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate(), exceptionDates);
-        return session.getRecurrenceService().iterateRecurrenceIds(recurrenceData).hasNext();
     }
 
     /**

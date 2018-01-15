@@ -194,6 +194,12 @@ public class SplitPerformer extends AbstractUpdatePerformer {
         DateTime until = splitPoint.addDuration(splitPoint.isAllDay() ? new Duration(-1, 1, 0) : new Duration(-1, 0, 1));
         detachedRule.setUntil(until);
         detachedSeriesMaster.setRecurrenceRule(detachedRule.toString());
+        if (detachedSeriesMaster.getStartDate().after(until) || false == hasFurtherOccurrences(detachedSeriesMaster, null)) {
+            /*
+             * no occurrences in 'detached' series, so no split is needed
+             */
+            return resultTracker.getResult();
+        }
         /*
          * adjust recurrence rule, start- and end-date for the updated event series to begin on or after the split point
          */
@@ -207,6 +213,12 @@ public class SplitPerformer extends AbstractUpdatePerformer {
         }
         updatedSeriesMaster.setStartDate(CalendarUtils.calculateStart(originalEvent, nextRecurrenceId));
         updatedSeriesMaster.setEndDate(CalendarUtils.calculateEnd(originalEvent, nextRecurrenceId));
+        if (false == hasFurtherOccurrences(updatedSeriesMaster, null)) {
+            /*
+             * no occurrences in updated series, so no split is needed
+             */
+            return resultTracker.getResult();
+        }
         /*
          * insert the new detached series event, taking over any auxiliary data from the original series
          */
