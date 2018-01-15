@@ -54,6 +54,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.EventUpdateImpl;
 import com.openexchange.chronos.itip.analyzers.AbstractITipAnalyzer;
 import com.openexchange.chronos.itip.osgi.Services;
@@ -124,14 +125,12 @@ public class ITipChange {
                 recurrenceId.setTimeInMillis(value.getTimestamp());
                 int position = recurrenceService.calculateRecurrencePosition(master, recurrenceId);
                 if (position > 0) {
-                    RecurrenceIterator<Event> recurrenceIterator = recurrenceService.iterateEventOccurrences(master, null, null);
-                    int count = 1; // calculateRecurrencePosition is 1-based
-                    while (recurrenceIterator.hasNext()) {
+                    RecurrenceIterator<Event> recurrenceIterator = recurrenceService.iterateEventOccurrences(master, CalendarUtils.asDate(newEvent.getStartDate()), CalendarUtils.asDate(newEvent.getEndDate()));
+                    while (recurrenceIterator.hasNext() && position >= recurrenceIterator.getPosition()) {
                         Event next = recurrenceIterator.next();
-                        if (count == position) {
+                        if (position == recurrenceIterator.getPosition()) {
                             return next;
                         }
-                        count++;
                     }
                 }
             }
@@ -199,15 +198,13 @@ public class ITipChange {
             recurrenceId.setTimeInMillis(newEvent.getRecurrenceId().getValue().getTimestamp());
             int position = recurrenceService.calculateRecurrencePosition(master, recurrenceId);
             if (position > 0) {
-                RecurrenceIterator<Event> recurrenceIterator = recurrenceService.iterateEventOccurrences(master, null, null);
-                int count = 1; // calculateRecurrencePosition is 1-based
-                while (recurrenceIterator.hasNext() && count <= position) {
+                RecurrenceIterator<Event> recurrenceIterator = recurrenceService.iterateEventOccurrences(master, CalendarUtils.asDate(newEvent.getStartDate()), CalendarUtils.asDate(newEvent.getEndDate()));
+                while (recurrenceIterator.hasNext() && position >= recurrenceIterator.getPosition()) {
                     Event event = recurrenceIterator.next();
-                    if (count == position) {
+                    if (position == recurrenceIterator.getPosition()) {
                         diff = new ITipEventUpdate(new EventUpdateImpl(event, newEvent, true, AbstractITipAnalyzer.SKIP));
                         return;
                     }
-                    count++;
                 }
             }
         }
