@@ -254,7 +254,11 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
                     if (message.getMethod() == ITipMethod.COUNTER) {
                         analysis.recommendActions(ITipAction.CREATE);
                     } else {
-                        analysis.recommendActions(ITipAction.ACCEPT, ITipAction.DECLINE, ITipAction.TENTATIVE, ITipAction.DELEGATE, ITipAction.COUNTER);
+                        if (change.isException()) {
+                            analysis.recommendActions(ITipAction.UPDATE, ITipAction.ACCEPT, ITipAction.DECLINE, ITipAction.TENTATIVE);
+                        } else {
+                            analysis.recommendActions(ITipAction.ACCEPT, ITipAction.DECLINE, ITipAction.TENTATIVE, ITipAction.DELEGATE, ITipAction.COUNTER);
+                        }
                     }
                 } else {
                     if (message.getMethod() == ITipMethod.COUNTER) {
