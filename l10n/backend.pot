@@ -7511,6 +7511,13 @@ msgid ""
 "pixels."
 msgstr ""
 
+#. Request rejected because file size (%1$s) exceeds the available storage space of %2$s.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:129
+msgid ""
+"Request rejected because file size (%1$s) exceeds the available storage "
+"space of %2$s."
+msgstr ""
+
 #. *
 #. * Configuration for user %1$s could not be found in context %2$d
 #.
