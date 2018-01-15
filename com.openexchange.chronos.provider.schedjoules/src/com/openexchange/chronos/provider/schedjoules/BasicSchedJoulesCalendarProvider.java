@@ -194,17 +194,12 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
          * initialize & check user configuration for new account
          */
         JSONObject userConfig = settings.getConfig();
-        String locale = userConfig.optString(SchedJoulesFields.LOCALE, ServerSessionAdapter.valueOf(session).getUser().getLocale().getLanguage());
-        int itemId = userConfig.optInt(SchedJoulesFields.ITEM_ID, 0);
-        long refreshInterval = userConfig.optLong(SchedJoulesFields.REFRESH_INTERVAL, MINIMUM_REFRESH_INTERVAL);
-        if (MINIMUM_REFRESH_INTERVAL > refreshInterval) {
-            throw SchedJoulesProviderExceptionCodes.INVALID_REFRESH_MINIMUM_INTERVAL.create(-1, session.getUserId(), session.getContextId());
-        }
-        if (0 == itemId) {
-            throw SchedJoulesProviderExceptionCodes.MISSING_ITEM_ID_FROM_CONFIG.create(-1, session.getUserId(), session.getContextId());
-        }
+
+        String locale = getLocale(session, userConfig);
+        int itemId = getItemId(session, userConfig);
+
         userConfig.putSafe(SchedJoulesFields.LOCALE, locale);
-        userConfig.putSafe(SchedJoulesFields.REFRESH_INTERVAL, refreshInterval);
+        userConfig.putSafe(SchedJoulesFields.REFRESH_INTERVAL, getRefreshInterval(session, userConfig));
 
         JSONObject item = fetchItem(session.getContextId(), itemId, locale);
         /*
@@ -236,17 +231,11 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
     @Override
     protected JSONObject reconfigureAccountOpt(Session session, CalendarAccount account, CalendarSettings settings, CalendarParameters parameters) throws OXException {
         JSONObject userConfig = settings.getConfig();
-        long refreshInterval = userConfig.optLong(SchedJoulesFields.REFRESH_INTERVAL, MINIMUM_REFRESH_INTERVAL);
-        if (MINIMUM_REFRESH_INTERVAL > refreshInterval) {
-            throw SchedJoulesProviderExceptionCodes.INVALID_REFRESH_MINIMUM_INTERVAL.create(-1, session.getUserId(), session.getContextId());
-        }
-        int itemId = userConfig.optInt(SchedJoulesFields.ITEM_ID, 0);
-        if (0 == itemId) {
-            throw SchedJoulesProviderExceptionCodes.MISSING_ITEM_ID_FROM_CONFIG.create(-1, session.getUserId(), session.getContextId());
-        }
+        getRefreshInterval(session, userConfig);
+        int itemId = getItemId(session, userConfig);
 
         // Check and apply locale change
-        String locale = userConfig.optString(SchedJoulesFields.LOCALE, ServerSessionAdapter.valueOf(session).getUser().getLocale().getLanguage());
+        String locale = getLocale(session, userConfig);
         boolean changed = false;
         JSONObject internalConfig = null != account.getInternalConfiguration() ? new JSONObject(account.getInternalConfiguration()) : new JSONObject();
         try {
@@ -284,6 +273,51 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
     @Override
     public boolean triggerCacheInvalidation(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException {
         return false;
+    }
+
+    /**
+     * Get the optional locale attribute from the specified user configuration. If not present,
+     * the locale is extracted from the specified {@link Session}.
+     * 
+     * @param session The groupware {@link Session}
+     * @param userConfig The {@link JSONObject} containing the user configuration
+     * @return The value of the {@link SchedJoulesFields#LOCALE} attribute if present, otherwise the locale from the specified {@link Session}
+     * @throws OXException if the context of the specified {@link Session} cannot be resolved
+     */
+    private String getLocale(Session session, JSONObject userConfig) throws OXException {
+        return userConfig.optString(SchedJoulesFields.LOCALE, ServerSessionAdapter.valueOf(session).getUser().getLocale().getLanguage());
+    }
+
+    /**
+     * Retrieves the item identifier form the specified {@link JSONObject}
+     * 
+     * @param session The groupware {@link Session}
+     * @param userConfig The user configuration
+     * @return the item identifier
+     * @throws OXException if the item identifier is missing from the user configuration
+     */
+    private int getItemId(Session session, JSONObject userConfig) throws OXException {
+        int itemId = userConfig.optInt(SchedJoulesFields.ITEM_ID, 0);
+        if (0 == itemId) {
+            throw SchedJoulesProviderExceptionCodes.MISSING_ITEM_ID_FROM_CONFIG.create(-1, session.getUserId(), session.getContextId());
+        }
+        return itemId;
+    }
+
+    /**
+     * Retrieves the refresh interval from the specified user configuration
+     * 
+     * @param session The groupware {@link Session}
+     * @param userConfig The user configuration
+     * @return The value of the refresh interval
+     * @throws OXException if the refresh interval is less than minimum allowed value
+     */
+    private long getRefreshInterval(Session session, JSONObject userConfig) throws OXException {
+        long refreshInterval = userConfig.optLong(SchedJoulesFields.REFRESH_INTERVAL, MINIMUM_REFRESH_INTERVAL);
+        if (MINIMUM_REFRESH_INTERVAL > refreshInterval) {
+            throw SchedJoulesProviderExceptionCodes.INVALID_REFRESH_MINIMUM_INTERVAL.create(-1, session.getUserId(), session.getContextId());
+        }
+        return refreshInterval;
     }
 
     /**
