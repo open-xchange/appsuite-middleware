@@ -178,7 +178,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
              * reload the (now splitted) series event & apply the update
              */
             Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
-            updateEvent(updatedMasterEvent, updatedEventData, ignoredFields);
+            updateEvent(updatedMasterEvent, updatedEventData, EventField.ID, EventField.RECURRENCE_RULE, EventField.RECURRENCE_ID, EventField.DELETE_EXCEPTION_DATES, EventField.CHANGE_EXCEPTION_DATES);
         } else {
             /*
              * update for new change exception; prepare & insert a plain exception first, based on the original data from the master
