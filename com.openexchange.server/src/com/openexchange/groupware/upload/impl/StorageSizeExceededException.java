@@ -52,7 +52,7 @@ package com.openexchange.groupware.upload.impl;
 import static com.openexchange.groupware.upload.impl.UploadUtility.getSize;
 
 /**
- * {@link StorageSizeExceededException} - The upload error with code MAX_UPLOAD_SIZE_EXCEEDED providing the possibility to convert bytes to a
+ * {@link StorageSizeExceededException} - The upload error with code MAX_STORAGE_SIZE_EXCEEDED providing the possibility to convert bytes to a
  * human readable string; e.g. <code>88.3 MB</code>.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
