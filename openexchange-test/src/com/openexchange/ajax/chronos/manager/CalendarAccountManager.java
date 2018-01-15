@@ -49,6 +49,9 @@
 
 package com.openexchange.ajax.chronos.manager;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -155,7 +158,7 @@ public class CalendarAccountManager extends AbstractManager {
 
     /**
      * Creates a calendar account with the specified configuration for the specified provider
-     * 
+     *
      * @param providerId The calendar provider identifier
      * @param configuration The configuration
      * @param expectedException flag to indicate that an exception is expected
@@ -204,7 +207,7 @@ public class CalendarAccountManager extends AbstractManager {
 
     /**
      * Helper method for {@link #updateCalendarAccount(CalendarAccountId, String)}
-     * 
+     *
      * @param accountId The account identifier
      * @param timestamp The latest known timestamp
      * @param configuration The optional configuration
@@ -306,7 +309,7 @@ public class CalendarAccountManager extends AbstractManager {
 
     /**
      * Handles the creation response and remembers the account id
-     * 
+     *
      * @param response The {@link CalendarAccountResponse}
      * @return The {@link CalendarAccountData}
      * @throws ApiException if an API error is occurred
