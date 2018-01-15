@@ -1974,8 +1974,10 @@ public class MimeMessageFiller {
     private static final boolean hasOnlyReferencedMailAttachments(final ComposedMailMessage mail, final int size) throws OXException {
         for (int i = 0; i < size; i++) {
             final MailPart part = mail.getEnclosedMailPart(i);
-            if (!ComposedPartType.REFERENCE.equals(((ComposedMailPart) part).getType()) || !((ReferencedMailPart) part).isMail()) {
-                return false;
+            if (part instanceof ComposedMailPart) {
+                if (!ComposedPartType.REFERENCE.equals(((ComposedMailPart) part).getType()) || !((ReferencedMailPart) part).isMail()) {
+                    return false;
+                }
             }
         }
         return true;
