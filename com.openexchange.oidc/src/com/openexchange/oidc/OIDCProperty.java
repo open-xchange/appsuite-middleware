@@ -92,4 +92,9 @@ public enum OIDCProperty implements Property {
 
     }
 
+    @Override
+    public Object getDefaultValue() {
+        return defaultValue;
+    }
+
 }
