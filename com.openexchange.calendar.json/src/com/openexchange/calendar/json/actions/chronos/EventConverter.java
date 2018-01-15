@@ -690,7 +690,9 @@ public abstract class EventConverter {
                         }
                     }
                     appointment.setRecurrenceDatePosition(Event2Appointment.getRecurrenceDatePosition(event.getRecurrenceId()));
-                    appointment.setRecurrencePosition(Event2Appointment.getRecurrencePosition(getRecurrenceService(), recurrenceData, event.getRecurrenceId()));
+                    if (null != event.getId()) {
+                        appointment.setRecurrencePosition(Event2Appointment.getRecurrencePosition(getRecurrenceService(), recurrenceData, event.getRecurrenceId()));
+                    }
                 }
             }
         }
