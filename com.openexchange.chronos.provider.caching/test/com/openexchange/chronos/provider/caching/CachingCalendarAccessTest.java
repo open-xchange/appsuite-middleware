@@ -76,6 +76,7 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarFolder;
 import com.openexchange.chronos.provider.caching.impl.TestCachingCalendarAccessImpl;
+import com.openexchange.chronos.provider.caching.internal.CachingCalendarAccessConstants;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.provider.caching.internal.handler.FolderProcessingType;
 import com.openexchange.chronos.provider.caching.internal.handler.FolderUpdateState;
@@ -253,7 +254,7 @@ public class CachingCalendarAccessTest {
     public void testGetLatestUpdateStates_noCacheConfiguration_returnInitialInsert() throws OXException, JSONException {
         Map<String, Map<String, Object>> folderCachingConfig = new HashMap<>();
         JSONObject cachingConfig = new JSONObject();
-        cachingConfig.put(CachingCalendarAccess.CACHING, folderCachingConfig);
+        cachingConfig.put(CachingCalendarAccessConstants.CACHING, folderCachingConfig);
 
         List<FolderUpdateState> latestUpdateStates = cachingCalendarAccess.getLatestUpdateStates();
 
@@ -264,10 +265,10 @@ public class CachingCalendarAccessTest {
     public void testGetLatestUpdateStates_oneFolderCachedButRequestedInReadTime_returnUpdateState() throws OXException, JSONException {
         Map<String, Map<String, Object>> folderCachingConfig = new HashMap<>();
         Map<String, Object> latestUpdate = new HashMap<>();
-        latestUpdate.put(CachingCalendarAccess.LAST_UPDATE, System.currentTimeMillis());
+        latestUpdate.put(CachingCalendarAccessConstants.LAST_UPDATE, System.currentTimeMillis());
         folderCachingConfig.put("0", latestUpdate);
         JSONObject cachingConfig = new JSONObject();
-        cachingConfig.put(CachingCalendarAccess.CACHING, folderCachingConfig);
+        cachingConfig.put(CachingCalendarAccessConstants.CACHING, folderCachingConfig);
         Mockito.when(account.getInternalConfiguration()).thenReturn(cachingConfig);
 
         List<FolderUpdateState> latestUpdateStates = cachingCalendarAccess.getLatestUpdateStates();
@@ -280,10 +281,10 @@ public class CachingCalendarAccessTest {
     public void testGetLatestUpdateStates_oneFolderCachedAndRefreshPeriodExceeded_returnUpdateState() throws OXException, JSONException {
         Map<String, Map<String, Object>> folderCachingConfig = new HashMap<>();
         Map<String, Object> latestUpdate = new HashMap<>();
-        latestUpdate.put(CachingCalendarAccess.LAST_UPDATE, System.currentTimeMillis() - TimeUnit.DAYS.toMillis(14L));
+        latestUpdate.put(CachingCalendarAccessConstants.LAST_UPDATE, System.currentTimeMillis() - TimeUnit.DAYS.toMillis(14L));
         folderCachingConfig.put("0", latestUpdate);
         JSONObject cachingConfig = new JSONObject();
-        cachingConfig.put(CachingCalendarAccess.CACHING, folderCachingConfig);
+        cachingConfig.put(CachingCalendarAccessConstants.CACHING, folderCachingConfig);
         Mockito.when(account.getInternalConfiguration()).thenReturn(cachingConfig);
 
         List<FolderUpdateState> latestUpdateStates = cachingCalendarAccess.getLatestUpdateStates();
@@ -296,14 +297,14 @@ public class CachingCalendarAccessTest {
     public void testGetLatestUpdateStates_multipleFolderCached_returnUpdateState() throws OXException, JSONException {
         Map<String, Map<String, Object>> folderCachingConfig = new HashMap<>();
         Map<String, Object> latestUpdate = new HashMap<>();
-        latestUpdate.put(CachingCalendarAccess.LAST_UPDATE, System.currentTimeMillis() - TimeUnit.DAYS.toMillis(14L));
+        latestUpdate.put(CachingCalendarAccessConstants.LAST_UPDATE, System.currentTimeMillis() - TimeUnit.DAYS.toMillis(14L));
         folderCachingConfig.put("0", latestUpdate);
 
         Map<String, Object> latestUpdate2 = new HashMap<>();
-        latestUpdate2.put(CachingCalendarAccess.LAST_UPDATE, System.currentTimeMillis());
+        latestUpdate2.put(CachingCalendarAccessConstants.LAST_UPDATE, System.currentTimeMillis());
         folderCachingConfig.put("2", latestUpdate2);
         JSONObject cachingConfig = new JSONObject();
-        cachingConfig.put(CachingCalendarAccess.CACHING, folderCachingConfig);
+        cachingConfig.put(CachingCalendarAccessConstants.CACHING, folderCachingConfig);
         Mockito.when(account.getInternalConfiguration()).thenReturn(cachingConfig);
 
         List<FolderUpdateState> latestUpdateStates = cachingCalendarAccess.getLatestUpdateStates();
@@ -325,7 +326,7 @@ public class CachingCalendarAccessTest {
         Map<String, Object> latestUpdate = new HashMap<>();
         folderCachingConfig.put("0", latestUpdate);
         JSONObject cachingConfig = new JSONObject();
-        cachingConfig.put(CachingCalendarAccess.CACHING, folderCachingConfig);
+        cachingConfig.put(CachingCalendarAccessConstants.CACHING, folderCachingConfig);
         Mockito.when(account.getInternalConfiguration()).thenReturn(cachingConfig);
 
         List<FolderUpdateState> latestUpdateStates = cachingCalendarAccess.getLatestUpdateStates();
