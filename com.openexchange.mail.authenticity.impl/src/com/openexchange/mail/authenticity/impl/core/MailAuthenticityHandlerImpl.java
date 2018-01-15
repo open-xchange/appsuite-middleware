@@ -69,8 +69,8 @@ import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.InterruptibleCharSequence;
-import com.openexchange.java.Strings;
 import com.openexchange.java.InterruptibleCharSequence.InterruptedRuntimeException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.authenticity.AllowedAuthServId;
@@ -298,10 +298,10 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 try {
                     overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, extractDomain(from));
                     overallResult.addAttribute(MailAuthenticityResultKey.TRUSTED_SENDER, from.getAddress());
-                } catch (final Exception e) {
-                    // Malformed from header, be strict and return with failed result
+                } catch (final IllegalArgumentException e) {
+                    // Malformed 'From' header, return with 'Not Analyzed' result
                     LOGGER.debug("An error occurred while trying to extract a valid domain from the 'From' header", e);
-                    overallResult.setStatus(MailAuthenticityStatus.FAIL);
+                    overallResult.setStatus(MailAuthenticityStatus.NOT_ANALYZED);
                     return overallResult;
                 }
 
@@ -356,7 +356,18 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     }
 
     /**
-     * Determine the overall result from the extracted results
+     * <p>Determine the overall result from the extracted results. The overall result
+     * will be determined by checking the results of DMARC, DKIM and SPF (in that order).</p>
+     * 
+     * <p>If multiple results of a specific mechanism are present, then the best result
+     * will be picked for that particular mechanism (according to their natural
+     * {@link Enum} ordering).</p>
+     * 
+     * <p>If the DMARC mechanism result is 'PASS' then the overall status is marked as 'PASS' or
+     * if is 'FAIL' then the overall status is marked as 'FAIL, and no further action is performed.</p>
+     * 
+     * <p>If the DMARC mechanism is other than 'PASS' or 'FAIL' then DKIM and SPF are checked and
+     * the overall status is determined in respect to their results.</p>
      *
      * @param overallResult The overall {@link MailAuthenticityResult}
      * @param results A {@link List} with the results of the known mechanisms
@@ -395,7 +406,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         }
 
         // The DMARC status was NEUTRAL or none existing, check for DKIM
-        boolean dkimFailed = checkDKIM(overallResult, bestOfDKIM);
+        boolean dkimFailed = dkimFailed(overallResult, bestOfDKIM);
         // Continue with SPF
         checkSPF(overallResult, bestOfSPF, dkimFailed);
     }
@@ -443,13 +454,20 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     }
 
     /**
-     * Check the DKIM best of result and determine the overall status
+     * <p>Check the DKIM best of result and set the overall status.</p>
+     * 
+     * <p>If the DKIM status is either 'PERMFAIL' or 'FAIL' then the DKIM mechanism is
+     * considered to have failed, thus the overall status is set accordingly to 'FAIL'.</p>
+     * 
+     * <p>If the DKIM status is set to 'PASS', then the overall status will be set to
+     * either 'PASS' or 'NEUTRAL' depending on whether there is a domain match ('PASS'
+     * in case of a domain match).</p>
      *
      * @param overallResult The overall {@link MailAuthenticityResult}
      * @param bestOfDKIM The best of DKIM {@link MailAuthenticityMechanismResult}
      * @return <code>true</code> if DKIM failed, <code>false</code> otherwise
      */
-    private boolean checkDKIM(final MailAuthenticityResult overallResult, MailAuthenticityMechanismResult bestOfDKIM) {
+    private boolean dkimFailed(final MailAuthenticityResult overallResult, MailAuthenticityMechanismResult bestOfDKIM) {
         if (bestOfDKIM == null) {
             return false;
         }
@@ -470,7 +488,19 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     }
 
     /**
-     * Check the SPF best of result and determine the overall status
+     * <p>Check the SPF best of result and set the overall status.</p>
+     * 
+     * <p>If the SPF status is either 'PERMERROR' or 'FAIL' then the SPF mechanism is
+     * considered to have failed, thus the overall status is set accordingly to 'FAIL'.</p>
+     * 
+     * <p>If the SPF status is either 'SOFTFAIL', or 'TEMPERROR', or 'NONE', or 'NEUTRAL'
+     * then the overall status is set to either 'NEUTRAL' or 'FAIL' depending on whether
+     * there is a domain match ('NEUTRAL' in case of a domain match).</p>
+     * 
+     * <p>On the other hand, if the SPF status is set to 'PASS' then the overall status
+     * is set to either 'NEUTRAL' or 'FAIL' depending on whether DKIM failed and there is
+     * a domain match ('NEUTRAL' in case of a domain match), or to either 'PASS' or 'NEUTRAL'
+     * if DKIM passed and there is a domain match ('PASS' in case of a domain match).</p>
      *
      * @param overallResult The overall {@link MailAuthenticityResult}
      * @param bestOfSPF The best of SPF {@link MailAuthenticityMechanismResult}
@@ -597,10 +627,11 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     }
 
     /**
-     *
+     * Extracts the domain from the specified internet address
+     * 
      * @param adr The address as string
      * @return The domain of the sender
-     * @throws IllegalAccessException if the address is either empty or <code>null</code
+     * @throws IllegalArgumentException if the address is either empty or <code>null</code
      */
     private String extractDomain(final InternetAddress address) {
         if (address == null) {
@@ -663,6 +694,9 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         }
         final int endIndex = value.indexOf(')');
         if (endIndex < 0) {
+            return null;
+        }
+        if (beginIndex >= endIndex) {
             return null;
         }
         value = Strings.unquote(value);

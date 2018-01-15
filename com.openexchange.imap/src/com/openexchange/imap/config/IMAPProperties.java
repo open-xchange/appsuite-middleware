@@ -689,7 +689,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         }
 
         {
-            final String tmp = configuration.getProperty(IMapPropertiesConstants.ATTACHMENT_SEARCH_ENABLED, STR_FALSE).trim();
+            final String tmp = configuration.getProperty(IMAPPropertiesConstants.ATTACHMENT_SEARCH_ENABLED, STR_FALSE).trim();
             enableAttachmentSearch = Boolean.parseBoolean(tmp);
             logBuilder.append("\tEnable attachment search: ").append(enableAttachmentSearch).append('\n');
         }

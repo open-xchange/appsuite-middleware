@@ -77,8 +77,7 @@ public class S3Activator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(S3Activator.class);
         logger.info("Starting bundle: com.openexchange.filestore.s3");
-        ConfigurationService configService = getService(ConfigurationService.class);
-        S3FileStorageFactory factory = new S3FileStorageFactory(configService);
+        S3FileStorageFactory factory = new S3FileStorageFactory(this);
         registerService(FileStorageProvider.class, factory);
     }
 

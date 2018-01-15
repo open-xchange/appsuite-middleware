@@ -45,16 +45,16 @@ public interface IFileItemService {
     public DatabaseType getDatabaseType();
 
     /**
-     * Registering a key or a list of keys for a specific group,
+     * Registering a group and potential custom keys for this specific group,
      * that can be used as user defined properties of a FileItem for the group.
-     * The registering of keys needs to be done prior to the usage of that key
-     * when accessing the {@link IFileItemReadAccess#getKeyValue(String)}
-     *q
+     * The registering of groups and keys needs to be done prior to the usage of
+     * that group and key(s) when accessing the {@link IFileItemReadAccess#getKeyValue(String)}
+     *
      * @param groupId The groupId to register the key for
      * @param keyNames The key(s) to be used as user defined properties
      * @throws FileItemException
      */
-    public void registerCustomKeys(final String groupId, final String... customKeyN) throws FileItemException;
+    public void registerGroup(final String groupId, final String... customKeyN) throws FileItemException;
 
     /**
      * Getting the array of custom keys, registered for a specific group.

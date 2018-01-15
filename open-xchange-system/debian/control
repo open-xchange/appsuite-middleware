@@ -9,6 +9,5 @@ Homepage: http://www.open-xchange.com
 Package: open-xchange-system
 Architecture: all
 Depends: ${misc:Depends}, adduser, sed
-Breaks: open-xchange-core (<< 7.6.1)
-Replaces: open-xchange-core (<< 7.6.1)
+Conflicts: open-xchange-core (<< 7.10.0)
 Description: system integration specific infrastructure

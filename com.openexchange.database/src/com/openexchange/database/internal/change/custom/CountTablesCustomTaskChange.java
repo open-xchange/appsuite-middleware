@@ -748,11 +748,12 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
             Class.forName(driver);
             DriverManager.setLoginTimeout(120);
 
-            Properties props = new Properties();
-            props.put("user", login);
-            props.put("password", passwd);
+            Properties defaults = new Properties();
+            defaults.put("user", login);
+            defaults.put("password", passwd);
+            defaults.setProperty("useSSL", "false");
 
-            return DriverManager.getConnection(url, props);
+            return DriverManager.getConnection(url, defaults);
         } catch (ClassNotFoundException e) {
             throw new SQLException("No such driver class: " + driver, e);
         }

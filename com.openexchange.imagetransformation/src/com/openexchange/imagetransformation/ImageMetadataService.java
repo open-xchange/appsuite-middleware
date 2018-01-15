@@ -74,4 +74,16 @@ public interface ImageMetadataService {
      */
     Dimension getDimensionFor(InputStream imageStream, String mimeType, String name) throws IOException;
 
+    /**
+     * Gets the meta-data for specified image data.
+     *
+     * @param imageStream The image data
+     * @param mimeType The image MIME type
+     * @param name The image name
+     * @param options The options to consider when retrieving image's meta-data
+     * @return The meta-data
+     * @throws IOException If meta-data cannot be returned
+     */
+    ImageMetadata getMetadataFor(InputStream imageStream, String mimeType, String name, ImageMetadataOptions options) throws IOException;
+
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-system"/>
+project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-system"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-osgi"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-xerces"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-core"/>
@@ -61,6 +61,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-hostname-ldap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-imageconverter-api"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-imap"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-imap-textpreview-mock"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-l10n"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-linkedin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,rt3,open-xchange-mailfilter"/>

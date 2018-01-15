@@ -215,7 +215,7 @@ public class Datamining {
             Questions.reportNumberOfUsersWhoLoggedInWithClientCardDAVInTheLast30Days();
             Questions.reportSliceAndDiceOnDraftMailSize();
             Questions.reportSliceAndDiceOnExternalAccountUsage();
-            
+
             rightNow = Calendar.getInstance();
             final long after = rightNow.getTime().getTime();
             report("durationInSeconds", Long.toString((after - before) / 1000));
@@ -507,7 +507,15 @@ public class Datamining {
 
             // connect
             DriverManager.setLoginTimeout(5);
-            Connection conn = DriverManager.getConnection(url + "?" + "user=" + user + "&" + "password=" + password);
+            java.util.Properties defaults = new java.util.Properties();
+            if (user != null) {
+                defaults.put("user", user);
+            }
+            if (password != null) {
+                defaults.put("password", password);
+            }
+            defaults.setProperty("useSSL", "false");
+            Connection conn = DriverManager.getConnection(url, defaults);
             return (MySQLConnection) conn;
         } catch (ClassNotFoundException e) {
             System.out.println("Error : JDBC driver not found");
@@ -543,10 +551,10 @@ public class Datamining {
                 ResultSet result = null;
                 try {
                     query = configdbConnection.createStatement();
-                    
+
                     String sql = "SELECT DISTINCT csp.db_schema, csp.read_db_pool_id, dp.url, dp.login, dp.password FROM context_server2db_pool csp, db_pool dp WHERE csp.read_db_pool_id = dp.db_pool_id;";
                     result = query.executeQuery(sql);
-                    
+
                     while (result.next()) {
                         Schema schema = new Schema(
                             result.getString("db_schema"),
@@ -608,10 +616,10 @@ public class Datamining {
                     ResultSet result = null;
                     try {
                         query = conn.createStatement();
-                        
+
                         String sql = "SELECT AVG(number_per_context) FROM (SELECT COUNT(id) AS number_per_context FROM infostore GROUP BY cid) AS T";
                         result = query.executeQuery(sql);
-                        
+
                         while (result.next()) {
                             String numberInOneSchema = result.getString(1);
                             numberInAllSchemata += new Float(numberInOneSchema);
@@ -641,10 +649,10 @@ public class Datamining {
                     ResultSet result = null;
                     try {
                         query = conn.createStatement();
-                        
+
                         String sql = "SELECT COUNT(*) FROM infostore";
                         result = query.executeQuery(sql);
-                        
+
                         while (result.next()) {
                             String numberInOneSchema = result.getString(1);
                             numberInAllSchemata += new Float(numberInOneSchema);
