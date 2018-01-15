@@ -309,7 +309,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @throws IOException If an I/O error occurs
      */
     protected void handleOXException(OXException e, int statusCode, String reasonPhrase, HttpServletRequest req, HttpServletResponse resp, boolean checkUploadQuota, boolean doLog) throws IOException {
-        if (checkUploadQuota && (UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED.equals(e) || UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED.equals(e))) {
+        if (checkUploadQuota && (UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED.equals(e) || UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED.equals(e) || UploadException.UploadCode.MAX_STORAGE_SIZE_EXCEEDED.equals(e))) {
             // An upload failed
             LOG.debug("", e);
             String sLoc = e.getProperty(OXExceptionConstants.PROPERTY_LOCALE);

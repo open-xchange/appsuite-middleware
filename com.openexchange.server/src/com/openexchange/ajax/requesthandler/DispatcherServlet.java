@@ -398,6 +398,7 @@ public class DispatcherServlet extends SessionServlet {
             SessionExceptionCodes.SESSION_EXPIRED,
             UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED,
             UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED,
+            UploadException.UploadCode.MAX_STORAGE_SIZE_EXCEEDED,
             AjaxExceptionCodes.CONNECTION_RESET
         );
 
@@ -500,7 +501,7 @@ public class DispatcherServlet extends SessionServlet {
         } catch (UploadException e) {
             exc = e;
             boolean forceJSON = AJAXRequestDataTools.parseBoolParameter(httpRequest.getParameter("force_json_response"));
-            if (!forceJSON && (UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED.equals(e) || UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED.equals(e))) {
+            if (!forceJSON && (UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED.equals(e) || UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED.equals(e) || UploadException.UploadCode.MAX_STORAGE_SIZE_EXCEEDED.equals(e))) {
                 // An upload failed
 
                 if (null == session || !Client.OX6_UI.getClientId().equals(session.getClient())) {

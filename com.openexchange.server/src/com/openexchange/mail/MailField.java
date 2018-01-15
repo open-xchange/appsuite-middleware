@@ -414,7 +414,7 @@ public enum MailField {
      * @return <code>true</code> if contained; otherwise <code>false</code>
      */
     public static boolean contains(MailField[] mailFields, MailField... fieldsToCheck) {
-        if (null == mailFields || fieldsToCheck == null) {
+        if (null == mailFields || fieldsToCheck == null || fieldsToCheck.length == 0) {
             return false;
         }
 
@@ -426,6 +426,46 @@ public enum MailField {
             }
         }
         return false;
+    }
+
+    /**
+     * Adds specified fields to given fields if not yet contained
+     *
+     * @param mailFields The fields to add to
+     * @param fieldsToAdd The fields to add
+     * @return The resulting fields extended by missing fields
+     */
+    public static MailField[] add(MailField[] mailFields, MailField... fieldsToAdd) {
+        if (null == mailFields || fieldsToAdd == null || fieldsToAdd.length == 0) {
+            return mailFields;
+        }
+
+        List<MailField> toAdd = new ArrayList<>(fieldsToAdd.length);
+        int numOfFields = mailFields.length;
+        for (MailField fieldToAdd : fieldsToAdd) {
+            boolean add = true;
+            for (int i = numOfFields; add && i-- > 0;) {
+                MailField mailField = mailFields[i];
+                if (mailField == fieldToAdd) {
+                    // Already contained
+                    add = false;
+                }
+            }
+            if (add) {
+                toAdd.add(fieldToAdd);
+            }
+        }
+
+        int numOfFieldsToAdd = toAdd.size();
+        if (numOfFieldsToAdd <= 0) {
+            return mailFields;
+        }
+        MailField[] newFields = new MailField[numOfFields + numOfFieldsToAdd];
+        System.arraycopy(mailFields, 0, newFields, 0, numOfFields);
+        for (MailField addMe : toAdd) {
+            newFields[numOfFields++] = addMe;
+        }
+        return newFields;
     }
 
 }

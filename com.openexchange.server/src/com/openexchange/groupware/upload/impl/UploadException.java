@@ -154,6 +154,11 @@ public class UploadException extends OXException {
          * Image upload denied. Resolution is too high. (current=%1$s, max=%2$s)
          */
         IMAGE_RESOLUTION_TOO_HIGH("Image upload denied. Resolution is too high. (current=%1$s, max=%2$s)", UploadExceptionMessage.IMAGE_RESOLUTION_TOO_HIGH_MSG, CATEGORY_USER_INPUT, 17),
+        /**
+         * Request rejected because its size (%1$s) exceeds the available storage space of %2$s
+         */
+        MAX_STORAGE_SIZE_EXCEEDED("Request rejected because its size (%1$s) exceeds the available storage space of %2$s",
+            UploadExceptionMessage.MAX_STORAGE_SIZE_EXCEEDED_MSG, CATEGORY_USER_INPUT, 18),
 
         ;
 

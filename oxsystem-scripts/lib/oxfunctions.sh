@@ -449,12 +449,13 @@ ox_remove_property() {
     test -z "$propfile" && die "ox_remove_property: missing propfile argument (arg 2)"
     test -e "$propfile" || die "ox_remove_property: $propfile does not exist"
 
-    local tmp=${propfile}.tmp$$
-    cp -a --remove-destination $propfile $tmp
+    if ox_exists_property "$prop" "$propfile"; then
+        local tmp=${propfile}.tmp$$
+        cp -a --remove-destination $propfile $tmp
 
-    export propfile
-    export prop
-    perl -e '
+        export propfile
+        export prop
+        perl -e '
 use strict;
 
 open(IN,"$ENV{propfile}") || die "unable to open $ENV{propfile}: $!";
@@ -484,11 +485,12 @@ for (my $i=0; $i<=$#LINES; $i++) {
     }
 }
 ' > $tmp
-    if [ $? -gt 0 ]; then
-        rm -f $tmp
-        die "ox_remove_property: FATAL: error removing property $prop from $propfile"
-    else
-        mv $tmp $propfile
+        if [ $? -gt 0 ]; then
+            rm -f $tmp
+            die "ox_remove_property: FATAL: error removing property $prop from $propfile"
+        else
+            mv $tmp $propfile
+        fi
     fi
     unset propfile
     unset prop

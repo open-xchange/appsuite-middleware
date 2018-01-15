@@ -150,4 +150,23 @@ public class MailFetchListenerChain implements MailFetchListener {
         return MailFetchListenerResult.neutral(ms, wannaCache);
     }
 
+    @Override
+    public MailMessage onMailFetch(MailMessage mail, Session session) throws OXException {
+        if (null == mail) {
+            return null;
+        }
+
+        Iterator<MailFetchListener> iterator = this.listeners.iterator();
+        if (false == iterator.hasNext()) {
+            return mail;
+        }
+
+        MailMessage result = mail;
+        do {
+            MailFetchListener listener = iterator.next();
+            result = listener.onMailFetch(result, session);
+        } while (iterator.hasNext());
+        return result;
+    }
+
 }
