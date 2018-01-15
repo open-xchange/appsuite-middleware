@@ -72,16 +72,19 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.group.GroupService;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.config.IMAPReloadable;
+import com.openexchange.imap.config.IgnoreDeletedPreferencesItem;
 import com.openexchange.imap.osgi.console.ClearListLsubCommandProvider;
 import com.openexchange.imap.osgi.console.ListLsubCommandProvider;
 import com.openexchange.imap.services.Services;
 import com.openexchange.imap.storecache.IMAPStoreCache;
 import com.openexchange.imap.threader.references.ConversationCache;
 import com.openexchange.imap.util.ExtAccountFolderField;
+import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.log.audit.AuditLogService;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.api.MailProvider;
@@ -374,6 +377,11 @@ public final class IMAPActivator extends HousekeepingActivator {
                 serviceProperties.put(EventConstants.EVENT_TOPIC, PushEventConstants.getAllTopics());
                 registerService(EventHandler.class, eventHandler, serviceProperties);
             }
+
+            IgnoreDeletedPreferencesItem ignoreDeleted = new IgnoreDeletedPreferencesItem();
+            registerService(ConfigTreeEquivalent.class, ignoreDeleted);
+            registerService(PreferencesItemService.class, ignoreDeleted);
+
         } catch (Exception e) {
             LOG.error("", e);
             throw e;

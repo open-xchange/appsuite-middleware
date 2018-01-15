@@ -79,6 +79,7 @@ import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.json.osgi.MailJSONActivator;
 import com.openexchange.mail.json.utils.ColumnCollection;
 import com.openexchange.mail.search.ANDTerm;
+import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.UserFlagTerm;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -373,6 +374,12 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                             }
                         }
                     }
+                }
+
+
+                SearchTerm<?> deleteTerm = ignoreDeleted ? new FlagTerm(MailMessage.FLAG_DELETED, false) : null;
+                if(deleteTerm != null) {
+                    searchTerm = searchTerm == null ? deleteTerm : new ANDTerm(deleteTerm, searchTerm);
                 }
             }
 

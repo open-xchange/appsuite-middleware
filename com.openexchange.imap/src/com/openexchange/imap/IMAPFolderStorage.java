@@ -644,7 +644,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
         try {
             IMAPFolderWorker.checkFailFast(imapStore, fullName);
-            boolean ignoreDeletedMailsForFolderCount = IMAPProperties.getInstance().isIgnoreDeletedMailsForFolderCount(this.session.getUserId(), this.session.getContextId());
+            boolean ignoreDeletedMailsForFolderCount = IMAPProperties.getInstance().isIgnoreDeletedMails(this.session.getUserId(), this.session.getContextId());
             ListLsubEntry listEntry = ListLsubCache.tryCachedLISTEntry(fullName, accountId, session);
             if (null != listEntry && listEntry.exists()) {
                 try {
@@ -682,7 +682,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
         try {
             IMAPFolderWorker.checkFailFast(imapStore, fullName);
-            boolean ignoreDeletedMailsForFolderCount = IMAPProperties.getInstance().isIgnoreDeletedMailsForFolderCount(this.session.getUserId(), this.session.getContextId());
+            boolean ignoreDeletedMailsForFolderCount = IMAPProperties.getInstance().isIgnoreDeletedMails(this.session.getUserId(), this.session.getContextId());
 
             ListLsubEntry listEntry = ListLsubCache.tryCachedLISTEntry(fullName, accountId, session);
             if (null != listEntry && listEntry.exists()) {

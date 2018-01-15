@@ -1750,6 +1750,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             MailSortField effectiveSortField = determineSortFieldForSearch(fullName, sortField);
             MailFields effectiveFields = prepareMailFieldsForSearch(mailFields, effectiveSortField);
             prepareMailFieldsForVirtualFolder(effectiveFields, fullName, session);
+            searchTerm = prepareSearchTerm(searchTerm);
             MailMessage[] mailMessages;
             if (searchViaIMAP(searchTerm == null ? new MailFields() : new MailFields(MailField.getMailFieldsFromSearchTerm(searchTerm)))) {
                 try {
@@ -1780,6 +1781,23 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         } finally {
             clearCache(imapFolder);
         }
+    }
+
+    /**
+     * Applies imap configurations to search term (e.g. ignoreDeleted)
+     *
+     * @param searchTerm The search term
+     * @return the prepared {@link SearchTerm}
+     */
+    private SearchTerm<?> prepareSearchTerm(SearchTerm<?> searchTerm) {
+        if(IMAPProperties.getInstance().isIgnoreDeletedMails(this.session.getUserId(), this.session.getContextId())) {
+
+           ImapConfigSearchTermVisitor imapConfigSearchTermVisitor = new ImapConfigSearchTermVisitor();
+           searchTerm.accept(imapConfigSearchTermVisitor);
+           return imapConfigSearchTermVisitor.checkTerm(searchTerm);
+        }
+
+        return searchTerm;
     }
 
     private boolean searchViaIMAP(MailFields fields) throws MessagingException {
@@ -2450,18 +2468,21 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     @Override
     public List<List<MailMessage>> getThreadSortedMessages(String fullName, boolean includeSent, boolean cache, IndexRange indexRange, long max, MailSortField sortField, OrderDirection order, MailField[] mailFields, SearchTerm<?> searchTerm) throws OXException {
         IMAPConversationWorker conversationWorker = new IMAPConversationWorker(this, imapFolderStorage);
+        searchTerm = prepareSearchTerm(searchTerm);
         return conversationWorker.getThreadSortedMessages(fullName, includeSent, cache, indexRange, max, sortField, order, mailFields, null, searchTerm);
     }
 
     @Override
     public List<List<MailMessage>> getThreadSortedMessages(String fullName, boolean includeSent, boolean cache, IndexRange indexRange, long max, MailSortField sortField, OrderDirection order, MailField[] mailFields, String[] headerNames, SearchTerm<?> searchTerm) throws OXException {
         IMAPConversationWorker conversationWorker = new IMAPConversationWorker(this, imapFolderStorage);
+        searchTerm = prepareSearchTerm(searchTerm);
         return conversationWorker.getThreadSortedMessages(fullName, includeSent, cache, indexRange, max, sortField, order, mailFields, headerNames, searchTerm);
     }
 
     @Override
     public MailMessage[] getThreadSortedMessages(String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] mailFields) throws OXException {
         IMAPConversationWorker conversationWorker = new IMAPConversationWorker(this, imapFolderStorage);
+        searchTerm = prepareSearchTerm(searchTerm);
         return conversationWorker.getThreadSortedMessages(fullName, indexRange, sortField, order, searchTerm, mailFields);
     }
 
@@ -2473,6 +2494,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     @Override
     public List<MailThread> getThreadReferences(String fullName, int size, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] mailFields, String[] headerNames) throws OXException {
         IMAPConversationWorker conversationWorker = new IMAPConversationWorker(this, imapFolderStorage);
+        searchTerm = prepareSearchTerm(searchTerm);
         return conversationWorker.getThreadReferences(fullName, size, sortField, order, searchTerm, mailFields, headerNames);
     }
 

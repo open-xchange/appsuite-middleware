@@ -1165,7 +1165,7 @@ public final class IMAPCommandsCollection {
                 /*
                  * Perform command
                  */
-                Response[] selectCommand = performCommand(protocol, "SELECT", sel_args);
+                Response[] selectCommand = performCommand(protocol, "EXAMINE", sel_args);
                 int total = 0;
                 final Response response = selectCommand[selectCommand.length - 1];
                 if(response.isOK()){

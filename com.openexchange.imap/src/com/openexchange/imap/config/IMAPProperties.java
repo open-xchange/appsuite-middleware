@@ -123,7 +123,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             boolean fallbackOnFailedSORT;
             boolean useMultipleAddresses;
             boolean useMultipleAddressesUserHash;
-            boolean ignoreDeletedMailsForFolderCount;
+            boolean ignoreDeletedMails;
 
             Params() {
                 super();
@@ -143,7 +143,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         final boolean fallbackOnFailedSORT;
         final boolean useMultipleAddresses;
         final boolean useMultipleAddressesUserHash;
-        final boolean ignoreDeletedMailsForFolderCount;
+        final boolean ignoreDeletedMails;
 
         PrimaryIMAPProperties(Params params) {
             super();
@@ -158,7 +158,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             this.fallbackOnFailedSORT = params.fallbackOnFailedSORT;
             this.useMultipleAddresses = params.useMultipleAddresses;
             this.useMultipleAddressesUserHash = params.useMultipleAddressesUserHash;
-            this.ignoreDeletedMailsForFolderCount = params.ignoreDeletedMailsForFolderCount;
+            this.ignoreDeletedMails = params.ignoreDeletedMails;
         }
     }
 
@@ -331,10 +331,10 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         }
 
         {
-            params.ignoreDeletedMailsForFolderCount = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.ignoreDeletedMailsForFolderCount", false, view);
+            params.ignoreDeletedMails = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.ignoreDeleted", false, view);
 
-            logMessageBuilder.append("  Ignore deleted mails for folder count: {}{}");
-            args.add(Autoboxing.valueOf(params.ignoreDeletedMailsForFolderCount));
+            logMessageBuilder.append("  Ignore deleted mails: {}{}");
+            args.add(Autoboxing.valueOf(params.ignoreDeletedMails));
             args.add(Strings.getLineSeparator());
         }
 
@@ -793,7 +793,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
             return primaryIMAPProps.useMultipleAddresses;
         } catch (Exception e) {
-            LOG.error("Failed to get host name expression for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), "false", e);
+            LOG.error("Failed to get host name expression for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), Boolean.FALSE.toString(), e);
             return false;
         }
     }
@@ -814,24 +814,24 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
             return primaryIMAPProps.useMultipleAddressesUserHash;
         } catch (Exception e) {
-            LOG.error("Failed to get host name expression for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), "false", e);
+            LOG.error("Failed to get host name expression for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), Boolean.FALSE.toString(), e);
             return false;
         }
     }
 
     /**
-     * Checks whether deleted mails should be ignored for folder counts.
+     * Checks whether deleted mails should be ignored.
      *
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @return <code>true</code> to use multiple IP addresses; otherwise <code>false</code>
+     * @return <code>true</code> to ignore deleted mails; otherwise <code>false</code>
      */
-    public boolean isIgnoreDeletedMailsForFolderCount(int userId, int contextId) {
+    public boolean isIgnoreDeletedMails(int userId, int contextId) {
         try {
             PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
-            return primaryIMAPProps.ignoreDeletedMailsForFolderCount;
+            return primaryIMAPProps.ignoreDeletedMails;
         } catch (Exception e) {
-            LOG.error("Failed to get ignoreDeletedMailsForFolderCount for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), "false", e);
+            LOG.error("Failed to get ignoreDeleted for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), Boolean.FALSE.toString(), e);
             return false;
         }
     }

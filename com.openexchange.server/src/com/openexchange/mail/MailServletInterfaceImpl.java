@@ -2142,7 +2142,22 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
                 // Check if a certain range/page is requested
                 if (IndexRange.NULL != indexRange) {
-                    return getMessageRange(searchTerm, fields, headers, fullName, indexRange, sortField, orderDir, accountId);
+                    SearchIterator<MailMessage> it = getMessageRange(searchTerm, fields, headers, fullName, indexRange, sortField, orderDir, accountId);
+
+                    /*
+                     * Set account information
+                     */
+                    List<MailMessage> l = new LinkedList<>();
+                    for (int i = it.size(); i-- > 0;) {
+                        final MailMessage mail = it.next();
+                        if (mail != null) {
+                            if (!mail.containsAccountId() || mail.getAccountId() < 0) {
+                                mail.setAccountId(accountId);
+                            }
+                            l.add(mail);
+                        }
+                    }
+                    return new SearchIteratorDelegator<>(l);
                 }
 
                 mails = mailAccess.getMessageStorage().searchMessages(fullName, indexRange, sortField, orderDir, searchTerm, FIELDS_ID_INFO);

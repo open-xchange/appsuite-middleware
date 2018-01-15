@@ -727,3 +727,20 @@ properties:
       file: imap.properties
       packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
+    - key: com.openexchange.imap.ignoreDeleted
+      description: |
+        Defines whether the middleware should ignore mails marked as deleted or not. If set to 'true' the unread count of mail folders ignores deleted mails. 
+        Also deleted mails are removed from mail requests like 'all'.
+        
+        Note:  
+        This only applies to the primary mail account. 
+        Please also be aware that requesting the unread count with this property set to 'true' requires a select + search query instead of a single status call.
+        Therefore only set this property to 'true' in case the primary imap server is able to perform this operation fast enough. In any case this will slow down the mail folder requests.   
+      defaultValue: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: imap.properties
+      packageName: open-xchange-imap
+      tags: ["Mail","IMAP"]

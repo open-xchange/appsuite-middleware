@@ -227,69 +227,55 @@ public final class SearchAction extends AbstractMailAction {
         List<MailMessage> mails = new LinkedList<MailMessage>();
         SearchIterator<MailMessage> it = null;
         try {
-            if (("thread".equalsIgnoreCase(sort))) {
-                it = mailInterface.getThreadedMessages(folderId, null, MailSortField.RECEIVED_DATE.getField(), orderDir, searchCols, searchPats, true, columns);
-                for (int i = it.size(); i-- > 0;) {
-                    MailMessage mail = it.next();
-                    if (!discardMail(mail, ignoreSeen, ignoreDeleted)) {
-                        if (!mail.containsAccountId()) {
-                            mail.setAccountId(mailInterface.getAccountID());
-                        }
-                        mails.add(mail);
-                    }
-                }
-                warnings = mailInterface.getWarnings();
-            } else {
-                int sortCol = req.getSortFieldFor(sort);
+            int sortCol = req.getSortFieldFor(sort);
 
-                mailInterface.openFor(folderId);
-                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailInterface.getMailAccess();
+            mailInterface.openFor(folderId);
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailInterface.getMailAccess();
 
-                SearchTerm<?> searchTerm;
-                if (ignoreDeleted || ignoreSeen) {
-                    SearchTerm<?> main = mailInterface.createSearchTermFrom(searchCols, searchPats, true);
+            SearchTerm<?> searchTerm;
+            if (ignoreDeleted || ignoreSeen) {
+                SearchTerm<?> main = mailInterface.createSearchTermFrom(searchCols, searchPats, true);
 
-                    SearchTerm<?> first = ignoreSeen ? new FlagTerm(MailMessage.FLAG_SEEN, false) : null;
-                    SearchTerm<?> second = ignoreDeleted ? (ignoreSeen ? null /* Already filtered by unseen, thus OR term will always be true */ : new ORTerm(new FlagTerm(MailMessage.FLAG_DELETED, false), new FlagTerm(MailMessage.FLAG_SEEN, false))) : null;
+                SearchTerm<?> first = ignoreSeen ? new FlagTerm(MailMessage.FLAG_SEEN, false) : null;
+                SearchTerm<?> second = ignoreDeleted ? (ignoreSeen ? null /* Already filtered by unseen, thus OR term will always be true */ : new ORTerm(new FlagTerm(MailMessage.FLAG_DELETED, false), new FlagTerm(MailMessage.FLAG_SEEN, false))) : null;
 
-                    if (null == first) {
-                        searchTerm = null == second ? main : new ANDTerm(main, second);
-                    } else {
-                        searchTerm = null == second ? new ANDTerm(main, first) : new ANDTerm(main, new ANDTerm(first, second));
-                    }
+                if (null == first) {
+                    searchTerm = null == second ? main : new ANDTerm(main, second);
                 } else {
-                    searchTerm = mailInterface.createSearchTermFrom(searchCols, searchPats, true);
+                    searchTerm = null == second ? new ANDTerm(main, first) : new ANDTerm(main, new ANDTerm(first, second));
                 }
+            } else {
+                searchTerm = mailInterface.createSearchTermFrom(searchCols, searchPats, true);
+            }
 
-                FullnameArgument fa = prepareMailFolderParam(folderId);
-                IndexRange indexRange = null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]);
-                MailSortField sortField = MailSortField.getField(sortCol);
-                OrderDirection orderDirection = OrderDirection.getOrderDirection(orderDir);
+            FullnameArgument fa = prepareMailFolderParam(folderId);
+            IndexRange indexRange = null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]);
+            MailSortField sortField = MailSortField.getField(sortCol);
+            OrderDirection orderDirection = OrderDirection.getOrderDirection(orderDir);
 
-                MailMessage[] result;
-                IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-                if (null != headers && 0 < headers.length) {
-                    IMailMessageStorageExt ext = messageStorage.supports(IMailMessageStorageExt.class);
-                    if (null != ext) {
-                        result = ext.searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, MailField.getFields(columns), headers);
-                    } else {
-                        result = messageStorage.searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, MailField.getFields(columns));
-                        enrichWithHeaders(fa.getFullname(), result, headers, messageStorage);
-                    }
+            MailMessage[] result;
+            IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+            if (null != headers && 0 < headers.length) {
+                IMailMessageStorageExt ext = messageStorage.supports(IMailMessageStorageExt.class);
+                if (null != ext) {
+                    result = ext.searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, MailField.getFields(columns), headers);
                 } else {
                     result = messageStorage.searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, MailField.getFields(columns));
+                    enrichWithHeaders(fa.getFullname(), result, headers, messageStorage);
                 }
-
-                for (MailMessage mm : result) {
-                    if (null != mm) {
-                        if (!mm.containsAccountId()) {
-                            mm.setAccountId(mailInterface.getAccountID());
-                        }
-                        mails.add(mm);
-                    }
-                }
-                warnings = mailAccess.getWarnings();
+            } else {
+                result = messageStorage.searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, MailField.getFields(columns));
             }
+
+            for (MailMessage mm : result) {
+                if (null != mm) {
+                    if (!mm.containsAccountId()) {
+                        mm.setAccountId(mailInterface.getAccountID());
+                    }
+                    mails.add(mm);
+                }
+            }
+            warnings = mailAccess.getWarnings();
         } finally {
             SearchIterators.close(it);
         }
