@@ -170,7 +170,7 @@ public class ICalCalendarProviderTestConstants {
         "DESCRIPTION:Confed Cup 2017 in Russland\\, Gruppenphase\\nB3-B4\\nDas L\u00e4ndersp\n" + 
         " iel Australien-Deutschland im Confed Cup wird live im Fernsehen \u00fcbertragen \n" + 
         " und es gibt einen gratis-LiveStream. Live im ZDF Fernsehen und als legaler \n" + 
-        " HD LiveStream bei zdf.de zu sehen\\nLive-Reporter: Béla Réthy\n" + 
+        " HD LiveStream bei zdf.de zu sehen\\nLive-Reporter: B\u00e9la R\u00e9thy\n" + 
         "LAST-MODIFIED:20170620T044052Z\n" + 
         "LOCATION:Sotschi\\, Russland. TV-\u00fcbertragung im ZDF (2. Programm)\n" + 
         "SEQUENCE:0\n" + 
@@ -243,7 +243,7 @@ public class ICalCalendarProviderTestConstants {
         "  im Rahmen eines Freundschaftsspiels zur Neuauflage des Finales von G\u00f6tebor\n" + 
         " g zwischen D\u00e4nemark und Deutschland. Anl\u00e4sslich des 25-j\u00e4hrigen Jubil\u00e4ums d\n" + 
         " es EM-Titelgewinns war die deutsche Nationalmannschaft Wunschgegner des D\u00e4n\n" + 
-        " ischen Fußball-Verbandes. Das ZDF \u00fcbertr\u00e4gt live im FreeTV und per Internet\n" + 
+        " ischen Fu\u00dfball-Verbandes. Das ZDF \u00fcbertr\u00e4gt live im FreeTV und per Internet\n" + 
         "  Streaming.\n" + 
         "LAST-MODIFIED:20170426T070729Z\n" + 
         "LOCATION:Kopenhagen. Live im ZDF \u00fcbertragen (und per LiveStream)\n" + 
@@ -258,7 +258,7 @@ public class ICalCalendarProviderTestConstants {
         "DTSTAMP:20170817T144059Z\n" + 
         "UID:bhft6ejt1r0tt02s3gid6rs3bk@google.com\n" + 
         "CREATED:20161021T061533Z\n" + 
-        "DESCRIPTION:Freundschaftsspiel der Fußball-Nationalmannschaften von Deutsch\n" + 
+        "DESCRIPTION:Freundschaftsspiel der Fu\u00dfball-Nationalmannschaften von Deutsch\n" + 
         " land und England.\\nWird live im FreeTV \u00fcbertragen bei DasErste (ARD) und au\n" + 
         " ch in der Internet-Mediathek bei daserste.de live gestreamt.\n" + 
         "LAST-MODIFIED:20170316T082458Z\n" + 
@@ -423,7 +423,7 @@ public class ICalCalendarProviderTestConstants {
         " \\nLive Fernseh \u00fcbertragung auf RTL und per Internet Livestream bei http://w\n" + 
         " ww.ran.de/\n" + 
         "LAST-MODIFIED:20161020T073553Z\n" + 
-        "LOCATION:Stadion Ullevål Oslo. Live bei RTL TV \u00fcbertragen\n" + 
+        "LOCATION:Stadion Ullev\u00e5l Oslo. Live bei RTL TV \u00fcbertragen\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
         "SUMMARY:Norwegen-Deutschland (WM Quali) 0:3\n" + 
@@ -456,7 +456,7 @@ public class ICalCalendarProviderTestConstants {
         " \\nLive Fernseh \u00fcbertragung auf RTL und per Internet Livestream bei http://w\n" + 
         " ww.ran.de/\n" + 
         "LAST-MODIFIED:20160904T080220Z\n" + 
-        "LOCATION:Stadion in Nordirland (Belfast?). Live auf RTL TV\n" + 
+        "LOCATION:Stadion in Nordirland (Belfast\u00df). Live auf RTL TV\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
         "SUMMARY:Nordirland-Deutschland (WM Quali)\n" + 
@@ -500,7 +500,7 @@ public class ICalCalendarProviderTestConstants {
         "DTSTAMP:20170817T144059Z\n" + 
         "UID:fb61s80t9drohvng4q2c6ic434@google.com\n" + 
         "CREATED:20160815T132310Z\n" + 
-        "DESCRIPTION:\u26bdHalbfinale beim olympischen Fußballturnier in Rio: Deutschland\n" + 
+        "DESCRIPTION:\u26bdHalbfinale beim olympischen Fu\u00dfballturnier in Rio: Deutschland\n" + 
         "  trifft auf Nigeria.\\nDas zweite deutsche Fernsehen \u00fcbertr\u00e4gt live im TV (F\n" + 
         " ree-TV)\\nInternetstream:\\nhttp://rio.zdf.de/live/\n" + 
         "LAST-MODIFIED:20160815T132532Z\n" + 
@@ -508,7 +508,7 @@ public class ICalCalendarProviderTestConstants {
         " ZDF). Und auf http://rio.zdf.de/live/\n" + 
         "SEQUENCE:0\n" + 
         "STATUS:CONFIRMED\n" + 
-        "SUMMARY:Olympia \u26bdFußball (M) Halbfinale: Deutschland - Nigeria\n" + 
+        "SUMMARY:Olympia \u26bdFu\u00dfball (M) Halbfinale: Deutschland - Nigeria\n" + 
         "TRANSP:OPAQUE\n" + 
         "END:VEVENT\n" + 
         "BEGIN:VEVENT\n" + 
@@ -517,7 +517,7 @@ public class ICalCalendarProviderTestConstants {
         "DTSTAMP:20170817T144059Z\n" + 
         "UID:msc1j4psqhahig749rlgu2pi44@google.com\n" + 
         "CREATED:20160804T154257Z\n" + 
-        "DESCRIPTION:Olympisches Fußball-Turnier mit der deutschen U21-Nationalmanns\n" + 
+        "DESCRIPTION:Olympisches Fu\u00dfball-Turnier mit der deutschen U21-Nationalmanns\n" + 
         " chaft in Brasilien\\nGruppe C\\nLive Fernseh \u00fcbertragung im ZDF (2. Programm)\n" + 
         "  und per Internet LiveStream\n" + 
         "LAST-MODIFIED:20160804T154257Z\n" + 
@@ -533,7 +533,7 @@ public class ICalCalendarProviderTestConstants {
         "DTSTAMP:20170817T144059Z\n" + 
         "UID:k3rhcel7k5uc96cjann1l94u1o@google.com\n" + 
         "CREATED:20160804T154012Z\n" + 
-        "DESCRIPTION:Olympisches Fußball-Turnier mit der deutschen U21-Nationalmanns\n" + 
+        "DESCRIPTION:Olympisches Fu\u00dfball-Turnier mit der deutschen U21-Nationalmanns\n" + 
         " chaft in Brasilien\\nGruppe C\\nLive Fernseh \u00fcbertragung im ZDF (Free TV) und\n" + 
         "  per Internet LiveStream in der ZDF-Mediathek\n" + 
         "LAST-MODIFIED:20160804T154012Z\n" + 
