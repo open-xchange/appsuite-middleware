@@ -306,9 +306,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     private AuthenticationInfo loadUserFromServer(String subject) throws OXException {
         LOG.trace("loadUserFromServer(String subject: {})", subject);
         ContextService contextService = Services.getService(ContextService.class);
-        //String[] userData = subject.split("@");
-        //TODO QS-VS: auf die auskommentierte Abhandlung umstellen
-        String[] userData = { "5", "wonderland.net" };
+        String[] userData = subject.split("@");
         if (userData.length != 2) {
             throw OIDCExceptionCode.BAD_SUBJECT.create(subject);
         }

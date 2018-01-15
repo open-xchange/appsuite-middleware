@@ -68,7 +68,6 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since v7.10.0
  */
-//TODO QS-VS: Warum gibt es eigentlich keinen LogoutRequestHandler??
 public class OIDCLogoutRequestHandler implements LoginRequestHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(OIDCLogoutRequestHandler.class);

@@ -21,8 +21,6 @@ import com.openexchange.session.inspector.SessionInspectorService;
  * with a {@link Session} parameter. Is used to check on expired OAuth tokens, if storage of
  * those is enabled for the current backend.
  *
- * TODO QS-VS: Den Loesungsansatz diskutieren, Beschaffung des Backends auch einfacher, besser moeglich?
- *
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since v7.10.0
  */

@@ -183,7 +183,6 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         String redirectURL = this.getAutologinByCookieURL(request, response, autologinCookie);
         String deeplink = request.getParameter("hash");
 
-        //TODO QS-VS um test erweitern, ist das ueberhaupt richtig so?
         if (!Strings.isEmpty(redirectURL) && !Strings.isEmpty(deeplink)) {
             redirectURL += "&" + deeplink.substring(1);
         }
