@@ -127,14 +127,14 @@ public class UpdatePerformer extends AbstractActionPerformer {
             if (original != null) {
                 ITipEventUpdate diff = change.getDiff();
                 if (null != diff && false == diff.isEmpty()) {
-                    event = updateEvent(original, event, session);
+                    event = updateEvent(original, event, session, false);
                 } else {
                     continue;
                 }
             } else if (isExceptionCreate(change)) {
                 Event masterEvent = original = change.getMasterEvent();
                 event.setSeriesId(masterEvent.getSeriesId());
-                event = updateEvent(masterEvent, event, session);
+                event = updateEvent(masterEvent, event, session, true);
                 forMail = event;
             } else {
                 ensureFolderId(event, session);
@@ -154,7 +154,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
         return result;
     }
 
-    private Event updateEvent(Event original, Event event, CalendarSession session) throws OXException {
+    private Event updateEvent(Event original, Event event, CalendarSession session, boolean intresetedInCreations) throws OXException {
         EventUpdate diff = session.getUtilities().compare(original, event, true, (EventField[]) null);
 
         Event update = new Event();
@@ -177,8 +177,8 @@ public class UpdatePerformer extends AbstractActionPerformer {
         }
 
         if (write) {
-            CalendarResult calendarResult = session.getCalendarService().updateEvent(session, new EventID(update.getFolderId(), update.getId()), update, original.getLastModified().getTime());
-            update = calendarResult.getUpdates().get(0).getUpdate();
+            CalendarResult calendarResult = session.getCalendarService().updateEvent(session, new EventID(update.getFolderId(), update.getId()), update, original.getTimestamp());
+            update = intresetedInCreations ? calendarResult.getCreations().get(0).getCreatedEvent() : calendarResult.getUpdates().get(0).getUpdate();
         }
         return update;
     }
@@ -288,6 +288,6 @@ public class UpdatePerformer extends AbstractActionPerformer {
     }
 
     private boolean isExceptionCreate(ITipChange change) {
-        return CalendarUtils.isSeriesMaster(change.getMasterEvent()) && change.isException() && null == change.getNewEvent().getId();
+        return change.isException() && CalendarUtils.isSeriesMaster(change.getMasterEvent()) && null == change.getNewEvent().getId();
     }
 }
