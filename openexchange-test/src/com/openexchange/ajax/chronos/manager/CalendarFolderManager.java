@@ -71,8 +71,12 @@ import com.openexchange.testing.httpclient.modules.FoldersApi;
  */
 public class CalendarFolderManager extends AbstractManager {
 
+    public static final String DEFAULT_ACCOUNT_ID = "0";
     public static final String DEFAULT_FOLDER_ID = "1";
     public static final String TREE_ID = "0";
+    public static final String MODULE = "calendar";
+    public static final String DEFAULT_ACCOUNT_PROVIDER_ID = "chronos";
+    public static final String ICAL_ACCOUNT_PROVIDER_ID = "ical";
 
     public static final String CALENDAR_MODULE = "calendar";
     public static final String EVENT_MODULE = "event";

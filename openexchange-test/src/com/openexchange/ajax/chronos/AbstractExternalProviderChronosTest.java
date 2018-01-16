@@ -57,6 +57,7 @@ import java.util.Collections;
 import java.util.Map;
 import org.json.JSONException;
 import com.openexchange.ajax.proxy.MockRequest;
+import com.openexchange.ajax.proxy.StartMockServerRequest;
 import com.openexchange.exception.OXException;
 
 /**
@@ -71,6 +72,12 @@ abstract class AbstractExternalProviderChronosTest extends AbstractChronosTest {
      */
     public AbstractExternalProviderChronosTest() {
         super();
+    }
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        client.execute(new StartMockServerRequest());
     }
 
     /**

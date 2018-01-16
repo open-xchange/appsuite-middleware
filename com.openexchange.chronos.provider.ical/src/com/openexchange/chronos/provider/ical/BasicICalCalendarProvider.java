@@ -240,8 +240,8 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
             }
             String uri = config.optString(URI, null);
             ICalProviderUtils.verifyURI(uri);
-            if (false == uri.equals(account.getUserConfiguration().optString(URI))) {
-                throw ICalProviderExceptionCodes.BAD_FEED_URI.create(uri);
+            if (!uri.equals(account.getUserConfiguration().optString(URI))) {
+                throw ICalProviderExceptionCodes.NOT_ALLOWED_CHANGE.create("uri");
             }
             ICalCalendarFeedConfig iCalFeedConfig = new ICalCalendarFeedConfig.EncryptedBuilder(session, new JSONObject(config), new JSONObject()).build();
             if (AuthType.BASIC.equals(iCalFeedConfig.getAuthInfo().getAuthType())) {

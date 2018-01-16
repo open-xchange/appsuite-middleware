@@ -53,21 +53,39 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Test;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.openexchange.ajax.chronos.manager.ChronosApiException;
-import com.openexchange.ajax.proxy.StartMockServerRequest;
-import com.openexchange.chronos.provider.ical.ICalCalendarConstants;
+import com.openexchange.ajax.chronos.manager.CalendarFolderManager;
+import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CalendarAccountProbeData;
 import com.openexchange.testing.httpclient.models.CalendarAccountProbeDataComOpenexchangeCalendarConfig;
 import com.openexchange.testing.httpclient.models.CalendarAccountProbeResponse;
+import com.openexchange.testing.httpclient.models.EventData;
+import com.openexchange.testing.httpclient.models.FolderBody;
+import com.openexchange.testing.httpclient.models.FolderData;
+import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalendarConfig;
+import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalendarExtendedProperties;
+import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalendarExtendedPropertiesColor;
+import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalendarExtendedPropertiesDescription;
+import com.openexchange.testing.httpclient.models.FolderPermission;
+import com.openexchange.testing.httpclient.models.FolderResponse;
+import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
+import com.openexchange.testing.httpclient.models.NewFolderBody;
+import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
 
 /**
  * {@link ICalCalendarProviderTest}
@@ -78,22 +96,11 @@ import com.openexchange.testing.httpclient.models.CalendarAccountProbeResponse;
 // TODO: Use the FolderManager instead of the foldersApi to create new folders
 public class ICalCalendarProviderTest extends AbstractExternalProviderChronosTest {
 
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-
-        client.execute(new StartMockServerRequest());
-    }
-
-    //FIXME better object
-    private String createAccount(JSONObject config) throws ChronosApiException, JsonParseException, JsonMappingException, ApiException, IOException, JSONException {
-        JSONObject configuration = new JSONObject();
-        configuration.put("configuration", config);
-        return folderManager.createFolder("event", ICalCalendarConstants.PROVIDER_ID, "testFolder_" + System.nanoTime(), configuration, new JSONObject());
-    }
-
-    private String createFolderId(String accountId) {
-        return "cal://" + accountId + "/0";
+    private String createAccount(NewFolderBody body) throws ApiException {
+        FolderUpdateResponse response = foldersApi.createFolder(CalendarFolderManager.DEFAULT_FOLDER_ID, defaultUserApi.getSession(), body, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE);
+        assertNull("Calendar account could not be created due an error.", response.getError());
+        assertNotNull(response.getData());
+        return response.getData();
     }
 
     private long dateToMillis(String date) {
@@ -102,9 +109,83 @@ public class ICalCalendarProviderTest extends AbstractExternalProviderChronosTes
     }
 
     @Test
+    public void testTooBig() throws OXException, IOException, JSONException, ApiException {
+        String externalUri = "http://example.com/files/tooBig.ics";
+        Map<String, String> responseHeaders = new HashMap<>();
+        responseHeaders.put(HttpHeaders.CONTENT_LENGTH, "100000000");
+        mock(externalUri, ICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK, responseHeaders);
+
+        CalendarAccountProbeData data = new CalendarAccountProbeData();
+        data.setComOpenexchangeCalendarProvider(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
+
+        CalendarAccountProbeDataComOpenexchangeCalendarConfig config = new CalendarAccountProbeDataComOpenexchangeCalendarConfig();
+        config.setUri(externalUri);
+        data.setComOpenexchangeCalendarConfig(config);
+
+        CalendarAccountProbeResponse probe = defaultUserApi.getChronosApi().probe(defaultUserApi.getSession(), data);
+
+        assertNotNull(probe.getError());
+        assertEquals("ICAL-PROV-4001", probe.getCode());
+    }
+
+    @Test
+    public void testNotFound() throws Exception {
+        String externalUri = "http://example.com/files/notFound.ics";
+        mock(externalUri, ICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_NOT_FOUND);
+
+        CalendarAccountProbeData data = new CalendarAccountProbeData();
+        data.setComOpenexchangeCalendarProvider(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
+
+        CalendarAccountProbeDataComOpenexchangeCalendarConfig config = new CalendarAccountProbeDataComOpenexchangeCalendarConfig();
+        config.setUri(externalUri);
+        data.setComOpenexchangeCalendarConfig(config);
+
+        CalendarAccountProbeResponse probe = defaultUserApi.getChronosApi().probe(defaultUserApi.getSession(), data);
+
+        assertNotNull(probe.getError());
+        assertEquals("ICAL-PROV-4043", probe.getCode());
+    }
+
+    @Test
+    public void testProbe_Unauthorized() throws ApiException, OXException, IOException, JSONException {
+        String externalUri = "http://example.com/files/testProbeUnauthorized.ics";
+        mock(externalUri, ICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_UNAUTHORIZED);
+
+        CalendarAccountProbeData data = new CalendarAccountProbeData();
+        data.setComOpenexchangeCalendarProvider(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
+
+        CalendarAccountProbeDataComOpenexchangeCalendarConfig config = new CalendarAccountProbeDataComOpenexchangeCalendarConfig();
+        config.setUri(externalUri);
+        data.setComOpenexchangeCalendarConfig(config);
+
+        CalendarAccountProbeResponse probe = defaultUserApi.getChronosApi().probe(defaultUserApi.getSession(), data);
+
+        assertNotNull(probe.getError());
+        assertEquals("CAL-4010", probe.getCode());
+    }
+
+    @Test
+    public void testDeniedHost() throws OXException, IOException, JSONException, ApiException {
+        String externalUri = "http://localhost/files/testDeniedHost.ics";
+        mock(externalUri, ICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK);
+
+        CalendarAccountProbeData data = new CalendarAccountProbeData();
+        data.setComOpenexchangeCalendarProvider(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
+
+        CalendarAccountProbeDataComOpenexchangeCalendarConfig config = new CalendarAccountProbeDataComOpenexchangeCalendarConfig();
+        config.setUri(externalUri);
+        data.setComOpenexchangeCalendarConfig(config);
+
+        CalendarAccountProbeResponse probe = defaultUserApi.getChronosApi().probe(defaultUserApi.getSession(), data);
+
+        assertNotNull(probe.getError());
+        assertEquals("ICAL-PROV-4042", probe.getCode());
+    }
+
+    @Test
     public void testProbe_uriMissing_notFound() throws Exception {
         CalendarAccountProbeData data = new CalendarAccountProbeData();
-        data.setComOpenexchangeCalendarProvider("ical");
+        data.setComOpenexchangeCalendarProvider(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
 
         CalendarAccountProbeResponse probe = defaultUserApi.getChronosApi().probe(defaultUserApi.getSession(), data);
 
@@ -117,7 +198,7 @@ public class ICalCalendarProviderTest extends AbstractExternalProviderChronosTes
         String externalUri = "http://localhost/files/notFound.ics";
 
         CalendarAccountProbeData data = new CalendarAccountProbeData();
-        data.setComOpenexchangeCalendarProvider("ical");
+        data.setComOpenexchangeCalendarProvider(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
 
         CalendarAccountProbeDataComOpenexchangeCalendarConfig config = new CalendarAccountProbeDataComOpenexchangeCalendarConfig();
         config.setUri(externalUri);
@@ -135,7 +216,7 @@ public class ICalCalendarProviderTest extends AbstractExternalProviderChronosTes
         mock(externalUri, ICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_NOT_FOUND);
 
         CalendarAccountProbeData data = new CalendarAccountProbeData();
-        data.setComOpenexchangeCalendarProvider("ical");
+        data.setComOpenexchangeCalendarProvider(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
 
         CalendarAccountProbeDataComOpenexchangeCalendarConfig config = new CalendarAccountProbeDataComOpenexchangeCalendarConfig();
         config.setUri(externalUri);
@@ -153,7 +234,7 @@ public class ICalCalendarProviderTest extends AbstractExternalProviderChronosTes
         mock(externalUri, ICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK);
 
         CalendarAccountProbeData data = new CalendarAccountProbeData();
-        data.setComOpenexchangeCalendarProvider("ical");
+        data.setComOpenexchangeCalendarProvider(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
 
         CalendarAccountProbeDataComOpenexchangeCalendarConfig config = new CalendarAccountProbeDataComOpenexchangeCalendarConfig();
         config.setUri(externalUri);
@@ -163,7 +244,7 @@ public class ICalCalendarProviderTest extends AbstractExternalProviderChronosTes
 
         assertNull(probe.getError());
         assertEquals("myCalendarFile", probe.getData().getTitle());
-        assertEquals("ical", probe.getData().getComOpenexchangeCalendarProvider());
+        assertEquals(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID, probe.getData().getComOpenexchangeCalendarProvider());
         assertNull(probe.getData().getComOpenexchangeCalendarConfig().getRefreshInterval());
     }
 
@@ -173,7 +254,7 @@ public class ICalCalendarProviderTest extends AbstractExternalProviderChronosTes
         mock(externalUri, ICalCalendarProviderTestConstants.RESPONSE_WITH_ADDITIONAL_PROPERTIES, HttpStatus.SC_OK);
 
         CalendarAccountProbeData data = new CalendarAccountProbeData();
-        data.setComOpenexchangeCalendarProvider("ical");
+        data.setComOpenexchangeCalendarProvider(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
 
         CalendarAccountProbeDataComOpenexchangeCalendarConfig config = new CalendarAccountProbeDataComOpenexchangeCalendarConfig();
         config.setUri(externalUri);
@@ -183,315 +264,277 @@ public class ICalCalendarProviderTest extends AbstractExternalProviderChronosTes
 
         assertNull(probe.getError());
         assertEquals("FC Schalke 04", probe.getData().getTitle());
-        assertEquals("ical", probe.getData().getComOpenexchangeCalendarProvider());
+        assertEquals(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID, probe.getData().getComOpenexchangeCalendarProvider());
         assertEquals("10080", probe.getData().getComOpenexchangeCalendarConfig().getRefreshInterval());
         assertEquals("Alle Spiele von FC Schalke 04", probe.getData().getComOpenexchangeCalendarExtendedProperties().getDescription().getValue());
     }
 
-    //    @Test
-    //    public void testEventsCreated() throws JSONException, ApiException, OXException, IOException, ChronosApiException {
-    //        String externalUri = "http://example.com/files/testEventsCreated.ics";
-    //        mock(externalUri, ICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK);
-    //
-    //        JSONObject ical = new JSONObject();
-    //        ical.put("uri", externalUri);
-    //        String folderId = createFolderId(createAccount(ical));
-    //
-    //        List<EventData> allEvents = eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis()), false, folderId);
-    //        assertEquals(38, allEvents.size());
-    //    }
-    //
-    //    @Test
-    //    public void testFolderConfiguredCorrectly_nameAndDescriptionNotAvailable() throws JSONException, OXException, IOException, ApiException {
-    //        String externalUri = "http://example.com/files/testFolderConfiguredCorrectly_nameAndDescriptionNotAvailable.ics";
-    //        mock(externalUri, ICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK);
-    //
-    //        JSONObject ical = new JSONObject();
-    //        ical.put("uri", externalUri);
-    //        String folderId = createFolderId(createAccount(ical));
-    //
-    //        //get events to fill events
-    //        eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis()), false, folderId);
-    //
-    //        FolderResponse folder = foldersApi.getFolder(defaultUserApi.getSession(), folderId, "0", null);
-    //        String folderName = folder.getData().getTitle();
-    //
-    //        assertEquals(externalUri, folderName);
-    //        assertNull(folder.getData().getComOpenexchangeCalendarExtendedProperties().getDescription().getValue());
-    //    }
-    //
-    //    @Test
-    //    public void testFolderConfiguredCorrectlyIfNameAndDescriptionIsInIcsAndEventsRetrieved() throws JSONException, OXException, IOException, ApiException {
-    //        String externalUri = "http://example.com/files/testFolderConfiguredCorrectlyIfNameAndDescriptionIsInIcsAndEventsRetrieved.ics";
-    //        mock(externalUri, ICalCalendarProviderTestConstants.RESPONSE_WITH_NAME_AND_DESC, HttpStatus.SC_OK);
-    //
-    //        JSONObject ical = new JSONObject();
-    //        ical.put("uri", externalUri);
-    //        String folderId = createFolderId(createAccount(ical));
-    //
-    //        //get events to fill table
-    //        List<EventData> allEvents = eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis()), false, folderId);
-    //        assertEquals(102, allEvents.size());
-    //
-    //        FolderResponse folder = foldersApi.getFolder(defaultUserApi.getSession(), folderId, "0", null);
-    //        String folderName = folder.getData().getTitle();
-    //
-    //        assertEquals("FC Schalke 04", folderName);
-    //        assertEquals("Alle Spiele von FC Schalke 04", folder.getData().getComOpenexchangeCalendarExtendedProperties().getDescription().getValue());
-    //    }
-    //
-    //    @Test
-    //    public void testFolderConfiguredCorrectlyIfNameAndDescriptionIsInIcsWithoutRetrievingEvents() throws JSONException, OXException, IOException, ApiException {
-    //        String externalUri = "http://example.com/files/testFolderConfiguredCorrectlyIfNameAndDescriptionIsInIcsWithoutRetrievingEvents.ics";
-    //        mock(externalUri, ICalCalendarProviderTestConstants.RESPONSE_WITH_NAME_AND_DESC, HttpStatus.SC_OK);
-    //
-    //        JSONObject ical = new JSONObject();
-    //        ical.put("uri", externalUri);
-    //        String folderId = createFolderId(createAccount(ical));
-    //
-    //        FolderResponse folder = foldersApi.getFolder(defaultUserApi.getSession(), folderId, "0", null);
-    //        String folderName = folder.getData().getTitle();
-    //
-    //        assertEquals("FC Schalke 04", folderName);
-    //        assertEquals("Alle Spiele von FC Schalke 04", folder.getData().getComOpenexchangeCalendarExtendedProperties().getDescription().getValue());
-    //    }
-    //
-    //    @Test
-    //    public void testFolderUpdate() throws OXException, IOException, JSONException, ApiException {
-    //        String externalUri = "http://example.com/files/testFolderUpdate.ics";
-    //        mock(externalUri, ICalCalendarProviderTestConstants.RESPONSE_WITH_NAME_AND_DESC, HttpStatus.SC_OK);
-    //
-    //        JSONObject ical = new JSONObject();
-    //        ical.put("uri", externalUri);
-    //        String folderId = createFolderId(createAccount(ical));
-    //
-    //        FolderResponse folder = foldersApi.getFolder(defaultUserApi.getSession(), folderId, "0", null);
-    //
-    //        FolderData folderData = folder.getData();
-    //        folderData.setTitle("changed");
-    //        FolderDataComOpenexchangeCalendarExtendedProperties extendedProperties = new FolderDataComOpenexchangeCalendarExtendedProperties();
-    //        FolderDataComOpenexchangeCalendarExtendedPropertiesColor color = new FolderDataComOpenexchangeCalendarExtendedPropertiesColor();
-    //        color.setValue("blue");
-    //        extendedProperties.setColor(color);
-    //        folderData.setComOpenexchangeCalendarExtendedProperties(extendedProperties);
-    //
-    //        FolderBody body = new FolderBody();
-    //        body.setFolder(folderData);
-    //
-    //        foldersApi.updateFolder(defaultUserApi.getSession(), folderId, System.currentTimeMillis(), body, false, "0", null, false);
-    //        FolderResponse folderReload = foldersApi.getFolder(defaultUserApi.getSession(), folderId, "0", null);
-    //        assertEquals("changed", folderReload.getData().getTitle());
-    //        assertEquals("Alle Spiele von FC Schalke 04", folderReload.getData().getComOpenexchangeCalendarExtendedProperties().getDescription().getValue());
-    //        assertEquals("blue", folderReload.getData().getComOpenexchangeCalendarExtendedProperties().getColor().getValue());
-    //    }
-    //
-    //    @Test
-    //    public void testFolderUpdateWithGettingEvents() throws OXException, IOException, JSONException, ApiException {
-    //        String externalUri = "http://example.com/files/testFolderUpdateWithGettingEvents.ics";
-    //        mock(externalUri, ICalCalendarProviderTestConstants.RESPONSE_WITH_NAME_AND_DESC, HttpStatus.SC_OK);
-    //
-    //        JSONObject ical = new JSONObject();
-    //        ical.put("uri", externalUri);
-    //        String folderId = createFolderId(createAccount(ical));
-    //
-    //        List<EventData> allEvents = eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis()), false, folderId);
-    //
-    //        FolderResponse folder = foldersApi.getFolder(defaultUserApi.getSession(), folderId, "0", null);
-    //
-    //        FolderData folderData = folder.getData();
-    //        folderData.setTitle("changed");
-    //        FolderDataComOpenexchangeCalendarExtendedProperties extendedProperties = new FolderDataComOpenexchangeCalendarExtendedProperties();
-    //        FolderDataComOpenexchangeCalendarExtendedPropertiesColor color = new FolderDataComOpenexchangeCalendarExtendedPropertiesColor();
-    //        color.setValue("blue");
-    //        extendedProperties.setColor(color);
-    //        FolderDataComOpenexchangeCalendarExtendedPropertiesDescription description = new FolderDataComOpenexchangeCalendarExtendedPropertiesDescription();
-    //        description.setValue("Keine Lust auf description");
-    //        extendedProperties.setDescription(description);
-    //        folderData.setComOpenexchangeCalendarExtendedProperties(extendedProperties);
-    //        FolderBody body = new FolderBody();
-    //        body.setFolder(folderData);
-    //
-    //        foldersApi.updateFolder(defaultUserApi.getSession(), folderId, System.currentTimeMillis(), body, false, "0", null, false);
-    //        FolderResponse folderReload = foldersApi.getFolder(defaultUserApi.getSession(), folderId, "0", null);
-    //        assertEquals("changed", folderReload.getData().getTitle());
-    //        assertEquals("Keine Lust auf description", folderReload.getData().getComOpenexchangeCalendarExtendedProperties().getDescription().getValue());
-    //
-    //        List<EventData> allEventsReloaded = eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis()), false, folderId);
-    //        assertEquals(allEvents.size(), allEventsReloaded.size());
-    //    }
-    //
-    //    @Test
-    //    public void testCalendarAccountUpdate_updateShouldContainAllFieldsAndEventsOnce() throws JSONException, OXException, IOException, ApiException {
-    //        String externalUri = "http://example.com/files/testCalendarAccountUpdateWithUpdatedURI.ics";
-    //        mock(externalUri, ICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK);
-    //
-    //        JSONObject ical = new JSONObject();
-    //        ical.put("uri", externalUri);
-    //        String accountId = createAccount(ical);
-    //
-    //        String folderId = createFolderId(accountId);
-    //        List<EventData> allEvents = eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis()), false, folderId);
-    //        assertEquals(38, allEvents.size());
-    //
-    //        JSONObject newConfiguration = new JSONObject();
-    //        ical.put("refreshInterval", "100000");
-    //        ical.put("color", "blue");
-    //        newConfiguration.put("configuration", ical);
-    //
-    //        calendarAccountManager.updateCalendarAccount(accountId, System.currentTimeMillis(), newConfiguration.toString());
-    //        List<EventData> allEventsAfterUriChange = eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis()), false, folderId);
-    //        assertEquals(38, allEventsAfterUriChange.size());
-    //
-    //        FolderResponse folderReload = foldersApi.getFolder(defaultUserApi.getSession(), folderId, "0", null);
-    //        assertEquals("blue", folderReload.getData().getComOpenexchangeCalendarExtendedProperties().getColor().getValue()); // should only pass after removing calendar account api
-    //    }
-    //
-    //    @Test
-    //    public void testCalendarAccountUriUpdateNotAllowed() throws JSONException, OXException, IOException, ApiException {
-    //        String externalUri = "http://example.com/files/testCalendarAccountUpdateWithUpdatedURI.ics";
-    //        mock(externalUri, ICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK);
-    //
-    //        JSONObject ical = new JSONObject();
-    //        ical.put("uri", externalUri);
-    //        String accountId = createAccount(ical);
-    //
-    //        List<EventData> allEvents = eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis()), false, createFolderId(accountId));
-    //        assertEquals(38, allEvents.size());
-    //
-    //        String externalUri2 = "http://example.com/files/testCalendarAccountUpdateWithUpdatedURI_invalidateCache.ics";
-    //        mock(externalUri2, ICalCalendarProviderTestConstants.RESPONSE_WITH_NAME_AND_DESC, HttpStatus.SC_OK);
-    //        JSONObject newConfiguration = new JSONObject();
-    //        JSONObject newIcal = new JSONObject();
-    //        newIcal.put("uri", externalUri2);
-    //        newConfiguration.put("configuration", newIcal);
-    //
-    //        CalendarAccountResponse response = defaultUserApi.getChronosApi().updateAccount(defaultUserApi.getSession(), accountId, System.currentTimeMillis(), newConfiguration.toString());
-    //        assertNotNull(response.getError());
-    //        assertEquals("ICAL-PROV-4044", response.getCode());
-    //    }
-    //
-    //    @Test
-    //    public void testUnauthorized() throws OXException, IOException, JSONException, ApiException {
-    //        String externalUri = "http://example.com/files/testUnauthorized.ics";
-    //        mock(externalUri, ICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_UNAUTHORIZED);
-    //
-    //        JSONObject ical = new JSONObject();
-    //        ical.put("uri", externalUri);
-    //        JSONObject configuration = new JSONObject();
-    //        configuration.put("configuration", ical);
-    //
-    //        CalendarAccountResponse response = defaultUserApi.getChronosApi().createAccount(defaultUserApi.getSession(), ICalCalendarConstants.PROVIDER_ID, configuration.toString());
-    //
-    //        assertNotNull(response.getError());
-    //        assertEquals("CAL-4010", response.getCode());
-    //    }
-    //
-    //    @Test
-    //    public void testDeniedHost() throws OXException, IOException, JSONException, ApiException {
-    //        String externalUri = "http://localhost/files/testDeniedHost.ics";
-    //        mock(externalUri, ICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK);
-    //
-    //        JSONObject ical = new JSONObject();
-    //        ical.put("uri", externalUri);
-    //        JSONObject configuration = new JSONObject();
-    //        configuration.put("configuration", ical);
-    //
-    //        CalendarAccountResponse response = defaultUserApi.getChronosApi().createAccount(defaultUserApi.getSession(), ICalCalendarConstants.PROVIDER_ID, configuration.toString());
-    //
-    //        assertNotNull(response.getError());
-    //        assertEquals("ICAL-PROV-4042", response.getCode());
-    //    }
-    //
-    //    @Test
-    //    public void testNotFound() throws Exception {
-    //        String externalUri = "http://example.com/files/notFound.ics";
-    //        mock(externalUri, ICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_NOT_FOUND);
-    //
-    //        JSONObject ical = new JSONObject();
-    //        ical.put("uri", externalUri);
-    //        JSONObject configuration = new JSONObject();
-    //        configuration.put("configuration", ical);
-    //
-    //        NewFolderBody body = new NewFolderBody();
-    //        NewFolderBodyFolder folder = new NewFolderBodyFolder();
-    //        folder.title("test it baby");
-    //        folder.setSubscribed(Boolean.TRUE);
-    //        folder.setModule("event");
-    //        folder.setComOpenexchangeCalendarProvider("ical");
-    //        
-    //        FolderDataComOpenexchangeCalendarConfig config = new FolderDataComOpenexchangeCalendarConfig();
-    //        config.setUri(externalUri);
-    //        folder.setComOpenexchangeCalendarConfig(config);
-    //        body.setFolder(folder);
-    //        FolderUpdateResponse createFolder = foldersApi.createFolder(this.getDefaultFolder(), defaultUserApi.getSession(), body, "0", "calendar");
-    //        
-    ////        CalendarAccountResponse response = defaultUserApi.getChronosApi().createAccount(defaultUserApi.getSession(), ICalCalendarConstants.PROVIDER_ID, configuration.toString());
-    //
-    //        assertNotNull(createFolder.getError());
-    //        assertEquals("ICAL-PROV-4043", createFolder.getCode());
-    //    }
-    //
-    //    @Test
-    //    public void testTooBig() throws OXException, IOException, JSONException, ApiException {
-    //        String externalUri = "http://example.com/files/tooBig.ics";
-    //        Map<String, String> responseHeaders = new HashMap<>();
-    //        responseHeaders.put(HttpHeaders.CONTENT_LENGTH, "100000000");
-    //        mock(externalUri, ICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK, responseHeaders);
-    //
-    //        JSONObject ical = new JSONObject();
-    //        ical.put("uri", externalUri);
-    //        JSONObject configuration = new JSONObject();
-    //        configuration.put("configuration", ical);
-    //
-    //        CalendarAccountResponse response = defaultUserApi.getChronosApi().createAccount(defaultUserApi.getSession(), ICalCalendarConstants.PROVIDER_ID, configuration.toString());
-    //
-    //        assertNotNull(response.getError());
-    //        assertEquals("ICAL-PROV-4001", response.getCode());
-    //    }
-    //
-    //    @Test
-    //    public void testParallelGet_onlyAddOneResultSet() throws OXException, IOException, JSONException, ApiException, InterruptedException {
-    //        String externalUri = "http://example.com/files/testParallelGet_onlyAddOneResultSet.ics";
-    //        mock(externalUri, ICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK, null, 2);
-    //
-    //        JSONObject ical = new JSONObject();
-    //        ical.put("uri", externalUri);
-    //        JSONObject configuration = new JSONObject();
-    //        configuration.put("configuration", ical);
-    //
-    //        String folderId = createFolderId(createAccount(ical));
-    //
-    //        ExecutorService executor = Executors.newWorkStealingPool();
-    //
-    //        Callable<Void> callable = new Callable<Void>() {
-    //
-    //            @Override
-    //            public Void call() throws Exception {
-    //                try {
-    //                    eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis()), false, folderId);
-    //                } catch (ApiException e) {
-    //                    // TODO Auto-generated catch block
-    //                    e.printStackTrace();
-    //                }
-    //                return null;
-    //            }
-    //        };
-    //        List<Callable<Void>> callables = Arrays.asList(callable, callable, callable);
-    //        executor.invokeAll(callables).stream().map(future -> {
-    //            try {
-    //                return future.get();
-    //            } catch (Exception e) {
-    //                throw new IllegalStateException(e);
-    //            }
-    //        });
-    //
-    //        List<EventData> allEvents = eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis()), false, folderId);
-    //        assertEquals(38, allEvents.size());
-    //    }
-    //
-    //    @Test
-    //    public void testParallelGetForMultipleUsers_onlyAddOneResultSet() throws OXException, IOException, JSONException, ApiException, InterruptedException {
-    //        
-    //    }
+    @Test
+    public void testEventsCreated() throws JSONException, ApiException, OXException, IOException {
+        String externalUri = "http://example.com/files/testEventsCreated.ics";
+        mock(externalUri, ICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK);
 
+        String newFolderId = createDefaultAccount(externalUri);
+
+        List<EventData> allEvents = eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis()), false, newFolderId);
+        assertEquals(38, allEvents.size());
+    }
+
+    @Test
+    public void testFolderConfiguredCorrectly_nameAndDescriptionNotAvailableButTitle() throws JSONException, OXException, IOException, ApiException {
+        String externalUri = "http://example.com/files/testFolderConfiguredCorrectly_nameAndDescriptionNotAvailable.ics";
+        mock(externalUri, ICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK);
+
+        FolderDataComOpenexchangeCalendarConfig config = new FolderDataComOpenexchangeCalendarConfig();
+        NewFolderBodyFolder folder = createFolder(externalUri, config);
+        addPermissions(folder);
+
+        NewFolderBody body = new NewFolderBody();
+        body.setFolder(folder);
+
+        String lFolderId = createAccount(body);
+
+        //get events to fill events
+        eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis()), false, lFolderId);
+
+        FolderResponse returnedFolder = foldersApi.getFolder(defaultUserApi.getSession(), lFolderId, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE);
+        String folderName = returnedFolder.getData().getTitle();
+
+        assertEquals(folder.getTitle(), folderName);
+        assertNull(returnedFolder.getData().getComOpenexchangeCalendarExtendedProperties().getDescription().getValue());
+    }
+
+    @Test
+    public void testFolderConfiguredCorrectlyIfNameAndDescriptionIsInIcsAndEventsRetrieved_takeNameFromFeed() throws JSONException, OXException, IOException, ApiException {
+        String externalUri = "http://example.com/files/testFolderConfiguredCorrectlyIfNameAndDescriptionIsInIcsAndEventsRetrieved.ics";
+        mock(externalUri, ICalCalendarProviderTestConstants.RESPONSE_WITH_ADDITIONAL_PROPERTIES, HttpStatus.SC_OK);
+
+        FolderDataComOpenexchangeCalendarConfig config = new FolderDataComOpenexchangeCalendarConfig();
+        NewFolderBodyFolder folder = createFolder(externalUri, config);
+        addPermissions(folder);
+        folder.setTitle(null);
+        NewFolderBody body = new NewFolderBody();
+        body.setFolder(folder);
+
+        String newFolderId = createAccount(body);
+
+        //get events to fill table
+        List<EventData> allEvents = eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis()), false, newFolderId);
+        assertEquals(102, allEvents.size());
+
+        FolderResponse folderResponse = foldersApi.getFolder(defaultUserApi.getSession(), newFolderId, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE);
+        String folderName = folderResponse.getData().getTitle();
+
+        assertEquals("FC Schalke 04", folderName);
+        assertEquals("Alle Spiele von FC Schalke 04", folderResponse.getData().getComOpenexchangeCalendarExtendedProperties().getDescription().getValue());
+    }
+
+    @Test
+    public void testFolderConfiguredCorrectlyIfNameAndDescriptionIsInIcsWithoutRetrievingEvents() throws JSONException, OXException, IOException, ApiException {
+        String externalUri = "http://example.com/files/testFolderConfiguredCorrectlyIfNameAndDescriptionIsInIcsWithoutRetrievingEvents.ics";
+        mock(externalUri, ICalCalendarProviderTestConstants.RESPONSE_WITH_ADDITIONAL_PROPERTIES, HttpStatus.SC_OK);
+
+        FolderDataComOpenexchangeCalendarConfig config = new FolderDataComOpenexchangeCalendarConfig();
+        NewFolderBodyFolder folder = createFolder(externalUri, config);
+        addPermissions(folder);
+        folder.setTitle(null);
+        NewFolderBody body = new NewFolderBody();
+        body.setFolder(folder);
+        String newFolderId = createAccount(body);
+
+        FolderResponse folderResponse = foldersApi.getFolder(defaultUserApi.getSession(), newFolderId, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE);
+        String folderName = folderResponse.getData().getTitle();
+
+        assertEquals("FC Schalke 04", folderName);
+        assertEquals("Alle Spiele von FC Schalke 04", folderResponse.getData().getComOpenexchangeCalendarExtendedProperties().getDescription().getValue());
+    }
+
+    @Test
+    public void testFolderUpdate() throws OXException, IOException, JSONException, ApiException {
+        String externalUri = "http://example.com/files/testFolderUpdate.ics";
+        mock(externalUri, ICalCalendarProviderTestConstants.RESPONSE_WITH_ADDITIONAL_PROPERTIES, HttpStatus.SC_OK);
+
+        String newFolderId = createDefaultAccount(externalUri);
+
+        FolderResponse folder = foldersApi.getFolder(defaultUserApi.getSession(), newFolderId, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE);
+
+        FolderData folderData = folder.getData();
+        folderData.setTitle("changed");
+        FolderDataComOpenexchangeCalendarExtendedProperties extendedProperties = new FolderDataComOpenexchangeCalendarExtendedProperties();
+        FolderDataComOpenexchangeCalendarExtendedPropertiesColor color = new FolderDataComOpenexchangeCalendarExtendedPropertiesColor();
+        color.setValue("blue");
+        extendedProperties.setColor(color);
+        folderData.setComOpenexchangeCalendarExtendedProperties(extendedProperties);
+
+        FolderBody body = new FolderBody();
+        body.setFolder(folderData);
+
+        FolderUpdateResponse updateResponse = foldersApi.updateFolder(defaultUserApi.getSession(), newFolderId, System.currentTimeMillis(), body, false, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE, false);
+        assertNull(updateResponse.getError());
+
+        FolderResponse folderReload = foldersApi.getFolder(defaultUserApi.getSession(), newFolderId, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE);
+        assertEquals("changed", folderReload.getData().getTitle());
+        assertEquals("blue", folderReload.getData().getComOpenexchangeCalendarExtendedProperties().getColor().getValue());
+        assertEquals("Alle Spiele von FC Schalke 04", folderReload.getData().getComOpenexchangeCalendarExtendedProperties().getDescription().getValue());
+    }
+
+    @Test
+    public void testFolderUpdateWithGettingEvents() throws OXException, IOException, JSONException, ApiException {
+        String externalUri = "http://example.com/files/testFolderUpdateWithGettingEvents.ics";
+        mock(externalUri, ICalCalendarProviderTestConstants.RESPONSE_WITH_ADDITIONAL_PROPERTIES, HttpStatus.SC_OK);
+
+        String newFolderId = createDefaultAccount(externalUri);
+
+        List<EventData> allEvents = eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis()), false, newFolderId);
+
+        FolderResponse folder = foldersApi.getFolder(defaultUserApi.getSession(), newFolderId, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE);
+
+        FolderData folderData = folder.getData();
+        folderData.setTitle("changed");
+        FolderDataComOpenexchangeCalendarExtendedProperties extendedProperties = new FolderDataComOpenexchangeCalendarExtendedProperties();
+        FolderDataComOpenexchangeCalendarExtendedPropertiesColor color = new FolderDataComOpenexchangeCalendarExtendedPropertiesColor();
+        color.setValue("blue");
+        extendedProperties.setColor(color);
+        FolderDataComOpenexchangeCalendarExtendedPropertiesDescription description = new FolderDataComOpenexchangeCalendarExtendedPropertiesDescription();
+        String updatedDescription = "Keine Lust auf description";
+        description.setValue(updatedDescription);
+        extendedProperties.setDescription(description);
+        folderData.setComOpenexchangeCalendarExtendedProperties(extendedProperties);
+        FolderBody body = new FolderBody();
+        body.setFolder(folderData);
+
+        FolderUpdateResponse updateResponse = foldersApi.updateFolder(defaultUserApi.getSession(), newFolderId, System.currentTimeMillis(), body, false, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE, false);
+        assertNull(updateResponse.getError());
+
+        FolderResponse folderReload = foldersApi.getFolder(defaultUserApi.getSession(), newFolderId, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE);
+        assertEquals("changed", folderReload.getData().getTitle());
+        assertEquals(updatedDescription, folderReload.getData().getComOpenexchangeCalendarExtendedProperties().getDescription().getValue());
+
+        List<EventData> allEventsReloaded = eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis()), false, newFolderId);
+        assertEquals(allEvents.size(), allEventsReloaded.size());
+    }
+
+    @Test
+    public void testCalendarAccountUpdate_updateShouldContainAllFieldsAndEventsOnce() throws JSONException, OXException, IOException, ApiException {
+        String externalUri = "http://example.com/files/testCalendarAccountUpdateWithUpdatedURI.ics";
+        mock(externalUri, ICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK);
+
+        String newFolderId = createDefaultAccount(externalUri);
+
+        List<EventData> allEvents = eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis()), false, newFolderId);
+        assertEquals(38, allEvents.size());
+
+        FolderResponse folder = foldersApi.getFolder(defaultUserApi.getSession(), newFolderId, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE);
+        FolderData data = folder.getData();
+        data.getComOpenexchangeCalendarConfig().setRefreshInterval("100000");
+        FolderDataComOpenexchangeCalendarExtendedPropertiesColor folderDataComOpenexchangeCalendarExtendedPropertiesColor = new FolderDataComOpenexchangeCalendarExtendedPropertiesColor();
+        folderDataComOpenexchangeCalendarExtendedPropertiesColor.setValue("blue");
+        data.getComOpenexchangeCalendarExtendedProperties().setColor(folderDataComOpenexchangeCalendarExtendedPropertiesColor);
+
+        FolderBody body = new FolderBody();
+        body.setFolder(data);
+
+        FolderUpdateResponse updateResponse = foldersApi.updateFolder(defaultUserApi.getSession(), newFolderId, System.currentTimeMillis(), body, false, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE, false);
+        assertNull(updateResponse.getError());
+
+        List<EventData> allEventsAfterUriChange = eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis()), false, folderId);
+        assertEquals(38, allEventsAfterUriChange.size());
+
+        FolderResponse folderReload = foldersApi.getFolder(defaultUserApi.getSession(), newFolderId, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE);
+        assertEquals("blue", folderReload.getData().getComOpenexchangeCalendarExtendedProperties().getColor().getValue()); // should only pass after removing calendar account api
+    }
+
+    @Test
+    public void testCalendarAccountUriUpdateNotAllowed() throws JSONException, OXException, IOException, ApiException {
+        String externalUri = "http://example.com/files/testCalendarAccountUpdateWithUpdatedURI.ics";
+        mock(externalUri, ICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK);
+
+        String newFolderId = createDefaultAccount(externalUri);
+
+        List<EventData> allEvents = eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis()), false, newFolderId);
+        assertEquals(38, allEvents.size());
+
+        String externalUri2 = "http://example.com/files/testCalendarAccountUpdateWithUpdatedURI_invalidateCache.ics";
+        mock(externalUri2, ICalCalendarProviderTestConstants.RESPONSE_WITH_ADDITIONAL_PROPERTIES, HttpStatus.SC_OK);
+
+        FolderResponse folder = foldersApi.getFolder(defaultUserApi.getSession(), newFolderId, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE);
+        FolderData data = folder.getData();
+        data.getComOpenexchangeCalendarConfig().setUri(externalUri2);
+        FolderBody body = new FolderBody();
+        body.setFolder(data);
+
+        FolderUpdateResponse updateResponse = foldersApi.updateFolder(defaultUserApi.getSession(), newFolderId, System.currentTimeMillis(), body, false, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE, false);
+        assertNotNull(updateResponse.getError());
+
+        assertEquals("ICAL-PROV-4044", updateResponse.getCode());
+    }
+
+    @Test
+    public void testParallelGet_onlyAddOnce() throws OXException, IOException, JSONException, ApiException, InterruptedException {
+        String externalUri = "http://example.com/files/testParallelGet_onlyAddOneResultSet.ics";
+        mock(externalUri, ICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK, null, 2);
+
+        String newFolderId = createDefaultAccount(externalUri);
+
+        ExecutorService executor = Executors.newWorkStealingPool();
+
+        Callable<Void> callable = new Callable<Void>() {
+
+            @Override
+            public Void call() throws Exception {
+                try {
+                    eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis()), false, newFolderId);
+                } catch (ApiException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        };
+        List<Callable<Void>> callables = Arrays.asList(callable, callable, callable);
+        executor.invokeAll(callables).stream().map(future -> {
+            try {
+                return future.get();
+            } catch (Exception e) {
+                throw new IllegalStateException(e);
+            }
+        });
+
+        List<EventData> allEvents = eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis()), false, newFolderId);
+        assertEquals(38, allEvents.size());
+    }
+
+    private String createDefaultAccount(String externalUri) throws ApiException {
+        FolderDataComOpenexchangeCalendarConfig config = new FolderDataComOpenexchangeCalendarConfig();
+        NewFolderBodyFolder folder = createFolder(externalUri, config);
+        addPermissions(folder);
+
+        NewFolderBody body = new NewFolderBody();
+        body.setFolder(folder);
+
+        return createAccount(body);
+    }
+
+    private NewFolderBodyFolder createFolder(String externalUri, FolderDataComOpenexchangeCalendarConfig config) {
+        config.setEnabled(Boolean.TRUE);
+        config.setUri(externalUri);
+        NewFolderBodyFolder folder = new NewFolderBodyFolder();
+        folder.setModule("event");
+        folder.setComOpenexchangeCalendarConfig(config);
+        folder.setSubscribed(Boolean.TRUE);
+        folder.setTitle("testFolder_" + System.nanoTime());
+        folder.setComOpenexchangeCalendarProvider(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
+        return folder;
+    }
+
+    private void addPermissions(NewFolderBodyFolder folder) {
+        FolderPermission perm = new FolderPermission();
+        perm.setEntity(defaultUserApi.getCalUser());
+        perm.setGroup(Boolean.FALSE);
+        perm.setBits(403710016);
+
+        List<FolderPermission> permissions = new ArrayList<>();
+        permissions.add(perm);
+
+        folder.setPermissions(permissions);
+    }
 }
