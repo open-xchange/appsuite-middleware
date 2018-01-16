@@ -77,6 +77,7 @@ import com.openexchange.groupware.contact.helpers.UseCountComparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.groupware.upload.impl.MaxSize;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.search.Operand;
 import com.openexchange.search.SearchExceptionMessages;
@@ -530,7 +531,7 @@ public class ContactRequest {
 
     public boolean containsImage() throws OXException {
         long maxSize = sysconfMaxUpload();
-        return request.hasUploads(-1L, maxSize > 0 ? maxSize : -1L);
+        return request.hasUploads(-1L, MaxSize.builder().withUploadLimit(maxSize > 0 ? maxSize : -1L).build());
     }
 
     public JSONObject getContactJSON(final boolean isUpload) throws OXException {
@@ -538,7 +539,7 @@ public class ContactRequest {
             return (JSONObject) request.requireData();
         }
         long maxSize = sysconfMaxUpload();
-        String jsonField = request.getUploadEvent(-1L, maxSize > 0 ? maxSize : -1L).getFormField("json");
+        String jsonField = request.getUploadEvent(-1L, MaxSize.builder().withUploadLimit(maxSize > 0 ? maxSize : -1L).build()).getFormField("json");
         try {
             return new JSONObject(jsonField);
         } catch (final JSONException e) {
@@ -548,7 +549,7 @@ public class ContactRequest {
 
     public UploadEvent getUploadEvent() throws OXException {
         long maxSize = sysconfMaxUpload();
-        return request.getUploadEvent(-1L, maxSize > 0 ? maxSize : -1L);
+        return request.getUploadEvent(-1L, MaxSize.builder().withUploadLimit(maxSize > 0 ? maxSize : -1L).build());
     }
 
     public int[] getDeleteRequestData() throws OXException {

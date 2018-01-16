@@ -89,9 +89,13 @@ import com.openexchange.file.storage.json.FileMetadataParser;
 import com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param;
 import com.openexchange.file.storage.json.osgi.FileFieldCollector;
 import com.openexchange.file.storage.json.services.Services;
+import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
+import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
 import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.groupware.upload.impl.MaxSize;
 import com.openexchange.java.FileKnowingInputStream;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
@@ -138,12 +142,58 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     private boolean notifyPermissionEntities;
     private Transport notificationTransport;
     private String notificationMessage;
+    private MaxSize maxSize;
 	protected AJAXRequestData data;
 
     public AJAXInfostoreRequest(final AJAXRequestData requestData, final ServerSession session) {
         super();
         this.data = requestData;
         this.session = session;
+        maxSize = null;
+    }
+
+    private MaxSize determineMaxSize() throws OXException {
+        MaxSize maxSize = this.maxSize;
+        if (null == maxSize) {
+            // Since Infostore/Drive uploads are supposed to be stored in internal filestore, check available space of user-associated filestore
+            Long available = null;
+            {
+                String folderId = null;
+                {
+                    File file = getFile();
+                    if (null != file) {
+                        folderId = file.getFolderId();
+                    }
+                    if (null == folderId) {
+                        folderId = getFolderId();
+                    }
+                }
+                if (null != folderId) {
+                    int filestoreOwner = getFileAccess().getAssociatedFilestoreOwnerFor(folderId);
+                    if (filestoreOwner > 0) {
+                        QuotaFileStorage qfs = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(filestoreOwner, session.getContextId(), Info.drive());
+                        long quota = qfs.getQuota();
+                        if (quota >= 0) {
+                            // There is only a storage space limitation if quota is equal to or greater than 0 (zero)
+                            if (quota == 0) {
+                                // No space at all
+                                available = Long.valueOf(0L);
+                            } else {
+                                long avail = quota - qfs.getUsage();
+                                available = Long.valueOf(avail <= 0L ? 0L : avail);
+                            }
+                        }
+                    }
+                }
+            }
+
+            maxSize = MaxSize.builder().withUploadLimit(InfostoreConfigUtils.determineRelevantUploadSize()).build();
+            if (null != available && (maxSize.getMaxSize() < 0 || available.longValue() < maxSize.getMaxSize())) {
+                maxSize = MaxSize.builder().withStorageLimit(available.longValue() <= 0 ? 0 : available.longValue()).build();
+            }
+            this.maxSize = maxSize;
+        }
+        return maxSize;
     }
 
     @Override
@@ -493,10 +543,10 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public InputStream getUploadedFileData() throws OXException {
-        long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
-        if (data.hasUploads(-1, maxSize > 0 ? maxSize : -1L)) {
+        MaxSize maxSize = determineMaxSize();
+        if (data.hasUploads(-1, maxSize)) {
             try {
-                final UploadFile uploadFile = data.getFiles(-1, maxSize > 0 ? maxSize : -1L).get(0);
+                final UploadFile uploadFile = data.getFiles(-1, maxSize).get(0);
                 checkSize(uploadFile.getSize());
                 java.io.File tmpFile = uploadFile.getTmpFile();
                 return new FileKnowingInputStream(new FileInputStream(tmpFile), tmpFile);
@@ -552,8 +602,8 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     @Override
     public boolean hasUploads() throws OXException {
-        long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
-        return data.hasUploads(-1, maxSize > 0 ? maxSize : -1L) || contentData != null;
+        MaxSize maxSize = determineMaxSize();
+        return data.hasUploads(-1, maxSize) || contentData != null;
     }
 
     @Override
@@ -577,8 +627,8 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     @Override
     public InfostoreRequest requireBody() throws OXException {
         if (data.getData() == null) {
-            long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
-            if (!data.hasUploads(-1, maxSize > 0 ? maxSize : -1L) && data.getParameter("json") == null) {
+            MaxSize maxSize = determineMaxSize();
+            if (!data.hasUploads(-1, maxSize) && data.getParameter("json") == null) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create( "data");
             }
         }
@@ -738,7 +788,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return (JSONArray) obj;
     }
 
-    private JSONArray optBodyAsJsonArray() throws OXException {
+    private JSONArray optBodyAsJsonArray() {
         Object obj = data.getData();
         if (null == obj) {
             return null;
@@ -833,16 +883,14 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             }
         }
 
+        MaxSize maxSize = determineMaxSize();
         UploadFile uploadFile = null;
-        {
-            long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
-            if (data.hasUploads(-1, maxSize > 0 ? maxSize : -1L)) {
-                uploadFile = data.getFiles(-1, maxSize > 0 ? maxSize : -1L).get(0);
-            }
+        if (data.hasUploads(-1, maxSize)) {
+            uploadFile = data.getFiles(-1, maxSize).get(0);
         }
 
-        if (data.getUploadEvent() != null) {
-            final List<UploadFile> list = data.getUploadEvent().getUploadFilesByFieldName("file");
+        if (data.getUploadEvent(-1, maxSize) != null) {
+            final List<UploadFile> list = data.getUploadEvent(-1, maxSize).getUploadFilesByFieldName("file");
             if (list != null && !list.isEmpty()) {
                 uploadFile = list.get(0);
             }

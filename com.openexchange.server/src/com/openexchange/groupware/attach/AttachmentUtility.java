@@ -63,9 +63,13 @@ import org.slf4j.Logger;
 import com.openexchange.ajax.Attachment;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
+import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.groupware.upload.impl.MaxSize;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -103,10 +107,31 @@ public final class AttachmentUtility {
      */
     public static List<Integer> attachTo(final int objectId, final int module, final int folderId, final AJAXRequestData requestData, final ServerSession session) throws OXException {
         long maxUploadSize = AttachmentConfig.getMaxUploadSize();
-        if (!requestData.hasUploads(-1, maxUploadSize > 0 ? maxUploadSize : -1L)) {
+        Long available = null;
+        {
+            // Since attachment uploads are supposed to be stored in internal filestore, check available space of context-associated filestore
+            QuotaFileStorage qfs = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(session.getContextId(), Info.general());
+            long quota = qfs.getQuota();
+            if (quota >= 0) {
+                // There is only a storage space limitation if quota is equal to or greater than 0 (zero)
+                if (quota == 0) {
+                    // No space at all
+                    available = Long.valueOf(0L);
+                } else {
+                    long avail = quota - qfs.getUsage();
+                    available = Long.valueOf(avail <= 0L ? 0L : avail);
+                }
+            }
+        }
+
+        MaxSize maxSize = MaxSize.builder().withUploadLimit(maxUploadSize > 0 ? maxUploadSize : -1L).build();
+        if (null != available && (maxSize.getMaxSize() < 0 || available.longValue() < maxSize.getMaxSize())) {
+            maxSize = MaxSize.builder().withStorageLimit(available.longValue() <= 0 ? 0 : available.longValue()).build();
+        }
+        if (!requestData.hasUploads(-1, maxSize)) {
             return Collections.emptyList();
         }
-        final UploadEvent upload = requestData.getUploadEvent(-1, maxUploadSize > 0 ? maxUploadSize : -1L);
+        final UploadEvent upload = requestData.getUploadEvent(-1, maxSize);
         if (null == upload) {
             return Collections.emptyList();
         }

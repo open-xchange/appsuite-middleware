@@ -289,7 +289,7 @@ public final class UploadUtility {
      * @return The processed instance of {@link UploadEvent}
      * @throws OXException Id processing the upload fails
      */
-    public static UploadEvent processUpload(HttpServletRequest req, long maxFileSize, long maxOverallSize, Session session) throws OXException {
+    public static UploadEvent processUpload_Disabled(HttpServletRequest req, long maxFileSize, long maxOverallSize, Session session) throws OXException {
         MaxSize maxSize = maxOverallSize < 0 ? MaxSize.UNLIMITED : MaxSize.builder().withMaxSize(maxOverallSize).withSource(MaxSize.Source.UPLOAD_LIMIT).build();
         return processUpload(req, maxFileSize, maxSize, session);
     }

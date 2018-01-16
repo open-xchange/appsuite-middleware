@@ -87,6 +87,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.groupware.upload.impl.MaxSize;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
@@ -174,7 +175,7 @@ public final class ImportAction extends AbstractMailAction {
                         if (maxSize <= 0) {
                             maxSize = -1L;
                         }
-                        iter = request.getFiles(maxFileSize, maxSize).iterator();
+                        iter = request.getFiles(maxFileSize, MaxSize.builder().withUploadLimit(maxSize > 0 ? maxSize : -1L).build()).iterator();
                     }
 
                     // Iterate uploaded messages

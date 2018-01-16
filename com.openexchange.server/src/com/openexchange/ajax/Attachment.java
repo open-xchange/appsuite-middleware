@@ -75,6 +75,9 @@ import com.openexchange.ajax.request.AttachmentRequest;
 import com.openexchange.ajax.request.ServletRequestAdapter;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
+import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentConfig;
 import com.openexchange.groupware.attach.AttachmentExceptionCodes;
@@ -85,6 +88,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.groupware.upload.impl.MaxSize;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadSizeExceededException;
@@ -292,8 +296,29 @@ public class Attachment extends PermissionServlet {
                 UploadEvent upload = null;
                 try {
                     {
-                        long maxSize = getMaxUploadSize();
-                        upload = processUpload(req, -1L, maxSize > 0 ? maxSize : -1L, session);
+                        long maxUploadSize = getMaxUploadSize();
+                        Long available = null;
+                        {
+                            // Since attachment uploads are supposed to be stored in internal filestore, check available space of context-associated filestore
+                            QuotaFileStorage qfs = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(session.getContextId(), Info.general());
+                            long quota = qfs.getQuota();
+                            if (quota >= 0) {
+                                // There is only a storage space limitation if quota is equal to or greater than 0 (zero)
+                                if (quota == 0) {
+                                    // No space at all
+                                    available = Long.valueOf(0L);
+                                } else {
+                                    long avail = quota - qfs.getUsage();
+                                    available = Long.valueOf(avail <= 0L ? 0L : avail);
+                                }
+                            }
+                        }
+
+                        MaxSize maxSize = MaxSize.builder().withUploadLimit(maxUploadSize > 0 ? maxUploadSize : -1L).build();
+                        if (null != available && (maxSize.getMaxSize() < 0 || available.longValue() < maxSize.getMaxSize())) {
+                            maxSize = MaxSize.builder().withStorageLimit(available.longValue() <= 0 ? 0 : available.longValue()).build();
+                        }
+                        upload = processUpload(req, -1L, maxSize, session);
                     }
                     final List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
                     final List<UploadFile> uploadFiles = new ArrayList<UploadFile>();

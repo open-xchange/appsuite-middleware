@@ -87,10 +87,10 @@ public interface UploadRegistry {
      *
      * @param req The corresponding instance of <code>HttpServletRequest</code>
      * @param maxFileSize The maximum allowed size of a single uploaded file or <code>-1</code>
-     * @param maxOverallSize The maximum allowed size of a complete request or <code>-1</code>
+     * @param maxSize The maximum allowed size of a complete request or {@link MaxSize#UNLIMITED}
      * @param session The associated session or <code>null</code>
      * @return An <code>UpdateEvent</code> object from incoming multipart form data
      * @throws OXException If an error like over quota occurs
      */
-    UploadEvent processUpload(HttpServletRequest req, long maxFileSize, long maxOverallSize, Session session) throws OXException;
+    UploadEvent processUpload(HttpServletRequest req, long maxFileSize, MaxSize maxSize, Session session) throws OXException;
 }

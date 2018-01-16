@@ -83,6 +83,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.groupware.upload.impl.MaxSize;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadListener;
 import com.openexchange.groupware.upload.impl.UploadRegistry;
@@ -1017,12 +1018,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     @Deprecated
     @Override
     public UploadEvent processUpload(HttpServletRequest req) throws OXException {
-        return processUpload(req, -1, -1, null);
+        return processUpload(req, -1, MaxSize.UNLIMITED, null);
     }
 
     @Override
-    public UploadEvent processUpload(HttpServletRequest req, long maxFileSize, long maxOverallSize, Session session) throws OXException {
-        return processUploadStatic(req, maxFileSize, maxOverallSize, session);
+    public UploadEvent processUpload(HttpServletRequest req, long maxFileSize, MaxSize maxSize, Session session) throws OXException {
+        return processUploadStatic(req, maxFileSize, maxSize, session);
     }
 
     /**
@@ -1067,7 +1068,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      */
     @Deprecated
     public static final UploadEvent processUploadStatic(HttpServletRequest req) throws OXException {
-        return processUploadStatic(req, -1, -1, null);
+        return processUploadStatic(req, -1, MaxSize.UNLIMITED, null);
     }
 
     /**
@@ -1075,13 +1076,13 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      *
      * @param req The request whose upload shall be processed
      * @param maxFileSize The maximum allowed size of a single uploaded file or <code>-1</code>
-     * @param maxOverallSize The maximum allowed size of a complete request or <code>-1</code>
+     * @param maxSize The maximum allowed size of a complete request or {@link MaxSize#UNLIMITED}
      * @param session The associated session or <code>null</code>
      * @return The processed instance of {@link UploadEvent}
      * @throws OXException Id processing the upload fails
      */
-    public static final UploadEvent processUploadStatic(HttpServletRequest req, long maxFileSize, long maxOverallSize, Session session) throws OXException {
-        return UploadUtility.processUpload(req, maxFileSize, maxOverallSize, session);
+    public static final UploadEvent processUploadStatic(HttpServletRequest req, long maxFileSize, MaxSize maxSize, Session session) throws OXException {
+        return UploadUtility.processUpload(req, maxFileSize, maxSize, session);
     }
 
     @Override

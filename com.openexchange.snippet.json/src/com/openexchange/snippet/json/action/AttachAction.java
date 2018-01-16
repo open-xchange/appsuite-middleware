@@ -65,6 +65,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.groupware.upload.impl.MaxSize;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.java.Strings;
@@ -131,10 +132,11 @@ public final class AttachAction extends SnippetAction {
         final DefaultSnippet snippet = new DefaultSnippet().setId(id);
         final AJAXRequestData requestData = snippetRequest.getRequestData();
         long maxSize = sysconfMaxUpload();
-        if (!requestData.hasUploads(-1L, maxSize > 0 ? maxSize : -1L)) {
+        MaxSize max = MaxSize.builder().withUploadLimit(maxSize > 0 ? maxSize : -1L).build();
+        if (!requestData.hasUploads(-1L, max)) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("Not an upload request.");
         }
-        final UploadEvent upload = requestData.getUploadEvent();
+        final UploadEvent upload = requestData.getUploadEvent(-1, max);
         /*
          * Iterate uploaded files
          */

@@ -83,6 +83,30 @@ public class MaxSize {
         }
 
         /**
+         * Sets the maximum allowed size for an upload request and {@link Source#UPLOAD_LIMIT UPLOAD_LIMIT} as source.
+         *
+         * @param maxSize The maximum allowed size
+         * @return This builder
+         */
+        public Builder withUploadLimit(long maxSize) {
+            this.maxSize = maxSize >= 0 ? maxSize : -1L;
+            this.source = Source.UPLOAD_LIMIT;
+            return this;
+        }
+
+        /**
+         * Sets the maximum allowed size for an upload request and {@link Source#STORAGE_LIMIT STORAGE_LIMIT} as source.
+         *
+         * @param maxSize The maximum allowed size
+         * @return This builder
+         */
+        public Builder withStorageLimit(long maxSize) {
+            this.maxSize = maxSize >= 0 ? maxSize : -1L;
+            this.source = Source.STORAGE_LIMIT;
+            return this;
+        }
+
+        /**
          * Sets the source for maximum allowed size for an upload request.
          *
          * @param source The source
@@ -100,7 +124,7 @@ public class MaxSize {
          * @return This builder
          */
         public Builder withMaxSize(long maxSize) {
-            this.maxSize = maxSize;
+            this.maxSize = maxSize >= 0 ? maxSize : -1L;
             return this;
         }
 
