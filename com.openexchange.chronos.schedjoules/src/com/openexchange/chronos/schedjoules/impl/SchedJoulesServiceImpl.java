@@ -150,7 +150,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
             });
             return getPage(contextId, itemId, locale, filteredFields);
         } catch (ExecutionException e) {
-            throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
+            throw handleExecutionException(e);
         }
     }
 
@@ -176,7 +176,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
             filterContent(content, SchedJoulesPageField.toSring(filteredFields));
             return new SchedJoulesResult(content);
         } catch (ExecutionException e) {
-            throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
+            throw handleExecutionException(e);
         }
     }
 
@@ -190,7 +190,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
         try {
             return new SchedJoulesResult(countriesCache.get(new SchedJoulesCachedItemKey(contextId, COUNTRIES_ID, locale)).getItemData());
         } catch (ExecutionException e) {
-            throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
+            throw handleExecutionException(e);
         }
     }
 
@@ -204,7 +204,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
         try {
             return new SchedJoulesResult(languagesCache.get(new SchedJoulesCachedItemKey(contextId, LANGUAGES_ID, null)).getItemData());
         } catch (ExecutionException e) {
-            throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
+            throw handleExecutionException(e);
         }
     }
 
@@ -297,5 +297,20 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
         } else if (obj instanceof JSONArray) {
             filterJSONArray((JSONArray) obj, filteredFields);
         }
+    }
+
+    /**
+     * Handles the specified {@link ExecutionException}. If the cause of the exception is
+     * an {@link OXException} then the cause is thrown, otherwise the {@link ExecutionException} is
+     * wrapped in a the {@link SchedJoulesAPIExceptionCodes#UNEXPECTED_ERROR} exception.
+     * 
+     * @param e the {@link ExecutionException} to handle
+     * @return the wrapped {@link OXException}
+     */
+    private OXException handleExecutionException(ExecutionException e) {
+        if (e.getCause() != null && e.getCause() instanceof OXException) {
+            return (OXException) e.getCause();
+        }
+        return SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
     }
 }
