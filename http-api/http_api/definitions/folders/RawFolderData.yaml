@@ -177,6 +177,9 @@ com.openexchange.calendar.config:
     itemId:
       type: string
       description: (schedjoules provider only) Unique identifier for schedjoules feed.
+    locale:
+      type: string
+      description: (schedjoules provider only) The locale of the subscribed schedjoules feed.
 com.openexchange.calendar.provider:
   type: string
   description: Denotes the identifier of the underlying calendar provider.
