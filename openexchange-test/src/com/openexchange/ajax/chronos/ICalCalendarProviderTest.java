@@ -52,12 +52,7 @@ package com.openexchange.ajax.chronos;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.Map;
 import org.apache.http.HttpStatus;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -67,10 +62,8 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
-import com.openexchange.ajax.proxy.MockRequest;
 import com.openexchange.ajax.proxy.StartMockServerRequest;
 import com.openexchange.chronos.provider.ical.ICalCalendarConstants;
-import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CalendarAccountProbeData;
 import com.openexchange.testing.httpclient.models.CalendarAccountProbeDataComOpenexchangeCalendarConfig;
@@ -83,28 +76,13 @@ import com.openexchange.testing.httpclient.models.CalendarAccountProbeResponse;
  * @since v7.10.0
  */
 // TODO: Use the FolderManager instead of the foldersApi to create new folders
-public class ICalCalendarProviderTest extends AbstractChronosTest {
+public class ICalCalendarProviderTest extends AbstractExternalProviderChronosTest {
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
 
         client.execute(new StartMockServerRequest());
-    }
-
-    private void mock(String uri, String responseContent, int httpStatus) throws OXException, IOException, JSONException {
-        mock(uri, responseContent, httpStatus, Collections.emptyMap());
-    }
-
-    private void mock(String uri, String responseContent, int httpStatus, Map<String, String> responseHeaders) throws OXException, IOException, JSONException {
-        mock(uri, responseContent, httpStatus, responseHeaders, 0);
-    }
-
-    private void mock(String uri, String responseContent, int httpStatus, Map<String, String> responseHeaders, int delay) throws OXException, IOException, JSONException {
-        InputStream stream = new ByteArrayInputStream(responseContent.getBytes(StandardCharsets.UTF_8.name()));
-
-        MockRequest mockRequest = new MockRequest(uri, stream, httpStatus, responseHeaders, delay);
-        client.execute(mockRequest);
     }
 
     //FIXME better object
