@@ -2,7 +2,6 @@
 
 Name:          open-xchange-appsuite-backend
 BuildArch:     noarch
-#!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
 %else
