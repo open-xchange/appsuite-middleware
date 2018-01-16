@@ -282,6 +282,7 @@ public class Compat {
     }
 
     private static Event adjustRecurrenceForExceptionAfterLoad(RdbEventStorage eventStorage, Connection connection, Event event) throws OXException, SQLException {
+        RecurrenceData recurrenceData = null;
         /*
          * drop recurrence information for change exceptions
          */
@@ -294,7 +295,7 @@ public class Compat {
              * load recurrence data from storage for further processing of change exception
              */
             RecurrenceId recurrenceId = null;
-            RecurrenceData recurrenceData = eventStorage.selectRecurrenceData(connection, asInt(event.getSeriesId()), false);
+            recurrenceData = eventStorage.selectRecurrenceData(connection, asInt(event.getSeriesId()), false);
             if (null != recurrenceData) {
                 int recurrencePosition = ((StoredRecurrenceId) event.getRecurrenceId()).getRecurrencePosition();
                 try {
@@ -321,7 +322,9 @@ public class Compat {
             }
         }
         if (event.containsChangeExceptionDates() && null != event.getChangeExceptionDates()) {
-            RecurrenceData recurrenceData = eventStorage.selectRecurrenceData(connection, asInt(event.getSeriesId()), false);
+            if (null == recurrenceData) {
+                recurrenceData = eventStorage.selectRecurrenceData(connection, asInt(event.getSeriesId()), false);
+            }
             if (null != recurrenceData) {
                 event.setChangeExceptionDates(getRecurrenceIDs(eventStorage, event.getId(), recurrenceData, getDates(event.getChangeExceptionDates()), EventField.CHANGE_EXCEPTION_DATES));
             } else {
