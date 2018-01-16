@@ -80,7 +80,8 @@ if [ ${1:-0} -eq 2 ]; then # only when updating
     fi
 
     # SoftwareChange_Request-3414
-    sed -i 's/-> Requires "emclient" capability/-> Requires "emclient_basic" or "emclient_premium" capability/' /opt/open-xchange/etc/client-onboarding-scenarios.yml
+    PFILE=/opt/open-xchange/etc/client-onboarding-scenarios.yml
+    $(contains '-> Requires "emclient" capability' $PFILE) && sed -i 's/-> Requires "emclient" capability/-> Requires "emclient_basic" or "emclient_premium" capability/' $PFILE
 
     # SoftwareChange_Request-3954
     PFILE=/opt/open-xchange/etc/client-onboarding.properties
