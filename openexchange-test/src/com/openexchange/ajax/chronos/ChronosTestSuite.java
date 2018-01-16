@@ -73,7 +73,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
     BasicSelfProtectionTest.class,
     BasicSeriesEventTest.class,
     BasicSingleEventTest.class,
-    CalendarAccountTest.class,
     ChronosQuotaTest.class,
     TimezoneAlarmTriggerTest.class,
     ICalEventImportExportTest.class,

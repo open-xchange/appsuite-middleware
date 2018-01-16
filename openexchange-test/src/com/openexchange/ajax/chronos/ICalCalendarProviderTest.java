@@ -75,7 +75,6 @@ import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CalendarAccountProbeData;
 import com.openexchange.testing.httpclient.models.CalendarAccountProbeDataComOpenexchangeCalendarConfig;
 import com.openexchange.testing.httpclient.models.CalendarAccountProbeResponse;
-import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
 
 /**
  * {@link ICalCalendarProviderTest}
@@ -83,6 +82,7 @@ import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
+// TODO: Use the FolderManager instead of the foldersApi to create new folders
 public class ICalCalendarProviderTest extends AbstractChronosTest {
 
     @Override
@@ -111,8 +111,7 @@ public class ICalCalendarProviderTest extends AbstractChronosTest {
     private String createAccount(JSONObject config) throws ChronosApiException, JsonParseException, JsonMappingException, ApiException, IOException, JSONException {
         JSONObject configuration = new JSONObject();
         configuration.put("configuration", config);
-        FolderUpdateResponse calendarAccount = calendarAccountManager.createCalendarAccount(ICalCalendarConstants.PROVIDER_ID, "testFolder_" + System.nanoTime(), configuration, false);
-        return calendarAccount.getData();
+        return folderManager.createFolder("event", ICalCalendarConstants.PROVIDER_ID, "testFolder_" + System.nanoTime(), configuration, new JSONObject());
     }
 
     private String createFolderId(String accountId) {

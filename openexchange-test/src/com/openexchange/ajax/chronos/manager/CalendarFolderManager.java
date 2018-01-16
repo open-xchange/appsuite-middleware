@@ -168,14 +168,14 @@ public class CalendarFolderManager extends AbstractManager {
         }
         return checkResponse(response.getError(), response.getErrorDesc(), response).getData();
     }
-    
+
     /**
      * Updates the folder with the specified identifier
      * 
      * @param folderId The folder identifier
      * @return The {@link FolderUpdateResponse}
      * @throws ApiException if an API error is occurred
-     * @throws ChronosApiException 
+     * @throws ChronosApiException
      */
     public FolderUpdateResponse updateFolder(FolderData folderData) throws ApiException, ChronosApiException {
         return updateFolder(folderData, false);
@@ -187,7 +187,7 @@ public class CalendarFolderManager extends AbstractManager {
      * @param folderId The folder identifier
      * @return The {@link FolderUpdateResponse}
      * @throws ApiException if an API error is occurred
-     * @throws ChronosApiException 
+     * @throws ChronosApiException
      */
     public FolderUpdateResponse updateFolder(FolderData folderData, boolean expectedException) throws ApiException, ChronosApiException {
         FolderBody body = new FolderBody();
@@ -213,6 +213,19 @@ public class CalendarFolderManager extends AbstractManager {
     }
 
     /**
+     * Deletes the folders with the specified identifier
+     * 
+     * @param folderId The folder identifiers
+     * @throws ApiException if an API error is occurred
+     */
+    public void deleteFolders(List<String> folders) throws ApiException {
+        foldersApi.deleteFolders(userApi.getSession(), folders, TREE_ID, System.currentTimeMillis(), CALENDAR_MODULE, true, false, false);
+        for (String folder : folders) {
+            folderIds.remove(folder);
+        }
+    }
+
+    /**
      * Handles the creation response and remembers the folder id
      *
      * @param response The {@link FolderUpdateResponse}
@@ -225,4 +238,3 @@ public class CalendarFolderManager extends AbstractManager {
         return data;
     }
 }
-

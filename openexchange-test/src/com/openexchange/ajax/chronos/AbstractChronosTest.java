@@ -57,7 +57,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import com.openexchange.ajax.chronos.manager.CalendarAccountManager;
 import com.openexchange.ajax.chronos.manager.CalendarFolderManager;
 import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.ajax.chronos.manager.ICalImportExportManager;
@@ -101,7 +100,6 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
 
     protected EventManager eventManager;
     protected AssetManager assetManager;
-    protected CalendarAccountManager calendarAccountManager;
     protected ICalImportExportManager importExportManager;
     protected CalendarFolderManager folderManager;
 
@@ -126,7 +124,6 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         folderId = getDefaultFolder();
         assetManager = new AssetManager();
         eventManager = new EventManager(defaultUserApi, folderId);
-        calendarAccountManager = new CalendarAccountManager(defaultUserApi, foldersApi);
         importApi = new ImportApi(client);
         exportApi = new ExportApi(client);
         importExportManager = new ICalImportExportManager(exportApi, importApi);
@@ -150,7 +147,6 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         // Clean-up event manager
         eventManager.cleanUp();
 
-        calendarAccountManager.cleanUp();
         try {
             if (folderToDelete != null) {
                 for (UserApi api : folderToDelete.keySet()) {
