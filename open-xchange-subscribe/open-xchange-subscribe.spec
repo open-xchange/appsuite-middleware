@@ -2,7 +2,6 @@
 
 Name:          open-xchange-subscribe
 BuildArch:     noarch
-#!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
 %else
@@ -67,6 +66,7 @@ if [ ${1:-0} -eq 2 ]; then
     ox_add_property com.openexchange.subscribe.microformats.createModifyEnabled false /opt/open-xchange/etc/microformatSubscription.properties
 
     # SoftwareChange_Request-2670
+    pfile=/opt/open-xchange/etc/crawler.properties
     rm -f /opt/open-xchange/etc/crawlers/t-online.yml
     ox_remove_property com.openexchange.subscribe.crawler.t-online.de $pfile
     ox_remove_property com.openexchange.subscribe.crawler.t-online.de.autorunInterval $pfile
