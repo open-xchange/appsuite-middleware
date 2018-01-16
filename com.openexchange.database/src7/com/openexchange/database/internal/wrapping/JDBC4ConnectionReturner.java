@@ -143,7 +143,6 @@ public abstract class JDBC4ConnectionReturner implements Connection, StateAware,
                             try {
                                 statement = con.createStatement();
                                 rs = statement.executeQuery("SELECT 1 AS keep_alive_test");
-                                System.out.println("Performed \"SELECT 1 AS keep_alive_test\" to keep connection alive");
                                 while (rs.next()) {
                                     // Discard
                                 }
