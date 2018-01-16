@@ -28,3 +28,33 @@ teardown() {
   ox_remove_property some.existing.property $PROPFILE
   [[ $(stat -c %Y $PROPFILE) -ne 0 ]]
 }
+
+@test "set property to same value" {
+  set +e
+  ox_set_property some.existing.property foo $PROPFILE
+  set -e
+  [[ $(stat -c %Y $PROPFILE) -eq 0 ]]
+}
+
+@test "set property to new value" {
+  set +e
+  ox_set_property some.existing.property bar $PROPFILE
+  set -e
+  [[ $(stat -c %Y $PROPFILE) -ne 0 ]]
+}
+
+@test "contains property value" {
+  if contains some.existing.property $PROPFILE; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+@test "not contains property value" {
+  if contains some.notexisting.property $PROPFILE; then
+    return 1
+  else
+    return 0
+  fi
+}

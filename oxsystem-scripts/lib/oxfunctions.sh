@@ -222,6 +222,47 @@ ox_daemon_status() {
     fi
 }
 
+# Scans for expression 1 in the file given as parameter2
+#
+# Param1: The expression to look for
+# Param2: The file to search in
+# Return: 0 if the expression was found, 1 otherwise
+# Example:
+#
+#   root@host:~$ $(contains SERVER_NAME /opt/open-xchange/etc/system.properties)
+#   && echo yes || echo no
+#   yes
+#   root@host:~$ 
+#
+contains() {
+    local expression="$1"
+    local file="$2"
+    test -z "$expression" && die "contains: missing expression argument (arg 1)"
+    test -z "$file" && die "contains: missing file argument (arg 2)"
+    test -e "$file" || die "contains: $file does not exist"
+
+    grep -q "$expression" "$file"
+    return $?
+}
+
+# Calculate and return only the md5sum of the given file
+# Param1: The (prop)file to calculate the md5sum from
+# Return: The md5 sum of the file given as Param1 
+# Example:
+#
+#   root@host:~$ [[ $(ox_md5 /usr/bin/md5sum) = $(ox_md5 /usr/bin/md5sum) ]] && echo equal || echo differ
+#   equal
+#   root@host:~$ 
+#
+function ox_md5() {
+    local file="$1"
+    test -z "$file" && die "ox_md5: missing file argument (arg 1)"
+    test -e "$file" || die "ox_md5: $file does not exist"
+    local output=$(md5sum $file)
+    local md5=${output%% *}
+    echo $md5
+}
+
 # usage:
 # ox_set_property property value /path/to/file
 #
@@ -348,7 +389,11 @@ if ( $found ) {
             rm -f $tmp
             die "ox_set_property: FATAL: error setting property $prop to \"$val\" in $propfile"
         else
-            mv $tmp $propfile
+            if [[ $(ox_md5 $tmp) != $(ox_md5 $propfile) ]]; then
+              mv $tmp $propfile
+            else
+              rm $tmp
+            fi
         fi
         unset origfile
         unset propfile
@@ -370,7 +415,11 @@ EOF
             rm -f $tmp
             die "ox_set_property: FATAL: error setting property $prop to \"$val\" in $propfile"
         else
-            mv $tmp $propfile
+            if [[ $(ox_md5 $tmp) != $(ox_md5 $propfile) ]]; then
+              mv $tmp $propfile
+            else
+              rm $tmp
+            fi
         fi
     fi
 }
@@ -759,12 +808,12 @@ ox_set_max_heap() {
       break
     fi
   done
-  
+
   ((modified)) || return 1
 
   # quote
   new_opts_line=\"${opts[*]}\"
-  
+
   # persist
   if ((new_style))
   then
@@ -774,3 +823,4 @@ ox_set_max_heap() {
   fi
   return $?
 }
+
