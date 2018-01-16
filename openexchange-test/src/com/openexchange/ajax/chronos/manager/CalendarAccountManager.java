@@ -82,6 +82,8 @@ import com.openexchange.testing.httpclient.modules.FoldersApi;
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
+ * @deprecated The calendar account API is now obsolete and the {@link CalendarAccountManager}
+ *             will be removed shortly. Use The {@link CalendarFolderManager} instead.
  */
 public class CalendarAccountManager extends AbstractManager {
 
