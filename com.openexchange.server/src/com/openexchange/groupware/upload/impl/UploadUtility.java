@@ -342,10 +342,7 @@ public final class UploadUtility {
         } catch (FileSizeLimitExceededException e) {
             throw UploadFileSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true);
         } catch (SizeLimitExceededException e) {
-            if (MaxSize.Source.UPLOAD_LIMIT == maxOverallSizeSource) {
-                throw UploadSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true);
-            }
-            throw StorageSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true);
+            throw maxOverallSizeSource.handleSizeLimitExceeded(e);
         } catch (FileUploadException e) {
             Throwable cause = e.getCause();
             if (cause instanceof IOException) {

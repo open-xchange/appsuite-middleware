@@ -114,6 +114,7 @@ public class DatabaseFolder extends AbstractFolder {
     private static final String CAPABILITY_LOCKS = Strings.asciiLowerCase(FileStorageCapability.LOCKS.name());
     private static final String CAPABILITY_COUNT_TOTAL = Strings.asciiLowerCase(FileStorageCapability.COUNT_TOTAL.name());
     private static final String CAPABILITY_CASE_INSENSITIVE = Strings.asciiLowerCase(FileStorageCapability.CASE_INSENSITIVE.name());
+    private static final String CAPABILITY_USING_FILESTORE = Strings.asciiLowerCase(FileStorageCapability.USING_FILESTORE.name());
 
     private static final TIntSet COUNTABLE_MODULES = new TIntHashSet(new int[] { FolderObject.CALENDAR, FolderObject.CONTACT, FolderObject.TASK, FolderObject.INFOSTORE });
 
@@ -161,6 +162,7 @@ public class DatabaseFolder extends AbstractFolder {
             addSupportedCapabilities(CAPABILITY_EXTENDED_METADATA);
             addSupportedCapabilities(CAPABILITY_LOCKS);
             addSupportedCapabilities(CAPABILITY_CASE_INSENSITIVE);
+            addSupportedCapabilities(CAPABILITY_USING_FILESTORE);
         }
         int module = contentType.getModule();
         if (COUNTABLE_MODULES.contains(module)) {

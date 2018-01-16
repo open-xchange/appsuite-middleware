@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.upload.impl;
 
+import org.apache.commons.fileupload.FileUploadBase.SizeLimitExceededException;
 
 /**
  * {@link MaxSize} - The maximum allowed size for an upload request.
@@ -115,17 +116,52 @@ public class MaxSize {
 
     // ---------------------------------------------------------------------------------------
 
+    /** Handles an exceeded size limit during upload */
+    public static interface SizeLimitExceededHandler {
+
+        /**
+         * Handles specified <code>SizeLimitExceededException</code> instance.
+         *
+         * @param sizeLimitExceededException The exception to handle
+         * @return The resulting upload exception
+         */
+        UploadException handleSizeLimitExceeded(SizeLimitExceededException sizeLimitExceededException);
+    }
+
     /** The source for maximum allowed size for an upload request. */
-    public static enum Source {
+    public static enum Source implements SizeLimitExceededHandler {
         /**
          * The configured maximum allowed size in bytes for a complete upload request.
          */
-        UPLOAD_LIMIT,
+        UPLOAD_LIMIT(new SizeLimitExceededHandler() {
+
+            @Override
+            public UploadException handleSizeLimitExceeded(SizeLimitExceededException e) {
+                return UploadSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true);
+            }}
+        ),
         /**
          * The available space of the storage to which the binary content is supposed to be saved.
          */
-        STORAGE_LIMIT,
+        STORAGE_LIMIT(new SizeLimitExceededHandler() {
+
+            @Override
+            public UploadException handleSizeLimitExceeded(SizeLimitExceededException e) {
+                return StorageSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true);
+            }}
+        ),
         ;
+
+        private final SizeLimitExceededHandler handler;
+
+        private Source(SizeLimitExceededHandler handler) {
+            this.handler = handler;
+        }
+
+        @Override
+        public UploadException handleSizeLimitExceeded(SizeLimitExceededException sizeLimitExceededException) {
+            return this.handler.handleSizeLimitExceeded(sizeLimitExceededException);
+        }
     }
 
     // ---------------------------------------------------------------------------------------
