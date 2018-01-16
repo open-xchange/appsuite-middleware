@@ -179,7 +179,7 @@ public class Check extends com.openexchange.chronos.common.Check {
      */
     public static Event requireUpToDateTimestamp(Event event, long clientTimestamp) throws OXException {
         if (event.getTimestamp() > clientTimestamp) {
-            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(event.getId(), L(clientTimestamp), L(event.getLastModified().getTime()));
+            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(event.getId(), L(clientTimestamp), L(event.getTimestamp()));
         }
         return event;
     }
