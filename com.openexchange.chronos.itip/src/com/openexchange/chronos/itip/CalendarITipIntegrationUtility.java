@@ -137,7 +137,7 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
 
     @Override
     public Event loadEvent(final Event event, final CalendarSession session) throws OXException {
-        return session.getCalendarService().getEvent(session, event.getId(), new EventID(event.getFolderId(), event.getId()));
+        return session.getCalendarService().getEvent(session, event.getFolderId(), new EventID(event.getFolderId(), event.getId()));
     }
 
     @Override

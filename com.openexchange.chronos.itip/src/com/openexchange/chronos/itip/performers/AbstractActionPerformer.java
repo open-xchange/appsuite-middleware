@@ -56,7 +56,6 @@ import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipActionPerformer;
 import com.openexchange.chronos.itip.ITipAnalysis;
@@ -70,7 +69,6 @@ import com.openexchange.chronos.itip.generators.NotificationParticipant;
 import com.openexchange.chronos.itip.sender.MailSenderService;
 import com.openexchange.chronos.itip.tools.ITipUtils;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
@@ -94,20 +92,32 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
         this.mailGenerators = mailGenerators;
     }
 
+    /**
+     * Get the original event
+     * 
+     * @param change The {@link ITipChange} to get the original event for
+     * @param processed The proccessed events
+     * @param session The {@link CalendarSession}
+     * @return The original {@link Event} or <code>null</code> if no original exists
+     * @throws OXException In case original can't be loaded
+     */
     protected Event determineOriginalEvent(final ITipChange change, final Map<String, Event> processed, final CalendarSession session) throws OXException {
+        if (change.getType().equals(Type.CREATE)) {
+            return null;
+        }
         Event currentEvent = change.getCurrentEvent();
         if (currentEvent == null || Strings.isEmpty(currentEvent.getId())) {
-            if (change.isException() && false == change.getType().equals(Type.CREATE)) {
+            if (change.isException()) {
                 currentEvent = change.getMasterEvent();
                 if (currentEvent == null || currentEvent.getId() != null) {
                     currentEvent = processed.get(change.getNewEvent().getUid());
                     if (currentEvent == null) {
-                        currentEvent = util.loadEvent(change.getNewEvent(), session);
+                        currentEvent = change.getNewEvent();
                     }
                 }
             }
         }
-        return currentEvent;
+        return null == currentEvent ? null : util.loadEvent(currentEvent, session);
     }
 
     protected void ensureFolderId(final Event event, final CalendarSession session) throws OXException {
@@ -126,10 +136,9 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
                 return;
             default: //Continue normally
         }
-        final Event filled = fillup(original, update, session);
-        original = constructOriginalForMail(action, original, filled, session, owner);
+        original = constructOriginalForMail(action, original, update, session, owner);
 
-        final ITipMailGenerator generator = mailGenerators.create(original, filled, session.getSession(), owner, ITipUtils.getPrincipal(session));
+        final ITipMailGenerator generator = mailGenerators.create(original, update, session.getSession(), owner, principal);
         switch (action) {
             case CREATE:
                 if (!generator.userIsTheOrganizer()) {
@@ -216,18 +225,6 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
                 }
             }
         }
-        return copy;
-    }
-
-    private Event fillup(final Event original, final Event update, CalendarSession session) throws OXException {
-        if (original == null) {
-            return update;
-        }
-
-        EventUpdate diff = session.getUtilities().compare(original, update, false, (EventField[]) null);
-        Event copy = session.getUtilities().copyEvent(original, (EventField[]) null);
-        EventMapper.getInstance().copy(original, copy, diff.getUpdatedFields().toArray(new EventField[diff.getUpdatedFields().size()]));
-
         return copy;
     }
 
