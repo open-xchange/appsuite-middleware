@@ -50,43 +50,51 @@
 package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Ignore;
 import org.junit.Test;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
-import com.openexchange.ajax.chronos.factory.AccountConfigurationFactory;
+import com.openexchange.ajax.chronos.factory.CalendarFolderConfig;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
-import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.testing.httpclient.invoker.ApiException;
-import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
+import com.openexchange.testing.httpclient.models.FolderData;
+import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalendarConfig;
 
 /**
  * {@link BasicSchedJoulesProviderTest}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@Ignore //FIXME class only made compileable ... 
 public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
+
+    private static final String MODULE = "event";
+    private static final String PROVIDER_ID = "schedjoules";
 
     private static final int ROOT_PAGE = 115673;
     private static final int NON_EXISTING_CALENDAR = 31145;
     private static final int CALENDAR_ONE = 90734;
     private static final int CALENDAR_TWO = 24428282;
     private static final int CALENDAR_THREE = 24428313;
-    private static final String PROVIDER_ID = "schedjoules";
+
+    private static final int DEFAULT_REFRESH_INTERVAL = 1440;
+    private static final String DEFAULT_LOCALE = "en";
 
     private String folderName = null;
 
+    /**
+     * Initialises a new {@link BasicSchedJoulesProviderTest}.
+     */
+    public BasicSchedJoulesProviderTest() {
+        super();
+    }
+
+    /**
+     * Setup the test
+     */
     @Override
     public void setUp() throws Exception {
         super.setUp();
@@ -102,10 +110,12 @@ public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
      * @throws JsonParseException
      */
     @Test
-    public void testCreateAccountWithNonExistingSchedJoulesCalendar() throws ApiException, JSONException, JsonParseException, JsonMappingException, IOException {
+    public void testCreateFolderWithNonExistingSchedJoulesCalendar() throws ApiException, JSONException, JsonParseException, JsonMappingException, IOException {
         try {
-            AccountConfiguration ac = AccountConfigurationFactory.createSubscriptionConfiguration(NON_EXISTING_CALENDAR);
-            calendarAccountManager.createCalendarAccount(PROVIDER_ID, folderName, ac.getConfiguration(), true);
+            JSONObject config = new JSONObject();
+            config.put(CalendarFolderConfig.ITEM_ID.getFieldName(), NON_EXISTING_CALENDAR);
+
+            folderManager.createFolder(MODULE, PROVIDER_ID, "testCreateAccountWithNonExistingSchedJoulesCalendar", config, new JSONObject(), true);
             fail("No exception was thrown");
         } catch (ChronosApiException e) {
             assertNotNull(e);
@@ -114,18 +124,21 @@ public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
     }
 
     /**
-     * Tests the initial creation of a calendar account with
+     * Tests the initial creation of a calendar folder with
      * a SchedJoules subscription to an invalid calendar, i.e. a 'page' item_class
      * 
-     * @throws IOException
+     * @throws JSONException
+     * 
      * @throws JsonMappingException
      * @throws JsonParseException
      */
     @Test
-    public void testCreateAccountWithInvalidSchedJoulesCalendar() throws ApiException, JSONException, JsonParseException, JsonMappingException, IOException {
+    public void testCreateFolderWithInvalidSchedJoulesCalendar() throws ApiException, JSONException {
         try {
-            AccountConfiguration ac = AccountConfigurationFactory.createSubscriptionConfiguration(ROOT_PAGE);
-            calendarAccountManager.createCalendarAccount(PROVIDER_ID, folderName, ac.getConfiguration(), true);
+            JSONObject config = new JSONObject();
+            config.put(CalendarFolderConfig.ITEM_ID.getFieldName(), ROOT_PAGE);
+
+            folderManager.createFolder(MODULE, PROVIDER_ID, "testCreateAccountWithInvalidSchedJoulesCalendar", config, new JSONObject(), true);
             fail("No exception was thrown");
         } catch (ChronosApiException e) {
             assertNotNull(e);
@@ -134,7 +147,7 @@ public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
     }
 
     /**
-     * Tests the initial creation of a calendar account with
+     * Tests the initial creation of a calendar folder with
      * a SchedJoules subscription to a random calendar.
      * 
      * @throws IOException
@@ -142,173 +155,97 @@ public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
      * @throws JsonParseException
      */
     @Test
-    public void testCreateAccountWithSchedJoulesSubscription() throws ApiException, JSONException, ChronosApiException, JsonParseException, JsonMappingException, IOException {
-        AccountConfiguration ac = AccountConfigurationFactory.createSubscriptionConfiguration(CALENDAR_ONE);
-        FolderUpdateResponse accountData = calendarAccountManager.createCalendarAccount(PROVIDER_ID, folderName, ac.getConfiguration(), false);
-        assertAccountConfiguration(accountData.getData(), 1);
+    public void testCreateFolderWithSchedJoulesSubscription() throws ApiException, JSONException, ChronosApiException, JsonParseException, JsonMappingException, IOException {
+        JSONObject config = new JSONObject();
+        config.put(CalendarFolderConfig.ITEM_ID.getFieldName(), CALENDAR_ONE);
+
+        String folderId = folderManager.createFolder(MODULE, PROVIDER_ID, folderName, config, new JSONObject(), false);
+        assertNotNull("No folder identifier returned", folderId);
+
+        FolderData folderData = folderManager.getFolder(folderId);
+        assertFolderData(folderData, folderName, CALENDAR_ONE);
     }
 
     /**
-     * Tests the update of a SchedJoules calendar account by
-     * adding one additional subscription
-     * @throws IOException 
-     * @throws JsonMappingException 
-     * @throws JsonParseException 
-     * @throws ChronosApiException 
-     */
-    @Test
-    public void testUpdateAccountAddOneSubscription() throws ApiException, JSONException, JsonParseException, JsonMappingException, IOException, ChronosApiException {
-        AccountConfiguration ac = AccountConfigurationFactory.createSubscriptionConfiguration(CALENDAR_ONE);
-        FolderUpdateResponse calendarAccount = calendarAccountManager.createCalendarAccount(PROVIDER_ID, folderName, ac.getConfiguration(), false);
-
-        //TODO load account and verify
-        
-        assertAccountConfiguration(calendarAccount.getData(), 1);
-        ac.addFolderConfiguration(CALENDAR_TWO);
-
-        // Add the second subscription
-        FolderUpdateResponse updatedAccountData = calendarAccountManager.updateCalendarAccount(calendarAccount.getData(), folderName, System.nanoTime(), ac.getConfiguration());
-        //TODO load account and verify
-        assertAccountConfiguration(updatedAccountData.getData(), 2);
-    }
-
-    /**
-     * Tests the update of a SchedJoules calendar account by
-     * removing one existing subscription
-     * @throws IOException 
-     * @throws JsonMappingException 
-     * @throws JsonParseException 
-     * @throws ChronosApiException 
-     */
-    @Test
-    public void testUpdateAccountRemoveOneSubscription() throws JSONException, ApiException, JsonParseException, JsonMappingException, IOException, ChronosApiException {
-        AccountConfiguration ac = AccountConfigurationFactory.createSubscriptionConfiguration(CALENDAR_ONE);
-        FolderUpdateResponse calendarAccount = calendarAccountManager.createCalendarAccount(PROVIDER_ID, folderName, ac.getConfiguration(), false);
-
-        //TODO load account and verify
-//        assertAccountConfiguration(accountData.getConfiguration(), 1);
-        ac.addFolderConfiguration(CALENDAR_TWO);
-
-        // Add the second subscription
-        FolderUpdateResponse updatedAccountData = calendarAccountManager.updateCalendarAccount(calendarAccount.getData(), folderName, System.nanoTime(), ac.getConfiguration());
-        //TODO load account and verify
-        assertAccountConfiguration(updatedAccountData.getData(), 2);
-
-        ac.removeFolderConfiguration(CALENDAR_ONE);
-
-        // Remove the first subscription
-        updatedAccountData = calendarAccountManager.updateCalendarAccount(updatedAccountData.getData(), folderName, System.nanoTime(), ac.getConfiguration());
-        //TODO load account and verify
-        assertAccountConfiguration(updatedAccountData, 1);
-    }
-
-    /**
-     * Tests the update of a SchedJoules calendar account by
-     * adding one additional subscription and deleting an existing one
-     * @throws IOException 
-     * @throws ChronosApiException 
-     * @throws JsonMappingException 
-     * @throws JsonParseException 
-     */
-    @Test
-    public void testUpdateAccountAddOneRemoveOneSubscription() throws JSONException, ApiException, JsonParseException, JsonMappingException, ChronosApiException, IOException {
-        AccountConfiguration ac = AccountConfigurationFactory.createSubscriptionConfiguration(CALENDAR_ONE);
-        ac.addFolderConfiguration(CALENDAR_TWO);
-        FolderUpdateResponse calendarAccount = calendarAccountManager.createCalendarAccount(PROVIDER_ID, folderName, ac.getConfiguration(), false);
-
-        //TODO load account and verify
-
-        assertAccountConfiguration(calendarAccount.getData(), 2);
-        ac.removeFolderConfiguration(CALENDAR_TWO);
-        ac.addFolderConfiguration(CALENDAR_THREE);
-
-        // Update
-        FolderUpdateResponse updatedAccountData = calendarAccountManager.updateCalendarAccount(calendarAccount.getData(), folderName, System.nanoTime(), ac.getConfiguration());
-        //TODO load account and verify
-
-        assertAccountConfiguration(updatedAccountData.getData(), 2);
-    }
-
-    /**
-     * Tests the update of a SchedJoules calendar account by
-     * renaming an existing subscription
+     * Tests the update of a SchedJoules calendar folder by changing the colour and
+     * renaming the folder.
      * 
-     * @throws JSONException
-     * @throws ApiException
-     * @throws IOException 
-     * @throws ChronosApiException 
-     * @throws JsonMappingException 
-     * @throws JsonParseException 
+     * @throws ChronosApiException
      */
     @Test
-    public void testUpdateAccountRenameSubscription() throws JSONException, ApiException, JsonParseException, JsonMappingException, ChronosApiException, IOException {
-        AccountConfiguration ac = AccountConfigurationFactory.createSubscriptionConfiguration(CALENDAR_ONE);
-        FolderUpdateResponse calendarAccount = calendarAccountManager.createCalendarAccount(PROVIDER_ID, folderName, ac.getConfiguration(), false);
+    public void testUpdateFolderChangeColorAndRename() throws ApiException, JSONException, ChronosApiException {
+        JSONObject config = new JSONObject();
+        config.put(CalendarFolderConfig.ITEM_ID.getFieldName(), CALENDAR_TWO);
 
-        //TODO load account and verify
-        assertAccountConfiguration(calendarAccount.getData(), 1);
-        ac.renameFolder(CALENDAR_ONE, "testUpdateAccountRenameSubscription");
+        String folderId = folderManager.createFolder(MODULE, PROVIDER_ID, folderName, config, new JSONObject());
+        assertNotNull("No folder identifier returned", folderId);
 
-        FolderUpdateResponse updatedAccountData = calendarAccountManager.updateCalendarAccount(calendarAccount.getData(), folderName, System.nanoTime(), ac.getConfiguration());
-        //TODO load account and verify
-        JSONObject config = assertAccountConfiguration(updatedAccountData.getData(), 1);
-        JSONArray folders = config.getJSONArray("folders");
-        JSONObject folder = folders.getJSONObject(0);
-        assertEquals("The subscription's name was not changed", "testUpdateAccountRenameSubscription", folder.getString("name"));
+        FolderData folderData = folderManager.getFolder(folderId);
+        assertFolderData(folderData, folderName, CALENDAR_TWO);
+
+        String expectedColor = "white";
+        String expectedTitle = "testUpdateFolderChangeColorAndRename";
+        folderData.getComOpenexchangeCalendarExtendedProperties().getColor().setValue(expectedColor);
+        folderData.setTitle(expectedTitle);
+        folderManager.updateFolder(folderId, folderData);
+
+        folderData = folderManager.getFolder(folderId);
+        assertFolderData(folderData, expectedTitle, CALENDAR_TWO);
+
+        assertEquals(expectedColor, folderData.getComOpenexchangeCalendarExtendedProperties().getColor().getValue());
     }
 
     /**
-     * Tests the deletion of a SchedJoules calendar account with subscriptions
-     * @throws IOException 
-     * @throws ChronosApiException 
-     * @throws JsonMappingException 
-     * @throws JsonParseException 
+     * Tests the deletion of a SchedJoules calendar folder
      */
     @Test
-    public void testDeleteAccountWithSubscriptions() throws JSONException, ApiException, JsonParseException, JsonMappingException, ChronosApiException, IOException {
-        AccountConfiguration ac = AccountConfigurationFactory.createSubscriptionConfiguration(CALENDAR_ONE);
-        ac.addFolderConfiguration(CALENDAR_TWO);
-        FolderUpdateResponse calendarAccount = calendarAccountManager.createCalendarAccount(PROVIDER_ID, folderName, ac.getConfiguration(), false);
-        //TODO load account and verify
-        assertAccountConfiguration(calendarAccount.getData(), 2);
+    public void testDeleteSchedJoulesSubscription() throws JSONException, ApiException, ChronosApiException {
+        JSONObject config = new JSONObject();
+        config.put(CalendarFolderConfig.ITEM_ID.getFieldName(), CALENDAR_THREE);
 
-        calendarAccountManager.deleteCalendarAccount(Collections.singletonList(calendarAccount.getData()));
+        String folderId = folderManager.createFolder(MODULE, PROVIDER_ID, folderName, config, new JSONObject());
+        assertNotNull("No folder identifier returned", folderId);
+
+        FolderData folderData = folderManager.getFolder(folderId);
+        assertFolderData(folderData, folderName, CALENDAR_THREE);
+
+        folderManager.deleteFolder(folderId);
+
+        try {
+            folderManager.getFolder(folderId, true);
+            fail("No exception was thrown");
+        } catch (ChronosApiException e) {
+            assertNotNull(e);
+            assertEquals("CAL-4044", e.getErrorCode());
+        }
     }
 
     ////////////////////////////////// HELPERS ///////////////////////////////////
 
     /**
-     * Asserts the specified configuration.
+     * Asserts the specified {@link FolderData}
      * 
-     * @param data The configuration data
-     * @param expectedAmountOfFolders The amount of expected folders in the configuration
-     * @return the asserted configuration
+     * @param folderData the {@link FolderData} to assert
      */
-    private JSONObject assertAccountConfiguration(Object data, int expectedAmountOfFolders) throws JSONException {
-        assertNotNull("The account data is 'null'", data);
-        assertTrue("The account data is of type: " + data.getClass(), data instanceof Map);
-        JSONObject config = (JSONObject) JSONCoercion.coerceToJSON(data);
-
-        JSONArray folders = config.getJSONArray("folders");
-        assertNotNull("The folders array is 'null'", folders);
-        assertFalse("The folders array is empty", folders.isEmpty());
-        assertEquals("The amount of expected folders does not match", expectedAmountOfFolders, folders.length());
-        for (int index = 0; index < folders.length(); index++) {
-            assertFolder(folders.optJSONObject(index));
-        }
-
-        return config;
+    private void assertFolderData(FolderData folderData, String title, int itemId) {
+        assertFolderData(folderData, title, itemId, DEFAULT_LOCALE, DEFAULT_REFRESH_INTERVAL);
     }
 
     /**
-     * Asserts the specified folder object
+     * Asserts the specified {@link FolderData}
      * 
-     * @param folder the folder object to assert
+     * @param folderData the {@link FolderData} to assert
      */
-    private void assertFolder(JSONObject folder) {
-        assertNotNull("The folder's metadata is 'null'", folder);
-        assertFalse("No folder metadata present", folder.isEmpty());
-        assertTrue("The 'itemId' is missing", folder.hasAndNotNull("itemId"));
-        assertTrue("The 'name' is missing", folder.hasAndNotNull("name"));
+    private void assertFolderData(FolderData folderData, String title, int itemId, String locale, int refreshInterval) {
+        assertNotNull("The folder data is 'null'", folderData);
+        assertEquals("The title does not match", title, folderData.getTitle());
+        assertEquals("The provider identifier does not match", folderData.getComOpenexchangeCalendarProvider(), PROVIDER_ID);
+        assertNotNull("The extended properties configuration is 'null'", folderData.getComOpenexchangeCalendarExtendedProperties());
+        assertNotNull("The calendar configuration is 'null'", folderData.getComOpenexchangeCalendarConfig());
+
+        FolderDataComOpenexchangeCalendarConfig calendarConfig = folderData.getComOpenexchangeCalendarConfig();
+        assertEquals("The item identifier does not match", itemId, Integer.parseInt(calendarConfig.getItemId()));
+        assertEquals("The refresh interval does not match", refreshInterval, Integer.parseInt(calendarConfig.getRefreshInterval()));
+        assertEquals("The locale does not match", locale, calendarConfig.getLocale());
     }
 }

@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.ajax.chronos.manager.CalendarAccountManager;
+import com.openexchange.ajax.chronos.manager.CalendarFolderManager;
 import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.ajax.chronos.manager.ICalImportExportManager;
 import com.openexchange.configuration.asset.AssetManager;
@@ -94,13 +95,15 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
     protected UserApi defaultUserApi;
     protected ChronosApi chronosApi;
     protected FoldersApi foldersApi;
+    protected ImportApi importApi;
+    protected ExportApi exportApi;
+    protected String folderId;
+
     protected EventManager eventManager;
     protected AssetManager assetManager;
     protected CalendarAccountManager calendarAccountManager;
     protected ICalImportExportManager importExportManager;
-    protected ImportApi importApi;
-    protected ExportApi exportApi;
-    protected String folderId;
+    protected CalendarFolderManager folderManager;
 
     /**
      * Initializes a new {@link AbstractChronosTest}.
@@ -127,6 +130,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         importApi = new ImportApi(client);
         exportApi = new ExportApi(client);
         importExportManager = new ICalImportExportManager(exportApi, importApi);
+        folderManager = new CalendarFolderManager(defaultUserApi, foldersApi);
     }
 
     @Override

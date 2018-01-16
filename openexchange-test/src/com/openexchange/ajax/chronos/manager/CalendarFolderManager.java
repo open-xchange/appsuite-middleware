@@ -105,6 +105,21 @@ public class CalendarFolderManager extends AbstractManager {
     }
 
     /**
+     * 
+     * @param module
+     * @param providerId
+     * @param title
+     * @param config
+     * @param extendedProperties
+     * @return
+     * @throws ApiException
+     * @throws ChronosApiException
+     */
+    public String createFolder(String module, String providerId, String title, JSONObject config, JSONObject extendedProperties) throws ApiException, ChronosApiException {
+        return createFolder(module, providerId, title, config, extendedProperties, false);
+    }
+
+    /**
      * Creates a folder for the specified module and provider
      * 
      * @param module The module
@@ -131,9 +146,26 @@ public class CalendarFolderManager extends AbstractManager {
      * @param folderId The folder identifier
      * @return the {@link FolderData}
      * @throws ApiException if an API error is occurred
+     * @throws ChronosApiException
      */
-    public FolderData getFolder(String folderId) throws ApiException {
+    public FolderData getFolder(String folderId) throws ApiException, ChronosApiException {
+        return getFolder(folderId, false);
+    }
+
+    /**
+     * Retrieves the folder with the specified identifier
+     * 
+     * @param folderId The folder identifier
+     * @return the {@link FolderData}
+     * @throws ApiException if an API error is occurred
+     * @throws ChronosApiException
+     */
+    public FolderData getFolder(String folderId, boolean expectedException) throws ApiException, ChronosApiException {
         FolderResponse response = foldersApi.getFolder(userApi.getSession(), folderId, TREE_ID, CALENDAR_MODULE);
+        if (expectedException) {
+            assertNotNull("An error was expected", response.getError());
+            throw new ChronosApiException(response.getCode(), response.getError());
+        }
         return checkResponse(response.getError(), response.getErrorDesc(), response).getData();
     }
 
@@ -153,7 +185,7 @@ public class CalendarFolderManager extends AbstractManager {
     }
 
     /**
-     * Deletes the folder with the specifid identifier
+     * Deletes the folder with the specified identifier
      * 
      * @param folderId The folder identifier
      * @throws ApiException if an API error is occurred

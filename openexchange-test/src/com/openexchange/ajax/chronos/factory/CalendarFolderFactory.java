@@ -102,10 +102,10 @@ public final class CalendarFolderFactory {
             config.setEnabled(Boolean.parseBoolean((String) value));
         });
         configMappers.put(CalendarFolderConfig.ITEM_ID, (config, value) -> {
-            config.setItemId((String) value);
+            config.setItemId(Integer.toString((int) value));
         });
         configMappers.put(CalendarFolderConfig.REFRESH_INTERVAL, (config, value) -> {
-            config.setRefreshInterval((String) value);
+            config.setRefreshInterval(Long.toString((long) value));
         });
     }
 
