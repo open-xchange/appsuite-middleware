@@ -168,6 +168,18 @@ public class CalendarFolderManager extends AbstractManager {
         }
         return checkResponse(response.getError(), response.getErrorDesc(), response).getData();
     }
+    
+    /**
+     * Updates the folder with the specified identifier
+     * 
+     * @param folderId The folder identifier
+     * @return The {@link FolderUpdateResponse}
+     * @throws ApiException if an API error is occurred
+     * @throws ChronosApiException 
+     */
+    public FolderUpdateResponse updateFolder(FolderData folderData) throws ApiException, ChronosApiException {
+        return updateFolder(folderData, false);
+    }
 
     /**
      * Updates the folder with the specified identifier
@@ -175,12 +187,17 @@ public class CalendarFolderManager extends AbstractManager {
      * @param folderId The folder identifier
      * @return The {@link FolderUpdateResponse}
      * @throws ApiException if an API error is occurred
+     * @throws ChronosApiException 
      */
-    public FolderUpdateResponse updateFolder(String folderId, FolderData folderData) throws ApiException {
+    public FolderUpdateResponse updateFolder(FolderData folderData, boolean expectedException) throws ApiException, ChronosApiException {
         FolderBody body = new FolderBody();
         body.setFolder(folderData);
 
-        FolderUpdateResponse response = foldersApi.updateFolder(userApi.getSession(), folderId, System.currentTimeMillis(), body, false, TREE_ID, CALENDAR_MODULE, true);
+        FolderUpdateResponse response = foldersApi.updateFolder(userApi.getSession(), folderData.getId(), System.currentTimeMillis(), body, false, TREE_ID, CALENDAR_MODULE, true);
+        if (expectedException) {
+            assertNotNull("An error was expected", response.getError());
+            throw new ChronosApiException(response.getCode(), response.getError());
+        }
         return checkResponse(response.getError(), response.getErrorDesc(), response);
     }
 
@@ -208,3 +225,4 @@ public class CalendarFolderManager extends AbstractManager {
         return data;
     }
 }
+

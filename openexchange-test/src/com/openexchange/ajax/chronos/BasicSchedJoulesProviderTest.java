@@ -104,10 +104,6 @@ public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
     /**
      * Tests the initial creation of a calendar account with
      * a SchedJoules subscription to a non existing calendar
-     * 
-     * @throws IOException
-     * @throws JsonMappingException
-     * @throws JsonParseException
      */
     @Test
     public void testCreateFolderWithNonExistingSchedJoulesCalendar() throws ApiException, JSONException, JsonParseException, JsonMappingException, IOException {
@@ -126,11 +122,6 @@ public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
     /**
      * Tests the initial creation of a calendar folder with
      * a SchedJoules subscription to an invalid calendar, i.e. a 'page' item_class
-     * 
-     * @throws JSONException
-     * 
-     * @throws JsonMappingException
-     * @throws JsonParseException
      */
     @Test
     public void testCreateFolderWithInvalidSchedJoulesCalendar() throws ApiException, JSONException {
@@ -149,47 +140,28 @@ public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
     /**
      * Tests the initial creation of a calendar folder with
      * a SchedJoules subscription to a random calendar.
-     * 
-     * @throws IOException
-     * @throws JsonMappingException
-     * @throws JsonParseException
      */
     @Test
     public void testCreateFolderWithSchedJoulesSubscription() throws ApiException, JSONException, ChronosApiException, JsonParseException, JsonMappingException, IOException {
-        JSONObject config = new JSONObject();
-        config.put(CalendarFolderConfig.ITEM_ID.getFieldName(), CALENDAR_ONE);
-
-        String folderId = folderManager.createFolder(MODULE, PROVIDER_ID, folderName, config, new JSONObject(), false);
-        assertNotNull("No folder identifier returned", folderId);
-
-        FolderData folderData = folderManager.getFolder(folderId);
-        assertFolderData(folderData, folderName, CALENDAR_ONE);
+        createFolder(CALENDAR_ONE, folderName);
     }
 
     /**
      * Tests the update of a SchedJoules calendar folder by changing the colour and
      * renaming the folder.
-     * 
-     * @throws ChronosApiException
      */
     @Test
     public void testUpdateFolderChangeColorAndRename() throws ApiException, JSONException, ChronosApiException {
-        JSONObject config = new JSONObject();
-        config.put(CalendarFolderConfig.ITEM_ID.getFieldName(), CALENDAR_TWO);
-
-        String folderId = folderManager.createFolder(MODULE, PROVIDER_ID, folderName, config, new JSONObject());
-        assertNotNull("No folder identifier returned", folderId);
-
-        FolderData folderData = folderManager.getFolder(folderId);
-        assertFolderData(folderData, folderName, CALENDAR_TWO);
+        FolderData folderData = createFolder(CALENDAR_TWO, folderName);
 
         String expectedColor = "white";
         String expectedTitle = "testUpdateFolderChangeColorAndRename";
         folderData.getComOpenexchangeCalendarExtendedProperties().getColor().setValue(expectedColor);
         folderData.setTitle(expectedTitle);
-        folderManager.updateFolder(folderId, folderData);
 
-        folderData = folderManager.getFolder(folderId);
+        folderManager.updateFolder(folderData);
+
+        folderData = folderManager.getFolder(folderData.getId());
         assertFolderData(folderData, expectedTitle, CALENDAR_TWO);
 
         assertEquals(expectedColor, folderData.getComOpenexchangeCalendarExtendedProperties().getColor().getValue());
@@ -200,17 +172,10 @@ public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
      */
     @Test
     public void testDeleteSchedJoulesSubscription() throws JSONException, ApiException, ChronosApiException {
-        JSONObject config = new JSONObject();
-        config.put(CalendarFolderConfig.ITEM_ID.getFieldName(), CALENDAR_THREE);
-
-        String folderId = folderManager.createFolder(MODULE, PROVIDER_ID, folderName, config, new JSONObject());
-        assertNotNull("No folder identifier returned", folderId);
-
-        FolderData folderData = folderManager.getFolder(folderId);
-        assertFolderData(folderData, folderName, CALENDAR_THREE);
+        FolderData folderData = createFolder(CALENDAR_THREE, folderName);
+        String folderId = folderData.getId();
 
         folderManager.deleteFolder(folderId);
-
         try {
             folderManager.getFolder(folderId, true);
             fail("No exception was thrown");
@@ -220,7 +185,62 @@ public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
         }
     }
 
+    /**
+     * Tests for a locale change
+     */
+    @Test
+    public void testChangeLocale() throws JSONException, ApiException, ChronosApiException {
+        FolderData folderData = createFolder(CALENDAR_THREE, folderName);
+
+        String expectedLocale = "de";
+        folderData.getComOpenexchangeCalendarConfig().setLocale(expectedLocale);
+
+        folderManager.updateFolder(folderData);
+
+        folderData = folderManager.getFolder(folderData.getId());
+        assertFolderData(folderData, folderName, CALENDAR_THREE, expectedLocale, DEFAULT_REFRESH_INTERVAL);
+    }
+
+    /**
+     * Tests for an refresh interval change
+     */
+    @Test
+    public void testChangeToInvalidRefreshInterval() throws JSONException, ApiException, ChronosApiException {
+        FolderData folderData = createFolder(CALENDAR_THREE, folderName);
+        folderData.getComOpenexchangeCalendarConfig().setRefreshInterval("123");
+        try {
+            folderManager.updateFolder(folderData, true);
+            fail("No exception was thrown");
+        } catch (ChronosApiException e) {
+            assertNotNull(e);
+            assertEquals("SCHEDJOULES-0011", e.getErrorCode());
+        }
+    }
+
     ////////////////////////////////// HELPERS ///////////////////////////////////
+
+    /**
+     * Creates a folder with a subscription to schedjoules feed with the specified item identifier and the specified name
+     * 
+     * @param itemId The item identifier
+     * @param folderName The folder name
+     * @return The {@link FolderData} of the created folder
+     * @throws ApiException
+     * @throws ChronosApiException
+     * @throws JSONException
+     */
+    private FolderData createFolder(int itemId, String folderName) throws ApiException, ChronosApiException, JSONException {
+        JSONObject config = new JSONObject();
+        config.put(CalendarFolderConfig.ITEM_ID.getFieldName(), itemId);
+
+        String folderId = folderManager.createFolder(MODULE, PROVIDER_ID, folderName, config, new JSONObject());
+        assertNotNull("No folder identifier returned", folderId);
+
+        FolderData folderData = folderManager.getFolder(folderId);
+        assertFolderData(folderData, folderName, itemId);
+
+        return folderData;
+    }
 
     /**
      * Asserts the specified {@link FolderData}
