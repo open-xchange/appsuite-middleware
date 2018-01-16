@@ -693,11 +693,12 @@ public class ICalCalendarProviderTestConstants {
         "";
     
     // contains 102 events
-    public static final String RESPONSE_WITH_NAME_AND_DESC = "BEGIN:VCALENDAR\n" + 
+    public static final String RESPONSE_WITH_ADDITIONAL_PROPERTIES = "BEGIN:VCALENDAR\n" + 
         "PRODID:-//Google Inc//Google Calendar 70.9054//EN\n" + 
         "VERSION:2.0\n" + 
         "CALSCALE:GREGORIAN\n" + 
         "METHOD:PUBLISH\n" + 
+        "REFRESH-INTERVAL;VALUE=DURATION:P1W\n" + 
         "X-WR-CALNAME:FC Schalke 04\n" + 
         "X-WR-TIMEZONE:Europe/Berlin\n" + 
         "X-WR-CALDESC:Alle Spiele von FC Schalke 04\n" + 
