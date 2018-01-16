@@ -82,7 +82,6 @@ import com.openexchange.mail.json.osgi.MailJSONActivator;
 import com.openexchange.mail.json.utils.ColumnCollection;
 import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.FlagTerm;
-import com.openexchange.mail.search.ORTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.UserFlagTerm;
 import com.openexchange.server.ServiceLookup;
@@ -254,8 +253,8 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
             }
 
             final boolean ignoreSeen = req.optBool("unseen");
-            final boolean ignoreDeleted = !req.optBool("deleted", true);
-            final boolean filterApplied = (ignoreSeen || ignoreDeleted);
+            final Boolean ignoreDeleted = getIgnoreDeleted(req);
+            final boolean filterApplied = (ignoreSeen || (ignoreDeleted != null));
             if (filterApplied) {
                 // Ensure flags is contained in provided columns
                 final int fieldFlags = MailListField.FLAGS.getField();
@@ -302,7 +301,12 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                     SearchTerm<?> searchTerm;
                     {
                         SearchTerm<?> first = ignoreSeen ? new FlagTerm(MailMessage.FLAG_SEEN, false) : null;
-                        SearchTerm<?> second = ignoreDeleted ? (ignoreSeen ? null /* Already filtered by unseen, thus OR term will always be true */ : new ORTerm(new FlagTerm(MailMessage.FLAG_DELETED, false), new FlagTerm(MailMessage.FLAG_SEEN, false))) : null;
+                        SearchTerm<?> second;
+                        if (ignoreDeleted != null) {
+                            second = new FlagTerm(MailMessage.FLAG_DELETED, !ignoreDeleted);
+                        } else {
+                            second = null;
+                        }
                         searchTerm = null != first && null != second ? new ANDTerm(first, second) : (null == first ? second : first);
 
                         // Check if mail categories are enabled

@@ -1088,10 +1088,8 @@ public final class IMAPCommandsCollection {
     public static int[] getTotalAndUnread(final IMAPStore imapStore, final String fullName, final boolean excludeDeleted) throws MessagingException {
         final DefaultFolder defaultFolder = (DefaultFolder) imapStore.getDefaultFolder();
         if (excludeDeleted) {
-            LOG.info("Get unread count by search...");
             return getTotalAndUnreadBySearch(defaultFolder, fullName);
         } else {
-            LOG.info("Get unread count by status...");
             return getTotalAndUnreadByStatus(defaultFolder, fullName);
         }
 

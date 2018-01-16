@@ -80,7 +80,6 @@ import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.utils.ColumnCollection;
 import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.FlagTerm;
-import com.openexchange.mail.search.ORTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -156,7 +155,8 @@ public final class SearchAction extends AbstractMailAction {
                 }
             }
             boolean ignoreSeen = req.optBool("unseen");
-            boolean ignoreDeleted = !req.optBool("deleted", true);
+            Boolean ignoreDeleted = getIgnoreDeleted(req);
+
             final JSONValue searchValue = (JSONValue) req.getRequest().requireData();
             /*
              * Get mail interface
@@ -199,7 +199,7 @@ public final class SearchAction extends AbstractMailAction {
         }
     }
 
-    private AJAXRequestResult searchByColumnAndPattern(MailRequest req, MailServletInterface mailInterface, JSONValue searchValue, int orderDir, String sort, String folderId, boolean ignoreSeen, boolean ignoreDeleted, int[] columns, int[] fromToIndices, String[] headers) throws JSONException, OXException {
+    private AJAXRequestResult searchByColumnAndPattern(MailRequest req, MailServletInterface mailInterface, JSONValue searchValue, int orderDir, String sort, String folderId, boolean ignoreSeen, Boolean ignoreDeleted, int[] columns, int[] fromToIndices, String[] headers) throws JSONException, OXException {
         Collection<OXException> warnings = null;
         /*
          * Parse body into a JSON array
@@ -237,8 +237,12 @@ public final class SearchAction extends AbstractMailAction {
                 SearchTerm<?> main = mailInterface.createSearchTermFrom(searchCols, searchPats, true);
 
                 SearchTerm<?> first = ignoreSeen ? new FlagTerm(MailMessage.FLAG_SEEN, false) : null;
-                SearchTerm<?> second = ignoreDeleted ? (ignoreSeen ? null /* Already filtered by unseen, thus OR term will always be true */ : new ORTerm(new FlagTerm(MailMessage.FLAG_DELETED, false), new FlagTerm(MailMessage.FLAG_SEEN, false))) : null;
-
+                SearchTerm<?> second;
+                if (ignoreDeleted != null) {
+                    second = new FlagTerm(MailMessage.FLAG_DELETED, !ignoreDeleted);
+                } else {
+                    second = null;
+                }
                 if (null == first) {
                     searchTerm = null == second ? main : new ANDTerm(main, second);
                 } else {
@@ -286,7 +290,7 @@ public final class SearchAction extends AbstractMailAction {
         return result;
     }
 
-    private AJAXRequestResult searchByFilter(MailRequest req, MailServletInterface mailInterface, JSONValue searchValue, int orderDir, String sort, String folderId, boolean ignoreSeen, boolean ignoreDeleted, int[] columns, int[] fromToIndices, String[] headers) throws JSONException, OXException {
+    private AJAXRequestResult searchByFilter(MailRequest req, MailServletInterface mailInterface, JSONValue searchValue, int orderDir, String sort, String folderId, boolean ignoreSeen, Boolean ignoreDeleted, int[] columns, int[] fromToIndices, String[] headers) throws JSONException, OXException {
         // Body is a JSON object
         JSONArray searchArray = searchValue.toObject().getJSONArray(Mail.PARAMETER_FILTER);
         /*
@@ -299,12 +303,16 @@ public final class SearchAction extends AbstractMailAction {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailInterface.getMailAccess();
 
         SearchTerm<?> searchTerm;
-        if (ignoreDeleted || ignoreSeen) {
+        if (ignoreDeleted != null || ignoreSeen) {
             SearchTerm<?> main = mailInterface.createSearchTermFrom(SearchTermParser.parse(searchArray));
 
             SearchTerm<?> first = ignoreSeen ? new FlagTerm(MailMessage.FLAG_SEEN, false) : null;
-            SearchTerm<?> second = ignoreDeleted ? (ignoreSeen ? null /* Already filtered by unseen, thus OR term will always be true */ : new ORTerm(new FlagTerm(MailMessage.FLAG_DELETED, false), new FlagTerm(MailMessage.FLAG_SEEN, false))) : null;
-
+            SearchTerm<?> second;
+            if (ignoreDeleted != null) {
+                second = new FlagTerm(MailMessage.FLAG_DELETED, !ignoreDeleted);
+            } else {
+                second = null;
+            }
             if (null == first) {
                 searchTerm = null == second ? main : new ANDTerm(main, second);
             } else {

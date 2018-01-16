@@ -77,7 +77,7 @@ public class ImapConfigSearchTermVisitor extends AbstractSearchTermVisitor{
 
     @Override
     public void visit(FlagTerm term) {
-        if ((term.getPattern() & MailMessage.FLAG_DELETED) == 0) {
+        if ((Math.abs(term.getPattern()) & MailMessage.FLAG_DELETED) > 0) {
             needsSourroundingAndTerm = false;
         }
     }

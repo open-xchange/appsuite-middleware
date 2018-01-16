@@ -1790,11 +1790,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @return the prepared {@link SearchTerm}
      */
     private SearchTerm<?> prepareSearchTerm(SearchTerm<?> searchTerm) {
-        if(IMAPProperties.getInstance().isIgnoreDeletedMails(this.session.getUserId(), this.session.getContextId())) {
-
-           ImapConfigSearchTermVisitor imapConfigSearchTermVisitor = new ImapConfigSearchTermVisitor();
-           searchTerm.accept(imapConfigSearchTermVisitor);
-           return imapConfigSearchTermVisitor.checkTerm(searchTerm);
+        if (IMAPProperties.getInstance().isIgnoreDeletedMails(this.session.getUserId(), this.session.getContextId())) {
+            if (searchTerm == null) {
+                return new FlagTerm(MailMessage.FLAG_DELETED, false);
+            }
+            ImapConfigSearchTermVisitor imapConfigSearchTermVisitor = new ImapConfigSearchTermVisitor();
+            searchTerm.accept(imapConfigSearchTermVisitor);
+            return imapConfigSearchTermVisitor.checkTerm(searchTerm);
         }
 
         return searchTerm;
