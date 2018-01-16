@@ -118,7 +118,7 @@ $ wget http://mirror.dkd.de/apache/lucene/solr/7.2.0/solr-7.2.0.tgz
 Now extract the Apache Solr service installer shell script from the downloaded Solr archive file `solr-7.2.0.tgz` using the following command: 
 
 ```
-$ tar xzf solr-7.1.0.tgz solr-7.1.0/bin/install_solr_service.sh --strip-components=2
+$ tar xzf solr-7.2.0.tgz solr-7.2.0/bin/install_solr_service.sh --strip-components=2
 
 ```
 
