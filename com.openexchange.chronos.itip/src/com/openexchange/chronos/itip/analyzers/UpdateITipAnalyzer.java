@@ -222,19 +222,6 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
                 analysis.addChange(change);
             }
         }
-        if (exceptions != null && !exceptions.isEmpty()) {
-            for (final Event unmentionedExceptions : exceptions) {
-                change = new ITipChange();
-                change.setException(true);
-                change.setType(ITipChange.Type.DELETE);
-                change.setDeleted(unmentionedExceptions);
-                change.setMaster(master);
-
-                change.setDiffDescription(new ArrayList<String>());
-                analysis.addChange(change);
-                analysis.recommendAction(ITipAction.DELETE);
-            }
-        }
 
         // Purge conflicts of irrelevant conflicts
 
@@ -255,7 +242,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
                         analysis.recommendActions(ITipAction.CREATE);
                     } else {
                         if (change.isException()) {
-                            analysis.recommendActions(ITipAction.UPDATE, ITipAction.ACCEPT, ITipAction.DECLINE, ITipAction.TENTATIVE);
+                            analysis.recommendActions(ITipAction.ACCEPT, ITipAction.DECLINE, ITipAction.TENTATIVE);
                         } else {
                             analysis.recommendActions(ITipAction.ACCEPT, ITipAction.DECLINE, ITipAction.TENTATIVE, ITipAction.DELEGATE, ITipAction.COUNTER);
                         }
