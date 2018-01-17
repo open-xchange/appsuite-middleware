@@ -336,8 +336,8 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public boolean incrementFailedMailAuthCount(int accountId, int userId, int contextId) throws OXException {
-        boolean disabled = delegate.incrementFailedMailAuthCount(accountId, userId, contextId);
+    public boolean incrementFailedMailAuthCount(int accountId, int userId, int contextId, Exception optReason) throws OXException {
+        boolean disabled = delegate.incrementFailedMailAuthCount(accountId, userId, contextId, optReason);
         if (disabled) {
             invalidateMailAccount(accountId, userId, contextId);
         }
@@ -345,8 +345,8 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public boolean incrementFailedTransportAuthCount(int accountId, int userId, int contextId) throws OXException {
-        boolean disabled = delegate.incrementFailedTransportAuthCount(accountId, userId, contextId);
+    public boolean incrementFailedTransportAuthCount(int accountId, int userId, int contextId, Exception optReason) throws OXException {
+        boolean disabled = delegate.incrementFailedTransportAuthCount(accountId, userId, contextId, optReason);
         if (disabled) {
             invalidateMailAccount(accountId, userId, contextId);
         }

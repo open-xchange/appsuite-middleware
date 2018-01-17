@@ -205,4 +205,7 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
     // Timeout while trying to send to the following recipient: %1$s
     public static final String SEND_TIMED_OUT_ERROR_MSG_DISPLAY = "Timeout while trying to send to the following recipient: %1$s. Please try again later.";
 
+    // Mail server denies access
+    public static final String AUTHORIZATION_FAILED_MSG_DISPLAY = "Mail server denies access.";
+
 }
