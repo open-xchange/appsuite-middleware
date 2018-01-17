@@ -789,7 +789,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                         return null;
                     }
                 };
-                ThreadPools.getThreadPool().submit(task);
+                ThreadPools.submitElseExecute(task);
             }
 
             if ("No authentication mechanisms supported by both server and client".equals(e.getMessage())) {
