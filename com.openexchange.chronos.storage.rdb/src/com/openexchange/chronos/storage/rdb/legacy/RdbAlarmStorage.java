@@ -87,6 +87,7 @@ import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.rdb.RdbStorage;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -176,12 +177,18 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
 
     @Override
     public Map<String, Map<Integer, List<Alarm>>> loadAlarms(List<Event> events) throws OXException {
+        boolean avoidLeftJoins = Services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.chronos.migration.avoidLeftJoins", Boolean.FALSE);
         Map<String, Event> eventsByID = CalendarUtils.getEventsByID(events);
         Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventID = new HashMap<String, Map<Integer, List<Alarm>>>(eventsByID.size());
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            Map<String, Map<Integer, ReminderData>> remindersByUserByID = selectReminders(connection, context.getContextId(), eventsByID.keySet());
+            Map<String, Map<Integer, ReminderData>> remindersByUserByID;
+            if (avoidLeftJoins) {
+                remindersByUserByID = selectRemindersWithoutJoin(connection, context.getContextId(), eventsByID.keySet());
+            } else {
+                remindersByUserByID = selectReminders(connection, context.getContextId(), eventsByID.keySet());
+            }
             for (Entry<String, Map<Integer, ReminderData>> entry : remindersByUserByID.entrySet()) {
                 String eventID = entry.getKey();
                 for (Entry<Integer, ReminderData> reminderEntry : entry.getValue().entrySet()) {
@@ -550,7 +557,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         Map<String, Map<Integer, ReminderData>> remindersByUserByID = new HashMap<String, Map<Integer, ReminderData>>();
         String sql = new StringBuilder()
             .append("SELECT m.object_id,m.member_uid,m.reminder,r.object_id,r.alarm,r.last_modified FROM prg_dates_members AS m ")
-            .append("LEFT JOIN reminder AS r ON m.cid=r.cid AND m.member_uid=r.userid AND m.object_id=r.target_id ")
+            .append("JOIN reminder AS r ON m.cid=r.cid AND m.member_uid=r.userid AND m.object_id=r.target_id ")
             .append("WHERE m.cid=? AND m.object_id IN (").append(getParameters(eventIDs.size())).append(");")
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -571,6 +578,78 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
                             remindersByUserByID.put(eventID, remindersByUser);
                         }
                         remindersByUser.put(userID, reminder);
+                    }
+                }
+            }
+        }
+        return remindersByUserByID;
+    }
+
+    private static Map<String, Map<Integer, ReminderData>> selectRemindersWithoutJoin(Connection connection, int contextID, Collection<String> eventIDs) throws SQLException, OXException {
+        /*
+         * load reminder minutes from 'prg_dates_members'
+         */
+        Map<String, Map<Integer, Integer>> remindersMinutesByUserByID = new HashMap<String, Map<Integer, Integer>>();
+        String sql = new StringBuilder()
+            .append("SELECT object_id,member_uid,reminder FROM prg_dates_members ")
+            .append("WHERE cid=? AND object_id IN (").append(getParameters(eventIDs.size())).append(") AND reminder IS NOT NULL;")
+        .toString();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            for (String eventID : eventIDs) {
+                stmt.setInt(parameterIndex++, asInt(eventID));
+            }
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                while (resultSet.next()) {
+                    String eventID = asString(resultSet.getInt("object_id"));
+                    Integer userID = I(resultSet.getInt("member_uid"));
+                    Integer reminderMinutes = I(resultSet.getInt("reminder"));
+                    Map<Integer, Integer> reminderMinutesByUser = remindersMinutesByUserByID.get(eventID);
+                    if (null == reminderMinutesByUser) {
+                        reminderMinutesByUser = new HashMap<Integer, Integer>();
+                        remindersMinutesByUserByID.put(eventID, reminderMinutesByUser);
+                    }
+                    reminderMinutesByUser.put(userID, reminderMinutes);
+                }
+            }
+        }
+        if (remindersMinutesByUserByID.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        /*
+         * load associated triggers from 'reminder' table
+         */
+        eventIDs = remindersMinutesByUserByID.keySet();
+        Map<String, Map<Integer, ReminderData>> remindersByUserByID = new HashMap<String, Map<Integer, ReminderData>>();
+        sql = new StringBuilder()
+            .append("SELECT object_id,target_id,userid,alarm,last_modified FROM reminder ")
+            .append("WHERE cid=? AND target_id IN (").append(getParameters(eventIDs.size())).append(");")
+        .toString();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            for (String eventID : eventIDs) {
+                stmt.setInt(parameterIndex++, asInt(eventID));
+            }
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                while (resultSet.next()) {
+                    String eventID = asString(resultSet.getInt("target_id"));
+                    Map<Integer, Integer> reminderMinutesByUser = remindersMinutesByUserByID.get(eventID);
+                    if (null != reminderMinutesByUser) {
+                        Integer userID = I(resultSet.getInt("userid"));
+                        Integer reminderMinutes = reminderMinutesByUser.get(userID);
+                        if (null != reminderMinutes) {
+                            int reminderID = resultSet.getInt("object_id");
+                            Timestamp nextTriggerTime = resultSet.getTimestamp("alarm");
+                            ReminderData reminder = new ReminderData(reminderID, i(reminderMinutes), null == nextTriggerTime ? 0L : nextTriggerTime.getTime());
+                            Map<Integer, ReminderData> remindersByUser = remindersByUserByID.get(eventID);
+                            if (null == remindersByUser) {
+                                remindersByUser = new HashMap<Integer, ReminderData>();
+                                remindersByUserByID.put(eventID, remindersByUser);
+                            }
+                            remindersByUser.put(userID, reminder);
+                        }
                     }
                 }
             }
