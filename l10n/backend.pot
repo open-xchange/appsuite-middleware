@@ -7511,13 +7511,6 @@ msgid ""
 "pixels."
 msgstr ""
 
-#. Request rejected because file size (%1$s) exceeds the available storage space of %2$s.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:129
-msgid ""
-"Request rejected because file size (%1$s) exceeds the available storage "
-"space of %2$s."
-msgstr ""
-
 #. *
 #. * Configuration for user %1$s could not be found in context %2$d
 #.
@@ -9798,6 +9791,13 @@ msgstr ""
 msgid ""
 "The user's files are owned by user %1$s in source context %2$s. Please set "
 "individual or context-associated file storage first."
+msgstr ""
+
+#. The user %1$s in source context %2$s does use Unified Quota and therefore cannot be copied.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.user.copy/src/com/openexchange/user/copy/UserCopyExceptionMessages.java:68
+msgid ""
+"The user %1$s in source context %2$s does use Unified Quota and therefore "
+"cannot be copied."
 msgstr ""
 
 #. The provided feedback score is invalid. Please choose a number > 0.
