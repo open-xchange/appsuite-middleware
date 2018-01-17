@@ -170,8 +170,6 @@ MailUpdateBody:
   $ref: ./mail/MailUpdateBody.yaml
 MailsAllSeenResponse:
   $ref: ./mail/MailsAllSeenResponse.yaml
-MailUpdatesResponse:
-  $ref: ./mail/MailUpdatesResponse.yaml
 MailResponse:
   $ref: ./mail/MailResponse.yaml
 MailHeadersResponse:
