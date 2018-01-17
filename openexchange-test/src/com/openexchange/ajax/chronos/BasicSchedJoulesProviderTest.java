@@ -69,7 +69,7 @@ import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalen
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class BasicSchedJoulesProviderTest extends AbstractChronosTest {
+public class BasicSchedJoulesProviderTest extends AbstractExternalProviderChronosTest {
 
     private static final String MODULE = "event";
     private static final String PROVIDER_ID = "schedjoules";
