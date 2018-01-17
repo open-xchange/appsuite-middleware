@@ -96,6 +96,13 @@ import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
 // TODO: Use the FolderManager instead of the foldersApi to create new folders
 public class ICalCalendarProviderTest extends AbstractExternalProviderChronosTest {
 
+    /**
+     * Initialises a new {@link ICalCalendarProviderTest}.
+     */
+    public ICalCalendarProviderTest() {
+        super(CalendarFolderManager.ICAL_ACCOUNT_PROVIDER_ID);
+    }
+
     private String createAccount(NewFolderBody body) throws ApiException {
         FolderUpdateResponse response = foldersApi.createFolder(CalendarFolderManager.DEFAULT_FOLDER_ID, defaultUserApi.getSession(), body, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE);
         assertNull("Calendar account could not be created due an error.", response.getError());

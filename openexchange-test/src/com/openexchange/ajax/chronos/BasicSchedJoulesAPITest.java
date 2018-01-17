@@ -78,6 +78,14 @@ import com.openexchange.testing.httpclient.models.SearchResponse;
 public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest {
 
     private static final String LANGUAGE_RESPONSE = "[{\"language_id\": 1,\"name\": \"Deutsch\",\"iso_639_1\": \"de\"},{\"language_id\": 2,\"name\": \"English\",\"iso_639_1\": \"en\"}]";
+    
+    
+    /**
+     * Initialises a new {@link BasicSchedJoulesAPITest}.
+     */
+    public BasicSchedJoulesAPITest() {
+        super("schedjoules");
+    }
 
     /**
      * Tests the available languages
