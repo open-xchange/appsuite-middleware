@@ -167,6 +167,9 @@ public class UserCopyTask implements CopyUserTaskService {
             error = false;
             return mapping;
         } catch (final OXException e) {
+            if (UserCopyExceptionCodes.prefix().equals(e.getPrefix())) {
+                throw e;
+            }
             throw UserCopyExceptionCodes.USER_SERVICE_PROBLEM.create(e);
         } finally {
             if (error && filestoreUsageEntryCreated) {
