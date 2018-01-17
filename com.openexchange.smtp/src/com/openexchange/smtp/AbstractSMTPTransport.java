@@ -777,7 +777,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                     public Void call() throws Exception {
                         MailAccountStorageService mass = Services.optService(MailAccountStorageService.class);
                         if (null != mass) {
-                            mass.incrementFailedTransportAuthCount(smtpConfig.getAccountId(), session.getUserId(), session.getContextId());
+                            mass.incrementFailedTransportAuthCount(smtpConfig.getAccountId(), session.getUserId(), session.getContextId(), e);
                         }
                         return null;
                     }

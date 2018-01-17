@@ -249,6 +249,8 @@ public class MimeMailException extends OXException {
             if ((e instanceof javax.mail.AuthenticationFailedException) || ((toLowerCase(e.getMessage(), "").indexOf(ERR_AUTH_FAILED) != -1))) {
                 // Authentication failed
                 return handleAuthenticationFailedException(e, mailConfig, session);
+            } else if (e instanceof javax.mail.AuthorizationFailedException) {
+                return MimeMailExceptionCode.LOGIN_FAILED.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
             } else if (e instanceof javax.mail.FolderClosedException) {
                 if (isTimeoutException(e)) {
                     // javax.mail.FolderClosedException through a read timeout

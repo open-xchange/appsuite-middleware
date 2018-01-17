@@ -542,10 +542,11 @@ public interface MailAccountStorageService {
      * @param accountId The account identifier
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @param optReason The optional reason for failed authentication or <code>null</code>
      * @return <code>true</code> if mail access has been disabled due to this call; otherwise <code>false</code>
      * @throws OXException If incrementing the count fails
      */
-    boolean incrementFailedMailAuthCount(int accountId, int userId, int contextId) throws OXException;
+    boolean incrementFailedMailAuthCount(int accountId, int userId, int contextId, Exception optReason) throws OXException;
 
     /**
      * Increments the count of failed authentications for specified account's mail transport.
@@ -553,10 +554,11 @@ public interface MailAccountStorageService {
      * @param accountId The account identifier
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @param optReason The optional reason for failed authentication or <code>null</code>
      * @return <code>true</code> if mail transport has been disabled due to this call; otherwise <code>false</code>
      * @throws OXException If incrementing the count fails
      */
-    boolean incrementFailedTransportAuthCount(int accountId, int userId, int contextId) throws OXException;
+    boolean incrementFailedTransportAuthCount(int accountId, int userId, int contextId, Exception optReason) throws OXException;
 
     // --------------------------------------------------------------------------------------------------------------------
 

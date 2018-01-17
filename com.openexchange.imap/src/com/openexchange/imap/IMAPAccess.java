@@ -813,7 +813,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                         public Void call() throws Exception {
                             MailAccountStorageService mass = Services.optService(MailAccountStorageService.class);
                             if (null != mass) {
-                                mass.incrementFailedMailAuthCount(accountId, session.getUserId(), session.getContextId());
+                                mass.incrementFailedMailAuthCount(accountId, session.getUserId(), session.getContextId(), null);
                             }
                             return null;
                         }
