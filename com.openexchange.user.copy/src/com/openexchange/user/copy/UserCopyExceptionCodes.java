@@ -100,6 +100,10 @@ public enum UserCopyExceptionCodes implements DisplayableOXExceptionCode {
     /** The user's files are owned by user %1$s in source context %2$s. Please set individual or context-associated file storage first. */
     FILE_STORAGE_CONFLICT("The user's files are owned by user %1$s in source context %2$s. Please set individual or context-associated file storage first.", Category.CATEGORY_USER_INPUT, 12,
        UserCopyExceptionMessages.FILE_STORAGE_CONFLICT_MSG),
+
+    /** The user %1$s in source context %2$s does use Unified Quota and therefore cannot be copied. */
+    UNIFIED_QUOTA_CONFLICT("The user %1$s in source context %2$s does use Unified Quota and therefore cannot be copied.", Category.CATEGORY_USER_INPUT, 13,
+       UserCopyExceptionMessages.UNIFIED_QUOTA_CONFLICT_MSG),
     ;
 
     private final String message;
