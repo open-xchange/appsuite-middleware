@@ -55,6 +55,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.util.List;
+import org.apache.commons.httpclient.HttpStatus;
 import org.junit.Test;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.BrowseResponse;
@@ -74,13 +75,16 @@ import com.openexchange.testing.httpclient.models.SearchResponse;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class BasicSchedJoulesAPITest extends AbstractChronosTest {
+public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest {
+
+    private static final String LANGUAGE_RESPONSE = "[{\"language_id\": 1,\"name\": \"Deutsch\",\"iso_639_1\": \"de\"},{\"language_id\": 2,\"name\": \"English\",\"iso_639_1\": \"en\"}]";
 
     /**
      * Tests the available languages
      */
     @Test
     public void testGetLanguages() throws Exception {
+        mock("https://api.schedjoules.com/languages?", LANGUAGE_RESPONSE, HttpStatus.SC_OK);
         LanguagesResponse response = chronosApi.languages(defaultUserApi.getSession());
         List<LanguageData> languages = response.getData();
         assertNull("Errors detected", response.getError());
