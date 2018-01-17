@@ -178,6 +178,9 @@ public class Participants implements ChangeDescriptionGenerator {
         for (Integer attendeeId : attendeeIds) {
             User u = users.getUser(i(attendeeId), ctx);
             ChangeType changeType = attendeeChange.get(attendeeId);
+            if (null == changeType) {
+                continue;
+            }
             switch (changeType) {
                 case ADD:
                 case REMOVE:
@@ -191,6 +194,8 @@ public class Participants implements ChangeDescriptionGenerator {
                     break;
                 case TENTATIVE:
                     changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).addStatus(ParticipationStatus.TENTATIVE));
+                    break;
+                default:
                     break;
             }
         }
