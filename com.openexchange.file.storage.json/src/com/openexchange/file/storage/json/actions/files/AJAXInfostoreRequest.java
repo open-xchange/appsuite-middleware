@@ -157,7 +157,10 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         if (null == maxSize) {
             // Since Infostore/Drive uploads are supposed to be stored in internal filestore, check available space of user-associated filestore
             Long available = null;
-            {
+            
+            // TODO: Disabled....
+            boolean b = false;
+            if (b) {
                 String folderId = null;
                 {
                     File file = getFile();
