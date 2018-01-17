@@ -71,7 +71,7 @@ public class NotificationParticipant implements Cloneable {
     private Set<ITipRole> roles;
     private boolean external;
     private String email;
-    private int identifier = -1;
+    private int identifier = 0;
     private String displayName;
     private ParticipationStatus confirmStatus = ParticipationStatus.NEEDS_ACTION;
     private String comment;
