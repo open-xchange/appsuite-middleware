@@ -133,7 +133,7 @@ public class ITipEventUpdate implements EventUpdate {
     }
 
     /**
-     * Checks if the appointment diff contains <b>only</b> state changes
+     * Checks if the event diff contains <b>only</b> state changes
      *
      * @return <code>true</code> for <b>only</b> state changes; otherwise <code>false</code>
      */
@@ -149,7 +149,7 @@ public class ITipEventUpdate implements EventUpdate {
     }
 
     /**
-     * Checks if the appointment diff contains <b>only</b> state changes beside relevant fields.
+     * Checks if the event diff contains <b>only</b> state changes beside relevant fields.
      *
      * @return <code>true</code> for <b>only</b> state changes; otherwise <code>false</code>
      */
@@ -157,7 +157,8 @@ public class ITipEventUpdate implements EventUpdate {
         // First, let's see if any fields besides the state tracking fields have changed
         Set<EventField> differing = new HashSet<>(getUpdatedFields());
         differing.remove(EventField.ATTENDEES);
-        if (differing.removeAll(Arrays.asList(relevant))) {
+        differing.removeAll(Arrays.asList(relevant));
+        if (false == differing.isEmpty()) {
             return false; // There is at least one relevant change left.
         }
 
@@ -165,7 +166,7 @@ public class ITipEventUpdate implements EventUpdate {
     }
 
     /**
-     * Checks if the appointment diff contains any state changes
+     * Checks if the event diff contains any state changes
      *
      * @return <code>true</code> for any state changes; otherwise <code>false</code>
      */
@@ -191,6 +192,11 @@ public class ITipEventUpdate implements EventUpdate {
         return true;
     }
 
+    /**
+     * Check if the event diff contains only changes besides attendee update
+     * 
+     * @return <code>false</code> if an attendee status was changes,<code>true</code> otherwise
+     */
     public boolean isAboutDetailChangesOnly() {
         HashSet<EventField> differing = new HashSet<>(getUpdatedFields());
         differing.remove(EventField.ATTENDEES);
