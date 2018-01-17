@@ -557,7 +557,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         Map<String, Map<Integer, ReminderData>> remindersByUserByID = new HashMap<String, Map<Integer, ReminderData>>();
         String sql = new StringBuilder()
             .append("SELECT m.object_id,m.member_uid,m.reminder,r.object_id,r.alarm,r.last_modified FROM prg_dates_members AS m ")
-            .append("JOIN reminder AS r ON m.cid=r.cid AND m.member_uid=r.userid AND m.object_id=r.target_id ")
+            .append("LEFT JOIN reminder AS r ON m.cid=r.cid AND m.member_uid=r.userid AND m.object_id=r.target_id ")
             .append("WHERE m.cid=? AND m.object_id IN (").append(getParameters(eventIDs.size())).append(");")
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
