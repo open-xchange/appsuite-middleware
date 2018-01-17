@@ -86,6 +86,11 @@ public abstract class AbstractDelegatingIDBasedFileAccess implements DelegatingI
     }
 
     @Override
+    public int getAssociatedFilestoreOwnerFor(String folderId) throws OXException {
+        return fileAccess.getAssociatedFilestoreOwnerFor(folderId);
+    }
+
+    @Override
     public IDBasedFileAccess getDelegate() {
         return fileAccess;
     }
