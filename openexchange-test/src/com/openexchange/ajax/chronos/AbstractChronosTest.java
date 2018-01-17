@@ -146,6 +146,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
         }
         // Clean-up event manager
         eventManager.cleanUp();
+        folderManager.cleanUp();
 
         try {
             if (folderToDelete != null) {

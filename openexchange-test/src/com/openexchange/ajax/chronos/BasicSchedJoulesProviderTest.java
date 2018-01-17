@@ -238,7 +238,7 @@ public class BasicSchedJoulesProviderTest extends AbstractExternalProviderChrono
      * @throws JsonMappingException
      * @throws JsonParseException
      */
-    private FolderData createFolder(int itemId, String folderName) throws ApiException, ChronosApiException, JSONException, JsonParseException, JsonMappingException, IOException {
+    FolderData createFolder(int itemId, String folderName) throws ApiException, ChronosApiException, JSONException, JsonParseException, JsonMappingException, IOException {
         JSONObject config = new JSONObject();
         config.put(CalendarFolderConfig.ITEM_ID.getFieldName(), itemId);
         config.put(CalendarFolderConfig.REFRESH_INTERVAL.getFieldName(), DEFAULT_REFRESH_INTERVAL);

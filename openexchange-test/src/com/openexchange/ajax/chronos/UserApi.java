@@ -54,6 +54,7 @@ import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.LoginResponse;
 import com.openexchange.testing.httpclient.modules.ChronosApi;
+import com.openexchange.testing.httpclient.modules.FindApi;
 import com.openexchange.testing.httpclient.modules.FoldersApi;
 import com.openexchange.testing.httpclient.modules.JSlobApi;
 import com.openexchange.testing.httpclient.modules.LoginApi;
@@ -72,6 +73,7 @@ public class UserApi {
     private String session;
     private Integer calUser;
     private FoldersApi foldersApi;
+    private FindApi findApi;
     private JSlobApi jslob;
     private ChronosApi chronosApi;
     private EnhancedChronosApi enhancedChronosApi;
@@ -95,6 +97,7 @@ public class UserApi {
         this.enhancedApiClient = enhancedApiClient;
         this.user = user;
         chronosApi = new ChronosApi(client);
+        findApi = new FindApi(client);
         jslob = new JSlobApi(client);
         foldersApi = new FoldersApi(client);
         setEnhancedChronosApi(new EnhancedChronosApi(enhancedApiClient));
@@ -240,6 +243,15 @@ public class UserApi {
      */
     public EnhancedChronosApi getEnhancedChronosApi() {
         return enhancedChronosApi;
+    }
+
+    /**
+     * Returns the findApi
+     * 
+     * @return The findApi
+     */
+    public FindApi getFindApi() {
+        return findApi;
     }
 
     /**
