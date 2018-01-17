@@ -106,6 +106,17 @@ public enum UserCopyExceptionCodes implements DisplayableOXExceptionCode {
        UserCopyExceptionMessages.UNIFIED_QUOTA_CONFLICT_MSG),
     ;
 
+    private static final String PREFIX = "UCP";
+    
+    /**
+     * Gets the <code>"UCP"</code> prefix
+     *
+     * @return The <code>"UCP"</code> prefix
+     */
+    public static String prefix() {
+        return PREFIX;
+    }
+    
     private final String message;
     private final Category category;
     private final int number;
@@ -154,6 +165,6 @@ public enum UserCopyExceptionCodes implements DisplayableOXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return "UCP";
+        return PREFIX;
     }
 }
