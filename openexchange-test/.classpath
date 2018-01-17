@@ -21,6 +21,10 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/jackson-databind-2.9.8.jar" sourcepath="/com.openexchange.bundles/source/jackson-databind-2.9.8-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.lang_2.6.0.v201404270220.jar" sourcepath="/com.openexchange.bundles/source/org.apache.commons.lang.source_2.6.0.v201404270220.jar"/>
 	<classpathentry kind="lib" path="lib/okio-1.9.0.jar"/>
+	<classpathentry kind="lib" path="lib/u2flib-server-core-0.19.0.jar"/>
+	<classpathentry kind="lib" path="lib/bcpg-jdk15on-160.jar"/>
+	<classpathentry kind="lib" path="lib/bcpkix-jdk15on-160.jar"/>
+	<classpathentry kind="lib" path="lib/bcprov-jdk15on-160.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.annotation"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.conversion"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.conversion.engine"/>
@@ -192,5 +196,6 @@
 	<classpathentry kind="lib" path="/org.apache.tika/lib/tika-core-1.20.jar" sourcepath="/org.apache.tika/lib/source/tika-core-1.20-sources.jar"/>
 	<classpathentry kind="lib" path="/org.apache.tika/lib/tika-parsers-1.20.jar" sourcepath="/org.apache.tika/lib/source/tika-parsers-1.20-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.principalusecount"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.multifactor.rmi"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

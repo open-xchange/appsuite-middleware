@@ -148,16 +148,16 @@ public interface Session {
      * ...
      * final Lock lock = (Lock) session.getParameter(Session.PARAM_LOCK);
      * if (null == lock) {
-     *  synchronized (session) {
-     *   ...
-     *  }
+     * synchronized (session) {
+     * ...
+     * }
      * } else {
-     *  lock.lock();
-     *  try {
-     *   ...
-     *  } finally {
-     *   lock.unlock();
-     *  }
+     * lock.lock();
+     * try {
+     * ...
+     * } finally {
+     * lock.unlock();
+     * }
      * }
      * </pre>
      */
@@ -271,6 +271,25 @@ public interface Session {
      * The session parameter used to hold the client's push token
      */
     public static final String PARAM_PUSH_TOKEN = "__session.pushtoken".intern();
+
+    /** 
+     * Parameter if multifactor authentication enabled for the user
+     */
+    public final static String MULTIFACTOR_PARAMETER = "multifactor".intern();
+
+    /**
+     * Parameter that the session has been multifactor authenticated successfully
+     */
+    public final static String MULTIFACTOR_AUTHENTICATED = "multifactorAuthenticated".intern();
+
+    /**
+     * Contains the time that the user last verified using multifactor.
+     *
+     * This parameter is not stored in session storage, and will be essentially set to 0 during a server change, or
+     * autologin. Used to check recent authentication for certain security critical functions.
+     *
+     */
+    public final static String MULTIFACTOR_LAST_VERIFIED = "multifactorSession";
 
     /**
      * @return the context identifier.
@@ -410,6 +429,7 @@ public interface Session {
      * The client is remembered through the whole session. It should identify what client uses the back-end. Normally this is the web
      * front-end but there may be other clients especially those that synchronize their data with OX. The client is a parameter passed to the
      * back-end during the login request.
+     * 
      * @return the client identifier of the client using the back-end.
      */
     String getClient();

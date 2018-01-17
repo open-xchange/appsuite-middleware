@@ -64,6 +64,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.login.ConfigurationProperty;
 import com.openexchange.login.LoginResult;
+import com.openexchange.login.multifactor.MultifactorChecker;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -151,6 +152,7 @@ public final class LoginWriter {
     private static final String RANDOM_PARAM = LoginFields.RANDOM_PARAM;
     private static final String PARAMETER_SESSION = AJAXServlet.PARAMETER_SESSION;
     private static final String PARAMETER_LOCALE = "locale";
+    private static final String PARAMETER_MULTIFACTOR = "requires_multifactor";
 
     private static volatile Boolean randomTokenEnabled;
     private static boolean randomTokenEnabled() {
@@ -159,7 +161,7 @@ public final class LoginWriter {
             synchronized (LoginWriter.class) {
                 tmp = randomTokenEnabled;
                 if (null == tmp) {
-                    ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    final ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
                     if (configurationService == null) {
                         LOG.warn("Unable to get ConfigurationService, refusing to write random.");
                         return false;
@@ -192,6 +194,9 @@ public final class LoginWriter {
         json.put(PARAMETER_USER_ID, session.getUserId());
         json.put(PARAMETER_CONTEXT_ID, session.getContextId());
         final Locale loc = locale == null ? resolveLocaleForUser(session, DEFAULT_LOCALE) : locale;
+        if (MultifactorChecker.requiresMultifactor(session)) {  // Multifactor authentication required
+            json.put(PARAMETER_MULTIFACTOR, true);
+        }
         json.put(PARAMETER_LOCALE, loc.toString());
         if (null != warnings && !warnings.isEmpty()) {
             /*
@@ -203,6 +208,7 @@ public final class LoginWriter {
             ResponseWriter.writeWarnings(list, writer, loc);
         }
     }
+
 
     private static String prepareLogin(final String login) {
         if (null == login) {

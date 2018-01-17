@@ -67,6 +67,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.login.multifactor.MultifactorLoginService;
 import com.openexchange.passwordchange.BasicPasswordChangeService;
 import com.openexchange.passwordchange.PasswordChangeEvent;
 import com.openexchange.passwordchange.PasswordChangeService;
@@ -243,6 +244,8 @@ public final class PasswordChangeServlet extends SessionServlet {
                 Map<String, List<String>> headers = copyHeaders(req);
                 com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
 
+                checkMultifactor(session);
+
                 passwordChangeService.perform(new PasswordChangeEvent(session, context, newPw, oldPw, headers, cookies, req.getRemoteAddr()));
             }
         } catch (final OXException e) {
@@ -256,6 +259,13 @@ public final class PasswordChangeServlet extends SessionServlet {
         // response.addWarning(PasswordChangeServletExceptionCode.PW_CHANGE_SUCCEEDED.create());
         response.setTimestamp(null);
         ResponseWriter.write(response, resp.getWriter(), localeFrom(session));
+    }
+
+    private void checkMultifactor (Session session) throws OXException {
+        MultifactorLoginService mfService = services.getOptionalService(MultifactorLoginService.class);
+        if (mfService != null) {
+            mfService.checkRecentMultifactorAuthentication(session);
+        }
     }
 
     private static String checkStringParam(final HttpServletRequest req, final String paramName) throws OXException {

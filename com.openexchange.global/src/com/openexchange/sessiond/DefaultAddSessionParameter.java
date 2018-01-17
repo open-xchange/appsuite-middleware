@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond;
 
+import java.util.ArrayList;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Origin;
@@ -71,7 +72,7 @@ public class DefaultAddSessionParameter implements AddSessionParameter {
     private String client;
     private String clientToken;
     private boolean tranzient;
-    private SessionEnhancement enhancement;
+    private ArrayList<SessionEnhancement> enhancements;
     private String userAgent;
     private Origin origin;
 
@@ -259,12 +260,12 @@ public class DefaultAddSessionParameter implements AddSessionParameter {
     }
 
     @Override
-    public SessionEnhancement getEnhancement() {
-        return enhancement;
+    public ArrayList<SessionEnhancement> getEnhancements() {
+        return enhancements;
     }
 
-    public void setEnhancement(SessionEnhancement enhancement) {
-        this.enhancement = enhancement;
+    public void addEnhancement(SessionEnhancement enhancement) {
+        this.enhancements.add(enhancement);
     }
 
     @Override

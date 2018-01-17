@@ -7,6 +7,7 @@ import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -987,8 +988,8 @@ public class SAMLWebSSOProviderTest {
             }
 
             @Override
-            public SessionEnhancement getEnhancement() {
-                return enhancement;
+            public List<SessionEnhancement> getEnhancements() {
+                return Arrays.asList(enhancement);
             }
 
             @Override

@@ -100,7 +100,8 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
             param.getClientToken(),
             param.isTransient(),
             param.getOrigin(),
-            param.getEnhancement(),
+            param.getEnhancements(),
+
             param.getUserAgent());
     }
 

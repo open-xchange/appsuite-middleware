@@ -1,0 +1,29 @@
+type: object
+properties:
+  id:
+    type: string
+    description: The unique ID of the device
+  name:
+    type: string
+    description: The user friendly name of the device
+  backup:
+    type: boolean
+    description: true, if the device is a "backup" device, false otherwise
+  enabled:
+    type: boolean
+    description: true, if the device is enabled, false otherwise
+    readOnly: true
+  providerName:
+    type: string
+    description: The name of the device's provider
+  parameters:
+    type: object
+    description: The provider specific parameters required for starting a new registration.
+    readOnly: true
+    properties:
+        phoneNumber:
+          type: string
+          description: (SMS provider only) The phone number of the SMS device to register 
+  
+
+  

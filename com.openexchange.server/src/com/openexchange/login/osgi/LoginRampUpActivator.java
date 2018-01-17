@@ -49,6 +49,7 @@
 
 package com.openexchange.login.osgi;
 
+import org.osgi.framework.BundleContext;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
@@ -91,6 +92,15 @@ public class LoginRampUpActivator extends HousekeepingActivator {
                 return Reloadables.interestsForProperties("com.openexchange.ajax.login.rampup.*");
             }
         });
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.osgi.DeferredActivator#stop(org.osgi.framework.BundleContext)
+     */
+    @Override
+    public void stop(BundleContext context) throws Exception {
+        closeTrackers();
+        super.stop(context);
     }
 
 }

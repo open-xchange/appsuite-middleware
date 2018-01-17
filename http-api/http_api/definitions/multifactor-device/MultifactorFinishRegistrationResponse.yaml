@@ -1,0 +1,4 @@
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    $ref: "#/definitions/MultifactorDevice"

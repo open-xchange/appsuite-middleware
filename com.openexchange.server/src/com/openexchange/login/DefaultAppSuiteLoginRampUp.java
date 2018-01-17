@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -129,6 +130,20 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
         private RampUpKey(String key) {
             this.key = key;
         }
+    }
+
+    /** Specifies the verbosity for the <code>"jslobs"</code> ramp-up contribution */
+    public static enum JSlobContributionVerbosity {
+        /**
+         * The <code>"jslobs"</code> ramp-up contribution only contains minimal information for <code>io.ox/core</code> (e.g. theme, language)
+         */
+        MINIMAL,
+        /**
+         * The (default) <code>"jslobs"</code> ramp-up contribution contains full information for <code>io.ox/core</code>,
+         * <code>io.ox/files</code>, <code>io.ox/mail</code> and so on.
+         */
+        FULL,
+        ;
     }
 
     public static interface Contribution {
@@ -224,14 +239,45 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
     /** The service look-up */
     protected final ServiceLookup services;
 
+    private final EnumSet<RampUpKey> acceptedKeys;
+    private final List<RampUpKey> keys;
+    private final Set<String> reserved;
+
     /**
      * Initializes a new {@link DefaultAppSuiteLoginRampUp}.
      *
      * @param services The service look-up
      */
     protected DefaultAppSuiteLoginRampUp(ServiceLookup services) {
+        this(RampUpKey.values(), services);
+    }
+
+    /**
+     * Initializes a new {@link DefaultAppSuiteLoginRampUp}.
+     *
+     * @param acceptedKeys The optional accepted ramp-up keys. If <code>null</code> is specified, all keys are accepted.
+     * @param services The service look-up
+     */
+    protected DefaultAppSuiteLoginRampUp(RampUpKey[] acceptedKeys, ServiceLookup services) {
         super();
         this.services = services;
+
+        RampUpKey[] values = acceptedKeys;
+        if (null == values) {
+            // Accept all available keys
+            values = RampUpKey.values();
+        }
+        ImmutableList.Builder<RampUpKey> keys = ImmutableList.builder();
+        ImmutableSet.Builder<String> reserved = ImmutableSet.builder();
+        for (RampUpKey rampUpKey : values) {
+            if (RampUpKey.ERRORS != rampUpKey) {
+                keys.add(rampUpKey);
+            }
+            reserved.add(Strings.asciiLowerCase(rampUpKey.key));
+        }
+        this.keys = keys.build();
+        this.acceptedKeys = EnumSet.copyOf(this.keys);
+        this.reserved = reserved.build();
     }
 
     /**
@@ -243,6 +289,25 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
      */
     protected String getConfigInfix() {
         return null;
+    }
+
+    /**
+     * Gets the desired verbosity for the <code>"jslobs"</code> ramp-up contribution.
+     *
+     * @return The JSlob verbosity
+     */
+    protected JSlobContributionVerbosity getJSlobVerbosity() {
+        return JSlobContributionVerbosity.FULL;
+    }
+
+    /**
+     * Checks whether the given ramp-up key is accepted for being delivered to the client.
+     *
+     * @param key The ramp-up key to check
+     * @return <code>true</code> if accepted; otherwise <code>false</code> is the key should be discarded
+     */
+    private boolean accept(RampUpKey key) {
+        return acceptedKeys.contains(key);
     }
 
     static void handleException(OXException e, String key, ConcurrentMap<String, OXException> errors) {
@@ -262,23 +327,6 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
     static void handleException(Exception e, String key) {
         LOG.error(ERROR_DURING_RAMP_UP, key, e);
-    }
-
-    /** The ramp-up keys. Keep order! */
-    private static final List<RampUpKey> KEYS;
-    private static final Set<String> RESERVED;
-    static {
-        RampUpKey[] values = RampUpKey.values();
-        ImmutableList.Builder<RampUpKey> keys = ImmutableList.builder();
-        ImmutableSet.Builder<String> reserved = ImmutableSet.builder();
-        for (RampUpKey rampUpKey : values) {
-            if (RampUpKey.ERRORS != rampUpKey) {
-                keys.add(rampUpKey);
-            }
-            reserved.add(Strings.asciiLowerCase(rampUpKey.key));
-        }
-        KEYS = keys.build();
-        RESERVED = reserved.build();
     }
 
     /**
@@ -324,7 +372,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
     @Override
     public JSONObject getContribution(final ServerSession session, final AJAXRequestData loginRequest) throws OXException {
-        int numberOfKeys = KEYS.size();
+        int numberOfKeys = keys.size();
 
         ConcurrentMap<String, Future<Object>> rampUps = new ConcurrentHashMap<String, Future<Object>>(numberOfKeys);
         final ConcurrentMap<String, OXException> errors = new ConcurrentHashMap<String, OXException>(numberOfKeys);
@@ -334,282 +382,309 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
         final LoginRampUpConfig config = getConfig(getConfigInfix());
         final long thresholdMillis = LOG.isDebugEnabled() ? config.debugThresholdMillis : -1;
 
-        rampUps.put(RampUpKey.FOLDER_LIST.key, threads.submit(new AbstractTrackableTask<Object>() {
+        if (accept(RampUpKey.FOLDER_LIST)) {
+            rampUps.put(RampUpKey.FOLDER_LIST.key, threads.submit(new AbstractTrackableTask<Object>() {
 
-            @Override
-            public Object call() throws Exception {
-                if (config.folderlistDisabled) {
-                    return null;
-                }
+                @Override
+                public Object call() throws Exception {
+                    if (config.folderlistDisabled) {
+                        return null;
+                    }
 
-                AJAXRequestResult requestResult = null;
-                Exception exc = null;
-                try {
-                    JSONObject folderlist = new JSONObject(2);
-                    AJAXRequestData requestData = request().session(session).module("folders").action("list").params("parent", "1", "tree", "0", "altNames", "true", "timezone", "UTC", "columns", "1,2,3,4,5,6,20,23,300,301,302,304,305,306,307,308,309,310,311,312,313,314,315,316,317,318,319,3010,3020,3030,3050,3201,3203,3204,3205,3220").format("json").build(loginRequest);
-                    requestResult = performDispatcherRequest(RampUpKey.FOLDER_LIST, null, requestData, session, ox, thresholdMillis);
-                    folderlist.put("1", requestResult.getResultObject());
-                    return folderlist;
-                } catch (OXException x) {
-                    // Omit result on error. Let the UI deal with this
-                    exc = x;
-                    handleException(x, RampUpKey.FOLDER_LIST.key, errors);
-                } catch (RuntimeException x) {
-                    // Omit result on error. Let the UI deal with this
-                    exc = x;
-                    handleException(x, RampUpKey.FOLDER_LIST.key);
-                } finally {
-                    Dispatchers.signalDone(requestResult, exc);
-                }
-                return null;
-            }
-        }));
-
-        rampUps.put(RampUpKey.FOLDER.key, threads.submit(new AbstractTrackableTask<Object>() {
-
-            @Override
-            public Object call() throws Exception {
-                if (config.folderDisabled) {
-                    return null;
-                }
-                if (null == session.getUserPermissionBits() || false == session.getUserPermissionBits().hasWebMail()) {
-                    return null;
-                }
-                JSONObject folder = new JSONObject(3);
-                {
                     AJAXRequestResult requestResult = null;
                     Exception exc = null;
                     try {
-                        AJAXRequestData requestData = request().session(session).module("folders").action("get").params("id", "1", "tree", "1", "altNames", "true", "timezone", "UTC").format("json").build(loginRequest);
-                        requestResult = performDispatcherRequest(RampUpKey.FOLDER, "\"private-folder\"", requestData, session, ox, thresholdMillis);
-                        folder.put("1", requestResult.getResultObject());
+                        JSONObject folderlist = new JSONObject(2);
+                        AJAXRequestData requestData = request().session(session).module("folders").action("list").params("parent", "1", "tree", "0", "altNames", "true", "timezone", "UTC", "columns", "1,2,3,4,5,6,20,23,300,301,302,304,305,306,307,308,309,310,311,312,313,314,315,316,317,318,319,3010,3020,3030,3050,3201,3203,3204,3205,3220").format("json").build(loginRequest);
+                        requestResult = performDispatcherRequest(RampUpKey.FOLDER_LIST, null, requestData, session, ox, thresholdMillis);
+                        folderlist.put("1", requestResult.getResultObject());
+                        return folderlist;
                     } catch (OXException x) {
                         // Omit result on error. Let the UI deal with this
                         exc = x;
-                        handleException(x, RampUpKey.FOLDER.key, errors);
+                        handleException(x, RampUpKey.FOLDER_LIST.key, errors);
                     } catch (RuntimeException x) {
                         // Omit result on error. Let the UI deal with this
                         exc = x;
-                        handleException(x, RampUpKey.FOLDER.key);
+                        handleException(x, RampUpKey.FOLDER_LIST.key);
                     } finally {
                         Dispatchers.signalDone(requestResult, exc);
                     }
+                    return null;
                 }
-                {
+            }));
+        }
+
+        if (accept(RampUpKey.FOLDER)) {
+            rampUps.put(RampUpKey.FOLDER.key, threads.submit(new AbstractTrackableTask<Object>() {
+
+                @Override
+                public Object call() throws Exception {
+                    if (config.folderDisabled) {
+                        return null;
+                    }
+                    if (null == session.getUserPermissionBits() || false == session.getUserPermissionBits().hasWebMail()) {
+                        return null;
+                    }
+                    JSONObject folder = new JSONObject(3);
+                    {
+                        AJAXRequestResult requestResult = null;
+                        Exception exc = null;
+                        try {
+                            AJAXRequestData requestData = request().session(session).module("folders").action("get").params("id", "1", "tree", "1", "altNames", "true", "timezone", "UTC").format("json").build(loginRequest);
+                            requestResult = performDispatcherRequest(RampUpKey.FOLDER, "\"private-folder\"", requestData, session, ox, thresholdMillis);
+                            folder.put("1", requestResult.getResultObject());
+                        } catch (OXException x) {
+                            // Omit result on error. Let the UI deal with this
+                            exc = x;
+                            handleException(x, RampUpKey.FOLDER.key, errors);
+                        } catch (RuntimeException x) {
+                            // Omit result on error. Let the UI deal with this
+                            exc = x;
+                            handleException(x, RampUpKey.FOLDER.key);
+                        } finally {
+                            Dispatchers.signalDone(requestResult, exc);
+                        }
+                    }
+                    {
+                        AJAXRequestResult requestResult = null;
+                        Exception exc = null;
+                        try {
+                            AJAXRequestData requestData = request().session(session).module("folders").action("get").params("id", "default0/INBOX", "tree", "1", "altNames", "true", "timezone", "UTC").format("json").build(loginRequest);
+                            requestResult = performDispatcherRequest(RampUpKey.FOLDER, "\"INBOX\"", requestData, session, ox, thresholdMillis);
+                            folder.put("default0/INBOX", requestResult.getResultObject());
+                        } catch (OXException x) {
+                            // Omit result on error. Let the UI deal with this
+                            exc = x;
+                            handleException(x, RampUpKey.FOLDER.key, errors);
+                        } catch (RuntimeException x) {
+                            // Omit result on error. Let the UI deal with this
+                            exc = x;
+                            handleException(x, RampUpKey.FOLDER.key);
+                        } finally {
+                            Dispatchers.signalDone(requestResult, exc);
+                        }
+                    }
+                    return folder;
+                }
+            }));
+        }
+
+        if (accept(RampUpKey.JSLOBS)) {
+            final JSlobContributionVerbosity jslobVerbosity = getJSlobVerbosity();
+            rampUps.put(RampUpKey.JSLOBS.key, threads.submit(new AbstractTrackableTask<Object>() {
+
+                @Override
+                public Object call() throws Exception {
+                    if (config.jslobsDisabled) {
+                        return null;
+                    }
+
                     AJAXRequestResult requestResult = null;
                     Exception exc = null;
                     try {
-                        AJAXRequestData requestData = request().session(session).module("folders").action("get").params("id", "default0/INBOX", "tree", "1", "altNames", "true", "timezone", "UTC").format("json").build(loginRequest);
-                        requestResult = performDispatcherRequest(RampUpKey.FOLDER, "\"INBOX\"", requestData, session, ox, thresholdMillis);
-                        folder.put("default0/INBOX", requestResult.getResultObject());
+                        JSONObject jslobs = new JSONObject();
+                        AJAXRequestData requestData;
+                        switch (jslobVerbosity) {
+                            case MINIMAL:
+                                requestData = request().session(session).module("jslob").action("list").data(new JSONArray(Arrays.asList("io.ox/core")), "json").format("json").build(loginRequest);
+                                break;
+                            case FULL:
+                                /* fall-through */
+                            default:
+                                requestData = request().session(session).module("jslob").action("list").data(new JSONArray(Arrays.asList("io.ox/core", "io.ox/core/updates", "io.ox/mail", "io.ox/contacts", "io.ox/calendar", "io.ox/caldav", "io.ox/files", "io.ox/tours", "io.ox/mail/emoji", "io.ox/tasks", "io.ox/office")), "json").format("json").build(loginRequest);
+                                break;
+                        }
+                        requestResult = performDispatcherRequest(RampUpKey.JSLOBS, null, requestData, session, ox, thresholdMillis);
+                        JSONArray lobs = (JSONArray) requestResult.getResultObject();
+                        if (null != lobs) {
+                            for (int i = 0, size = lobs.length(); i < size; i++) {
+                                JSONObject lob = lobs.getJSONObject(i);
+                                jslobs.put(lob.getString("id"), lob);
+                            }
+                        }
+                        return jslobs;
                     } catch (OXException x) {
                         // Omit result on error. Let the UI deal with this
                         exc = x;
-                        handleException(x, RampUpKey.FOLDER.key, errors);
+                        handleException(x, RampUpKey.JSLOBS.key, errors);
                     } catch (RuntimeException x) {
                         // Omit result on error. Let the UI deal with this
                         exc = x;
-                        handleException(x, RampUpKey.FOLDER.key);
+                        handleException(x, RampUpKey.JSLOBS.key);
                     } finally {
                         Dispatchers.signalDone(requestResult, exc);
                     }
-                }
-                return folder;
-            }
-        }));
-
-        rampUps.put(RampUpKey.JSLOBS.key, threads.submit(new AbstractTrackableTask<Object>() {
-
-            @Override
-            public Object call() throws Exception {
-                if (config.jslobsDisabled) {
                     return null;
                 }
+            }));
+        }
 
-                AJAXRequestResult requestResult = null;
-                Exception exc = null;
-                try {
-                    JSONObject jslobs = new JSONObject();
-                    AJAXRequestData requestData = request().session(session).module("jslob").action("list").data(new JSONArray(Arrays.asList("io.ox/core", "io.ox/core/updates", "io.ox/mail", "io.ox/contacts", "io.ox/calendar", "io.ox/caldav", "io.ox/files", "io.ox/tours", "io.ox/mail/emoji", "io.ox/tasks", "io.ox/office")), "json").format("json").build(loginRequest);
-                    requestResult = performDispatcherRequest(RampUpKey.JSLOBS, null, requestData, session, ox, thresholdMillis);
-                    JSONArray lobs = (JSONArray) requestResult.getResultObject();
-                    for (int i = 0, size = lobs.length(); i < size; i++) {
-                        JSONObject lob = lobs.getJSONObject(i);
-                        jslobs.put(lob.getString("id"), lob);
+        if (accept(RampUpKey.SERVER_CONFIG)) {
+            rampUps.put(RampUpKey.SERVER_CONFIG.key, threads.submit(new AbstractTrackableTask<Object>() {
+
+                @Override
+                public Object call() throws Exception {
+                    if (config.serverConfigDisabled) {
+                        return null;
                     }
-                    return jslobs;
-                } catch (OXException x) {
-                    // Omit result on error. Let the UI deal with this
-                    exc = x;
-                    handleException(x, RampUpKey.JSLOBS.key, errors);
-                } catch (RuntimeException x) {
-                    // Omit result on error. Let the UI deal with this
-                    exc = x;
-                    handleException(x, RampUpKey.JSLOBS.key);
-                } finally {
-                    Dispatchers.signalDone(requestResult, exc);
+
+                    AJAXRequestResult requestResult = null;
+                    Exception exc = null;
+                    try {
+                        AJAXRequestData requestData = request().session(session).module("apps/manifests").action("config").format("json").hostname(loginRequest.getHostname()).build(loginRequest);
+                        requestResult = performDispatcherRequest(RampUpKey.SERVER_CONFIG, null, requestData, session, ox, thresholdMillis);
+                        return requestResult.getResultObject();
+                    } catch (OXException x) {
+                        // Omit result on error. Let the UI deal with this
+                        exc = x;
+                        handleException(x, RampUpKey.SERVER_CONFIG.key, errors);
+                    } catch (RuntimeException x) {
+                        // Omit result on error. Let the UI deal with this
+                        exc = x;
+                        handleException(x, RampUpKey.SERVER_CONFIG.key);
+                    } finally {
+                        Dispatchers.signalDone(requestResult, exc);
+                    }
+                    return null;
                 }
-                return null;
-            }
-        }));
+            }));
+        }
 
-        rampUps.put(RampUpKey.SERVER_CONFIG.key, threads.submit(new AbstractTrackableTask<Object>() {
+        if (accept(RampUpKey.OAUTH)) {
+            rampUps.put(RampUpKey.OAUTH.key, threads.submit(new AbstractTrackableTask<Object>() {
 
-            @Override
-            public Object call() throws Exception {
-                if (config.serverConfigDisabled) {
+                @Override
+                public Object call() throws Exception {
+                    if (config.oauthDisabled) {
+                        return null;
+                    }
+                    if (session.isAnonymous() || session.getUser().isGuest()) {
+                        return null;
+                    }
+
+                    JSONObject oauth = new JSONObject(3);
+                    AJAXRequestResult requestResult = null;
+                    Exception exc = null;
+                    try {
+                        AJAXRequestData requestData = request().session(session).module("oauth/services").action("all").format("json").build(loginRequest);
+                        requestResult = performDispatcherRequest(RampUpKey.OAUTH, "\"available-services\"", requestData, session, ox, thresholdMillis);
+                        oauth.put("services", requestResult.getResultObject());
+                    } catch (OXException x) {
+                        // Omit result on error. Let the UI deal with this
+                        exc = x;
+                        handleException(x, RampUpKey.OAUTH.key, errors);
+                    } catch (RuntimeException x) {
+                        // Omit result on error. Let the UI deal with this
+                        exc = x;
+                        handleException(x, RampUpKey.OAUTH.key);
+                    } finally {
+                        Dispatchers.signalDone(requestResult, exc);
+                    }
+
+                    requestResult = null;
+                    exc = null;
+                    try {
+                        AJAXRequestData requestData = request().session(session).module("oauth/accounts").action("all").format("json").build(loginRequest);
+                        requestResult = performDispatcherRequest(RampUpKey.OAUTH, "\"available-accounts\"", requestData, session, ox, thresholdMillis);
+                        oauth.put("accounts", requestResult.getResultObject());
+                    } catch (OXException x) {
+                        // Omit result on error. Let the UI deal with this
+                        exc = x;
+                        handleException(x, RampUpKey.OAUTH.key, errors);
+                    } catch (RuntimeException x) {
+                        // Omit result on error. Let the UI deal with this
+                        exc = x;
+                        handleException(x, RampUpKey.OAUTH.key);
+                    } finally {
+                        Dispatchers.signalDone(requestResult, exc);
+                    }
+
+                    requestResult = null;
+                    exc = null;
+                    try {
+                        AJAXRequestData requestData = request().session(session).module("recovery/secret").action("check").format("json").build(loginRequest);
+                        requestResult = performDispatcherRequest(RampUpKey.OAUTH, "\"password-check\"", requestData, session, ox, thresholdMillis);
+                        oauth.put("secretCheck", requestResult.getResultObject());
+                    } catch (OXException x) {
+                        // Omit result on error. Let the UI deal with this
+                        exc = x;
+                        handleException(x, RampUpKey.OAUTH.key, errors);
+                    } catch (RuntimeException x) {
+                        // Omit result on error. Let the UI deal with this
+                        exc = x;
+                        handleException(x, RampUpKey.OAUTH.key);
+                    } finally {
+                        Dispatchers.signalDone(requestResult, exc);
+                    }
+
+                    return oauth;
+                }
+            }));
+        }
+
+        if (accept(RampUpKey.USER)) {
+            rampUps.put(RampUpKey.USER.key, threads.submit(new AbstractTrackableTask<Object>() {
+
+                @Override
+                public Object call() throws Exception {
+                    if (config.userDisabled) {
+                        return null;
+                    }
+
+                    AJAXRequestResult requestResult = null;
+                    Exception exc = null;
+                    try {
+                        AJAXRequestData requestData = request().session(session).module("user").action("get").params("timezone", "utc", "id", Integer.toString(session.getUserId())).format("json").build(loginRequest);
+                        requestResult = performDispatcherRequest(RampUpKey.USER, null, requestData, session, ox, thresholdMillis);
+                        return requestResult.getResultObject();
+                    } catch (OXException x) {
+                        // Omit result on error. Let the UI deal with this
+                        exc = x;
+                        handleException(x, RampUpKey.USER.key, errors);
+                    } catch (RuntimeException x) {
+                        // Omit result on error. Let the UI deal with this
+                        exc = x;
+                        handleException(x, RampUpKey.USER.key);
+                    } finally {
+                        Dispatchers.signalDone(requestResult, exc);
+                    }
+                    return null;
+                }
+            }));
+        }
+
+        if (accept(RampUpKey.ACCOUNTS)) {
+            rampUps.put(RampUpKey.ACCOUNTS.key, threads.submit(new AbstractTrackableTask<Object>() {
+
+                @Override
+                public Object call() throws Exception {
+                    if (config.accountsDisabled) {
+                        return null;
+                    }
+
+                    AJAXRequestResult requestResult = null;
+                    Exception exc = null;
+                    try {
+                        AJAXRequestData requestData = request().session(session).module("account").action("all").format("json").params("columns", "all").build(loginRequest);
+                        requestResult = performDispatcherRequest(RampUpKey.ACCOUNTS, null, requestData, session, ox, thresholdMillis);
+                        return requestResult.getResultObject();
+                    } catch (OXException x) {
+                        // Omit result on error. Let the UI deal with this
+                        exc = x;
+                        handleException(x, RampUpKey.ACCOUNTS.key, errors);
+                    } catch (RuntimeException x) {
+                        // Omit result on error. Let the UI deal with this
+                        exc = x;
+                        handleException(x, RampUpKey.ACCOUNTS.key);
+                    } finally {
+                        Dispatchers.signalDone(requestResult, exc);
+                    }
                     return null;
                 }
 
-                AJAXRequestResult requestResult = null;
-                Exception exc = null;
-                try {
-                    AJAXRequestData requestData = request().session(session).module("apps/manifests").action("config").format("json").hostname(loginRequest.getHostname()).build(loginRequest);
-                    requestResult = performDispatcherRequest(RampUpKey.SERVER_CONFIG, null, requestData, session, ox, thresholdMillis);
-                    return requestResult.getResultObject();
-                } catch (OXException x) {
-                    // Omit result on error. Let the UI deal with this
-                    exc = x;
-                    handleException(x, RampUpKey.SERVER_CONFIG.key, errors);
-                } catch (RuntimeException x) {
-                    // Omit result on error. Let the UI deal with this
-                    exc = x;
-                    handleException(x, RampUpKey.SERVER_CONFIG.key);
-                } finally {
-                    Dispatchers.signalDone(requestResult, exc);
-                }
-                return null;
-            }
-        }));
-
-        rampUps.put(RampUpKey.OAUTH.key, threads.submit(new AbstractTrackableTask<Object>() {
-
-            @Override
-            public Object call() throws Exception {
-                if (config.oauthDisabled) {
-                    return null;
-                }
-                if (session.isAnonymous() || session.getUser().isGuest()) {
-                    return null;
-                }
-
-                JSONObject oauth = new JSONObject(3);
-                AJAXRequestResult requestResult = null;
-                Exception exc = null;
-                try {
-                    AJAXRequestData requestData = request().session(session).module("oauth/services").action("all").format("json").build(loginRequest);
-                    requestResult = performDispatcherRequest(RampUpKey.OAUTH, "\"available-services\"", requestData, session, ox, thresholdMillis);
-                    oauth.put("services", requestResult.getResultObject());
-                } catch (OXException x) {
-                    // Omit result on error. Let the UI deal with this
-                    exc = x;
-                    handleException(x, RampUpKey.OAUTH.key, errors);
-                } catch (RuntimeException x) {
-                    // Omit result on error. Let the UI deal with this
-                    exc = x;
-                    handleException(x, RampUpKey.OAUTH.key);
-                } finally {
-                    Dispatchers.signalDone(requestResult, exc);
-                }
-
-                requestResult = null;
-                exc = null;
-                try {
-                    AJAXRequestData requestData = request().session(session).module("oauth/accounts").action("all").format("json").build(loginRequest);
-                    requestResult = performDispatcherRequest(RampUpKey.OAUTH, "\"available-accounts\"", requestData, session, ox, thresholdMillis);
-                    oauth.put("accounts", requestResult.getResultObject());
-                } catch (OXException x) {
-                    // Omit result on error. Let the UI deal with this
-                    exc = x;
-                    handleException(x, RampUpKey.OAUTH.key, errors);
-                } catch (RuntimeException x) {
-                    // Omit result on error. Let the UI deal with this
-                    exc = x;
-                    handleException(x, RampUpKey.OAUTH.key);
-                } finally {
-                    Dispatchers.signalDone(requestResult, exc);
-                }
-
-                requestResult = null;
-                exc = null;
-                try {
-                    AJAXRequestData requestData = request().session(session).module("recovery/secret").action("check").format("json").build(loginRequest);
-                    requestResult = performDispatcherRequest(RampUpKey.OAUTH, "\"password-check\"", requestData, session, ox, thresholdMillis);
-                    oauth.put("secretCheck", requestResult.getResultObject());
-                } catch (OXException x) {
-                    // Omit result on error. Let the UI deal with this
-                    exc = x;
-                    handleException(x, RampUpKey.OAUTH.key, errors);
-                } catch (RuntimeException x) {
-                    // Omit result on error. Let the UI deal with this
-                    exc = x;
-                    handleException(x, RampUpKey.OAUTH.key);
-                } finally {
-                    Dispatchers.signalDone(requestResult, exc);
-                }
-
-                return oauth;
-            }
-        }));
-
-        rampUps.put(RampUpKey.USER.key, threads.submit(new AbstractTrackableTask<Object>() {
-
-            @Override
-            public Object call() throws Exception {
-                if (config.userDisabled) {
-                    return null;
-                }
-
-                AJAXRequestResult requestResult = null;
-                Exception exc = null;
-                try {
-                    AJAXRequestData requestData = request().session(session).module("user").action("get").params("timezone", "utc", "id", Integer.toString(session.getUserId())).format("json").build(loginRequest);
-                    requestResult = performDispatcherRequest(RampUpKey.USER, null, requestData, session, ox, thresholdMillis);
-                    return requestResult.getResultObject();
-                } catch (OXException x) {
-                    // Omit result on error. Let the UI deal with this
-                    exc = x;
-                    handleException(x, RampUpKey.USER.key, errors);
-                } catch (RuntimeException x) {
-                    // Omit result on error. Let the UI deal with this
-                    exc = x;
-                    handleException(x, RampUpKey.USER.key);
-                } finally {
-                    Dispatchers.signalDone(requestResult, exc);
-                }
-                return null;
-            }
-        }));
-
-        rampUps.put(RampUpKey.ACCOUNTS.key, threads.submit(new AbstractTrackableTask<Object>() {
-
-            @Override
-            public Object call() throws Exception {
-                if (config.accountsDisabled) {
-                    return null;
-                }
-
-                AJAXRequestResult requestResult = null;
-                Exception exc = null;
-                try {
-                    AJAXRequestData requestData = request().session(session).module("account").action("all").format("json").params("columns", "all").build(loginRequest);
-                    requestResult = performDispatcherRequest(RampUpKey.ACCOUNTS, null, requestData, session, ox, thresholdMillis);
-                    return requestResult.getResultObject();
-                } catch (OXException x) {
-                    // Omit result on error. Let the UI deal with this
-                    exc = x;
-                    handleException(x, RampUpKey.ACCOUNTS.key, errors);
-                } catch (RuntimeException x) {
-                    // Omit result on error. Let the UI deal with this
-                    exc = x;
-                    handleException(x, RampUpKey.ACCOUNTS.key);
-                } finally {
-                    Dispatchers.signalDone(requestResult, exc);
-                }
-                return null;
-            }
-
-        }));
+            }));
+        }
 
         // Check for extended contributions
         List<String> extendedKeys = null;
@@ -618,7 +693,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
             if (null != contributions && false == contributions.isEmpty()) {
                 extendedKeys = new ArrayList<>(contributions.size());
                 for (final Contribution contribution : contributions) {
-                    if (RESERVED.contains(Strings.asciiLowerCase(contribution.getKey()))) {
+                    if (reserved.contains(Strings.asciiLowerCase(contribution.getKey()))) {
                         // Illegal key... Ignore
                     } else {
                         rampUps.put(contribution.getKey(), threads.submit(new AbstractTrackableTask<Object>() {
@@ -646,7 +721,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
         try {
             // Grab tasks to complete in preserved order
             List<RampUpFuture> taskCompletions = new LinkedList<>();
-            for (RampUpKey rampUpKey : KEYS) {
+            for (RampUpKey rampUpKey : keys) {
                 Future<Object> taskCompletion = rampUps.get(rampUpKey.key);
                 if (null != taskCompletion) {
                     taskCompletions.add(new RampUpFuture(rampUpKey, taskCompletion));

@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: RMI for multifactor framework
+Bundle-SymbolicName: com.openexchange.admin.multifactor.rmi
+Bundle-Version: 7.10.2
+Bundle-Vendor: OX Software GmbH
+Automatic-Module-Name: com.openexchange.multifactor.rmi
+Bundle-Activator: com.openexchange.multifactor.rmi.osgi.MultifactorRMIActivator
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.admin.rmi.dataobjects,
+ com.openexchange.admin.rmi.exceptions,
+ com.openexchange.admin.rmi.impl,
+ com.openexchange.auth,
+ com.openexchange.auth.rmi,
+ com.openexchange.config,
+ com.openexchange.exception,
+ com.openexchange.multifactor,
+ com.openexchange.multifactor.exceptions,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j
+Export-Package: com.openexchange.multifactor.rmi

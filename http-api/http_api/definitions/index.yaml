@@ -401,6 +401,29 @@ ReminderUpdateBody:
   $ref: ./reminder/ReminderUpdateBody.yaml
 ReminderResponse:
   $ref: ./reminder/ReminderResponse.yaml
+# Module: multifactor-provider
+MultifactorProvidersResponse:
+  $ref: ./multifactor-provider/MultifactorProvidersResponse.yaml
+MultifactorProvider:
+  $ref: ./multifactor-provider/MultifactorProvider.yaml
+MultifactorDeviceResponse:
+  $ref: ./multifactor-device/MultifactorDeviceResponse.yaml
+MultifactorDevicesResponse:
+  $ref: ./multifactor-device/MultifactorDevicesResponse.yaml
+MultifactorDevice:
+  $ref: ./multifactor-device/MultifactorDevice.yaml
+MultifactorDeleteResponse:
+  $ref: ./multifactor-device/MultifactorDeleteResponse.yaml
+MultifactorStartRegistrationResponse:
+  $ref: ./multifactor-device/MultifactorStartRegistrationResponse.yaml
+MultifactorFinishRegistrationData:
+  $ref: ./multifactor-device/MultifactorFinishRegistrationData.yaml
+MultifactorFinishRegistrationResponse:
+  $ref: ./multifactor-device/MultifactorFinishRegistrationResponse.yaml
+MultifactorStartAuthenticationResponse:
+  $ref: ./multifactor-device/MultifactorStartAuthenticationResponse.yaml
+MultifactorFinishAuthenticationData:
+  $ref: ./multifactor-device/MultifactorFinishAuthenticationData.yaml
 # Module: multiple
 SingleRequest:
   $ref: ./multiple/SingleRequest.yaml

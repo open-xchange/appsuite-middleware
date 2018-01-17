@@ -186,6 +186,8 @@ import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.internal.LoginNameRecorder;
 import com.openexchange.login.listener.AutoLoginAwareLoginListener;
 import com.openexchange.login.listener.LoginListener;
+import com.openexchange.login.multifactor.MultifactorAutoLoginAwareListener;
+import com.openexchange.login.multifactor.MultifactorChecker;
 import com.openexchange.mail.MailCounterImpl;
 import com.openexchange.mail.MailIdleCounterImpl;
 import com.openexchange.mail.MailQuotaProvider;
@@ -739,6 +741,9 @@ public final class ServerActivator extends HousekeepingActivator {
         // TODO: Register server's login handler here until its encapsulated in an own bundle
         registerService(LoginHandlerService.class, new MailLoginHandler());
         registerService(LoginHandlerService.class, new LoginNameRecorder(userService));
+        // Multifactor Services
+        registerService(AutoLoginAwareLoginListener.class, new MultifactorAutoLoginAwareListener());
+        ServerServiceRegistry.getInstance().addService(MultifactorChecker.class, new MultifactorChecker(this));
         // registrationList.add(context.registerService(LoginHandlerService.class.getName(), new PasswordCrypter(), null));
         // Register table creation for mail account storage.
         registerService(CreateTableService.class, new CreateMailAccountTables());

@@ -1,0 +1,23 @@
+/multifactor/device?action=startRegistration:
+  put:
+    operationId: multifactorDeviceActionStartRegistration
+    tags:
+      - Multifactor
+    summary: Starts the process of registering a new multifactor device 
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: body
+        name: device
+        description: | 
+            A device which should be registered as new multifactor device.
+        schema:
+          $ref: "#/definitions/MultifactorDevice"
+    responses:
+        200:
+          description: |
+            A JSON object containing necessary information required to finish the registration process.
+            In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
+          schema:
+            $ref: "#/definitions/MultifactorStartRegistrationResponse"

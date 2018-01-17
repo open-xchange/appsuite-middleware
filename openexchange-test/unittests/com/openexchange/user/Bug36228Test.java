@@ -51,6 +51,7 @@ package com.openexchange.user;
 
 import static org.junit.Assert.assertEquals;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import org.junit.After;
 import org.junit.Before;
@@ -210,7 +211,7 @@ public class Bug36228Test {
             }
 
             @Override
-            public SessionEnhancement getEnhancement() {
+            public List<SessionEnhancement> getEnhancements() {
                 return null;
             }
 

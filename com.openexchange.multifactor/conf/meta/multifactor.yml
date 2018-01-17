@@ -1,0 +1,2 @@
+com.openexchange.multifactor.allowMultiple:
+    preferencePath: io.ox/multifactor//allowMultiple

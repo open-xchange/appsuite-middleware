@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond;
 
+import java.util.List;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Origin;
@@ -137,11 +138,11 @@ public interface AddSessionParameter {
     boolean isTransient();
 
     /**
-     * A callback for modifying the session after it is created. This allows to put arbitrary additional information into a newly created
+     * A list of callbacks for modifying the session after it is created. This allows to put arbitrary additional information into a newly created
      * session. Normally some parameters are added. Use this to get this arbitrary information published to the whole cluster.
-     * @return a callback for modifying the session after its creation or <code>null</code> if no modification should take place.
+     * @return a list of callbacks for modifying the session after its creation or <code>null</code> if no modification should take place.
      */
-    SessionEnhancement getEnhancement();
+    List<SessionEnhancement> getEnhancements();
 
     /**
      * Gets the identifier of the user-agent using the session.

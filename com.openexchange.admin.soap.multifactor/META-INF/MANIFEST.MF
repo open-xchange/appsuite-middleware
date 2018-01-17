@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange Admin SOAP Multifactor Bundle
+Bundle-SymbolicName: com.openexchange.admin.soap.multifactor
+Bundle-Version: 7.10.2
+Bundle-Vendor: OX Software GmbH
+Automatic-Module-Name: com.openexchange.admin.soap.multifactor
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.admin.rmi,
+ com.openexchange.admin.rmi.dataobjects,
+ com.openexchange.exception,
+ com.openexchange.multifactor.rmi,
+ com.openexchange.osgi,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j
+Bundle-Activator: com.openexchange.admin.soap.multifactor.osgi.SoapMultifactorActivator

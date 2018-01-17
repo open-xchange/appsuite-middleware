@@ -1,0 +1,26 @@
+/multifactor/device?action=finishRegistration:
+  put:
+    operationId: multifactorDeviceActionfinishRegistration
+    tags:
+      - Multifactor
+    summary: Finishes the process of registering a new multifactor device 
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/QueryParamMultifactorProviderName"
+      - $ref: "#/parameters/QueryParamMultifactorDeviceId"
+      - in: body
+        name: body
+        description: | 
+            The information required to finish the registration of a new multifactor device.
+        required: true
+        schema:
+          $ref: "#/definitions/MultifactorFinishRegistrationData"
+    responses:
+        200:
+          description: |
+            A JSON object containing all device IDs deleted. In case of errors the
+            responsible fields in the response are filled (see [Error handling](#error-handling)).
+          schema:
+            $ref: "#/definitions/MultifactorFinishRegistrationResponse"

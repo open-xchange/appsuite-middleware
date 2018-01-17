@@ -266,5 +266,4 @@ public enum LoginExceptionCodes implements DisplayableOXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
-
 }

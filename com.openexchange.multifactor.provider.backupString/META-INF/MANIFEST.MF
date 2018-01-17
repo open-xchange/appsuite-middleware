@@ -1,0 +1,30 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Backup String provider for multifactor authentication
+Bundle-SymbolicName: com.openexchange.multifactor.provider.backupString
+Automatic-Module-Name: com.openexchange.multifactor.provider.backupString
+Bundle-Version: 7.10.2
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: 
+ com.openexchange.config.lean,
+ com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.i18n.tools,
+ com.openexchange.java,
+ com.openexchange.java.util,
+ com.openexchange.login.multifactor,
+ com.openexchange.multifactor,
+ com.openexchange.multifactor.exceptions,
+ com.openexchange.multifactor.storage,
+ com.openexchange.multifactor.util,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j
+Bundle-Activator: com.openexchange.multifactor.provider.backupString.osgi.BackupStringProviderActivator
+Bundle-ClassPath: .
+Export-Package: com.openexchange.multifactor.provider.backupString,
+ com.openexchange.multifactor.provider.backupString.storage

@@ -81,6 +81,7 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
 
     protected final static AtomicReference<String> RMI_HOSTNAME = new AtomicReference<String>("rmi://localhost:1099/");
 
+
     /**
      * Sets the RMI host name
      *
@@ -335,7 +336,7 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractCLI#getContext()
      */
     @Override
@@ -380,7 +381,7 @@ public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, Str
             host = host + "/";
         }
 
-        Stub stub = (Stub) Naming.lookup(host + name);
+        @SuppressWarnings("unchecked") Stub stub = (Stub) Naming.lookup(host + name);
         return stub;
     }
 }

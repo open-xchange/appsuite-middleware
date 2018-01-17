@@ -1,0 +1,53 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: object
+    description: Registration response data
+    properties:
+        deviceId:
+          type: string
+          description: A unique ID of the new device  
+        challenge:
+          type: object
+          description: A challenge required to be solved for registering a new device
+          properties:
+            sharedSecret:
+                type: string
+                description: (TOTP, BACKUP_STRING provider only) The TOTP secret
+            base64Image:
+                type: string
+                description: |
+                    (TOTP provider only) A base64 encoded QR-Code containing all relevant information for setting up TOTP.
+            url:
+                type: string
+                description: (TOTP provider only) An URL containing all relevant information for setting up TOTP.
+            requestId: 
+                type: string
+                description: (U2F provider only) The unique U2F request ID.
+            registerRequests:
+                type: array
+                description: A list of challenge data
+                items:
+                    type: object
+                    description: (U2F provider only) The U2F challenge data for registering a new device
+                    properties:
+                        version:
+                            type: string
+                            description: (U2F provider only) The U2F protocol version
+                        challenge:
+                            type: string
+                            description: (U2F provider only) The U2F challenge data
+
+                        appId:
+                            type: string
+                            description: (U2F provider only) The U2F APP ID
+                        requestId: 
+                            type: string
+                            description: (U2F provider only) The unique U2F request ID.
+
+
+
+          
+
+

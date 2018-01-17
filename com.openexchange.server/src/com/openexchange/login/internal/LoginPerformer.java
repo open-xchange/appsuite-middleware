@@ -50,11 +50,13 @@
 package com.openexchange.login.internal;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.security.auth.login.LoginException;
@@ -94,6 +96,7 @@ import com.openexchange.login.internal.format.DefaultLoginFormatter;
 import com.openexchange.login.internal.format.LoginFormatter;
 import com.openexchange.login.listener.LoginListener;
 import com.openexchange.login.listener.internal.LoginListenerRegistryImpl;
+import com.openexchange.login.multifactor.MultifactorChecker;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -282,6 +285,13 @@ public final class LoginPerformer {
             // Check if indicated client is allowed to perform a login
             checkClient(request, user, ctx);
 
+            //Perform multi-factor authentication if enabled for the user and mark session
+            SessionEnhancement multifactor = null;
+            MultifactorChecker multifactorCheck = ServerServiceRegistry.getInstance().getService(MultifactorChecker.class);
+            if (multifactorCheck != null) {
+                multifactor = multifactorCheck.checkMultiFactorAuthentication(request, ctx, user);
+            }
+
             // Check needed service
             SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
             if (null == sessiondService) {
@@ -293,7 +303,10 @@ public final class LoginPerformer {
             }
             AddSessionParameterImpl addSession = new AddSessionParameterImpl(authed.getUserInfo(), request, user, ctx);
             if (SessionEnhancement.class.isInstance(authed)) {
-                addSession.setEnhancement((SessionEnhancement) authed);
+                addSession.addEnhancement((SessionEnhancement) authed);
+            }
+            if (multifactor != null) {
+                addSession.addEnhancement(multifactor);
             }
             Session session = sessiondService.addSession(addSession);
             if (null == session) {
@@ -303,6 +316,7 @@ public final class LoginPerformer {
             LogProperties.putSessionProperties(session);
             retval.setServerToken((String) session.getParameter(LoginFields.SERVER_TOKEN));
             retval.setSession(session);
+
 
             // Trigger registered login handlers
             triggerLoginHandlers(retval);

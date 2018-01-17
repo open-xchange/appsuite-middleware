@@ -49,6 +49,8 @@
 
 package com.openexchange.sessiond.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import org.junit.After;
@@ -290,7 +292,8 @@ public class SessionHandlerTest {
             return SessionHandler.addSession(1, "user", "secret", 1, "", "user", UUID.randomUUID().toString(), "5433", "TestClient", null, false, null, null, "default-user-agent");
         }
 
-        return SessionHandler.addSession(1, "user", "secret", 1, "", "user", UUID.randomUUID().toString(), "5433", "TestClient", null, false, null, new SessionEnhancement() {
+        return SessionHandler.addSession(1, "user", "secret", 1, "", "user", UUID.randomUUID().toString(), "5433", "TestClient", null, false, null, Arrays.asList(new SessionEnhancement() {
+
 
             @Override
             public void enhanceSession(Session session) {
@@ -298,7 +301,7 @@ public class SessionHandlerTest {
                     session.setParameter(PROP_NAMES[i], props[i]);
                 }
             }
-        }, "default-user-agent");
+        }), "default-user-agent");
     }
 
 }

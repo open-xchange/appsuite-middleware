@@ -1,0 +1,17 @@
+/multifactor/device?action=startAuthentication:
+  get:
+    operationId: multifactorDeviceActionStartAuthentication
+    tags:
+      - Multifactor
+    summary: Starts the process of authentication against a multifactor device 
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/QueryParamMultifactorProviderName"
+      - $ref: "#/parameters/QueryParamMultifactorDeviceId"
+    responses:
+        200:
+          description: |
+            A JSON object containing necessary information required to finish the authentication process.
+            In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
+          schema:
+            $ref: "#/definitions/MultifactorStartAuthenticationResponse"
