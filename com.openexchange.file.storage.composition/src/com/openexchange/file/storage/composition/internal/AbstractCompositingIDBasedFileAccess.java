@@ -209,21 +209,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
     }
 
     @Override
-    public int getAssociatedFilestoreOwnerFor(String folderId) throws OXException {
-        if (null == folderId) {
-            return -1;
-        }
-
-        FolderID folderID = new FolderID(folderId);
-        FileStorageFileAccess fileAccess = getFileAccess(folderID.getService(), folderID.getAccountId());
-        if (false == FileStorageTools.supports(fileAccess, FileStorageCapability.USING_FILESTORE)) {
-            return -1;
-        }
-
-        return getFolderAccess(folderID).getFolder(folderID.getFolderId()).getCreatedBy();
-    }
-
-    @Override
     public boolean supports(String serviceID, String accountID, FileStorageCapability...capabilities) throws OXException {
         if (null == capabilities || 0 == capabilities.length) {
             return true;

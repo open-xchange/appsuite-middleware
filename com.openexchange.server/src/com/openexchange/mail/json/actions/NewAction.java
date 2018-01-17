@@ -77,7 +77,6 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.upload.impl.MaxSize;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
@@ -179,7 +178,7 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
             }
         }
 
-        return request.hasUploads(maxFileSize, MaxSize.builder().withUploadLimit(maxSize).build());
+        return request.hasUploads(maxFileSize, maxSize);
     }
 
     @Override
@@ -190,8 +189,7 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
                 return EnqueuableAJAXActionService.resultFor(false);
             }
 
-            // Ignore deprecated here since proper arguments were already applied through hasUploads()
-            @SuppressWarnings("deprecation") UploadEvent uploadEvent = request.getUploadEvent();
+            UploadEvent uploadEvent = request.getUploadEvent();
             String json0 = uploadEvent.getFormField(UPLOAD_FORMFIELD_MAIL);
             if (json0 == null || json0.trim().length() == 0) {
                 throw MailExceptionCode.PROCESSING_ERROR.create(MailExceptionCode.MISSING_PARAM.create(UPLOAD_FORMFIELD_MAIL), new Object[0]);
@@ -247,8 +245,7 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
     private AJAXRequestResult performWithUploads(MailRequest req, AJAXRequestData request) throws OXException, JSONException {
         ServerSession session = req.getSession();
         String csid = req.getParameter(AJAXServlet.PARAMETER_CSID);
-        // Ok to call deprecated since arguments were already proerply set
-        @SuppressWarnings("deprecation") UploadEvent uploadEvent = request.getUploadEvent();
+        UploadEvent uploadEvent = request.getUploadEvent();
         List<OXException> warnings = new ArrayList<OXException>();
         String msgIdentifier = null;
         UserSettingMail userSettingMail = null;

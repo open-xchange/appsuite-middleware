@@ -63,9 +63,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.groupware.upload.impl.MaxSize;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
-import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
 
 public class ImportRequest {
@@ -100,17 +98,16 @@ public class ImportRequest {
 		if(request.getParameter(AJAXServlet.PARAMETER_FOLDERID) == null){
 			throw ImportExportExceptionCodes.NEED_FOLDER.create();
 		}
-		this.folders = Arrays.asList(Strings.splitByComma(request.getParameter(AJAXServlet.PARAMETER_FOLDERID)));
+		this.folders = Arrays.asList(request.getParameter(AJAXServlet.PARAMETER_FOLDERID).split(","));
 
 		long maxSize = sysconfMaxUpload();
-		MaxSize max = MaxSize.builder().withUploadLimit(maxSize > 0 ? maxSize : -1L).build();
-        if (!request.hasUploads(-1, max)){
+		if(!request.hasUploads(-1, maxSize > 0 ? maxSize : -1L)){
 			throw ImportExportExceptionCodes.NO_FILE_UPLOADED.create();
 		}
-		if (request.getFiles(-1, max).size() > 1){
+		if(request.getFiles(-1, maxSize > 0 ? maxSize : -1L).size() > 1){
 			throw ImportExportExceptionCodes.ONLY_ONE_FILE.create();
 		}
-		UploadFile uploadFile = request.getFiles(-1, max).get(0);
+		UploadFile uploadFile = request.getFiles().get(0);
 		try {
 			inputStream = new FileInputStream(uploadFile.getTmpFile());
 		} catch (FileNotFoundException e) {

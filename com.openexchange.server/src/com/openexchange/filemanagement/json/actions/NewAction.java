@@ -65,7 +65,6 @@ import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.groupware.upload.impl.MaxSize;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.imagetransformation.ImageTransformationDeniedIOException;
@@ -96,11 +95,10 @@ public final class NewAction implements AJAXActionService {
             throw ServiceExceptionCode.absentService(ManagedFileManagement.class);
         }
         long maxSize = sysconfMaxUpload();
-        MaxSize max = MaxSize.builder().withUploadLimit(maxSize > 0 ? maxSize : -1L).build();
-        if (!requestData.hasUploads(-1, max)) {
+        if (!requestData.hasUploads(-1, maxSize > 0 ? maxSize : -1L)) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("Not an upload request.");
         }
-        final UploadEvent upload = requestData.getUploadEvent(-1, max);
+        final UploadEvent upload = requestData.getUploadEvent();
         final String moduleParam = requestData.getParameter(AJAXServlet.PARAMETER_MODULE);
         if (moduleParam == null) {
             throw UploadException.UploadCode.MISSING_PARAM.create(AJAXServlet.PARAMETER_MODULE);

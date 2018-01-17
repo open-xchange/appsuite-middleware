@@ -74,9 +74,6 @@ import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.FileStorages;
-import com.openexchange.filestore.Info;
-import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentBatch;
 import com.openexchange.groupware.attach.AttachmentConfig;
@@ -86,7 +83,6 @@ import com.openexchange.groupware.attach.AttachmentUtility;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.groupware.upload.impl.MaxSize;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.ServiceExceptionCode;
@@ -123,29 +119,8 @@ public final class AttachAction extends AbstractAttachmentAction {
             User user = session.getUser();
             UserConfiguration userConfiguration = session.getUserConfiguration();
             long maxUploadSize = AttachmentConfig.getMaxUploadSize();
-            Long available = null;
-            {
-                // Since attachment uploads are supposed to be stored in internal filestore, check available space of context-associated filestore
-                QuotaFileStorage qfs = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(session.getContextId(), Info.general());
-                long quota = qfs.getQuota();
-                if (quota >= 0) {
-                    // There is only a storage space limitation if quota is equal to or greater than 0 (zero)
-                    if (quota == 0) {
-                        // No space at all
-                        available = Long.valueOf(0L);
-                    } else {
-                        long avail = quota - qfs.getUsage();
-                        available = Long.valueOf(avail <= 0L ? 0L : avail);
-                    }
-                }
-            }
-
-            MaxSize maxSize = MaxSize.builder().withUploadLimit(maxUploadSize > 0 ? maxUploadSize : -1L).build();
-            if (null != available && (maxSize.getMaxSize() < 0 || available.longValue() < maxSize.getMaxSize())) {
-                maxSize = MaxSize.builder().withStorageLimit(available.longValue() <= 0 ? 0 : available.longValue()).build();
-            }
-            if (requestData.hasUploads(-1, maxSize)) {
-                final UploadEvent upload = requestData.getUploadEvent(-1, maxSize);
+            if (requestData.hasUploads(-1, maxUploadSize > 0 ? maxUploadSize : -1L)) {
+                final UploadEvent upload = requestData.getUploadEvent();
                 final List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
                 final List<UploadFile> uploadFiles = new ArrayList<UploadFile>();
 
@@ -303,7 +278,7 @@ public final class AttachAction extends AbstractAttachmentAction {
             final JSONArray arr = new JSONArray();
             long timestamp = 0;
             final UUID batchId = UUID.randomUUID();
-
+            
             Iterator<AttachmentMetadata> iterator = attachments.iterator();
             while (iterator.hasNext()) {
                 AttachmentMetadata attachment = iterator.next();

@@ -49,9 +49,16 @@
 
 package com.openexchange.user.json.actions;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import javax.activation.MimetypesFileTypeMap;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -68,8 +75,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.upload.impl.MaxSize;
+import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.guest.GuestService;
+import com.openexchange.java.Streams;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -108,8 +117,7 @@ public final class UpdateAction extends AbstractUserAction {
              * Parse parameters
              */
             long maxSize = sysconfMaxUpload();
-            MaxSize max = MaxSize.builder().withUploadLimit(maxSize > 0 ? maxSize : -1L).build();
-            boolean containsImage = request.hasUploads(-1, max);
+            boolean containsImage = request.hasUploads(-1, maxSize > 0 ? maxSize : -1L);
 
             final int id = checkIntParameter(AJAXServlet.PARAMETER_ID, request);
             final Date clientLastModified = new Date(checkLongParameter(AJAXServlet.PARAMETER_TIMESTAMP, request));
@@ -126,7 +134,7 @@ public final class UpdateAction extends AbstractUserAction {
             if (null == timeZoneID) {
                 timeZoneID = session.getUser().getTimeZone();
             }
-            final JSONObject jData = containsImage ? new JSONObject(request.getUploadEvent(-1L, max).getFormField("json")) : (JSONObject) request.requireData();
+            final JSONObject jData = containsImage ? new JSONObject(request.getUploadEvent().getFormField("json")) : (JSONObject) request.requireData();
             Contact parsedUserContact;
             User parsedUser;
             parsedUserContact = ContactMapper.getInstance().deserialize(jData, ContactMapper.getInstance().getAllFields(), timeZoneID);

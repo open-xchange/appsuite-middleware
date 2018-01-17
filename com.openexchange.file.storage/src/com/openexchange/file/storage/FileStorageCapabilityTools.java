@@ -119,8 +119,6 @@ public class FileStorageCapabilityTools {
             return Boolean.valueOf(FileStorageCaseInsensitiveAccess.class.isAssignableFrom(fileAccessClass));
         case AUTO_RENAME_FOLDERS:
             return Boolean.valueOf(FileStorageAutoRenameFoldersAccess.class.isAssignableFrom(fileAccessClass));
-        case USING_FILESTORE:
-            return Boolean.valueOf(FileStorageUsingFilestore.class.isAssignableFrom(fileAccessClass));
         default:
             org.slf4j.LoggerFactory.getLogger(FileStorageCapabilityTools.class).warn("Unknown capability: {}", capability);
             return Boolean.FALSE;
@@ -180,8 +178,6 @@ public class FileStorageCapabilityTools {
             return FileStorageCaseInsensitiveAccess.class.isInstance(fileAccess);
         case AUTO_RENAME_FOLDERS:
             return FileStorageAutoRenameFoldersAccess.class.isInstance(fileAccess);
-        case USING_FILESTORE:
-            return FileStorageUsingFilestore.class.isInstance(fileAccess);
         default:
             org.slf4j.LoggerFactory.getLogger(FileStorageCapabilityTools.class).warn("Unknown capability: {}", capability);
             return false;

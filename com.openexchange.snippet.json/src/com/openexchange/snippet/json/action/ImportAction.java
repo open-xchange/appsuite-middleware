@@ -63,7 +63,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.groupware.upload.impl.MaxSize;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.CharsetDetector;
@@ -140,12 +139,11 @@ public final class ImportAction extends SnippetAction {
                 }
             }
 
-            MaxSize max = MaxSize.builder().withUploadLimit(maxSize > 0 ? maxSize : -1L).build();
-            if (false == snippetRequest.getRequestData().hasUploads(maxFileSize, max)) {
+            if (false == snippetRequest.getRequestData().hasUploads(maxFileSize, maxSize)) {
                 throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
             }
 
-            uploadEvent = snippetRequest.getRequestData().getUploadEvent(maxFileSize, max);
+            uploadEvent = snippetRequest.getRequestData().getUploadEvent();
             if (null == uploadEvent) {
                 throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
             }

@@ -64,12 +64,10 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.groupware.upload.impl.MaxSize;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -149,8 +147,7 @@ public class RequestTools {
     public static void setImageData(final AJAXRequestData request, final Contact contact) throws OXException {
         UploadEvent uploadEvent = null;
         try {
-            long maxSize = sysconfMaxUpload();
-            uploadEvent = request.getUploadEvent(-1L, MaxSize.builder().withUploadLimit(maxSize > 0 ? maxSize : -1L).build());
+            uploadEvent = request.getUploadEvent();
             final UploadFile uploadFile;
             {
                 final List<UploadFile> list = uploadEvent.getUploadFilesByFieldName("file");
@@ -165,14 +162,6 @@ public class RequestTools {
                 uploadEvent.cleanUp();
             }
         }
-    }
-
-    private static long sysconfMaxUpload() {
-        final String sizeS = ServerConfig.getProperty(com.openexchange.configuration.ServerConfig.Property.MAX_UPLOAD_SIZE);
-        if(null == sizeS) {
-            return 0;
-        }
-        return Long.parseLong(sizeS);
     }
 
     /**

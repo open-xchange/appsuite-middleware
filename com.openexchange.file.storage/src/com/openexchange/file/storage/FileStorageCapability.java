@@ -168,10 +168,5 @@ public enum FileStorageCapability {
      */
     AUTO_RENAME_FOLDERS,
 
-    /**
-     * Marks the file storage that the internal filestore is used to store/retrieve binary content.
-     */
-    USING_FILESTORE,
-
     ;
 }

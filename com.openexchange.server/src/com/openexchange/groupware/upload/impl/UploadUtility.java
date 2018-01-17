@@ -280,7 +280,7 @@ public final class UploadUtility {
     }
 
     /**
-     * Processes specified request's upload provided that request is of content type <code>multipart/*</code>.
+     * (Statically) Processes specified request's upload provided that request is of content type <code>multipart/*</code>.
      *
      * @param req The request whose upload shall be processed
      * @param maxFileSize The maximum allowed size of a single uploaded file or <code>-1</code>
@@ -289,22 +289,7 @@ public final class UploadUtility {
      * @return The processed instance of {@link UploadEvent}
      * @throws OXException Id processing the upload fails
      */
-    public static UploadEvent processUpload_Disabled(HttpServletRequest req, long maxFileSize, long maxOverallSize, Session session) throws OXException {
-        MaxSize maxSize = maxOverallSize < 0 ? MaxSize.UNLIMITED : MaxSize.builder().withMaxSize(maxOverallSize).withSource(MaxSize.Source.UPLOAD_LIMIT).build();
-        return processUpload(req, maxFileSize, maxSize, session);
-    }
-
-    /**
-     * Processes specified request's upload provided that request is of content type <code>multipart/*</code>.
-     *
-     * @param req The request whose upload shall be processed
-     * @param maxFileSize The maximum allowed size of a single uploaded file or <code>-1</code>
-     * @param maxSize The maximum allowed size of a complete request or <code>-1</code>
-     * @param session The associated session or <code>null</code>
-     * @return The processed instance of {@link UploadEvent}
-     * @throws OXException Id processing the upload fails
-     */
-    public static UploadEvent processUpload(HttpServletRequest req, long maxFileSize, MaxSize maxSize, Session session) throws OXException {
+    public static UploadEvent processUpload(HttpServletRequest req, long maxFileSize, long maxOverallSize, Session session) throws OXException {
         if (!Tools.isMultipartContent(req)) {
             // No multipart content
             throw UploadException.UploadCode.NO_MULTIPART_CONTENT.create();
@@ -319,8 +304,6 @@ public final class UploadUtility {
         }
 
         // Parse the upload request
-        long maxOverallSize = null == maxSize ? MaxSize.UNLIMITED.getMaxSize() : maxSize.getMaxSize();
-        MaxSize.Source maxOverallSizeSource = null == maxSize ? MaxSize.UNLIMITED.getSource() : maxSize.getSource();
         FileItemIterator iter;
         try {
             // Get file upload...
@@ -342,7 +325,7 @@ public final class UploadUtility {
         } catch (FileSizeLimitExceededException e) {
             throw UploadFileSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true);
         } catch (SizeLimitExceededException e) {
-            throw maxOverallSizeSource.handleSizeLimitExceeded(e);
+            throw UploadSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true);
         } catch (FileUploadException e) {
             Throwable cause = e.getCause();
             if (cause instanceof IOException) {

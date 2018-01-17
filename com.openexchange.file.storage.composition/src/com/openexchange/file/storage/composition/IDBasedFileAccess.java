@@ -76,15 +76,6 @@ import com.openexchange.tx.TransactionAware;
 public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
 
     /**
-     * Gets the owner of the filestore associated with specified folder
-     *
-     * @param folderId The identifier of the folder
-     * @return The filestore owner or <code>-1</code>
-     * @throws OXException If filestore owner cannot be returned
-     */
-    int getAssociatedFilestoreOwnerFor(String folderId) throws OXException;
-
-    /**
      * Gets a value indicating whether a specific account supports one or more capabilities.
      *
      * @param serviceID The service identifier for the account to query the capabilities for

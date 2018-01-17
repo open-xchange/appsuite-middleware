@@ -59,7 +59,6 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.upload.impl.MaxSize;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
@@ -112,12 +111,11 @@ public final class EditAction extends AbstractMailAction {
             if (maxSize <= 0) {
                 maxSize = -1L;
             }
-            MaxSize max = MaxSize.builder().withUploadLimit(maxSize).build();
-            if (!request.hasUploads(maxFileSize, max)) {
+            if (!request.hasUploads(maxFileSize, maxSize)) {
                 throw AjaxExceptionCodes.UNKNOWN_ACTION.create("edit");
             }
             String csid = req.getParameter(AJAXServlet.PARAMETER_CSID);
-            UploadEvent uploadEvent = request.getUploadEvent(-1, max);
+            UploadEvent uploadEvent = request.getUploadEvent();
             /*
              * Edit draft
              */

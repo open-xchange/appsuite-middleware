@@ -134,11 +134,6 @@ public class GetAction extends AbstractFileStorageAccountAction {
             if (null != supported && supported.booleanValue()) {
                 caps.add(FileStorageCapability.MAIL_ATTACHMENTS.name());
             }
-
-            supported = capabilityAware.supports(FileStorageCapability.USING_FILESTORE);
-            if (null != supported && supported.booleanValue()) {
-                caps.add(FileStorageCapability.USING_FILESTORE.name());
-            }
         }
         return new AJAXRequestResult(writer.write(account, rootFolder, caps));
     }
