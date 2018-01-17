@@ -794,12 +794,20 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      *
      * @param seriesMaster The series master event
      * @param recurrenceIds The recurrence identifiers to skip, or <code>null</code> to just check the series itself
-     * @return <code>true</code> if the event's reucrrence set yields at least one further occurrence, <code>false</code>, otherwise
+     * @return <code>true</code> if the event's recurrence set yields at least one further occurrence, <code>false</code>, otherwise
      */
     protected boolean hasFurtherOccurrences(Event seriesMaster, SortedSet<RecurrenceId> recurrenceIds) throws OXException {
         long[] exceptionDates = CalendarUtils.getExceptionDates(recurrenceIds);
         RecurrenceData recurrenceData = new DefaultRecurrenceData(seriesMaster.getRecurrenceRule(), seriesMaster.getStartDate(), exceptionDates);
-        return session.getRecurrenceService().iterateRecurrenceIds(recurrenceData).hasNext();
+        try {
+            return session.getRecurrenceService().iterateRecurrenceIds(recurrenceData).hasNext();
+        } catch (OXException e) {
+            if ("CAL-4061".equals(e.getErrorCode())) {
+                // "Invalid recurrence id [id ..., rule ...]", so outside recurrence set
+                return false;
+            }
+            throw e;
+        }
     }
 
 }
