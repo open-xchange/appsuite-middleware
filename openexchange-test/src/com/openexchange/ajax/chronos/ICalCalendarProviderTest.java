@@ -170,7 +170,7 @@ public class ICalCalendarProviderTest extends AbstractExternalProviderChronosTes
         assertEquals(description.getValue(), probe.getData().getComOpenexchangeCalendarExtendedProperties().getDescription().getValue());
         assertEquals(title, probe.getData().getTitle());
     }
-    
+
     @Test
     public void testTooBig() throws OXException, IOException, JSONException, ApiException {
         String externalUri = "http://example.com/files/tooBig.ics";
@@ -393,7 +393,7 @@ public class ICalCalendarProviderTest extends AbstractExternalProviderChronosTes
     }
 
     @Test
-    public void testFolderConfiguredCorrectlyIfNameAndDescriptionIsInIcsWithoutRetrievingEvents() throws JSONException, OXException, IOException, ApiException {
+    public void testNameAndDescriptionIsInIcsWithoutRetrievingEvents() throws JSONException, OXException, IOException, ApiException {
         String externalUri = "http://example.com/files/testFolderConfiguredCorrectlyIfNameAndDescriptionIsInIcsWithoutRetrievingEvents.ics";
         mock(externalUri, ICalCalendarProviderTestConstants.RESPONSE_WITH_ADDITIONAL_PROPERTIES, HttpStatus.SC_OK);
 
@@ -531,6 +531,31 @@ public class ICalCalendarProviderTest extends AbstractExternalProviderChronosTes
         assertNotNull(updateResponse.getError());
 
         assertEquals("ICAL-PROV-4044", updateResponse.getCode());
+    }
+
+    @Test
+    public void testCreateAccountWithDescriptionAndFeedNameProvidedByClient_returnProvidedValues() throws OXException, IOException, JSONException, ApiException {
+        String externalUri = "http://example.com/files/testCreateAccountWithDescriptionAndFeedNameProvidedByClient_returnProvidedValues.ics";
+        mock(externalUri, ICalCalendarProviderTestConstants.RESPONSE_WITH_ADDITIONAL_PROPERTIES, HttpStatus.SC_OK);
+
+        FolderDataComOpenexchangeCalendarConfig config = new FolderDataComOpenexchangeCalendarConfig();
+        NewFolderBodyFolder folder = createFolder(externalUri, config);
+        String title = "The initial title";
+        folder.setTitle(title);
+        FolderDataComOpenexchangeCalendarExtendedProperties comOpenexchangeCalendarExtendedProperties = new FolderDataComOpenexchangeCalendarExtendedProperties();
+        FolderDataComOpenexchangeCalendarExtendedPropertiesDescription description = new FolderDataComOpenexchangeCalendarExtendedPropertiesDescription();
+        description.setValue("The nice description");
+        comOpenexchangeCalendarExtendedProperties.setDescription(description);
+        folder.setComOpenexchangeCalendarExtendedProperties(comOpenexchangeCalendarExtendedProperties);
+        addPermissions(folder);
+        NewFolderBody body = new NewFolderBody();
+        body.setFolder(folder);
+        String newFolderId = createAccount(body);
+
+        FolderResponse folderResponse = foldersApi.getFolder(defaultUserApi.getSession(), newFolderId, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE);
+
+        assertEquals(description.getValue(), folderResponse.getData().getComOpenexchangeCalendarExtendedProperties().getDescription().getValue());
+        assertEquals(title, folderResponse.getData().getTitle());
     }
 
     @Test
