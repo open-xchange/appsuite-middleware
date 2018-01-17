@@ -61,13 +61,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -76,7 +73,6 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EntityResolver;
@@ -280,32 +276,10 @@ public class CalendarDataMigration {
         copiedAttendees += attendeeCount;
         destinationStorage.getAlarmStorage().insertAlarms(prepareAlarms(destinationStorage.getAlarmStorage(), alarms));
         copiedAlarms += alarmCount;
-
+        destinationStorage.getAlarmTriggerStorage().insertTriggers(alarms, events);
         /*
-         * prepare alarm trigger
+         * return next object id as offset for next iteration
          */
-        Map<String, Set<RecurrenceId>> exceptionMap = new HashMap<>(events.size());
-
-        for (Event event : events) {
-            List<Attendee> atts = attendees.get(event.getId());
-            if (atts != null) {
-                event.setAttendees(atts);
-            }
-            Map<Integer, List<Alarm>> alarmsPerAttendee = alarms.get(event.getId());
-            if (alarmsPerAttendee == null) {
-                continue;
-            }
-
-            Set<RecurrenceId> exceptions;
-            if (CalendarUtils.isSeriesMaster(event)) {
-                exceptions = CalendarUtils.combine(event.getChangeExceptionDates(), event.getDeleteExceptionDates());
-            } else {
-                exceptions = Collections.emptySet();
-            }
-            exceptionMap.put(event.getId(), exceptions);
-        }
-        destinationStorage.getAlarmTriggerStorage().insertTriggers(alarms, events, exceptionMap);
-
         int nextLastObjectId = Integer.parseInt(events.get(events.size() - 1).getId());
         LOG.trace("Successfully copied {} events, {} attendees and {} alarms; next last object id evaluated to {}.",
             I(events.size()), I(attendeeCount), I(alarmCount), I(nextLastObjectId));

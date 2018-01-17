@@ -59,7 +59,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TimeZone;
 import com.google.common.collect.Lists;
 import com.openexchange.chronos.Alarm;
@@ -580,13 +579,13 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     }
 
     @Override
-    public void insertTriggers(Map<String, Map<Integer, List<Alarm>>> alarmMap, List<Event> events, Map<String, Set<RecurrenceId>> exceptionsMap) throws OXException {
+    public void insertTriggers(Map<String, Map<Integer, List<Alarm>>> alarmMap, List<Event> events) throws OXException {
 
         Connection writeCon = dbProvider.getWriteConnection(context);
         int updated = 0;
         try {
             txPolicy.setAutoCommit(writeCon, false);
-            updated = insertTrigger(alarmMap, events, exceptionsMap, writeCon);
+            updated = insertTrigger(alarmMap, events, writeCon);
             txPolicy.commit(writeCon);
         } catch (SQLException e) {
             throw asOXException(e);
@@ -597,7 +596,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
 
     }
 
-    private int insertTrigger(Map<String, Map<Integer, List<Alarm>>> alarmMap, List<Event> events, Map<String, Set<RecurrenceId>> exceptionsMap, Connection writeCon) throws OXException, SQLException {
+    private int insertTrigger(Map<String, Map<Integer, List<Alarm>>> alarmMap, List<Event> events, Connection writeCon) throws OXException, SQLException {
         try (PreparedStatement stmt = getInsertStatementForBatch(writeCon)) {
             for (Event event : events) {
 

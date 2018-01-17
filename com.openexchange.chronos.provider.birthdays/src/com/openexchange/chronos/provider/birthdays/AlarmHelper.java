@@ -285,7 +285,7 @@ public class AlarmHelper {
                 if (null != originalAlarms && 0 < originalAlarms.size()) {
                     storage.getAlarmTriggerStorage().deleteTriggers(Collections.singletonList(event.getId()), account.getUserId());
                 }
-                storage.getAlarmTriggerStorage().insertTriggers(alarmsByUserByEventId, Collections.singletonList(event), Collections.emptyMap());
+                storage.getAlarmTriggerStorage().insertTriggers(alarmsByUserByEventId, Collections.singletonList(event));
                 return new UpdateResultImpl(applyAlarms(event, originalAlarms), applyAlarms(event, newAlarms));
             }
         }.executeUpdate();
@@ -347,7 +347,7 @@ public class AlarmHelper {
             count += newAlarms.size();
         }
         storage.getAlarmStorage().insertAlarms(alarmsByUserByEventId);
-        storage.getAlarmTriggerStorage().insertTriggers(alarmsByUserByEventId, birthdaySeriesList, Collections.emptyMap());
+        storage.getAlarmTriggerStorage().insertTriggers(alarmsByUserByEventId, birthdaySeriesList);
         return count;
     }
 

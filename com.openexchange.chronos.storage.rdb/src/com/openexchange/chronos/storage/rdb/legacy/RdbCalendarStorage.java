@@ -54,12 +54,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.AlarmTriggerStorage;
@@ -179,7 +177,7 @@ public class RdbCalendarStorage implements CalendarStorage {
             }
 
             @Override
-            public void insertTriggers(Map<String, Map<Integer, List<Alarm>>> alarms, List<Event> events, Map<String, Set<RecurrenceId>> exceptions) throws OXException {
+            public void insertTriggers(Map<String, Map<Integer, List<Alarm>>> alarms, List<Event> events) throws OXException {
                 // Do nothing
             }
 
