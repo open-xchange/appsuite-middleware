@@ -29,6 +29,7 @@
           Only events which end before this date are returned.
         required: false
       - $ref: "#/parameters/QueryParamChronosExpand"
+      - $ref: "#/parameters/QueryParamChronosExtendedEntities"
       - in: body
         name: body
         description: A JSON array of JSON objects with the id and optionally the recurrence position of the event.

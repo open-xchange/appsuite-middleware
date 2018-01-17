@@ -436,3 +436,11 @@ QueryParamChronosSchedJoulesLanguage:
     The language/locale to translate the results to. If none is provided then the locale of the user's session will be used. 
     If that one is not available then falls back to 'en'.
   required: false
+QueryParamChronosExtendedEntities:
+  in: query
+  name: extendedEntities
+  type: boolean
+  description: |
+    If set to 'true' attendees of internal users will be extended by a 'contact' field, which contains some of the contact fields of this user.
+  required: false
+  default: false

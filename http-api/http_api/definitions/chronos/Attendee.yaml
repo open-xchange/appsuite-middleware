@@ -43,3 +43,24 @@ properties:
     items:
       type: string
       description: The ID of the group or list.
+  contact:
+    type: object
+    description: |
+     In case the parameter 'extendedEntities' is set to 'true' and the entity is an internal user 
+     then this field contains some of the contact data of this user.
+    properties:
+      first_name: 
+        type: string
+        description: The first name of the attendee.
+      last_name: 
+        type: string
+        description: The last name of the attendee.
+      title:
+        type: string
+        description: The title of the attendee.
+      display_name:
+        type: string
+        description: The display name of the attendee.
+      image1_url:
+        type: string
+        description: The url to the image of the attendee. 

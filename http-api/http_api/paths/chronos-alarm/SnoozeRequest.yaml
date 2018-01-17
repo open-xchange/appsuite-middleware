@@ -8,17 +8,18 @@
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/QueryParamChronosID"
       - $ref: "#/parameters/QueryParamChronosFolder"
+      - $ref: "#/parameters/QueryParamChronosExtendedEntities"
       - in: query
         name: alarmId
         type: integer
-        description: | 
+        description: |
           The id of the alarm which shall be snoozed.
         required: true
       - in: query
         name: snoozeTime
         type: integer
         format: int64
-        description: | 
+        description: |
           The duration in milliseconds the alarm should be snoozed by. E.g. 300000 for 5 minutes.
         required: true
     responses:

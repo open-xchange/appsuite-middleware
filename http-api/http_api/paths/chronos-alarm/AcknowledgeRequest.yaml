@@ -8,10 +8,11 @@
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/QueryParamChronosID"
       - $ref: "#/parameters/QueryParamChronosFolder"
+      - $ref: "#/parameters/QueryParamChronosExtendedEntities"
       - in: query
         name: alarmId
         type: integer
-        description: | 
+        description: |
           The id of the alarm which shall be acknowledged.
         required: true
     responses:

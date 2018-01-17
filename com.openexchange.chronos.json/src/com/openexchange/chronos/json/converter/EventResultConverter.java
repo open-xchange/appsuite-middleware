@@ -49,6 +49,9 @@
 
 package com.openexchange.chronos.json.converter;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -57,12 +60,18 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
 import com.openexchange.chronos.json.fields.ChronosGeneralJsonFields;
+import com.openexchange.chronos.json.fields.ChronosJsonFields;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.contact.ContactService;
+import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -76,6 +85,16 @@ import com.openexchange.tools.session.ServerSession;
 public class EventResultConverter implements ResultConverter {
 
     public static final String INPUT_FORMAT = "event";
+    private final ContactService contactService;
+
+
+    /**
+     * Initializes a new {@link EventResultConverter}.
+     */
+    public EventResultConverter(ContactService contactService) {
+        super();
+        this.contactService = contactService;
+    }
 
     @Override
     public String getInputFormat() {
@@ -99,23 +118,30 @@ public class EventResultConverter implements ResultConverter {
          * check and convert result object
          */
         Object resultObject = result.getResultObject();
+        Boolean extendedEntities = requestData.getParameter("extendedEntities", Boolean.class, true);
+        if (extendedEntities == null) {
+            extendedEntities = false;
+        }
+
         if (Event.class.isInstance(resultObject)) {
             /*
              * only one event to convert
              */
-            resultObject = convertEvent((Event) resultObject, getTimeZoneID(requestData, session), session, getFields(requestData));
+            resultObject = convertEvent((Event) resultObject, getTimeZoneID(requestData, session), session, getFields(requestData), extendedEntities);
         } else if (List.class.isInstance(resultObject)) {
             /*
              * convert list of events
              */
-            resultObject = convertEvents((List<Event>) resultObject, getTimeZoneID(requestData, session), session, getFields(requestData));
+            resultObject = convertEvents((List<Event>) resultObject, getTimeZoneID(requestData, session), session, getFields(requestData), extendedEntities);
         } else {
             throw new UnsupportedOperationException();
         }
         result.setResultObject(resultObject, getOutputFormat());
     }
 
-    protected JSONObject convertEvent(Event event, String timeZoneID, Session session, EventField[] fields) throws OXException {
+    private static final ContactField CONTACT_FIELDS[] = { ContactField.SUR_NAME, ContactField.GIVEN_NAME, ContactField.TITLE, ContactField.DISPLAY_NAME, ContactField.IMAGE1_URL, ContactField.IMAGE1 };
+
+    protected JSONObject convertEvent(Event event, String timeZoneID, Session session, EventField[] fields, boolean extendedEntities) throws OXException {
         if (null == event) {
             return null;
         }
@@ -123,19 +149,37 @@ public class EventResultConverter implements ResultConverter {
             fields = EventMapper.getInstance().getAssignedFields(event);
         }
         try {
-            return EventMapper.getInstance().serialize(event, fields, timeZoneID, session);
+            JSONObject result = EventMapper.getInstance().serialize(event, fields, timeZoneID, session);
+            if(extendedEntities && result.has(ChronosJsonFields.ATTENDEES)) {
+                JSONArray jsonArray = result.getJSONArray(ChronosJsonFields.ATTENDEES);
+                Iterator<Object> iterator = jsonArray.iterator();
+                while(iterator.hasNext()) {
+                    JSONObject attendee = (JSONObject) iterator.next();
+
+                    if(attendee.has(ChronosJsonFields.Attendee.ENTITY) && attendee.getString(ChronosJsonFields.Attendee.CU_TYPE).equals(CalendarUserType.INDIVIDUAL.getValue())) {
+                        Contact user = contactService.getUser(session, attendee.getInt(ChronosJsonFields.Attendee.ENTITY), CONTACT_FIELDS);
+                        ContactMapper mapper = ContactMapper.getInstance();
+                        ContactField[] assignedFields = mapper.getAssignedFields(user);
+                        List<ContactField> asList = new ArrayList<>(Arrays.asList(assignedFields));
+                        asList.retainAll(Arrays.asList(CONTACT_FIELDS));
+                        JSONObject contact = mapper.serialize(user, asList.toArray(new ContactField[asList.size()]), timeZoneID, session);
+                        attendee.put(ChronosJsonFields.Attendee.CONTACT, contact);
+                    }
+                }
+            }
+            return result;
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
     }
 
-    protected JSONArray convertEvents(List<Event> events, String timeZoneID, Session session, EventField[] fields) throws OXException {
+    protected JSONArray convertEvents(List<Event> events, String timeZoneID, Session session, EventField[] fields, boolean extendedEntities) throws OXException {
         if (null == events) {
             return null;
         }
         JSONArray jsonArray = new JSONArray(events.size());
         for (Event event : events) {
-            jsonArray.put(convertEvent(event, timeZoneID, session, fields));
+            jsonArray.put(convertEvent(event, timeZoneID, session, fields, extendedEntities));
         }
         return jsonArray;
     }

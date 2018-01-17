@@ -8,6 +8,7 @@
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/QueryParamChronosID"
       - $ref: "#/parameters/QueryParamChronosFields"
+      - $ref: "#/parameters/QueryParamChronosExtendedEntities"
     responses:
       200:
         description: |

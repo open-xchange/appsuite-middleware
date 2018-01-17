@@ -9,6 +9,7 @@
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/QueryParamChronosFields"
+      - $ref: "#/parameters/QueryParamChronosExtendedEntities"
       - in: body
         name: body
         description: A JSON array of JSON objects with the id and optionally the recurrence position of the event.

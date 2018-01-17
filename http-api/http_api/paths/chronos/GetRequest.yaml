@@ -10,6 +10,7 @@
       - $ref: "#/parameters/QueryParamChronosFolder"
       - $ref: "#/parameters/QueryParamChronosRecurrenceID"
       - $ref: "#/parameters/QueryParamChronosFields"
+      - $ref: "#/parameters/QueryParamChronosExtendedEntities"
     responses:
       200:
         description: |

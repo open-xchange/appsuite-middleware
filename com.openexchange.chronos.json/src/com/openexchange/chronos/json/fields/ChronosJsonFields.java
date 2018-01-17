@@ -208,7 +208,7 @@ public class ChronosJsonFields {
      * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
      * @since v7.10.0
      */
-    public static final class CalendarUser {
+    public static class CalendarUser {
 
         /**
          * The uri of the calendar user. See {@link com.openexchange.chronos.CalendarUser#getUri()}
@@ -239,7 +239,7 @@ public class ChronosJsonFields {
      * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
      * @since v7.10.0
      */
-    public static final class Attendee {
+    public static final class Attendee extends CalendarUser {
 
         /**
          * The type of the attendee. See {@link com.openexchange.chronos.Attendee#getCuType()}
@@ -269,6 +269,11 @@ public class ChronosJsonFields {
          * The member of the attendee. See {@link com.openexchange.chronos.Attendee#getMember()}
          */
         public static final String MEMBER = "member";
+        /**
+         * The contact of the attendee.
+         */
+        public static final String CONTACT = "contact";
+
     }
 
     /**

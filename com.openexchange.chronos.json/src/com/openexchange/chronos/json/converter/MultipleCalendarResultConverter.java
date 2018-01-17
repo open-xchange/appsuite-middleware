@@ -69,6 +69,7 @@ import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UpdateResult;
+import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -80,6 +81,15 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.10.0
  */
 public class MultipleCalendarResultConverter extends CalendarResultConverter {
+
+    /**
+     * Initializes a new {@link MultipleCalendarResultConverter}.
+     *
+     * @param contactService
+     */
+    public MultipleCalendarResultConverter(ContactService contactService) {
+        super(contactService);
+    }
 
     public static final String INPUT_FORMAT = "calendarResults";
 
@@ -95,15 +105,19 @@ public class MultipleCalendarResultConverter extends CalendarResultConverter {
          * check and convert result object
          */
         Object resultObject = result.getResultObject();
+        Boolean extendedEntities = requestData.getParameter("extendedEntities", Boolean.class, true);
+        if (extendedEntities == null) {
+            extendedEntities = false;
+        }
         if (resultObject instanceof List) {
-            resultObject = convertCalendarResult((List<CalendarResult>) resultObject, getTimeZoneID(requestData, session), requestData.getSession(), getFields(requestData));
+            resultObject = convertCalendarResult((List<CalendarResult>) resultObject, getTimeZoneID(requestData, session), requestData.getSession(), getFields(requestData), extendedEntities);
         } else {
             throw new UnsupportedOperationException();
         }
         result.setResultObject(resultObject, getOutputFormat());
     }
 
-    private JSONObject convertCalendarResult(List<CalendarResult> calendarResults, String timeZoneID, ServerSession session, EventField[] fields) throws OXException {
+    private JSONObject convertCalendarResult(List<CalendarResult> calendarResults, String timeZoneID, ServerSession session, EventField[] fields, boolean extendedEntities) throws OXException {
         JSONObject result = new JSONObject(1);
         try {
             List<Event> creates = new ArrayList<Event>();
@@ -154,9 +168,9 @@ public class MultipleCalendarResultConverter extends CalendarResultConverter {
                 }
             }
 
-            result.put(ChronosCalendarResultJsonFields.Result.CREATED, convertEvents(creates, timeZoneID, session, fields));
-            result.put(ChronosCalendarResultJsonFields.Result.UPDATED, convertEvents(updates, timeZoneID, session, fields));
-            result.put(ChronosCalendarResultJsonFields.Result.DELETED, convertEvents(deletes, timeZoneID, session, fields));
+            result.put(ChronosCalendarResultJsonFields.Result.CREATED, convertEvents(creates, timeZoneID, session, fields, extendedEntities));
+            result.put(ChronosCalendarResultJsonFields.Result.UPDATED, convertEvents(updates, timeZoneID, session, fields, extendedEntities));
+            result.put(ChronosCalendarResultJsonFields.Result.DELETED, convertEvents(deletes, timeZoneID, session, fields, extendedEntities));
 
             if(errors != null && !errors.isEmpty()){
                 convertErrors(result, errors, session.getUser().getLocale());

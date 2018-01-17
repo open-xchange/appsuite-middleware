@@ -54,10 +54,7 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Available;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.alarm.json.AlarmActionFactory;
 import com.openexchange.chronos.availability.json.mapper.AvailableMapper;
 import com.openexchange.chronos.common.DataHandlers;
@@ -83,10 +80,10 @@ import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.json.oauth.OAuthScopeDescription;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
-import com.openexchange.chronos.service.AvailableField;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.contact.ContactService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.groupware.userconfiguration.Permission;
@@ -105,7 +102,7 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            IDBasedCalendarAccessFactory.class, CalendarUtilities.class, CalendarService.class, LeanConfigurationService.class, CalendarAccountService.class, ConversionService.class, ITipActionPerformerFactoryService.class
+            IDBasedCalendarAccessFactory.class, CalendarUtilities.class, CalendarService.class, LeanConfigurationService.class, CalendarAccountService.class, ConversionService.class, ITipActionPerformerFactoryService.class, ContactService.class
         };
     }
 
@@ -149,14 +146,17 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
                     return capabilities.contains(Permission.CALENDAR.getCapabilityName());
                 }
             });
+
+            ContactService contactService = getServiceSafe(ContactService.class);
+
             /*
              * register result converters
              */
             registerService(ResultConverter.class, new FreeBusyConverter());
-            registerService(ResultConverter.class, new EventResultConverter());
+            registerService(ResultConverter.class, new EventResultConverter(contactService));
             registerService(ResultConverter.class, new EventConflictResultConverter());
-            registerService(ResultConverter.class, new CalendarResultConverter());
-            registerService(ResultConverter.class, new MultipleCalendarResultConverter());
+            registerService(ResultConverter.class, new CalendarResultConverter(contactService));
+            registerService(ResultConverter.class, new MultipleCalendarResultConverter(contactService));
             registerService(ResultConverter.class, new AlarmTriggerConverter());
             registerService(ResultConverter.class, new ITipAnalysisResultConverter());
             /*

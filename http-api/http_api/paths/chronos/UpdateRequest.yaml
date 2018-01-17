@@ -14,6 +14,7 @@
       - $ref: "#/parameters/QueryParamChronosRecurrenceRange"
       - $ref: "#/parameters/QueryParamChronosCheckConflicts"
       - $ref: "#/parameters/QueryParamChronosNotification"
+      - $ref: "#/parameters/QueryParamChronosExtendedEntities"
       - in: query
         name: rangeStart
         type: string
@@ -71,6 +72,7 @@
       - $ref: "#/parameters/QueryParamChronosRecurrenceID"
       - $ref: "#/parameters/QueryParamChronosCheckConflicts"
       - $ref: "#/parameters/QueryParamChronosNotification"
+      - $ref: "#/parameters/QueryParamChronosExtendedEntities"
       - in: query
         name: timestamp
         type: integer

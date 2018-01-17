@@ -21,6 +21,7 @@
       - $ref: "#/parameters/QueryParamChronosFields"
       - $ref: "#/parameters/QueryParamChronosOrder"
       - $ref: "#/parameters/QueryParamChronosSort"
+      - $ref: "#/parameters/QueryParamChronosExtendedEntities"
     responses:
       200:
         description: |
