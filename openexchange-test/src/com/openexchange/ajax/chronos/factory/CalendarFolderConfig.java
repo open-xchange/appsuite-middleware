@@ -58,7 +58,8 @@ public enum CalendarFolderConfig {
     COLOR("color"),
     ENABLED("enabled"),
     ITEM_ID("itemId"),
-    REFRESH_INTERVAL("refreshInterval");
+    REFRESH_INTERVAL("refreshInterval"),
+    LOCALE("locale");
 
     private final String fieldName;
 

@@ -57,7 +57,8 @@ package com.openexchange.ajax.chronos.factory;
 public enum CalendarFolderExtendedProperty {
     COLOR("color"),
     DESCRIPTION("description"),
-    SCHEDULE_TRANSP("scheduleTransp");
+    SCHEDULE_TRANSP("scheduleTransp"),
+    USED_FOR_SYNC("usedForSync");
 
     private final String fieldName;
 

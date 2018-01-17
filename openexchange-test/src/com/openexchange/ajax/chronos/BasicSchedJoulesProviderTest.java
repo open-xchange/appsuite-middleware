@@ -59,6 +59,7 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.openexchange.ajax.chronos.factory.CalendarFolderConfig;
+import com.openexchange.ajax.chronos.factory.CalendarFolderExtendedProperty;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.FolderData;
@@ -240,6 +241,18 @@ public class BasicSchedJoulesProviderTest extends AbstractExternalProviderChrono
     private FolderData createFolder(int itemId, String folderName) throws ApiException, ChronosApiException, JSONException, JsonParseException, JsonMappingException, IOException {
         JSONObject config = new JSONObject();
         config.put(CalendarFolderConfig.ITEM_ID.getFieldName(), itemId);
-        return createFolder(folderName, MODULE, config, new JSONObject());
+        config.put(CalendarFolderConfig.REFRESH_INTERVAL.getFieldName(), DEFAULT_REFRESH_INTERVAL);
+        config.put(CalendarFolderConfig.LOCALE.getFieldName(), DEFAULT_LOCALE);
+
+        JSONObject extendedProperties = new JSONObject();
+        JSONObject v = new JSONObject();
+        v.put("value", "TRANSPARENT");
+        extendedProperties.put(CalendarFolderExtendedProperty.SCHEDULE_TRANSP.getFieldName(), v);
+        v = new JSONObject();
+        v.put("value", "false");
+        extendedProperties.put(CalendarFolderExtendedProperty.USED_FOR_SYNC.getFieldName(), v);
+        extendedProperties.put(CalendarFolderExtendedProperty.COLOR.getFieldName(), new JSONObject());
+        extendedProperties.put(CalendarFolderExtendedProperty.DESCRIPTION.getFieldName(), new JSONObject());
+        return createFolder(folderName, MODULE, config, extendedProperties);
     }
 }
