@@ -161,6 +161,8 @@ flags:
        * `delegated` - The calendar user's participation status is <i>delegated</i>.
        * `series` - The event represents the <i>master</i> of a recurring event series, or an expanded (regular) occurrence of a series. 
        * `overridden` - The event represents an exception / overridden instance of a recurring event series.
+       * `first_occurrence` - The event represents the <i>first</i> occurrence of a recurring event series.
+       * `last_occurrence` - The event represents the <i>last</i> occurrence of a recurring event series.
 relatedTo:
   type: string
   description: The relationship between this and other events.
