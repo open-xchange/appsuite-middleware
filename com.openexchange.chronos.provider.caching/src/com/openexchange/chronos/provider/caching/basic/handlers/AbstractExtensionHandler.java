@@ -249,7 +249,7 @@ abstract class AbstractExtensionHandler {
      * @throws OXException
      */
     List<Event> postProcess(List<Event> events) throws OXException {
-        if (false == parameters.get(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.class)) {
+        if (false == parameters.get(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.class, false)) {
             return events;
         }
         List<Event> processedEvents = new ArrayList<>(events.size());
