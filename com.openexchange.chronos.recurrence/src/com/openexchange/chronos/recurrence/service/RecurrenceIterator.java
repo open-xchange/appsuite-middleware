@@ -51,7 +51,9 @@ package com.openexchange.chronos.recurrence.service;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.EnumSet;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventFlag;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.EventOccurrence;
 import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
@@ -103,8 +105,35 @@ public class RecurrenceIterator extends AbstractRecurrenceIterator<Event> {
 
     @Override
     protected Event nextInstance() {
-        return new EventOccurrence(master, new PositionAwareRecurrenceId(
-            recurrenceData, next, position, CalendarUtils.truncateTime(new Date(next.getTimestamp()), TimeZones.UTC)));
+        PositionAwareRecurrenceId recurrenceId = new PositionAwareRecurrenceId(recurrenceData, next, position, CalendarUtils.truncateTime(new Date(next.getTimestamp()), TimeZones.UTC));
+        if (isFirstOccurrence()) {
+            return new EventOccurrence(master, recurrenceId) {
+
+                @Override
+                public EnumSet<EventFlag> getFlags() {
+                    EnumSet<EventFlag> flags = super.getFlags();
+                    if (null != flags) {
+                        flags = EnumSet.copyOf(flags);
+                        flags.add(EventFlag.FIRST_OCCURRENCE);
+                    }
+                    return flags;
+                }
+            };
+        } else if (isLastOccurrence()) {
+            return new EventOccurrence(master, recurrenceId) {
+
+                @Override
+                public EnumSet<EventFlag> getFlags() {
+                    EnumSet<EventFlag> flags = super.getFlags();
+                    if (null != flags) {
+                        flags = EnumSet.copyOf(flags);
+                        flags.add(EventFlag.LAST_OCCURRENCE);
+                    }
+                    return flags;
+                }
+            };
+        }
+        return new EventOccurrence(master, recurrenceId);
     }
 
 }

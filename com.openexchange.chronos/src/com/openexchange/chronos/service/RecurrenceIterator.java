@@ -66,4 +66,18 @@ public interface RecurrenceIterator<T> extends Iterator<T> {
      */
     int getPosition();
 
+    /**
+     * Gets a value indicating whether the current element represents the <i>first</i> one in the recurrence set.
+     *
+     * @return <code>true</code> if the element is the first one, <code>false</code>, otherwise
+     */
+    boolean isFirstOccurrence();
+
+    /**
+     * Gets a value indicating whether the current element represents the <i>last</i> one in the recurrence set.
+     *
+     * @return <code>true</code> if the element is the last one, <code>false</code>, otherwise
+     */
+    boolean isLastOccurrence();
+
 }

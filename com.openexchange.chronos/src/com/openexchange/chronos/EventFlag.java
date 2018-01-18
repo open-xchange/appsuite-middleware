@@ -129,6 +129,14 @@ public enum EventFlag {
      * The event represents an exception / overridden instance of a recurring event series.
      */
     OVERRIDDEN,
+    /**
+     * The event represents the <i>first</i> occurrence of a recurring event series.
+     */
+    FIRST_OCCURRENCE,
+    /**
+     * The event represents the <i>last</i> occurrence of a recurring event series.
+     */
+    LAST_OCCURRENCE,
 
     ;
 }

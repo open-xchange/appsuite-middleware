@@ -239,6 +239,16 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
         return null == next ? position : position - 1;
     }
 
+    @Override
+    public boolean isFirstOccurrence() {
+        return 1 == getPosition();
+    }
+
+    @Override
+    public boolean isLastOccurrence() {
+        return null == lookAhead && false == inner.hasNext() && 0 < getPosition();
+    }
+
     /**
      * Gets the date-time representation of a timestamp retrieved from the underlying recurrence set iterator.
      * <p/>
