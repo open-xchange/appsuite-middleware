@@ -74,6 +74,8 @@ import com.openexchange.ajax.chronos.util.AssertUtil;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.configuration.asset.Asset;
 import com.openexchange.configuration.asset.AssetType;
+import com.openexchange.data.conversion.ical.Assert;
+import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.ChronosAttachment;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
@@ -102,7 +104,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
      */
     @Test
     public void testCreateSingle() throws Exception {
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testCreateSingle"));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testCreateSingle"));
         EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
     }
@@ -112,7 +114,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
      */
     @Test
     public void testDeleteSingle() throws Exception {
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testDeleteSingle"));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testDeleteSingle"));
 
         EventId eventId = new EventId();
         eventId.setId(expectedEventData.getId());
@@ -134,7 +136,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
      */
     @Test
     public void testUpdateSingle() throws Exception {
-        EventData initialEvent = EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testUpdateSingle");
+        EventData initialEvent = EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testUpdateSingle");
         EventData event = eventManager.createEvent(initialEvent);
         event.setEndDate(DateTimeUtil.incrementDateTimeData(event.getEndDate(), 5000));
 
@@ -158,7 +160,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         Date tomorrow = DateTimeUtil.incrementDateTimeData(TimeZone.getTimeZone("UTC"), date, 1);
 
         // Create a single event
-        EventData event = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testGetEvent"));
+        EventData event = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testGetEvent"));
         EventId eventId = new EventId();
         eventId.setId(event.getId());
         eventId.setFolder(folderId);
@@ -195,9 +197,25 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         Calendar end = Calendar.getInstance(TimeZone.getTimeZone("Europe/Berlin"));
         end.setTimeInMillis(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(10));
 
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testCreateSingle", DateTimeUtil.getDateTime(start), DateTimeUtil.getDateTime(end)));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleEvent(defaultUserApi.getCalUser(), "testCreateSingle", DateTimeUtil.getDateTime(start), DateTimeUtil.getDateTime(end)));
         EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
+    }
+
+
+    /**
+     * Test extendedEntities parameter
+     */
+    @Test
+    public void testExtendedEntities() throws Exception {
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testCreateSingle"));
+        EventData actualEventData = eventManager.getRecurringEvent(expectedEventData.getId(), null, false, true);
+        List<Attendee> attendees = actualEventData.getAttendees();
+        Assert.assertEquals(1, attendees.size());
+        Attendee attendee = attendees.get(0);
+        Assert.assertTrue(attendee.getContact() != null);
+        Assert.assertTrue(attendee.getContact().getFirstName() != null);
+        Assert.assertTrue(attendee.getContact().getLastName() != null);
     }
 
     ////////////////////////////////// Attachment Tests ///////////////////////////////////
@@ -209,7 +227,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
     public void testCreateSingleWithAttachment() throws Exception {
         Asset asset = assetManager.getRandomAsset(AssetType.jpg);
 
-        JSONObject expectedEventData = eventManager.createEventWithAttachment(EventFactory.createSingleEventWithAttachment(defaultUserApi.getCalUser(), testUser.getLogin(), "testCreateSingleWithAttachment", asset), asset);
+        JSONObject expectedEventData = eventManager.createEventWithAttachment(EventFactory.createSingleEventWithAttachment(defaultUserApi.getCalUser(), "testCreateSingleWithAttachment", asset), asset);
         assertEquals("The amount of attachments is not correct", 1, expectedEventData.getJSONArray("attachments").length());
     }
 
@@ -220,7 +238,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
     public void testUpdateSingleWithAttachment() throws Exception {
         Asset asset = assetManager.getRandomAsset(AssetType.jpg);
 
-        JSONObject expectedEventData = eventManager.createEventWithAttachment(EventFactory.createSingleEventWithAttachment(defaultUserApi.getCalUser(), testUser.getLogin(), "testUpdateSingleWithAttachment", asset), asset);
+        JSONObject expectedEventData = eventManager.createEventWithAttachment(EventFactory.createSingleEventWithAttachment(defaultUserApi.getCalUser(), "testUpdateSingleWithAttachment", asset), asset);
         assertEquals("The amount of attachments is not correct", 1, expectedEventData.getJSONArray("attachments").length());
 
         EventData actualEventData = eventManager.getEvent(expectedEventData.getString("id"));
@@ -243,7 +261,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         Path path = Paths.get(asset.getAbsolutePath());
         byte[] expectedAttachmentData = Files.readAllBytes(path);
 
-        JSONObject expectedEventData = eventManager.createEventWithAttachment(EventFactory.createSingleEventWithAttachment(defaultUserApi.getCalUser(), testUser.getLogin(), "testUpdateSingleWithAttachment", asset), asset);
+        JSONObject expectedEventData = eventManager.createEventWithAttachment(EventFactory.createSingleEventWithAttachment(defaultUserApi.getCalUser(), "testUpdateSingleWithAttachment", asset), asset);
         assertEquals("The amount of attachments is not correct", 1, expectedEventData.getJSONArray("attachments").length());
 
         byte[] actualAttachmentData = eventManager.getAttachment(expectedEventData.getString("id"), expectedEventData.getJSONArray("attachments").getJSONObject(0).getInt("managedId"));
@@ -262,7 +280,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         assets.add(assetA);
         assets.add(assetB);
 
-        JSONObject expectedEventData = eventManager.createEventWithAttachments(EventFactory.createSingleEventWithAttachments(defaultUserApi.getCalUser(), testUser.getLogin(), "testUpdateSingleWithAttachmentsDeleteOne", assets), assets);
+        JSONObject expectedEventData = eventManager.createEventWithAttachments(EventFactory.createSingleEventWithAttachments(defaultUserApi.getCalUser(), "testUpdateSingleWithAttachmentsDeleteOne", assets), assets);
         assertEquals("The amount of attachments is not correct", 2, expectedEventData.getJSONArray("attachments").length());
 
         EventData actualEventData = eventManager.getEvent(expectedEventData.getString("id"));

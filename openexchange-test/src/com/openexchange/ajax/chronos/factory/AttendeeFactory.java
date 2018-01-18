@@ -63,16 +63,13 @@ public final class AttendeeFactory {
      * Creates a new {@link Attendee} object with the specified user identifier, email address and {@link CuTypeEnum}
      *
      * @param userId The user identifier
-     * @param emailAddress the e-mail address
      * @param cuType the {@link CuTypeEnum}
      * @return The new {@link Attendee}
      */
-    public static Attendee createAttendee(int userId, String emailAddress, CuTypeEnum cuType) {
+    public static Attendee createAttendee(int userId, CuTypeEnum cuType) {
         Attendee attendee = new Attendee();
         attendee.entity(userId);
         attendee.cuType(cuType);
-        attendee.setUri("mailto:" + emailAddress);
-
         return attendee;
     }
 
@@ -80,11 +77,10 @@ public final class AttendeeFactory {
      * Creates an {@link Attendee} of type {@link CuTypeEnum#INDIVIDUAL}
      *
      * @param userId The user identifier
-     * @param emailAddress The e-mail address
      * @return The new {@link Attendee}
      */
-    public static Attendee createIndividual(int userId, String emailAddress) {
-        return createAttendee(userId, emailAddress, CuTypeEnum.INDIVIDUAL);
+    public static Attendee createIndividual(int userId) {
+        return createAttendee(userId, CuTypeEnum.INDIVIDUAL);
     }
 
     /**

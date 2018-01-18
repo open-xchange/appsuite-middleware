@@ -91,10 +91,10 @@ public class RestrictedAttendeePermissionsTest extends AbstractAttendeeTest {
     @Test
     public void testAttendeeAlarms() throws Exception {
         // attendee should be able to adjust his alarms
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testAddSingleAlarm"));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testAddSingleAlarm"));
 
         ArrayList<Attendee> atts = new ArrayList<>(2);
-        Attendee attendee2 = AttendeeFactory.createIndividual(user2.getCalUser(), testUser2.getLogin());
+        Attendee attendee2 = AttendeeFactory.createIndividual(user2.getCalUser());
         attendee2.setPartStat("ACCEPTED");
         atts.add(attendee2);
         expectedEventData.setAttendees(atts);
@@ -112,11 +112,11 @@ public class RestrictedAttendeePermissionsTest extends AbstractAttendeeTest {
     @Test
     public void testAttendeeRemoveFromEvent() throws Exception {
         // attendee should be able to remove himself from an event
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testCreateSingle"));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testCreateSingle"));
         String expectedEventId = expectedEventData.getId();
 
         ArrayList<Attendee> atts = new ArrayList<>(2);
-        Attendee attendee2 = AttendeeFactory.createIndividual(user2.getCalUser(), testUser2.getLogin());
+        Attendee attendee2 = AttendeeFactory.createIndividual(user2.getCalUser());
         attendee2.setPartStat("ACCEPTED");
         atts.add(attendee2);
         expectedEventData.setAttendees(atts);
@@ -144,11 +144,11 @@ public class RestrictedAttendeePermissionsTest extends AbstractAttendeeTest {
     @Test
     public void testAttendeeParticipationStatus() throws Exception {
         // attendee should be able to change his participation status
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testCreateSingle"));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testCreateSingle"));
         String expectedEventId = expectedEventData.getId();
 
         ArrayList<Attendee> atts = new ArrayList<>(2);
-        Attendee attendee2 = AttendeeFactory.createIndividual(user2.getCalUser(), testUser2.getLogin());
+        Attendee attendee2 = AttendeeFactory.createIndividual(user2.getCalUser());
         attendee2.setPartStat("ACCEPTED");
         atts.add(attendee2);
         expectedEventData.setAttendees(atts);
@@ -168,10 +168,10 @@ public class RestrictedAttendeePermissionsTest extends AbstractAttendeeTest {
     @Test
     public void testAttendeePermissionRestrictions() throws Exception {
         // attendee should not be able to do everything else
-        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testCreateSingle"));
+        EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testCreateSingle"));
 
         ArrayList<Attendee> atts = new ArrayList<>(2);
-        Attendee attendee2 = AttendeeFactory.createIndividual(user2.getCalUser(), testUser2.getLogin());
+        Attendee attendee2 = AttendeeFactory.createIndividual(user2.getCalUser());
         attendee2.setPartStat("ACCEPTED");
         atts.add(attendee2);
         expectedEventData.setAttendees(atts);

@@ -75,6 +75,7 @@ import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.ChronosUpdatesResponse;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
+import com.openexchange.testing.httpclient.models.EventResponse;
 import com.openexchange.testing.httpclient.models.EventsResponse;
 import com.openexchange.testing.httpclient.models.UpdatesResult;
 
@@ -240,17 +241,29 @@ public class EventManager extends AbstractManager {
      * @throws ChronosApiException if a Chronos API error is occurred
      */
     public EventData getRecurringEvent(String eventId, String reccurenceId, boolean expectException) throws ApiException, ChronosApiException {
-        EventId event = new EventId();
-        event.setFolder(defaultFolder);
-        event.setRecurrenceId(reccurenceId);
-        event.setId(eventId);
-        EventsResponse eventsResponse = userApi.getChronosApi().getEventList(userApi.getSession(), Collections.singletonList(event), null, null);
+        return getRecurringEvent(eventId, reccurenceId, expectException, false);
+    }
+
+
+    /**
+     * Gets the occurrence of an event
+     *
+     * @param eventId The {@link EventId}
+     * @param reccurenceId The recurrence identifier
+     * @param expectedException flag to indicate that an exception is expected
+     * @param extendedEntities Whether attendees should be extended with contact field or not
+     * @return the {@link EventData}
+     * @throws ApiException if an API error is occurred
+     * @throws ChronosApiException if a Chronos API error is occurred
+     */
+    public EventData getRecurringEvent(String eventId, String reccurenceId, boolean expectException, boolean extendedEntities) throws ApiException, ChronosApiException {
+        EventResponse eventsResponse = userApi.getChronosApi().getEvent(userApi.getSession(), eventId, defaultFolder, reccurenceId, null, extendedEntities);
         if (expectException) {
             assertNotNull("An error was expected", eventsResponse.getError());
             throw new ChronosApiException(eventsResponse.getCode(), eventsResponse.getError());
         }
         checkResponse(eventsResponse.getError(), eventsResponse.getError(), eventsResponse.getData());
-        return eventsResponse.getData().get(0);
+        return eventsResponse.getData();
     }
 
     /**

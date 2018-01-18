@@ -73,14 +73,13 @@ public final class EventFactory {
      * Creates a single event for the specified user with in the specified interval.
      *
      * @param userId The user identifier
-     * @param emailAddress The user's e-mail address
      * @param summary The summary of the event
      * @param startDate The start date
      * @param endDate The end date
      * @return The {@link EventData}
      */
-    public static EventData createSingleEvent(int userId, String emailAddress, String summary, DateTimeData startDate, DateTimeData endDate) {
-        Attendee attendee = AttendeeFactory.createIndividual(userId, emailAddress);
+    public static EventData createSingleEvent(int userId, String summary, DateTimeData startDate, DateTimeData endDate) {
+        Attendee attendee = AttendeeFactory.createIndividual(userId);
 
         EventData singleEvent = new EventData();
         singleEvent.setPropertyClass("PUBLIC");
@@ -97,12 +96,11 @@ public final class EventFactory {
      * Creates a simple daily two hour event with the specified amount of occurrences
      *
      * @param userId The user identifier
-     * @param emailAddress The e-mail address of the user
      * @param summary The summary of the event
      * @return The series {@link EventData}
      */
-    public static EventData createSeriesEvent(int userId, String emailAddress, String summary, int occurences) {
-        EventData seriesEvent = createSingleTwoHourEvent(userId, emailAddress, summary);
+    public static EventData createSeriesEvent(int userId, String summary, int occurences) {
+        EventData seriesEvent = createSingleTwoHourEvent(userId, summary);
         seriesEvent.setRrule("FREQ=DAILY;COUNT=" + occurences);
         return seriesEvent;
     }
@@ -111,12 +109,14 @@ public final class EventFactory {
      * Creates a simple daily two hour event with the specified amount of occurrences
      *
      * @param userId The user identifier
-     * @param emailAddress The e-mail address of the user
      * @param summary The summary of the event
+     * @param startDate The start date
+     * @param endDate The end date
+     * @param occurences The number of occurences
      * @return The series {@link EventData}
      */
-    public static EventData createSeriesEvent(int userId, String emailAddress, String summary, DateTimeData startDate, DateTimeData endDate, int occurences) {
-        EventData seriesEvent = createSingleEvent(userId, emailAddress, summary, startDate, endDate);
+    public static EventData createSeriesEvent(int userId, String summary, DateTimeData startDate, DateTimeData endDate, int occurences) {
+        EventData seriesEvent = createSingleEvent(userId, summary, startDate, endDate);
         seriesEvent.setRrule("FREQ=DAILY;COUNT=" + occurences);
         return seriesEvent;
     }
@@ -125,33 +125,32 @@ public final class EventFactory {
      * Creates a single event with the specified start and end time and with the specified attachment.
      *
      * @param userId The user identifier
-     * @param emailAddress The e-mail address of the user
      * @param summary The summary of the event
      * @param startDate The start date
      * @param endDate The end date
      * @param asset The {@link Asset} to attach
      * @return The {@link EventData}
      */
-    public static EventData createSingleEventWithAttachment(int userId, String emailAddress, String summary, Asset asset) {
-        return createSingleEventWithAttachments(userId, emailAddress, summary, Collections.singletonList(asset));
+    public static EventData createSingleEventWithAttachment(int userId, String summary, Asset asset) {
+        return createSingleEventWithAttachments(userId, summary, Collections.singletonList(asset));
     }
 
-    public static EventData createSingleEventWithAttachments(int userId, String emailAddress, String summary, List<Asset> assets) {
-        EventData eventData = createSingleTwoHourEvent(userId, emailAddress, summary);
+    public static EventData createSingleEventWithAttachments(int userId, String summary, List<Asset> assets) {
+        EventData eventData = createSingleTwoHourEvent(userId, summary);
         for (Asset asset : assets) {
             eventData.addAttachmentsItem(createAttachment(asset));
         }
         return eventData;
     }
 
-    public static EventData createSingleEventWithSingleAlarm(int userId, String emailAddress, String summary, Alarm alarm) {
-        EventData eventData = createSingleTwoHourEvent(userId, emailAddress, summary);
+    public static EventData createSingleEventWithSingleAlarm(int userId, String summary, Alarm alarm) {
+        EventData eventData = createSingleTwoHourEvent(userId, summary);
         eventData.setAlarms(Collections.singletonList(alarm));
         return eventData;
     }
 
-    public static EventData createSingleEventWithSingleAlarm(int userId, String emailAddress, String summary, DateTimeData startDate, DateTimeData endDate, Alarm alarm) {
-        EventData eventData = createSingleEvent(userId, emailAddress, summary, startDate, endDate);
+    public static EventData createSingleEventWithSingleAlarm(int userId, String summary, DateTimeData startDate, DateTimeData endDate, Alarm alarm) {
+        EventData eventData = createSingleEvent(userId, summary, startDate, endDate);
         eventData.setAlarms(Collections.singletonList(alarm));
         return eventData;
     }
@@ -175,17 +174,16 @@ public final class EventFactory {
      * Creates a single event two-hour event
      *
      * @param userId The user identifier
-     * @param emailAddress The user's e-mail address
      * @param summary The event's summary
      * @return The {@link EventData}
      */
-    public static EventData createSingleTwoHourEvent(int userId, String emailAddress, String summary) {
+    public static EventData createSingleTwoHourEvent(int userId, String summary) {
         Calendar start = Calendar.getInstance();
         start.setTimeInMillis(System.currentTimeMillis());
 
         Calendar end = Calendar.getInstance();
         end.setTimeInMillis(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(2));
 
-        return createSingleEvent(userId, emailAddress, summary, DateTimeUtil.getDateTime(start), DateTimeUtil.getDateTime(end));
+        return createSingleEvent(userId, summary, DateTimeUtil.getDateTime(start), DateTimeUtil.getDateTime(end));
     }
 }

@@ -98,7 +98,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
          * 1. Test alarm related to start
          */
         {
-            EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), testUser.getLogin(), "testPositiveDurationTrigger", startDate, endDate, AlarmFactory.createDisplayAlarm("-PT10M"));
+            EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testPositiveDurationTrigger", startDate, endDate, AlarmFactory.createDisplayAlarm("-PT10M"));
             EventData event = eventManager.createEvent(toCreate);
             getAndAssertAlarms(event, 1);
 
@@ -116,7 +116,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
          * 2. Test alarm related to end
          */
         {
-            EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), testUser.getLogin(), "testPositiveDurationTrigger", startDate, endDate, AlarmFactory.createAlarm("-PT10M", RelatedEnum.END));
+            EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testPositiveDurationTrigger", startDate, endDate, AlarmFactory.createAlarm("-PT10M", RelatedEnum.END));
             EventData event = eventManager.createEvent(toCreate);
             getAndAssertAlarms(event, 1);
 
@@ -144,7 +144,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
          * 1. Test alarm related to start
          */
         {
-            EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), testUser.getLogin(), "testPositiveDurationTrigger", startDate, endDate, AlarmFactory.createDisplayAlarm("-PT10M"));
+            EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testPositiveDurationTrigger", startDate, endDate, AlarmFactory.createDisplayAlarm("-PT10M"));
             EventData event = eventManager.createEvent(toCreate);
             getAndAssertAlarms(event, 1);
 
@@ -162,7 +162,7 @@ public class TimezoneAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTe
          * 2. Test alarm related to end
          */
         {
-            EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), testUser.getLogin(), "testPositiveDurationTrigger", startDate, endDate, AlarmFactory.createAlarm("PT10M", RelatedEnum.END));
+            EventData toCreate = EventFactory.createSingleEventWithSingleAlarm(defaultUserApi.getCalUser(), "testPositiveDurationTrigger", startDate, endDate, AlarmFactory.createAlarm("PT10M", RelatedEnum.END));
             EventData event = eventManager.createEvent(toCreate);
             getAndAssertAlarms(event, 1);
 

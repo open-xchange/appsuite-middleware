@@ -92,7 +92,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
      */
     @Test
     public void testCreateSeries() throws Exception {
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testCreateSeries", 3);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testCreateSeries", 3);
         EventData expectedEventData = eventManager.createEvent(toCreate);
         EventData actualEventData = eventManager.getEvent(expectedEventData.getId());
         AssertUtil.assertEventsEqual(expectedEventData, actualEventData);
@@ -103,7 +103,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
      */
     @Test
     public void testDeleteCompleteSeries() throws Exception {
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testDeleteCompleteSeries", 3);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testDeleteCompleteSeries", 3);
         EventData expectedEventData = eventManager.createEvent(toCreate);
 
         EventId eventId = new EventId();
@@ -129,7 +129,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         Date today = DateTimeUtil.getZuluDate(date.getTime() - offset);
         Date nextWeek = DateTimeUtil.parseZuluDateTime(DateTimeUtil.formatZuluDate(DateTimeUtil.incrementDateTimeData(TimeZone.getTimeZone("UTC"), date, 7)));
 
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testDeleteSeriesOccurence", 3);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testDeleteSeriesOccurence", 3);
         EventData expectedEventData = eventManager.createEvent(toCreate);
 
         EventId eventId = new EventId();
@@ -169,7 +169,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
      */
     @Test
     public void testUpdateSeriesMaster() throws Exception {
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testUpdateSeriesMaster", 3);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testUpdateSeriesMaster", 3);
         EventData expectedEventData = eventManager.createEvent(toCreate);
 
         EventId eventId = new EventId();
@@ -200,7 +200,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         Date today = DateTimeUtil.getZuluDate(date.getTime() - offset);
         Date nextWeek = DateTimeUtil.parseZuluDateTime(DateTimeUtil.formatZuluDate(DateTimeUtil.incrementDateTimeData(TimeZone.getTimeZone("UTC"), date, 7)));
 
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testUpdateSeriesOccurence", 3);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testUpdateSeriesOccurence", 3);
         EventData expectedEventData = eventManager.createEvent(toCreate);
 
         EventId masterId = new EventId();
@@ -250,7 +250,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         DateTimeData nextWeek = DateTimeUtil.getZuluDateTime(DateTimeUtil.incrementDateTimeData(TimeZone.getTimeZone("UTC"), date, 7).getTime());
 
         // Create a series event
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testGetSeries", 3);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testGetSeries", 3);
         EventData expectedEventData = eventManager.createEvent(toCreate);
 
         // Get series master
@@ -291,7 +291,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         DateTimeData nextWeek = DateTimeUtil.getZuluDateTime(DateTimeUtil.incrementDateTimeData(TimeZone.getTimeZone("UTC"), date, 7).getTime());
 
         // Create a series event
-        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testFloatingSeries", 3);
+        EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), "testFloatingSeries", 3);
         toCreate.setStartDate(DateTimeUtil.getDateTime(null, System.currentTimeMillis()));
         toCreate.setEndDate(DateTimeUtil.getDateTime(null, System.currentTimeMillis() + 5000));
         EventData expectedEventData = eventManager.createEvent(toCreate);
