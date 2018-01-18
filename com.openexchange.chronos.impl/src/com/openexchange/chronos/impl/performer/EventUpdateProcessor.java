@@ -57,7 +57,6 @@ import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getExceptionDateUpdates;
 import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
-import static com.openexchange.chronos.common.CalendarUtils.isPublicClassification;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
@@ -107,6 +106,7 @@ import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceData;
+import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -324,10 +324,12 @@ public class EventUpdateProcessor implements EventUpdate {
                 break;
             case CLASSIFICATION:
                 /*
-                 * check validity & deny update for change exceptions (treating PUBLIC as default value)
+                 * check validity; for now, deny update for change exceptions, or if there are existing change exceptions
                  */
+                //TODO: implement correct propagation of classification change to master and change exceptions;
+                //      requires to pass series information in event update processor of change exceptions
                 Check.classificationIsValid(updatedEvent.getClassification(), folder);
-                if (isSeriesException(originalEvent) && isPublicClassification(originalEvent) != isPublicClassification(updatedEvent)) {
+                if (isSeriesException(originalEvent) || isSeriesMaster(originalEvent) && false == isNullOrEmpty(originalEvent.getChangeExceptionDates())) {
                     throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE.create(
                         String.valueOf(updatedEvent.getClassification()), originalEvent.getSeriesId(), String.valueOf(originalEvent.getRecurrenceId()));
                 }
@@ -496,7 +498,8 @@ public class EventUpdateProcessor implements EventUpdate {
          * apply common changes in 'basic' fields'
          */
         EventField[] basicFields = {
-            EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.CATEGORIES, EventField.COLOR, EventField.URL, EventField.GEO
+            EventField.CLASSIFICATION, EventField.TRANSP, EventField.STATUS, EventField.CATEGORIES,
+            EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.COLOR, EventField.URL, EventField.GEO
         };
         for (EventField field : basicFields) {
             propagateFieldUpdate(originalMaster, updatedMaster, field, changedChangeExceptions);
@@ -624,7 +627,7 @@ public class EventUpdateProcessor implements EventUpdate {
      * @param originalChangeExceptions The change exceptions of the original series event, or <code>null</code> if not applicable
      * @return The resulting list of (possibly adjusted) change exceptions
      */
-    private static List<Event> adjustRecurrenceIds(Event originalEvent, Event updatedEvent, List<Event> originalChangeExceptions) throws OXException {
+    private List<Event> adjustRecurrenceIds(Event originalEvent, Event updatedEvent, List<Event> originalChangeExceptions) throws OXException {
         if (false == isSeriesMaster(originalEvent)) {
             return Collections.emptyList();
         }
@@ -632,13 +635,24 @@ public class EventUpdateProcessor implements EventUpdate {
         DateTime updatedSeriesStart = updatedEvent.getStartDate();
         if (false == originalSeriesStart.equals(updatedSeriesStart)) {
             /*
-             * start-date changed, adjust recurrence identifiers for delete- and change-exception collections in changed event
-             * accordingly (unless already done by the client)
+             * start date change, determine start- and end-time of first occurrence
+             */
+            RecurrenceIterator<Event> iterator = session.getRecurrenceService().iterateEventOccurrences(originalEvent, null, null);
+            if (iterator.hasNext()) {
+                originalSeriesStart = iterator.next().getStartDate();
+            }
+            iterator = session.getRecurrenceService().iterateEventOccurrences(updatedEvent, null, null);
+            if (iterator.hasNext()) {
+                updatedSeriesStart = iterator.next().getStartDate();
+            }
+            /*
+             * shift recurrence identifiers for delete- and change-exception collections in changed event by same offset
+             * (unless already done by the client)
              */
             updatedEvent.setDeleteExceptionDates(shiftRecurrenceIds(originalEvent.getDeleteExceptionDates(), updatedEvent.getDeleteExceptionDates(), originalSeriesStart, updatedSeriesStart));
             updatedEvent.setChangeExceptionDates(shiftRecurrenceIds(originalEvent.getChangeExceptionDates(), updatedEvent.getChangeExceptionDates(), originalSeriesStart, updatedSeriesStart));
             /*
-             * also adjust recurrence identifier of existing change exceptions
+             * also shift recurrence identifier of existing change exceptions
              */
             if (false == isNullOrEmpty(originalChangeExceptions)) {
                 List<Event> changedChangeExceptions = EventMapper.getInstance().copy(originalChangeExceptions, (EventField[]) null);
