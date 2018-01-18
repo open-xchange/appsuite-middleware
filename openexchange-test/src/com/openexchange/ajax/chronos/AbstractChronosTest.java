@@ -138,7 +138,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
             if (eventIds != null) {
                 for (UserApi api : eventIds.keySet()) {
                     // FIXME: Switch to EventManager
-                    api.getChronosApi().deleteEvent(api.getSession(), System.currentTimeMillis(), eventIds.get(api), null, null, false);
+                    api.getChronosApi().deleteEvent(api.getSession(), System.currentTimeMillis(), eventIds.get(api), null, null, false, false);
                 }
             }
         } catch (Exception e) {
@@ -323,6 +323,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
      * @param data The data element of the response
      * @return The data
      */
+    @Override
     protected <T> T checkResponse(String error, String errorDesc, T data) {
         assertNull(errorDesc, error);
         assertNotNull(data);

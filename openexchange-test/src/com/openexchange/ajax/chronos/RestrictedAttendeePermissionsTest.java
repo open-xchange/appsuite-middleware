@@ -134,7 +134,7 @@ public class RestrictedAttendeePermissionsTest extends AbstractAttendeeTest {
         List<EventId> eventIdList = new ArrayList<>();
         eventIdList.add(event);
         //TODO put in abstract class
-        user2.getChronosApi().deleteEvent(user2.getSession(), System.currentTimeMillis(), eventIdList, null, null, false);
+        user2.getChronosApi().deleteEvent(user2.getSession(), System.currentTimeMillis(), eventIdList, null, null, false, false);
 
         expectedEventData = eventManager.getEvent(expectedEventId);
         assertNotNull(expectedEventData);

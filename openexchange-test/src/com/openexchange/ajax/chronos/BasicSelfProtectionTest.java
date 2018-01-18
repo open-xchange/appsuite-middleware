@@ -103,7 +103,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
         EventData toCreate = EventFactory.createSeriesEvent(defaultUserApi.getCalUser(), testUser.getLogin(), "testTooManyEvents", 1002);
 
         // Try create with expand 'true'
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, toCreate, true, false, fromStr, untilStr, true);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, toCreate, true, false, false, fromStr, untilStr, true);
         Assert.assertNotNull("Response doesn't contain an error", createEvent.getError());
         Assert.assertEquals(excpectedErrorCode, createEvent.getCode());
 
@@ -114,14 +114,14 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
         long timestamp = eventManager.getLastTimeStamp();
 
         // Query all event occurrences
-        EventsResponse eventsResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), fromStr, untilStr, folderId, null, null, null, true, true);
+        EventsResponse eventsResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), fromStr, untilStr, folderId, null, null, null, true, true, false);
         Assert.assertNotNull("Response doesn't contain an error", eventsResponse.getError());
         Assert.assertEquals(excpectedErrorCode, eventsResponse.getCode());
 
         // Update event with expand 'true'
         EventData eventData = actualEventData;
         eventData.setDescription("Changed description");
-        ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, eventData.getId(), eventData, eventManager.getLastTimeStamp(), null, null, true, false, fromStr, untilStr, true);
+        ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, eventData.getId(), eventData, eventManager.getLastTimeStamp(), null, null, true, false, false, fromStr, untilStr, true);
         Assert.assertNotNull("Response doesn't contain an error", updateResponse.getError());
         Assert.assertEquals(excpectedErrorCode, updateResponse.getCode());
 
@@ -129,7 +129,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
         eventManager.updateEvent(eventData);
 
         // Query updates with expand 'true'
-        ChronosUpdatesResponse updatesResponse = defaultUserApi.getChronosApi().getUpdates(defaultUserApi.getSession(), folderId, timestamp, fromStr, untilStr, null, null, null, true, true);
+        ChronosUpdatesResponse updatesResponse = defaultUserApi.getChronosApi().getUpdates(defaultUserApi.getSession(), folderId, timestamp, fromStr, untilStr, null, null, null, true, true, false);
         Assert.assertNotNull("Response doesn't contain an error", updatesResponse.getError());
         Assert.assertEquals(excpectedErrorCode, updatesResponse.getCode());
     }
@@ -155,7 +155,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
         }
 
         // Try create with expand 'true'
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, toCreate, true, false, null, null, false);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, toCreate, true, false, false, null, null, false);
         Assert.assertNotNull("Response doesn't contain an error", createEvent.getError());
         Assert.assertEquals(excpectedErrorCode, createEvent.getCode());
 
@@ -171,7 +171,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
             actualEventData.addAttendeesItem(AttendeeFactory.createIndividual(mail));
         }
 
-        ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, actualEventData.getId(), actualEventData, eventManager.getLastTimeStamp(), null, null, true, false, null, null, false);
+        ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, actualEventData.getId(), actualEventData, eventManager.getLastTimeStamp(), null, null, true, false, false, null, null, false);
         Assert.assertNotNull("Response doesn't contain an error", updateResponse.getError());
         Assert.assertEquals(excpectedErrorCode, updateResponse.getCode());
     }
@@ -195,7 +195,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
         }
 
         // Try create with expand 'true'
-        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, toCreate, true, false, null, null, false);
+        ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, toCreate, true, false, false, null, null, false);
         Assert.assertNotNull("Response doesn't contain an error", createEvent.getError());
         Assert.assertEquals(excpectedErrorCode, createEvent.getCode());
 
@@ -210,7 +210,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
             actualEventData.addAlarmsItem(AlarmFactory.createDisplayAlarm("-PT"+x+"M"));
         }
 
-        ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, actualEventData.getId(), actualEventData, eventManager.getLastTimeStamp(), null, null, true, false, null, null, false);
+        ChronosCalendarResultResponse updateResponse = defaultUserApi.getChronosApi().updateEvent(defaultUserApi.getSession(), folderId, actualEventData.getId(), actualEventData, eventManager.getLastTimeStamp(), null, null, true, false, false, null, null, false);
         Assert.assertNotNull("Response doesn't contain an error", updateResponse.getError());
         Assert.assertEquals(excpectedErrorCode, updateResponse.getCode());
     }
