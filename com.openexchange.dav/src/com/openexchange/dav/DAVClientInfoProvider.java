@@ -54,6 +54,8 @@ import com.openexchange.clientinfo.ClientInfo;
 import com.openexchange.clientinfo.ClientInfoProvider;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
+import com.openexchange.uadetector.UserAgentParser;
+import net.sf.uadetector.ReadableUserAgent;
 
 /**
  * {@link DAVClientInfoProvider}
@@ -63,11 +65,14 @@ import com.openexchange.session.Session;
  */
 public class DAVClientInfoProvider implements ClientInfoProvider {
 
+    private UserAgentParser userAgentParser;
+
     /**
      * Initializes a new {@link DAVClientInfoProvider}.
      */
-    public DAVClientInfoProvider() {
+    public DAVClientInfoProvider(UserAgentParser userAgentParser) {
         super();
+        this.userAgentParser = userAgentParser;
     }
 
     @Override
@@ -78,6 +83,14 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
         DAVUserAgent userAgent = getDAVUserAgent(session);
         if (DAVUserAgent.UNKNOWN.equals(userAgent)) {
             return getClientInfo(session.getClient());
+        }
+        ReadableUserAgent readableUserAgent = userAgentParser.parse((String) session.getParameter(Session.PARAM_USER_AGENT));
+        if (null != readableUserAgent) {
+            String osFamily = readableUserAgent.getOperatingSystem().getFamilyName();
+            String osVersion = new StringBuilder().append(readableUserAgent.getOperatingSystem().getVersionNumber().getMajor()).append(".").append(readableUserAgent.getOperatingSystem().getVersionNumber().getMinor()).toString();
+            String client = readableUserAgent.getName();
+            String clientVersion = new StringBuilder().append(readableUserAgent.getVersionNumber().getMajor()).append(".").append(readableUserAgent.getVersionNumber().getMinor()).toString();
+            return new DAVClientInfo(userAgent.getReadableName(), osFamily, osVersion, client, clientVersion);
         }
         return new DAVClientInfo(userAgent.getReadableName());
     }

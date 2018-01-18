@@ -69,6 +69,7 @@ public class WebClientInfo implements ClientInfo {
     private final String platformVersion;
     private final String browser;
     private final String browserVersion;
+    //    private final ReadableUserAgent info;
 
     public WebClientInfo(String client, String platform, String platformVersion, String browser, String browserVersion) {
         this.client = client;
@@ -97,6 +98,32 @@ public class WebClientInfo implements ClientInfo {
     @Override
     public ClientInfoType getType() {
         return ClientInfoType.BROWSER;
+    }
+
+    @Override
+    public String getOSFamily() {
+        if (Strings.isNotEmpty(platform)) {
+            return platform.toLowerCase();
+        }
+        return null;
+    }
+
+    @Override
+    public String getOSVersion() {
+        return platformVersion;
+    }
+
+    @Override
+    public String getClientName() {
+        if (Strings.isNotEmpty(browser)) {
+            return browser.toLowerCase();
+        }
+        return null;
+    }
+
+    @Override
+    public String getClientVersion() {
+        return browserVersion;
     }
 
 }

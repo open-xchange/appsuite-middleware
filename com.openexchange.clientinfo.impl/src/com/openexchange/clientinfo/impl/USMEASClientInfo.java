@@ -72,4 +72,24 @@ public class USMEASClientInfo implements ClientInfo {
         return ClientInfoStrings.USM_EAS_CLIENT;
     }
 
+    @Override
+    public String getOSFamily() {
+        return null;
+    }
+
+    @Override
+    public String getOSVersion() {
+        return null;
+    }
+
+    @Override
+    public String getClientName() {
+        return null;
+    }
+
+    @Override
+    public String getClientVersion() {
+        return null;
+    }
+
 }

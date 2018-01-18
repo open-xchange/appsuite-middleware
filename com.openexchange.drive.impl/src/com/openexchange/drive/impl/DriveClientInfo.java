@@ -67,12 +67,14 @@ public class DriveClientInfo implements ClientInfo {
     private final String platform;
     private final String platformVersion;
     private final String appVersion;
+    private final String osFamily;
 
-    public DriveClientInfo(String platform, String platformVersion, String appVersion) {
+    public DriveClientInfo(String platform, String platformVersion, String appVersion, String osFamily) {
         super();
         this.platform = platform;
         this.platformVersion = platformVersion;
         this.appVersion = appVersion;
+        this.osFamily = osFamily;
     }
 
     @Override
@@ -100,6 +102,26 @@ public class DriveClientInfo implements ClientInfo {
             return String.format(helper.getString(DriveClientInfoStrings.DRIVE_CLIENT), app);
         }
         return app;
+    }
+
+    @Override
+    public String getOSFamily() {
+        return osFamily;
+    }
+
+    @Override
+    public String getOSVersion() {
+        return null;
+    }
+
+    @Override
+    public String getClientName() {
+        return DriveConfig.getInstance().getShortProductName().toLowerCase();
+    }
+
+    @Override
+    public String getClientVersion() {
+        return null;
     }
 
 }
