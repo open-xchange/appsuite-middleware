@@ -173,6 +173,16 @@ public interface ShareService {
     Set<Integer> getSharingUsersFor(int contextID, int guestID) throws OXException;
 
     /**
+     * Checks if specified guest is visible to session-associated user.
+     *
+     * @param session The session
+     * @param userID The user identifier
+     * @return <code>true</code> if specified guest is visible; otherwise <code>false</code>
+     * @throws OXException If visibility cannot be checked
+     */
+    boolean isGuestVisibleTo(int guestID, Session session) throws OXException;
+
+    /**
      * Schedules guest cleanup tasks in a context.
      *
      * @param contextID The context ID
