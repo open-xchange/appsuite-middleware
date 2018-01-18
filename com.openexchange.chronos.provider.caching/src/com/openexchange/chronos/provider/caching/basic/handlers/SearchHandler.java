@@ -55,6 +55,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.exception.OXException;
@@ -76,6 +77,9 @@ public class SearchHandler extends AbstractExtensionHandler {
      * The wildcard character '*'
      */
     private static final String WILDCARD = "*";
+
+    private static final String PROTOCOL = "cal://";
+    private static final String DELIMITER = "/";
 
     private final int minimumSearchPatternLength;
 
@@ -128,10 +132,10 @@ public class SearchHandler extends AbstractExtensionHandler {
      * @throws OXException if one of the queries is too short
      */
     private SearchTerm<?> compileQueriesSearchTerm(List<String> queries) throws OXException {
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
         if (null == queries || queries.isEmpty()) {
-            return searchTerm.getOperands()[0];
+            return SearchTermFactory.createSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, getFolderId());
         }
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
         for (String query : queries) {
             if (isWildcardOnly(query)) {
                 continue;
@@ -190,5 +194,16 @@ public class SearchHandler extends AbstractExtensionHandler {
             pattern += WILDCARD;
         }
         return pattern;
+    }
+
+    /**
+     * Constructs the folder identifier
+     * 
+     * @return The folder identifier
+     */
+    private String getFolderId() {
+        StringBuilder builder = new StringBuilder(PROTOCOL);
+        builder.append(getAccount().getAccountId()).append(DELIMITER).append(BasicCalendarAccess.FOLDER_ID);
+        return builder.toString();
     }
 }
