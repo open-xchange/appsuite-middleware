@@ -64,6 +64,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
 import com.openexchange.chronos.Alarm;
@@ -262,7 +263,12 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
          * track update result & update any stored alarm triggers of all users if required
          */
         Event updatedEvent = loadEventData(originalEvent.getId());
-        resultTracker.trackUpdate(originalEvent, updatedEvent);
+        if (originalEvent.getId().equals(updatedEvent.getId()) && Objects.equals(originalEvent.getRecurrenceId(), updatedEvent.getRecurrenceId())) {
+            resultTracker.trackUpdate(originalEvent, updatedEvent);
+        } else {
+            resultTracker.trackDeletion(originalEvent);
+            resultTracker.trackCreation(updatedEvent);
+        }
         storage.getAlarmTriggerStorage().deleteTriggers(originalEvent.getId());
         storage.getAlarmTriggerStorage().insertTriggers(updatedEvent);
         /*
