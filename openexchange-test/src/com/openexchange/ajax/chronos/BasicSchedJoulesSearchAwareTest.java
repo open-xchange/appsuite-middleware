@@ -50,10 +50,13 @@
 package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import java.sql.Date;
 import org.junit.Test;
 import com.openexchange.ajax.chronos.factory.FindFactory;
 import com.openexchange.testing.httpclient.models.FindQueryBody;
 import com.openexchange.testing.httpclient.models.FindQueryResponse;
+import com.openexchange.testing.httpclient.models.FindQueryResponseData;
 import com.openexchange.testing.httpclient.models.FolderData;
 import com.openexchange.testing.httpclient.modules.FindApi;
 
@@ -82,12 +85,15 @@ public class BasicSchedJoulesSearchAwareTest extends BasicSchedJoulesProviderTes
     @Test
     public void testSimpleSearch() throws Exception {
         FolderData folderData = createFolder(CALENDAR_ONE, "testSimpleSearch");
+        eventManager.getAllEvents(new Date(0), new Date(System.currentTimeMillis()), false, folderData.getId());
 
         FindQueryBody queryBody = FindFactory.createFindBody("Full", folderData.getId());
 
         FindApi findApi = defaultUserApi.getFindApi();
         FindQueryResponse response = findApi.doQuery(defaultUserApi.getSession(), "calendar", queryBody, DEFAULT_COLUMNS);
-        assertNotNull(response.getData());
+        FindQueryResponseData responseData = response.getData();
+        assertNotNull(responseData);
+        assertTrue("No results found", responseData.getSize() > 0);
     }
 
     /**
@@ -96,10 +102,14 @@ public class BasicSchedJoulesSearchAwareTest extends BasicSchedJoulesProviderTes
     @Test
     public void testSearchWithFields() throws Exception {
         FolderData folderData = createFolder(CALENDAR_ONE, "testSearchWithFields");
+        eventManager.getAllEvents(new Date(0), new Date(System.currentTimeMillis()), false, folderData.getId());
+
         FindQueryBody queryBody = FindFactory.createFindBody("Full", folderData.getId());
 
         FindApi findApi = defaultUserApi.getFindApi();
         FindQueryResponse response = findApi.doQuery(defaultUserApi.getSession(), "calendar", queryBody, "400");
-        assertNotNull(response.getData());
+        FindQueryResponseData responseData = response.getData();
+        assertNotNull(responseData);
+        assertTrue("No results found", responseData.getSize() > 0);
     }
 }
