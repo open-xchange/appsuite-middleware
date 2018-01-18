@@ -55,6 +55,7 @@ import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarService;
@@ -117,6 +118,7 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
         }
         CalendarStorage storage = getStorage(session);
         Event event = storage.getEventStorage().loadEvent(id, null);
+        event.setFlags(CalendarUtils.getFlags(event, session.getUserId()));
         event.setAttendees(storage.getAttendeeStorage().loadAttendees(event.getId()));
         for (Attendee attendee : event.getAttendees()) {
             if (attendee.getEntity() == session.getUserId()) {
@@ -165,7 +167,15 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
             return null;
         }
         loadEvent = getStorage(calendarSession).getUtilities().loadAdditionalEventData(session.getUserId(), loadEvent, null);
-        return CalendarUtils.getFolderView(loadEvent, session.getUserId());
+        String retval = null;
+        try {
+            retval = CalendarUtils.getFolderView(loadEvent, session.getUserId());
+        } catch (OXException e) {
+            if (CalendarExceptionCodes.ATTENDEE_NOT_FOUND.equals(e)) {
+                retval = getPrivateCalendarFolderId(calendarSession);
+            }
+        }
+        return retval;
     }
 
     @Override

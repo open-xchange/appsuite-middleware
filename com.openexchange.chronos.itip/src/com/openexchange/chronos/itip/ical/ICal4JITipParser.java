@@ -57,6 +57,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ImportedCalendar;
@@ -102,6 +103,7 @@ public class ICal4JITipParser {
             }
             resolveAttendees(event, session);
             resolveOrganizer(event, session);
+            event.setFlags(CalendarUtils.getFlags(event, message.getOwner()));
             
             if (event.containsRecurrenceId()) {
                 message.addException(event);
