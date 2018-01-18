@@ -115,8 +115,15 @@ public class WebClientInfoProvider implements ClientInfoProvider {
                 String osVersion = null;
                 if (null != operatingSystem) {
                     os = operatingSystem.getFamilyName();
-                    StringBuilder sb = new StringBuilder().append(operatingSystem.getVersionNumber().getMajor()).append(".").append(operatingSystem.getVersionNumber().getMinor());
-                    osVersion = sb.toString();
+                    String osVersionMajor = operatingSystem.getVersionNumber().getMajor();
+                    String osVersionMinor = operatingSystem.getVersionNumber().getMinor();
+                    if (Strings.isNotEmpty(osVersionMajor)) {
+                        StringBuilder sb = new StringBuilder(osVersionMajor);
+                        if (Strings.isNotEmpty(osVersionMinor)) {
+                            sb.append(".").append(osVersionMinor);
+                        }
+                        osVersion = sb.toString();
+                    }
                 }
                 String browser = info.getName();
                 String browserVersion = info.getVersionNumber().getMajor();

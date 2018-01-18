@@ -64,6 +64,10 @@ public class ClientInfoStrings implements LocalizableStrings {
     // E.g. App Suite UI, Chrome 61 on Windows 10
     public final static String DEFAULT_CLIENT_INFO_MESSAGE = "%1$s, %2$s %3$s on %4$s %5$s";
 
+    // %1$s, %2$s %3$s on %4$s
+    // E.g. App Suite UI, Chrome 61 on Windows
+    public final static String DEFAULT_CLIENT_INFO_WITHOUT_PLATFORN_VERSION_MESSAGE = "%1$s, %2$s %3$s on %4$s";
+
     // %1$s on %2$s %3$s
     // E.g. App Suite UI on Windows 10
     public final static String CLIENT_BROWSER_INFO_MESSAGE = "%1$s on %2$s %3$s";

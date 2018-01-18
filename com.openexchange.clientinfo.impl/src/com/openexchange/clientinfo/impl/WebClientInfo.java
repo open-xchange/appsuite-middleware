@@ -83,9 +83,14 @@ public class WebClientInfo implements ClientInfo {
     public String toString(Locale locale) {
         StringHelper helper = StringHelper.valueOf(locale);
         String out;
-        if (Strings.isNotEmpty(platform) && Strings.isNotEmpty(platformVersion)) {
-            out = helper.getString(ClientInfoStrings.DEFAULT_CLIENT_INFO_MESSAGE);
-            return String.format(out, client, browser, browserVersion, platform, platformVersion);
+        if (Strings.isNotEmpty(platform)) {
+            if (Strings.isNotEmpty(platformVersion)) {
+                out = helper.getString(ClientInfoStrings.DEFAULT_CLIENT_INFO_MESSAGE);
+                return String.format(out, client, browser, browserVersion, platform, platformVersion);
+            } else {
+                out = helper.getString(ClientInfoStrings.DEFAULT_CLIENT_INFO_WITHOUT_PLATFORN_VERSION_MESSAGE);
+                return String.format(out, client, browser, browserVersion, platform);
+            }
         } else if (Strings.isNotEmpty(browser) && Strings.isNotEmpty(browserVersion)) {
             out = helper.getString(ClientInfoStrings.CLIENT_BROWSER_INFO_MESSAGE);
             return String.format(out, client, browser, browserVersion);
