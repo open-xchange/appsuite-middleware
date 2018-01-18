@@ -1,4 +1,4 @@
-/chronos?action=get:
+/chronos?action=resolve:
   get:
     operationId: resolveEvent
     tags:

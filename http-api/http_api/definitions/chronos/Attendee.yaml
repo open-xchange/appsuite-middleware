@@ -45,6 +45,7 @@ properties:
       description: The ID of the group or list.
   contact:
     type: object
+    title: contact
     description: |
      In case the parameter 'extendedEntities' is set to 'true' and the entity is an internal user 
      then this field contains some of the contact data of this user.
