@@ -177,7 +177,8 @@ public class AllPerformer extends AbstractQueryPerformer {
         requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         SearchTerm<?> searchTerm = getFolderIdTerm(session, folder);
         EventField[] fields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
-        if (null == fields || false == contains(fields, EventField.FLAGS)) {
+        boolean dynamicFlags = false; //TODO: doesn't recognize pseudo-group-scheduled, so disabled for now
+        if (false == dynamicFlags || null == fields || false == contains(fields, EventField.FLAGS)) {
             /*
              * get events with default fields & load additional event data as needed
              */
@@ -231,6 +232,7 @@ public class AllPerformer extends AbstractQueryPerformer {
         public EnumSet<EventFlag> getFlags(Event event, int calendarUser) {
             EnumSet<EventFlag> flags = CalendarUtils.getFlags(event, calendarUser);
             if (null != event.getOrganizer()) {
+                //TODO: doesn't recognize pseudo-group-scheduled, so disabled for now
                 flags.add(EventFlag.SCHEDULED);
             }
             if (null != partStatsPerEventId) {

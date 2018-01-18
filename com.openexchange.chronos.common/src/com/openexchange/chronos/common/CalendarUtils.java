@@ -1809,7 +1809,7 @@ public class CalendarUtils {
         if (null != requiredFields && 0 < requiredFields.length) {
             fields.addAll(Arrays.asList(requiredFields));
         }
-        if (fields.contains(EventFlag.class)) {
+        if (fields.contains(EventField.FLAGS)) {
             fields.addAll(FLAG_FIELDS);
         }
         return fields.toArray(new EventField[fields.size()]);
@@ -1830,7 +1830,7 @@ public class CalendarUtils {
         if (null != event.getAlarms() && 0 < event.getAlarms().size()) {
             flags.add(EventFlag.ALARMS);
         }
-        if (isGroupScheduled(event)) {
+        if (isGroupScheduled(event) && false == isPseudoGroupScheduled(event)) {
             flags.add(EventFlag.SCHEDULED);
         }
         if (isOrganizerSchedulingResource(event, calendarUser)) {

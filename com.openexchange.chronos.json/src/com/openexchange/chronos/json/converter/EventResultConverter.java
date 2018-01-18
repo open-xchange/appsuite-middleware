@@ -169,27 +169,28 @@ public class EventResultConverter implements ResultConverter {
                 }
             }
 
-            int[] userToLoadArray = new int[contactsToLoad.size()];
-            int x=0;
-            for(Integer id : contactsToLoad.keySet()) {
-                userToLoadArray[x++] = id;
-            }
-
-
-            SearchIterator<Contact> users = contactService.getUsers(session, userToLoadArray, CONTACT_FIELDS_TO_LOAD);
-            while (users.hasNext()) {
-                Contact con = users.next();
-                JSONObject attendee = contactsToLoad.get(con.getInternalUserId());
-                if(attendee == null) {
-                    LOG.warn("Unable to find attendee for contact with id {}", con.getInternalUserId());
-                    continue;
+            if (0 < contactsToLoad.size()) {
+                int[] userToLoadArray = new int[contactsToLoad.size()];
+                int x = 0;
+                for (Integer id : contactsToLoad.keySet()) {
+                    userToLoadArray[x++] = id;
                 }
-                ContactMapper mapper = ContactMapper.getInstance();
-                ContactField[] assignedFields = mapper.getAssignedFields(con);
-                List<ContactField> asList = new ArrayList<>(Arrays.asList(assignedFields));
-                asList.retainAll(Arrays.asList(CONTACT_FIELDS_TO_SHOW));
-                JSONObject contact = mapper.serialize(con, asList.toArray(new ContactField[asList.size()]), timeZoneID, session);
-                attendee.put(ChronosJsonFields.Attendee.CONTACT, contact);
+
+                SearchIterator<Contact> users = contactService.getUsers(session, userToLoadArray, CONTACT_FIELDS_TO_LOAD);
+                while (users.hasNext()) {
+                    Contact con = users.next();
+                    JSONObject attendee = contactsToLoad.get(con.getInternalUserId());
+                    if (attendee == null) {
+                        LOG.warn("Unable to find attendee for contact with id {}", con.getInternalUserId());
+                        continue;
+                    }
+                    ContactMapper mapper = ContactMapper.getInstance();
+                    ContactField[] assignedFields = mapper.getAssignedFields(con);
+                    List<ContactField> asList = new ArrayList<>(Arrays.asList(assignedFields));
+                    asList.retainAll(Arrays.asList(CONTACT_FIELDS_TO_SHOW));
+                    JSONObject contact = mapper.serialize(con, asList.toArray(new ContactField[asList.size()]), timeZoneID, session);
+                    attendee.put(ChronosJsonFields.Attendee.CONTACT, contact);
+                }
             }
 
             return result;
