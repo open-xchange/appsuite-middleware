@@ -168,18 +168,7 @@ public final class IMAPActivator extends HousekeepingActivator {
             registerService(CommandProvider.class, new ListLsubCommandProvider());
             registerService(CommandProvider.class, new ClearListLsubCommandProvider());
             registerService(MailAccountDeleteListener.class, listLsubInvalidator);
-            registerService(ForcedReloadable.class, new ForcedReloadable() {
-
-                @Override
-                public void reloadConfiguration(ConfigurationService configService) {
-                    IMAPProperties.invalidateCache();
-                }
-
-                @Override
-                public Interests getInterests() {
-                    return null;
-                }
-            });
+            registerService(ForcedReloadable.class, new IMAPPropertiesReloader());
             /*
              * Initialize cache regions
              */
@@ -405,6 +394,33 @@ public final class IMAPActivator extends HousekeepingActivator {
         } catch (final Exception e) {
             LOG.error("", e);
             throw e;
+        }
+    }
+
+    /**
+     *
+     * {@link IMAPPropertiesReloader} reloads the imap properties
+     *
+     * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+     * @since v7.10.0
+     */
+    private static final class IMAPPropertiesReloader implements ForcedReloadable {
+
+        /**
+         * Initializes a new {@link IMAPPropertiesReloader}.
+         */
+        public IMAPPropertiesReloader() {
+            super();
+        }
+
+        @Override
+        public void reloadConfiguration(ConfigurationService configService) {
+            IMAPProperties.invalidateCache();
+        }
+
+        @Override
+        public Interests getInterests() {
+            return null;
         }
     }
 

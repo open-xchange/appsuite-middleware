@@ -195,7 +195,7 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
 
     @Override
     protected String getReloadables() {
-        return "IMAPReloadable";
+        return "IMAPPropertiesReloader";
     }
 
 }
