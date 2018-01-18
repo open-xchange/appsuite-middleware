@@ -308,6 +308,7 @@ public class AvailableMapper extends DefaultJsonMapper<Available, AvailableField
      *
      * @return The mappedFields
      */
+    @Override
     public AvailableField[] getMappedFields() {
         return mappedFields;
     }

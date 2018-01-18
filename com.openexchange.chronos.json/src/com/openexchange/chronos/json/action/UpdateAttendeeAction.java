@@ -73,9 +73,7 @@ import com.openexchange.chronos.json.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarResult;
-import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.json.ListMapping;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
@@ -147,18 +145,7 @@ public class UpdateAttendeeAction extends ChronosAction {
             List<OXException> warnings = null;
             List<CalendarResult> results = null;
             if (((JSONObject) data).has(ALARMS_FIELD)) {
-                List<CreateResult> creations = updateAttendeeResult.getCreations();
-                List<UpdateResult> updates = updateAttendeeResult.getUpdates();
-
-                Event toUpdate = null;
-                if (creations.size() == 1) {
-                    toUpdate = creations.get(0).getCreatedEvent();
-                } else if(updates.size() == 1){
-                    toUpdate = updates.get(0).getUpdate();
-                } else {
-                    toUpdate = calendarAccess.getEvent(eventID);
-                }
-                toUpdate = EventMapper.getInstance().copy(toUpdate, null, (EventField[]) null);
+                Event toUpdate = new Event();
                 Entry<String, ?> parseParameter = parseParameter(requestData, "timezone", false);
                 try {
                     if (parseParameter == null) {
@@ -169,7 +156,7 @@ public class UpdateAttendeeAction extends ChronosAction {
                     }
                     try {
                         // Update calendar session with new timestamp
-                        CalendarResult updateAlarmResult = calendarAccess.updateEvent(eventID, toUpdate, clientTimestamp);
+                        CalendarResult updateAlarmResult = calendarAccess.updateAlarms(eventID, toUpdate.getAlarms(), clientTimestamp);
                         results = new ArrayList<>(2);
                         results.add(updateAttendeeResult);
                         results.add(updateAlarmResult);
