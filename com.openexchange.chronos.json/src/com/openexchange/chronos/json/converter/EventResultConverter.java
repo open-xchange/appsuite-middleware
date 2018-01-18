@@ -51,11 +51,15 @@ package com.openexchange.chronos.json.converter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
@@ -73,6 +77,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.session.Session;
+import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -84,6 +89,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class EventResultConverter implements ResultConverter {
 
+    private static final Logger LOG = LoggerFactory.getLogger(EventResultConverter.class);
     public static final String INPUT_FORMAT = "event";
     private final ContactService contactService;
 
@@ -139,8 +145,8 @@ public class EventResultConverter implements ResultConverter {
         result.setResultObject(resultObject, getOutputFormat());
     }
 
-    private static final ContactField CONTACT_FIELDS[] = { ContactField.SUR_NAME, ContactField.GIVEN_NAME, ContactField.TITLE, ContactField.DISPLAY_NAME, ContactField.IMAGE1_URL, ContactField.IMAGE1 };
-
+    private static final ContactField CONTACT_FIELDS_TO_LOAD[] = { ContactField.SUR_NAME, ContactField.GIVEN_NAME, ContactField.TITLE, ContactField.DISPLAY_NAME, ContactField.IMAGE1_URL, ContactField.IMAGE1, ContactField.INTERNAL_USERID };
+    private static final ContactField CONTACT_FIELDS_TO_SHOW[] = { ContactField.SUR_NAME, ContactField.GIVEN_NAME, ContactField.TITLE, ContactField.DISPLAY_NAME, ContactField.IMAGE1_URL, ContactField.IMAGE1 };
     protected JSONObject convertEvent(Event event, String timeZoneID, Session session, EventField[] fields, boolean extendedEntities) throws OXException {
         if (null == event) {
             return null;
@@ -150,6 +156,7 @@ public class EventResultConverter implements ResultConverter {
         }
         try {
             JSONObject result = EventMapper.getInstance().serialize(event, fields, timeZoneID, session);
+            Map<Integer, JSONObject> contactsToLoad = new HashMap<Integer, JSONObject>();
             if(extendedEntities && result.has(ChronosJsonFields.ATTENDEES)) {
                 JSONArray jsonArray = result.getJSONArray(ChronosJsonFields.ATTENDEES);
                 Iterator<Object> iterator = jsonArray.iterator();
@@ -157,16 +164,34 @@ public class EventResultConverter implements ResultConverter {
                     JSONObject attendee = (JSONObject) iterator.next();
 
                     if(attendee.has(ChronosJsonFields.Attendee.ENTITY) && attendee.getString(ChronosJsonFields.Attendee.CU_TYPE).equals(CalendarUserType.INDIVIDUAL.getValue())) {
-                        Contact user = contactService.getUser(session, attendee.getInt(ChronosJsonFields.Attendee.ENTITY), CONTACT_FIELDS);
-                        ContactMapper mapper = ContactMapper.getInstance();
-                        ContactField[] assignedFields = mapper.getAssignedFields(user);
-                        List<ContactField> asList = new ArrayList<>(Arrays.asList(assignedFields));
-                        asList.retainAll(Arrays.asList(CONTACT_FIELDS));
-                        JSONObject contact = mapper.serialize(user, asList.toArray(new ContactField[asList.size()]), timeZoneID, session);
-                        attendee.put(ChronosJsonFields.Attendee.CONTACT, contact);
+                        contactsToLoad.put(attendee.getInt(ChronosJsonFields.Attendee.ENTITY), attendee);
                     }
                 }
             }
+
+            int[] userToLoadArray = new int[contactsToLoad.size()];
+            int x=0;
+            for(Integer id : contactsToLoad.keySet()) {
+                userToLoadArray[x++] = id;
+            }
+
+
+            SearchIterator<Contact> users = contactService.getUsers(session, userToLoadArray, CONTACT_FIELDS_TO_LOAD);
+            while (users.hasNext()) {
+                Contact con = users.next();
+                JSONObject attendee = contactsToLoad.get(con.getInternalUserId());
+                if(attendee == null) {
+                    LOG.warn("Unable to find attendee for contact with id {}", con.getInternalUserId());
+                    continue;
+                }
+                ContactMapper mapper = ContactMapper.getInstance();
+                ContactField[] assignedFields = mapper.getAssignedFields(con);
+                List<ContactField> asList = new ArrayList<>(Arrays.asList(assignedFields));
+                asList.retainAll(Arrays.asList(CONTACT_FIELDS_TO_SHOW));
+                JSONObject contact = mapper.serialize(con, asList.toArray(new ContactField[asList.size()]), timeZoneID, session);
+                attendee.put(ChronosJsonFields.Attendee.CONTACT, contact);
+            }
+
             return result;
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
