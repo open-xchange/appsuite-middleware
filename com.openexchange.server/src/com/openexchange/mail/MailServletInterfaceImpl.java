@@ -2000,37 +2000,37 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                                     IMailMessageStorageExt messageStorageExt = messageStorage.supports(IMailMessageStorageExt.class);
                                     if (null != messageStorageExt) {
                                         MailField[] fieldsToLoad = loadTextPreview ? MailField.add(FIELDS_ID_INFO, MailField.TEXT_PREVIEW) : FIELDS_ID_INFO;
-                                        for (MailMessage header : messageStorageExt.getMessages(fullName, loadMe.toArray(new String[loadMe.size()]), fieldsToLoad, headers)) {
-                                            if (null != header) {
-                                                MailMessage mailMessage = finder.get(header.getMailId());
+                                        for (MailMessage loaded : messageStorageExt.getMessages(fullName, loadMe.toArray(new String[loadMe.size()]), fieldsToLoad, headers)) {
+                                            if (null != loaded) {
+                                                MailMessage mailMessage = finder.get(loaded.getMailId());
                                                 if (null != mailMessage) {
-                                                    mailMessage.addHeaders(header.getHeaders());
+                                                    mailMessage.addHeaders(loaded.getHeaders());
                                                     if (loadTextPreview) {
-                                                        mailMessage.setTextPreview(header.getTextPreview());
+                                                        mailMessage.setTextPreview(loaded.getTextPreview());
                                                     }
                                                 }
                                             }
                                         }
                                     } else {
                                         MailField[] fieldsToLoad = loadTextPreview ? MailField.add(FIELDS_HEADERS, MailField.TEXT_PREVIEW) : FIELDS_HEADERS;
-                                        for (MailMessage header : messageStorage.getMessages(fullName, loadMe.toArray(new String[loadMe.size()]), fieldsToLoad)) {
-                                            if (null != header) {
-                                                MailMessage mailMessage = finder.get(header.getMailId());
+                                        for (MailMessage loaded : messageStorage.getMessages(fullName, loadMe.toArray(new String[loadMe.size()]), fieldsToLoad)) {
+                                            if (null != loaded) {
+                                                MailMessage mailMessage = finder.get(loaded.getMailId());
                                                 if (null != mailMessage) {
-                                                    mailMessage.addHeaders(header.getHeaders());
+                                                    mailMessage.addHeaders(loaded.getHeaders());
                                                     if (loadTextPreview) {
-                                                        mailMessage.setTextPreview(header.getTextPreview());
+                                                        mailMessage.setTextPreview(loaded.getTextPreview());
                                                     }
                                                 }
                                             }
                                         }
                                     }
                                 } else {
-                                    for (MailMessage header : messageStorage.getMessages(fullName, loadMe.toArray(new String[loadMe.size()]), FIELDS_TEXT_PREVIEW)) {
-                                        if (null != header) {
-                                            MailMessage mailMessage = finder.get(header.getMailId());
+                                    for (MailMessage withTextPreview : messageStorage.getMessages(fullName, loadMe.toArray(new String[loadMe.size()]), FIELDS_TEXT_PREVIEW)) {
+                                        if (null != withTextPreview) {
+                                            MailMessage mailMessage = finder.get(withTextPreview.getMailId());
                                             if (null != mailMessage) {
-                                                mailMessage.setTextPreview(header.getTextPreview());
+                                                mailMessage.setTextPreview(withTextPreview.getTextPreview());
                                             }
                                         }
                                     }
