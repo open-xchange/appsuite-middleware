@@ -50,7 +50,6 @@
 package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
-import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
 import static com.openexchange.chronos.common.CalendarUtils.isClassifiedFor;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isInRange;
@@ -78,7 +77,6 @@ import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarStrings;
@@ -313,58 +311,6 @@ public class Utils {
      */
     public static <E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation) {
         return new SingleSearchTerm(operation).addOperand(new ColumnFieldOperand<E>(field));
-    }
-
-    /**
-     * Creates a <i>userized</i> version of an event, representing a specific user's point of view on the event data. This includes
-     * <ul>
-     * <li><i>anonymization</i> of restricted event data in case the event it is not marked as {@link Classification#PUBLIC}, and the
-     * current session's user is neither creator, nor attendee of the event.</li>
-     * <li>selecting the appropriate parent folder identifier for the specific user</li>
-     * <li>apply <i>userized</i> versions of change- and delete-exception dates in the series master event based on the user's actual
-     * attendance</li>
-     * <li>taking over the user's personal list of alarms for the event</li>
-     * </ul>
-     *
-     * @param storage The calendar storage to use
-     * @param session The calendar session
-     * @param event The event to userize
-     * @param forUser The identifier of the user in whose point of view the event should be adjusted
-     * @return The <i>userized</i> event
-     * @see Utils#applyExceptionDates
-     * @see Utils#anonymizeIfNeeded
-     */
-    public static Event userize(CalendarSession session, CalendarStorage storage, Event event, int forUser) throws OXException {
-        if (isSeriesMaster(event)) {
-            event = applyExceptionDates(storage, event, forUser);
-        }
-        final List<Alarm> alarms = storage.getAlarmStorage().loadAlarms(event, forUser);
-        final String folderView = getFolderView(event, forUser);
-        if (null != alarms || false == folderView.equals(event.getFolderId())) {
-            event = new DelegatingEvent(event) {
-
-                @Override
-                public String getFolderId() {
-                    return folderView;
-                }
-
-                @Override
-                public boolean containsFolderId() {
-                    return true;
-                }
-
-                @Override
-                public List<Alarm> getAlarms() {
-                    return alarms;
-                }
-
-                @Override
-                public boolean containsAlarms() {
-                    return true;
-                }
-            };
-        }
-        return anonymizeIfNeeded(session, event);
     }
 
     /**
