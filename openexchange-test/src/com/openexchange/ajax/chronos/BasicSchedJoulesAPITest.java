@@ -54,6 +54,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -61,7 +62,8 @@ import java.util.Map;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.HttpHeaders;
 import org.junit.Test;
-import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.configuration.asset.Asset;
+import com.openexchange.configuration.asset.AssetType;
 import com.openexchange.testing.httpclient.models.BrowseResponse;
 import com.openexchange.testing.httpclient.models.CountriesResponse;
 import com.openexchange.testing.httpclient.models.CountryData;
@@ -81,9 +83,8 @@ import com.openexchange.testing.httpclient.models.SearchResponse;
  */
 public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest {
 
-    private static final String LANGUAGE_RESPONSE = "[{\"language_id\": 1,\"name\": \"Deutsch\",\"iso_639_1\": \"de\"},{\"language_id\": 2,\"name\": \"English\",\"iso_639_1\": \"en\"}]";
-    
-    
+    private static final Map<String, String> RESPONSE_HEADERS = Collections.singletonMap(HttpHeaders.CONTENT_TYPE, "application/json");
+
     /**
      * Initialises a new {@link BasicSchedJoulesAPITest}.
      */
@@ -118,8 +119,9 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
      */
     @Test
     public void testGetLanguages() throws Exception {
-        Map<String, String> headers = Collections.singletonMap(HttpHeaders.CONTENT_TYPE, "application/json");
-        mock("http://example.com/languages?", LANGUAGE_RESPONSE, HttpStatus.SC_OK, headers);
+        Asset asset = assetManager.getAsset(AssetType.json, "schedjoulesLanguagesResponse.json");
+        mock("http://example.com/languages?", assetManager.readAssetString(asset), HttpStatus.SC_OK, RESPONSE_HEADERS);
+
         LanguagesResponse response = chronosApi.languages(defaultUserApi.getSession());
         List<LanguageData> languages = response.getData();
         assertNull("Errors detected", response.getError());
@@ -133,6 +135,9 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
      */
     @Test
     public void testGetCountriesWithDefaultLocale() throws Exception {
+        Asset asset = assetManager.getAsset(AssetType.json, "schedjoulesCountriesResponse.json");
+        mock("http://example.com/countries?", assetManager.readAssetString(asset), HttpStatus.SC_OK, RESPONSE_HEADERS);
+
         CountriesResponse response = chronosApi.countries(defaultUserApi.getSession(), null);
         List<CountryData> countries = response.getData();
         assertNull("Errors detected", response.getError());
@@ -146,7 +151,12 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
      */
     @Test
     public void testGetCountriesWithRandomLocale() throws Exception {
-        CountriesResponse response = chronosApi.countries(defaultUserApi.getSession(), getRandomLanguage());
+        String randomLanguage = getRandomLanguage();
+
+        Asset countriesAsset = assetManager.getAsset(AssetType.json, "schedjoulesCountriesResponse.json");
+        mock("http://example.com/countries?locale=" + randomLanguage, assetManager.readAssetString(countriesAsset), HttpStatus.SC_OK, RESPONSE_HEADERS);
+
+        CountriesResponse response = chronosApi.countries(defaultUserApi.getSession(), randomLanguage);
         List<CountryData> countries = response.getData();
         assertNull("Errors detected", response.getError());
         assertTrue("Exception was thrown on server side", response.getErrorStack().isEmpty());
@@ -159,6 +169,9 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
      */
     @Test
     public void testGetNonExistentPage() throws Exception {
+        Asset asset = assetManager.getAsset(AssetType.json, "schedjoulesPageNotFoundResponse.json");
+        mock("http://example.com/pages/1138", assetManager.readAssetString(asset), HttpStatus.SC_NOT_FOUND, RESPONSE_HEADERS);
+
         BrowseResponse response = chronosApi.browse(defaultUserApi.getSession(), 1138, null, null);
         assertNotNull("There was no error returned", response.getError());
         assertEquals("The exception code does not match", "SCHEDJOULES-API-0012", response.getCode());
@@ -169,7 +182,12 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
      */
     @Test
     public void testBrowseRootOfRandomCountry() throws Exception {
-        BrowseResponse response = chronosApi.browse(defaultUserApi.getSession(), null, getRandomLanguage(), getRandomCountry());
+        String randomLanguage = getRandomLanguage();
+        String randomCountry = getRandomCountry();
+        Asset rootPageAsset = assetManager.getAsset(AssetType.json, "schedjoulesRootPageResponse.json");
+        mock("http://example.com/pages?locale=" + randomLanguage + "&location" + randomCountry, assetManager.readAssetString(rootPageAsset), HttpStatus.SC_OK, RESPONSE_HEADERS);
+
+        BrowseResponse response = chronosApi.browse(defaultUserApi.getSession(), null, randomLanguage, randomCountry);
         assertNull("Errors detected", response.getError());
         assertTrue("Exception was thrown on server side", response.getErrorStack().isEmpty());
     }
@@ -179,7 +197,12 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
      */
     @Test
     public void testBrowsePage() throws Exception {
-        BrowseResponse response = chronosApi.browse(defaultUserApi.getSession(), null, getRandomLanguage(), getRandomCountry());
+        String randomLanguage = getRandomLanguage();
+        String randomCountry = getRandomCountry();
+        Asset rootPageAsset = assetManager.getAsset(AssetType.json, "schedjoulesRootPageResponse.json");
+        mock("http://example.com/pages?locale=" + randomLanguage + "&location" + randomCountry, assetManager.readAssetString(rootPageAsset), HttpStatus.SC_OK, RESPONSE_HEADERS);
+
+        BrowseResponse response = chronosApi.browse(defaultUserApi.getSession(), null, randomLanguage, randomCountry);
         assertNull("Errors detected", response.getError());
         assertTrue("Exception was thrown on server side", response.getErrorStack().isEmpty());
 
@@ -196,6 +219,10 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
 
         ItemsData itemsData = pageSectionsData.getItems();
         ItemsDataInner itemData = itemsData.get(0);
+
+        Asset pageAsset = assetManager.getAsset(AssetType.json, "schedjoulesPageResponse.json");
+        mock("http://example.com/pages/" + itemData.getItem().getItemId() + "?locale=" + randomLanguage, assetManager.readAssetString(pageAsset), HttpStatus.SC_OK, RESPONSE_HEADERS);
+
         response = chronosApi.browse(defaultUserApi.getSession(), itemData.getItem().getItemId(), getRandomLanguage(), null);
         assertNull("Errors detected", response.getError());
         assertTrue("Exception was thrown on server side", response.getErrorStack().isEmpty());
@@ -206,8 +233,13 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
      */
     @Test
     public void testSearch() throws Exception {
+        String language = getRandomLanguage();
         String query = "Star Wars";
-        SearchResponse response = chronosApi.search(defaultUserApi.getSession(), query, getRandomLanguage(), 5);
+        int numberOfResults = 5;
+        Asset pageAsset = assetManager.getAsset(AssetType.json, "schedjoulesSearchResponse.json");
+        mock("http://example.com/pages/search?q=" + URLEncoder.encode(query, "UTF-8") + "&nr_results=" + numberOfResults + "&locale=" + language, assetManager.readAssetString(pageAsset), HttpStatus.SC_OK, RESPONSE_HEADERS);
+
+        SearchResponse response = chronosApi.search(defaultUserApi.getSession(), query, language, numberOfResults);
         assertNull("Errors detected", response.getError());
         assertTrue("Exception was thrown on server side", response.getErrorStack().isEmpty());
 
@@ -222,9 +254,12 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
      * Get a random language from the available languages
      * 
      * @return The ISO 6391 code of the selected language
-     * @throws ApiException if an API error occurs
+     * @throws Exception
      */
-    private String getRandomLanguage() throws ApiException {
+    private String getRandomLanguage() throws Exception {
+        Asset asset = assetManager.getAsset(AssetType.json, "schedjoulesLanguagesResponse.json");
+        mock("http://example.com/languages?", assetManager.readAssetString(asset), HttpStatus.SC_OK, RESPONSE_HEADERS);
+
         LanguagesResponse response = chronosApi.languages(defaultUserApi.getSession());
         List<LanguageData> languages = response.getData();
         assertNull("Errors detected", response.getError());
@@ -241,9 +276,12 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
      * Get a random country from the available countries
      * 
      * @returnThe ISO 3166 country code
-     * @throws ApiException if an API error occurs
+     * @throws Exception
      */
-    private String getRandomCountry() throws ApiException {
+    private String getRandomCountry() throws Exception {
+        Asset countriesAsset = assetManager.getAsset(AssetType.json, "schedjoulesCountriesResponse.json");
+        mock("http://example.com/countries?", assetManager.readAssetString(countriesAsset), HttpStatus.SC_OK, RESPONSE_HEADERS);
+
         CountriesResponse response = chronosApi.countries(defaultUserApi.getSession(), null);
         List<CountryData> countries = response.getData();
         assertNull("Errors detected", response.getError());

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,13 +47,41 @@
  *
  */
 
-package com.openexchange.configuration.asset;
+package com.openexchange.ajax.chronos;
+
+import static org.junit.Assert.assertEquals;
+import java.sql.Date;
+import java.util.List;
+import org.junit.Test;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.service.SortOrder;
+import com.openexchange.testing.httpclient.models.EventData;
+import com.openexchange.testing.httpclient.models.FolderData;
+import com.openexchange.testing.httpclient.models.UpdatesResult;
 
 /**
- * {@link AssetType}
+ * {@link BasicSchedJoulesSyncAwareTest}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum AssetType {
-    txt, jpg, png, eml, vcf, html, svg, ods, odt, htm, base64, gif, pdf, ics, json;
+public class BasicSchedJoulesSyncAwareTest extends BasicSchedJoulesProviderTest {
+    
+    private static final long FIVE_YEARS_OFFSET = 5 * 365 * 24 * 60 * 60 * 1000 * 1000;
+
+    /**
+     * Tests getting updated events since a defined point in time
+     */
+    @Test
+    public void testGetUpdatedEventsSince() throws Exception {
+        FolderData folderData = createFolder(CALENDAR_ONE, "testSimpleSearch");
+        Date beginOfTime = new Date(0);
+        Date future = new Date(System.currentTimeMillis() + FIVE_YEARS_OFFSET);
+        List<EventData> allEvents = eventManager.getAllEvents(beginOfTime, future, false, folderData.getId(), SortOrder.getSortOrder(EventField.TIMESTAMP, SortOrder.Order.ASC));
+
+        EventData eventData = allEvents.get(allEvents.size() - 1);
+        Long since = eventData.getTimestamp();
+        UpdatesResult updates = eventManager.getUpdates(new Date(since), beginOfTime, future, false, folderData.getId());
+        assertEquals(1, updates.getNewAndModified().size());
+    }
+
 }

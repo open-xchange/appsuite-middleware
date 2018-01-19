@@ -1,0 +1,133 @@
+{
+    "item_id": "nil",
+    "name": "Star Wars",
+    "page_sections": [
+        {
+            "name": "Results",
+            "items": [
+                {
+                    "item_class": "calendar",
+                    "item": {
+                        "item_id": 635412,
+                        "name": "Star Wars Rebels - DISXD",
+                        "url": "https://openxchange.schedjoules.com/calendars/f094cd988e7d?l=en&x=239a18",
+                        "category": "TV shows",
+                        "category_id": 6,
+                        "country": "United States",
+                        "parent_name": "Disney XD",
+                        "time_zone": "ET"
+                    }
+                },
+                {
+                    "item_class": "calendar",
+                    "item": {
+                        "item_id": 635415,
+                        "name": "Star Wars Rebels - DISXD",
+                        "url": "https://openxchange.schedjoules.com/calendars/401dbdec4c71?l=en&x=239a18",
+                        "category": "TV shows",
+                        "category_id": 6,
+                        "country": "United States",
+                        "parent_name": "Disney XD",
+                        "time_zone": "PT"
+                    }
+                },
+                {
+                    "item_class": "calendar",
+                    "item": {
+                        "item_id": 410421,
+                        "name": "Star Wars Rebels - DiXDDK",
+                        "url": "https://openxchange.schedjoules.com/calendars/e85ea10aad50?l=en&x=239a18",
+                        "category": "TV shows",
+                        "category_id": 6,
+                        "country": "Denmark",
+                        "parent_name": "Disney XD"
+                    }
+                },
+                {
+                    "item_class": "calendar",
+                    "item": {
+                        "item_id": 1653963,
+                        "name": "Star Wars Rebels - DISNEYXD",
+                        "url": "https://openxchange.schedjoules.com/calendars/59e7a166aa82?l=en&x=239a18",
+                        "category": "TV shows",
+                        "category_id": 6,
+                        "country": "Italy",
+                        "parent_name": "Disney XD"
+                    }
+                },
+                {
+                    "item_class": "calendar",
+                    "item": {
+                        "item_id": 403785,
+                        "name": "Star Wars Rebels - DISXDHD",
+                        "url": "https://openxchange.schedjoules.com/calendars/b8379a3fadec?l=en&x=239a18",
+                        "category": "TV shows",
+                        "category_id": 6,
+                        "country": "France",
+                        "parent_name": "Disney XD HDTV"
+                    }
+                },
+                {
+                    "item_class": "calendar",
+                    "item": {
+                        "item_id": 1490124,
+                        "name": "Star Wars, Yodas beretninger - DiXDDK",
+                        "url": "https://openxchange.schedjoules.com/calendars/b2c7bfb56c49?l=en&x=239a18",
+                        "category": "TV shows",
+                        "category_id": 6,
+                        "country": "Denmark",
+                        "parent_name": "Disney XD"
+                    }
+                },
+                {
+                    "item_class": "calendar",
+                    "item": {
+                        "item_id": 21483002,
+                        "name": "STAR WARS: Droide beretninger - DiXDDK",
+                        "url": "https://openxchange.schedjoules.com/calendars/7504741afa03?l=en&x=239a18",
+                        "category": "TV shows",
+                        "category_id": 6,
+                        "country": "Denmark",
+                        "parent_name": "Disney XD"
+                    }
+                },
+                {
+                    "item_class": "calendar",
+                    "item": {
+                        "item_id": 410595,
+                        "name": "Star Wars Rebels - Disney XD HD",
+                        "url": "https://openxchange.schedjoules.com/calendars/de8809ec29c4?l=en&x=239a18",
+                        "category": "TV shows",
+                        "category_id": 6,
+                        "country": "United Kingdom",
+                        "parent_name": "Disney XD HD"
+                    }
+                },
+                {
+                    "item_class": "calendar",
+                    "item": {
+                        "item_id": 410592,
+                        "name": "Star Wars Rebels - Disney XD +1",
+                        "url": "https://openxchange.schedjoules.com/calendars/b8177f1cc1d9?l=en&x=239a18",
+                        "category": "TV shows",
+                        "category_id": 6,
+                        "country": "United Kingdom",
+                        "parent_name": "Disney Channel XD +1"
+                    }
+                },
+                {
+                    "item_class": "calendar",
+                    "item": {
+                        "item_id": 410589,
+                        "name": "Star Wars Rebels - DISNEYXD",
+                        "url": "https://openxchange.schedjoules.com/calendars/7cc344efaf3f?l=en&x=239a18",
+                        "category": "TV shows",
+                        "category_id": 6,
+                        "country": "United Kingdom",
+                        "parent_name": "Disney XD"
+                    }
+                }
+            ]
+        }
+    ]
+}
