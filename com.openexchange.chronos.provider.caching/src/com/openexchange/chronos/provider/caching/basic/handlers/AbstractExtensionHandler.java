@@ -121,7 +121,7 @@ abstract class AbstractExtensionHandler {
         this.session = session;
         this.account = account;
         this.parameters = parameters;
-        this.calendarSession = Services.getService(CalendarService.class).init(session);
+        this.calendarSession = Services.getService(CalendarService.class).init(session, parameters);
         this.searchOptions = new SearchOptions(getCalendarSession());
         LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
         this.selfProtection = SelfProtectionFactory.createSelfProtection(session, leanConfigurationService);
