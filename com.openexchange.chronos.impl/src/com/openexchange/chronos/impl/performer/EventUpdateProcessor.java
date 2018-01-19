@@ -816,7 +816,11 @@ public class EventUpdateProcessor implements EventUpdate {
         /*
          * check if only the INTERVAL was extended
          */
-        //TODO
+        checkedRule = initRecurrenceRule(updatedRule.toString());
+        checkedRule.setInterval(originalRule.getInterval());
+        if (checkedRule.toString().equals(originalRule.toString())) {
+            return 0 != updatedRule.getInterval() % originalRule.getInterval();
+        }
 
         /*
          * check if each BY... part is equally or more restrictive
