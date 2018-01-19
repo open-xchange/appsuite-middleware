@@ -93,7 +93,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
 
     protected UserApi defaultUserApi;
     protected ChronosApi chronosApi;
-    protected FoldersApi foldersApi;
+    private FoldersApi foldersApi;
     protected ImportApi importApi;
     protected ExportApi exportApi;
     protected String folderId;
