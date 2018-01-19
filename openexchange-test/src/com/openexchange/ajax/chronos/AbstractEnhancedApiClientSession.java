@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.chronos;
 
-import com.openexchange.ajax.framework.AbstractAPIClientSession;
+import com.openexchange.ajax.framework.AbstractConfigAwareAPIClientSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.test.pool.TestUser;
 
@@ -59,7 +59,7 @@ import com.openexchange.test.pool.TestUser;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public abstract class AbstractEnhancedApiClientSession extends AbstractAPIClientSession {
+public abstract class AbstractEnhancedApiClientSession extends AbstractConfigAwareAPIClientSession {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractEnhancedApiClientSession.class);
 

@@ -88,9 +88,9 @@ public enum SchedJoulesAPIExceptionCodes implements DisplayableOXExceptionCode {
     NO_STREAM_PARSER("No stream parser found for the specified content type '%1$s'", CATEGORY_ERROR, 6),
     /**
      * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
-     * <li>The apiKey is missing from the 'schedjoules.properties'. Please configure the service properly.</li>
+     * <li>The configuration is missing from the '%1$s' property. Please configure the service properly.</li>
      */
-    NO_API_KEY_CONFIGURED("The apiKey is missing from the '%1$s' property. Please configure the service properly.", CATEGORY_ERROR, 7),
+    CONFIGURATION_MISSING("The configuration is missing from the '%1$s' property. Please configure the service properly.", CATEGORY_ERROR, 7),
     /**
      * <li>An error occurred inside the server which prevented it from fulfilling the request.</li>
      * <li>The URI path '%1$s' is not valid.</li>

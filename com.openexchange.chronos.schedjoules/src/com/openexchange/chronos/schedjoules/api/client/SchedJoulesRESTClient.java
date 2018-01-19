@@ -105,8 +105,6 @@ public class SchedJoulesRESTClient implements Closeable {
         }
     };
 
-    private static final String SCHEME = "https";
-    private static final String BASE_URL = "api.schedjoules.com";
     private static final String USER_AGENT = "Open-Xchange SchedJoules Client";
     private static final int API_VERSION = 1;
 
@@ -119,11 +117,17 @@ public class SchedJoulesRESTClient implements Closeable {
 
     private final Map<String, BiConsumer<SchedJoulesResponse, HttpResponse>> headerParsers;
 
+    private final String scheme;
+
+    private final String host;
+
     /**
      * Initialises a new {@link SchedJoulesRESTClient}.
      */
-    public SchedJoulesRESTClient(String apiKey) {
+    public SchedJoulesRESTClient(String scheme, String host, String apiKey) {
         super();
+        this.scheme = scheme;
+        this.host = host;
         authorizationHeader = prepareAuthorizationHeader(apiKey);
         acceptHeader = prepareAcceptHeader();
         httpClient = initializeHttpClient();
@@ -280,7 +284,7 @@ public class SchedJoulesRESTClient implements Closeable {
 
         // Prepare the request
         HttpRequestBase httpRequest = createRequest(request.getMethod());
-        prepareAuthorizedRequest(httpRequest, SCHEME, BASE_URL, request.getPath(), query);
+        prepareAuthorizedRequest(httpRequest, this.scheme, this.host, request.getPath(), query);
         return httpRequest;
     }
 
@@ -375,7 +379,7 @@ public class SchedJoulesRESTClient implements Closeable {
      */
     public SchedJoulesResponse executeRequest(SchedJoulesRequest request, HttpMethod httpMethod, String eTag, long lastModified) throws OXException {
         HttpRequestBase httpRequest = createRequest(httpMethod);
-        prepareRequest(httpRequest, SCHEME, BASE_URL, request.getPath(), prepareQuery(request.getQueryParameters()), eTag, lastModified);
+        prepareRequest(httpRequest, this.scheme, this.host, request.getPath(), prepareQuery(request.getQueryParameters()), eTag, lastModified);
         httpRequest.addHeader(HttpHeaders.AUTHORIZATION, authorizationHeader);
         return executeRequest(httpRequest);
     }

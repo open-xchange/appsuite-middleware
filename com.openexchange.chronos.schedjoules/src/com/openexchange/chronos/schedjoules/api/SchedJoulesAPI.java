@@ -68,12 +68,14 @@ public final class SchedJoulesAPI {
     /**
      * Initialises a new {@link SchedJoulesAPI}.
      * 
+     * @param scheme
+     * @param host
      * @param apiKey
      * @throws OXException if the REST client cannot be initialised
      */
-    public SchedJoulesAPI(String apiKey) {
+    public SchedJoulesAPI(String scheme, String host, String apiKey) {
         super();
-        client = new SchedJoulesRESTClient(apiKey);
+        client = new SchedJoulesRESTClient(scheme, host, apiKey);
         pages = new SchedJoulesPagesAPI(client);
         calendar = new SchedJoulesCalendarAPI(client);
         countries = new SchedJoulesCountriesAPI(client);

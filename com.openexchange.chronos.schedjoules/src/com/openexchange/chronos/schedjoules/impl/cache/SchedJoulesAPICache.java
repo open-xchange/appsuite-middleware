@@ -103,7 +103,7 @@ public class SchedJoulesAPICache {
             String apiKeyHash = getHashedAPIKey(contextId);
             return apiCache.get(new SchedJoulesCachedAPIKey(apiKeyHash, contextId), () -> {
                 LOG.debug("Cache miss for key '{}', initialising new SchedJoules API.", apiKeyHash);
-                return new SchedJoulesAPI(getAPIKey(contextId));
+                return new SchedJoulesAPI(getProperty(contextId, SchedJoulesProperty.scheme), getProperty(contextId, SchedJoulesProperty.host), getProperty(contextId, SchedJoulesProperty.apiKey));
             });
         } catch (ExecutionException e) {
             throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
@@ -119,22 +119,22 @@ public class SchedJoulesAPICache {
      * @throws OXException if the API key is not configured for the specified context
      */
     private String getHashedAPIKey(int contextId) throws OXException {
-        return DigestUtils.sha256Hex(getAPIKey(contextId));
-
+        return DigestUtils.sha256Hex(getProperty(contextId, SchedJoulesProperty.apiKey));
     }
 
     /**
-     * Retrieves the API key for the specified context
+     * Retrieves the desired {@link SchedJoulesProperty} for the specified context
      * 
      * @param contextId The context identifier
+     * @param property The {@link SchedJoulesProperty} to get
      * @return The API key
      * @throws OXException if no API key is configured
      */
-    private String getAPIKey(int contextId) throws OXException {
+    private String getProperty(int contextId, SchedJoulesProperty property) throws OXException {
         LeanConfigurationService leanConfigService = Services.getService(LeanConfigurationService.class);
-        String apiKey = leanConfigService.getProperty(-1, contextId, SchedJoulesProperty.apiKey);
+        String apiKey = leanConfigService.getProperty(-1, contextId, property);
         if (Strings.isEmpty(apiKey)) {
-            throw SchedJoulesAPIExceptionCodes.NO_API_KEY_CONFIGURED.create(SchedJoulesProperty.apiKey.getFQPropertyName());
+            throw SchedJoulesAPIExceptionCodes.CONFIGURATION_MISSING.create(property.getFQPropertyName());
         }
         return apiKey;
     }

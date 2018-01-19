@@ -54,8 +54,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.http.HttpHeaders;
 import org.junit.Test;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.BrowseResponse;
@@ -87,12 +91,35 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
         super("schedjoules");
     }
 
+    private static final Map<String, String> CONFIG = new HashMap<String, String>();
+    static {
+        CONFIG.put("com.openexchange.chronos.schedjoules.host", "example.com");
+        CONFIG.put("com.openexchange.chronos.schedjoules.scheme", "http");
+    }
+
+    @Override
+    protected Map<String, String> getNeededConfigurations() {
+        return CONFIG;
+    }
+
+    @Override
+    protected String getScope() {
+        return "context";
+    }
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        setUpConfiguration();
+    }
+
     /**
      * Tests the available languages
      */
     @Test
     public void testGetLanguages() throws Exception {
-        mock("https://api.schedjoules.com/languages?", LANGUAGE_RESPONSE, HttpStatus.SC_OK);
+        Map<String, String> headers = Collections.singletonMap(HttpHeaders.CONTENT_TYPE, "application/json");
+        mock("http://example.com/languages?", LANGUAGE_RESPONSE, HttpStatus.SC_OK, headers);
         LanguagesResponse response = chronosApi.languages(defaultUserApi.getSession());
         List<LanguageData> languages = response.getData();
         assertNull("Errors detected", response.getError());

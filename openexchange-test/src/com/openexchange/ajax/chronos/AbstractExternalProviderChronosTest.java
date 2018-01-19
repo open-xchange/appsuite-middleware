@@ -65,7 +65,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
 import com.openexchange.ajax.proxy.MockRequest;
 import com.openexchange.ajax.proxy.StartMockServerRequest;
-import com.openexchange.ajax.proxy.StopMockServerRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.FolderData;
@@ -93,12 +92,6 @@ abstract class AbstractExternalProviderChronosTest extends AbstractChronosTest {
     public void setUp() throws Exception {
         super.setUp();
         client.execute(new StartMockServerRequest());
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        client.execute(new StopMockServerRequest());
-        super.tearDown();
     }
 
     /**
