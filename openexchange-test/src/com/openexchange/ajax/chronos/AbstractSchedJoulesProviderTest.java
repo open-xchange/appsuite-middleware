@@ -49,15 +49,15 @@
 
 package com.openexchange.ajax.chronos;
 
-import java.io.IOException;
-import org.json.JSONException;
+import java.util.Collections;
+import java.util.Map;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.http.HttpHeaders;
 import org.json.JSONObject;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.openexchange.ajax.chronos.factory.CalendarFolderConfig;
 import com.openexchange.ajax.chronos.factory.CalendarFolderExtendedProperty;
-import com.openexchange.ajax.chronos.manager.ChronosApiException;
-import com.openexchange.testing.httpclient.invoker.ApiException;
+import com.openexchange.configuration.asset.Asset;
+import com.openexchange.configuration.asset.AssetType;
 import com.openexchange.testing.httpclient.models.FolderData;
 
 /**
@@ -67,6 +67,7 @@ import com.openexchange.testing.httpclient.models.FolderData;
  */
 abstract class AbstractSchedJoulesProviderTest extends AbstractExternalProviderChronosTest {
 
+    static final Map<String, String> RESPONSE_HEADERS = Collections.singletonMap(HttpHeaders.CONTENT_TYPE, "application/json");
     static final String MODULE = "event";
     static final String PROVIDER_ID = "schedjoules";
     static final int ROOT_PAGE = 115673;
@@ -103,14 +104,12 @@ abstract class AbstractSchedJoulesProviderTest extends AbstractExternalProviderC
      * @param itemId The item identifier
      * @param folderName The folder name
      * @return The {@link FolderData} of the created folder
-     * @throws ApiException
-     * @throws ChronosApiException
-     * @throws JSONException
-     * @throws IOException
-     * @throws JsonMappingException
-     * @throws JsonParseException
+     * @throws Exception
      */
-    FolderData createFolder(int itemId, String folderName) throws ApiException, ChronosApiException, JSONException, JsonParseException, JsonMappingException, IOException {
+    FolderData createFolder(int itemId, String folderName) throws Exception {
+        Asset pageAsset = assetManager.getAsset(AssetType.json, "schedjoulesPageResponse.json");
+        mock("http://example.com/pages/" + itemId, assetManager.readAssetString(pageAsset), HttpStatus.SC_OK, RESPONSE_HEADERS);
+
         JSONObject config = new JSONObject();
         config.put(CalendarFolderConfig.ITEM_ID.getFieldName(), itemId);
         config.put(CalendarFolderConfig.REFRESH_INTERVAL.getFieldName(), DEFAULT_REFRESH_INTERVAL);

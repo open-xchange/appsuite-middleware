@@ -53,12 +53,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import java.io.IOException;
+import org.apache.commons.httpclient.HttpStatus;
 import org.json.JSONObject;
 import org.junit.Test;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.openexchange.ajax.chronos.factory.CalendarFolderConfig;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
+import com.openexchange.configuration.asset.Asset;
+import com.openexchange.configuration.asset.AssetType;
 import com.openexchange.testing.httpclient.models.FolderData;
 
 /**
@@ -82,6 +85,9 @@ public class BasicSchedJoulesProviderTest extends AbstractSchedJoulesProviderTes
     @Test
     public void testCreateFolderWithNonExistingSchedJoulesCalendar() throws Exception {
         try {
+            Asset asset = assetManager.getAsset(AssetType.json, "schedjoulesPageNotFoundResponse.json");
+            mock("http://example.com/pages/" + NON_EXISTING_CALENDAR, assetManager.readAssetString(asset), HttpStatus.SC_NOT_FOUND, RESPONSE_HEADERS);
+
             JSONObject config = new JSONObject();
             config.put(CalendarFolderConfig.ITEM_ID.getFieldName(), NON_EXISTING_CALENDAR);
 
@@ -100,6 +106,9 @@ public class BasicSchedJoulesProviderTest extends AbstractSchedJoulesProviderTes
     @Test
     public void testCreateFolderWithInvalidSchedJoulesCalendar() throws Exception {
         try {
+            Asset rootPageAsset = assetManager.getAsset(AssetType.json, "schedjoulesRootPageResponse.json");
+            mock("http://example.com/pages/" + ROOT_PAGE, assetManager.readAssetString(rootPageAsset), HttpStatus.SC_OK, RESPONSE_HEADERS);
+
             JSONObject config = new JSONObject();
             config.put(CalendarFolderConfig.ITEM_ID.getFieldName(), ROOT_PAGE);
 
