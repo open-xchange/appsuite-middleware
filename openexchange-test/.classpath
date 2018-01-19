@@ -191,7 +191,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.config.lean"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.session.management.impl"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chronos.provider.ical"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chronos.account.json"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chronos.provider"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chronos.common"/>
 	<classpathentry kind="output" path="build"/>
