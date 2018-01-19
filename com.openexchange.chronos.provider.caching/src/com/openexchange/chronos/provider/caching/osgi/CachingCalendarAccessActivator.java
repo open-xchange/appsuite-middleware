@@ -57,6 +57,7 @@ import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -82,7 +83,7 @@ public class CachingCalendarAccessActivator extends HousekeepingActivator {
         //@formatter:off
         return new Class<?>[] { CalendarStorageFactory.class, DatabaseService.class, ContextService.class, 
             CalendarUtilities.class, CalendarAccountService.class, AdministrativeCalendarAccountService.class, 
-            RecurrenceService.class, CalendarService.class };
+            RecurrenceService.class, CalendarService.class, LeanConfigurationService.class };
         //@formatter:on
     }
 
