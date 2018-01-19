@@ -141,19 +141,28 @@ public interface IFileItemService {
      * Getting all {@link IFileItem} interfaces that are selected
      * by the customQuery SQL string.
      * The query has to be created with returning all following columns
-     * of the appropriate FileItem database table(s) in the correct order
+     * of the appropriate FileItem database table(s) in the correct order:</br>
+     *  1. FileContent.FileStoreNumber</br>
+     *  2. FileContent.FileStoreId</br>
+     *  3. FileContent.SubGroupId</br>
+     *  4. FileContent.FileId
      *
-     *  1. FileContent.FileStoreNumber
-     *  2. FileContent.FileStoreId
-     *  3. FileContent.GroupId
-     *  4. FileContent.SubGroupId
-     *  5. FileContent.FileId
-     *
-     * @param customSqlStatement
-     * @return
+     * @param groupId The groupId for which the query is performed
+     * @param customQuery The SQL query string string
+     * @param returnValues The optional return values of the query.
+     *  The number of return values depends on the provided, optional
+     *  number of return values given. The first 5 return values are always:</br>
+     *    1. fileStoreNumber </br>
+     *    2. fileStoreId</br>
+     *    3. groupId</br>
+     *    4. subGroupId</br>
+     *    5. fileId</br>
+     *    </br>
+     *  Further return values are possible and depend on the given SQL query
+     * @return The array of {@link IFileItem} interfaces queried.
      * @throws FileItemException
      */
-    public IFileItem[] getByCustomQuery(final String customQuery, Object... returnValues) throws FileItemException;
+    public IFileItem[] getByCustomQuery(final String groupId, final String customQuery, Object... returnValues) throws FileItemException;
 
     /**
      * Getting the number of distinct subgroup ids.
