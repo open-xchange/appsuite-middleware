@@ -59,11 +59,7 @@ import static com.openexchange.folderstorage.Permission.CREATE_OBJECTS_IN_FOLDER
 import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
-import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
-import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
-import static com.openexchange.folderstorage.Permission.WRITE_ALL_OBJECTS;
-import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
@@ -119,11 +115,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
          */
         Event originalEvent = loadEventData(objectId);
         Check.eventIsInFolder(originalEvent, folder);
-        if (matches(originalEvent.getCreatedBy(), session.getUserId())) {
-            requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, WRITE_OWN_OBJECTS, NO_PERMISSIONS);
-        } else {
-            requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, NO_PERMISSIONS);
-        }
+        requireWritePermissions(originalEvent, attendee);
         if (null != clientTimestamp) {
             requireUpToDateTimestamp(originalEvent, clientTimestamp.longValue());
         }

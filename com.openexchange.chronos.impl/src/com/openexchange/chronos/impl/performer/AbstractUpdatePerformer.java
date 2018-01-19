@@ -749,6 +749,20 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     }
 
     /**
+     * Checks that data of a specific attendee of an event can be updated by the current session's user under the perspective of the
+     * current folder.
+     *
+     * @param originalEvent The original event being updated
+     * @param updatedAttendee The attendee whose data is updated
+     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_FOLDER}, {@link CalendarExceptionCodes#NO_READ_PERMISSION},
+     *             {@link CalendarExceptionCodes#NO_WRITE_PERMISSION}, {@link CalendarExceptionCodes#NOT_ORGANIZER},
+     *             {@link CalendarExceptionCodes#RESTRICTED_BY_CLASSIFICATION}
+     */
+    protected void requireWritePermissions(Event originalEvent, Attendee updatedAttendee) throws OXException {
+        requireWritePermissions(originalEvent, Collections.singletonList(updatedAttendee));
+    }
+
+    /**
      * Checks that data of one or more attendees of an event can be updated by the current session's user under the perspective of the
      * current folder.
      *
