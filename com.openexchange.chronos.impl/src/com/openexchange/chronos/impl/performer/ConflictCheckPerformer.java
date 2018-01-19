@@ -85,6 +85,7 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.impl.EventConflictImpl;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -343,16 +344,10 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
      * @return The event conflict
      */
     private EventConflict getEventConflict(Event event, List<Attendee> conflictingAttendees, Boolean hardConflict) throws OXException {
-        Event eventData = new Event();
-        eventData.setStartDate(event.getStartDate());
-        eventData.setEndDate(event.getEndDate());
-        eventData.setId(event.getId());
-        eventData.setRecurrenceId(event.getRecurrenceId());
-        eventData.setCreatedBy(event.getCreatedBy());
-        eventData.setTransp(event.getTransp());
+        Event eventData = EventMapper.getInstance().copy(event, null, EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_ID, 
+            EventField.START_DATE, EventField.END_DATE, EventField.TRANSP, EventField.CREATED_BY);        
         if (detailsVisible(event)) {
-            eventData.setSummary(event.getSummary());
-            eventData.setLocation(event.getLocation());
+            eventData = EventMapper.getInstance().copy(event, eventData, EventField.SUMMARY, EventField.LOCATION);
             eventData.setFolderId(chooseFolderID(event));
         }
         return new EventConflictImpl(eventData, conflictingAttendees, null != hardConflict ? hardConflict.booleanValue() : false);
