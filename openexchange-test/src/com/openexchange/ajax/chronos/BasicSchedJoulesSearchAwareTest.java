@@ -67,7 +67,6 @@ import com.openexchange.testing.httpclient.modules.FindApi;
  */
 public class BasicSchedJoulesSearchAwareTest extends BasicSchedJoulesProviderTest {
 
-    private static final int CALENDAR_ONE = 90734;
     private static final String DEFAULT_COLUMNS = "1,2,20,101,200,201,202,206,207,209,212,213,214,215,216,220,221,222,224,227,400,401,402";
 
     /**

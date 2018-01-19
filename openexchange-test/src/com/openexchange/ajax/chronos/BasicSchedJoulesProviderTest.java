@@ -76,7 +76,7 @@ public class BasicSchedJoulesProviderTest extends AbstractExternalProviderChrono
 
     private static final int ROOT_PAGE = 115673;
     private static final int NON_EXISTING_CALENDAR = 31145;
-    private static final int CALENDAR_ONE = 90734;
+    static final int CALENDAR_ONE = 90734;
     private static final int CALENDAR_TWO = 24428282;
     private static final int CALENDAR_THREE = 24428313;
 
