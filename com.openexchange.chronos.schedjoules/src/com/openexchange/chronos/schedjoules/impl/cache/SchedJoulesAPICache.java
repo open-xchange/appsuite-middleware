@@ -132,10 +132,10 @@ public class SchedJoulesAPICache {
      */
     private String getProperty(int contextId, SchedJoulesProperty property) throws OXException {
         LeanConfigurationService leanConfigService = Services.getService(LeanConfigurationService.class);
-        String apiKey = leanConfigService.getProperty(-1, contextId, property);
-        if (Strings.isEmpty(apiKey)) {
+        String value = leanConfigService.getProperty(-1, contextId, property);
+        if (Strings.isEmpty(value)) {
             throw SchedJoulesAPIExceptionCodes.CONFIGURATION_MISSING.create(property.getFQPropertyName());
         }
-        return apiKey;
+        return value;
     }
 }
