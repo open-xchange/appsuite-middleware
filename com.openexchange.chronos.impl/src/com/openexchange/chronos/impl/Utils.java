@@ -56,6 +56,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isInRange;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
 import static com.openexchange.chronos.impl.AbstractStorageOperation.PARAM_CONNECTION;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i2I;
@@ -123,12 +124,9 @@ import com.openexchange.quota.QuotaType;
 import com.openexchange.quota.groupware.AmountQuotas;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
-import com.openexchange.search.Operand;
 import com.openexchange.search.SearchTerm;
-import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnFieldOperand;
-import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -275,44 +273,44 @@ public class Utils {
         return searchTerm;
     }
 
-    /**
-     * Gets a single search term using the field itself as column operand and a second operand.
-     *
-     * @param <V> The operand's type
-     * @param <E> The field type
-     * @param operation The operation to use
-     * @param operand The second operand
-     * @return A single search term
-     */
-    public static <V, E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation, Operand<V> operand) {
-        return getSearchTerm(field, operation).addOperand(operand);
-    }
-
-    /**
-     * Gets a single search term using the field itself as column operand and adds the supplied value as constant operand.
-     *
-     * @param <V> The operand's type
-     * @param <E> The field type
-     * @param operation The operation to use
-     * @param operand The value to use as constant operand
-     * @return A single search term
-     */
-    public static <V, E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation, V operand) {
-        return getSearchTerm(field, operation, new ConstantOperand<V>(operand));
-    }
-
-    /**
-     * Gets a single search term using the field itself as single column operand.
-     *
-     * @param <E> The field type
-     * @param operation The operation to use
-     * @param operand The value to use as constant operand
-     * @return A single search term
-     */
-    public static <E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation) {
-        return new SingleSearchTerm(operation).addOperand(new ColumnFieldOperand<E>(field));
-    }
-
+    //    /**
+    //     * Gets a single search term using the field itself as column operand and a second operand.
+    //     *
+    //     * @param <V> The operand's type
+    //     * @param <E> The field type
+    //     * @param operation The operation to use
+    //     * @param operand The second operand
+    //     * @return A single search term
+    //     */
+    //    public static <V, E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation, Operand<V> operand) {
+    //        return getSearchTerm(field, operation).addOperand(operand);
+    //    }
+    //
+    //    /**
+    //     * Gets a single search term using the field itself as column operand and adds the supplied value as constant operand.
+    //     *
+    //     * @param <V> The operand's type
+    //     * @param <E> The field type
+    //     * @param operation The operation to use
+    //     * @param operand The value to use as constant operand
+    //     * @return A single search term
+    //     */
+    //    public static <V, E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation, V operand) {
+    //        return getSearchTerm(field, operation, new ConstantOperand<V>(operand));
+    //    }
+    //
+    //    /**
+    //     * Gets a single search term using the field itself as single column operand.
+    //     *
+    //     * @param <E> The field type
+    //     * @param operation The operation to use
+    //     * @param operand The value to use as constant operand
+    //     * @return A single search term
+    //     */
+    //    public static <E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation) {
+    //        return new SingleSearchTerm(operation).addOperand(new ColumnFieldOperand<E>(field));
+    //    }
+    //
     /**
      * <i>Anonymizes</i> an event in case it is not marked as {@link Classification#PUBLIC}, and the session's user is neither creator, nor
      * attendee of the event.

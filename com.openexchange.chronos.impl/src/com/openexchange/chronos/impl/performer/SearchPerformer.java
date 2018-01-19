@@ -50,9 +50,11 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.getFields;
+import static com.openexchange.chronos.common.SearchUtils.addWildcards;
+import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
+import static com.openexchange.chronos.common.SearchUtils.isWildcardOnly;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getFolder;
-import static com.openexchange.chronos.impl.Utils.getSearchTerm;
 import static com.openexchange.chronos.impl.Utils.getVisibleFolders;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
@@ -80,7 +82,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PublicType;
-import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
@@ -302,25 +303,6 @@ public class SearchPerformer extends AbstractQueryPerformer {
             }
         }
         return folders;
-    }
-
-    private static boolean isWildcardOnly(String query) {
-        return Strings.isEmpty(query) || "*".equals(query);
-    }
-
-    private static String addWildcards(String pattern, boolean prepend, boolean append) {
-        if ((null == pattern || 0 == pattern.length()) && (append || prepend)) {
-            return "*";
-        }
-        if (null != pattern) {
-            if (prepend && '*' != pattern.charAt(0)) {
-                pattern = "*" + pattern;
-            }
-            if (append && '*' != pattern.charAt(pattern.length() - 1)) {
-                pattern = pattern + "*";
-            }
-        }
-        return pattern;
     }
 
 }
