@@ -192,6 +192,7 @@ public class ExtendedPropertiesCodec {
         switch (type) {
             case TYPE_JSON_DEFLATE:
                 encodeDeflatedJson(extendedProperties, outputStream);
+                break;
             case TYPE_VOBJECT:
                 encodeVObjectProperties(extendedProperties, outputStream);
                 break;
@@ -205,6 +206,7 @@ public class ExtendedPropertiesCodec {
         switch (type) {
             case TYPE_JSON_DEFLATE:
                 encodeDeflatedJson(parameters, outputStream);
+                break;
             case TYPE_VOBJECT:
                 encodeVObjectParameters(parameters, outputStream);
                 break;
