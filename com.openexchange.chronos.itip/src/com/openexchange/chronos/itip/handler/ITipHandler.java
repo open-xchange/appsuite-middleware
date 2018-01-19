@@ -53,6 +53,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,12 +92,12 @@ public class ITipHandler implements CalendarHandler {
     /**
      * Contains the three fields that are updated if a series is updated
      */
-    private final static EventField[] SERIES_UPDATE = new EventField[] { EventField.LAST_MODIFIED, EventField.SEQUENCE, EventField.TIMESTAMP };
+    private final static EventField[] SERIES_UPDATE = new EventField[] { EventField.SEQUENCE };
 
     /**
      * Contains the three fields that are updated if a master event has a new change/delete exception
      */
-    private final static EventField[] MASTER_EXCEPTION_UPDATE = new EventField[] { EventField.CHANGE_EXCEPTION_DATES, EventField.LAST_MODIFIED, EventField.TIMESTAMP };
+    private final static EventField[] MASTER_EXCEPTION_UPDATE = new EventField[] { EventField.CHANGE_EXCEPTION_DATES };
 
     private NotificationMailGeneratorFactory generators;
     private MailSenderService                sender;
@@ -161,14 +162,25 @@ public class ITipHandler implements CalendarHandler {
             if (eventGroup.size() > 1) {
                 // Check if master is present and if every update is a series update
                 Optional<UpdateResult> master = eventGroup.stream().filter(u -> seriesId.equals(u.getUpdate().getId())).findFirst();
-                if (master.isPresent() && CalendarUtils.isSeriesMaster(master.get().getUpdate()) && eventGroup.stream().filter(u -> u.containsAnyChangeOf(SERIES_UPDATE)).collect(Collectors.toList()).size() == eventGroup.size()) {
-                    // Series update, remove those items from the update list and the master from the exceptions
-                    updates.removeAll(eventGroup);
-                    eventGroup.remove(master.get());
+                if (master.isPresent() && CalendarUtils.isSeriesMaster(master.get().getUpdate())) {
+                    UpdateResult masterUpdate = master.get();
+                    if (eventGroup.stream().filter(u -> u.containsAnyChangeOf(SERIES_UPDATE)).collect(Collectors.toList()).size() == eventGroup.size()) {
+                        // Series update, remove those items from the update list and the master from the exceptions
+                        updates.removeAll(eventGroup);
+                        eventGroup.remove(masterUpdate);
 
-                    // Set for processing
-                    update = master.get();
-                    exceptions = eventGroup;
+                        // Set for processing
+                        update = masterUpdate;
+                        exceptions = eventGroup;
+                    } else {
+                        Set<EventField> fields = masterUpdate.getUpdatedFields();
+                        fields.remove(EventField.TIMESTAMP);
+                        fields.remove(EventField.LAST_MODIFIED);
+                        if(fields.isEmpty()) {
+                            // Exception update, no update on master
+                            updates.remove(masterUpdate);
+                        }
+                    }
                 }
             }
         }
