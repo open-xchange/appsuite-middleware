@@ -371,9 +371,6 @@ public class NotificationMail {
             return false;
         }
 
-        if (stateType == Type.MODIFIED && onlyPseudoChangesOnParticipants()) {
-            return false;
-        }
         if (getRecipient().getConfiguration().sendITIP() && itipMessage != null) {
             return true;
         }
@@ -488,25 +485,6 @@ public class NotificationMail {
                 }
             }
         };
-    }
-
-    private boolean onlyPseudoChangesOnParticipants() throws OXException {
-        ITipEventUpdate appDiff = getDiff();
-        if (appDiff == null) {
-            return false;
-        }
-
-        if (appDiff.containsExactTheseChanges(new EventField[] { EventField.ATTENDEES })) {
-            if (appDiff.getAttendeeUpdates().getAddedItems() != null && appDiff.getAttendeeUpdates().getAddedItems().size() > 0) {
-                return true;
-            }
-
-            if (appDiff.getAttendeeUpdates().getRemovedItems() != null && appDiff.getAttendeeUpdates().getRemovedItems().size() > 0) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private boolean endsInPast(final Event event) throws OXException {
