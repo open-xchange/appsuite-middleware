@@ -62,6 +62,7 @@ import static com.openexchange.chronos.impl.Utils.isResolveOccurrences;
 import static com.openexchange.chronos.impl.Utils.mapEventOccurrences;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -69,6 +70,8 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventFlag;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.EventOccurrence;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
 import com.openexchange.chronos.impl.AbstractStorageOperation;
@@ -291,6 +294,7 @@ public class ResultTracker {
      * <li><i>anonymization</i> of restricted event data in case the event it is not marked as {@link Classification#PUBLIC}, and the
      * current session's user is neither creator, nor attendee of the event.</li>
      * <li>selecting the appropriate parent folder identifier for the specific user</li>
+     * <li>generate and apply event flags</li>
      * <li>apply <i>userized</i> versions of change- and delete-exception dates in the series master event based on the user's actual
      * attendance</li>
      * <li>taking over the user's personal list of alarms for the event</li>
@@ -311,6 +315,7 @@ public class ResultTracker {
      * <li><i>anonymization</i> of restricted event data in case the event it is not marked as {@link Classification#PUBLIC}, and the
      * current session's user is neither creator, nor attendee of the event.</li>
      * <li>selecting the appropriate parent folder identifier for the specific user</li>
+     * <li>generate and apply event flags</li>
      * <li>apply <i>userized</i> versions of change- and delete-exception dates in the series master event based on the user's actual
      * attendance</li>
      * <li>taking over the user's personal list of alarms for the event</li>
@@ -330,30 +335,43 @@ public class ResultTracker {
         }
         final List<Alarm> alarms = storage.getAlarmStorage().loadAlarms(event, forUser);
         final String folderView = getFolderView(event, forUser);
-        if (null != alarms || false == folderView.equals(event.getFolderId())) {
-            event = new DelegatingEvent(event) {
-
-                @Override
-                public String getFolderId() {
-                    return folderView;
-                }
-
-                @Override
-                public boolean containsFolderId() {
-                    return true;
-                }
-
-                @Override
-                public List<Alarm> getAlarms() {
-                    return alarms;
-                }
-
-                @Override
-                public boolean containsAlarms() {
-                    return true;
-                }
-            };
+        EnumSet<EventFlag> flags = CalendarUtils.getFlags(event, forUser);
+        if (null != alarms && 0 < alarms.size()) {
+            flags.add(EventFlag.ALARMS);
         }
+        event = new DelegatingEvent(event) {
+
+            @Override
+            public String getFolderId() {
+                return folderView;
+            }
+
+            @Override
+            public boolean containsFolderId() {
+                return true;
+            }
+
+            @Override
+            public List<Alarm> getAlarms() {
+                return alarms;
+            }
+
+            @Override
+            public boolean containsAlarms() {
+                return true;
+            }
+
+            @Override
+            public EnumSet<EventFlag> getFlags() {
+                return flags;
+            }
+
+            @Override
+            public boolean containsFlags() {
+                return true;
+            }
+
+        };
         return anonymizeIfNeeded(session, event);
     }
 

@@ -171,7 +171,7 @@ public abstract class AbstractQueryPerformer {
      * <ul>
      * <li>excluding events that are excluded as per {@link Utils#isExcluded(Event, CalendarSession, boolean)}</li>
      * <li>applying the folder identifier from the passed folder</li>
-     * <li>generate and apply event flags applying the folder identifier from the passed folder</li>
+     * <li>generate and apply event flags</li>
      * <li>resolving occurrences of the series master event as per {@link Utils#isResolveOccurrences(com.openexchange.chronos.service.CalendarParameters)}</li>
      * <li>apply <i>userized</i> versions of change- and delete-exception dates in the series master event based on the calendar user's actual attendance</li>
      * <li>sorting the resulting event list based on the requested sort options</li>
@@ -192,7 +192,7 @@ public abstract class AbstractQueryPerformer {
      * <ul>
      * <li>excluding events that are excluded as per {@link Utils#isExcluded(Event, CalendarSession, boolean)}</li>
      * <li>applying the folder identifier from the passed folder</li>
-     * <li>generate and apply event flags applying the folder identifier from the passed folder</li>
+     * <li>generate and apply event flags</li>
      * <li>resolving occurrences of the series master event as per {@link Utils#isResolveOccurrences(com.openexchange.chronos.service.CalendarParameters)}</li>
      * <li>apply <i>userized</i> versions of change- and delete-exception dates in the series master event based on the calendar user's actual attendance</li>
      * <li>sorting the resulting event list based on the requested sort options</li>
@@ -236,6 +236,7 @@ public abstract class AbstractQueryPerformer {
      * <ul>
      * <li>excluding events that are excluded as per {@link Utils#isExcluded(Event, CalendarSession, boolean)}</li>
      * <li>selecting the appropriate parent folder identifier for the specific user</li>
+     * <li>generate and apply event flags</li>
      * <li>resolving occurrences of the series master event as per {@link Utils#isResolveOccurrences(com.openexchange.chronos.service.CalendarParameters)}</li>
      * <li>apply <i>userized</i> versions of change- and delete-exception dates in the series master event based on the user's actual attendance</li>
      * <li>sorting the resulting event list based on the requested sort options</li>
