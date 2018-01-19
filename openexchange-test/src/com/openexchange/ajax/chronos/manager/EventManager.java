@@ -54,6 +54,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -95,6 +96,8 @@ public class EventManager extends AbstractManager {
     private long lastTimeStamp;
 
     private static final boolean EXPAND_SERIES = false;
+    
+    private static final SimpleDateFormat UTC_DATE_FORMATTER = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
 
     /**
      * Initializes a new {@link EventManager}.
@@ -463,7 +466,20 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     public UpdatesResult getUpdates(Date since, boolean expand, String folderId) throws ApiException {
-        ChronosUpdatesResponse updatesResponse = userApi.getChronosApi().getUpdates(userApi.getSession(), folderId, since.getTime(), null, null, null, null, null, expand, true, false);
+        return getUpdates(since, null, null, expand, folderId);
+    }
+    
+    /**
+     * Gets all changed events in the specified folder since the given timestamp.
+     * 
+     * @param since The timestamp
+     * @param expand Flag to expand any recurring events
+     * @param folderId The folder identifier
+     * @return The {@link UpdatesResult}
+     * @throws ApiException if an API error is occurred
+     */
+    public UpdatesResult getUpdates(Date since, Date start, Date end, boolean expand, String folderId) throws ApiException {
+        ChronosUpdatesResponse updatesResponse = userApi.getChronosApi().getUpdates(userApi.getSession(), folderId, since.getTime(), UTC_DATE_FORMATTER.format(start), UTC_DATE_FORMATTER.format(end), null, null, null, expand, true, false);
         this.lastTimeStamp = updatesResponse.getTimestamp();
         return checkResponse(updatesResponse.getErrorDesc(), updatesResponse.getError(), updatesResponse.getData());
     }
