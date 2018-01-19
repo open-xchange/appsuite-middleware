@@ -244,7 +244,6 @@ public class EventManager extends AbstractManager {
         return getRecurringEvent(eventId, reccurenceId, expectException, false);
     }
 
-
     /**
      * Gets the occurrence of an event
      *
@@ -421,7 +420,20 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     public UpdatesResult getUpdates(Date since, boolean expand) throws ApiException {
-        ChronosUpdatesResponse updatesResponse = userApi.getChronosApi().getUpdates(userApi.getSession(), defaultFolder, since.getTime(), null, null, null, null, null, expand, true, false);
+        return getUpdates(since, expand, defaultFolder);
+    }
+
+    /**
+     * Gets all changed events in the specified folder since the given timestamp.
+     * 
+     * @param since The timestamp
+     * @param expand Flag to expand any recurring events
+     * @param folderId The folder identifier
+     * @return The {@link UpdatesResult}
+     * @throws ApiException if an API error is occurred
+     */
+    public UpdatesResult getUpdates(Date since, boolean expand, String folderId) throws ApiException {
+        ChronosUpdatesResponse updatesResponse = userApi.getChronosApi().getUpdates(userApi.getSession(), folderId, since.getTime(), null, null, null, null, null, expand, true, false);
         this.lastTimeStamp = updatesResponse.getTimestamp();
         return checkResponse(updatesResponse.getErrorDesc(), updatesResponse.getError(), updatesResponse.getData());
     }
