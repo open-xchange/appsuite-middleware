@@ -65,6 +65,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.chronos.UserApi;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
+import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.configuration.asset.Asset;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.AlarmTriggerData;
@@ -319,7 +320,7 @@ public class EventManager extends AbstractManager {
     }
 
     /**
-     * Retrieves all events with in the specified interval
+     * Retrieves all events within the specified interval
      *
      * @param from The starting date
      * @param until The ending date
@@ -328,12 +329,41 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error occurs
      */
     public List<EventData> getAllEvents(Date from, Date until, boolean expand) throws ApiException {
-        EventsResponse eventsResponse = userApi.getChronosApi().getAllEvents(userApi.getSession(), DateTimeUtil.getZuluDateTime(from.getTime()).getValue(), DateTimeUtil.getZuluDateTime(until.getTime()).getValue(), defaultFolder, null, null, null, expand, true, false);
-        return checkResponse(eventsResponse.getErrorDesc(), eventsResponse.getError(), eventsResponse.getData());
+        return getAllEvents(from, until, expand, defaultFolder);
     }
 
+    /**
+     * Retrieves all events within the specified interval in the specified folder
+     * 
+     * @param from The starting date
+     * @param until The ending date
+     * @param expand Flag to expand occurrences
+     * @param folder The folder identifier
+     * @return A {@link List} with {@link EventData}
+     * @throws ApiException if an API error occurs
+     */
     public List<EventData> getAllEvents(Date from, Date until, boolean expand, String folder) throws ApiException {
-        EventsResponse eventsResponse = userApi.getChronosApi().getAllEvents(userApi.getSession(), DateTimeUtil.getZuluDateTime(from.getTime()).getValue(), DateTimeUtil.getZuluDateTime(until.getTime()).getValue(), folder, null, null, null, expand, true, false);
+        return getAllEvents(from, until, expand, folder, null);
+    }
+
+    /**
+     * Retrieves all events within the specified interval in the specified folder
+     * 
+     * @param from The starting date
+     * @param until The ending date
+     * @param expand Flag to expand occurrences
+     * @param folder The folder identifier
+     * @return A {@link List} with {@link EventData}
+     * @throws ApiException if an API error occurs
+     */
+    public List<EventData> getAllEvents(Date from, Date until, boolean expand, String folder, SortOrder sortOrder) throws ApiException {
+        String sort = null;
+        String order = null;
+        if (sortOrder != null) {
+            sort = sortOrder.getBy().name();
+            order = sortOrder.isDescending() ? SortOrder.Order.DESC.name() : SortOrder.Order.ASC.name();
+        }
+        EventsResponse eventsResponse = userApi.getChronosApi().getAllEvents(userApi.getSession(), DateTimeUtil.getZuluDateTime(from.getTime()).getValue(), DateTimeUtil.getZuluDateTime(until.getTime()).getValue(), folder, null, order, sort, expand, true, false);
         return checkResponse(eventsResponse.getErrorDesc(), eventsResponse.getError(), eventsResponse.getData());
     }
 
