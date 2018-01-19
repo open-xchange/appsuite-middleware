@@ -144,6 +144,11 @@ public class CalendarFolderManager extends AbstractManager {
         return handleCreation(response).getData();
     }
 
+    public String createFolder(NewFolderBody body) throws ApiException {
+        FolderUpdateResponse response = foldersApi.createFolder(DEFAULT_FOLDER_ID, userApi.getSession(), body, CalendarFolderManager.TREE_ID, CalendarFolderManager.MODULE);
+        return handleCreation(response).getData();
+    }
+
     /**
      * Retrieves the folder with the specified identifier
      * 
