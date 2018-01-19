@@ -620,7 +620,9 @@ public class SearchAdapter {
                 usesExternalAttendees = true;
                 return Collections.<String, DbMapping<? extends Object, ?>> singletonMap(prefixExternalAttendees, externalAttendeeMapping);
             }
-            if (null == externalAttendeeMapping) {
+            //TODO: quirk to make the "needsAction" action work with legacy storage
+            //            if (null == externalAttendeeMapping) {
+            if (null == externalAttendeeMapping || AttendeeField.PARTSTAT.equals(value)) {
                 usesInternalAttendees = true;
                 return Collections.<String, DbMapping<? extends Object, ?>> singletonMap(prefixInternalAttendees, internalAttendeeMapping);
             }

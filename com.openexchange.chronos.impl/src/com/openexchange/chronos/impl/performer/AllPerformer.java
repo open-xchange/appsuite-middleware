@@ -128,7 +128,10 @@ public class AllPerformer extends AbstractQueryPerformer {
             /*
              * only include events with matching rsvp
              */
-            searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(searchTerm).addSearchTerm(getSearchTerm(AttendeeField.RSVP, SingleOperation.EQUALS, rsvp));
+            searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+                .addSearchTerm(searchTerm)
+                .addSearchTerm(getSearchTerm(AttendeeField.RSVP, SingleOperation.EQUALS, rsvp))
+            ;
         }
         if (null != partStats) {
             /*
@@ -138,13 +141,19 @@ public class AllPerformer extends AbstractQueryPerformer {
                 return Collections.emptyList();
             }
             if (1 == partStats.length) {
-                searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(searchTerm).addSearchTerm(getSearchTerm(AttendeeField.PARTSTAT, SingleOperation.EQUALS, partStats[0].getValue()));
+                searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+                    .addSearchTerm(searchTerm)
+                    .addSearchTerm(getSearchTerm(AttendeeField.PARTSTAT, SingleOperation.EQUALS, partStats[0]))
+                ;
             } else {
                 CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
                 for (ParticipationStatus partStat : partStats) {
-                    orTerm.addSearchTerm(getSearchTerm(AttendeeField.PARTSTAT, SingleOperation.EQUALS, partStat.getValue()));
+                    orTerm.addSearchTerm(getSearchTerm(AttendeeField.PARTSTAT, SingleOperation.EQUALS, partStat));
                 }
-                searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(searchTerm).addSearchTerm(orTerm);
+                searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+                    .addSearchTerm(searchTerm)
+                    .addSearchTerm(orTerm)
+                ;
             }
         }
         if (false == isEnforceDefaultAttendee(session)) {
