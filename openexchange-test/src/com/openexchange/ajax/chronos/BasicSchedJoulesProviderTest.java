@@ -53,15 +53,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import java.io.IOException;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Test;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.openexchange.ajax.chronos.factory.CalendarFolderConfig;
-import com.openexchange.ajax.chronos.factory.CalendarFolderExtendedProperty;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
-import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.FolderData;
 
 /**
@@ -69,36 +66,13 @@ import com.openexchange.testing.httpclient.models.FolderData;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class BasicSchedJoulesProviderTest extends AbstractExternalProviderChronosTest {
-
-    private static final String MODULE = "event";
-    private static final String PROVIDER_ID = "schedjoules";
-
-    private static final int ROOT_PAGE = 115673;
-    private static final int NON_EXISTING_CALENDAR = 31145;
-    static final int CALENDAR_ONE = 90734;
-    private static final int CALENDAR_TWO = 24428282;
-    private static final int CALENDAR_THREE = 24428313;
-
-    private static final int DEFAULT_REFRESH_INTERVAL = 1440;
-    private static final String DEFAULT_LOCALE = "en";
-
-    private String folderName = null;
+public class BasicSchedJoulesProviderTest extends AbstractSchedJoulesProviderTest {
 
     /**
      * Initialises a new {@link BasicSchedJoulesProviderTest}.
      */
     public BasicSchedJoulesProviderTest() {
-        super(PROVIDER_ID);
-    }
-
-    /**
-     * Setup the test
-     */
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        folderName = "testfolder_" + System.nanoTime();
+        super();
     }
 
     /**
@@ -225,34 +199,4 @@ public class BasicSchedJoulesProviderTest extends AbstractExternalProviderChrono
 
     ////////////////////////////////// HELPERS ///////////////////////////////////
 
-    /**
-     * Creates a folder with a subscription to schedjoules feed with the specified item identifier and the specified name
-     * 
-     * @param itemId The item identifier
-     * @param folderName The folder name
-     * @return The {@link FolderData} of the created folder
-     * @throws ApiException
-     * @throws ChronosApiException
-     * @throws JSONException
-     * @throws IOException
-     * @throws JsonMappingException
-     * @throws JsonParseException
-     */
-    FolderData createFolder(int itemId, String folderName) throws ApiException, ChronosApiException, JSONException, JsonParseException, JsonMappingException, IOException {
-        JSONObject config = new JSONObject();
-        config.put(CalendarFolderConfig.ITEM_ID.getFieldName(), itemId);
-        config.put(CalendarFolderConfig.REFRESH_INTERVAL.getFieldName(), DEFAULT_REFRESH_INTERVAL);
-        config.put(CalendarFolderConfig.LOCALE.getFieldName(), DEFAULT_LOCALE);
-
-        JSONObject extendedProperties = new JSONObject();
-        JSONObject v = new JSONObject();
-        v.put("value", "TRANSPARENT");
-        extendedProperties.put(CalendarFolderExtendedProperty.SCHEDULE_TRANSP.getFieldName(), v);
-        v = new JSONObject();
-        v.put("value", "false");
-        extendedProperties.put(CalendarFolderExtendedProperty.USED_FOR_SYNC.getFieldName(), v);
-        extendedProperties.put(CalendarFolderExtendedProperty.COLOR.getFieldName(), new JSONObject());
-        extendedProperties.put(CalendarFolderExtendedProperty.DESCRIPTION.getFieldName(), new JSONObject());
-        return createFolder(folderName, MODULE, config, extendedProperties);
-    }
 }

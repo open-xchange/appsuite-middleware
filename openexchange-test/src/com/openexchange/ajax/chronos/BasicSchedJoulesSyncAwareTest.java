@@ -64,8 +64,17 @@ import com.openexchange.testing.httpclient.models.UpdatesResult;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class BasicSchedJoulesSyncAwareTest extends BasicSchedJoulesProviderTest {
-    
+public class BasicSchedJoulesSyncAwareTest extends AbstractSchedJoulesProviderTest {
+
+    /**
+     * Initialises a new {@link BasicSchedJoulesSyncAwareTest}.
+     * 
+     * @param providerId
+     */
+    public BasicSchedJoulesSyncAwareTest() {
+        super();
+    }
+
     private static final long FIVE_YEARS_OFFSET = 5 * 365 * 24 * 60 * 60 * 1000 * 1000;
 
     /**
