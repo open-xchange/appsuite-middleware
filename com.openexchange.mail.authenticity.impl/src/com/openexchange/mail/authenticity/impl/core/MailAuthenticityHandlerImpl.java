@@ -750,6 +750,9 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      */
     private void logMetrics(final List<String> authHeaders, MailAuthenticityResult overallResult) {
         MailAuthenticityMetricLogger metricLogger = services.getService(MailAuthenticityMetricLogger.class);
+        if (metricLogger == null) {
+            return;
+        }
         metricLogger.log(authHeaders, overallResult);
     }
 
