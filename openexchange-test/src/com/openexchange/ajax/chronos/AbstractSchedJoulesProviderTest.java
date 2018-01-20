@@ -79,6 +79,8 @@ abstract class AbstractSchedJoulesProviderTest extends AbstractExternalProviderC
 
     private static final int DEFAULT_REFRESH_INTERVAL = 1440;
     private static final String DEFAULT_LOCALE = "en";
+    
+    static final long TIMESTAMP = 1516370400;
 
     /**
      * Initialises a new {@link AbstractSchedJoulesProviderTest}.

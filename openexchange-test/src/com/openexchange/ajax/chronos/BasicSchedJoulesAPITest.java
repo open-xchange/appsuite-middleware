@@ -92,28 +92,6 @@ public class BasicSchedJoulesAPITest extends AbstractExternalProviderChronosTest
         super("schedjoules");
     }
 
-    private static final Map<String, String> CONFIG = new HashMap<String, String>();
-    static {
-        CONFIG.put("com.openexchange.chronos.schedjoules.host", "example.com");
-        CONFIG.put("com.openexchange.chronos.schedjoules.scheme", "http");
-    }
-
-    @Override
-    protected Map<String, String> getNeededConfigurations() {
-        return CONFIG;
-    }
-
-    @Override
-    protected String getScope() {
-        return "context";
-    }
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        setUpConfiguration();
-    }
-
     /**
      * Tests the available languages
      */

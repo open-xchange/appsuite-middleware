@@ -107,6 +107,7 @@ public abstract class AbstractConfigAwareAPIClientSession extends AbstractAPICli
     @Override
     public void tearDown() throws Exception {
         try {
+            //FIXME: remove test values even if old values were not present
             if (oldData != null) {
                 // change back to old value if present
                 Map<String, Object> map = oldData.asMap();

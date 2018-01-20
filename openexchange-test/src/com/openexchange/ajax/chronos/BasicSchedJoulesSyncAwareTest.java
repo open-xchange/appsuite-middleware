@@ -50,6 +50,8 @@
 package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.sql.Date;
 import java.util.List;
 import org.junit.Test;
@@ -75,6 +77,7 @@ public class BasicSchedJoulesSyncAwareTest extends AbstractSchedJoulesProviderTe
         super();
     }
 
+    private static final long TIMESTAMP = 1516370400;
     private static final long FIVE_YEARS_OFFSET = 5 * 365 * 24 * 60 * 60 * 1000 * 1000;
 
     /**
@@ -84,8 +87,11 @@ public class BasicSchedJoulesSyncAwareTest extends AbstractSchedJoulesProviderTe
     public void testGetUpdatedEventsSince() throws Exception {
         FolderData folderData = createFolder(CALENDAR_ONE, "testSimpleSearch");
         Date beginOfTime = new Date(0);
-        Date future = new Date(System.currentTimeMillis() + FIVE_YEARS_OFFSET);
+        Date future = new Date(TIMESTAMP + FIVE_YEARS_OFFSET);
         List<EventData> allEvents = eventManager.getAllEvents(beginOfTime, future, false, folderData.getId(), SortOrder.getSortOrder(EventField.TIMESTAMP, SortOrder.Order.ASC));
+
+        assertNotNull(allEvents);
+        assertTrue(allEvents.size() > 0);
 
         EventData eventData = allEvents.get(allEvents.size() - 1);
         Long since = eventData.getTimestamp();

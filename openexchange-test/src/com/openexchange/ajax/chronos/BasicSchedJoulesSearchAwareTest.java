@@ -65,7 +65,7 @@ import com.openexchange.testing.httpclient.modules.FindApi;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class BasicSchedJoulesSearchAwareTest extends BasicSchedJoulesProviderTest {
+public class BasicSchedJoulesSearchAwareTest extends AbstractSchedJoulesProviderTest {
 
     private static final String DEFAULT_COLUMNS = "1,2,20,101,200,201,202,206,207,209,212,213,214,215,216,220,221,222,224,227,400,401,402";
 
@@ -84,7 +84,7 @@ public class BasicSchedJoulesSearchAwareTest extends BasicSchedJoulesProviderTes
     @Test
     public void testSimpleSearch() throws Exception {
         FolderData folderData = createFolder(CALENDAR_ONE, "testSimpleSearch");
-        eventManager.getAllEvents(new Date(0), new Date(System.currentTimeMillis()), false, folderData.getId());
+        eventManager.getAllEvents(new Date(0), new Date(1516370400), false, folderData.getId());
 
         FindQueryBody queryBody = FindFactory.createFindBody("Full", folderData.getId());
 
@@ -101,7 +101,7 @@ public class BasicSchedJoulesSearchAwareTest extends BasicSchedJoulesProviderTes
     @Test
     public void testSearchWithFields() throws Exception {
         FolderData folderData = createFolder(CALENDAR_ONE, "testSearchWithFields");
-        eventManager.getAllEvents(new Date(0), new Date(System.currentTimeMillis()), false, folderData.getId());
+        eventManager.getAllEvents(new Date(0), new Date(1516370400), false, folderData.getId());
 
         FindQueryBody queryBody = FindFactory.createFindBody("Full", folderData.getId());
 
