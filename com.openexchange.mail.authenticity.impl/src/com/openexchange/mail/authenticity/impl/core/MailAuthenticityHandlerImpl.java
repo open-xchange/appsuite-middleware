@@ -192,7 +192,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         if (authHeaders == null || authHeaders.length == 0) {
             // Pass on to custom handlers
             mailMessage.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
-            logMetrics(Collections.emptyList(), mailMessage.getAuthenticityResult());
+            logMetrics(mailMessage.getMessageId(), Collections.emptyList(), mailMessage.getAuthenticityResult());
             return;
         }
 
@@ -200,7 +200,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         if (from == null || from.length == 0) {
             // Pass on to custom handlers
             mailMessage.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
-            logMetrics(Arrays.asList(authHeaders), mailMessage.getAuthenticityResult());
+            logMetrics(mailMessage.getMessageId(), Arrays.asList(authHeaders), mailMessage.getAuthenticityResult());
             return;
         }
 
@@ -212,7 +212,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             LOGGER.error("An error occurred during parsing the 'Authentication-Results' header: {}", e.getMessage(), e);
         }
         mailMessage.setAuthenticityResult(authenticityResult);
-        logMetrics(headers, mailMessage.getAuthenticityResult());
+        logMetrics(mailMessage.getMessageId(), headers, mailMessage.getAuthenticityResult());
 
         trustedMailService.handle(session, mailMessage);
     }
@@ -601,24 +601,6 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     }
 
     /**
-     * Converts the specified {@link MailAuthenticityMechanismResult} to a {@link Map}
-     *
-     * @param result The {@link MailAuthenticityMechanismResult} to convert
-     * @return A {@link Map} with the converted {@link MailAuthenticityMechanismResult}
-     */
-    private Map<String, String> convert(MailAuthenticityMechanismResult result) {
-        final Map<String, String> unconsidered = new HashMap<>(6);
-        unconsidered.put("mechanism", result.getMechanism().getTechnicalName());
-        unconsidered.put("result", result.getResult().getTechnicalName());
-        unconsidered.put("domain", result.getDomain());
-        String reason = result.getReason();
-        if (!Strings.isEmpty(reason)) {
-            unconsidered.put("reason", reason);
-        }
-        return unconsidered;
-    }
-
-    /**
      * Extracts the domain from the specified internet address
      * 
      * @param adr The address as string
@@ -748,12 +730,12 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @param authHeaders the raw headers
      * @param overallResult the overall result
      */
-    private void logMetrics(final List<String> authHeaders, MailAuthenticityResult overallResult) {
+    private void logMetrics(String mailId, final List<String> authHeaders, MailAuthenticityResult overallResult) {
         MailAuthenticityMetricLogger metricLogger = services.getService(MailAuthenticityMetricLogger.class);
         if (metricLogger == null) {
             return;
         }
-        metricLogger.log(authHeaders, overallResult);
+        metricLogger.log(mailId, authHeaders, overallResult);
     }
 
     ///////////////////////////////// HELPER CLASSES /////////////////////////////////

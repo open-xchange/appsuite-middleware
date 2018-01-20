@@ -50,6 +50,7 @@
 package com.openexchange.mail.authenticity.impl.core.metrics;
 
 import java.util.List;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.mail.authenticity.MailAuthenticityProperty;
@@ -59,15 +60,6 @@ import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanism;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
-import ch.qos.logback.core.rolling.RollingFileAppender;
-import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy;
-import ch.qos.logback.core.util.FileSize;
 
 /**
  * {@link MailAuthenticityMetricFileLogger}
@@ -77,104 +69,13 @@ import ch.qos.logback.core.util.FileSize;
 @SuppressWarnings("unchecked")
 public class MailAuthenticityMetricFileLogger implements MailAuthenticityMetricLogger {
 
-    private final ch.qos.logback.classic.Logger metricLogger;
+    private final Logger metricLogger = LoggerFactory.getLogger(MailAuthenticityMetricFileLogger.class);
 
     /**
      * Initialises a new {@link MailAuthenticityMetricFileLogger}.
      */
     public MailAuthenticityMetricFileLogger() {
         super();
-        metricLogger = initialiseLogger();
-    }
-
-    /**
-     * Creates a new logger
-     * 
-     * @return A new call trace logger
-     */
-    private Logger initialiseLogger() {
-        String logPath = "/var/log/open-xchange";
-        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-        return createLogger(createFileAppender(logPath, loggerContext, createPatternLayoutEncoder(loggerContext)));
-    }
-
-    /**
-     * Creates the {@link PatternLayoutEncoder}. A simple encoder with the pattern '%message%n'
-     * 
-     * @param loggerContext The {@link LoggerContext}
-     * @return The {@link PatternLayoutEncoder}
-     */
-    private PatternLayoutEncoder createPatternLayoutEncoder(LoggerContext loggerContext) {
-        PatternLayoutEncoder patternLayoutEncoder = new PatternLayoutEncoder();
-        patternLayoutEncoder.setPattern("%date - %message %n");
-        patternLayoutEncoder.setContext(loggerContext);
-        patternLayoutEncoder.start();
-        return patternLayoutEncoder;
-    }
-
-    /**
-     * Creates a {@link RollingFileAppender} in the specified file system path, with the specified {@link LoggerContext} and {@link PatternLayoutEncoder}
-     * 
-     * @param logPath the file system logging path
-     * @param loggerContext The {@link LoggerContext}
-     * @param patternLayoutEncoder The {@link PatternLayoutEncoder}
-     * @return The {@link RollingFileAppender}
-     */
-    private RollingFileAppender<ILoggingEvent> createFileAppender(String logPath, LoggerContext loggerContext, PatternLayoutEncoder patternLayoutEncoder) {
-        RollingFileAppender<ILoggingEvent> fileAppender = new RollingFileAppender<ILoggingEvent>();
-        fileAppender.setFile(logPath + "/mailAuthenticityMetrics.log.0");
-        fileAppender.setEncoder(patternLayoutEncoder);
-        fileAppender.setContext(loggerContext);
-        fileAppender.setRollingPolicy(createRollingPolicy(logPath, loggerContext, fileAppender));
-        fileAppender.setTriggeringPolicy(createTriggeringPolicy(loggerContext));
-        fileAppender.start();
-        return fileAppender;
-    }
-
-    /**
-     * Creates the trace logger
-     * 
-     * @param fileAppender The {@link RollingFileAppender} for the logger
-     * @return the {@link ch.qos.logback.classic.Logger}
-     */
-    private Logger createLogger(RollingFileAppender<ILoggingEvent> fileAppender) {
-        Logger logger = (Logger) LoggerFactory.getLogger("com.openexchange.mail.authenticity.metrics.MailAuthenticityMetricLogger");
-        logger.addAppender(fileAppender);
-        logger.setLevel(Level.INFO);
-        logger.setAdditive(false);
-        return logger;
-    }
-
-    /**
-     * Creates a {@link SizeBasedTriggeringPolicy} for the logger appender
-     * 
-     * @param loggerContext the {@link LoggerContext}
-     * @return The {@link SizeBasedTriggeringPolicy}
-     */
-    private SizeBasedTriggeringPolicy<ILoggingEvent> createTriggeringPolicy(LoggerContext loggerContext) {
-        SizeBasedTriggeringPolicy<ILoggingEvent> triggeringPolicy = new SizeBasedTriggeringPolicy<ILoggingEvent>();
-        triggeringPolicy.setContext(loggerContext);
-        triggeringPolicy.setMaxFileSize(new FileSize(2 * FileSize.MB_COEFFICIENT));
-        triggeringPolicy.start();
-        return triggeringPolicy;
-    }
-
-    /**
-     * Creates a {@link FixedWindowRollingPolicy} for the file appender
-     * 
-     * @param logPath the file system logging path
-     * @param loggerContext The {@link LoggerContext}
-     * @param fileAppender The {@link RollingFileAppender}
-     * @return The {@link FixedWindowRollingPolicy}
-     */
-    private FixedWindowRollingPolicy createRollingPolicy(String logPath, LoggerContext loggerContext, RollingFileAppender<ILoggingEvent> fileAppender) {
-        FixedWindowRollingPolicy rollingPolicy = new FixedWindowRollingPolicy();
-        rollingPolicy.setContext(loggerContext);
-        rollingPolicy.setFileNamePattern(logPath + "/mailAuthenticityMetrics.log.%i");
-        rollingPolicy.setMinIndex(1);
-        rollingPolicy.setMaxIndex(99);
-        rollingPolicy.setParent(fileAppender);
-        return rollingPolicy;
     }
 
     /*
@@ -183,18 +84,13 @@ public class MailAuthenticityMetricFileLogger implements MailAuthenticityMetricL
      * @see com.openexchange.mail.authenticity.impl.core.metrics.MailAuthenticityMetricLogger#log(java.util.List, com.openexchange.mail.dataobjects.MailAuthenticityResult)
      */
     @Override
-    public void log(List<String> rawHeaders, MailAuthenticityResult overallResult) {
+    public void log(String mailId, List<String> rawHeaders, MailAuthenticityResult overallResult) {
         LeanConfigurationService leanConfigService = Services.getService(LeanConfigurationService.class);
         if (!leanConfigService.getBooleanProperty(MailAuthenticityProperty.LOG_METRICS)) {
             return;
         }
-        switch (metricLogger.getLevel().toInt()) {
-            case Level.DEBUG_INT:
-                metricLogger.debug("{}, {}, {}", serialiseCodes(overallResult), serialiseRawHeaders(rawHeaders), serialiseTechnicalNames(overallResult));
-                break;
-            case Level.INFO_INT:
-            default:
-                metricLogger.info("{}", serialiseCodes(overallResult));
+        if (metricLogger.isDebugEnabled()) {
+            metricLogger.debug("MailId: {}, {}, {}, {}", mailId, serialiseCodes(overallResult), serialiseRawHeaders(rawHeaders), serialiseTechnicalNames(overallResult));
         }
     }
 
