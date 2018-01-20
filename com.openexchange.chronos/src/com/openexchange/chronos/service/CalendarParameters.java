@@ -88,14 +88,14 @@ public interface CalendarParameters {
      * <p/>
      * Specifies the lower inclusive limit of the queried range, i.e. only events which start on or after this date should be returned.
      */
-    static final String PARAMETER_RANGE_START = "start";
+    static final String PARAMETER_RANGE_START = "rangeStart";
 
     /**
      * {@link Date}
      * <p/>
      * Specifies the upper exclusive limit of the queried range, i.e. only appointments which end before this date should be returned.
      */
-    static final String PARAMETER_RANGE_END = "end";
+    static final String PARAMETER_RANGE_END = "rangeEnd";
 
     /**
      * Array of {@link EventField}
