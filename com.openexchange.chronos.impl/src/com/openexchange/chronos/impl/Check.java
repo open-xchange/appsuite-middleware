@@ -53,7 +53,6 @@ import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.isPublicClassification;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
-import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.List;
 import com.openexchange.chronos.Alarm;
@@ -152,21 +151,6 @@ public class Check extends com.openexchange.chronos.common.Check {
 
     public static void allowedAttendeeSchedulingObjectChange(Event originalEvent, Event udpatedEvent) throws OXException {
 
-    }
-
-    /**
-     * Checks that the supplied search pattern length is equal to or greater than a configured minimum.
-     *
-     * @param minimumPatternLength, The minimum search pattern length, or <code>0</code> for no limitation
-     * @param pattern The pattern to check
-     * @return The passed pattern, after the length was checked
-     * @throws OXException {@link CalendarExceptionCodes#QUERY_TOO_SHORT}
-     */
-    public static String minimumSearchPatternLength(String pattern, int minimumPatternLength) throws OXException {
-        if (null != pattern && 0 < minimumPatternLength && pattern.length() < minimumPatternLength) {
-            throw CalendarExceptionCodes.QUERY_TOO_SHORT.create(I(minimumPatternLength), pattern);
-        }
-        return pattern;
     }
 
     /**

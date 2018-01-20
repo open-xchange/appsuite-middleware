@@ -50,9 +50,7 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.getFields;
-import static com.openexchange.chronos.common.SearchUtils.addWildcards;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
-import static com.openexchange.chronos.common.SearchUtils.isWildcardOnly;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.chronos.impl.Utils.getVisibleFolders;
@@ -71,6 +69,7 @@ import java.util.Set;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.SearchUtils;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Utils;
@@ -128,6 +127,7 @@ public class SearchPerformer extends AbstractQueryPerformer {
      * @return The found events
      */
     public List<Event> perform(String[] folderIDs, List<SearchFilter> filters, List<String> queries) throws OXException {
+        Check.minimumSearchPatternLength(queries, minimumSearchPatternLength);
         List<UserizedFolder> folders = getFolders(folderIDs);
         EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
         SearchOptions sortOptions = new SearchOptions(session);
@@ -149,20 +149,11 @@ public class SearchPerformer extends AbstractQueryPerformer {
     }
 
     private SearchTerm<?> buildSearchTerm(List<UserizedFolder> folders, List<String> queries) throws OXException {
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(getFolderIdsTerm(folders));
-        if (null != queries) {
-            for (String query : queries) {
-                if (false == isWildcardOnly(query)) {
-                    String pattern = addWildcards(Check.minimumSearchPatternLength(query, minimumSearchPatternLength), true, true);
-                    searchTerm.addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
-                        .addSearchTerm(getSearchTerm(EventField.SUMMARY, SingleOperation.EQUALS, pattern))
-                        .addSearchTerm(getSearchTerm(EventField.DESCRIPTION, SingleOperation.EQUALS, pattern))
-                        .addSearchTerm(getSearchTerm(EventField.CATEGORIES, SingleOperation.EQUALS, pattern))
-                    );
-                }
-            }
+        SearchTerm<?> queriesTerm = SearchUtils.buildSearchTerm(queries);
+        if (null == queriesTerm) {
+            return getFolderIdsTerm(folders);
         }
-        return 1 == searchTerm.getOperands().length ? searchTerm.getOperands()[0] : searchTerm;
+        return new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(getFolderIdsTerm(folders)).addSearchTerm(queriesTerm);
     }
 
     private static SearchTerm<?> getPublicFolderIdsTerm(Set<String> folderIDs, boolean onlyOwn, int userID) {

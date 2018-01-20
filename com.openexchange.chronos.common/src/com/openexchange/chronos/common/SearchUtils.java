@@ -49,8 +49,14 @@
 
 package com.openexchange.chronos.common;
 
+import java.util.List;
+import com.openexchange.chronos.EventField;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.Operand;
+import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnFieldOperand;
@@ -100,6 +106,30 @@ public class SearchUtils {
      */
     public static <E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation) {
         return new SingleSearchTerm(operation).addOperand(new ColumnFieldOperand<E>(field));
+    }
+
+    /**
+     * Constructs a search term for a list of calendar queries. Each query is surrounded with wildcards implicitly, and matched against a
+     * certain set of event fields.
+     *
+     * @param queries The queries to get the search term for
+     * @return The search term, or <code>null</code> if the passed queries yield no search criteria
+     */
+    public static SearchTerm<?> buildSearchTerm(List<String> queries) throws OXException {
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
+        if (null != queries) {
+            for (String query : queries) {
+                if (false == isWildcardOnly(query)) {
+                    String pattern = addWildcards(query, true, true);
+                    searchTerm.addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
+                        .addSearchTerm(getSearchTerm(EventField.SUMMARY, SingleOperation.EQUALS, pattern))
+                        .addSearchTerm(getSearchTerm(EventField.DESCRIPTION, SingleOperation.EQUALS, pattern))
+                        .addSearchTerm(getSearchTerm(EventField.CATEGORIES, SingleOperation.EQUALS, pattern))
+                    );
+                }
+            }
+        }
+        return 0 == searchTerm.getOperands().length ? null : 1 == searchTerm.getOperands().length ? searchTerm.getOperands()[0] : searchTerm;
     }
 
     /**

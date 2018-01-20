@@ -50,6 +50,7 @@
 package com.openexchange.chronos.common;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.SearchStrings.lengthWithoutWildcards;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -408,4 +409,37 @@ public class Check {
             throw CalendarExceptionCodes.INCOMPATIBLE_DATE_TYPES.create(String.valueOf(event.getStartDate()), String.valueOf(event.getEndDate()));
         }
     }
+
+    /**
+     * Checks that the supplied search pattern length is equal to or greater than a configured minimum.
+     *
+     * @param minimumPatternLength The minimum search pattern length, or <code>0</code> for no limitation
+     * @param pattern The pattern to check
+     * @return The passed pattern, after the length was checked
+     * @throws OXException {@link CalendarExceptionCodes#QUERY_TOO_SHORT}
+     */
+    public static String minimumSearchPatternLength(String pattern, int minimumPatternLength) throws OXException {
+        if (null != pattern && 0 < minimumPatternLength && lengthWithoutWildcards(pattern) < minimumPatternLength) {
+            throw CalendarExceptionCodes.QUERY_TOO_SHORT.create(I(minimumPatternLength), pattern);
+        }
+        return pattern;
+    }
+
+    /**
+     * Checks that each of the supplied search patterns length is equal to or greater than a configured minimum.
+     *
+     * @param minimumPatternLength The minimum search pattern length, or <code>0</code> for no limitation
+     * @param patterns The patterns to check
+     * @return The passed patterns, after their length was checked
+     * @throws OXException {@link CalendarExceptionCodes#QUERY_TOO_SHORT}
+     */
+    public static List<String> minimumSearchPatternLength(List<String> patterns, int minimumPatternLength) throws OXException {
+        if (null != patterns && 0 < minimumPatternLength) {
+            for (String pattern : patterns) {
+                Check.minimumSearchPatternLength(pattern, minimumPatternLength);
+            }
+        }
+        return patterns;
+    }
+
 }
