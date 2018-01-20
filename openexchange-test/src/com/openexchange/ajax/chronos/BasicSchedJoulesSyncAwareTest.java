@@ -77,7 +77,6 @@ public class BasicSchedJoulesSyncAwareTest extends AbstractSchedJoulesProviderTe
         super();
     }
 
-    private static final long TIMESTAMP = 1516370400;
     private static final long FIVE_YEARS_OFFSET = 5 * 365 * 24 * 60 * 60 * 1000 * 1000;
 
     /**
