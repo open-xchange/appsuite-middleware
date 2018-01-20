@@ -69,7 +69,7 @@ import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 @SuppressWarnings("unchecked")
 public class MailAuthenticityMetricFileLogger implements MailAuthenticityMetricLogger {
 
-    private final Logger metricLogger = LoggerFactory.getLogger(MailAuthenticityMetricFileLogger.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MailAuthenticityMetricFileLogger.class);
 
     /**
      * Initialises a new {@link MailAuthenticityMetricFileLogger}.
@@ -89,8 +89,8 @@ public class MailAuthenticityMetricFileLogger implements MailAuthenticityMetricL
         if (!leanConfigService.getBooleanProperty(MailAuthenticityProperty.LOG_METRICS)) {
             return;
         }
-        if (metricLogger.isDebugEnabled()) {
-            metricLogger.debug("MailId: {}, {}, {}, {}", mailId, serialiseCodes(overallResult), serialiseRawHeaders(rawHeaders), serialiseTechnicalNames(overallResult));
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("MailId: {}, {}, {}, {}", mailId, serialiseCodes(overallResult), serialiseRawHeaders(rawHeaders), serialiseTechnicalNames(overallResult));
         }
     }
 
