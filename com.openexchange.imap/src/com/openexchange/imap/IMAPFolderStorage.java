@@ -2490,14 +2490,13 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
                     String trashFullname = null;
                     final boolean hardDeleteMsgsByConfig = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx).isHardDeleteMsgs();
-                    final boolean backup =
-                        (!hardDelete && !hardDeleteMsgsByConfig && !isSubfolderOf(f.getFullName(), (trashFullname = getTrashFolder()), getSeparator()));
+                    final boolean backup = (!hardDelete && !hardDeleteMsgsByConfig && !isSubfolderOf(f.getFullName(), (trashFullname = getTrashFolder()), getSeparator()));
                     if (backup) {
                         imapAccess.getMessageStorage().notifyIMAPFolderModification(trashFullname);
                     }
+                    final boolean supportsMove = imapConfig.asMap().containsKey("MOVE");
                     final int blockSize = imapConfig.getIMAPProperties().getBlockSize();
                     if (blockSize > 0) {
-                        final boolean supportsMove = imapConfig.asMap().containsKey("MOVE");
                         /*
                          * Block-wise deletion
                          */
@@ -2505,12 +2504,12 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                             /*
                              * Don't adapt sequence number since folder expunge already resets message numbering
                              */
+                            boolean deleteRequired = true;
                             if (backup) {
                                 try {
-                                    if(supportsMove){
+                                    if (supportsMove) {
                                         new MoveIMAPCommand(f, 1, blockSize, trashFullname).doCommand();
-                                        msgCount -= blockSize;
-                                        continue;
+                                        deleteRequired = false;
                                     } else {
                                         new CopyIMAPCommand(f, 1, blockSize, trashFullname).doCommand();
                                     }
@@ -2528,45 +2527,30 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                                          */
                                         throw MailExceptionCode.DELETE_FAILED_OVER_QUOTA.create(e, new Object[0]);
                                     }
-                                    throw IMAPException.create(
-                                        IMAPException.Code.MOVE_ON_DELETE_FAILED,
-                                        imapConfig,
-                                        session,
-                                        e,
-                                        new Object[0]);
+                                    throw IMAPException.create(IMAPException.Code.MOVE_ON_DELETE_FAILED, imapConfig, session, e, new Object[0]);
                                 }
                             }
-                            /*
-                             * Delete through storing \Deleted flag...
-                             */
-                            new FlagsIMAPCommand(f, 1, blockSize, FLAGS_DELETED, true, true).doCommand();
-                            /*
-                             * ... and perform EXPUNGE
-                             */
-                            try {
-                                IMAPCommandsCollection.fastExpunge(f);
-                            } catch (final FolderClosedException e) {
+                            if (deleteRequired) {
                                 /*
-                                 * Not possible to retry since connection is broken
+                                 * Delete through storing \Deleted flag...
                                  */
-                                throw IMAPException.create(
-                                    IMAPException.Code.CONNECT_ERROR,
-                                    imapConfig,
-                                    session,
-                                    e,
-                                    imapConfig.getServer(),
-                                    imapConfig.getLogin());
-                            } catch (final StoreClosedException e) {
+                                new FlagsIMAPCommand(f, 1, blockSize, FLAGS_DELETED, true, true).doCommand();
                                 /*
-                                 * Not possible to retry since connection is broken
+                                 * ... and perform EXPUNGE
                                  */
-                                throw IMAPException.create(
-                                    IMAPException.Code.CONNECT_ERROR,
-                                    imapConfig,
-                                    session,
-                                    e,
-                                    imapConfig.getServer(),
-                                    imapConfig.getLogin());
+                                try {
+                                    IMAPCommandsCollection.fastExpunge(f);
+                                } catch (final FolderClosedException e) {
+                                    /*
+                                     * Not possible to retry since connection is broken
+                                     */
+                                    throw IMAPException.create(IMAPException.Code.CONNECT_ERROR, imapConfig, session, e, imapConfig.getServer(), imapConfig.getLogin());
+                                } catch (final StoreClosedException e) {
+                                    /*
+                                     * Not possible to retry since connection is broken
+                                     */
+                                    throw IMAPException.create(IMAPException.Code.CONNECT_ERROR, imapConfig, session, e, imapConfig.getServer(), imapConfig.getLogin());
+                                }
                             }
                             /*
                              * Decrement
@@ -2582,8 +2566,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     }
                     if (backup) {
                         try {
-                            final boolean supportsMove = imapConfig.asMap().containsKey("MOVE");
-                            if(supportsMove){
+                            if (supportsMove) {
                                 new MoveIMAPCommand(f, trashFullname).doCommand();
                                 return;
                             }
