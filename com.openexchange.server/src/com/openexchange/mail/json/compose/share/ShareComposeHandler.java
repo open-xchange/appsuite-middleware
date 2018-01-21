@@ -301,7 +301,11 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             ComposedMailMessage composeMessage = createRegularComposeMessage(context);
             DelegatingComposedMailMessage transportMessage = new DelegatingComposedMailMessage(composeMessage);
             transportMessage.setAppendToSentFolder(false);
-            return new DefaultComposeTransportResult(Collections.<ComposedMailMessage> singletonList(transportMessage), composeMessage, true);
+            return DefaultComposeTransportResult.builder()
+                .withTransportMessages(Collections.<ComposedMailMessage> singletonList(transportMessage), true)
+                .withSentMessage(composeMessage)
+                .withTransportEqualToSent()
+                .build();
         }
 
         // Get the basic source message
@@ -434,11 +438,16 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 }
             }
 
-            // Commit attachment storage
-            attachmentsControl.commit();
+            // Everything went fine. Let 'StoredAttachmentsControl' instance be managed by transport result now.
+            DefaultComposeTransportResult transportResult = DefaultComposeTransportResult.builder()
+                .withTransportMessages(transportMessages, true)
+                .withSentMessage(sentMessage)
+                .withAttachmentsControl(attachmentsControl)
+                .build();
+            attachmentsControl = null;
             rollback = false;
 
-            return new DefaultComposeTransportResult(transportMessages, sentMessage, false);
+            return transportResult;
         } finally {
             if (null != attachmentsControl) {
                 if (rollback) {
