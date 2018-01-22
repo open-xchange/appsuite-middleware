@@ -63,6 +63,7 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FolderStats;
+import com.openexchange.drive.TrashContent;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveStrings;
 import com.openexchange.drive.impl.DriveUtils;
@@ -95,6 +96,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.search.FileNameTerm;
+import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -1225,6 +1227,16 @@ public class DriveStorage {
     @Override
     public String toString() {
         return session.getServerSession().getLogin() + ':' + rootFolderID.toUniqueID() + "# ";
+    }
+
+    public TrashContent getTrashContent() throws OXException {
+        FileStorageFolder trashFolder = getTrashFolder();
+        if(trashFolder == null) {
+            return null;
+        }
+        FileStorageFolder[] subfolders = getFolderAccess().getSubfolders(trashFolder.getId(), true);
+        TimedResult<File> documents = getFileAccess().getDocuments(trashFolder.getId());
+        return new TrashContent(subfolders, documents.results());
     }
 
 }

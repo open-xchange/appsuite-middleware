@@ -263,4 +263,13 @@ public interface DriveUtility {
      */
     FolderStats emptyTrash(DriveSession session) throws OXException;
 
+    /**
+     * Retrieves files and folders of the users trash folder
+     * 
+     * @param session The session
+     * @return The results as a json object
+     * @throws OXException
+     */
+    JSONObject getTrashContent(DriveSession session) throws OXException;
+
 }
