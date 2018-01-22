@@ -75,8 +75,8 @@ import com.openexchange.search.internal.operands.ColumnFieldOperand;
  */
 public class ChangeExceptionsResponseGenerator extends ResponseGenerator {
 
-    private String folderId;
-    private String seriesId;
+    String folderId;
+    final String seriesId;
 
     public ChangeExceptionsResponseGenerator(CachingCalendarAccess cachedCalendarAccess, String folderId, String seriesId) {
         super(cachedCalendarAccess);

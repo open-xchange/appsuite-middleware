@@ -73,9 +73,9 @@ import com.openexchange.exception.OXException;
  */
 public class SingleEventResponseGenerator extends ResponseGenerator {
 
-    private final String folderId;
-    private final String eventId;
-    private final RecurrenceId recurrenceId;
+    final String folderId;
+    final String eventId;
+    final RecurrenceId recurrenceId;
 
     public SingleEventResponseGenerator(CachingCalendarAccess cachedCalendarAccess, String folderId, String eventId, RecurrenceId recurrenceId) {
         super(cachedCalendarAccess);

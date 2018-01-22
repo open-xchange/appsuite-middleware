@@ -76,7 +76,7 @@ import com.openexchange.search.SingleSearchTerm.SingleOperation;
  */
 public class FolderEventsResponseGenerator extends ResponseGenerator {
 
-    private final String folderId;
+    final String folderId;
 
     public FolderEventsResponseGenerator(CachingCalendarAccess cachedCalendarAccess, String folderId) {
         super(cachedCalendarAccess);

@@ -1816,7 +1816,7 @@ public class CalendarUtils {
     }
 
     /**
-     * Generates the flags for a specific event.
+     * Generates the flags for a specific event (see {@link EventFlag}).
      *
      * @param event The event to get the flags for
      * @param calendarUser The identifier of the calendar user to get flags for
