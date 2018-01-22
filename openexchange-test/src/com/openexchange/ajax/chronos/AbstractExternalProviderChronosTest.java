@@ -65,6 +65,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
 import com.openexchange.ajax.proxy.MockRequest;
+import com.openexchange.ajax.proxy.MockRequestMethod;
 import com.openexchange.ajax.proxy.StartMockServerRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiException;
@@ -138,12 +139,26 @@ abstract class AbstractExternalProviderChronosTest extends AbstractChronosTest {
      * @throws JSONException if a JSON error is occurred
      */
     void mock(String uri, String responseContent, int httpStatus, Map<String, String> responseHeaders) throws OXException, IOException, JSONException {
-        mock(uri, responseContent, httpStatus, responseHeaders, 0);
+        mock(MockRequestMethod.GET, uri, responseContent, httpStatus, responseHeaders, 0);
     }
 
     /**
-     * Mocks an external provider request with the specified URI, response content/payload,
-     * status code, response headers and simulated response time
+     * Mocks an external provider request with the specified URI, response content/payload, status code and response headers
+     * 
+     * @param method The HTTP method
+     * @param uri The URI of the external source
+     * @param responseContent The response content/payload
+     * @param httpStatus The response status code
+     * @throws OXException if an error is occurred
+     * @throws IOException if an I/O error is occurred
+     * @throws JSONException if a JSON error is occurred
+     */
+    void mock(MockRequestMethod method, String uri, String responseContent, int httpStatus) throws OXException, IOException, JSONException {
+        mock(method, uri, responseContent, httpStatus, Collections.emptyMap(), 0);
+    }
+
+    /**
+     * Mocks an external provider request with the specified URI, response content/payload, status code and response headers
      * 
      * @param uri The URI of the external source
      * @param responseContent The response content/payload
@@ -155,8 +170,26 @@ abstract class AbstractExternalProviderChronosTest extends AbstractChronosTest {
      * @throws JSONException if a JSON error is occurred
      */
     void mock(String uri, String responseContent, int httpStatus, Map<String, String> responseHeaders, int delay) throws OXException, IOException, JSONException {
+        mock(MockRequestMethod.GET, uri, responseContent, httpStatus, Collections.emptyMap(), 0);
+    }
+
+    /**
+     * Mocks an external provider request with the specified URI, response content/payload,
+     * status code, response headers and simulated response time
+     * 
+     * @param method The HTTP method
+     * @param uri The URI of the external source
+     * @param responseContent The response content/payload
+     * @param httpStatus The response status code
+     * @param responseHeaders the response headers
+     * @param delay The simulated delay/response time
+     * @throws OXException if an error is occurred
+     * @throws IOException if an I/O error is occurred
+     * @throws JSONException if a JSON error is occurred
+     */
+    void mock(MockRequestMethod method, String uri, String responseContent, int httpStatus, Map<String, String> responseHeaders, int delay) throws OXException, IOException, JSONException {
         InputStream stream = new ByteArrayInputStream(responseContent.getBytes(StandardCharsets.UTF_8.name()));
-        MockRequest mockRequest = new MockRequest(uri, stream, httpStatus, responseHeaders, delay);
+        MockRequest mockRequest = new MockRequest(method, uri, stream, httpStatus, responseHeaders, delay);
         client.execute(mockRequest);
     }
 
