@@ -339,7 +339,7 @@ public class RdbContextStorage extends ContextStorage {
 
             List<PoolAndSchema> schemas = new LinkedList<>();
             do {
-                schemas.add(new PoolAndSchema(result.getInt(2)/*write_db_pool_id*/, result.getString(3)/*db_schema*/));
+                schemas.add(new PoolAndSchema(result.getInt(1)/* write_db_pool_id */, result.getString(2)/* db_schema */));
             } while (result.next());
             closeSQLStuff(result, stmt);
             result = null;
