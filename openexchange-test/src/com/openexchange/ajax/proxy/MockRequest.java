@@ -72,14 +72,14 @@ import com.openexchange.ajax.framework.Header;
  * @since v7.10.0
  */
 public class MockRequest implements AJAXRequest<MockResponse> {
-
+    
     private boolean failOnError = true;
     private String uri;
     private InputStream response;
     private int statusCode;
     private Map<String, String> responseHeaders;
     private int delay;
-    private Method method;
+    private MockRequestMethod method;
 
     public MockRequest(String uri, InputStream response) {
         this(uri, response, HttpStatus.SC_OK);
@@ -94,10 +94,10 @@ public class MockRequest implements AJAXRequest<MockResponse> {
     }
 
     public MockRequest(String uri, InputStream response, int statusCode, Map<String, String> responseHeaders, int delay) {
-        this(Method.GET, uri, response, statusCode, responseHeaders, delay);
+        this(MockRequestMethod.GET, uri, response, statusCode, responseHeaders, delay);
     }
 
-    public MockRequest(Method method, String uri, InputStream response, int statusCode, Map<String, String> responseHeaders, int delay) {
+    public MockRequest(MockRequestMethod method, String uri, InputStream response, int statusCode, Map<String, String> responseHeaders, int delay) {
         this.method = method;
         this.uri = uri;
         this.response = response;
@@ -126,7 +126,7 @@ public class MockRequest implements AJAXRequest<MockResponse> {
         parameters.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "mock"));
         parameters.add(new Parameter(MockConstants.URI_KEY, uri));
         parameters.add(new Parameter(MockConstants.STATUS_CODE_KEY, Integer.toString(statusCode)));
-        parameters.add(new Parameter(MockConstants.METHOD_KEY, method.toString()));
+        parameters.add(new Parameter(MockConstants.METHOD_KEY, method.name()));
 
         if (responseHeaders != null && !responseHeaders.isEmpty()) {
             parameters.add(new Parameter(MockConstants.HEADERS_KEY, addHeaders()));
