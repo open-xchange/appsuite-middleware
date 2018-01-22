@@ -49,7 +49,9 @@
 package com.openexchange.oidc;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import com.openexchange.authentication.AuthenticationService;
 
 /**
  * {@link OIDCBackendConfig}
@@ -255,4 +257,11 @@ public interface OIDCBackendConfig {
      * @return
      */
     String getBackendPath();
+    
+    /**
+     * Load all hosts separated by a comma, that this backend supports.
+     * 
+     * @return
+     */
+    List<String> getHosts();
 }

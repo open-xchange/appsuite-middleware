@@ -49,6 +49,9 @@
 
 package com.openexchange.oidc.spi;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
@@ -172,6 +175,12 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
     @Override
     public String autologinCookieMode() {
         return this.loadStringProperty(OIDCBackendProperty.autologinCookieMode);
+    }
+    
+    @Override
+    public List<String> getHosts() {
+        String[] hosts = this.loadStringProperty(OIDCBackendProperty.hosts).split(",");
+        return Arrays.asList(hosts);
     }
 
     @Override

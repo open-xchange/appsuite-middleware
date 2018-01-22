@@ -50,6 +50,7 @@ package com.openexchange.oidc.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
@@ -165,7 +166,6 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                 if (!serviceRegistrations.isEmpty()) {
                     this.backendServiceRegistrations.putIfAbsent(oidcBackend, serviceRegistrations);
                 }
-
             }
         }
         return null;
@@ -181,13 +181,24 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                     return;
                 }
                 
-                String backendPath = oidcBackend.getPath();
                 String oidcPath = "/" + OIDCTools.DEFAULT_BACKEND_PATH;
+                String backendPath = oidcBackend.getPath();
                 if (!Strings.isEmpty(backendPath)) {
                     oidcPath += "/" + backendPath;
-                } 
+                }
                 
-                serverConfig.put("oidcPath", oidcPath);
+                List<String> hosts = oidcBackend.getBackendConfig().getHosts();
+                if (hosts.contains("all")) {
+                    serverConfig.put("oidcPath", oidcPath);
+                    return;
+                }
+                
+                for (String hostIdentifer: hosts) {
+                    if (!Strings.isEmpty(hostIdentifer) && hostIdentifer.equalsIgnoreCase(hostName)) {
+                        serverConfig.put("oidcPath", oidcPath);
+                        return;
+                    }
+                }
             }
         };
     }

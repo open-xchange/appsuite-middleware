@@ -146,7 +146,12 @@ public enum OIDCBackendProperty implements Property {
     /**
      * backendPath - This backends servlet path, which is appended to the default /oidc/ path.
      */
-    backendPath(OIDCProperty.PREFIX, "");
+    backendPath(OIDCProperty.PREFIX, ""),
+    
+    /**
+     * hosts - This contains a comma separated list of hosts, that this backend supports.
+     */
+    hosts(OIDCProperty.PREFIX, "all");
     
     private final String fqn;
     private final Object defaultValue;
