@@ -54,7 +54,7 @@ package com.openexchange.ajax.chronos;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-abstract class AbstractSearchAwareTest extends AbstractExternalProviderChronosTest {
+public abstract class AbstractSearchAwareTest extends AbstractExternalProviderChronosTest {
 
     /**
      * Initialises a new {@link AbstractSearchAwareTest}.

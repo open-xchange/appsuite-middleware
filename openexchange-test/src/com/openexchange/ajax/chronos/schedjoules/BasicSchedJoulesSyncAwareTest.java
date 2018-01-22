@@ -47,68 +47,55 @@
  *
  */
 
-package com.openexchange.ajax.chronos;
+package com.openexchange.ajax.chronos.schedjoules;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.sql.Date;
+import java.util.List;
 import org.junit.Test;
-import com.openexchange.ajax.chronos.factory.FindFactory;
-import com.openexchange.testing.httpclient.models.FindQueryBody;
-import com.openexchange.testing.httpclient.models.FindQueryResponse;
-import com.openexchange.testing.httpclient.models.FindQueryResponseData;
+import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.service.SortOrder;
+import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.FolderData;
-import com.openexchange.testing.httpclient.modules.FindApi;
+import com.openexchange.testing.httpclient.models.UpdatesResult;
 
 /**
- * {@link BasicSchedJoulesSearchAwareTest}
+ * {@link BasicSchedJoulesSyncAwareTest}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class BasicSchedJoulesSearchAwareTest extends AbstractSchedJoulesProviderTest {
-
-    private static final String DEFAULT_COLUMNS = "1,2,20,101,200,201,202,206,207,209,212,213,214,215,216,220,221,222,224,227,400,401,402";
+public class BasicSchedJoulesSyncAwareTest extends AbstractSchedJoulesProviderTest {
 
     /**
-     * Initialises a new {@link BasicSchedJoulesSearchAwareTest}.
+     * Initialises a new {@link BasicSchedJoulesSyncAwareTest}.
      * 
      * @param providerId
      */
-    public BasicSchedJoulesSearchAwareTest() {
+    public BasicSchedJoulesSyncAwareTest() {
         super();
     }
 
+    private static final long FIVE_YEARS_OFFSET = 5 * 365 * 24 * 60 * 60 * 1000 * 1000;
+
     /**
-     * Tests a simple search with default fields
+     * Tests getting updated events since a defined point in time
      */
     @Test
-    public void testSimpleSearch() throws Exception {
+    public void testGetUpdatedEventsSince() throws Exception {
         FolderData folderData = createFolder(CALENDAR_ONE, "testSimpleSearch");
-        eventManager.getAllEvents(new Date(0), new Date(1516370400), false, folderData.getId());
+        Date beginOfTime = new Date(0);
+        Date future = new Date(TIMESTAMP + FIVE_YEARS_OFFSET);
+        List<EventData> allEvents = eventManager.getAllEvents(beginOfTime, future, false, folderData.getId(), SortOrder.getSortOrder(EventField.TIMESTAMP, SortOrder.Order.ASC));
 
-        FindQueryBody queryBody = FindFactory.createFindBody("Full", folderData.getId());
+        assertNotNull(allEvents);
+        assertTrue(allEvents.size() > 0);
 
-        FindApi findApi = defaultUserApi.getFindApi();
-        FindQueryResponse response = findApi.doQuery(defaultUserApi.getSession(), "calendar", queryBody, DEFAULT_COLUMNS);
-        FindQueryResponseData responseData = response.getData();
-        assertNotNull(responseData);
-        assertTrue("No results found", responseData.getSize() > 0);
+        EventData eventData = allEvents.get(allEvents.size() - 1);
+        Long since = eventData.getTimestamp();
+        UpdatesResult updates = eventManager.getUpdates(new Date(since), beginOfTime, future, false, folderData.getId());
+        assertEquals(1, updates.getNewAndModified().size());
     }
 
-    /**
-     * Tests a simple search with defined fields
-     */
-    @Test
-    public void testSearchWithFields() throws Exception {
-        FolderData folderData = createFolder(CALENDAR_ONE, "testSearchWithFields");
-        eventManager.getAllEvents(new Date(0), new Date(1516370400), false, folderData.getId());
-
-        FindQueryBody queryBody = FindFactory.createFindBody("Full", folderData.getId());
-
-        FindApi findApi = defaultUserApi.getFindApi();
-        FindQueryResponse response = findApi.doQuery(defaultUserApi.getSession(), "calendar", queryBody, "400");
-        FindQueryResponseData responseData = response.getData();
-        assertNotNull(responseData);
-        assertTrue("No results found", responseData.getSize() > 0);
-    }
 }

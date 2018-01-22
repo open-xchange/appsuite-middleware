@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.chronos;
+package com.openexchange.ajax.chronos.schedjoules;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -61,6 +61,7 @@ import java.util.Map;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.HttpHeaders;
 import org.junit.Test;
+import com.openexchange.ajax.chronos.AbstractExternalProviderChronosTest;
 import com.openexchange.configuration.asset.Asset;
 import com.openexchange.configuration.asset.AssetType;
 import com.openexchange.testing.httpclient.models.BrowseResponse;

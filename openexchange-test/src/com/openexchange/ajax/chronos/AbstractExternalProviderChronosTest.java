@@ -78,7 +78,7 @@ import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalen
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-abstract class AbstractExternalProviderChronosTest extends AbstractChronosTest {
+public abstract class AbstractExternalProviderChronosTest extends AbstractChronosTest {
 
     private static final Map<String, String> CONFIG = new HashMap<String, String>();
     static {
@@ -123,7 +123,7 @@ abstract class AbstractExternalProviderChronosTest extends AbstractChronosTest {
      * @throws IOException if an I/O error is occurred
      * @throws JSONException if a JSON error is occurred
      */
-    void mock(String uri, String responseContent, int httpStatus) throws OXException, IOException, JSONException {
+    protected void mock(String uri, String responseContent, int httpStatus) throws OXException, IOException, JSONException {
         mock(uri, responseContent, httpStatus, Collections.emptyMap());
     }
 
@@ -138,7 +138,7 @@ abstract class AbstractExternalProviderChronosTest extends AbstractChronosTest {
      * @throws IOException if an I/O error is occurred
      * @throws JSONException if a JSON error is occurred
      */
-    void mock(String uri, String responseContent, int httpStatus, Map<String, String> responseHeaders) throws OXException, IOException, JSONException {
+    protected void mock(String uri, String responseContent, int httpStatus, Map<String, String> responseHeaders) throws OXException, IOException, JSONException {
         mock(MockRequestMethod.GET, uri, responseContent, httpStatus, responseHeaders, 0);
     }
 
@@ -153,7 +153,7 @@ abstract class AbstractExternalProviderChronosTest extends AbstractChronosTest {
      * @throws IOException if an I/O error is occurred
      * @throws JSONException if a JSON error is occurred
      */
-    void mock(MockRequestMethod method, String uri, String responseContent, int httpStatus) throws OXException, IOException, JSONException {
+    protected void mock(MockRequestMethod method, String uri, String responseContent, int httpStatus) throws OXException, IOException, JSONException {
         mock(method, uri, responseContent, httpStatus, Collections.emptyMap(), 0);
     }
 
@@ -169,7 +169,7 @@ abstract class AbstractExternalProviderChronosTest extends AbstractChronosTest {
      * @throws IOException if an I/O error is occurred
      * @throws JSONException if a JSON error is occurred
      */
-    void mock(String uri, String responseContent, int httpStatus, Map<String, String> responseHeaders, int delay) throws OXException, IOException, JSONException {
+    protected void mock(String uri, String responseContent, int httpStatus, Map<String, String> responseHeaders, int delay) throws OXException, IOException, JSONException {
         mock(MockRequestMethod.GET, uri, responseContent, httpStatus, responseHeaders, 0);
     }
 
@@ -187,7 +187,7 @@ abstract class AbstractExternalProviderChronosTest extends AbstractChronosTest {
      * @throws IOException if an I/O error is occurred
      * @throws JSONException if a JSON error is occurred
      */
-    void mock(MockRequestMethod method, String uri, String responseContent, int httpStatus, Map<String, String> responseHeaders, int delay) throws OXException, IOException, JSONException {
+    protected void mock(MockRequestMethod method, String uri, String responseContent, int httpStatus, Map<String, String> responseHeaders, int delay) throws OXException, IOException, JSONException {
         InputStream stream = new ByteArrayInputStream(responseContent.getBytes(StandardCharsets.UTF_8.name()));
         MockRequest mockRequest = new MockRequest(method, uri, stream, httpStatus, responseHeaders, delay);
         client.execute(mockRequest);
@@ -208,7 +208,7 @@ abstract class AbstractExternalProviderChronosTest extends AbstractChronosTest {
      * @throws JsonMappingException
      * @throws JsonParseException
      */
-    FolderData createFolder(String folderName, String module, JSONObject config, JSONObject extendedProperties) throws ApiException, ChronosApiException, JSONException, JsonParseException, JsonMappingException, IOException {
+    protected FolderData createFolder(String folderName, String module, JSONObject config, JSONObject extendedProperties) throws ApiException, ChronosApiException, JSONException, JsonParseException, JsonMappingException, IOException {
         String folderId = folderManager.createFolder(module, providerId, folderName, config, new JSONObject());
         assertNotNull("No folder identifier returned", folderId);
         return assertFolderData(folderManager.getFolder(folderId), folderName, config, extendedProperties);
@@ -224,7 +224,7 @@ abstract class AbstractExternalProviderChronosTest extends AbstractChronosTest {
      * @throws JsonMappingException
      * @throws JsonParseException
      */
-    FolderData assertFolderData(FolderData actualFolderData, String expectedTitle, JSONObject config, JSONObject extProperties) throws JsonParseException, JsonMappingException, IOException {
+    protected FolderData assertFolderData(FolderData actualFolderData, String expectedTitle, JSONObject config, JSONObject extProperties) throws JsonParseException, JsonMappingException, IOException {
         assertNotNull("The folder data is 'null'", actualFolderData);
         assertEquals("The title does not match", expectedTitle, actualFolderData.getTitle());
         assertEquals("The provider identifier does not match", actualFolderData.getComOpenexchangeCalendarProvider(), providerId);

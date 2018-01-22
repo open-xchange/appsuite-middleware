@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,55 +47,27 @@
  *
  */
 
-package com.openexchange.ajax.chronos;
+package com.openexchange.ajax.chronos.schedjoules;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import java.sql.Date;
-import java.util.List;
-import org.junit.Test;
-import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.service.SortOrder;
-import com.openexchange.testing.httpclient.models.EventData;
-import com.openexchange.testing.httpclient.models.FolderData;
-import com.openexchange.testing.httpclient.models.UpdatesResult;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
- * {@link BasicSchedJoulesSyncAwareTest}
+ * {@link SchedJoulesTestSuite}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class BasicSchedJoulesSyncAwareTest extends AbstractSchedJoulesProviderTest {
+@RunWith(ParallelSuite.class)
+@Suite.SuiteClasses({
+    // @formatter:off
+    BasicSchedJoulesAPITest.class,
+    BasicSchedJoulesProviderTest.class,
+    BasicSchedJoulesSearchAwareTest.class,
+    BasicSchedJoulesSyncAwareTest.class
+    // @formatter:on
 
-    /**
-     * Initialises a new {@link BasicSchedJoulesSyncAwareTest}.
-     * 
-     * @param providerId
-     */
-    public BasicSchedJoulesSyncAwareTest() {
-        super();
-    }
-
-    private static final long FIVE_YEARS_OFFSET = 5 * 365 * 24 * 60 * 60 * 1000 * 1000;
-
-    /**
-     * Tests getting updated events since a defined point in time
-     */
-    @Test
-    public void testGetUpdatedEventsSince() throws Exception {
-        FolderData folderData = createFolder(CALENDAR_ONE, "testSimpleSearch");
-        Date beginOfTime = new Date(0);
-        Date future = new Date(TIMESTAMP + FIVE_YEARS_OFFSET);
-        List<EventData> allEvents = eventManager.getAllEvents(beginOfTime, future, false, folderData.getId(), SortOrder.getSortOrder(EventField.TIMESTAMP, SortOrder.Order.ASC));
-
-        assertNotNull(allEvents);
-        assertTrue(allEvents.size() > 0);
-
-        EventData eventData = allEvents.get(allEvents.size() - 1);
-        Long since = eventData.getTimestamp();
-        UpdatesResult updates = eventManager.getUpdates(new Date(since), beginOfTime, future, false, folderData.getId());
-        assertEquals(1, updates.getNewAndModified().size());
-    }
+})
+public class SchedJoulesTestSuite {
 
 }

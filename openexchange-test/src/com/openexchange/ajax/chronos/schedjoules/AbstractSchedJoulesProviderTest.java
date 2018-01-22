@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.chronos;
+package com.openexchange.ajax.chronos.schedjoules;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -55,6 +55,7 @@ import java.util.Map;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.HttpHeaders;
 import org.json.JSONObject;
+import com.openexchange.ajax.chronos.AbstractExternalProviderChronosTest;
 import com.openexchange.ajax.chronos.factory.CalendarFolderConfig;
 import com.openexchange.ajax.chronos.factory.CalendarFolderExtendedProperty;
 import com.openexchange.ajax.proxy.MockRequestMethod;
