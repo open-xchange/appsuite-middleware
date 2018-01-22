@@ -55,7 +55,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
@@ -134,7 +136,7 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
      * @param value The comma separated string of field names to parse
      * @return The parsed fields, or <code>null</code> if the passed value was <code>null</code>
      */
-    public EventField[] parseFields(String value) throws OXException {
+    public Set<EventField> parseFields(String value) throws OXException {
         if (null == value) {
             return null;
         }
@@ -148,17 +150,17 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
      * @param value The field identifiers
      * @return The parsed fields, or <code>null</code> if the passed array was <code>null</code>
      */
-    public EventField[] parseFields(String[] fieldNames) throws OXException {
+    public Set<EventField> parseFields(String[] fieldNames) throws OXException {
         if (null == fieldNames) {
             return null;
         }
-        EventField[] fields = new EventField[fieldNames.length];
+        Set<EventField> fields = new HashSet<EventField>(fieldNames.length);
         for (int i = 0; i < fieldNames.length; i++) {
             EventField field = getMappedField(fieldNames[i]);
             if (null == field) {
                 throw OXException.notFound(fieldNames[i]);
             }
-            fields[i] = field;
+            fields.add(field);
         }
         return fields;
     }

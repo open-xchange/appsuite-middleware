@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.json.converter.handler;
 
+import java.util.Set;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
 import com.openexchange.conversion.ConversionResult;
@@ -85,9 +86,9 @@ public class EventFieldDataHandler implements DataHandler {
         if(fieldNames == null || fieldNames.length == 0) {
             return null;
         }
-        EventField[] parseFields = EventMapper.getInstance().parseFields(fieldNames);
+        Set<EventField> parseFields = EventMapper.getInstance().parseFields(fieldNames);
         ConversionResult conversionResult = new ConversionResult();
-        conversionResult.setData(parseFields);
+        conversionResult.setData(parseFields.toArray(new EventField[parseFields.size()]));
         return conversionResult;
     }
 

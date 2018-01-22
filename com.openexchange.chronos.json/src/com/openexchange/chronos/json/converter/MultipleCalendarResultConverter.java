@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -117,7 +118,7 @@ public class MultipleCalendarResultConverter extends CalendarResultConverter {
         result.setResultObject(resultObject, getOutputFormat());
     }
 
-    private JSONObject convertCalendarResult(List<CalendarResult> calendarResults, String timeZoneID, ServerSession session, EventField[] fields, boolean extendedEntities) throws OXException {
+    private JSONObject convertCalendarResult(List<CalendarResult> calendarResults, String timeZoneID, ServerSession session, Set<EventField> requestedFields, boolean extendedEntities) throws OXException {
         JSONObject result = new JSONObject(1);
         try {
             List<Event> creates = new ArrayList<Event>();
@@ -168,9 +169,9 @@ public class MultipleCalendarResultConverter extends CalendarResultConverter {
                 }
             }
 
-            result.put(ChronosCalendarResultJsonFields.Result.CREATED, convertEvents(creates, timeZoneID, session, fields, extendedEntities));
-            result.put(ChronosCalendarResultJsonFields.Result.UPDATED, convertEvents(updates, timeZoneID, session, fields, extendedEntities));
-            result.put(ChronosCalendarResultJsonFields.Result.DELETED, convertEvents(deletes, timeZoneID, session, fields, extendedEntities));
+            result.put(ChronosCalendarResultJsonFields.Result.CREATED, convertEvents(creates, timeZoneID, session, requestedFields, extendedEntities));
+            result.put(ChronosCalendarResultJsonFields.Result.UPDATED, convertEvents(updates, timeZoneID, session, requestedFields, extendedEntities));
+            result.put(ChronosCalendarResultJsonFields.Result.DELETED, convertEvents(deletes, timeZoneID, session, requestedFields, extendedEntities));
 
             if(errors != null && !errors.isEmpty()){
                 convertErrors(result, errors, session.getUser().getLocale());

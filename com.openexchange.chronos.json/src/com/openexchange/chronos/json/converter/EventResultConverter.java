@@ -52,9 +52,12 @@ package com.openexchange.chronos.json.converter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -76,6 +79,7 @@ import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -147,15 +151,23 @@ public class EventResultConverter implements ResultConverter {
 
     private static final ContactField CONTACT_FIELDS_TO_LOAD[] = { ContactField.SUR_NAME, ContactField.GIVEN_NAME, ContactField.TITLE, ContactField.DISPLAY_NAME, ContactField.IMAGE1_URL, ContactField.IMAGE1, ContactField.INTERNAL_USERID };
     private static final ContactField CONTACT_FIELDS_TO_SHOW[] = { ContactField.SUR_NAME, ContactField.GIVEN_NAME, ContactField.TITLE, ContactField.DISPLAY_NAME, ContactField.IMAGE1_URL, ContactField.IMAGE1 };
-    protected JSONObject convertEvent(Event event, String timeZoneID, Session session, EventField[] fields, boolean extendedEntities) throws OXException {
+
+    protected JSONObject convertEvent(Event event, String timeZoneID, Session session, Set<EventField> requestedFields, boolean extendedEntities) throws OXException {
         if (null == event) {
             return null;
         }
-        if (null == fields) {
-            fields = EventMapper.getInstance().getAssignedFields(event);
+        /*
+         * determine relevant fields
+         */
+        Set<EventField> fields = new HashSet<EventField>();
+        for (Entry<EventField, ? extends JsonMapping<? extends Object, Event>> entry : EventMapper.getInstance().getMappings().entrySet()) {
+            JsonMapping<? extends Object, Event> mapping = entry.getValue();
+            if ((null == requestedFields || requestedFields.contains(entry.getKey())) && mapping.isSet(event) && null != mapping.get(event)) {
+                fields.add(entry.getKey());
+            }
         }
         try {
-            JSONObject result = EventMapper.getInstance().serialize(event, fields, timeZoneID, session);
+            JSONObject result = EventMapper.getInstance().serialize(event, fields.toArray(new EventField[fields.size()]), timeZoneID, session);
             Map<Integer, JSONObject> contactsToLoad = new HashMap<Integer, JSONObject>();
             if(extendedEntities && result.has(ChronosJsonFields.ATTENDEES)) {
                 JSONArray jsonArray = result.getJSONArray(ChronosJsonFields.ATTENDEES);
@@ -199,13 +211,13 @@ public class EventResultConverter implements ResultConverter {
         }
     }
 
-    protected JSONArray convertEvents(List<Event> events, String timeZoneID, Session session, EventField[] fields, boolean extendedEntities) throws OXException {
+    protected JSONArray convertEvents(List<Event> events, String timeZoneID, Session session, Set<EventField> requestedFields, boolean extendedEntities) throws OXException {
         if (null == events) {
             return null;
         }
         JSONArray jsonArray = new JSONArray(events.size());
         for (Event event : events) {
-            jsonArray.put(convertEvent(event, timeZoneID, session, fields, extendedEntities));
+            jsonArray.put(convertEvent(event, timeZoneID, session, requestedFields, extendedEntities));
         }
         return jsonArray;
     }
@@ -215,7 +227,7 @@ public class EventResultConverter implements ResultConverter {
         return null == timeZoneID ? session.getUser().getTimeZone() : timeZoneID;
     }
 
-    protected static EventField[] getFields(AJAXRequestData requestData) throws OXException {
+    protected static Set<EventField> getFields(AJAXRequestData requestData) throws OXException {
         return EventMapper.getInstance().parseFields(requestData.getParameter(CalendarParameters.PARAMETER_FIELDS));
     }
 
