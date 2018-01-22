@@ -55,6 +55,7 @@ import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.DefaultUpdatesResult;
+import com.openexchange.chronos.common.SearchUtils;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.SearchOptions;
@@ -145,8 +146,8 @@ public class SyncHandler extends AbstractExtensionHandler {
      */
     public List<Event> resolveResource(String resourceName) throws OXException {
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.OR);
-        searchTerm.addSearchTerm(SearchTermFactory.createSearchTerm(EventField.UID, SingleOperation.EQUALS, resourceName));
-        searchTerm.addSearchTerm(SearchTermFactory.createSearchTerm(EventField.FILENAME, SingleOperation.EQUALS, resourceName));
+        searchTerm.addSearchTerm(SearchUtils.getSearchTerm(EventField.UID, SingleOperation.EQUALS, resourceName));
+        searchTerm.addSearchTerm(SearchUtils.getSearchTerm(EventField.FILENAME, SingleOperation.EQUALS, resourceName));
 
         EventField[] defaultEventFields = getDefaultEventFields();
 
@@ -167,6 +168,6 @@ public class SyncHandler extends AbstractExtensionHandler {
      * @return The compiled {@link SearchTerm}
      */
     private SearchTerm<?> createSearchTerm(long updatedSince) {
-        return SearchTermFactory.createSearchTerm(EventField.TIMESTAMP, SingleOperation.GREATER_OR_EQUAL, L(updatedSince));
+        return SearchUtils.getSearchTerm(EventField.TIMESTAMP, SingleOperation.GREATER_OR_EQUAL, L(updatedSince));
     }
 }
