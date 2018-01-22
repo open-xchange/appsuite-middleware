@@ -59,6 +59,7 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.openexchange.ajax.chronos.factory.CalendarFolderConfig;
+import com.openexchange.ajax.chronos.factory.CalendarFolderExtendedProperty;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
 import com.openexchange.configuration.asset.Asset;
 import com.openexchange.configuration.asset.AssetType;
@@ -145,8 +146,15 @@ public class BasicSchedJoulesProviderTest extends AbstractSchedJoulesProviderTes
         folderManager.updateFolder(folderData);
 
         FolderData actualFolderData = folderManager.getFolder(folderData.getId());
-        //FIXME: prepare the config and extProps for assertion
-        assertFolderData(actualFolderData, expectedTitle, new JSONObject(), new JSONObject());
+
+        JSONObject expectedConfig = new JSONObject();
+        expectedConfig.put(CalendarFolderConfig.REFRESH_INTERVAL.getFieldName(), 1440);
+        expectedConfig.put(CalendarFolderConfig.ITEM_ID.getFieldName(), CALENDAR_TWO);
+        expectedConfig.put(CalendarFolderConfig.LOCALE.getFieldName(), "en");
+
+        JSONObject extendedProperties = defaultExtendedProperties();
+        extendedProperties.getJSONObject(CalendarFolderExtendedProperty.COLOR.getFieldName()).put("value", expectedColor);
+        assertFolderData(actualFolderData, expectedTitle, expectedConfig, extendedProperties);
 
         assertEquals(expectedColor, folderData.getComOpenexchangeCalendarExtendedProperties().getColor().getValue());
     }
@@ -182,8 +190,13 @@ public class BasicSchedJoulesProviderTest extends AbstractSchedJoulesProviderTes
         folderManager.updateFolder(folderData);
 
         folderData = folderManager.getFolder(folderData.getId());
-        //FIXME: prepare the config and extProps for assertion
-        assertFolderData(folderData, folderName, new JSONObject(), new JSONObject());
+
+        JSONObject expectedConfig = new JSONObject();
+        expectedConfig.put(CalendarFolderConfig.REFRESH_INTERVAL.getFieldName(), 1440);
+        expectedConfig.put(CalendarFolderConfig.ITEM_ID.getFieldName(), CALENDAR_THREE);
+        expectedConfig.put(CalendarFolderConfig.LOCALE.getFieldName(), "de");
+
+        assertFolderData(folderData, folderName, expectedConfig, defaultExtendedProperties());
     }
 
     /**
@@ -205,7 +218,4 @@ public class BasicSchedJoulesProviderTest extends AbstractSchedJoulesProviderTes
             assertEquals("SCHEDJOULES-0011", e.getErrorCode());
         }
     }
-
-    ////////////////////////////////// HELPERS ///////////////////////////////////
-
 }

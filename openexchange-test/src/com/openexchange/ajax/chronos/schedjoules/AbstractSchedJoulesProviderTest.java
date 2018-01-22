@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.HttpHeaders;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.chronos.AbstractExternalProviderChronosTest;
 import com.openexchange.ajax.chronos.factory.CalendarFolderConfig;
@@ -144,16 +145,27 @@ abstract class AbstractSchedJoulesProviderTest extends AbstractExternalProviderC
         config.put(CalendarFolderConfig.REFRESH_INTERVAL.getFieldName(), DEFAULT_REFRESH_INTERVAL);
         config.put(CalendarFolderConfig.LOCALE.getFieldName(), DEFAULT_LOCALE);
 
+        return createFolder(folderName, MODULE, config, defaultExtendedProperties());
+    }
+    
+    /**
+     * Prepare a {@link JSONObject} with the default extended properties
+     * 
+     * @return a {@link JSONObject} with the default extended properties
+     * @throws JSONException if a JSON parsing error is occurred
+     */
+    protected JSONObject defaultExtendedProperties() throws JSONException {
         JSONObject extendedProperties = new JSONObject();
         JSONObject v = new JSONObject();
         v.put("value", "TRANSPARENT");
         extendedProperties.put(CalendarFolderExtendedProperty.SCHEDULE_TRANSP.getFieldName(), v);
+
         v = new JSONObject();
         v.put("value", "false");
         extendedProperties.put(CalendarFolderExtendedProperty.USED_FOR_SYNC.getFieldName(), v);
         extendedProperties.put(CalendarFolderExtendedProperty.COLOR.getFieldName(), new JSONObject());
         extendedProperties.put(CalendarFolderExtendedProperty.DESCRIPTION.getFieldName(), new JSONObject());
-        return createFolder(folderName, MODULE, config, extendedProperties);
-    }
 
+        return extendedProperties;
+    }
 }
