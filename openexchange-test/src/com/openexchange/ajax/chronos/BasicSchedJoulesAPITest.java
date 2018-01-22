@@ -56,7 +56,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.net.URLEncoder;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.httpclient.HttpStatus;

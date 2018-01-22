@@ -50,12 +50,14 @@
 package com.openexchange.ajax.chronos;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.HttpHeaders;
 import org.json.JSONObject;
 import com.openexchange.ajax.chronos.factory.CalendarFolderConfig;
 import com.openexchange.ajax.chronos.factory.CalendarFolderExtendedProperty;
+import com.openexchange.ajax.proxy.MockRequestMethod;
 import com.openexchange.configuration.asset.Asset;
 import com.openexchange.configuration.asset.AssetType;
 import com.openexchange.testing.httpclient.models.FolderData;
@@ -79,7 +81,7 @@ abstract class AbstractSchedJoulesProviderTest extends AbstractExternalProviderC
 
     private static final int DEFAULT_REFRESH_INTERVAL = 1440;
     private static final String DEFAULT_LOCALE = "en";
-    
+
     static final long TIMESTAMP = 1516370400;
 
     /**
@@ -111,6 +113,14 @@ abstract class AbstractSchedJoulesProviderTest extends AbstractExternalProviderC
     FolderData createFolder(int itemId, String folderName) throws Exception {
         Asset pageAsset = assetManager.getAsset(AssetType.json, "schedjoulesPageResponse.json");
         mock("http://example.com/pages/" + itemId, assetManager.readAssetString(pageAsset), HttpStatus.SC_OK, RESPONSE_HEADERS);
+        
+        Asset calendarAsset = assetManager.getAsset(AssetType.ics, "schedjoulesCalendarResponse.ics");
+        mock(MockRequestMethod.GET, "http://example.com/calendars/dbe807996754?l=en&x=239a18", assetManager.readAssetString(calendarAsset), HttpStatus.SC_OK, Collections.singletonMap(HttpHeaders.CONTENT_TYPE, "text/calendar"), 0);
+
+        Map<String, String> copy = new HashMap<>();
+        copy.putAll(RESPONSE_HEADERS);
+        copy.put("ETag", "9dcd50c9806b5b316dfbc31dd6739d22");
+        mock(MockRequestMethod.HEAD, "http://example.com/calendars/dbe807996754?l=en&x=239a18", " ", HttpStatus.SC_OK, copy, 0);
 
         JSONObject config = new JSONObject();
         config.put(CalendarFolderConfig.ITEM_ID.getFieldName(), itemId);

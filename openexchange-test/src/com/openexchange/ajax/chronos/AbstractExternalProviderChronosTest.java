@@ -170,7 +170,7 @@ abstract class AbstractExternalProviderChronosTest extends AbstractChronosTest {
      * @throws JSONException if a JSON error is occurred
      */
     void mock(String uri, String responseContent, int httpStatus, Map<String, String> responseHeaders, int delay) throws OXException, IOException, JSONException {
-        mock(MockRequestMethod.GET, uri, responseContent, httpStatus, Collections.emptyMap(), 0);
+        mock(MockRequestMethod.GET, uri, responseContent, httpStatus, responseHeaders, 0);
     }
 
     /**
