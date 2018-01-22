@@ -103,7 +103,8 @@ import com.openexchange.user.UserService;
  */
 public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 
-    public static final EventField[] SKIP = new EventField[] { EventField.FOLDER_ID, EventField.ID, EventField.CREATED_BY, EventField.CREATED, EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.MODIFIED_BY, EventField.SEQUENCE, EventField.ALARMS };
+    public static final EventField[] SKIP = new EventField[] { EventField.FOLDER_ID, EventField.ID, EventField.CREATED_BY, EventField.CREATED, EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.MODIFIED_BY, EventField.SEQUENCE,
+        EventField.ALARMS, EventField.FLAGS };
     protected ITipIntegrationUtility util;
 
     @Override
@@ -241,7 +242,8 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
         }
     }
 
-    AttendeeField[] ALL_BUT_CONFIRMATION = new AttendeeField[] { AttendeeField.CN, AttendeeField.CU_TYPE, AttendeeField.EMAIL, AttendeeField.ENTITY, AttendeeField.FOLDER_ID, AttendeeField.MEMBER, AttendeeField.ROLE, AttendeeField.RSVP, AttendeeField.SENT_BY, AttendeeField.URI };
+    AttendeeField[] ALL_BUT_CONFIRMATION = new AttendeeField[] { AttendeeField.CN, AttendeeField.CU_TYPE, AttendeeField.EMAIL, AttendeeField.ENTITY, AttendeeField.FOLDER_ID, AttendeeField.MEMBER, AttendeeField.ROLE, AttendeeField.RSVP,
+        AttendeeField.SENT_BY, AttendeeField.URI };
 
     private boolean onlyStateChanged(ITipEventUpdate diff) {
         if (diff.containsAnyChangesBeside(new EventField[] { EventField.ATTENDEES })) {
@@ -304,7 +306,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
     }
 
     public boolean doAppointmentsDiffer(final Event update, final Event original) throws OXException {
-        if(original == update) {
+        if (original == update) {
             // Can be the same object .. so omit roundtrip of diff
             return false;
         }
