@@ -69,6 +69,7 @@ import java.util.TimeZone;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DataHandlers;
 import com.openexchange.chronos.common.DefaultSearchFilter;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
@@ -77,6 +78,11 @@ import com.openexchange.chronos.service.RangeOption;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.conversion.ConversionResult;
+import com.openexchange.conversion.ConversionService;
+import com.openexchange.conversion.DataArguments;
+import com.openexchange.conversion.DataHandler;
+import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
@@ -204,6 +210,15 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
         }
         List<String> folderIDs = Folders.getStringIDs(searchRequest, Module.CALENDAR, session);
         List<SearchFilter> filters = getFilters(session, searchRequest.getFilters());
+
+        DataHandler dataHandler = Services.requireService(ConversionService.class).getDataHandler(DataHandlers.STRING_ARRAY_TO_EVENT_FIELDS);
+        if (dataHandler != null) {
+            ConversionResult processData = dataHandler.processData(new SimpleData<Object>(searchRequest.getColumns().getStringColumns()), new DataArguments(), session);
+            if (processData != null) {
+                calendarAccess.set(CalendarParameters.PARAMETER_FIELDS, processData.getData());
+            }
+        }
+
         List<Event> events = calendarAccess.searchEvents(null != folderIDs ? folderIDs.toArray(new String[folderIDs.size()]) : null, filters, searchRequest.getQueries());
         /*
          * select suitable occurrences for series events

@@ -138,11 +138,24 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
             return null;
         }
         String[] splittedValue = Strings.splitByComma(value);
-        EventField[] fields = new EventField[splittedValue.length];
-        for (int i = 0; i < splittedValue.length; i++) {
-            EventField field = getMappedField(splittedValue[i]);
+        return parseFields(splittedValue);
+    }
+
+    /**
+     * Parses event fields from an array of event identifiers.
+     *
+     * @param value The field identifiers
+     * @return The parsed fields, or <code>null</code> if the passed array was <code>null</code>
+     */
+    public EventField[] parseFields(String[] fieldNames) throws OXException {
+        if (null == fieldNames) {
+            return null;
+        }
+        EventField[] fields = new EventField[fieldNames.length];
+        for (int i = 0; i < fieldNames.length; i++) {
+            EventField field = getMappedField(fieldNames[i]);
             if (null == field) {
-                throw OXException.notFound(splittedValue[i]);
+                throw OXException.notFound(fieldNames[i]);
             }
             fields[i] = field;
         }

@@ -70,6 +70,7 @@ import com.openexchange.chronos.json.converter.EventConflictResultConverter;
 import com.openexchange.chronos.json.converter.EventResultConverter;
 import com.openexchange.chronos.json.converter.FreeBusyConverter;
 import com.openexchange.chronos.json.converter.MultipleCalendarResultConverter;
+import com.openexchange.chronos.json.converter.handler.EventFieldDataHandler;
 import com.openexchange.chronos.json.converter.handler.Json2ObjectDataHandler;
 import com.openexchange.chronos.json.converter.handler.Json2XPropertiesDataHandler;
 import com.openexchange.chronos.json.converter.handler.Object2JsonDataHandler;
@@ -174,6 +175,8 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
                 AvailableMapper.getInstance(), Available.class, Available[].class), singletonDictionary("identifier", DataHandlers.AVAILABLE2JSON));
             registerService(DataHandler.class, new XProperties2JsonDataHandler(), singletonDictionary("identifier", DataHandlers.XPROPERTIES2JSON));
             registerService(DataHandler.class, new Json2XPropertiesDataHandler(), singletonDictionary("identifier", DataHandlers.JSON2XPROPERTIES));
+            registerService(DataHandler.class, new EventFieldDataHandler(), singletonDictionary("identifier", DataHandlers.STRING_ARRAY_TO_EVENT_FIELDS));
+
         } catch (Exception e) {
             getLogger(ChronosJsonActivator.class).error("error starting {}", context.getBundle(), e);
             throw e;

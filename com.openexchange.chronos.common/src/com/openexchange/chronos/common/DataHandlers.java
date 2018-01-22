@@ -82,6 +82,9 @@ public enum DataHandlers {
     /** The identifier of the data handler to convert from an extended properties JSON representation to {@link ExtendedProperties}. */
     public static final String JSON2XPROPERTIES = "com.openexchange.chronos.json2xproperties";
 
+    /** The identifier of the data handler to convert from a string array to an event field array. */
+    public static final String STRING_ARRAY_TO_EVENT_FIELDS = "com.openexchange.chronos.stringArray2EventField";
+
     /** The identifier of the data handler to convert from an {@link ExtendedProperties} to its JSON representation. */
     public static final String XPROPERTIES2JSON = "com.openexchange.chronos.xproperties2json";
 
