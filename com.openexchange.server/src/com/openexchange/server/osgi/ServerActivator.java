@@ -808,25 +808,6 @@ public final class ServerActivator extends HousekeepingActivator {
         registerService(ResultConverterRegistry.class, resultConverterRegistry);
         ServerServiceRegistry.getInstance().addService(ResultConverterRegistry.class, resultConverterRegistry);
         
-        /*
-         * Register data handlers
-         */
-        {
-            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-            props.put(STR_IDENTIFIER, "com.openexchange.ical");
-            registerService(DataHandler.class, new ICalInsertDataHandler(), props);
-        }
-        {
-            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-            props.put(STR_IDENTIFIER, "com.openexchange.ical.json");
-            registerService(DataHandler.class, new ICalJSONDataHandler(), props);
-        }
-        {
-            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-            props.put(STR_IDENTIFIER, "com.openexchange.mail.vcard");
-            registerService(DataHandler.class, new VCardAttachMailDataHandler(), props);
-        }
-
         // Register DBProvider
         registerService(DBProvider.class, new DBPoolProvider());
 
