@@ -56,7 +56,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -80,12 +79,6 @@ import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalen
  */
 public abstract class AbstractExternalProviderChronosTest extends AbstractChronosTest {
 
-    private static final Map<String, String> CONFIG = new HashMap<String, String>();
-    static {
-        CONFIG.put("com.openexchange.chronos.schedjoules.host", "example.com");
-        CONFIG.put("com.openexchange.chronos.schedjoules.scheme", "http");
-    }
-
     private final String providerId;
 
     /**
@@ -94,16 +87,6 @@ public abstract class AbstractExternalProviderChronosTest extends AbstractChrono
     public AbstractExternalProviderChronosTest(String providerId) {
         super();
         this.providerId = providerId;
-    }
-
-    @Override
-    protected Map<String, String> getNeededConfigurations() {
-        return CONFIG;
-    }
-
-    @Override
-    protected String getScope() {
-        return "context";
     }
 
     @Override

@@ -70,6 +70,12 @@ import com.openexchange.testing.httpclient.models.FolderData;
  */
 abstract class AbstractSchedJoulesProviderTest extends AbstractExternalProviderChronosTest {
 
+    private static final Map<String, String> CONFIG = new HashMap<String, String>();
+    static {
+        CONFIG.put("com.openexchange.chronos.schedjoules.host", "example.com");
+        CONFIG.put("com.openexchange.chronos.schedjoules.scheme", "http");
+    }
+
     static final Map<String, String> RESPONSE_HEADERS = Collections.singletonMap(HttpHeaders.CONTENT_TYPE, "application/json");
     static final String MODULE = "event";
     static final String PROVIDER_ID = "schedjoules";
@@ -103,6 +109,16 @@ abstract class AbstractSchedJoulesProviderTest extends AbstractExternalProviderC
         folderName = "testfolder_" + System.nanoTime();
     }
 
+    @Override
+    protected Map<String, String> getNeededConfigurations() {
+        return CONFIG;
+    }
+
+    @Override
+    protected String getScope() {
+        return "context";
+    }
+
     /**
      * Creates a folder with a subscription to schedjoules feed with the specified item identifier and the specified name
      * 
@@ -114,7 +130,7 @@ abstract class AbstractSchedJoulesProviderTest extends AbstractExternalProviderC
     FolderData createFolder(int itemId, String folderName) throws Exception {
         Asset pageAsset = assetManager.getAsset(AssetType.json, "schedjoulesPageResponse.json");
         mock("http://example.com/pages/" + itemId, assetManager.readAssetString(pageAsset), HttpStatus.SC_OK, RESPONSE_HEADERS);
-        
+
         Asset calendarAsset = assetManager.getAsset(AssetType.ics, "schedjoulesCalendarResponse.ics");
         mock(MockRequestMethod.GET, "http://example.com/calendars/dbe807996754?l=en&x=239a18", assetManager.readAssetString(calendarAsset), HttpStatus.SC_OK, Collections.singletonMap(HttpHeaders.CONTENT_TYPE, "text/calendar"), 0);
 
