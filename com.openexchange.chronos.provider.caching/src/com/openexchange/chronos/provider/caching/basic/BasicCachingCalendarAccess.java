@@ -166,7 +166,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         if ((null == filters || filters.isEmpty()) && (null == queries || queries.isEmpty())) {
             return Collections.emptyList();
         }
-        
+        getEvents();
         return new SearchHandler(session, account, parameters).searchEvents(filters, queries);
     }
 
@@ -177,6 +177,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      */
     @Override
     public UpdatesResult getUpdatedEvents(long updatedSince) throws OXException {
+        getEvents();
         return new SyncHandler(session, account, parameters).getUpdatedEvents(updatedSince);
     }
 
@@ -187,6 +188,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      */
     @Override
     public long getSequenceNumber() throws OXException {
+        getEvents();
         return new SyncHandler(session, account, parameters).getSequenceNumber();
     }
 
@@ -197,6 +199,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      */
     @Override
     public List<Event> resolveResource(String resourceName) throws OXException {
+        getEvents();
         return new SyncHandler(session, account, parameters).resolveResource(resourceName);
     }
 
