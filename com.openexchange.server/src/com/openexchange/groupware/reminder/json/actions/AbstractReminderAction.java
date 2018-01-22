@@ -52,7 +52,6 @@ package com.openexchange.groupware.reminder.json.actions;
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.util.Date;
 import java.util.List;
-import java.util.SortedSet;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -64,15 +63,11 @@ import com.openexchange.ajax.writer.ReminderWriter;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.compat.Event2Appointment;
-import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.service.RecurrenceData;
-import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.UserParticipant;
@@ -92,9 +87,6 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractReminderAction implements AJAXActionService {
-
-    private static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(AbstractReminderAction.class);
 
     private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 
@@ -209,7 +201,7 @@ public abstract class AbstractReminderAction implements AJAXActionService {
         }
     }
 
-    protected void convertAlarmTrigger2Reminder(AlarmTrigger trigger, CalendarService calService, CalendarSession calSession, RecurrenceService recurrenceService, ReminderWriter reminderWriter, JSONArray jsonResponseArray) throws OXException, JSONException{
+    protected void convertAlarmTrigger2Reminder(CalendarSession calendarSession, AlarmTrigger trigger, ReminderWriter reminderWriter, JSONArray jsonResponseArray) throws OXException, JSONException {
         final JSONObject jsonReminderObj = new JSONObject(12);
 
         ReminderObject reminder = new ReminderObject();
@@ -220,7 +212,7 @@ public abstract class AbstractReminderAction implements AJAXActionService {
         } else {
             eventId = new EventID(trigger.getFolder(), trigger.getEventId());
         }
-        Event event = calService.getEvent(calSession, trigger.getFolder(), eventId);
+        Event event = calendarSession.getCalendarService().getEvent(calendarSession, trigger.getFolder(), eventId);
         List<Alarm> alarms = event.getAlarms();
         reminder.setLastModified(event.getLastModified());
         reminder.setFolder(Integer.valueOf(trigger.getFolder()));
@@ -229,20 +221,8 @@ public abstract class AbstractReminderAction implements AJAXActionService {
         reminder.setObjectId(trigger.getAlarm()); // Store the alarm id instead of the reminder id
         reminder.setTargetId(Integer.valueOf(event.getId()));
 
-        if (CalendarUtils.isSeriesMaster(event)) {
-            SortedSet<RecurrenceId> exceptions = event.getDeleteExceptionDates();
-            List<Event> changeExceptions = calService.getChangeExceptions(calSession, event.getFolderId(), event.getSeriesId());
-            for (Event exception : changeExceptions) {
-                exceptions.add(exception.getRecurrenceId());
-            }
-            long[] exceptionDates = new long[exceptions.size()];
-            int x = 0;
-            for (RecurrenceId id : exceptions) {
-                exceptionDates[x++] = id.getValue().getTimestamp();
-            }
-            RecurrenceData data = new DefaultRecurrenceData(event.getRecurrenceRule(), event.getStartDate(), exceptionDates);
-
-            int pos = Event2Appointment.getRecurrencePosition(recurrenceService, data, event.getRecurrenceId());
+        if (CalendarUtils.isSeriesMaster(event) && null != eventId.getRecurrenceID()) {
+            int pos = Event2Appointment.getRecurrencePosition(calendarSession.getRecurrenceService(), new DefaultRecurrenceData(event), eventId.getRecurrenceID());
             reminder.setRecurrencePosition(pos);
             reminder.setRecurrenceAppointment(true);
         } else {

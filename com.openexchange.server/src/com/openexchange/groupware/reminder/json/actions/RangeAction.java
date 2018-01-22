@@ -64,7 +64,6 @@ import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.reminder.ReminderObject;
@@ -156,9 +155,8 @@ public final class RangeAction extends AbstractReminderAction {
         calSession.set(CalendarParameters.PARAMETER_RANGE_END, until);
 
         List<AlarmTrigger> alarmTrigger = calService.getAlarmTrigger(calSession, Collections.singleton("DISPLAY"));
-        RecurrenceService recurrenceService = ServerServiceRegistry.getInstance().getService(RecurrenceService.class);
-        for(AlarmTrigger trigger: alarmTrigger){
-            convertAlarmTrigger2Reminder(trigger, calService, calSession, recurrenceService, reminderWriter, jsonResponseArray);
+        for (AlarmTrigger trigger : alarmTrigger) {
+            convertAlarmTrigger2Reminder(calSession, trigger, reminderWriter, jsonResponseArray);
         }
     }
 

@@ -69,7 +69,6 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.reminder.ReminderObject;
@@ -134,7 +133,6 @@ public final class UpdatesAction extends AbstractReminderAction {
             CalendarSession calendarSession = calendarService.init(session);
             calendarSession.set(CalendarParameters.PARAMETER_RANGE_END, new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7)));
             UpdatesResult updatedEventsOfUser = calendarService.getUpdatedEventsOfUser(calendarSession, timestamp.getTime());
-            RecurrenceService recurrenceService = ServerServiceRegistry.getInstance().getService(RecurrenceService.class);
 
             List<AlarmTrigger> triggers = calendarService.getAlarmTrigger(calendarSession, Collections.singleton("DISPLAY"));
             List<Integer> updatedAlarmIds = new ArrayList<>();
@@ -143,9 +141,9 @@ public final class UpdatesAction extends AbstractReminderAction {
                     updatedAlarmIds.add(alarm.getId());
                 }
             }
-            for(AlarmTrigger trigger: triggers){
-                if(updatedAlarmIds.contains(trigger.getAlarm())){
-                    convertAlarmTrigger2Reminder(trigger, calendarService, calendarSession, recurrenceService, reminderWriter, jsonResponseArray);
+            for (AlarmTrigger trigger: triggers) {
+                if (updatedAlarmIds.contains(trigger.getAlarm())) {
+                    convertAlarmTrigger2Reminder(calendarSession, trigger, reminderWriter, jsonResponseArray);
                 }
             }
 
