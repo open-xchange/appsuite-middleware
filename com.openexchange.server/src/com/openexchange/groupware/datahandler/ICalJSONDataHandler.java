@@ -49,15 +49,12 @@
 
 package com.openexchange.groupware.datahandler;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DefaultConverter;
@@ -70,7 +67,6 @@ import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataExceptionCodes;
-import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
@@ -80,8 +76,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
@@ -100,24 +95,22 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class ICalJSONDataHandler implements DataHandler {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ICalJSONDataHandler.class);
+public final class ICalJSONDataHandler extends ICalDataHandler {
 
     private static final Class<?>[] TYPES = { InputStream.class };
 
-    private static final String[] ARGS = new String[0];
-
     /**
      * Initializes a new {@link ICalJSONDataHandler}
+     * 
+     * @param services The {@link ServiceLookup}
      */
-    public ICalJSONDataHandler() {
-        super();
+    public ICalJSONDataHandler(ServiceLookup services) {
+        super(services);
     }
 
     @Override
     public String[] getRequiredArguments() {
-        return ARGS;
+        return new String[0];
     }
 
     @Override
@@ -128,10 +121,7 @@ public final class ICalJSONDataHandler implements DataHandler {
     @Override
     public ConversionResult processData(final Data<? extends Object> data, final DataArguments dataArguments, final Session session) throws OXException {
         final Context ctx = ContextStorage.getStorageContext(session);
-        final ICalParser iCalParser = ServerServiceRegistry.getInstance().getService(ICalParser.class);
-        if (iCalParser == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ICalParser.class.getName());
-        }
+        final ICalParser iCalParser = services.getServiceSafe(ICalParser.class);
         final List<Event> events;
         final List<Task> tasks;
         final InputStreamCopy inputStreamCopy;
@@ -159,7 +149,7 @@ public final class ICalJSONDataHandler implements DataHandler {
              */
             InputStream stream = null;
             try {
-                ICalService iCalService = ServerServiceRegistry.getServize(ICalService.class, true);
+                ICalService iCalService = services.getServiceSafe(ICalService.class);
                 stream = inputStreamCopy.getInputStream();
                 ImportedCalendar calendar = iCalService.importICal(stream, null);
                 events = calendar.getEvents();
@@ -185,7 +175,7 @@ public final class ICalJSONDataHandler implements DataHandler {
          * The JSON array to return
          */
         final JSONArray objects = new JSONArray();
-        ResultConverterRegistry converterRegistry = ServerServiceRegistry.getServize(ResultConverterRegistry.class, true);
+        ResultConverterRegistry converterRegistry = services.getServiceSafe(ResultConverterRegistry.class);
         AJAXRequestData request = new AJAXRequestData();
         request.setSession(serverSession);
         /*
@@ -226,40 +216,4 @@ public final class ICalJSONDataHandler implements DataHandler {
         result.setData(objects);
         return result;
     }
-
-    private List<Task> parseTaskStream(final Context ctx, final ICalParser iCalParser, final InputStreamCopy inputStreamCopy, final List<ConversionError> conversionErrors, final List<ConversionWarning> conversionWarnings, final TimeZone defaultZone) throws IOException, ConversionError {
-        final InputStream inputStream = inputStreamCopy.getInputStream();
-        try {
-            return iCalParser.parseTasks(inputStream, defaultZone, ctx, conversionErrors, conversionWarnings).getImportedObjects();
-        } finally {
-            safeClose(inputStream);
-        }
-    }
-
-    /**
-     * Closes a {@link Closeable} save. In case of an error while closing, the error will be logged instead of being thrown
-     * so that possible earlier errors won't be 'overriden'
-     * 
-     * @param closeable The {@link Closeable}
-     */
-    protected static void safeClose(Closeable closeable) {
-        if (null != closeable) {
-            try {
-                closeable.close();
-            } catch (Exception e) {
-                LOGGER.debug("Error while closing.", e);
-            }
-        }
-    }
-
-    private static final int LIMIT = 1048576;
-
-    private static InputStreamCopy copyStream(final InputStream orig, final long size) throws OXException {
-        try {
-            return new InputStreamCopy(orig, "openexchange-icaljson-", (size <= 0 || size > LIMIT));
-        } catch (final IOException e) {
-            throw DataExceptionCodes.ERROR.create(e, e.getMessage());
-        }
-    }
-
 }

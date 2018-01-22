@@ -84,7 +84,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
@@ -103,14 +103,11 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
 
     /**
      * Initializes a new {@link ICalInsertDataHandler}
+     * 
+     * @param services The {@link ServiceLookup}
      */
-    public ICalInsertDataHandler() {
-        super();
-    }
-
-    @Override
-    public String[] getRequiredArguments() {
-        return new String[] {};
+    public ICalInsertDataHandler(ServiceLookup services) {
+        super(services);
     }
 
     @Override
@@ -139,7 +136,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
         }
 
         final Context ctx = ContextStorage.getStorageContext(session);
-        final ICalParser iCalParser = ServerServiceRegistry.getInstance().getService(ICalParser.class);
+        final ICalParser iCalParser = services.getServiceSafe(ICalParser.class);
         if (iCalParser == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ICalParser.class.getName());
         }
@@ -159,7 +156,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
             /*
              * Get user time zone
              */
-            final TimeZone defaultZone = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class).getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
+            final TimeZone defaultZone = services.getServiceSafe(CalendarCollectionService.class).getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
             /*
              * Errors and warnings
              */
@@ -171,7 +168,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
                  */
                 InputStream stream = null;
                 try {
-                    ICalService iCalService = ServerServiceRegistry.getServize(ICalService.class, true);
+                    ICalService iCalService = services.getServiceSafe(ICalService.class);
                     stream = inputStreamCopy.getInputStream();
                     ImportedCalendar calendar = iCalService.importICal(stream, null);
                     events = calendar.getEvents();
@@ -201,7 +198,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
                  * Insert parsed appointments into denoted calendar folder
                  */
                 try {
-                    CalendarService calendarService = ServerServiceRegistry.getServize(CalendarService.class, true);
+                    CalendarService calendarService = services.getServiceSafe(CalendarService.class);
                     CalendarSession calendarSession = calendarService.init(session);
                     calendarSession.set(CalendarParameters.UID_CONFLICT_STRATEGY, UIDConflictStrategy.UPDATE_OR_REASSIGN);
                     List<ImportResult> importEvents = calendarService.importEvents(calendarSession, String.valueOf(calendarFolder), events);

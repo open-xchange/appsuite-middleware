@@ -71,6 +71,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -83,6 +84,24 @@ public abstract class ICalDataHandler implements DataHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ICalDataHandler.class);
 
     private static final int LIMIT = 1048576;
+
+    protected final ServiceLookup services;
+
+    /**
+     * Initializes a new {@link ICalDataHandler}.
+     * 
+     * @param services The {@link ServiceLookup}
+     * 
+     */
+    public ICalDataHandler(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
+    
+    @Override
+    public String[] getRequiredArguments() {
+        return new String[0];
+    }
 
     protected void insertTasks(final Session session, final int taskFolder, final List<Task> tasks, final JSONArray folderAndIdArray) throws OXException, JSONException {
         final TasksSQLInterface taskSql = new TasksSQLImpl(session);
