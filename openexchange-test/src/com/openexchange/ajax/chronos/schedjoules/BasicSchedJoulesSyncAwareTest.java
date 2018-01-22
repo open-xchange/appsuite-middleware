@@ -90,7 +90,7 @@ public class BasicSchedJoulesSyncAwareTest extends AbstractSchedJoulesProviderTe
         List<EventData> allEvents = eventManager.getAllEvents(beginOfTime, future, false, folderData.getId(), SortOrder.getSortOrder(EventField.TIMESTAMP, SortOrder.Order.ASC));
 
         assertNotNull(allEvents);
-        assertTrue(allEvents.size() > 0);
+        assertTrue("No events returned", allEvents.size() > 0);
 
         EventData eventData = allEvents.get(allEvents.size() - 1);
         Long since = eventData.getTimestamp();
