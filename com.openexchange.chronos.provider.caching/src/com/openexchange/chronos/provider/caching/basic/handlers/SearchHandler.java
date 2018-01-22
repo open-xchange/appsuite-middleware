@@ -49,17 +49,15 @@
 
 package com.openexchange.chronos.provider.caching.basic.handlers;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.common.SearchUtils;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
@@ -72,11 +70,6 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class SearchHandler extends AbstractExtensionHandler {
-
-    /**
-     * The wildcard character '*'
-     */
-    private static final String WILDCARD = "*";
 
     private static final String PROTOCOL = "cal://";
     private static final String DELIMITER = "/";
@@ -133,67 +126,23 @@ public class SearchHandler extends AbstractExtensionHandler {
      */
     private SearchTerm<?> compileQueriesSearchTerm(List<String> queries) throws OXException {
         if (null == queries || queries.isEmpty()) {
-            return SearchTermFactory.createSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, getFolderId());
+            return SearchUtils.getSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, getFolderId());
         }
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
         for (String query : queries) {
-            if (isWildcardOnly(query)) {
+            if (SearchUtils.isWildcardOnly(query)) {
                 continue;
             }
-            String pattern = surroundWithWildcards(checkMinimumSearchPatternLength(query, minimumSearchPatternLength));
+            String pattern = SearchUtils.surroundWithWildcards(SearchUtils.checkMinimumSearchPatternLength(query, minimumSearchPatternLength));
 
             CompositeSearchTerm compositeSearchTerm = new CompositeSearchTerm(CompositeOperation.OR);
-            compositeSearchTerm.addSearchTerm(SearchTermFactory.createSearchTerm(EventField.SUMMARY, SingleOperation.EQUALS, pattern));
-            compositeSearchTerm.addSearchTerm(SearchTermFactory.createSearchTerm(EventField.DESCRIPTION, SingleOperation.EQUALS, pattern));
-            compositeSearchTerm.addSearchTerm(SearchTermFactory.createSearchTerm(EventField.CATEGORIES, SingleOperation.EQUALS, pattern));
+            compositeSearchTerm.addSearchTerm(SearchUtils.getSearchTerm(EventField.SUMMARY, SingleOperation.EQUALS, pattern));
+            compositeSearchTerm.addSearchTerm(SearchUtils.getSearchTerm(EventField.DESCRIPTION, SingleOperation.EQUALS, pattern));
+            compositeSearchTerm.addSearchTerm(SearchUtils.getSearchTerm(EventField.CATEGORIES, SingleOperation.EQUALS, pattern));
 
             searchTerm.addSearchTerm(compositeSearchTerm);
         }
         return searchTerm;
-    }
-
-    /**
-     * Checks that the supplied search pattern length is equal to or greater than a configured minimum.
-     *
-     * @param minimumPatternLength, The minimum search pattern length, or <code>0</code> for no limitation
-     * @param pattern The pattern to check
-     * @return The passed pattern, after the length was checked
-     * @throws OXException {@link CalendarExceptionCodes#QUERY_TOO_SHORT}
-     */
-    private String checkMinimumSearchPatternLength(String pattern, int minimumPatternLength) throws OXException {
-        if (null != pattern && 0 < minimumPatternLength && pattern.length() < minimumPatternLength) {
-            throw CalendarExceptionCodes.QUERY_TOO_SHORT.create(I(minimumPatternLength), pattern);
-        }
-        return pattern;
-    }
-
-    /**
-     * Checks whether the specified query is a wildcard query.
-     * 
-     * @param query The query to check
-     * @return <code>true</code> if the query is empty or consists out of the wildcard character '*'
-     */
-    private boolean isWildcardOnly(String query) {
-        return Strings.isEmpty(query) || WILDCARD.equals(query);
-    }
-
-    /**
-     * Surrounds the specified pattern with wildcards
-     * 
-     * @param pattern The pattern to surround with wildcards
-     * @return The updated pattern
-     */
-    private String surroundWithWildcards(String pattern) {
-        if (Strings.isEmpty(pattern)) {
-            return WILDCARD;
-        }
-        if (false == pattern.startsWith(WILDCARD)) {
-            pattern = WILDCARD + pattern;
-        }
-        if (false == pattern.endsWith(WILDCARD)) {
-            pattern += WILDCARD;
-        }
-        return pattern;
     }
 
     /**

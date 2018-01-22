@@ -49,8 +49,10 @@
 
 package com.openexchange.chronos.common;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
@@ -71,19 +73,6 @@ import com.openexchange.search.internal.operands.ConstantOperand;
 public class SearchUtils {
 
     /**
-     * Gets a single search term using the field itself as column operand and a second operand.
-     *
-     * @param <V> The operand's type
-     * @param <E> The field type
-     * @param operation The operation to use
-     * @param operand The second operand
-     * @return A single search term
-     */
-    public static <V, E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation, Operand<V> operand) {
-        return getSearchTerm(field, operation).addOperand(operand);
-    }
-
-    /**
      * Gets a single search term using the field itself as column operand and adds the supplied value as constant operand.
      *
      * @param <V> The operand's type
@@ -94,6 +83,19 @@ public class SearchUtils {
      */
     public static <V, E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation, V operand) {
         return getSearchTerm(field, operation, new ConstantOperand<V>(operand));
+    }
+
+    /**
+     * Gets a single search term using the field itself as column operand and a second operand.
+     *
+     * @param <V> The operand's type
+     * @param <E> The field type
+     * @param operation The operation to use
+     * @param operand The second operand
+     * @return A single search term
+     */
+    public static <V, E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation, Operand<V> operand) {
+        return getSearchTerm(field, operation).addOperand(operand);
     }
 
     /**
@@ -141,6 +143,16 @@ public class SearchUtils {
     public static boolean isWildcardOnly(String query) {
         return Strings.isEmpty(query) || "*".equals(query);
     }
+    
+    /**
+     * Surrounds the specified pattern with wildcards
+     * 
+     * @param pattern The pattern to surround with wildcards
+     * @return The updated pattern
+     */
+    public static  String surroundWithWildcards(String pattern) {
+        return addWildcards(pattern, true, true);
+    }
 
     /**
      * Appends and/or prepends the wildcard character <code>*</code> to the supplied search pattern, if not already done.
@@ -166,4 +178,18 @@ public class SearchUtils {
         return pattern;
     }
 
+    /**
+     * Checks that the supplied search pattern length is equal to or greater than a configured minimum.
+     *
+     * @param minimumPatternLength, The minimum search pattern length, or <code>0</code> for no limitation
+     * @param pattern The pattern to check
+     * @return The passed pattern, after the length was checked
+     * @throws OXException {@link CalendarExceptionCodes#QUERY_TOO_SHORT}
+     */
+    public static String checkMinimumSearchPatternLength(String pattern, int minimumPatternLength) throws OXException {
+        if (null != pattern && 0 < minimumPatternLength && pattern.length() < minimumPatternLength) {
+            throw CalendarExceptionCodes.QUERY_TOO_SHORT.create(I(minimumPatternLength), pattern);
+        }
+        return pattern;
+    }
 }
