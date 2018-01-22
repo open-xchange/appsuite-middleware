@@ -72,7 +72,7 @@ public class ClusterLockServiceHazelcastImpl extends AbstractClusterLockServiceI
 
     /**
      * Initialises a new {@link ClusterLockServiceHazelcastImpl}.
-     * 
+     *
      * @param services The {@link ServiceLookup} instance
      * @param unregisterer The {@link Unregisterer} instance
      */
@@ -83,7 +83,7 @@ public class ClusterLockServiceHazelcastImpl extends AbstractClusterLockServiceI
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cluster.lock.ClusterLockService#acquireClusterLock(com.openexchange.cluster.lock.ClusterTask)
      */
     @Override
@@ -91,7 +91,7 @@ public class ClusterLockServiceHazelcastImpl extends AbstractClusterLockServiceI
         HazelcastInstance hzInstance = getHazelcastInstance();
 
         IMap<String, Long> clusterLocks = hzInstance.getMap(ClusterLockType.ClusterTaskLocks.name());
-        long timeNow = System.nanoTime();
+        long timeNow = System.currentTimeMillis();
         Long timeThen = clusterLocks.putIfAbsent(clusterTask.getTaskName(), timeNow);
         if (timeThen == null) {
             return true;
@@ -106,7 +106,7 @@ public class ClusterLockServiceHazelcastImpl extends AbstractClusterLockServiceI
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cluster.lock.ClusterLockService#releaseClusterLock(com.openexchange.cluster.lock.ClusterTask)
      */
     @Override
@@ -118,7 +118,7 @@ public class ClusterLockServiceHazelcastImpl extends AbstractClusterLockServiceI
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cluster.lock.ClusterLockService#runClusterTask(com.openexchange.cluster.lock.ClusterTask)
      */
     @Override
@@ -128,7 +128,7 @@ public class ClusterLockServiceHazelcastImpl extends AbstractClusterLockServiceI
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cluster.lock.ClusterLockService#runClusterTask(com.openexchange.cluster.lock.ClusterTask, com.openexchange.cluster.lock.RetryPolicy)
      */
     @Override
@@ -150,7 +150,7 @@ public class ClusterLockServiceHazelcastImpl extends AbstractClusterLockServiceI
     /**
      * Returns the {@link HazelcastInstance}. If the instance cannot be returned (i.e. due its absence)
      * then an {@link OXException} will be thrown
-     * 
+     *
      * @return The {@link HazelcastInstance}
      * @throws OXException if the {@link HazelcastInstance} is absent
      */
@@ -168,11 +168,11 @@ public class ClusterLockServiceHazelcastImpl extends AbstractClusterLockServiceI
      */
     private class RefreshLockTask implements Runnable {
 
-        private String taskName;
+        private final String taskName;
 
         /**
          * Initialises a new {@link RefreshLockTask}.
-         * 
+         *
          * @param taskName The cluster task's name to refresh
          */
         public RefreshLockTask(String taskName) {
@@ -182,7 +182,7 @@ public class ClusterLockServiceHazelcastImpl extends AbstractClusterLockServiceI
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.lang.Runnable#run()
          */
         @Override
@@ -192,7 +192,7 @@ public class ClusterLockServiceHazelcastImpl extends AbstractClusterLockServiceI
 
                 IMap<String, Long> clusterLocks = hzInstance.getMap(ClusterLockType.ClusterTaskLocks.name());
                 LOGGER.debug("Refreshing lock for cluster task '{}'", taskName);
-                long timeNow = System.nanoTime();
+                long timeNow = System.currentTimeMillis();
                 clusterLocks.put(taskName, timeNow);
             } catch (OXException e) {
                 LOGGER.error("{}", e.getMessage(), e);

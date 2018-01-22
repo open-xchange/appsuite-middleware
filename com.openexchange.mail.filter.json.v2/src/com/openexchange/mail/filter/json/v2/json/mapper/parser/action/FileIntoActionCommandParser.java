@@ -61,7 +61,7 @@ import com.openexchange.jsieve.commands.ActionCommand.Commands;
 import com.openexchange.mail.filter.json.v2.json.fields.GeneralField;
 import com.openexchange.mail.filter.json.v2.json.fields.MoveActionField;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.CommandParserJSONUtil;
-import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.simplified.SimplifiedActions;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.simplified.SimplifiedAction;
 import com.openexchange.mail.filter.json.v2.mapper.ArgumentUtil;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailfilter.properties.MailFilterProperty;
@@ -89,7 +89,7 @@ public class FileIntoActionCommandParser extends AbstractActionCommandParser {
         final ArrayList<Object> argList = new ArrayList<Object>();
 
         Boolean copy = jsonObject.optBoolean(MoveActionField.copy.name(), false);
-        if (copy || jsonObject.getString("id").equals(SimplifiedActions.Copy.getCommandName())) {
+        if (copy || jsonObject.getString("id").equals(SimplifiedAction.COPY.getCommandName())) {
             argList.add(ArgumentUtil.createTagArgument(MoveActionField.copy.name()));
         }
 
@@ -104,7 +104,7 @@ public class FileIntoActionCommandParser extends AbstractActionCommandParser {
 
         argList.add(CommandParserJSONUtil.stringToList(folderName));
         ActionCommand result = new ActionCommand(Commands.FILEINTO, argList);
-        if (copy || jsonObject.getString("id").equals(SimplifiedActions.Copy.getCommandName())) {
+        if (copy || jsonObject.getString("id").equals(SimplifiedAction.COPY.getCommandName())) {
             result.addOptionalRequired(MoveActionField.copy.name());
         }
         return result;
@@ -127,7 +127,7 @@ public class FileIntoActionCommandParser extends AbstractActionCommandParser {
         } else {
             String copyCommandString = ArgumentUtil.createTagArgument(MoveActionField.copy.name()).toString();
             if (actionCommand.getTagArguments().get(copyCommandString) != null) {
-                jsonObject.put(GeneralField.id.name(), SimplifiedActions.Copy.getCommandName());
+                jsonObject.put(GeneralField.id.name(), SimplifiedAction.COPY.getCommandName());
             }
             if (useUTF7Encoding()) {
                 folderName = BASE64MailboxDecoder.decode(((List<String>) arguments.get(1)).get(0));

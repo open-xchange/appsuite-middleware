@@ -47,24 +47,26 @@
  *
  */
 
-package com.openexchange.mail.filter.json.v2.json.mapper.parser.action.simplified;
+package com.openexchange.oauth.impl.internal.hazelcast;
+
+import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
+import com.openexchange.hazelcast.serialization.CustomPortable;
 
 /**
- * {@link SimplifiedActions}
+ * {@link PortableCallbackRegistryFetchFactory} - The portable factory for {@link PortableCallbackRegistryFetch} type.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.4
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum SimplifiedActions {
-    Copy("copy");
+public class PortableCallbackRegistryFetchFactory extends AbstractCustomPortableFactory {
 
-    private String commandName;
-
-    SimplifiedActions(String commandName) {
-        this.commandName = commandName;
+    @Override
+    public CustomPortable create() {
+        return new PortableCallbackRegistryFetch();
     }
 
-    public String getCommandName() {
-        return commandName;
+    @Override
+    public int getClassId() {
+        return PortableCallbackRegistryFetch.CLASS_ID;
     }
+
 }

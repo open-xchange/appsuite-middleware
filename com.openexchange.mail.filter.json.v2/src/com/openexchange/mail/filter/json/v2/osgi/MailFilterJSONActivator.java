@@ -80,7 +80,7 @@ import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.RemoveFlag
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.SetFlagActionCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.StopActionCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.VacationActionCommandParser;
-import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.simplified.SimplifiedActions;
+import com.openexchange.mail.filter.json.v2.json.mapper.parser.action.simplified.SimplifiedAction;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.AddressTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.AllOfTestCommandParser;
 import com.openexchange.mail.filter.json.v2.json.mapper.parser.test.AnyOfTestCommandParser;
@@ -189,7 +189,7 @@ public class MailFilterJSONActivator extends AJAXModuleActivator {
         registry.register(ActionCommand.Commands.REMOVEFLAG.getJsonName(), new RemoveFlagActionCommandParser(this));
         registry.register(ActionCommand.Commands.PGP_ENCRYPT.getJsonName(), new PGPEncryptActionCommandParser(this));
 
-        registry.register(SimplifiedActions.Copy.getCommandName(), new FileIntoActionCommandParser(this));
+        registry.register(SimplifiedAction.COPY.getCommandName(), new FileIntoActionCommandParser(this));
 
         registerService(ActionCommandParserRegistry.class, registry);
         trackService(ActionCommandParserRegistry.class);
