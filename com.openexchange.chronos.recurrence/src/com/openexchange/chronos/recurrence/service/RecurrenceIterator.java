@@ -106,7 +106,7 @@ public class RecurrenceIterator extends AbstractRecurrenceIterator<Event> {
     @Override
     protected Event nextInstance() {
         PositionAwareRecurrenceId recurrenceId = new PositionAwareRecurrenceId(recurrenceData, next, position, CalendarUtils.truncateTime(new Date(next.getTimestamp()), TimeZones.UTC));
-        if (isFirstOccurrence()) {
+        if (1 == position) {
             return new EventOccurrence(master, recurrenceId) {
 
                 @Override
