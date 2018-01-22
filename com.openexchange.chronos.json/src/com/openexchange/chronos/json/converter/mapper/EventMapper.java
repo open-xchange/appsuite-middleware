@@ -76,6 +76,7 @@ import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.TimeTransparency;
+import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.json.fields.ChronosJsonFields;
 import com.openexchange.exception.OXException;
@@ -629,7 +630,8 @@ public class EventMapper extends DefaultJsonMapper<Event, EventField> {
 
             @Override
             public String get(Event object) {
-                return object.getTransp().getValue();
+                Transp transp = object.getTransp();
+                return null == transp ? null : transp.getValue();
             }
 
             @Override
