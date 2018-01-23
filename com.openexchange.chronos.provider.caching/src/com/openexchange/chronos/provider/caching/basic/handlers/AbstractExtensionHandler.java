@@ -218,6 +218,7 @@ abstract class AbstractExtensionHandler {
         }
         List<Event> processedEvents = new ArrayList<>(events.size());
         for (Event event : events) {
+            event.setFlags(CalendarUtils.getFlags(event, getSession().getUserId()));
             processedEvents.addAll(CalendarUtils.isSeriesMaster(event) ? resolveOccurrences(event) : Collections.singletonList(event));
         }
         selfProtection.checkEventCollection(processedEvents);
