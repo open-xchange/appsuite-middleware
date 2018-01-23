@@ -56,5 +56,11 @@ package com.openexchange.oidc.spi;
  * @since v7.10.0
  */
 public class OIDCCoreBackend extends AbstractOIDCBackend{
-    
+
+    /**
+     * Initializes a new {@link OIDCCoreBackend}.
+     */
+    public OIDCCoreBackend() {
+        super();
+    }
 }

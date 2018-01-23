@@ -76,9 +76,15 @@ import com.openexchange.session.reservation.Reservation;
 public class OIDCLoginRequestHandler implements LoginRequestHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(OIDCLoginRequestHandler.class);
-    private OIDCBackend backend;
+    private final OIDCBackend backend;
 
+    /**
+     * Initializes a new {@link OIDCLoginRequestHandler}.
+     *
+     * @param backend The back-end to use
+     */
     public OIDCLoginRequestHandler(OIDCBackend backend) {
+        super();
         this.backend = backend;
     }
 

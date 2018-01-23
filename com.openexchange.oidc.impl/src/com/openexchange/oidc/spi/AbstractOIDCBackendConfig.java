@@ -50,7 +50,6 @@
 package com.openexchange.oidc.spi;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,10 +73,10 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
 
     protected LeanConfigurationService leanConfigurationService;
 
-    
+
     /**
-     * customPropertyPrefix - If set, it identifies this {@link OIDCBackendConfig}. The set value 
-     * is appended to OIDCProperty.PREFIX. 
+     * customPropertyPrefix - If set, it identifies this {@link OIDCBackendConfig}. The set value
+     * is appended to OIDCProperty.PREFIX.
      * See <code>com.openexchange.oidc.spi.AbstractOIDCBackendConfig.getCustomProperty(OIDCBackendProperty)</code>
      * for more information
      */
@@ -92,7 +91,7 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
      * @param leanConfigurationService - The {@link LeanConfigurationService} to use
      * @param customPropertyPrefix - The additional prefix like "custom.", the dot at the end is mandatory. Can be null.
      */
-    public AbstractOIDCBackendConfig(LeanConfigurationService leanConfigurationService, String customPropertyPrefix) {
+    protected AbstractOIDCBackendConfig(LeanConfigurationService leanConfigurationService, String customPropertyPrefix) {
         this.leanConfigurationService = leanConfigurationService;
         this.customPropertyPrefix = customPropertyPrefix;
     }
@@ -176,7 +175,7 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
     public String autologinCookieMode() {
         return this.loadStringProperty(OIDCBackendProperty.autologinCookieMode);
     }
-    
+
     @Override
     public List<String> getHosts() {
         String[] hosts = this.loadStringProperty(OIDCBackendProperty.hosts).split(",");
@@ -222,7 +221,7 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
         String result = "";
         if (!Strings.isEmpty(this.customPropertyPrefix)) {
             result = this.leanConfigurationService.getProperty(this.getCustomProperty(backendProperty));
-        } 
+        }
         if (Strings.isEmpty(result)) {
             result = this.leanConfigurationService.getProperty(backendProperty);
         }
@@ -239,8 +238,9 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
     protected int loadIntProperty(final OIDCBackendProperty backendProperty) {
         Integer result = null;
         if (!Strings.isEmpty(this.customPropertyPrefix)) {
+            // TODO QS-VS: Does not work this way. Requesting getIntProperty() for a non-existing property will yield a NullPointerException in LeanConfigurationServiceImpl.getIntProperty(Property)
             result = this.leanConfigurationService.getIntProperty(this.getCustomProperty(backendProperty));
-        } 
+        }
         if (result == null) {
             result = this.leanConfigurationService.getIntProperty(backendProperty);
         }
@@ -257,8 +257,9 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
     protected boolean loadBooleanProperty(final OIDCBackendProperty backendProperty) {
         Boolean result = null;
         if (!Strings.isEmpty(this.customPropertyPrefix)) {
+            // TODO QS-VS: Does not work this way. Requesting getBooleanProperty() for a non-existing property will yield a NullPointerException in LeanConfigurationServiceImpl.getBooleanProperty(Property)
             result = this.leanConfigurationService.getBooleanProperty(this.getCustomProperty(backendProperty));
-        } 
+        }
         if (result == null) {
             result = this.leanConfigurationService.getBooleanProperty(backendProperty);
         }

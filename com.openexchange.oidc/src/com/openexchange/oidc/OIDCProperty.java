@@ -66,21 +66,22 @@ public enum OIDCProperty implements Property {
      * startDefaultBackend - Start the default core OpenID backend.
      */
     startDefaultBackend(OIDCProperty.PREFIX, false);
-    
+
 
     public static final String EMPTY = "";
     public static final String PREFIX = "com.openexchange.oidc.";
+
     private final String fqn;
     private final Object defaultValue;
-    
-    private OIDCProperty(String fqn, Object defaultValue) {
-        this.fqn = fqn;
+
+    private OIDCProperty(String prefix, Object defaultValue) {
+        this.fqn = prefix + name();
         this.defaultValue = defaultValue;
     }
-    
+
     @Override
     public String getFQPropertyName() {
-        return fqn + name();
+        return fqn;
     }
 
     @Override

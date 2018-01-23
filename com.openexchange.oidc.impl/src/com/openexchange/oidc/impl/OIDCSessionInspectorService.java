@@ -49,6 +49,7 @@ public class OIDCSessionInspectorService implements SessionInspectorService{
     }
 
     private OIDCBackend loadBackendForSession(Session session) throws OXException{
+        // TODO QS-VS better make com.openexchange.oidc.osgi.OIDCBackendRegistry.backends available to avoid excessive utilization of OSGi look-up stuff
         SortedMap<ServiceReference<OIDCBackend>,OIDCBackend> tracked = this.oidcBackends.getTracked();
         String backendPath = (String) session.getParameter(OIDCTools.BACKEND_PATH);
         if (null == backendPath) {

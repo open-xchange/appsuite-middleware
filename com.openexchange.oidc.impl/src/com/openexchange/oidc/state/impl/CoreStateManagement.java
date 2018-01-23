@@ -68,9 +68,16 @@ import com.openexchange.oidc.state.StateManagement;
 public class CoreStateManagement implements StateManagement {
 
     private static final Logger LOG = LoggerFactory.getLogger(CoreStateManagement.class);
-    private final HazelcastInstance hazelcast;
+
+    // TODO: QS-VS: Add dedicate Hazelcast configuration files for the used Hazelcast maps; see com.openexchange.sessionstorage.hazelcast/conf/hazelcast/sessions.properties
+    // Those configuration files specify backup count, max. idle seconds, etc.
+    // Otherwise defauls are used, which might not apply well
+    // In addition: Using shorter map names might be more adequate as .properties file carries that map name
+
     private static final String HAZELCAST_AUTHREQUEST_INFO_MAP = "oidcAuthenticationRequestInfos";
     private static final String HAZELCAST_LOGOUT_REQUEST_INFO_MAP = "oidcLogoutRequestInfos";
+
+    private final HazelcastInstance hazelcast;
 
     public CoreStateManagement(HazelcastInstance hazelcast) {
         super();

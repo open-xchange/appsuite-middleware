@@ -50,12 +50,13 @@
 package com.openexchange.oidc.http;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Set;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.oidc.OIDCExceptionCode;
@@ -74,19 +75,11 @@ public class InitService extends OIDCServlet {
     private static final String LOGIN = "login";
     private static final String LOGOUT = "logout";
     private static final String THIRD_PARTY = "thirdParty";
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(InitService.class);
     private static final long serialVersionUID = -7066156332544428369L;
 
-    private static final ArrayList<String> acceptedFlows = new ArrayList<String>() {
-
-        private static final long serialVersionUID = -2423863714624255114L;
-        {
-            add(LOGIN);
-            add(LOGOUT);
-            add(THIRD_PARTY);
-        }
-    };
+    private static final Set<String> acceptedFlows = ImmutableSet.of(LOGIN, LOGOUT, THIRD_PARTY);
 
     public InitService(OIDCWebSSOProvider provider, OIDCExceptionHandler exceptionHandler) {
         super(provider, exceptionHandler);
@@ -114,7 +107,7 @@ public class InitService extends OIDCServlet {
             }
         }
     }
-    
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String flow = request.getParameter("flow");
@@ -123,7 +116,7 @@ public class InitService extends OIDCServlet {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        
+
         try {
             String redirectURI = provider.getLoginRedirectRequest(request, response);
             OIDCTools.buildRedirectResponse(response, redirectURI, request.getParameter("redirect"));
@@ -148,7 +141,7 @@ public class InitService extends OIDCServlet {
         if (flow.equals(THIRD_PARTY) && !provider.validateThirdPartyRequest(request)) {
             throw OIDCExceptionCode.INVALID_THIRDPARTY_LOGIN_REQUEST.create("Issuer is unknown to the backend.");
         }
-        
+
         if (flow.equals(LOGIN) || flow.equals(THIRD_PARTY)) {
             redirectUri = provider.getLoginRedirectRequest(request, response);
         } else if (flow.equals(LOGOUT)) {
@@ -164,13 +157,7 @@ public class InitService extends OIDCServlet {
             LOG.debug("OpenID flow parameter not set");
             isValid = false;
         } else if (!acceptedFlows.contains(flow)) {
-            StringBuilder validFlows = new StringBuilder();
-            String delim = "";
-            for (String validFlow : acceptedFlows) {
-                validFlows.append(delim).append(validFlow);
-                delim = ",";
-            }
-            LOG.debug("OpenID flow parameter unknown, valid parameters are: {}. Input is: {}", validFlows, flow);
+            LOG.debug("OpenID flow parameter unknown, valid parameters are: {}. Input is: {}", acceptedFlows, flow);
             isValid = false;
         }
         return isValid;

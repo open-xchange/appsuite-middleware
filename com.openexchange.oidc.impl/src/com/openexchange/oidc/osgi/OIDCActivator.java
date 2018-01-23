@@ -49,16 +49,23 @@
 package com.openexchange.oidc.osgi;
 
 import org.osgi.service.http.HttpService;
+import org.slf4j.Logger;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.oidc.OIDCBackend;
+import com.openexchange.oidc.hz.PortableAuthenticationRequestFactory;
+import com.openexchange.oidc.hz.PortableLogoutRequestFactory;
 import com.openexchange.oidc.impl.OIDCConfigImpl;
+import com.openexchange.oidc.impl.OIDCSessionInspectorService;
 import com.openexchange.oidc.impl.OIDCSessionParameterNamesProvider;
 import com.openexchange.oidc.spi.OIDCCoreBackend;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.inspector.SessionInspectorService;
 import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessionstorage.SessionStorageParameterNamesProvider;
@@ -73,7 +80,7 @@ import com.openexchange.user.UserService;
  */
 public class OIDCActivator extends HousekeepingActivator{
 
-    private OIDCFeature oidcFeature;
+    private OIDCBackendRegistry oidcBackends;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -93,23 +100,42 @@ public class OIDCActivator extends HousekeepingActivator{
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected boolean stopOnServiceUnavailability() {
+        return true;
+    }
+
+    private void getOIDCBackends(ServiceLookup services) {
+        if (this.oidcBackends == null) {
+            this.oidcBackends = new OIDCBackendRegistry(context, services);
+        }
+        this.oidcBackends.open();
+    }
+
+    @Override
+    protected synchronized void startBundle() throws Exception {
         Services.setServices(this);
         OIDCConfigImpl config = new OIDCConfigImpl(this);
-        this.oidcFeature = new OIDCFeature(context, getNeededServices(), config);
-        this.oidcFeature.open();
+
+        Logger logger = org.slf4j.LoggerFactory.getLogger(OIDCActivator.class);
+        if (config.isEnabled().booleanValue()) {
+            logger.info("Starting core OpenID Connect support... ");
+            getOIDCBackends(this);
+            registerService(SessionInspectorService.class, new OIDCSessionInspectorService(oidcBackends, context), null);
+            registerService(CustomPortableFactory.class, new PortableAuthenticationRequestFactory(), null);
+            registerService(CustomPortableFactory.class, new PortableLogoutRequestFactory(), null);
+        } else {
+            logger.info("OpenID Connect support is disabled by configuration. Skipping initialization...");
+        }
+
         //register default oidc backend if configured
-        if (config.startDefaultBackend()) {
+        if (config.startDefaultBackend().booleanValue()) {
             context.registerService(OIDCBackend.class, new OIDCCoreBackend() , null);
         }
         context.registerService(SessionStorageParameterNamesProvider.class, new OIDCSessionParameterNamesProvider(), null);
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        if (this.oidcFeature != null) {
-            this.oidcFeature.close();
-        }
+    protected synchronized void stopBundle() throws Exception {
         Services.setServices(null);
         super.stopBundle();
     }

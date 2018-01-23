@@ -74,6 +74,7 @@ public class OIDCLogoutRequestHandler implements LoginRequestHandler {
     private final OIDCBackend backend;
 
     public OIDCLogoutRequestHandler(OIDCBackend oidcBackend) {
+        super();
         this.backend = oidcBackend;
     }
 

@@ -98,11 +98,13 @@ import com.openexchange.session.Session;
 public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend>{
 
     private static final Logger LOG = LoggerFactory.getLogger(OIDCBackendRegistry.class);
-    private ServiceLookup services;
+
+    private final ServiceLookup services;
     private final ConcurrentList<OIDCBackend> backends;
-    private ConcurrentHashMap<OIDCBackend, Stack<String>> backendServlets;
-    private ConcurrentHashMap<OIDCBackend, Stack<ServiceRegistration<?>>> backendServiceRegistrations;
-    private LoginConfiguration loginConfiguration;
+    private final ConcurrentHashMap<OIDCBackend, Stack<String>> backendServlets;
+    private final ConcurrentHashMap<OIDCBackend, Stack<ServiceRegistration<?>>> backendServiceRegistrations;
+    private final LoginConfiguration loginConfiguration;
+    private final CoreStateManagement stateManagement;
 
     public OIDCBackendRegistry(BundleContext context, ServiceLookup services) {
         super(context, OIDCBackend.class, null);
@@ -111,6 +113,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
         this.backendServlets = new ConcurrentHashMap<>();
         this.backendServiceRegistrations = new ConcurrentHashMap<>();
         this.loginConfiguration = LoginServlet.getLoginConfiguration();
+        this.stateManagement = new CoreStateManagement(services.getService(HazelcastInstance.class));
     }
 
     @Override
@@ -121,33 +124,50 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
         HttpService httpService = this.services.getService(HttpService.class);
         final Stack<ServiceRegistration<?>> serviceRegistrations = new Stack<ServiceRegistration<?>>();
 
-        if (backends.addIfAbsent(oidcBackend)) {
-            LOG.info("Adding OIDCBackend: {}", oidcBackend.getPath());
-            try {
-                OIDCConfig config = oidcBackend.getOIDCConfig();
-                String path = oidcBackend.getPath();
-                if (config == null) {
-                    throw OIDCExceptionCode.MISSING_BACKEND_CONFIGURATION.create(path.isEmpty() ? "No path available" : path);
-                }
-                
-                if (!Strings.isEmpty(path)) {
-                    OIDCTools.validatePath(path);
-                }
-                serviceRegistrations.push(context.registerService(ComputedServerConfigValueService.class, getOidcPathComputedValue(oidcBackend),null));
+        if (false == backends.addIfAbsent(oidcBackend)) {
+            // Such a back-end already exists
+            return null;
+        }
 
-                oidcBackend.setLoginConfiguration(this.loginConfiguration);
-                OIDCWebSSOProvider ssoProvider = new OIDCWebSSOProviderImpl(oidcBackend, new CoreStateManagement(this.services.getService(HazelcastInstance.class)), this.services, this.loginConfiguration);
-                OIDCExceptionHandler exceptionHandler = oidcBackend.getExceptionHandler();
-                
-                this.registerServlet(servlets, httpService, OIDCTools.getPrefix(oidcBackend), new InitService(ssoProvider, exceptionHandler), "init");
-                this.registerServlet(servlets, httpService, OIDCTools.getPrefix(oidcBackend), new AuthenticationService(ssoProvider, exceptionHandler), "auth");
-                this.registerServlet(servlets, httpService, OIDCTools.getPrefix(oidcBackend), new LogoutService(ssoProvider, exceptionHandler), "logout");
-                this.registerRequestHandler(oidcBackend, serviceRegistrations, OIDCTools.OIDC_LOGIN, new OIDCLoginRequestHandler(oidcBackend));
-                this.registerRequestHandler(oidcBackend, serviceRegistrations, OIDCTools.OIDC_LOGOUT, new OIDCLogoutRequestHandler(oidcBackend));
+        String path = oidcBackend.getPath();
+        LOG.info("Adding OIDCBackend: {}", Strings.isEmpty(path) ? oidcBackend.getClass().getSimpleName() : path);
 
-                return oidcBackend;
-            } catch (OXException | ServletException | NamespaceException e) {
-                LOG.error(e.getLocalizedMessage(), e);
+        boolean error = true; // pessimistic
+        try {
+            OIDCConfig config = oidcBackend.getOIDCConfig();
+            if (config == null) {
+                throw OIDCExceptionCode.MISSING_BACKEND_CONFIGURATION.create(Strings.isEmpty(path) ? "No path available" : path);
+            }
+
+            if (false == Strings.isEmpty(path)) {
+                OIDCTools.validatePath(path);
+            }
+            serviceRegistrations.push(context.registerService(ComputedServerConfigValueService.class, getOidcPathComputedValue(oidcBackend),null));
+
+            oidcBackend.setLoginConfiguration(this.loginConfiguration);
+            OIDCWebSSOProvider ssoProvider = new OIDCWebSSOProviderImpl(oidcBackend, stateManagement, this.services, this.loginConfiguration);
+            OIDCExceptionHandler exceptionHandler = oidcBackend.getExceptionHandler();
+
+            String prefix = OIDCTools.getPrefix(oidcBackend);
+            this.registerServlet(servlets, httpService, prefix, new InitService(ssoProvider, exceptionHandler), "init");
+            this.registerServlet(servlets, httpService, prefix, new AuthenticationService(ssoProvider, exceptionHandler), "auth");
+            this.registerServlet(servlets, httpService, prefix, new LogoutService(ssoProvider, exceptionHandler), "logout");
+            this.registerRequestHandler(oidcBackend, serviceRegistrations, OIDCTools.OIDC_LOGIN, new OIDCLoginRequestHandler(oidcBackend));
+            this.registerRequestHandler(oidcBackend, serviceRegistrations, OIDCTools.OIDC_LOGOUT, new OIDCLogoutRequestHandler(oidcBackend));
+
+            if (!servlets.isEmpty()) {
+                this.backendServlets.putIfAbsent(oidcBackend, servlets);
+            }
+            if (!serviceRegistrations.isEmpty()) {
+                this.backendServiceRegistrations.putIfAbsent(oidcBackend, serviceRegistrations);
+            }
+
+            error = false;
+            return oidcBackend;
+        } catch (Exception e) {
+            LOG.error("Failed to add OIDCBackend {} to registry", Strings.isEmpty(path) ? oidcBackend.getClass().getSimpleName() : path, e);
+        } finally {
+            if (error) {
                 while (!servlets.isEmpty()) {
                     httpService.unregister(servlets.pop());
                 }
@@ -159,40 +179,35 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                 }
                 this.backends.remove(oidcBackend);
                 this.context.ungetService(reference);
-            } finally {
-                if (!servlets.isEmpty()) {
-                    this.backendServlets.putIfAbsent(oidcBackend, servlets);
-                }
-                if (!serviceRegistrations.isEmpty()) {
-                    this.backendServiceRegistrations.putIfAbsent(oidcBackend, serviceRegistrations);
-                }
             }
         }
+
+        // Return nothing...
         return null;
     }
-    
+
     private ComputedServerConfigValueService getOidcPathComputedValue(final OIDCBackend oidcBackend) {
         return new ComputedServerConfigValueService() {
 
             @Override
             public void addValue(Map<String, Object> serverConfig, String hostName, int userID, int contextID, Session optSession) throws OXException {
-                
+
                 if (serverConfig.containsKey("oidcPath")) {
                     return;
                 }
-                
+
                 String oidcPath = "/" + OIDCTools.DEFAULT_BACKEND_PATH;
                 String backendPath = oidcBackend.getPath();
                 if (!Strings.isEmpty(backendPath)) {
                     oidcPath += "/" + backendPath;
                 }
-                
+
                 List<String> hosts = oidcBackend.getBackendConfig().getHosts();
                 if (hosts.contains("all")) {
                     serverConfig.put("oidcPath", oidcPath);
                     return;
                 }
-                
+
                 for (String hostIdentifer: hosts) {
                     if (!Strings.isEmpty(hostIdentifer) && hostIdentifer.equalsIgnoreCase(hostName)) {
                         serverConfig.put("oidcPath", oidcPath);

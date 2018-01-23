@@ -52,8 +52,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.Cookie;
@@ -152,7 +152,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         LOG.trace("getLoginRedirectRequest(HttpServletRequest request: {}, HttpServletResponse response)", request.getRequestURI());
         AutologinMode autologinMode = OIDCBackendConfig.AutologinMode.get(this.backend.getBackendConfig().autologinCookieMode());
 
-        if (autologinMode != null && autologinMode == AutologinMode.OX_DIRECT) {
+        if (autologinMode == AutologinMode.OX_DIRECT) {
             String autologinRedirect = this.getAutologinURLFromOIDCCookie(request, response);
             if (!Strings.isEmpty(autologinRedirect)) {
                 return autologinRedirect;
@@ -184,6 +184,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         String deeplink = request.getParameter("hash");
 
         if (!Strings.isEmpty(redirectURL) && !Strings.isEmpty(deeplink)) {
+            // TODO: QS-VS URL-encode appended query parameters (if not done yet); e.g. using com.openexchange.ajax.AJAXUtility.encodeUrl(String, boolean, boolean, String)
             redirectURL += "&" + deeplink.substring(1);
         }
 
@@ -218,6 +219,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         if (sessions.size() > 0) {
             session = sessiondService.getSession(sessions.iterator().next());
         }
+        // TODO: QS-VS Validate session; see SAMLLoginRequestHandler.tryAutoLogin(HttpServletRequest, HttpServletResponse, Reservation, SAMLBackend)
         return session;
     }
 
@@ -250,7 +252,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         String deepLink = request.getParameter("deep_link");
         String uiClientID = OIDCTools.getUiClient(request);
         String hostname = OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class));
-        Map<String, String> additionalClientInformation = new HashMap<>();
+        Map<String, String> additionalClientInformation = Collections.emptyMap();
 
         AuthenticationRequestInfo authenticationRequestInfo = new DefaultAuthenticationRequestInfo.Builder(state.getValue())
             .domainName(hostname)
@@ -275,11 +277,10 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             TokenRequest tokenReq = this.createTokenRequest(request);
             OIDCTokenResponse tokenResponse = this.getTokenResponse(tokenReq);
             IDTokenClaimsSet validTokenResponse = this.backend.validateIdToken(tokenResponse.getOIDCTokens().getIDToken(), storedRequestInformation.getNonce());
-            if (validTokenResponse != null) {
-                this.sendLoginRequestToServer(request, response, tokenResponse, storedRequestInformation.getDomainName());
-                return;
+            if (validTokenResponse == null) {
+                throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create("IDToken validation failed, no claim set could be extracted");
             }
-            throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create("IDToken validation failed, no claim set could be extracted");
+            this.sendLoginRequestToServer(request, response, tokenResponse, storedRequestInformation.getDomainName());
         } catch (OXException e) {
             if (e.getExceptionCode() != OIDCExceptionCode.IDTOKEN_GATHERING_ERROR) {
                 throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create(e, e.getMessage());
@@ -414,6 +415,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         if (session == null) {
             throw OIDCExceptionCode.INVALID_LOGOUT_REQUEST.create("Invalid session parameter, no session found.");
         }
+        // TODO: QS-VS Further validate session (check against secret cookie, etc.); see SessionUtility
         return session;
     }
 
@@ -482,7 +484,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         LOG.trace("resumeUser(HttpServletRequest request: {}, HttpServletResponse response)", request.getRequestURI());
         LogoutRequestInfo logoutRequestInfo = this.loadLogoutRequestInfo(request);
         try {
-            OIDCTools.buildRedirectResponse(response, logoutRequestInfo.getRequestURI(), "true");
+            OIDCTools.buildRedirectResponse(response, logoutRequestInfo.getRequestURI(), Boolean.TRUE);
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
             this.logoutInCaseOfError(logoutRequestInfo.getSessionId(), request, response);

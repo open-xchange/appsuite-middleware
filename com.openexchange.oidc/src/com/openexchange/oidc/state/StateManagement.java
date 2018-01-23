@@ -58,38 +58,39 @@ import java.util.concurrent.TimeUnit;
  * @since v7.10.0
  */
 public interface StateManagement {
-    
+
     /**
      * Adds an AuthenticationRequestInfo object to be managed.
-     * 
+     *
      * @param authenticationRequestInfo - The {@link AuthenticationRequestInfo} to be managed by hazelcast
      * @param ttl The time to live
      * @param timeUnit The time unit of <code>ttl</code>
      */
+    //TODO QS-VS: Alle interfaces werfen OXExceptions, die abgefangen werden müssen
     void addAuthenticationRequest(AuthenticationRequestInfo authenticationRequestInfo, long ttl, TimeUnit timeUnit);
-    
+
     /**
      * Load the {@link AuthenticationRequestInfo} which is identified by the state.
-     * 
+     *
      * @param state The state to identify the {@link AuthenticationRequestInfo}
      * @return The {@link AuthenticationRequestInfo}
      */
     AuthenticationRequestInfo getAndRemoveAuthenticationInfo(String state);
-    
+
     /**
      * Add the given {@link LogoutRequestInfo} to a hazelcast IMap, which is managed
      * by hazelcast and enables every node in the cluster to handle Logout requests.
-     * 
+     *
      * @param logoutRequestInfo - The {@link LogoutRequestInfo} to managed by hazelcast
      * @param ttl The time to live
      * @param timeUnit The time unit of <code>ttl</code>
      */
     void addLogoutRequest(LogoutRequestInfo logoutRequestInfo, long ttl, TimeUnit timeUnit);
-    
+
     /**
      * Load the stored {@link LogoutRequestInfo} from hazelcasts {@link IMap} by
      * passing the state, which identifies the {@link LogoutRequestInfo}.
-     * 
+     *
      * @param state The identifier of the {@link LogoutRequestInfo}
      * @return The {@link LogoutRequestInfo}
      */

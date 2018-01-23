@@ -48,7 +48,9 @@
  */
 package com.openexchange.oidc.state.impl;
 
+import java.util.Collections;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.oidc.state.AuthenticationRequestInfo;
 
 /**
@@ -59,12 +61,12 @@ import com.openexchange.oidc.state.AuthenticationRequestInfo;
  */
 public class DefaultAuthenticationRequestInfo implements AuthenticationRequestInfo{
 
-    private String state;
-    private String domainName;
-    private String deepLink;
-    private String nonce;
-    private Map<String, String> additionalClientInformation;
-    private String uiClientID;
+    private final String state;
+    private final String domainName;
+    private final String deepLink;
+    private final String nonce;
+    private final Map<String, String> additionalClientInformation;
+    private final String uiClientID;
 
     public DefaultAuthenticationRequestInfo(String state, String domainName, String deepLink, String nonce, Map<String, String> additionalClientInformation, String uiClientID) {
         super();
@@ -72,7 +74,7 @@ public class DefaultAuthenticationRequestInfo implements AuthenticationRequestIn
         this.domainName = domainName;
         this.deepLink = deepLink;
         this.nonce = nonce;
-        this.additionalClientInformation = additionalClientInformation;
+        this.additionalClientInformation = null == additionalClientInformation ? Collections.<String, String> emptyMap() : ImmutableMap.copyOf(additionalClientInformation);
         this.uiClientID = uiClientID;
     }
 
@@ -105,53 +107,54 @@ public class DefaultAuthenticationRequestInfo implements AuthenticationRequestIn
     public String getUiClientID() {
         return this.uiClientID;
     }
-    
+
     public static class Builder {
-        private String state;
+
+        private final String state;
         private String domainName;
         private String deepLink;
         private String nonce;
         private Map<String, String> additionalClientInformation;
         private String uiClientID;
-        
+
         public Builder(String state) {
             this.state = state;
         }
-        
+
         public Builder domainName(String domainName) {
             this.domainName = domainName;
             return this;
         }
-        
+
         public Builder deepLink(String deepLink) {
             this.deepLink = deepLink;
             return this;
         }
-        
+
         public Builder nonce(String nonce) {
             this.nonce = nonce;
             return this;
         }
-        
+
         public Builder additionalClientInformation(Map<String, String> additionalClientInformation) {
             this.additionalClientInformation = additionalClientInformation;
             return this;
         }
-        
+
         public Builder uiClientID(String uiClientID) {
             this.uiClientID = uiClientID;
             return this;
         }
-        
+
         public DefaultAuthenticationRequestInfo build() {
             return new DefaultAuthenticationRequestInfo(
-                this.state, 
-                this.domainName, 
-                this.deepLink, 
-                this.nonce, 
-                this.additionalClientInformation, 
+                this.state,
+                this.domainName,
+                this.deepLink,
+                this.nonce,
+                this.additionalClientInformation,
                 this.uiClientID);
         }
     }
-    
+
 }

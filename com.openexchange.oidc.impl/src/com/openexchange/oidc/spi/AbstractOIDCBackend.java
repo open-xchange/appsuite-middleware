@@ -60,6 +60,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -149,10 +150,17 @@ import com.openexchange.user.UserService;
  */
 public abstract class AbstractOIDCBackend implements OIDCBackend {
 
-    protected static final String AUTH_RESPONSE = "auth_response";
     private static final Logger LOG = LoggerFactory.getLogger(AbstractOIDCBackend.class);
-    private LoginConfiguration loginConfiguration;
-    
+
+    protected static final String AUTH_RESPONSE = "auth_response";
+
+    private final AtomicReference<LoginConfiguration> loginConfigurationReference;
+
+    protected AbstractOIDCBackend() {
+        super();
+        loginConfigurationReference = new AtomicReference<LoginConfiguration>(null);
+    }
+
     @Override
     public OIDCConfig getOIDCConfig() {
         return new OIDCConfigImpl(Services.getService(LeanConfigurationService.class));
@@ -165,7 +173,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
     @Override
     public void setLoginConfiguration(LoginConfiguration loginConfiguration) {
-        this.loginConfiguration = loginConfiguration;
+        loginConfigurationReference.set(loginConfiguration);
     }
 
     @Override
@@ -398,11 +406,14 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         }
     }
 
-    private LoginConfiguration getLoginConfiguration() {
-        if (this.loginConfiguration == null) {
-            this.loginConfiguration = LoginServlet.getLoginConfiguration();
-        }
-        return this.loginConfiguration;
+    /**
+     * Gets the assigned login configuration or falls-back to {@link LoginServlet#getLoginConfiguration()}.
+     *
+     * @return The effective login configuration
+     */
+    protected LoginConfiguration getLoginConfiguration() {
+        LoginConfiguration loginConfiguration = loginConfigurationReference.get();
+        return null == loginConfiguration ? LoginServlet.getLoginConfiguration() : loginConfiguration;
     }
 
     @Override
@@ -413,7 +424,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         SessionUtility.removeOXCookies(session, request, response);
         SessionUtility.removeJSESSIONID(request, response);
         if (this.getBackendConfig().isAutologinEnabled()) {
-            Cookie autologinCookie = OIDCTools.loadAutologinCookie(request, loginConfiguration != null ? loginConfiguration : this.getLoginConfiguration());
+            Cookie autologinCookie = OIDCTools.loadAutologinCookie(request, getLoginConfiguration());
             SessionUtility.removeCookie(autologinCookie, "", autologinCookie.getDomain(), response);
         }
     }
@@ -490,7 +501,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
         if (autologinMode == OIDCBackendConfig.AutologinMode.SSO_REDIRECT) {
             try {
-                Cookie autologinCookie = OIDCTools.loadAutologinCookie(request, this.loginConfiguration);
+                Cookie autologinCookie = OIDCTools.loadAutologinCookie(request, getLoginConfiguration());
                 return this.getAutologinByCookieURL(request, response, reservation, autologinCookie, respondWithJson);
             } catch (OXException e) {
                 LOG.debug("Ignoring OIDC auto-login attempt due to failed IP or secret check", e);
@@ -536,6 +547,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         if (sessions.size() > 0) {
             session = sessiondService.getSession(sessions.iterator().next());
         }
+        // TODO: QS-VS Validate session; see SAMLLoginRequestHandler.tryAutoLogin(HttpServletRequest, HttpServletResponse, Reservation, SAMLBackend)
         return session;
     }
 
@@ -545,7 +557,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         if (session.getContextId() != reservation.getContextId() && session.getUserId() != reservation.getUserId()) {
             this.handleException(null, true, LoginExceptionCodes.LOGIN_DENIED.create(), 0);
         }
-        return OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(this.loginConfiguration, this.getBackendConfig()));
+        return OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(getLoginConfiguration(), this.getBackendConfig()));
     }
 
     private void writeSessionDataAsJson(Session session, HttpServletResponse response) throws JSONException, IOException {
@@ -564,7 +576,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
     private LoginResult loginUser(HttpServletRequest request, final Context context, final User user, final Map<String, String> state, final String oidcAutologinCookieValue) throws OXException {
         LOG.trace("loginUser(HttpServletRequest request: {}, final Context context: {}, final User user: {}, final Map<String, String> state.size: {}, final String oidcAutologinCookieValue: {})", request.getRequestURI(), context.getContextId(), user.getId(), state.size(), oidcAutologinCookieValue);
-        final LoginRequest loginRequest = this.getLoginRequest(request, user.getId(), context.getContextId(), loginConfiguration);
+        final LoginRequest loginRequest = this.getLoginRequest(request, user.getId(), context.getContextId(), getLoginConfiguration());
 
         LoginResult loginResult = LoginPerformer.getInstance().doLogin(loginRequest, new HashMap<String, Object>(), new LoginMethodClosure() {
 
@@ -619,7 +631,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
         SessionUtility.rememberSession(request, new ServerSessionAdapter(session));
 
-        LoginServlet.writeSecretCookie(request, response, session, session.getHash(), request.isSecure(), request.getServerName(), this.loginConfiguration);
+        LoginServlet.writeSecretCookie(request, response, session, session.getHash(), request.isSecure(), request.getServerName(), getLoginConfiguration());
 
         return session;
     }
@@ -641,7 +653,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
     private void sendRedirect(Session session, HttpServletRequest request, HttpServletResponse response, boolean respondWithJson) throws IOException, JSONException {
         LOG.trace("sendRedirect(Session session: {}, HttpServletRequest request: {}, HttpServletResponse response, boolean respondWithJson {})", session.getSessionID(), request.getRequestURI(), respondWithJson);
-        String uiWebPath = OIDCTools.getUIWebPath(this.loginConfiguration, this.getBackendConfig());
+        String uiWebPath = OIDCTools.getUIWebPath(getLoginConfiguration(), this.getBackendConfig());
         String frontendRedirectLocation = OIDCTools.buildFrontendRedirectLocation(session, uiWebPath);
         if (respondWithJson) {
             this.writeSessionDataAsJson(session, response);

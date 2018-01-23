@@ -61,22 +61,22 @@ import com.openexchange.server.ServiceLookup;
  * @since v7.10.0
  */
 public class OIDCConfigImpl implements OIDCConfig{
-    
-    private LeanConfigurationService leanConfigurationService; 
-    
+
+    private final LeanConfigurationService leanConfigurationService;
+
     public OIDCConfigImpl(LeanConfigurationService leanConfigurationService) {
         this.leanConfigurationService = leanConfigurationService;
     }
-    
+
     public OIDCConfigImpl(ServiceLookup serviceLookup) {
         this.leanConfigurationService = serviceLookup.getService(LeanConfigurationService.class);
-    } 
+    }
 
     @Override
     public Boolean isEnabled() {
         return this.leanConfigurationService.getBooleanProperty(OIDCProperty.enabled);
     }
-    
+
     @Override
     public Boolean startDefaultBackend() {
         return this.leanConfigurationService.getBooleanProperty(OIDCProperty.startDefaultBackend);

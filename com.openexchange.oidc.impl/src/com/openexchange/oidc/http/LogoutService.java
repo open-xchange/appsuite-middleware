@@ -91,7 +91,7 @@ public class LogoutService extends OIDCServlet {
         } else {
             try {
                 String redirectURI = this.provider.logoutSSOUser(request, response);
-                OIDCTools.buildRedirectResponse(response, redirectURI, "true");
+                OIDCTools.buildRedirectResponse(response, redirectURI, Boolean.TRUE);
             } catch (OXException e) {
                 exceptionHandler.handleLogoutFailed(request, response, e);
             }

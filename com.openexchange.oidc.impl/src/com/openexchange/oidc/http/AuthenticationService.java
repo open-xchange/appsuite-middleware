@@ -78,13 +78,14 @@ public class AuthenticationService extends OIDCServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        
-        if (Strings.toLowerCase(request.getQueryString()).contains("error")) {
+
+        String queryString = request.getQueryString();
+        if (null != queryString && Strings.toLowerCase(queryString).contains("error=")) {
             String errorMessage = request.getParameter("error") + ":" + request.getParameter("error_description");
             exceptionHandler.handleResponseException(request, response, OIDCExceptionCode.OP_SERVER_ERROR.create(errorMessage));
             return;
         }
-        
+
         try {
             this.provider.authenticateUser(request, response);
         } catch (OXException e) {

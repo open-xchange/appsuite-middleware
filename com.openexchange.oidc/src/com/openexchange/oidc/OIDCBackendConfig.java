@@ -60,29 +60,29 @@ import com.openexchange.authentication.AuthenticationService;
  * @since v7.10.0
  */
 public interface OIDCBackendConfig {
-    
+
     /**
      * {@link AutologinMode}
      *
      * All valid auto-login modes for a given backend. The session information is stored in an
      * own OIDC-Cookie. Therefore the name of the property is 'com.openexchange.oidc.autologinCookieMode'.
-     * 
+     *
      * off: No auto-login at all
      * sso_redirect: Means the user is redirected to the OP first and asked for confirmation
-     * ox_direct: The current user session is terminated immediately 
+     * ox_direct: The current user session is terminated immediately
      */
     public static enum AutologinMode {
         /**
          * OFF - No auto-login at all
          */
-        OFF("off"), 
+        OFF("off"),
         /**
          * SSO_REDIRECT - Redirect to OP for confirmation of a valid session
          * Needed properties:
          * <br>
          * - autologinCookieMode <br>
          */
-        SSO_REDIRECT("sso_redirect"), 
+        SSO_REDIRECT("sso_redirect"),
         /**
          * OX_DIRECT - Directly login into a valid OXSession
          * Needed properties:
@@ -90,17 +90,17 @@ public interface OIDCBackendConfig {
          * - autologinCookieMode <br>
          */
         OX_DIRECT("ox_direct");
-        
-        private String value;
-        
+
+        private final String value;
+
         private AutologinMode(String value) {
             this.value = value;
         }
-        
+
         public String getValue() {
             return this.value;
         }
-        
+
         private static final Map<String, AutologinMode> lookup = new HashMap<String, AutologinMode>();
 
         static {
@@ -108,15 +108,15 @@ public interface OIDCBackendConfig {
                 lookup.put(mode.getValue(), mode);
             }
         }
-        
+
         public static AutologinMode get(String mode) {
             return lookup.get(mode);
         }
     }
-    
+
     /**
      * The id, which the backend client received from the OP on client registration.
-     * 
+     *
      * @return the client id.
      */
     String getClientID();
@@ -124,143 +124,143 @@ public interface OIDCBackendConfig {
     /**
      * Get the redirect URI that should be used by the frontend to start the authentication
      * process. Pointing to the init-Servlet. {@link InitService}
-     * 
+     *
      * @return the redirect URI
      */
     String getRpRedirectURIInit();
-    
+
     /**
      * Get the redirect URI that the OP should redirect to after token generation. Pointing to
      * the authentication servlet. {@link AuthenticationService}
-     * 
+     *
      * @return the redirect URI
      */
     String getRpRedirectURIAuth();
-    
+
     /**
      * The path to the authorization endpoint of the OP
-     * 
+     *
      * @return the path to the endpoint
      */
     String getOpAuthorizationEndpoint();
 
     /**
      * The path to the token endpoint of the OP
-     * 
+     *
      * @return the path to the endpoint
      */
     String getOpTokenEndpoint();
 
     /**
      * The secret, which the backend client received from the OP on client registration.
-     * 
+     *
      * @return the secret
      */
     String getClientSecret();
 
     /**
      * The path to the JWK Set endpoint of the OP.
-     * 
+     *
      * @return the path to the endpoint
      */
     String getOpJwkSetEndpoint();
 
     /**
      * The used algorithm to encrypt communication with the OP.
-     * 
+     *
      * @return the used algorithm
      */
     String getJWSAlgortihm();
-    
+
     /**
      * The used OIDC scope.
-     * 
+     *
      * @return the scope
      */
     String getScope();
-    
+
     /**
      * The path to the issuer endpoint of the OP
-     * 
+     *
      * @return the path to the endpoint
      */
     String getOpIssuer();
-    
+
     /**
      * The response type used by the OP
-     * 
+     *
      * @return the used type
      */
     String getResponseType();
-    
+
     /**
      * The path to the logout endpoint of the OP
-     * 
+     *
      * @return the path to the endpoint
      */
     String getOpLogoutEndpoint();
-    
+
     /**
-     * The path to the post OP logout location that should be used. Pointing to the 
+     * The path to the post OP logout location that should be used. Pointing to the
      * logout servlet. {@link LogoutService}
-     * 
+     *
      * @return the redirect URI
      */
     String getRpRedirectURIPostSSOLogout();
 
     /**
      * Is SSO logout enabled, triggers the confirmation procedure via OP if enabled.
-     * 
+     *
      * @return true or false
      */
     boolean isSSOLogout();
 
     /**
      * Where is the user supposed to be redirected to, after a successful logout.
-     * 
+     *
      * @return the redirect URI
      */
     String getRpRedirectURILogout();
-    
+
     /**
      * Which logout mode is selected. Potential content can be found here {@link OIDCBackendConfig.AutologinMode}
-     * 
+     *
      * @return the selected mode.
      */
     String autologinCookieMode();
 
     /**
      * Is auto-login at all enabled or not
-     * 
+     *
      * @return true or false
      */
     boolean isAutologinEnabled();
-    
+
     /**
      * How long before an Oauth Access token expires a new token is supposed to be
      * requested. Time in milliseconds.
-     * 
+     *
      * @return the time
      */
     int getOauthRefreshTime();
 
     /**
      * Load the web ui web path for this backend.
-     * 
+     *
      * @return the ui web path.
      */
     String getUIWebpath();
-    
+
     /**
      * Load this backends path, which is appended to the default /oidc/ path.
-     * 
+     *
      * @return
      */
     String getBackendPath();
-    
+
     /**
      * Load all hosts separated by a comma, that this backend supports.
-     * 
+     *
      * @return
      */
     List<String> getHosts();

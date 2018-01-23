@@ -100,7 +100,7 @@ public class OIDCTools {
     public static final String TYPE = "type";
 
     public static final String END = "end";
-    
+
     public static final String RESUME = "resume";
 
     public static final String STATE = "state";
@@ -118,7 +118,7 @@ public class OIDCTools {
     public static final String ACCESS_TOKEN_EXPIRY = "access_token_expiry";
 
     public static final String BACKEND_PATH = "__session.oidc.backend.path";
-    
+
     public static final String DEFAULT_BACKEND_PATH = "oidc";
 
     public static String getPathString(String path) {
@@ -166,7 +166,7 @@ public class OIDCTools {
      *
      * @param request The {@link HttpServletRequest}
      * @param hostnameService The {@link HostnameService}, nullable
-     * @return The domian name
+     * @return The domain name
      */
     public static String getDomainName(HttpServletRequest request, HostnameService hostnameService) {
         LOG.trace("getDomainName(HttpServletRequest request: {}, HostnameService hostnameService: {})", request.getRequestURI(), (hostnameService != null ? "HostnameService instance" : "null"));
@@ -206,13 +206,27 @@ public class OIDCTools {
      *
      * @param response The {@link HttpServletResponse} to use
      * @param redirectURI The URI where the response should redirect to
-     * @param respondWithRedirect 'true', 'false' or null. Triggers the addition of a JSON body, where an
+     * @param respondWithRedirect 'true', 'false' or <code>null</code>. Triggers the addition of a JSON body, where an
      *  attribute is added with the name 'redirect' and the value of the redirect URI.
      * @throws IOException If the redirect URI can not be added
      */
     public static void buildRedirectResponse(HttpServletResponse response, String redirectURI, String respondWithRedirect) throws IOException {
-        LOG.trace("buildRedirectResponse(HttpServletResponse response, String redirectURI: , String respondWithRedirect: )", redirectURI, (respondWithRedirect != null ? respondWithRedirect : "null"));
-        if (respondWithRedirect != null && Boolean.parseBoolean(respondWithRedirect)) {
+        buildRedirectResponse(response, redirectURI, null == respondWithRedirect ? null : Boolean.valueOf(respondWithRedirect.trim()));
+    }
+
+    /**
+     * Add the given redirect URI to the given {@link HttpServletResponse}. Either in a JSON object with
+     * the attribute name 'redirect', if respondWithRedirect is 'true' or by a direct redirect.
+     *
+     * @param response The {@link HttpServletResponse} to use
+     * @param redirectURI The URI where the response should redirect to
+     * @param respondWithRedirect <code>Boolean.TRUE</code>, <code>Boolean.FALSE</code> or <code>null</code>. Triggers the addition of a JSON body, where an
+     *  attribute is added with the name 'redirect' and the value of the redirect URI.
+     * @throws IOException If the redirect URI can not be added
+     */
+    public static void buildRedirectResponse(HttpServletResponse response, String redirectURI, Boolean respondWithRedirect) throws IOException {
+        LOG.trace("buildRedirectResponse(HttpServletResponse response, String redirectURI: {}, Boolean respondWithRedirect: {})", redirectURI, (respondWithRedirect != null ? respondWithRedirect : "null"));
+        if (respondWithRedirect != null && respondWithRedirect.booleanValue()) {
             response.sendRedirect(redirectURI);
         } else {
             response.setStatus(HttpServletResponse.SC_OK);
@@ -270,7 +284,7 @@ public class OIDCTools {
         }
         return uiWebPath;
     }
-    
+
     /**
      * Helper method that validates the path to only contain allowed characters
      * @param path The path to be checked.
@@ -281,11 +295,11 @@ public class OIDCTools {
             throw OIDCExceptionCode.INVALID_BACKEND_PATH.create(path);
         }
     }
-    
-    
+
+
     /**
      * Get the prefix for the given path or set it to "oidc/" if not configured.
-     * 
+     *
      * @param oidcBackend The backend which prefix should be determined
      * @return the backends path or "oidc/"
      */
@@ -300,11 +314,11 @@ public class OIDCTools {
         }
         return prefixBuilder.toString();
     }
-    
+
     /**
      * Load the UI Client name from the given request. If not present,
      * load the default client information from {@link LoginConfiguration}.
-     * 
+     *
      * @param request The request for which the UI Client should be determined
      * @return The UI client name
      */
@@ -319,10 +333,10 @@ public class OIDCTools {
 
         return uiClientID;
     }
-    
+
     /**
      * Determine whether the given request is secure or not.
-     * 
+     *
      * @param request The request
      * @return "https" if request is considered secure, "http" otherwise
      */

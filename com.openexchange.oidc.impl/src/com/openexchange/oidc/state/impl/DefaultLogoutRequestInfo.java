@@ -59,12 +59,12 @@ import com.openexchange.oidc.state.LogoutRequestInfo;
  * @since v7.10.0
  */
 public class DefaultLogoutRequestInfo implements LogoutRequestInfo {
-    
-    private String state;
-    private String domainName;
-    private String sessionId;
-    private String requestURI;
-    
+
+    private final String state;
+    private final String domainName;
+    private final String sessionId;
+    private final String requestURI;
+
     public DefaultLogoutRequestInfo(String state, String domainName, String sessionId, String requestURI) {
         super();
         this.state = state;
@@ -87,7 +87,7 @@ public class DefaultLogoutRequestInfo implements LogoutRequestInfo {
     public String getSessionId() {
         return this.sessionId;
     }
-    
+
     @Override
     public String getRequestURI() {
         return this.requestURI;
