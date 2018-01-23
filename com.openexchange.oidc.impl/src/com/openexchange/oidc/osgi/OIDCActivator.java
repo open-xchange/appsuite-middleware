@@ -136,6 +136,11 @@ public class OIDCActivator extends HousekeepingActivator{
 
     @Override
     protected synchronized void stopBundle() throws Exception {
+        OIDCBackendRegistry oidcBackends = this.oidcBackends;
+        if (null != oidcBackends) {
+            this.oidcBackends = null;
+            oidcBackends.close();
+        }
         Services.setServices(null);
         super.stopBundle();
     }
