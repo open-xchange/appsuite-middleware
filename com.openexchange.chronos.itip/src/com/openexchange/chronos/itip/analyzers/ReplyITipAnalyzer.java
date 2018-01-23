@@ -117,8 +117,8 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
         if (update != null) {
             uid = update.getUid();
         } else {
-            for (final Event appointment : message.exceptions()) {
-                uid = appointment.getUid();
+            for (final Event event : message.exceptions()) {
+                uid = event.getUid();
                 if (uid != null) {
                     break;
                 }
