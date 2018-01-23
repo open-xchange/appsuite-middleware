@@ -103,7 +103,7 @@ public class ICal4JITipParser {
             }
             resolveAttendees(event, session);
             resolveOrganizer(event, session);
-            event.setFlags(CalendarUtils.getFlags(event, message.getOwner()));
+            event.setFlags(CalendarUtils.getFlags(event, session.getUserId()));
             
             if (event.containsRecurrenceId()) {
                 message.addException(event);
