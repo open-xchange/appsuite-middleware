@@ -70,6 +70,7 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
 import com.openexchange.java.InetAddresses;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.rss.osgi.Services;
 import com.openexchange.tools.stream.CountingInputStream;
@@ -145,10 +146,23 @@ public class TimoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Rel
             return null;
         }
 
+        // Get redirect location & disconnect current URL connection instance
         String redirectUrl = httpConnection.getHeaderField("Location");
         httpConnection.disconnect();
+
+        // Validate redirect location
+        if (Strings.isEmpty(redirectUrl)) {
+            // Missing "Location" header
+            throw new FetcherException("Missing redirect URL");
+        }
+
+        // Examine redirect location
         try {
             URL feedUrl = new URL(redirectUrl);
+            if (RssProperties.isDenied(feedUrl.getProtocol(), feedUrl.getHost(), feedUrl.getPort())) {
+                // Deny redirecting to a local address
+                throw new FetcherException(feedUrl.toExternalForm() + " is not an allowed redirect URL");
+            }
             if (originalAddressIsRemote) {
                 try {
                     InetAddress inetAddress = InetAddress.getByName(feedUrl.getHost());
@@ -217,10 +231,8 @@ public class TimoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Rel
                 httpConnection.setReadTimeout(readTimout);
             }
 
-            if (originalAddressIsRemote) {
-                // Deny to automatically follow redirects in case original address is remote
-                httpConnection.setInstanceFollowRedirects(false);
-            }
+            // Deny to automatically follow redirects
+            httpConnection.setInstanceFollowRedirects(false);
 
             FeedFetcherCache cache = getFeedInfoCache();
             if (cache == null) {
