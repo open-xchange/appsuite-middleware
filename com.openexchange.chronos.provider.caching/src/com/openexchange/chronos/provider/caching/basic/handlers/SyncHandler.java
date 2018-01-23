@@ -56,6 +56,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.DefaultUpdatesResult;
 import com.openexchange.chronos.common.SearchUtils;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.SortOrder;
@@ -69,7 +70,6 @@ import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.arrays.Arrays;
 
@@ -86,8 +86,8 @@ public class SyncHandler extends AbstractExtensionHandler {
     /**
      * Initialises a new {@link SyncHandler}.
      */
-    public SyncHandler(ServiceLookup services, Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super(services, session, account, parameters);
+    public SyncHandler(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        super(session, account, parameters);
     }
 
     /**
@@ -98,7 +98,7 @@ public class SyncHandler extends AbstractExtensionHandler {
      * @throws OXException if the operation fails
      */
     public UpdatesResult getUpdatedEvents(long updatedSince) throws OXException {
-        return new OSGiCalendarStorageOperation<UpdatesResult>(services, getSession().getContextId(), getAccount().getAccountId()) {
+        return new OSGiCalendarStorageOperation<UpdatesResult>(Services.getServiceLookup(), getSession().getContextId(), getAccount().getAccountId()) {
 
             @Override
             protected UpdatesResult call(CalendarStorage storage) throws OXException {
@@ -136,7 +136,7 @@ public class SyncHandler extends AbstractExtensionHandler {
      * @throws OXException
      */
     public long getSequenceNumber() throws OXException {
-        return new OSGiCalendarStorageOperation<Long>(services, getSession().getContextId(), getAccount().getAccountId()) {
+        return new OSGiCalendarStorageOperation<Long>(Services.getServiceLookup(), getSession().getContextId(), getAccount().getAccountId()) {
 
             @Override
             protected Long call(CalendarStorage storage) throws OXException {
@@ -165,7 +165,7 @@ public class SyncHandler extends AbstractExtensionHandler {
      * @throws OXException if an error is occurred
      */
     public List<Event> resolveResource(String resourceName) throws OXException {
-        return new OSGiCalendarStorageOperation<List<Event>>(services, getSession().getContextId(), getAccount().getAccountId()) {
+        return new OSGiCalendarStorageOperation<List<Event>>(Services.getServiceLookup(), getSession().getContextId(), getAccount().getAccountId()) {
 
             @Override
             protected List<Event> call(CalendarStorage storage) throws OXException {

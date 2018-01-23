@@ -171,7 +171,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             return getEvents();
         }
         getEvents();
-        return new SearchHandler(services, session, account, parameters).searchEvents(filters, queries);
+        return new SearchHandler(session, account, parameters).searchEvents(filters, queries);
     }
 
     /*
@@ -182,7 +182,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     @Override
     public UpdatesResult getUpdatedEvents(long updatedSince) throws OXException {
         getEvents();
-        return new SyncHandler(services, session, account, parameters).getUpdatedEvents(updatedSince);
+        return new SyncHandler(session, account, parameters).getUpdatedEvents(updatedSince);
     }
 
     /*
@@ -193,7 +193,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     @Override
     public long getSequenceNumber() throws OXException {
         getEvents();
-        return new SyncHandler(services, session, account, parameters).getSequenceNumber();
+        return new SyncHandler(session, account, parameters).getSequenceNumber();
     }
 
     /*
@@ -204,7 +204,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     @Override
     public List<Event> resolveResource(String resourceName) throws OXException {
         getEvents();
-        return new SyncHandler(services, session, account, parameters).resolveResource(resourceName);
+        return new SyncHandler(session, account, parameters).resolveResource(resourceName);
     }
 
     private static final class CachingAccessBridge extends SingleFolderCachingCalendarAccess {

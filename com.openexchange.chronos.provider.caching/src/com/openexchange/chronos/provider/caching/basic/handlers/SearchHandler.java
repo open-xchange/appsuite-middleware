@@ -53,6 +53,7 @@ import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.SearchUtils;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -81,8 +82,8 @@ public class SearchHandler extends AbstractExtensionHandler {
      * @throws OXException if the property <code>com.openexchange.MinimumSearchCharacters</code> is missing or it type
      *             is not an integer
      */
-    public SearchHandler(ServiceLookup services, Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super(services, session, account, parameters);
+    public SearchHandler(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        super(session, account, parameters);
         this.minimumSearchPatternLength = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
     }
 
@@ -95,7 +96,7 @@ public class SearchHandler extends AbstractExtensionHandler {
      * @throws OXException if an error is occurred
      */
     public List<Event> searchEvents(List<SearchFilter> filters, List<String> queries) throws OXException {
-        return new OSGiCalendarStorageOperation<List<Event>>(services, getSession().getContextId(), getAccount().getAccountId()) {
+        return new OSGiCalendarStorageOperation<List<Event>>(Services.getServiceLookup(), getSession().getContextId(), getAccount().getAccountId()) {
 
             @Override
             protected List<Event> call(CalendarStorage storage) throws OXException {

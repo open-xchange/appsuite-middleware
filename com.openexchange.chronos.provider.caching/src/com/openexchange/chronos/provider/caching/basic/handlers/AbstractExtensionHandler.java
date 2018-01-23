@@ -81,7 +81,6 @@ abstract class AbstractExtensionHandler {
     private final CalendarSession calendarSession;
     private final SearchOptions searchOptions;
     private final SelfProtection selfProtection;
-    protected final ServiceLookup services;
 
     /**
      * Initialises a new {@link AbstractExtensionHandler}.
@@ -92,13 +91,12 @@ abstract class AbstractExtensionHandler {
      * @param calendarParameters The {@link CalendarParameters}
      * @throws OXException if the property {@link CalendarSession} cannot be initialised
      */
-    public AbstractExtensionHandler(ServiceLookup services, Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public AbstractExtensionHandler(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         super();
-        this.services = services;
         this.session = session;
         this.account = account;
         this.parameters = parameters;
-        this.calendarSession = services.getService(CalendarService.class).init(session, parameters);
+        this.calendarSession = Services.getService(CalendarService.class).init(session, parameters);
         this.searchOptions = new SearchOptions(calendarSession);
         LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
         this.selfProtection = SelfProtectionFactory.createSelfProtection(session, leanConfigurationService);
