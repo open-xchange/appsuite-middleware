@@ -59,6 +59,7 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -91,7 +92,7 @@ public class SearchHandler extends AbstractExtensionHandler {
      */
     public SearchHandler(ServiceLookup services, Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         super(services, session, account, parameters);
-        this.minimumSearchPatternLength = getCalendarSession().getConfig().getMinimumSearchPatternLength();
+        this.minimumSearchPatternLength = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
     }
 
     /**
