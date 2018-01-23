@@ -210,6 +210,6 @@ public abstract class BasicCachingCalendarProvider implements BasicCalendarProvi
                 storage.getUtilities().deleteAllData();
                 return null;
             }
-        };
+        }.executeUpdate();
     }
 }
