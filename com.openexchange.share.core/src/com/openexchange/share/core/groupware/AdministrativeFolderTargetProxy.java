@@ -56,12 +56,14 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.groupware.DriveTargetProxyType;
+import com.openexchange.share.groupware.SubfolderAwareTargetPermission;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxyType;
 
@@ -78,6 +80,8 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
     private final Set<Integer> affectedUsers;
     private final ShareTarget target;
     private final ShareTargetPath targetPath;
+    private List<OCLPermission> appliedPermissions;
+    private List<OCLPermission> removedPermissions;
 
     /**
      * Initializes a new {@link AdministrativeFolderTargetProxy}.
@@ -97,6 +101,8 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
     public AdministrativeFolderTargetProxy(FolderObject folder, ShareTarget target) {
         super();
         this.folder = folder;
+        appliedPermissions = new ArrayList<>();
+        removedPermissions = new ArrayList<>();
         this.affectedUsers = new HashSet<Integer>();
         this.target = target;
         this.targetPath = new ShareTargetPath(target.getModule(), target.getFolder(), target.getItem());
@@ -147,6 +153,7 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
                 affectedUsers.add(Integer.valueOf(permission.getEntity()));
             }
         }
+        appliedPermissions = mergePermissions(appliedPermissions, permissions, new OCLPermissionConverter(folder));
         folder.setPermissions(newPermissions);
         setModified();
     }
@@ -163,6 +170,7 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
             }
         }
         List<OCLPermission> newPermissions = removePermissions(originalPermissions, permissions, new OCLPermissionConverter(folder));
+        removedPermissions = mergePermissions(removedPermissions, permissions, new OCLPermissionConverter(folder));
         folder.setPermissions(newPermissions);
         setModified();
     }
@@ -206,7 +214,7 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
         return DriveTargetProxyType.FOLDER;
     }
 
-    private static class OCLPermissionConverter implements PermissionConverter<OCLPermission> {
+    public static class OCLPermissionConverter implements PermissionConverter<OCLPermission> {
 
         private final FolderObject folder;
 
@@ -247,12 +255,16 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
             oclPermission.setGroupPermission(permission.isGroup());
             int[] bits = Permissions.parsePermissionBits(permission.getBits());
             oclPermission.setAllPermission(bits[0], bits[1], bits[2], bits[3]);
+            if(permission instanceof SubfolderAwareTargetPermission) {
+                oclPermission.setType(FolderPermissionType.getType(((SubfolderAwareTargetPermission) permission).getType()));
+                oclPermission.setPermissionLegator(((SubfolderAwareTargetPermission) permission).getPermissionLegator());
+            }
             return oclPermission;
         }
 
         @Override
         public TargetPermission convert(OCLPermission permission) {
-            return new TargetPermission(permission.getEntity(), permission.isGroupPermission(), getBits(permission));
+            return new SubfolderAwareTargetPermission(permission.getEntity(), permission.isGroupPermission(), getBits(permission), permission.getType().getTypeNumber(), permission.getPermissionLegator());
         }
 
     }
@@ -265,6 +277,14 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
     @Override
     public Date getTimestamp() {
         return folder.getLastModified();
+    }
+
+    public List<OCLPermission> getAppliedPermissions(){
+        return appliedPermissions;
+    }
+
+    public List<OCLPermission> getRemovedPermissions() {
+        return removedPermissions;
     }
 
 }

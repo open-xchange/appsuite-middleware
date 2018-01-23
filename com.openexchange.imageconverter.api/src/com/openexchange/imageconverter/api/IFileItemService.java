@@ -20,16 +20,41 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface IFileItemService {
 
     /**
-     * Registering a key or a list of keys for a specific group,
+     * {@link DatabaseType}
+     *
+     * @author <a href="mailto:kai.ahrens@open-xchange.com">Kai Ahrens</a>
+     * @since v7.10.0
+     */
+    public enum DatabaseType {
+        /**
+         * A database, that supports only standard SQL queries.
+         */
+        STANDARD_SQL,
+
+        /**
+         * A database, that supports standard SQL queries as well as MySQL specific queries.
+         */
+        MYSQL
+    }
+
+    /**
+     * Retrieving the type of database, internally used to store and retrieve file metadata.
+     *
+     * @return The {@link DatabaseType}.
+     */
+    public DatabaseType getDatabaseType();
+
+    /**
+     * Registering a group and potential custom keys for this specific group,
      * that can be used as user defined properties of a FileItem for the group.
-     * The registering of keys needs to be done prior to the usage of that key
-     * when accessing the {@link IFileItemReadAccess#getKeyValue(String)}
-     *q
+     * The registering of groups and keys needs to be done prior to the usage of
+     * that group and key(s) when accessing the {@link IFileItemReadAccess#getKeyValue(String)}
+     *
      * @param groupId The groupId to register the key for
      * @param keyNames The key(s) to be used as user defined properties
      * @throws FileItemException
      */
-    public void registerCustomKeys(final String groupId, final String... customKeyN) throws FileItemException;
+    public void registerGroup(final String groupId, final String... customKeyN) throws FileItemException;
 
     /**
      * Getting the array of custom keys, registered for a specific group.
@@ -111,6 +136,33 @@ public interface IFileItemService {
      * @throws FileItemException
      */
     public IFileItem[] get(final String groupId, final Properties properties) throws FileItemException;
+
+    /**
+     * Getting all {@link IFileItem} interfaces that are selected
+     * by the customQuery SQL string.
+     * The query has to be created with returning all following columns
+     * of the appropriate FileItem database table(s) in the correct order:</br>
+     *  1. FileContent.FileStoreNumber</br>
+     *  2. FileContent.FileStoreId</br>
+     *  3. FileContent.SubGroupId</br>
+     *  4. FileContent.FileId
+     *
+     * @param groupId The groupId for which the query is performed
+     * @param customQuery The SQL query string string
+     * @param returnValues The optional return values of the query.
+     *  The number of return values depends on the provided, optional
+     *  number of return values given. The first 5 return values are always:</br>
+     *    1. fileStoreNumber </br>
+     *    2. fileStoreId</br>
+     *    3. groupId</br>
+     *    4. subGroupId</br>
+     *    5. fileId</br>
+     *    </br>
+     *  Further return values are possible and depend on the given SQL query
+     * @return The array of {@link IFileItem} interfaces queried.
+     * @throws FileItemException
+     */
+    public IFileItem[] getByCustomQuery(final String groupId, final String customQuery, Object... returnValues) throws FileItemException;
 
     /**
      * Getting the number of distinct subgroup ids.

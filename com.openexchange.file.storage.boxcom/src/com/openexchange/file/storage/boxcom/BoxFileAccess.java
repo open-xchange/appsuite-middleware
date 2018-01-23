@@ -748,8 +748,11 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
                 BoxSearchParameters bsp = new BoxSearchParameters(pattern == null ? "*" : pattern);
                 bsp.setType("file");
+
+                String fid = null;
                 if (folderId != null) {
-                    bsp.setAncestorFolderIds(Collections.singletonList(toBoxFolderId(folderId)));
+                    fid = Strings.isEmpty(folderId) ? "0" : folderId;
+                    bsp.setAncestorFolderIds(Collections.singletonList(toBoxFolderId(fid)));
                 }
 
                 // TODO: play with start and end parameters
@@ -766,12 +769,14 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                 BoxSearch boxSearch = new BoxSearch(apiConnection);
                 PartialCollection<com.box.sdk.BoxItem.Info> searchRange = boxSearch.searchRange(s, limit, bsp);
                 for (BoxItem.Info info : searchRange) {
-                    if (info instanceof com.box.sdk.BoxFile.Info) {
-                        com.box.sdk.BoxFile.Info i = (Info) info;
-                        String parentFolderId = i.getParent().getID();
-                        if (null != folderId && false == includeSubfolders && false == folderId.equals(parentFolderId)) {
-                            continue;
-                        }
+                    if (!(info instanceof com.box.sdk.BoxFile.Info)) {
+                        continue;
+                    }
+                    com.box.sdk.BoxFile.Info i = (Info) info;
+                    String parentFolderId = i.getParent().getID();
+                    if (includeSubfolders) {
+                        files.add(new BoxFile(parentFolderId, i.getID(), userId, rootFolderId).parseBoxFile(i));
+                    } else if (fid != null && fid.equals(parentFolderId)) {
                         files.add(new BoxFile(parentFolderId, i.getID(), userId, rootFolderId).parseBoxFile(i));
                     }
                 }
@@ -1013,7 +1018,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
             int dot = fileName.lastIndexOf('.');
             if (dot >= 0) {
                 base = fileName.substring(0, dot);
-                extension = fileName.substring(dot+1);
+                extension = fileName.substring(dot + 1);
             } else {
                 base = fileName;
                 extension = null;

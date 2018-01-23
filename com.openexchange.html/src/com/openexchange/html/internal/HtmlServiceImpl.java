@@ -106,7 +106,9 @@ import org.htmlcleaner.TagNode;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Comment;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.DocumentType;
 import org.jsoup.nodes.Node;
+import org.jsoup.select.Elements;
 import org.jsoup.select.NodeVisitor;
 import org.owasp.esapi.codecs.HTMLEntityCodec;
 import com.openexchange.config.ConfigurationService;
@@ -1754,6 +1756,59 @@ public final class HtmlServiceImpl implements HtmlService {
             sb.append("</html>").append(lineSeparator);
         }
         return sb.toString();
+    }
+
+    @Override
+    public String getWellFormedHTMLDocument(String htmlContent) throws OXException {
+        if (null == htmlContent || 0 == htmlContent.length()) {
+            return htmlContent;
+        }
+
+        Document document = Jsoup.parse(htmlContent);
+
+        {
+            DocumentType docType = null;
+            List<Node> nodes = document.childNodes();
+            for (Iterator<Node> it = nodes.iterator(); null == docType && it.hasNext();) {
+                Node node = it.next();
+                if (node instanceof DocumentType) {
+                    docType = (DocumentType) node;
+                }
+            }
+            if (null == docType) {
+                docType = new DocumentType("html", "", "");
+                document.insertChildren(0, docType);
+            }
+        }
+
+        {
+            Elements heads = document.getElementsByTag("head");
+            if (false == heads.isEmpty()) {
+                org.jsoup.nodes.Element head = heads.get(0);
+                org.jsoup.nodes.Element meta = null;
+                List<Node> nodes = head.childNodes();
+                for (Iterator<Node> it = nodes.iterator(); null == meta && it.hasNext();) {
+                    Node node = it.next();
+                    if (node instanceof org.jsoup.nodes.Element) {
+                        org.jsoup.nodes.Element e = (org.jsoup.nodes.Element) node;
+                        if ("meta".equals(e.tagName())) {
+                            org.jsoup.nodes.Attributes attributes = e.attributes();
+                            if ("Content-Type".equalsIgnoreCase(attributes.get("http-equiv"))) {
+                                meta = e;
+                            }
+                        }
+                    }
+                }
+                if (null == meta) {
+                    meta = new org.jsoup.nodes.Element("meta");
+                    meta.attr("http-equiv", "Content-Type");
+                    meta.attr("content", "text/html; charset=UTF-8");
+                    head.insertChildren(0, meta);
+                }
+            }
+        }
+
+        return document.outerHtml();
     }
 
     @Override

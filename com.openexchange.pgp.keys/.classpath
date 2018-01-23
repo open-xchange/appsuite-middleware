@@ -6,7 +6,4 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test"/>
 	<classpathentry kind="output" path="build"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/bcpg-jdk15on-156.jar" sourcepath="/com.openexchange.bundles/source/bcpg-jdk15on-1.56-sources.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/bcpkix-jdk15on-156.jar" sourcepath="/com.openexchange.bundles/source/bcpkix-jdk15on-1.56-sources.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/bcprov-jdk15on-156.jar" sourcepath="/com.openexchange.bundles/source/bcprov-jdk15on-1.56-sources.jar"/>
 </classpath>

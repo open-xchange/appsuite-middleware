@@ -50,6 +50,8 @@
 package com.openexchange.share.impl.groupware;
 
 import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -57,6 +59,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.service.FolderCacheInvalidationService;
 import com.openexchange.groupware.container.FolderObject;
@@ -64,6 +67,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.osgi.Tools;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
@@ -89,7 +93,7 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
     private final Connection connection;
     private final HandlerParameters parameters;
     private final OXFolderAccess folderAccess;
-	private ModuleExtensionRegistry<FolderHandlerModuleExtension> folderExtensions;
+	private final ModuleExtensionRegistry<FolderHandlerModuleExtension> folderExtensions;
 
     public AdministrativeTargetUpdateImpl(ServiceLookup services, int contextID, Connection writeCon, ModuleExtensionRegistry<ModuleHandler> handlers, ModuleExtensionRegistry<FolderHandlerModuleExtension> folderExtensions) throws OXException {
         super(services, handlers);
@@ -127,7 +131,24 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
             syntheticOwnerSession.setParameter("com.openexchange.share.administrativeUpdate", Boolean.TRUE);
             syntheticOwnerSession.setParameter(Connection.class.getName() + '@' + Thread.currentThread().getId(), connection);
             OXFolderManager folderManager = OXFolderManager.getInstance(syntheticOwnerSession, folderAccess, connection, connection);
-            folderManager.updateFolder(folderTargetProxy.getFolder(), false, System.currentTimeMillis());
+            FolderObject folder = folderTargetProxy.getFolder();
+            folderManager.updateFolder(folder, false, System.currentTimeMillis());
+
+            if (folder.getModule() == FolderObject.INFOSTORE) {
+                // Add permission to sub folders
+                List<Integer> subfolderIds = folder.getSubfolderIds();
+
+                List<OCLPermission> appliedPermissions = folderTargetProxy.getAppliedPermissions();
+                List<OCLPermission> removedPermissions = folderTargetProxy.getRemovedPermissions();
+
+                Context context = getContextService().loadContext(contextID);
+                for (Integer id : subfolderIds) {
+                    FolderObject sub = FolderObject.loadFolderObjectFromDB(id, context);
+                    prepareInheritedPermissions(sub, appliedPermissions, removedPermissions);
+                    folderManager.updateFolder(sub, false, true, sub.getLastModified().getTime());
+                }
+            }
+
             /*
              * clear some additional caches for all potentially affected users that are not covered when updating through folder manager
              */
@@ -138,6 +159,56 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
             }
         }
 
+    }
+
+    private static FolderObject prepareInheritedPermissions(FolderObject folder, List<OCLPermission> added, List<OCLPermission> removed) {
+        List<OCLPermission> originalPermissions = folder.getPermissions();
+        if (null == originalPermissions) {
+            originalPermissions = new ArrayList<>();
+        }
+
+        List<OCLPermission> filtered = new ArrayList<>(added.size());
+        for (OCLPermission add : added) {
+            if(add.getType() == FolderPermissionType.LEGATOR) {
+                add.setPermissionLegator(String.valueOf(folder.getParentFolderID()));
+                add.setType(FolderPermissionType.INHERITED);
+                filtered.add(add);
+            }
+        }
+
+        for (OCLPermission rem : removed) {
+            if(rem.getType() == FolderPermissionType.LEGATOR) {
+                rem.setPermissionLegator(String.valueOf(folder.getParentFolderID()));
+            }
+            rem.setType(FolderPermissionType.INHERITED);
+        }
+
+        List<OCLPermission> permissions = new ArrayList<>(originalPermissions.size() + filtered.size());
+        permissions.addAll(originalPermissions);
+        permissions.addAll(filtered);
+        permissions = removePermissions(permissions, removed);
+        folder.setPermissions(permissions);
+        return folder;
+    }
+
+    protected static List<OCLPermission> removePermissions(List<OCLPermission> origPermissions, List<OCLPermission> toRemove) {
+        if (origPermissions == null || origPermissions.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<OCLPermission> newPermissions = new ArrayList<OCLPermission>(origPermissions);
+        Iterator<OCLPermission> it = newPermissions.iterator();
+        while (it.hasNext()) {
+            OCLPermission permission = it.next();
+            for (OCLPermission removable : toRemove) {
+                if (permission.isGroupPermission() == removable.isGroupPermission() && permission.getEntity() == removable.getEntity()) {
+                    it.remove();
+                    break;
+                }
+            }
+        }
+
+        return newPermissions;
     }
 
     @Override

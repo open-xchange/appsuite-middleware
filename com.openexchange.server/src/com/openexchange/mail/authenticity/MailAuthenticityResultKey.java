@@ -69,7 +69,7 @@ public enum MailAuthenticityResultKey {
      * Defines the domain of the 'From' header from the e-mail
      * which the authenticity was evaluated.
      */
-    FROM_DOMAIN("from_dmain"),
+    FROM_DOMAIN("from_domain"),
     /**
      * Defines the {@link MailAuthenticityMechanismResult}s that were
      * collected during the evaluation process of the e-mail.

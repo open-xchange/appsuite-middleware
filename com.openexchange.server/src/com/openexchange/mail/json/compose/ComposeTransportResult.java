@@ -50,6 +50,7 @@
 package com.openexchange.mail.json.compose;
 
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 
 /**
@@ -81,5 +82,26 @@ public interface ComposeTransportResult {
      * @return <code>true</code> if transport is equal to sent version; otherwise <code>false</code>
      */
     boolean isTransportEqualToSent();
+
+    /**
+     * Commits this transport result to signal successful execution
+     *
+     * @throws OXException If commit fails
+     */
+    void commit() throws OXException;
+
+    /**
+     * Rolls-back this transport result to signal failed execution
+     *
+     * @throws OXException If roll-back fails
+     */
+    void rollback() throws OXException;
+
+    /**
+     * Finishes this transport result to clear up any used resources.
+     *
+     * @throws OXException If finishing fails
+     */
+    void finish() throws OXException;
 
 }

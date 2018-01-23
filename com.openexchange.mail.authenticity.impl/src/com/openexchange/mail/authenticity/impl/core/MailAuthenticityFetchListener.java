@@ -49,14 +49,21 @@
 
 package com.openexchange.mail.authenticity.impl.core;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailAttributation;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailFetchArguments;
 import com.openexchange.mail.MailFetchListener;
 import com.openexchange.mail.MailFetchListenerResult;
@@ -65,11 +72,12 @@ import com.openexchange.mail.MailFields;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
 import com.openexchange.mail.authenticity.impl.osgi.Services;
-import com.openexchange.mail.dataobjects.Delegatized;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link MailAuthenticityFetchListener}
@@ -79,16 +87,21 @@ import com.openexchange.session.Session;
  */
 public class MailAuthenticityFetchListener implements MailFetchListener {
 
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MailAuthenticityFetchListener.class);
+
     private static final String STATE_PARAM_HANDLER = "mail.authenticity.handler";
 
     private final MailAuthenticityHandlerRegistry handlerRegistry;
+    private final ThreadPoolService threadPool;
 
     /**
      * Initializes a new {@link MailAuthenticityFetchListener}.
+     * @param threadPool
      */
-    public MailAuthenticityFetchListener(MailAuthenticityHandlerRegistry handlerRegistry) {
+    public MailAuthenticityFetchListener(MailAuthenticityHandlerRegistry handlerRegistry, ThreadPoolService threadPool) {
         super();
         this.handlerRegistry = handlerRegistry;
+        this.threadPool = threadPool;
     }
 
     private boolean isNotApplicableFor(MailFetchArguments fetchArguments, Session session) throws OXException {
@@ -159,8 +172,11 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         }
 
         MailFields fields = null == fetchArguments.getFields() ? new MailFields() : new MailFields(fetchArguments.getFields());
+        fields.add(MailField.ID);
+        fields.add(MailField.FOLDER_ID);
         fields.add(MailField.RECEIVED_DATE); // For date threshold
-        Set<String> headerNames = null == fetchArguments.getHeaderNames() ? new LinkedHashSet<>() : new LinkedHashSet<>(Arrays.asList(fetchArguments.getHeaderNames()));
+        fields.add(MailField.ACCOUNT_NAME); // For account verification
+        Set<String> headerNames = null == fetchArguments.getHeaderNames() ? null : new LinkedHashSet<>(Arrays.asList(fetchArguments.getHeaderNames()));
         {
             Collection<MailField> requiredFields = handler.getRequiredFields();
             if (null != requiredFields && !requiredFields.isEmpty()) {
@@ -170,6 +186,9 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
             }
             Collection<String> requiredHeaders = handler.getRequiredHeaders();
             if (null != requiredHeaders && !requiredHeaders.isEmpty()) {
+                if (null == headerNames) {
+                    headerNames = new LinkedHashSet<>();
+                }
                 for (String requiredHeader : requiredHeaders) {
                     headerNames.add(requiredHeader);
                 }
@@ -177,32 +196,97 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         }
 
         state.put(STATE_PARAM_HANDLER, handler);
-        return MailAttributation.builder(fields.isEmpty() ? null : fields.toArray(), headerNames.isEmpty() ? null : headerNames.toArray(new String[headerNames.size()])).build();
+        return MailAttributation.builder(fields.isEmpty() ? null : fields.toArray(), null == headerNames ? null : headerNames.toArray(new String[headerNames.size()])).build();
     }
 
     @Override
-    public MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, Session session, Map<String, Object> state) throws OXException {
+    public MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, final Session session, Map<String, Object> state) throws OXException {
+        if (null == mails || mails.length == 0) {
+            return MailFetchListenerResult.neutral(mails, cacheable);
+        }
+
         MailAuthenticityHandler handler = (MailAuthenticityHandler) state.get(STATE_PARAM_HANDLER);
         if (null == handler) {
             return MailFetchListenerResult.neutral(mails, cacheable);
         }
 
-        int unifiedINBOXAccountId = getUnifiedINBOXAccountId(session);
-        for (MailMessage mail : mails) {
+        // int unifiedINBOXAccountId = getUnifiedINBOXAccountId(session);
+        List<FutureAndMail> submittedTasks = new ArrayList<>(mails.length);
+        for (final MailMessage mail : mails) {
             if (mail != null) {
                 int accId = mail.getAccountId();
+                /*-
                 if (mail instanceof Delegatized) {
                     int undelegatedAccountId = ((Delegatized) mail).getUndelegatedAccountId();
                     if (undelegatedAccountId >= 0) {
                         accId = undelegatedAccountId;
                     }
                 }
-                if (accId == MailAccount.DEFAULT_ID || accId == unifiedINBOXAccountId) {
-                    handler.handle(session, mail);
+                */
+                if (accId == MailAccount.DEFAULT_ID /*|| accId == unifiedINBOXAccountId*/) {
+                    Future<Void> future = threadPool.submit(new MailAuthenticityTask(mail, handler, session));
+                    submittedTasks.add(new FutureAndMail(future, mail));
                 }
             }
         }
+        try {
+            for (FutureAndMail submitted : submittedTasks) {
+                try {
+                    submitted.future.get(5, TimeUnit.SECONDS);
+                } catch (ExecutionException e) {
+                    MailMessage mail = submitted.mail;
+                    LOGGER.warn("Failed to verify mail authenticity for mail {} in folder {}", mail.getMailId(), mail.getFolder(), e.getCause());
+                } catch (TimeoutException e) {
+                    submitted.future.cancel(true);
+                    MailMessage mail = submitted.mail;
+                    LOGGER.warn("Verification of mail authenticity for mail {} in folder {} took too long", mail.getMailId(), mail.getFolder());
+                }
+            }
+        } catch (InterruptedException e) {
+            // Keep interrupted status
+            Thread.currentThread().interrupt();
+            throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
+        }
         return MailFetchListenerResult.neutral(mails, cacheable);
+    }
+
+    @Override
+    public MailMessage onMailFetch(MailMessage mail, Session session) throws OXException {
+        return mail;
+    }
+
+    // --------------------------------------------------------------------------------------------------------------
+
+    private static class MailAuthenticityTask extends AbstractTask<Void> {
+
+        private final MailMessage mail;
+        private final MailAuthenticityHandler handler;
+        private final Session session;
+
+        MailAuthenticityTask(MailMessage mail, MailAuthenticityHandler handler, Session session) {
+            super();
+            this.mail = mail;
+            this.handler = handler;
+            this.session = session;
+        }
+
+        @Override
+        public Void call() throws Exception {
+            handler.handle(session, mail);
+            return null;
+        }
+    }
+
+    private static class FutureAndMail {
+
+        final Future<Void> future;
+        final MailMessage mail;
+
+        FutureAndMail(Future<Void> future, MailMessage mail) {
+            super();
+            this.future = future;
+            this.mail = mail;
+        }
     }
 
 }

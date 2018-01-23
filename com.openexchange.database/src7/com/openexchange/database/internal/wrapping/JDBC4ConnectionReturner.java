@@ -92,6 +92,9 @@ import com.openexchange.timer.TimerService;
  */
 public abstract class JDBC4ConnectionReturner implements Connection, StateAware, Heartbeat {
 
+    /** The logger constant */
+    static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(JDBC4ConnectionReturner.class);
+
     private static final class HeartBeatHelper {
 
         private final long timeoutMillis;
@@ -143,6 +146,7 @@ public abstract class JDBC4ConnectionReturner implements Connection, StateAware,
                             try {
                                 statement = con.createStatement();
                                 rs = statement.executeQuery("SELECT 1 AS keep_alive_test");
+                                LOGGER.debug("Performed \"SELECT 1 AS keep_alive_test\" to keep connection alive");
                                 while (rs.next()) {
                                     // Discard
                                 }
@@ -231,6 +235,7 @@ public abstract class JDBC4ConnectionReturner implements Connection, StateAware,
         }
 
         heartBeat.startHeartbeat(timer);
+        state.setHeartbeatEnabled(true);
         return true;
     }
 
@@ -568,7 +573,7 @@ public abstract class JDBC4ConnectionReturner implements Connection, StateAware,
     }
 
     /**
-     * Touches this connection; updates its last-accessed time stanp
+     * Touches this connection; updates its last-accessed time stamp
      */
     public void touch() {
         HeartBeatHelper heartBeat = heartBeatReference.get();

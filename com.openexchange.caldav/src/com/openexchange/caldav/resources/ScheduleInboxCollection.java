@@ -61,7 +61,7 @@ import com.openexchange.caldav.query.Filter;
 import com.openexchange.caldav.reports.FilteringResource;
 import com.openexchange.dav.mixins.SyncToken;
 import com.openexchange.dav.resources.DAVCollection;
-import com.openexchange.folderstorage.DefaultPermission;
+import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.webdav.protocol.Protocol.Property;
@@ -95,7 +95,7 @@ public class ScheduleInboxCollection extends DAVCollection implements FilteringR
     @Override
     public Permission[] getPermissions() {
         return new Permission[] {
-            new DefaultPermission(getFactory().getUser().getId(), false, Permissions.createPermissionBits(
+            new BasicPermission(getFactory().getUser().getId(), false, Permissions.createPermissionBits(
                 Permission.READ_FOLDER, Permission.READ_ALL_OBJECTS, Permission.WRITE_ALL_OBJECTS, Permission.DELETE_ALL_OBJECTS, false))
         };
     }

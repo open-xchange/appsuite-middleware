@@ -121,10 +121,21 @@ public class UserContactResultConverter implements ResultConverter {
 			 */
 			UserContact userContact = (UserContact)resultObject;
 
-			if (Anonymizers.isGuest(session) && null != userContact.getUser() && session.getUserId() != userContact.getUser().getId()) {
-                userContact.setContact(Anonymizers.optAnonymize(userContact.getContact(), Module.CONTACT, session));
-                userContact.setUser(Anonymizers.optAnonymize(userContact.getUser(), Module.USER, session));
-            }
+			User optUser = userContact.getUser();
+			if (Anonymizers.isGuest(session)) {
+                if (null != optUser && session.getUserId() != optUser.getId()) {
+                    Set<Integer> sharingUsers = Anonymizers.getSharingUsersFor(session.getContextId(), session.getUserId());
+                    if (false == sharingUsers.contains(Integer.valueOf(optUser.getId()))) {
+                        userContact.setContact(Anonymizers.optAnonymize(userContact.getContact(), Module.CONTACT, session));
+                        userContact.setUser(Anonymizers.optAnonymize(optUser, Module.USER, session));
+                    }
+                }
+			} else {
+			    if (null != optUser && session.getUserId() != optUser.getId() && Anonymizers.isNonVisibleGuest(optUser.getId(), session)) {
+			        userContact.setContact(Anonymizers.optAnonymize(userContact.getContact(), Module.CONTACT, session));
+	                userContact.setUser(Anonymizers.optAnonymize(optUser, Module.USER, session));
+			    }
+			}
 
 			resultObject = userContact.serialize(timeZoneID, session);
         } else {
@@ -134,19 +145,30 @@ public class UserContactResultConverter implements ResultConverter {
             List<UserContact> userContacts = (List<UserContact>) resultObject;
             JSONArray jArray = new JSONArray(userContacts.size());
 
+            AnonymizerService<Contact> contactAnonymizer = Anonymizers.optAnonymizerFor(Module.CONTACT);
+            AnonymizerService<User> userAnonymizer = Anonymizers.optAnonymizerFor(Module.USER);
             if (Anonymizers.isGuest(session)) {
-                AnonymizerService<Contact> contactAnonymizer = Anonymizers.optAnonymizerFor(Module.CONTACT);
-                AnonymizerService<User> userAnonymizer = Anonymizers.optAnonymizerFor(Module.USER);
-
+                Set<Integer> sharingUsers = null;
                 for (UserContact userContact : userContacts) {
-                    if (null != userContact.getUser() && session.getUserId() != userContact.getUser().getId()) {
-                        userContact.setContact(contactAnonymizer.anonymize(userContact.getContact(), session));
-                        userContact.setUser(userAnonymizer.anonymize(userContact.getUser(), session));
+                    User optUser = userContact.getUser();
+                    if (null != optUser && session.getUserId() != optUser.getId()) {
+                        if (null == sharingUsers) {
+                            sharingUsers = Anonymizers.getSharingUsersFor(session.getContextId(), session.getUserId());
+                        }
+                        if (false == sharingUsers.contains(Integer.valueOf(optUser.getId()))) {
+                            userContact.setContact(contactAnonymizer.anonymize(userContact.getContact(), session));
+                            userContact.setUser(userAnonymizer.anonymize(optUser, session));
+                        }
                     }
                     jArray.put(userContact.serialize(session, columnIDs, timeZoneID, attributeParameters));
                 }
             } else {
                 for (UserContact userContact : userContacts) {
+                    User optUser = userContact.getUser();
+                    if (null != optUser && session.getUserId() != optUser.getId() && Anonymizers.isNonVisibleGuest(optUser.getId(), session)) {
+                        userContact.setContact(contactAnonymizer.anonymize(userContact.getContact(), session));
+                        userContact.setUser(userAnonymizer.anonymize(optUser, session));
+                    }
                     jArray.put(userContact.serialize(session, columnIDs, timeZoneID, attributeParameters));
                 }
             }

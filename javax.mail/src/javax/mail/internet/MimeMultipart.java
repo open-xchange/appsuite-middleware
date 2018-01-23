@@ -568,11 +568,12 @@ public class MimeMultipart extends Multipart {
 	if (preamble != null) {
 	    String p = preamble;
 	    if (!p.endsWith("\r\n")) {
-            char c = p.charAt(p.length() - 1);
+            int mlen = p.length() - 1;
+            char c = p.charAt(mlen);
             if (c == '\n') {
-                p = p.substring(0, p.length()-1) + "\r\n";
+                p = p.substring(0, mlen) + "\r\n";
             } else if (c == '\r') {
-                p = p.substring(0, p.length()-1) + "\r\n";
+                p = p.substring(0, mlen) + "\r\n";
             } else {
                 p = p + "\r\n";
             }

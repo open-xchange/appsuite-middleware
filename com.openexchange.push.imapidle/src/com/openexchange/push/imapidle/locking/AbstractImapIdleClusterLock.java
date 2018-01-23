@@ -49,18 +49,13 @@
 
 package com.openexchange.push.imapidle.locking;
 
-import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import org.slf4j.Logger;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.Hazelcasts;
 import com.hazelcast.core.IExecutorService;
 import com.hazelcast.core.Member;
 import com.openexchange.server.ServiceLookup;
@@ -74,8 +69,6 @@ import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionEx
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractImapIdleClusterLock implements ImapIdleClusterLock {
-
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractImapIdleClusterLock.class);
 
     /** The time-to-live in cache; cluster lock timeout minus 5 minutes */
     private static final long CACHE_EXPIRATION = ImapIdleClusterLock.TIMEOUT_MILLIS - 300000L;
@@ -102,37 +95,37 @@ public abstract class AbstractImapIdleClusterLock implements ImapIdleClusterLock
     /**
      * Generate an appropriate value for given time stamp and session identifier pair
      *
-     * @param nanos The time stamp
+     * @param millis The time stamp
      * @param sessionInfo The session info
      * @return The value
      */
-    protected String generateValue(long nanos, SessionInfo sessionInfo) {
+    protected String generateValue(long millis, SessionInfo sessionInfo) {
         if (sessionInfo.isPermanent()) {
-            return Long.toString(nanos);
+            return Long.toString(millis);
         }
-        return new StringBuilder(32).append(nanos).append('?').append(sessionInfo.getSessionId()).toString();
+        return new StringBuilder(32).append(millis).append('?').append(sessionInfo.getSessionId()).toString();
     }
 
     /**
      * Checks validity of passed value in comparison to given time stamp (and session).
      *
      * @param value The value to check
-     * @param now The current time stamp nano seconds
+     * @param now The current time stamp
      * @param tranzient <code>true</code> if session is not supposed to be held in session storage; otherwise <code>false</code>
      * @param hzInstance The Hazelcast instance
      * @return <code>true</code> if valid; otherwise <code>false</code>
      */
     protected boolean validValue(String value, long now, boolean tranzient, HazelcastInstance hzInstance) {
-        return (TimeUnit.NANOSECONDS.toMillis(now - parseNanosFromValue(value)) <= TIMEOUT_MILLIS) && existsSessionFromValue(value, tranzient, hzInstance);
+        return (now - parseMillisFromValue(value) <= TIMEOUT_MILLIS) && existsSessionFromValue(value, tranzient, hzInstance);
     }
 
     /**
-     * Parses the time stamp nanos from given value
+     * Parses the time stamp milliseconds from given value
      *
      * @param value The value
-     * @return The nano seconds
+     * @return The milliseconds
      */
-    protected long parseNanosFromValue(String value) {
+    protected long parseMillisFromValue(String value) {
         int pos = value.indexOf('?');
         return Long.parseLong(pos > 0 ? value.substring(0, pos) : value);
     }
@@ -200,74 +193,34 @@ public abstract class AbstractImapIdleClusterLock implements ImapIdleClusterLock
     }
 
     private boolean checkRemoteMembersIfSessionExists(String sessionId, HazelcastInstance hzInstance) {
-        // Check in cluster
-        Cluster cluster = hzInstance.getCluster();
-
-        // Get local member
-        Member localMember = cluster.getLocalMember();
-
         // Determine other cluster members
-        Set<Member> otherMembers = getOtherMembers(cluster.getMembers(), localMember);
+        Set<Member> otherMembers = Hazelcasts.getRemoteMembers(hzInstance);
 
         if (!otherMembers.isEmpty()) {
-            IExecutorService executor = hzInstance.getExecutorService("default");
-            Map<Member, Future<Boolean>> futureMap = executor.submitToMembers(new PortableSessionExistenceCheck(sessionId), otherMembers);
-            for (Map.Entry<Member, Future<Boolean>> entry : futureMap.entrySet()) {
-                Future<Boolean> future = entry.getValue();
-                // Check Future's return value
-                int retryCount = 3;
-                while (retryCount-- > 0) {
-                    try {
-                        boolean exists = future.get().booleanValue();
-                        retryCount = 0;
-                        if (exists) {
-                            return true;
-                        }
-                    } catch (InterruptedException e) {
-                        // Interrupted - Keep interrupted state
-                        Thread.currentThread().interrupt();
-                    } catch (CancellationException e) {
-                        // Canceled
-                        retryCount = 0;
-                    } catch (ExecutionException e) {
-                        Throwable cause = e.getCause();
+            Hazelcasts.Filter<Boolean, Boolean> filter = new Hazelcasts.Filter<Boolean, Boolean>() {
 
-                        // Check for Hazelcast timeout
-                        if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
-                            if (cause instanceof RuntimeException) {
-                                throw ((RuntimeException) cause);
-                            }
-                            if (cause instanceof Error) {
-                                throw (Error) cause;
-                            }
-                            throw new IllegalStateException("Not unchecked", cause);
-                        }
-
-                        // Timeout while awaiting remote result
-                        if (retryCount <= 0) {
-                            // No further retry
-                            cancelFutureSafe(future);
-                        }
-                    }
+                @Override
+                public Boolean accept(Boolean result) {
+                    return result.booleanValue() ? Boolean.TRUE : null;
                 }
+            };
+            IExecutorService executor = hzInstance.getExecutorService("default");
+            try {
+                Boolean exists = Hazelcasts.executeByMembersAndFilter(new PortableSessionExistenceCheck(sessionId), otherMembers, executor, filter);
+                return null != exists && exists.booleanValue();
+            } catch (ExecutionException e) {
+                Throwable cause = e.getCause();
+                if (cause instanceof RuntimeException) {
+                    throw ((RuntimeException) cause);
+                }
+                if (cause instanceof Error) {
+                    throw (Error) cause;
+                }
+                throw new IllegalStateException("Not unchecked", cause);
             }
         }
 
         return false;
-    }
-
-    static Set<Member> getOtherMembers(Set<Member> allMembers, Member localMember) {
-        Set<Member> otherMembers = new LinkedHashSet<Member>(allMembers);
-        if (!otherMembers.remove(localMember)) {
-            LOG.warn("Couldn't remove local member from cluster members.");
-        }
-        return otherMembers;
-    }
-
-    static void cancelFutureSafe(Future<Boolean> future) {
-        if (null != future) {
-            try { future.cancel(true); } catch (Exception e) {/*Ignore*/}
-        }
     }
 
 }

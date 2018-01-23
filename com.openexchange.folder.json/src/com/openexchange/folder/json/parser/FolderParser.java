@@ -60,6 +60,8 @@ import org.json.JSONObject;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.FolderField;
+import com.openexchange.folderstorage.BasicGuestPermission;
+import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -216,14 +218,14 @@ public final class FolderParser {
             /*
              * parse as guest permission entity
              */
-            ParsedGuestPermission parsedGuestPermission = new ParsedGuestPermission();
+            BasicGuestPermission parsedGuestPermission = new BasicGuestPermission();
             parsedGuestPermission.setRecipient(ShareTool.parseRecipient(jsonObject, timeZone));
             permission = parsedGuestPermission;
         } else {
             /*
              * parse as already known permission entity
              */
-            ParsedPermission parsedPermission = new ParsedPermission();
+            Permission parsedPermission = new BasicPermission();
             if (false == jsonObject.has(FolderField.ENTITY.getName())) {
                 throw FolderExceptionErrorMessage.MISSING_PARAMETER.create(FolderField.ENTITY.getName());
             }

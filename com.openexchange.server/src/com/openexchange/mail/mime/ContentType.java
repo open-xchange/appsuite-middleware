@@ -80,8 +80,12 @@ public class ContentType extends ParameterizedHeader {
             synchronized (ContentType.class) {
                 b = contentTypeRegexFallback;
                 if (null == b) {
-                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    b = Boolean.valueOf(null == service || service.getBoolProperty("com.openexchange.mail.mime.contentTypeRegexFallback", true));
+                    boolean defaultValue = true;
+                    ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        return defaultValue;
+                    }
+                    b = Boolean.valueOf(service.getBoolProperty("com.openexchange.mail.mime.contentTypeRegexFallback", defaultValue));
                     contentTypeRegexFallback = b;
                 }
             }
@@ -330,8 +334,19 @@ public class ContentType extends ParameterizedHeader {
      * @throws OXException If content type cannot be parsed
      */
     public ContentType(final String contentType) throws OXException {
+        this(contentType, false);
+    }
+
+    /**
+     * Initializes a new {@link ContentType}
+     *
+     * @param contentType The content type
+     * @param strict <code>true</code> for strict parsing; otherwise <code>false</code>
+     * @throws OXException If content type cannot be parsed
+     */
+    public ContentType(final String contentType, final boolean strict) throws OXException {
         super();
-        parseContentType(contentType);
+        parseContentType(contentType, strict);
     }
 
     /**
@@ -404,11 +419,11 @@ public class ContentType extends ParameterizedHeader {
         return lcBaseType;
     }
 
-    private void parseContentType(final String contentType) throws OXException {
-        parseContentType(contentType, true);
+    private void parseContentType(final String contentType, final boolean strict) throws OXException {
+        parseContentType(contentType, true, strict);
     }
 
-    private void parseContentType(final String contentType, final boolean paramList) throws OXException {
+    private void parseContentType(final String contentType, final boolean paramList, final boolean strict) throws OXException {
         if ((null == contentType) || (contentType.length() == 0)) {
             setContentType(DEFAULT_CONTENT_TYPE);
             return;
@@ -506,7 +521,7 @@ public class ContentType extends ParameterizedHeader {
                     }
                     return;
                 } catch (final OXException e) {
-                    if (!contentTypeRegexFallback()) {
+                    if (strict || !contentTypeRegexFallback()) {
                         throw e;
                     }
                     // Content-Type could not be parsed the simple way
@@ -817,7 +832,18 @@ public class ContentType extends ParameterizedHeader {
      * @throws OXException If specified content type string cannot be parsed
      */
     public void setContentType(final String contentType) throws OXException {
-        parseContentType(contentType);
+        setContentType(contentType, false);
+    }
+
+    /**
+     * Sets the content type to specified content type string; e.g. "text/plain; charset=US-ASCII"
+     *
+     * @param contentType The content type string
+     * @param strict <code>true</code> for strict parsing; otherwise <code>false</code>
+     * @throws OXException If specified content type string cannot be parsed
+     */
+    public void setContentType(final String contentType, final boolean strict) throws OXException {
+        parseContentType(contentType, strict);
     }
 
     /**

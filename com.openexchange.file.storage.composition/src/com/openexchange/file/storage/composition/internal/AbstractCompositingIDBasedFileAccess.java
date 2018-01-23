@@ -49,12 +49,7 @@
 
 package com.openexchange.file.storage.composition.internal;
 
-import static com.openexchange.file.storage.composition.internal.FileStorageTools.addIDColumns;
-import static com.openexchange.file.storage.composition.internal.FileStorageTools.checkPatternLength;
-import static com.openexchange.file.storage.composition.internal.FileStorageTools.ensureFolderIDs;
-import static com.openexchange.file.storage.composition.internal.FileStorageTools.extractRemoteAddress;
-import static com.openexchange.file.storage.composition.internal.FileStorageTools.getAccountName;
-import static com.openexchange.file.storage.composition.internal.FileStorageTools.getPathString;
+import static com.openexchange.file.storage.composition.internal.FileStorageTools.*;
 import static com.openexchange.file.storage.composition.internal.idmangling.IDManglingFileCustomizer.fixIDs;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -1298,7 +1293,35 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                     }
                 };
 
-                return callable.call(fileAccess);
+                List<String> conflicted = callable.call(fileAccess);
+                /*
+                 * build & send events (assume relative file id is unchanged for multimove)
+                 */
+                for (String sourceId : sourceIds) {
+                    if (conflicted.contains(sourceId)) {
+                        continue;
+                    }
+                    FileID sourceFileID = new FileID(sourceId);
+                    FolderID sourceFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceFileID.getFolderId());
+                    FileID newFileID = new FileID(destService, destAccountId, destFolderId, new FileID(sourceId).getFileId());
+                    FolderID newFolderID = new FolderID(destService, destAccountId, destFolderId);
+                    postEvent(FileStorageEventHelper.buildDeleteEvent(
+                        session,
+                        sourceFileID.getService(),
+                        sourceFileID.getAccountId(),
+                        sourceFolderID.toUniqueID(),
+                        sourceFileID.toUniqueID(),
+                        null,
+                        null));
+                    postEvent(FileStorageEventHelper.buildCreateEvent(
+                        session,
+                        newFileID.getService(),
+                        newFileID.getAccountId(),
+                        newFolderID.toUniqueID(),
+                        newFileID.toUniqueID(),
+                        null));
+                }
+                return conflicted;
             }
         }
 

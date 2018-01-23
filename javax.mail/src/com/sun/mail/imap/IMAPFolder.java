@@ -1358,6 +1358,8 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
     Map<String, String> capabilities = protocol.getCapabilities();
     boolean xdovecot = capabilities.containsKey("XDOVECOT");
     boolean hasSnippets = capabilities.containsKey("SNIPPET=FUZZY");
+    IMAPTextPreviewProvider textPreviewProvider = ((IMAPStore) store).getTextPreviewProvider();
+    IMAPTextPreviewProvider.Mode textPreviewProviderMode = null;
     for (FetchProfile.Item item : fp.getItems()) {
         if ("ORIGINAL-MAILBOX".equals(item.name())) {
             if (xdovecot) {
@@ -1376,11 +1378,17 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
             }
         } else if (item instanceof SnippetFetchProfileItem) {
             if (hasSnippets) {
-                SnippetFetchProfileItem snippetItem = (SnippetFetchProfileItem) item;
-                command.append(first ? "SNIPPET" : " SNIPPET").append(" (").append(snippetItem.getAlgoritmhName()).append(')');
+                command.append(first ? "SNIPPET" : " SNIPPET").append(" (").append(((SnippetFetchProfileItem) item).getAlgoritmhName()).append(')');
                 first = false;
+            } else if (null != textPreviewProvider) {
+                textPreviewProviderMode = IMAPTextPreviewProvider.Mode.modeFor(((SnippetFetchProfileItem) item).getAlgoritmhName());
             }
         }
+    }
+    if (textPreviewProviderMode != null && command.indexOf("UID") < 0) {
+        // Add an artificial fetch item
+        command.append(first ? "UID" : " UID");
+        first = false;
     }
 
 	// if we're not fetching all headers, fetch individual headers
@@ -1493,8 +1501,12 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 		    } else if (msg != null)
 			msg.handleFetchItem(item, hdrs, allHeaders);
 		}
-		if (msg != null)
+		if (msg != null) {
 		    msg.handleExtensionFetchItems(f.getExtensionItems());
+		    if (null != textPreviewProviderMode) {
+                textPreviewProvider.getTextPreview(msg, textPreviewProviderMode);
+            }
+		}
 
 		// If this response contains any unsolicited FLAGS
 		// add it to the unsolicited response vector

@@ -49,6 +49,7 @@
 
 package com.openexchange.mail;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -105,6 +106,16 @@ public class MailFetchListenerRegistry {
     public static MailFetchListenerChain determineFetchListenerChainFor(MailFetchArguments fetchArguments, Session session, Map<String, Object> state) throws OXException {
         MailFetchListenerRegistry registry = INSTANCE_REFERENCE.get();
         return null == registry ? MailFetchListenerChain.EMPTY_CHAIN : registry.getFetchListenerChainFor(fetchArguments, session, state);
+    }
+
+    /**
+     * Gets the fetch listeners.
+     *
+     * @return The listeners
+     */
+    public static List<MailFetchListener> getFetchListeners() {
+        MailFetchListenerRegistry registry = INSTANCE_REFERENCE.get();
+        return null == registry ? Collections.emptyList() : registry.getListeners();
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------

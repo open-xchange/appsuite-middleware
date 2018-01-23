@@ -101,6 +101,7 @@ import com.openexchange.multiple.MultipleHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.PathAware;
 import com.openexchange.multiple.internal.MultipleHandlerRegistry;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.BoundedCompletionService;
@@ -429,6 +430,15 @@ public class Multiple extends SessionServlet {
             jsonObj.put(ROUTE, Tools.getRoute(req.getSession(true).getId()));
             jsonObj.put(REMOTE_ADDRESS, req.getRemoteAddr());
             final Dispatcher dispatcher = getDispatcher();
+            if (null == dispatcher) {
+                // Most likely currently shutting down
+                OXException oxe = ServiceExceptionCode.absentService(Dispatcher.class);
+                logError(oxe.getMessage(), session, oxe);
+                jsonWriter.object();
+                ResponseWriter.writeException(oxe, jsonWriter, localeFrom(session), false);
+                jsonWriter.endObject();
+                return state;
+            }
             final StringBuilder moduleCandidate = new StringBuilder(32);
             boolean handles = false;
             for (final String component : SPLIT.split(module, 0)) {

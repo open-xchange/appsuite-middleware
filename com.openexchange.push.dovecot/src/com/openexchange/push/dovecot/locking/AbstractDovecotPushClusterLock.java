@@ -49,12 +49,7 @@
 
 package com.openexchange.push.dovecot.locking;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import org.slf4j.Logger;
-import com.hazelcast.core.Member;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -63,8 +58,6 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractDovecotPushClusterLock implements DovecotPushClusterLock {
-
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractDovecotPushClusterLock.class);
 
     /** The service look-up */
     protected final ServiceLookup services;
@@ -80,53 +73,38 @@ public abstract class AbstractDovecotPushClusterLock implements DovecotPushClust
     /**
      * Generate an appropriate value for given time stamp and session identifier pair
      *
-     * @param nanos The time stamp
+     * @param millis The time stamp
      * @param sessionInfo The session info
      * @return The value
      */
-    protected String generateValue(long nanos, SessionInfo sessionInfo) {
+    protected String generateValue(long millis, SessionInfo sessionInfo) {
         if (sessionInfo.isPermanent()) {
-            return Long.toString(nanos);
+            return Long.toString(millis);
         }
-        return new StringBuilder(32).append(nanos).append('?').append(sessionInfo.getCompositeId()).toString();
+        return new StringBuilder(32).append(millis).append('?').append(sessionInfo.getCompositeId()).toString();
     }
 
     /**
      * Checks validity of passed value in comparison to given time stamp (and session).
      *
      * @param value The value to check
-     * @param now The current time stamp nano seconds
+     * @param now The current time stamp milliseconds
      * @param hzInstance The Hazelcast instance
      * @return <code>true</code> if valid; otherwise <code>false</code>
      */
     protected boolean validValue(String value, long now) {
-        return (TimeUnit.NANOSECONDS.toMillis(now - parseNanosFromValue(value)) <= TIMEOUT_MILLIS);
+        return (now - parseMillisFromValue(value) <= TIMEOUT_MILLIS);
     }
 
     /**
-     * Parses the time stamp nanos from given value
+     * Parses the time stamp milliseconds from given value
      *
      * @param value The value
-     * @return The nano seconds
+     * @return The milliseconds
      */
-    protected long parseNanosFromValue(String value) {
+    protected long parseMillisFromValue(String value) {
         int pos = value.indexOf('?');
         return Long.parseLong(pos > 0 ? value.substring(0, pos) : value);
-    }
-
-    /**
-     * Gets the other cluster members
-     *
-     * @param allMembers All known members
-     * @param localMember The local member
-     * @return Other cluster members
-     */
-    public static Set<Member> getOtherMembers(Set<Member> allMembers, Member localMember) {
-        Set<Member> otherMembers = new LinkedHashSet<Member>(allMembers);
-        if (!otherMembers.remove(localMember)) {
-            LOG.warn("Couldn't remove local member from cluster members.");
-        }
-        return otherMembers;
     }
 
     /**

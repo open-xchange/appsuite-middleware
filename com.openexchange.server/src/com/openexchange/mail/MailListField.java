@@ -77,7 +77,7 @@ public enum MailListField {
     /**
      * Whether message contains attachments (602)
      */
-    ATTACHMENT(602, MailJSONField.HAS_ATTACHMENTS.getKey()),
+    ATTACHMENT(602, MailJSONField.HAS_ATTACHMENTS.getKey()), //FIXME use new approach
     /**
      * From (603)
      */
@@ -246,7 +246,11 @@ public enum MailListField {
      *
      * @since v7.10.0
      */
-    AUTHENTICATION_MECHANISM_RESULTS(665, MailJSONField.AUTHENTICITY.getKey());
+    AUTHENTICATION_MECHANISM_RESULTS(665, MailJSONField.AUTHENTICITY.getKey()),
+
+    CONTENT_TYPE(666, MailJSONField.CONTENT_TYPE.getKey()),
+
+    ;
 
     private final int field;
     private final String key;

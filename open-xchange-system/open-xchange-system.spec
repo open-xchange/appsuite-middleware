@@ -12,6 +12,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 %else
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
+BuildRequires: coreutils
 Version:       @OXVERSION@
 %define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
@@ -29,7 +30,8 @@ Requires:      util-linux
 Requires:      which
 %endif
 Requires:      sed
-
+Requires:      coreutils
+Conflicts:     open-xchange-core < 7.10.0
 %description
 System integration specific infrastructure
 
@@ -60,6 +62,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %dir /opt/open-xchange/
 %dir /opt/open-xchange/lib/
 /opt/open-xchange/lib/oxfunctions.sh
+%dir /opt/open-xchange/sbin/
+/opt/open-xchange/sbin/*
 
 %changelog
 * Thu Oct 12 2017 Marcus Klein <marcus.klein@open-xchange.com>

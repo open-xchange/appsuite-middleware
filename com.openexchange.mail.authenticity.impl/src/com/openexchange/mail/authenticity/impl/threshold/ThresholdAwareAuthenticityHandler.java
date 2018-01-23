@@ -82,7 +82,7 @@ public class ThresholdAwareAuthenticityHandler implements MailAuthenticityHandle
             return;
         }
         if ((threshold > 0 && mailMessage.getReceivedDate().getTime() < threshold)) {
-            mailMessage.setAuthenticityResult(MailAuthenticityResult.NONE_RESULT);
+            mailMessage.setAuthenticityResult(MailAuthenticityResult.NOT_ANALYZED_RESULT);
             return;
         }
 

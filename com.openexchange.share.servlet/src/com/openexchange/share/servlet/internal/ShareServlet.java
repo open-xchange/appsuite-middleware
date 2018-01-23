@@ -59,8 +59,10 @@ import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareExceptionMessages;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
@@ -213,6 +215,13 @@ public class ShareServlet extends AbstractShareServlet {
         } catch (OXException e) {
             if (ShareExceptionCodes.INVALID_TOKEN.equals(e) || ShareExceptionCodes.UNKNOWN_SHARE.equals(e)) {
                 sendNotFound(response, translator);
+            } else if (SessionExceptionCodes.MAX_SESSION_PER_USER_EXCEPTION.equals(e)){
+                LOG.error("Error processing share '{}': {}", request.getPathInfo(), e.getMessage(), e);
+                LoginLocation location = new LoginLocation()
+                    .status("internal_error")
+                    .loginType(LoginType.MESSAGE)
+                    .message(MessageType.ERROR, translator.translate(ShareExceptionMessages.SHARE_NOT_AVAILABLE_MSG));
+                LoginLocationRegistry.getInstance().putAndRedirect(location, response);
             } else {
                 LOG.error("Error processing share '{}': {}", request.getPathInfo(), e.getMessage(), e);
                 LoginLocation location = new LoginLocation()

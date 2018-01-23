@@ -84,6 +84,8 @@ import com.openexchange.ajax.share.tests.FileStorageTransactionTest;
 import com.openexchange.ajax.share.tests.FolderItemCountTest;
 import com.openexchange.ajax.share.tests.FolderTransactionTest;
 import com.openexchange.ajax.share.tests.GetALinkTest;
+import com.openexchange.ajax.share.tests.GetLinkInheritanceTest;
+import com.openexchange.ajax.share.tests.GetLinkInheritanceWrongModuleTest;
 import com.openexchange.ajax.share.tests.GuestAutologinTest;
 import com.openexchange.ajax.share.tests.GuestContactTest;
 import com.openexchange.ajax.share.tests.GuestPasswordTest;
@@ -122,6 +124,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     AnonymousGuestPasswordTest.class,
     GuestPasswordTest.class,
     GetALinkTest.class,
+    GetLinkInheritanceTest.class,
+    GetLinkInheritanceWrongModuleTest.class,
     ParallelGuestSessionsTest.class,
     QuotaTest.class,
     DownloadHandlerTest.class,

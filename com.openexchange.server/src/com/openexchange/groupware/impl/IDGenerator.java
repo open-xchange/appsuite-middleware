@@ -334,7 +334,6 @@ public final class IDGenerator {
             tmp.put(Types.SUBSCRIPTION, "sequence_subscriptions");
             tmp.put(Types.PUBLICATION, "sequence_publications");
             tmp.put(Types.EAV_NODE, "sequence_uid_eav_node");
-            tmp.put(Types.PASSWORD_CHANGE, "sequence_password_history");
             TABLES = tmp;
         }
 
@@ -461,7 +460,6 @@ public final class IDGenerator {
             tmp.put(Types.SUBSCRIPTION, "sequence_subscriptions");
             tmp.put(Types.PUBLICATION, "sequence_publications");
             tmp.put(Types.EAV_NODE, "sequence_uid_eav_node");
-            tmp.put(Types.PASSWORD_CHANGE, "sequence_password_history");
             TABLES = tmp;
         }
 

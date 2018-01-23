@@ -75,6 +75,7 @@ import com.openexchange.mail.authenticity.impl.trusted.internal.TrustedMailAuthe
 import com.openexchange.mail.authenticity.impl.trusted.internal.TrustedMailDataSource;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link MailAuthenticityActivator}
@@ -98,7 +99,7 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { LeanConfigurationService.class, ConfigurationService.class, UnifiedInboxManagement.class };
+        return new Class<?>[] { LeanConfigurationService.class, ConfigurationService.class, UnifiedInboxManagement.class, ThreadPoolService.class };
     }
 
     @Override
@@ -108,8 +109,11 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
         final MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(getService(LeanConfigurationService.class), context);
         registerService(MailAuthenticityHandlerRegistry.class, registry);
 
-        registerService(MailAuthenticityMetricLogger.class, new MailAuthenticityMetricFileLogger());
-        trackService(MailAuthenticityMetricLogger.class);
+        LeanConfigurationService leanConfigService = getService(LeanConfigurationService.class);
+        if (leanConfigService.getBooleanProperty(MailAuthenticityProperty.LOG_METRICS)) {
+            registerService(MailAuthenticityMetricLogger.class, new MailAuthenticityMetricFileLogger());
+            trackService(MailAuthenticityMetricLogger.class);
+        }
 
         track(MailAuthenticityHandler.class, registry);
         openTrackers();
@@ -122,7 +126,7 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
         registerService(MailAuthenticityHandler.class, handlerImpl);
         registerService(Reloadable.class, new ConfigReloader(registry, handlerImpl));
 
-        MailAuthenticityFetchListener fetchListener = new MailAuthenticityFetchListener(registry);
+        MailAuthenticityFetchListener fetchListener = new MailAuthenticityFetchListener(registry, getService(ThreadPoolService.class));
         registerService(MailFetchListener.class, fetchListener);
 
         registerService(JSlobEntry.class, new MailAuthenticityJSlobEntry(this));

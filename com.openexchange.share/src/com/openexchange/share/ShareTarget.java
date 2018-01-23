@@ -80,7 +80,7 @@ public class ShareTarget implements Cloneable, Serializable {
      * @param folder The identifier of the share's folder
      */
     public ShareTarget(int module, String folder) {
-        this(module, folder, null);
+        this(module, folder, (String) null);
     }
 
     /**

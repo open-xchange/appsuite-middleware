@@ -56,6 +56,8 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.internal.CompositingIDBasedAdministrativeFileAccess;
 import com.openexchange.file.storage.composition.internal.CompositingIDBasedFileAccess;
+import com.openexchange.file.storage.composition.internal.IDBasedAccessCloseable;
+import com.openexchange.marker.OXThreadMarkers;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -87,7 +89,9 @@ public class TrackingIDBasedFileAccessFactory extends RankingAwareNearRegistrySe
     }
 
     private CompositingIDBasedFileAccess newFileAccess(Session session) {
-        return new CompositingIDBasedFileAccess(session, services);
+        CompositingIDBasedFileAccess fileAccess = new CompositingIDBasedFileAccess(session, services);
+        OXThreadMarkers.rememberCloseable(new IDBasedAccessCloseable(fileAccess));
+        return fileAccess;
     }
 
     @Override

@@ -338,6 +338,10 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
      * Mail server %1$s unexpectedly closed connection for user %2$s.
      */
     CONNECTION_CLOSED("Mail server %1$s unexpectedly closed connection for user %2$s.", CATEGORY_SERVICE_DOWN, 1035, MimeMailExceptionMessage.CONNECTION_CLOSED_MSG_DISPLAY),
+    /**
+     * Mail server %1$s denies access for login %2$s.
+     */
+    AUTHORIZATION_FAILED("Mail server %1$s denies access for login %2$s.", CATEGORY_PERMISSION_DENIED, 1036, MimeMailExceptionMessage.AUTHORIZATION_FAILED_MSG_DISPLAY)
 
     ;
 
