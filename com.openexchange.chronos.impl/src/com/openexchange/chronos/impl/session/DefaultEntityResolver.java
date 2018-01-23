@@ -254,6 +254,7 @@ public class DefaultEntityResolver implements EntityResolver {
         calendarUser.setEntity(user.getId());
         calendarUser.setCn(user.getDisplayName());
         calendarUser.setUri(getCalAddress(user));
+        calendarUser.setEMail(getEMail(user));
         return calendarUser;
     }
 
