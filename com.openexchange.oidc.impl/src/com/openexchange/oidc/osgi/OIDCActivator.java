@@ -107,8 +107,8 @@ public class OIDCActivator extends HousekeepingActivator{
     private void getOIDCBackends(ServiceLookup services) {
         if (this.oidcBackends == null) {
             this.oidcBackends = new OIDCBackendRegistry(context, services);
+            this.oidcBackends.open();
         }
-        this.oidcBackends.open();
     }
 
     @Override
