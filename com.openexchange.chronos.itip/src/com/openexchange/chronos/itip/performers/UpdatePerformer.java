@@ -227,7 +227,9 @@ public class UpdatePerformer extends AbstractActionPerformer {
         boolean found = false;
         for (Attendee attendee : event.getAttendees()) {
             if (attendee.getEntity() == owner) {
-                attendee.setPartStat(confirm);
+                if (null != confirm) {
+                    attendee.setPartStat(confirm);
+                }
                 if (message != null) {
                     attendee.setComment(message);
                 }
