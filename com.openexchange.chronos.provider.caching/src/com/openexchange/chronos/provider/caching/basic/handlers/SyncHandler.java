@@ -105,7 +105,7 @@ public class SyncHandler extends AbstractExtensionHandler {
                 SearchOptions searchOptions = getSearchOptions();
                 SearchTerm<?> searchTerm = createSearchTerm(updatedSince);
 
-                EventField[] eventFields = getDefaultEventFields();
+                EventField[] eventFields = getEventFields();
 
                 List<Event> newAndUpdated = null;
                 String[] ignore = getCalendarSession().get(CalendarParameters.PARAMETER_IGNORE, String[].class);
@@ -173,10 +173,10 @@ public class SyncHandler extends AbstractExtensionHandler {
                 searchTerm.addSearchTerm(SearchUtils.getSearchTerm(EventField.UID, SingleOperation.EQUALS, resourceName));
                 searchTerm.addSearchTerm(SearchUtils.getSearchTerm(EventField.FILENAME, SingleOperation.EQUALS, resourceName));
 
-                EventField[] defaultEventFields = getDefaultEventFields();
+                EventField[] eventFields = getEventFields();
 
-                List<Event> resolvedEvents = storage.getEventStorage().searchEvents(searchTerm, getSearchOptions(), defaultEventFields);
-                return postProcess(storage.getUtilities().loadAdditionalEventData(getSession().getUserId(), resolvedEvents, defaultEventFields));
+                List<Event> resolvedEvents = storage.getEventStorage().searchEvents(searchTerm, getSearchOptions(), eventFields);
+                return postProcess(storage.getUtilities().loadAdditionalEventData(getSession().getUserId(), resolvedEvents, eventFields));
             }
         }.executeQuery();
     }

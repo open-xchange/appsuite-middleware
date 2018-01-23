@@ -101,7 +101,7 @@ public class SearchHandler extends AbstractExtensionHandler {
 
             @Override
             protected List<Event> call(CalendarStorage storage) throws OXException {
-                List<Event> events = storage.getEventStorage().searchEvents(SearchUtils.buildSearchTerm(queries, minimumSearchPatternLength), filters, getSearchOptions(), getEventFields(eventFields));
+                List<Event> events = storage.getEventStorage().searchEvents(SearchUtils.buildSearchTerm(queries, minimumSearchPatternLength), filters, getSearchOptions(), getEventFields());
                 return postProcess(storage.getUtilities().loadAdditionalEventData(getSession().getUserId(), events, eventFields));
             }
         }.executeQuery();
