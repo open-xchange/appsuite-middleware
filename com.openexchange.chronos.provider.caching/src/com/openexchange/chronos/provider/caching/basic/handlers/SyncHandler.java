@@ -144,7 +144,7 @@ public class SyncHandler extends AbstractExtensionHandler {
 
                 SearchOptions searchOptions = new SearchOptions().addOrder(SortOrder.getSortOrder(EventField.TIMESTAMP, SortOrder.Order.DESC)).setLimits(0, 1);
                 EventField[] fields = { EventField.TIMESTAMP };
-                List<Event> events = storage.getEventStorage().searchEvents(createSearchTerm(0), searchOptions, fields);
+                List<Event> events = storage.getEventStorage().searchEvents(createSearchTerm(System.currentTimeMillis()), searchOptions, fields);
                 if (false == events.isEmpty() && timestamp < events.get(0).getTimestamp()) {
                     timestamp = events.get(0).getTimestamp();
                 }
