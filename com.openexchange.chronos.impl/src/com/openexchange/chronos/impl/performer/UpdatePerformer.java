@@ -401,6 +401,9 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @return <code>true</code> if there were changes, <code>false</code>, otherwise
      */
     private boolean storeEventUpdate(Event originalEvent, Event deltaEvent, Set<EventField> updatedFields) throws OXException {
+        if (updatedFields.isEmpty()) {
+            return false;
+        }
         boolean realChange = false;
         for (EventField updatedField : updatedFields) {
             if (Arrays.contains(SKIPPED_FIELDS, updatedField)) {
