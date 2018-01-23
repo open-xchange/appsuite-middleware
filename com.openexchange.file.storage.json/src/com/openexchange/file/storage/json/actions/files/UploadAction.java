@@ -72,6 +72,13 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public class UploadAction extends AbstractWriteAction {
 
+    /**
+     * Initialises a new {@link UploadAction}.
+     */
+    public UploadAction() {
+        super();
+    }
+
     @Override
     protected AJAXRequestResult handle(InfostoreRequest request) throws OXException {
 
