@@ -50,14 +50,9 @@
 package com.openexchange.chronos.storage.rdb.legacy;
 
 import static com.openexchange.chronos.common.CalendarUtils.ID_COMPARATOR;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import com.openexchange.chronos.Alarm;
-import com.openexchange.chronos.AlarmTrigger;
-import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.AlarmTriggerStorage;
@@ -85,6 +80,7 @@ public class RdbCalendarStorage implements CalendarStorage {
     private final RdbEventStorage eventStorage;
     private final RdbAttendeeStorage attendeeStorage;
     private final RdbAlarmStorage alarmStorage;
+    private final RdbAlarmTriggerStorage alarmTriggerStorage;
     private final RdbAttachmentStorage attachmentStorage;
     private final CalendarAccountStorage accountStorage;
     private final CalendarStorageUtilities storageUtilities;
@@ -102,6 +98,7 @@ public class RdbCalendarStorage implements CalendarStorage {
         eventStorage = new RdbEventStorage(context, entityResolver, dbProvider, txPolicy);
         attendeeStorage = new RdbAttendeeStorage(context, entityResolver, dbProvider, txPolicy);
         alarmStorage = new RdbAlarmStorage(context, entityResolver, dbProvider, txPolicy);
+        alarmTriggerStorage = new RdbAlarmTriggerStorage(context, entityResolver, dbProvider, txPolicy);
         attachmentStorage = new RdbAttachmentStorage(context, dbProvider, txPolicy);
         accountStorage = com.openexchange.chronos.storage.rdb.RdbCalendarAccountStorage.init(context, dbProvider, txPolicy);
         storageUtilities = new RdbCalendarStorageUtilities(this);
@@ -163,65 +160,7 @@ public class RdbCalendarStorage implements CalendarStorage {
 
     @Override
     public AlarmTriggerStorage getAlarmTriggerStorage() {
-        // Return an idly storage for the legacy storage
-        return new AlarmTriggerStorage() {
-
-            @Override
-            public Integer recalculateFloatingAlarmTriggers(int userId) throws OXException {
-                return 0;
-            }
-
-            @Override
-            public List<AlarmTrigger> loadTriggers(int userId, Date until) throws OXException {
-                return Collections.emptyList();
-            }
-
-            @Override
-            public void insertTriggers(Map<String, Map<Integer, List<Alarm>>> alarms, List<Event> events) throws OXException {
-                // Do nothing
-            }
-
-            @Override
-            public void insertTriggers(Event event) throws OXException {
-                // Do nothing
-            }
-
-            @Override
-            public void deleteTriggers(List<String> eventIds) throws OXException {
-                // Do nothing
-            }
-
-            @Override
-            public void deleteTriggers(String eventId) throws OXException {
-                // Do nothing
-            }
-
-            @Override
-            public void deleteTriggers(List<String> eventIds, int userId) throws OXException {
-                // Do nothing
-            }
-
-            @Override
-            public void deleteTriggers(int userId) throws OXException {
-                // Do nothing
-            }
-
-            @Override
-            public void deleteAllTriggers() throws OXException {
-                // Do nothing
-            }
-
-            @Override
-            public void insertTriggers(Event event, Map<Integer, List<Alarm>> alarmsPerUserId) throws OXException {
-                // Do nothing
-            }
-
-            @Override
-            public Map<String, Boolean> hasTriggers(int userId, String[] eventIds) throws OXException {
-                // Do nothing
-                return Collections.emptyMap();
-            }
-        };
+        return alarmTriggerStorage;
     }
 
 }

@@ -389,6 +389,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         Alarm primaryAlarm = new Alarm(new Trigger("-PT" + reminderData.reminderMinutes + 'M'), AlarmAction.DISPLAY);
         primaryAlarm.setDescription("Reminder");
         primaryAlarm.setUid(new UUID(context.getContextId(), reminderData.id).toString().toUpperCase());
+        primaryAlarm.setId(reminderData.id);
         /*
          * assume alarm is not yet acknowledged if next trigger still matches the primary alarm's regular trigger time
          */
@@ -411,9 +412,11 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
          * assume primary trigger has been snoozed by marking as acknowledged and adding an accompanying snooze trigger for the trigger time
          */
         primaryAlarm.setAcknowledged(acknowledgedGuardian);
+        primaryAlarm.setId(primaryAlarm.getId() * -1);
         Alarm snoozeAlarm = new Alarm(new Trigger(new Date(reminderData.nextTriggerTime)), primaryAlarm.getAction());
         //        snoozeAlarm.setDescription(primaryAlarm.getDescription());
         snoozeAlarm.setRelatedTo(new RelatedTo("SNOOZE", primaryAlarm.getUid()));
+        snoozeAlarm.setId(primaryAlarm.getId());
         List<Alarm> alarms = new ArrayList<Alarm>(2);
         alarms.add(primaryAlarm);
         alarms.add(snoozeAlarm);
