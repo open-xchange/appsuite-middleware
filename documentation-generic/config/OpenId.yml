@@ -50,7 +50,7 @@ properties:
       packageName: open-xchange-oidc
       tags: ["OpenID"]
       
-- key: com.openexchange.oidc.rpRedirectURIAuth
+    - key: com.openexchange.oidc.rpRedirectURIAuth
       description: |
         The path to the authentication servlet of this backend
       defaultValue:
@@ -62,7 +62,7 @@ properties:
       packageName: open-xchange-oidc
       tags: ["OpenID"]
       
-- key: com.openexchange.oidc.opAuthorizationEndpoint
+    - key: com.openexchange.oidc.opAuthorizationEndpoint
       description: |
         The OPs authorization endpoint
       defaultValue:
@@ -74,7 +74,7 @@ properties:
       packageName: open-xchange-oidc
       tags: ["OpenID"]
       
-- key: com.openexchange.oidc.opTokenEndpoint
+    - key: com.openexchange.oidc.opTokenEndpoint
       description: |
         The OPs token endpoint
       defaultValue:
@@ -86,7 +86,7 @@ properties:
       packageName: open-xchange-oidc
       tags: ["OpenID"]
       
-- key: com.openexchange.oidc.clientSecret
+    - key: com.openexchange.oidc.clientSecret
       description: |
         The client secret, which was assigned by the OP to this client/backend
         on registration
@@ -99,7 +99,7 @@ properties:
       packageName: open-xchange-oidc
       tags: ["OpenID"]
       
-- key: com.openexchange.oidc.opJwkSetEndpoint
+    - key: com.openexchange.oidc.opJwkSetEndpoint
       description: |
         The OPs JWK Set endpoint
       defaultValue:
@@ -111,7 +111,7 @@ properties:
       packageName: open-xchange-oidc
       tags: ["OpenID"]
       
-- key: com.openexchange.oidc.jwsAlgorithm
+    - key: com.openexchange.oidc.jwsAlgorithm
       description: |
         The used JWS encryption algorithm
       defaultValue:
@@ -123,7 +123,7 @@ properties:
       packageName: open-xchange-oidc
       tags: ["OpenID"]
       
-- key: com.openexchange.oidc.scope
+    - key: com.openexchange.oidc.scope
       description: |
         The used scope
       defaultValue: OpenID
@@ -135,7 +135,7 @@ properties:
       packageName: open-xchange-oidc
       tags: ["OpenID"]
       
-- key: com.openexchange.oidc.opIssuer
+    - key: com.openexchange.oidc.opIssuer
       description: |
         The OPs issuer path
       defaultValue:
@@ -147,7 +147,7 @@ properties:
       packageName: open-xchange-oidc
       tags: ["OpenID"]
       
-- key: com.openexchange.oidc.responseType
+    - key: com.openexchange.oidc.responseType
       description: |
         The OPs response type, which also identifies the used flow
       defaultValue: code
@@ -159,7 +159,7 @@ properties:
       packageName: open-xchange-oidc
       tags: ["OpenID"]
       
-- key: com.openexchange.oidc.opLogoutEndpoint
+    - key: com.openexchange.oidc.opLogoutEndpoint
       description: |
         The OPs logout endpoint
       defaultValue:
@@ -171,7 +171,7 @@ properties:
       packageName: open-xchange-oidc
       tags: ["OpenID"]
       
-- key: com.openexchange.oidc.rpRedirectURIPostSSOLogout
+    - key: com.openexchange.oidc.rpRedirectURIPostSSOLogout
       description: |
         The location where the Browser should be redirected after logout
         from OP
@@ -184,7 +184,7 @@ properties:
       packageName: open-xchange-oidc
       tags: ["OpenID"]
       
-- key: com.openexchange.oidc.ssoLogout
+    - key: com.openexchange.oidc.ssoLogout
       description: |
         Whether to redirect to the OP on logout trigger from client or not
       defaultValue: false
@@ -196,7 +196,7 @@ properties:
       packageName: open-xchange-oidc
       tags: ["OpenID"]
       
-- key: com.openexchange.oidc.rpRedirectURILogout
+    - key: com.openexchange.oidc.rpRedirectURILogout
       description: |
         Where to redirect the user after a valid logout
       defaultValue: false
@@ -208,7 +208,7 @@ properties:
       packageName: open-xchange-oidc
       tags: ["OpenID"]
       
-- key: com.openexchange.oidc.autologinCookieMode
+    - key: com.openexchange.oidc.autologinCookieMode
       description: |
         Which login mode is enabled look at {@link OIDCBackendConfig.AutologinMode} for all valid values,
         so far the following values are valid: {off, ox_direct, sso_redirect}.
@@ -225,7 +225,7 @@ properties:
       packageName: open-xchange-oidc
       tags: ["OpenID"]
       
-- key: com.openexchange.oidc.oauthRefreshTime
+    - key: com.openexchange.oidc.oauthRefreshTime
       description: |
         Time in milliseconds determines how long before the expiration of the
         OAuth AccessToken a new AccessToken should be requested. "refresh_token"
@@ -239,7 +239,7 @@ properties:
       packageName: open-xchange-oidc
       tags: ["OpenID"]
       
-- key: com.openexchange.oidc.uiWebPath
+    - key: com.openexchange.oidc.uiWebPath
       description: |
         This backends UI path
       defaultValue:
@@ -251,9 +251,21 @@ properties:
       packageName: open-xchange-oidc
       tags: ["OpenID"]
       
-- key: com.openexchange.oidc.backendPath
+    - key: com.openexchange.oidc.backendPath
       description: |
         This backends servlet path, which is appended to the default /oidc/ path.
+      defaultValue:
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+
+    - key: com.openexchange.oidc.hosts
+      description: |
+        This contains a comma separated list of hosts, that this backend supports.
       defaultValue:
       version: 7.10.0
       reloadable: true

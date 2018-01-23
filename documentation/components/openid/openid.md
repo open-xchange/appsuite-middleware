@@ -19,6 +19,7 @@ The full OpenID specification can be found [here](http://openid.net/specs/openid
 * Oauth token refresh
 * Third Party initiated login
 * Multiple registration of OpenID backends in one instance
+* Multiple tenants working with one backend
 
 # Supported Message Flows
 So far only code flow is supported for login. The logout mechanisms are either with termination of the OP session or without. There are also two autologin flows supported, one with redirect to the OP for a valid session check and one without.
