@@ -47,15 +47,10 @@
  *
  */
 
-
 package com.openexchange.xing.session;
 
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
-import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
-import oauth.signpost.exception.OAuthCommunicationException;
-import oauth.signpost.exception.OAuthExpectationFailedException;
-import oauth.signpost.exception.OAuthMessageSignerException;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
@@ -76,6 +71,10 @@ import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.exception.XingException;
+import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
+import oauth.signpost.exception.OAuthCommunicationException;
+import oauth.signpost.exception.OAuthExpectationFailedException;
+import oauth.signpost.exception.OAuthMessageSignerException;
 
 /**
  * Keeps track of a logged in user and contains configuration options for the
@@ -106,7 +105,7 @@ public abstract class AbstractSession implements Session {
      * type. The session will not be linked because it has no access token pair.
      */
     protected AbstractSession(final AppKeyPair appKeyPair) {
-        this(appKeyPair, (AccessTokenPair)null);
+        this(appKeyPair, (AccessTokenPair) null);
     }
 
     /**
@@ -210,8 +209,8 @@ public abstract class AbstractSession implements Session {
 
     /**
      * Signs the request by using's OAuth's HTTP header authorization scheme
-     * and the PLAINTEXT signature method.  As such, this should only be used
-     * over secure connections (i.e. HTTPS).  Using this over regular HTTP
+     * and the PLAINTEXT signature method. As such, this should only be used
+     * over secure connections (i.e. HTTPS). Using this over regular HTTP
      * connections is completely insecure.
      *
      * @see Session#sign
@@ -313,8 +312,7 @@ public abstract class AbstractSession implements Session {
             // Keep-alive for the shorter of 20 seconds or what the server specifies.
             long timeout = KEEP_ALIVE_DURATION_SECS * 1000;
 
-            final HeaderElementIterator i = new BasicHeaderElementIterator(
-                    response.headerIterator(HTTP.CONN_KEEP_ALIVE));
+            final HeaderElementIterator i = new BasicHeaderElementIterator(response.headerIterator(HTTP.CONN_KEEP_ALIVE));
             while (i.hasNext()) {
                 final HeaderElement element = i.nextElement();
                 final String name = element.getName();
