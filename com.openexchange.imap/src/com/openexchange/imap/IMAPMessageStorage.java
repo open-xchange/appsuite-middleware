@@ -123,7 +123,6 @@ import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.FlaggingMode;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
@@ -171,7 +170,7 @@ import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.UserFlagTerm;
 import com.openexchange.mail.text.TextFinder;
 import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.utils.MailMessageComparator;
+import com.openexchange.mail.utils.MailMessageComparatorFactory;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 import com.openexchange.mailaccount.MailAccount;
@@ -2076,8 +2075,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
 
             // Sort
-            Integer flaggingColor = FlaggingMode.FLAGGED_IMPLICIT.equals(FlaggingMode.getFlaggingMode(getSession())) ? FlaggingMode.getFlaggingColor(getSession()) : null;
-            Collections.sort(list, new MailMessageComparator(sortField, order == OrderDirection.DESC, getLocale(), getIMAPProperties().isUserFlagsEnabled(), flaggingColor));
+            Collections.sort(list, MailMessageComparatorFactory.createComparator(sortField, order, getLocale(), getSession(), getIMAPProperties().isUserFlagsEnabled()));
 
             // Return
             MailMessage[] mailMessages = list.toArray(new MailMessage[list.size()]);
@@ -2103,8 +2101,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         }
 
         // Sort them
-        Integer flaggingColor = FlaggingMode.FLAGGED_IMPLICIT.equals(FlaggingMode.getFlaggingMode(getSession())) ? FlaggingMode.getFlaggingColor(getSession()) : null;
-        Collections.sort(list, new MailMessageComparator(sortField, order == OrderDirection.DESC, getLocale(), getIMAPProperties().isUserFlagsEnabled(), flaggingColor ));
+        Collections.sort(list, MailMessageComparatorFactory.createComparator(sortField, order, getLocale(), getSession(), getIMAPProperties().isUserFlagsEnabled()));
 
         // Apply index range
         list = applyIndexRange(list, indexRange);
@@ -2524,8 +2521,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     setAccountInfo(mails);
                 }
                 final List<MailMessage> msgList = Arrays.asList(mails);
-                Integer flaggingColor = FlaggingMode.FLAGGED_IMPLICIT.equals(FlaggingMode.getFlaggingMode(imapFolderStorage.getSession())) ? FlaggingMode.getFlaggingColor(imapFolderStorage.getSession()) : null;
-                Collections.sort(msgList, new MailMessageComparator(sortField, order == OrderDirection.DESC, getLocale(), getIMAPProperties().isUserFlagsEnabled(), flaggingColor));
+                Collections.sort(msgList, MailMessageComparatorFactory.createComparator(sortField, order, getLocale(), imapFolderStorage.getSession(), getIMAPProperties().isUserFlagsEnabled()));
+
                 mails = msgList.toArray(mails);
             }
             /*
