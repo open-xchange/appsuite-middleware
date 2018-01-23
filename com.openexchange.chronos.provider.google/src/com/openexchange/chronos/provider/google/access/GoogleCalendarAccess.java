@@ -92,6 +92,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -112,13 +113,14 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
     /**
      * Initializes a new {@link GoogleCalendarAccess}.
      *
+     * @param services The {@link ServiceLookup} instance
      * @param session The user session
      * @param account The calendar account
      * @param parameters The calendar parameters
      * @throws OXException
      */
-    public GoogleCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters, boolean checkConfig) throws OXException {
-        super(session, account, parameters);
+    public GoogleCalendarAccess(ServiceLookup services, Session session, CalendarAccount account, CalendarParameters parameters, boolean checkConfig) throws OXException {
+        super(services, session, account, parameters);
         this.parameters = parameters;
         this.account = account;
         refreshInterval = GoogleCalendarConfig.getResfrehInterval(session);

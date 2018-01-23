@@ -72,6 +72,7 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -88,16 +89,19 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     protected final CalendarParameters parameters;
 
     private final SingleFolderCachingCalendarAccess cachingBridge;
+    protected final ServiceLookup services;
 
     /**
      * Initializes a new {@link BirthdaysCalendarAccess}.
      *
+     * @param services The {@link ServiceLookup} instance
      * @param session The session
      * @param account The underlying calendar account
      * @param parameters Additional calendar parameters
      */
-    protected BasicCachingCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    protected BasicCachingCalendarAccess(ServiceLookup services, Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         super();
+        this.services = services;
         this.account = account;
         this.session = session;
         this.parameters = parameters;
@@ -164,7 +168,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     @Override
     public List<Event> searchEvents(List<SearchFilter> filters, List<String> queries) throws OXException {
         if ((null == filters || filters.isEmpty()) && (null == queries || queries.isEmpty())) {
-            return Collections.emptyList();
+            return getEvents();
         }
         getEvents();
         return new SearchHandler(session, account, parameters).searchEvents(filters, queries);
@@ -216,14 +220,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             DefaultCalendarFolder folder = new DefaultCalendarFolder(FOLDER_ID, settings.getName());
             folder.setLastModified(settings.getLastModified());
             folder.setExtendedProperties(settings.getExtendedProperties());
-            folder.setPermissions(Collections.singletonList(new DefaultCalendarPermission(userId, 
-                CalendarPermission.MAX_PERMISSION, 
-                CalendarPermission.READ_ALL_OBJECTS, 
-                CalendarPermission.WRITE_ALL_OBJECTS, 
-                CalendarPermission.NO_PERMISSIONS, 
-                true, 
-                false, 
-                CalendarPermission.NO_PERMISSIONS)));
+            folder.setPermissions(Collections.singletonList(new DefaultCalendarPermission(userId, CalendarPermission.MAX_PERMISSION, CalendarPermission.READ_ALL_OBJECTS, CalendarPermission.WRITE_ALL_OBJECTS, CalendarPermission.NO_PERMISSIONS, true, false, CalendarPermission.NO_PERMISSIONS)));
             return folder;
         }
 

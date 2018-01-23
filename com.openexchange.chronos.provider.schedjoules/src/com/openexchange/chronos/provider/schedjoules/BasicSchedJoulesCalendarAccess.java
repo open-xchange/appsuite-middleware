@@ -96,8 +96,6 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
      */
     private static final int EXTERNAL_REQUEST_TIMEOUT = 60;
 
-    private final ServiceLookup services;
-
     /**
      * Initialises a new {@link BasicSchedJoulesCalendarAccess}.
      *
@@ -107,8 +105,7 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
      * @throws OXException If the context cannot be resolved
      */
     protected BasicSchedJoulesCalendarAccess(ServiceLookup services, Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super(session, account, parameters);
-        this.services = services;
+        super(services, session, account, parameters);
     }
 
     @Override

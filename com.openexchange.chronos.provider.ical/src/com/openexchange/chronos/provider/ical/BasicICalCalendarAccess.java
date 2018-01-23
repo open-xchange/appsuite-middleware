@@ -64,7 +64,6 @@ import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.ical.conn.ICalFeedClient;
-import com.openexchange.chronos.provider.ical.osgi.Services;
 import com.openexchange.chronos.provider.ical.properties.ICalCalendarProviderProperties;
 import com.openexchange.chronos.provider.ical.result.GetResponse;
 import com.openexchange.chronos.provider.ical.result.GetResponseState;
@@ -72,6 +71,7 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -90,13 +90,14 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
 
     /**
      * Initializes a new {@link BasicICalCalendarAccess}.
-     *
+     * 
+     * @param services The {@link ServiceLookup} instance
      * @param session The calendar session
      * @param account The calendar account
      * @param parameters The calendar parameters
      */
-    public BasicICalCalendarAccess(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super(session, account, parameters);
+    public BasicICalCalendarAccess(ServiceLookup services, Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        super(services, session, account, parameters);
         JSONObject userConfiguration = new JSONObject(account.getUserConfiguration());
         this.iCalFeedConfig = new ICalCalendarFeedConfig.DecryptedBuilder(session, userConfiguration, getICalConfiguration()).build();
         this.feedClient = new ICalFeedClient(session, iCalFeedConfig);
@@ -132,7 +133,7 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
                 return calendarProviderInterval.longValue();
             }
         }
-        return Services.getService(LeanConfigurationService.class).getLongProperty(session.getUserId(), session.getContextId(), ICalCalendarProviderProperties.refreshInterval);
+        return services.getService(LeanConfigurationService.class).getLongProperty(session.getUserId(), session.getContextId(), ICalCalendarProviderProperties.refreshInterval);
     }
 
     @Override

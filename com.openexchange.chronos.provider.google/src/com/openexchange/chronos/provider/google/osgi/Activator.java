@@ -84,7 +84,7 @@ public class Activator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         openTrackers();
         Services.setServiceLookup(this);
-        registerService(CalendarProvider.class, new GoogleCalendarProvider());
+        registerService(CalendarProvider.class, new GoogleCalendarProvider(this));
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new GoogleSubscriptionsMigrationTask()));
     }
 

@@ -76,12 +76,12 @@ import com.openexchange.chronos.provider.basic.BasicCalendarProvider;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.google.access.GoogleCalendarAccess;
 import com.openexchange.chronos.provider.google.access.GoogleOAuthAccess;
-import com.openexchange.chronos.provider.google.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -96,6 +96,18 @@ public class GoogleCalendarProvider implements BasicCalendarProvider {
 
     public static final String PROVIDER_ID = "google";
     private static final String DISPLAY_NAME = "Google";
+
+    private final ServiceLookup services;
+
+    /**
+     * Initialises a new {@link GoogleCalendarProvider}.
+     * 
+     * @param services The {@link ServiceLookup} instance
+     */
+    public GoogleCalendarProvider(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
 
     @Override
     public String getId() {
@@ -158,7 +170,7 @@ public class GoogleCalendarProvider implements BasicCalendarProvider {
         } catch (JSONException e) {
             throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(e, userConfig);
         }
-        OAuthService oAuthService = requireService(OAuthService.class, Services.getServiceLookup());
+        OAuthService oAuthService = requireService(OAuthService.class, services);
         oAuthService.getAccount(oauthId, session, session.getUserId(), session.getContextId());
         /*
          * prepare & return checked proposed settings based on client-supplied settings
@@ -214,7 +226,7 @@ public class GoogleCalendarProvider implements BasicCalendarProvider {
         JSONObject userConfig = settings.getConfig();
         int accountId = checkConfig(userConfig);
 
-        final OAuthService oAuthService = Services.optService(OAuthService.class);
+        final OAuthService oAuthService = services.getOptionalService(OAuthService.class);
         if (null == oAuthService) {
             throw ServiceExceptionCode.absentService(OAuthService.class);
         }
@@ -252,7 +264,7 @@ public class GoogleCalendarProvider implements BasicCalendarProvider {
         JSONObject userConfig = settings.getConfig();
         int accountId = checkConfig(userConfig);
 
-        final OAuthService oAuthService = Services.optService(OAuthService.class);
+        final OAuthService oAuthService = services.getOptionalService(OAuthService.class);
         if (null == oAuthService) {
             throw ServiceExceptionCode.absentService(OAuthService.class);
         }
@@ -286,7 +298,7 @@ public class GoogleCalendarProvider implements BasicCalendarProvider {
 
     @Override
     public BasicCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        return new GoogleCalendarAccess(session, account, parameters, true);
+        return new GoogleCalendarAccess(services, session, account, parameters, true);
     }
 
 }
