@@ -57,11 +57,14 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.SearchFilter;
+import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
 import com.openexchange.exception.OXException;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -79,14 +82,15 @@ public class SearchHandler extends AbstractExtensionHandler {
     /**
      * Initialises a new {@link SearchHandler}.
      * 
+     * @param services The {@link ServiceLookup} instance
      * @param session The groupware {@link Session}
      * @param account The {@link CalendarAccount}
      * @param calendarParameters The {@link CalendarParameters}
      * @throws OXException if the property <code>com.openexchange.MinimumSearchCharacters</code> is missing or it type
      *             is not an integer
      */
-    public SearchHandler(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super(session, account, parameters);
+    public SearchHandler(ServiceLookup services, Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        super(services, session, account, parameters);
         this.minimumSearchPatternLength = getCalendarSession().getConfig().getMinimumSearchPatternLength();
     }
 
@@ -100,8 +104,14 @@ public class SearchHandler extends AbstractExtensionHandler {
      * @throws OXException if an error is occurred
      */
     public List<Event> searchEvents(List<SearchFilter> filters, List<String> queries, EventField... eventFields) throws OXException {
-        List<Event> events = getEventStorage().searchEvents(compileSearchTerm(queries), filters, getSearchOptions(), getEventFields(eventFields));
-        return postProcess(getUtilities().loadAdditionalEventData(getSession().getUserId(), events, eventFields));
+        return new OSGiCalendarStorageOperation<List<Event>>(services, getSession().getContextId(), getAccount().getAccountId()) {
+
+            @Override
+            protected List<Event> call(CalendarStorage storage) throws OXException {
+                List<Event> events = storage.getEventStorage().searchEvents(compileSearchTerm(queries), filters, getSearchOptions(), getEventFields(eventFields));
+                return postProcess(getUtilities().loadAdditionalEventData(getSession().getUserId(), events, eventFields));
+            }
+        }.executeQuery();
     }
 
     ///////////////////////////////////////////////// HELPERS ////////////////////////////////////////////////////////
