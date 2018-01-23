@@ -67,14 +67,8 @@ import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchOptions;
-import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.chronos.storage.CalendarStorageFactory;
-import com.openexchange.chronos.storage.CalendarStorageUtilities;
-import com.openexchange.chronos.storage.EventStorage;
 import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -209,40 +203,6 @@ abstract class AbstractExtensionHandler {
         }
 
         return eventFields.toArray(new EventField[eventFields.size()]);
-    }
-
-    /**
-     * Initialises and returns a {@link CalendarStorage} for the current {@link Session}
-     * 
-     * @return The initialised storage
-     * @throws OXException if the storage cannot be initialised
-     */
-    CalendarStorage getStorage() throws OXException {
-        ContextService contextService = Services.getService(ContextService.class);
-        Context context = contextService.loadContext(getSession().getContextId());
-
-        CalendarStorageFactory storageFactory = Services.getService(CalendarStorageFactory.class);
-        return storageFactory.create(context, getAccount().getAccountId(), getCalendarSession().getEntityResolver());
-    }
-
-    /**
-     * Helper method for getting the {@link EventStorage}
-     * 
-     * @return The {@link EventStorage}
-     * @throws OXException if the {@link EventStorage} cannot be returned
-     */
-    EventStorage getEventStorage() throws OXException {
-        return getStorage().getEventStorage();
-    }
-
-    /**
-     * Gets additional storage utilities.
-     * 
-     * @return The {@link CalendarStorageUtilities}
-     * @throws OXException if the {@link CalendarStorageUtilities} cannot be returned
-     */
-    CalendarStorageUtilities getUtilities() throws OXException {
-        return getStorage().getUtilities();
     }
 
     /**

@@ -144,11 +144,11 @@ public class SyncHandler extends AbstractExtensionHandler {
 
                 SearchOptions searchOptions = new SearchOptions().addOrder(SortOrder.getSortOrder(EventField.TIMESTAMP, SortOrder.Order.DESC)).setLimits(0, 1);
                 EventField[] fields = { EventField.TIMESTAMP };
-                List<Event> events = getEventStorage().searchEvents(createSearchTerm(0), searchOptions, fields);
+                List<Event> events = storage.getEventStorage().searchEvents(createSearchTerm(0), searchOptions, fields);
                 if (false == events.isEmpty() && timestamp < events.get(0).getTimestamp()) {
                     timestamp = events.get(0).getTimestamp();
                 }
-                List<Event> tombstoneEvents = getEventStorage().searchEventTombstones(createSearchTerm(0), searchOptions, fields);
+                List<Event> tombstoneEvents = storage.getEventStorage().searchEventTombstones(createSearchTerm(0), searchOptions, fields);
                 if (false == tombstoneEvents.isEmpty() && timestamp < tombstoneEvents.get(0).getTimestamp()) {
                     timestamp = tombstoneEvents.get(0).getTimestamp();
                 }
@@ -175,8 +175,8 @@ public class SyncHandler extends AbstractExtensionHandler {
 
                 EventField[] defaultEventFields = getDefaultEventFields();
 
-                List<Event> resolvedEvents = getEventStorage().searchEvents(searchTerm, getSearchOptions(), defaultEventFields);
-                return postProcess(getUtilities().loadAdditionalEventData(getSession().getUserId(), resolvedEvents, defaultEventFields));
+                List<Event> resolvedEvents = storage.getEventStorage().searchEvents(searchTerm, getSearchOptions(), defaultEventFields);
+                return postProcess(storage.getUtilities().loadAdditionalEventData(getSession().getUserId(), resolvedEvents, defaultEventFields));
             }
         }.executeQuery();
     }
