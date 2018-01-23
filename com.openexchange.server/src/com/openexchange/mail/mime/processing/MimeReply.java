@@ -788,6 +788,14 @@ public final class MimeReply extends AbstractMimeProcessing {
                     replyPrefix = new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).append(nextLine).toString();
                 }
             }
+            if (isHtml) {
+                HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                if (null != htmlService) {
+                    String wellFormedHtmlDoc = htmlService.getWellFormedHTMLDocument(textBuilder.toString());
+                    textBuilder.setLength(0);
+                    textBuilder.append(wellFormedHtmlDoc);
+                }
+            }
             /*-
              * Surround with quote
              *
