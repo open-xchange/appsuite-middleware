@@ -106,6 +106,9 @@ public class RecurrenceIterator extends AbstractRecurrenceIterator<Event> {
     @Override
     protected Event nextInstance() {
         PositionAwareRecurrenceId recurrenceId = new PositionAwareRecurrenceId(recurrenceData, next, position, CalendarUtils.truncateTime(new Date(next.getTimestamp()), TimeZones.UTC));
+        /*
+         * extend flags (if actually set and not null in master) by "first" / "last" occurrence flag dynamically
+         */
         if (1 == position) {
             return new EventOccurrence(master, recurrenceId) {
 
@@ -119,7 +122,8 @@ public class RecurrenceIterator extends AbstractRecurrenceIterator<Event> {
                     return flags;
                 }
             };
-        } else if (isLastOccurrence()) {
+        }
+        if (isLastOccurrence()) {
             return new EventOccurrence(master, recurrenceId) {
 
                 @Override
