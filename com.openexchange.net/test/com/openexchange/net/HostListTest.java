@@ -159,7 +159,7 @@ public class HostListTest {
             assertFalse(hl.contains("192.168.255.255"));
             assertTrue(hl.contains("127.168.32.4"));
             assertTrue(hl.contains("10.20.30.222"));
-            assertFalse(hl.contains("::1"));
+            assertTrue(hl.contains("::1"));
             assertFalse(hl.contains("barfoo.open-xchange.com"));
             assertFalse(hl.contains("12.open-xchange.com"));
             assertFalse(hl.contains("ox.io.com"));
@@ -330,6 +330,36 @@ public class HostListTest {
             assertTrue(hl.contains("0xc0.0xa8.0xa")); // 16 bit
             assertTrue(hl.contains("0xc0.0xa8000a")); // 24 bit
             assertTrue(hl.contains("0xc0a8000a")); // 32 bit
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testForBug56706() {
+        try {
+            HostList hl = HostList.valueOf("127.0.0.1-127.255.255.255,localhost,192.168.0.10");
+
+            String shl = hl.toString();
+            assertNotNull("Host-list's string representation is null", shl);
+
+            assertTrue(hl.contains("0")); // All IPv4
+            assertTrue(hl.contains("::")); // All IPv6
+            assertTrue(hl.contains("0.0.0.0")); // All IPv4
+            assertTrue(hl.contains("::1")); // Localhost IPv6
+
+            assertTrue(hl.contains("0000")); // All IPv4
+            assertTrue(hl.contains("00000000")); // All IPv4 (Leading zeros)
+            assertTrue(hl.contains("0:0:0:0:0:FFFF:7F00:0001")); // IPv4 mapped IPv6 address
+            assertTrue(hl.contains("0177.00.00.01")); // 8-Bit Octal conversion
+            assertTrue(hl.contains("017700000001")); // 32-Bit Octal conversion
+            assertTrue(hl.contains("0x7f000001")); // 32-Bit Hex conversion
+
+            // Trial bypasses for IPv4 addresses (192.168.0.10 in this case)
+            assertTrue(hl.contains("0:0:0:0:0:FFFF:C0A8:000A")); // IPv4 mapped IPv6 address
+            assertTrue(hl.contains("030052000012")); // 32-Bit Hex conversion
+            assertTrue(hl.contains("0xc0a8000a")); // 32-Bit Octal conversion
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

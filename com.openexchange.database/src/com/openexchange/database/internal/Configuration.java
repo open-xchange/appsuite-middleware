@@ -170,6 +170,8 @@ public final class Configuration {
     }
 
     private void separateReadWrite() {
+        readProps.setProperty("useSSL", "false");
+        writeProps.setProperty("useSSL", "false");
         for (final Object tmp : props.keySet()) {
             final String key = (String) tmp;
             if (key.startsWith("readProperty.")) {

@@ -111,7 +111,7 @@ public class DefaultFileStoragePermission implements FileStoragePermission {
         result = prime * result + readPermission;
         result = prime * result + system;
         result = prime * result + type.getTypeNumber();
-        result = prime * result + legator==null ? 0 : legator.hashCode();
+        result = prime * result + (legator==null ? 0 : legator.hashCode());
         result = prime * result + writePermission;
         return result;
     }

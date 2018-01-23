@@ -87,6 +87,8 @@ public class FileActionFactory implements AJAXActionServiceFactory {
         actions.put("copy", new CopyAction());
         actions.put("move", new MoveAction());
 
+        actions.put("upload", new UploadAction());
+
         actions.put("all", new AllAction());
         actions.put("updates", new UpdatesAction());
         actions.put("list", new ListAction());

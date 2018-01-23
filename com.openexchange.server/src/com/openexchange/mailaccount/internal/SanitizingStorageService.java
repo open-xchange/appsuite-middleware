@@ -102,13 +102,13 @@ final class SanitizingStorageService implements MailAccountStorageService {
     }
 
     @Override
-    public boolean incrementFailedMailAuthCount(int accountId, int userId, int contextId) throws OXException {
-        return storageService.incrementFailedMailAuthCount(accountId, userId, contextId);
+    public boolean incrementFailedMailAuthCount(int accountId, int userId, int contextId, Exception optReason) throws OXException {
+        return storageService.incrementFailedMailAuthCount(accountId, userId, contextId, optReason);
     }
 
     @Override
-    public boolean incrementFailedTransportAuthCount(int accountId, int userId, int contextId) throws OXException {
-        return storageService.incrementFailedTransportAuthCount(accountId, userId, contextId);
+    public boolean incrementFailedTransportAuthCount(int accountId, int userId, int contextId, Exception optReason) throws OXException {
+        return storageService.incrementFailedTransportAuthCount(accountId, userId, contextId, optReason);
     }
 
     @Override
@@ -252,13 +252,13 @@ final class SanitizingStorageService implements MailAccountStorageService {
     }
 
     @Override
-    public void setFullNamesForMailAccount(int id, int[] indexes, String[] fullNames, int user, int cid) throws OXException {
-        storageService.setFullNamesForMailAccount(id, indexes, fullNames, user, cid);
+    public boolean setFullNamesForMailAccount(int id, int[] indexes, String[] fullNames, int user, int cid) throws OXException {
+        return storageService.setFullNamesForMailAccount(id, indexes, fullNames, user, cid);
     }
 
     @Override
-    public void setNamesForMailAccount(int id, int[] indexes, String[] names, int userId, int contextId) throws OXException {
-        storageService.setNamesForMailAccount(id, indexes, names, userId, contextId);
+    public boolean setNamesForMailAccount(int id, int[] indexes, String[] names, int userId, int contextId) throws OXException {
+        return storageService.setNamesForMailAccount(id, indexes, names, userId, contextId);
     }
 
     @Override

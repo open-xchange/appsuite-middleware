@@ -156,6 +156,11 @@ public class SimHtmlService implements HtmlService {
     }
 
     @Override
+    public String getWellFormedHTMLDocument(String htmlContent) throws OXException {
+        return htmlService.getWellFormedHTMLDocument(htmlContent);
+    }
+
+    @Override
     public String getConformHTML(final String htmlContent, final String charset) throws OXException {
         return htmlService.getConformHTML(htmlContent, charset);
     }

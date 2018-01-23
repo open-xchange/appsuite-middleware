@@ -50,7 +50,6 @@
 package com.openexchange.oauth.access;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -68,8 +67,8 @@ import com.openexchange.session.Session;
  */
 public abstract class AbstractOAuthAccess implements OAuthAccess {
 
-    /** The re-check threshold in seconds (45 minutes) */
-    private static final long RECHECK_THRESHOLD = 2700;
+    /** The re-check threshold in milliseconds (45 minutes) */
+    private static final long RECHECK_THRESHOLD_MILLIS = 2700000;
 
     /** The {@link OAuthAccount} */
     private volatile OAuthAccount oauthAccount;
@@ -77,8 +76,8 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
     /** The associated OAuth client */
     private final AtomicReference<OAuthClient<?>> oauthClientRef;
 
-    /** The last-accessed time stamp */
-    private volatile long lastAccessed;
+    /** The last-accessed time stamp milliseconds */
+    private volatile long lastAccessedMillis;
 
     /** The associated Groupware {@link Session} */
     private final Session session;
@@ -148,8 +147,8 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
      * @return <code>true</code> if expired; <code>false</code> otherwise
      */
     protected boolean isExpired() {
-        long now = System.nanoTime();
-        return TimeUnit.NANOSECONDS.toSeconds(now - lastAccessed) > RECHECK_THRESHOLD;
+        long now = System.currentTimeMillis();
+        return (now - lastAccessedMillis) > RECHECK_THRESHOLD_MILLIS;
     }
 
     /**
@@ -158,7 +157,7 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
      * @param client The {@link OAuthClient} to set
      */
     protected <T> void setOAuthClient(OAuthClient<T> client) {
-        lastAccessed = System.nanoTime();
+        lastAccessedMillis = System.currentTimeMillis();
         oauthClientRef.set(client);
     }
 

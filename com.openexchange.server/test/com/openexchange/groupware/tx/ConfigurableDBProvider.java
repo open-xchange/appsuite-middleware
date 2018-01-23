@@ -65,7 +65,15 @@ public class ConfigurableDBProvider implements DBProvider {
     @Override
     public Connection getReadConnection(final Context ctx) {
         try {
-            return DriverManager.getConnection(url,login,password);
+            java.util.Properties defaults = new java.util.Properties();
+            if (login != null) {
+                defaults.put("user", login);
+            }
+            if (password != null) {
+                defaults.put("password", password);
+            }
+            defaults.setProperty("useSSL", "false");
+            return DriverManager.getConnection(url, defaults);
         } catch (final SQLException e) {
         }
         return null;
