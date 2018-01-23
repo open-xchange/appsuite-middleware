@@ -49,8 +49,8 @@
 
 package com.openexchange.chronos.json.converter;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -70,6 +71,7 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
 import com.openexchange.chronos.json.fields.ChronosGeneralJsonFields;
 import com.openexchange.chronos.json.fields.ChronosJsonFields;
@@ -80,11 +82,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tools.mappings.json.JsonMapping;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
-
 /**
  * {@link EventResultConverter}
  *
@@ -176,32 +179,26 @@ public class EventResultConverter implements ResultConverter {
                     JSONObject attendee = (JSONObject) iterator.next();
 
                     if(attendee.has(ChronosJsonFields.Attendee.ENTITY) && attendee.getString(ChronosJsonFields.Attendee.CU_TYPE).equals(CalendarUserType.INDIVIDUAL.getValue())) {
-                        contactsToLoad.put(attendee.getInt(ChronosJsonFields.Attendee.ENTITY), attendee);
+                        contactsToLoad.put(I(attendee.getInt(ChronosJsonFields.Attendee.ENTITY)), attendee);
                     }
                 }
             }
 
             if (0 < contactsToLoad.size()) {
-                int[] userToLoadArray = new int[contactsToLoad.size()];
-                int x = 0;
-                for (Integer id : contactsToLoad.keySet()) {
-                    userToLoadArray[x++] = id;
-                }
-
-                SearchIterator<Contact> users = contactService.getUsers(session, userToLoadArray, CONTACT_FIELDS_TO_LOAD);
-                while (users.hasNext()) {
-                    Contact con = users.next();
-                    JSONObject attendee = contactsToLoad.get(con.getInternalUserId());
-                    if (attendee == null) {
-                        LOG.warn("Unable to find attendee for contact with id {}", con.getInternalUserId());
-                        continue;
+                SearchIterator<Contact> users = null;
+                try {
+                    users = contactService.getUsers(session, I2i(contactsToLoad.keySet()), CONTACT_FIELDS_TO_LOAD);
+                    while (users.hasNext()) {
+                        Contact con = users.next();
+                        JSONObject attendee = contactsToLoad.get(I(con.getInternalUserId()));
+                        if (attendee == null) {
+                            LOG.warn("Unable to find attendee for contact with id {}", I(con.getInternalUserId()));
+                            continue;
+                        }
+                        attendee.put(ChronosJsonFields.Attendee.CONTACT, serialize(con, CalendarUtils.optTimeZone(timeZoneID, TimeZones.UTC), session));
                     }
-                    ContactMapper mapper = ContactMapper.getInstance();
-                    ContactField[] assignedFields = mapper.getAssignedFields(con);
-                    List<ContactField> asList = new ArrayList<>(Arrays.asList(assignedFields));
-                    asList.retainAll(Arrays.asList(CONTACT_FIELDS_TO_SHOW));
-                    JSONObject contact = mapper.serialize(con, asList.toArray(new ContactField[asList.size()]), timeZoneID, session);
-                    attendee.put(ChronosJsonFields.Attendee.CONTACT, contact);
+                } finally {
+                    SearchIterators.close(users);
                 }
             }
 
@@ -229,6 +226,24 @@ public class EventResultConverter implements ResultConverter {
 
     protected static Set<EventField> getFields(AJAXRequestData requestData) throws OXException {
         return EventMapper.getInstance().parseFields(requestData.getParameter(CalendarParameters.PARAMETER_FIELDS));
+    }
+
+    /**
+     * Serializes contact data to JSON.
+     *
+     * @param contact The contact to serialize
+     * @param timeZone The client time zone to consider
+     * @param session The underlying session
+     */
+    private static JSONObject serialize(Contact contact, TimeZone timeZone, Session session) throws OXException, JSONException {
+        JSONObject jsonObject = new JSONObject();
+        for (ContactField field : CONTACT_FIELDS_TO_SHOW) {
+            JsonMapping<? extends Object, Contact> mapping = ContactMapper.getInstance().get(field);
+            if (mapping.isSet(contact)) {
+                mapping.serialize(contact, jsonObject, timeZone, session);
+            }
+        }
+        return jsonObject;
     }
 
 }
