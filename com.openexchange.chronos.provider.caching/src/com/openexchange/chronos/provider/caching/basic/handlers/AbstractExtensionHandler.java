@@ -99,7 +99,7 @@ abstract class AbstractExtensionHandler {
         this.account = account;
         this.parameters = parameters;
         this.calendarSession = services.getService(CalendarService.class).init(session, parameters);
-        this.searchOptions = new SearchOptions(getCalendarSession());
+        this.searchOptions = new SearchOptions(calendarSession);
         LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
         this.selfProtection = SelfProtectionFactory.createSelfProtection(session, leanConfigurationService);
     }
