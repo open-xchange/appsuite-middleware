@@ -121,21 +121,10 @@ public class SearchHandler extends AbstractExtensionHandler {
      * Compiles the {@link SearchTerm} from the specified {@link List} of queries
      * 
      * @param queries The {@link List} of queries
-     * @return The {@link SearchTerm}
-     * @throws OXException if one of the queries is too short
-     */
-    private SearchTerm<?> compileSearchTerm(List<String> queries) throws OXException {
-        return compileQueriesSearchTerm(queries);
-    }
-
-    /**
-     * Compiles a {@link SearchTerm} out of the specified {@link List} of queries
-     * 
-     * @param queries the {@link List} of queries from which to compile the {@link SearchTerm}
      * @return The compiled {@link SearchTerm}
      * @throws OXException if one of the queries is too short
      */
-    private SearchTerm<?> compileQueriesSearchTerm(List<String> queries) throws OXException {
+    private SearchTerm<?> compileSearchTerm(List<String> queries) throws OXException {
         if (null == queries || queries.isEmpty()) {
             return SearchUtils.getSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, getFolderId());
         }
