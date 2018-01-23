@@ -54,17 +54,12 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.SearchUtils;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
-import com.openexchange.search.CompositeSearchTerm;
-import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
-import com.openexchange.search.SearchTerm;
-import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -74,9 +69,6 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class SearchHandler extends AbstractExtensionHandler {
-
-    private static final String PROTOCOL = "cal://";
-    private static final String DELIMITER = "/";
 
     private final int minimumSearchPatternLength;
 
@@ -109,50 +101,9 @@ public class SearchHandler extends AbstractExtensionHandler {
 
             @Override
             protected List<Event> call(CalendarStorage storage) throws OXException {
-                List<Event> events = storage.getEventStorage().searchEvents(compileSearchTerm(queries), filters, getSearchOptions(), getEventFields(eventFields));
+                List<Event> events = storage.getEventStorage().searchEvents(SearchUtils.buildSearchTerm(queries, minimumSearchPatternLength), filters, getSearchOptions(), getEventFields(eventFields));
                 return postProcess(getUtilities().loadAdditionalEventData(getSession().getUserId(), events, eventFields));
             }
         }.executeQuery();
-    }
-
-    ///////////////////////////////////////////////// HELPERS ////////////////////////////////////////////////////////
-
-    /**
-     * Compiles the {@link SearchTerm} from the specified {@link List} of queries
-     * 
-     * @param queries The {@link List} of queries
-     * @return The compiled {@link SearchTerm}
-     * @throws OXException if one of the queries is too short
-     */
-    private SearchTerm<?> compileSearchTerm(List<String> queries) throws OXException {
-        if (null == queries || queries.isEmpty()) {
-            return SearchUtils.getSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, getFolderId());
-        }
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
-        for (String query : queries) {
-            if (SearchUtils.isWildcardOnly(query)) {
-                continue;
-            }
-            String pattern = SearchUtils.surroundWithWildcards(SearchUtils.checkMinimumSearchPatternLength(query, minimumSearchPatternLength));
-
-            CompositeSearchTerm compositeSearchTerm = new CompositeSearchTerm(CompositeOperation.OR);
-            compositeSearchTerm.addSearchTerm(SearchUtils.getSearchTerm(EventField.SUMMARY, SingleOperation.EQUALS, pattern));
-            compositeSearchTerm.addSearchTerm(SearchUtils.getSearchTerm(EventField.DESCRIPTION, SingleOperation.EQUALS, pattern));
-            compositeSearchTerm.addSearchTerm(SearchUtils.getSearchTerm(EventField.CATEGORIES, SingleOperation.EQUALS, pattern));
-
-            searchTerm.addSearchTerm(compositeSearchTerm);
-        }
-        return searchTerm;
-    }
-
-    /**
-     * Constructs the folder identifier
-     * 
-     * @return The folder identifier
-     */
-    private String getFolderId() {
-        StringBuilder builder = new StringBuilder(PROTOCOL);
-        builder.append(getAccount().getAccountId()).append(DELIMITER).append(BasicCalendarAccess.FOLDER_ID);
-        return builder.toString();
     }
 }
