@@ -50,11 +50,13 @@
 package com.openexchange.file.storage.json;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentType;
@@ -68,6 +70,11 @@ import com.openexchange.mail.mime.ContentType;
 public class ParameterBasedFileMetadataParser {
 
     private final static ParameterBasedFileMetadataParser INSTANCE = new ParameterBasedFileMetadataParser();
+
+    //@formatter:off
+    private static final List<File.Field> POSSIBLE_FIELDS = Arrays.asList(Field.FOLDER_ID, Field.TITLE, Field.FILENAME, Field.FILE_MIMETYPE,
+        Field.FILE_MD5SUM, Field.DESCRIPTION, Field.ID, Field.VERSION, Field.VERSION_COMMENT, Field.CATEGORIES, Field.COLOR_LABEL, Field.FILE_SIZE);
+    //@formatter:on
 
     /**
      * Initializes a new {@link ParameterBasedFileMetadataParser}.
@@ -117,7 +124,7 @@ public class ParameterBasedFileMetadataParser {
         result.setVersionComment(request.getParameter(File.Field.VERSION_COMMENT.getName()));
         result.setCategories(request.getParameter(File.Field.CATEGORIES.getName()));
         String colorString = request.getParameter(File.Field.COLOR_LABEL.getName());
-        if(Strings.isNotEmpty(colorString)) {
+        if (Strings.isNotEmpty(colorString)) {
             result.setColorLabel(Integer.valueOf(colorString));
         }
         String sizeString = request.getParameter(File.Field.FILE_SIZE.getName());
@@ -127,46 +134,19 @@ public class ParameterBasedFileMetadataParser {
         return result;
     }
 
+    /**
+     * Gets the fields from the specified {@link AJAXRequestData}
+     * 
+     * @param request the {@link AJAXRequestData}
+     * @return A {@link List} with the set {@link Field}s
+     */
     public List<File.Field> getFields(AJAXRequestData request) {
         ArrayList<File.Field> result = new ArrayList<>();
-        if (request.containsParameter(File.Field.FOLDER_ID.getName())) {
-            result.add(File.Field.FOLDER_ID);
+        for (Field field : POSSIBLE_FIELDS) {
+            if (request.containsParameter(field.getName())) {
+                result.add(field);
+            }
         }
-        if (request.containsParameter(File.Field.TITLE.getName())) {
-            result.add(File.Field.TITLE);
-        }
-        if (request.containsParameter(File.Field.FILENAME.getName())) {
-            result.add(File.Field.FILENAME);
-        }
-        if (request.containsParameter(File.Field.FILE_MIMETYPE.getName())) {
-            result.add(File.Field.FILE_MIMETYPE);
-        }
-        if (request.containsParameter(File.Field.FILE_MD5SUM.getName())) {
-            result.add(File.Field.FILE_MD5SUM);
-        }
-        if (request.containsParameter(File.Field.DESCRIPTION.getName())) {
-            result.add(File.Field.DESCRIPTION);
-        }
-        if (request.containsParameter(File.Field.ID.getName())) {
-            result.add(File.Field.ID);
-        }
-        if (request.containsParameter(File.Field.VERSION.getName())) {
-            result.add(File.Field.VERSION);
-        }
-        if (request.containsParameter(File.Field.VERSION_COMMENT.getName())) {
-            result.add(File.Field.VERSION_COMMENT);
-        }
-        if (request.containsParameter(File.Field.CATEGORIES.getName())) {
-            result.add(File.Field.CATEGORIES);
-        }
-        if (request.containsParameter(File.Field.COLOR_LABEL.getName())) {
-            result.add(File.Field.COLOR_LABEL);
-        }
-        if (request.containsParameter(File.Field.FILE_SIZE.getName())) {
-            result.add(File.Field.FILE_SIZE);
-        }
-
         return result;
     }
-
 }
