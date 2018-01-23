@@ -265,11 +265,21 @@ public interface DriveUtility {
 
     /**
      * Retrieves files and folders of the users trash folder
-     * 
+     *
      * @param session The session
      * @return The results as a json object
      * @throws OXException
      */
     JSONObject getTrashContent(DriveSession session) throws OXException;
+
+    /**
+     * Removes the given files and folders from the trash.
+     *
+     * @param session The session
+     * @param files The names of the files
+     * @param folders The names of the folders
+     * @throws OXException
+     */
+    void removeFromTrash(DriveSession session, List<String> files, List<String> folders) throws OXException;
 
 }

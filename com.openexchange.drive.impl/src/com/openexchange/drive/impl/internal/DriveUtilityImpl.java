@@ -623,4 +623,9 @@ public class DriveUtilityImpl implements DriveUtility {
         return storage.getFolderStats(trashFolder.getId(), true);
     }
 
+    @Override
+    public void removeFromTrash(DriveSession session, List<String> files, List<String> folders) throws OXException {
+        new SyncSession(session).getStorage().deleteFromTrash(files, folders);
+    }
+
 }

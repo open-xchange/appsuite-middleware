@@ -101,6 +101,7 @@ import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 
 /**
  * {@link DriveStorage}
@@ -1237,6 +1238,49 @@ public class DriveStorage {
         FileStorageFolder[] subfolders = getFolderAccess().getSubfolders(trashFolder.getId(), true);
         TimedResult<File> documents = getFileAccess().getDocuments(trashFolder.getId());
         return new TrashContent(subfolders, documents.results());
+    }
+
+    public void deleteFromTrash(List<String> files, List<String> folders) throws OXException {
+        FileStorageFolder trashFolder = getTrashFolder();
+        if (trashFolder == null) {
+            return;
+        }
+        if (!folders.isEmpty()) {
+            FileStorageFolder[] subfolders = getFolderAccess().getSubfolders(trashFolder.getId(), true);
+            if (subfolders != null && subfolders.length > 0) {
+                List<String> folderIdsToDelete = new ArrayList<>(folders.size());
+                for (int x = 0; x < subfolders.length; x++) {
+                    if (folders.contains(subfolders[x].getName())) {
+                        folderIdsToDelete.add(subfolders[x].getId());
+                    }
+                }
+                for (String id : folderIdsToDelete) {
+                    try {
+                        getFolderAccess().deleteFolder(id, true);
+                    } catch (OXException ex) {
+                        if (OXFolderExceptionCode.isNotFound(ex)) {
+                            continue;
+                        }
+                        throw ex;
+                    }
+                }
+            }
+        }
+
+        if (!files.isEmpty()) {
+            SearchIterator<File> documents = getFileAccess().getDocuments(trashFolder.getId()).results();
+            if (documents != null && documents.hasNext()) {
+                List<String> fileIdsToDelete = new ArrayList<>(folders.size());
+                do {
+                    File file = documents.next();
+                    if (files.contains(file.getFileName())) {
+                        fileIdsToDelete.add(file.getId());
+                    }
+                } while (documents.hasNext());
+
+                getFileAccess().removeDocument(fileIdsToDelete, FileStorageFileAccess.DISTANT_FUTURE);
+            }
+        }
     }
 
 }
