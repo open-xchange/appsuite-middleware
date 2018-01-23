@@ -51,7 +51,6 @@ package com.openexchange.chronos.provider.caching.basic.handlers;
 
 import java.util.List;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.SearchUtils;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -88,21 +87,20 @@ public class SearchHandler extends AbstractExtensionHandler {
     }
 
     /**
-     * Searches for events
+     * Searches for events. The optional event fields will be loaded from the {@link CalendarParameters#PARAMETER_FIELDS}
      * 
      * @param filters A {@link List} with the {@link SearchFilter}s
      * @param queries A {@link List} with the queries
-     * @param eventFields The optional {@link EventField}s. If <code>null</code> all fields will be retrieved
      * @return A {@link List} with all matching {@link Event}s
      * @throws OXException if an error is occurred
      */
-    public List<Event> searchEvents(List<SearchFilter> filters, List<String> queries, EventField... eventFields) throws OXException {
+    public List<Event> searchEvents(List<SearchFilter> filters, List<String> queries) throws OXException {
         return new OSGiCalendarStorageOperation<List<Event>>(services, getSession().getContextId(), getAccount().getAccountId()) {
 
             @Override
             protected List<Event> call(CalendarStorage storage) throws OXException {
                 List<Event> events = storage.getEventStorage().searchEvents(SearchUtils.buildSearchTerm(queries, minimumSearchPatternLength), filters, getSearchOptions(), getEventFields());
-                return postProcess(storage.getUtilities().loadAdditionalEventData(getSession().getUserId(), events, eventFields));
+                return postProcess(storage.getUtilities().loadAdditionalEventData(getSession().getUserId(), events, getEventFields()));
             }
         }.executeQuery();
     }
