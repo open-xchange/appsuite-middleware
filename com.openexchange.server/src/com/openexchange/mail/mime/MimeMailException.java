@@ -674,6 +674,8 @@ public class MimeMailException extends OXException {
                 break;
             case UNAVAILABLE:
                 return MailExceptionCode.SUBSYSTEM_DOWN.create(pe, new Object[0]);
+            case TRYCREATE:
+                return MimeMailExceptionCode.TRYCREATE.create(pe, new Object[0]);
             default:
                 break;
         }
