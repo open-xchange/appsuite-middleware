@@ -149,7 +149,7 @@ public class SearchUtils {
             searchTerm.addSearchTerm(compositeSearchTerm);
         }
 
-        return searchTerm;
+        return 0 == searchTerm.getOperands().length ? null : 1 == searchTerm.getOperands().length ? searchTerm.getOperands()[0] : searchTerm;
     }
 
     /**
@@ -164,7 +164,7 @@ public class SearchUtils {
 
     /**
      * Surrounds the specified pattern with wildcards
-     * 
+     *
      * @param pattern The pattern to surround with wildcards
      * @return The updated pattern
      */
