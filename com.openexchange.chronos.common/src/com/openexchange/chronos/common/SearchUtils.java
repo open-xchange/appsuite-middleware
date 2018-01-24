@@ -149,7 +149,7 @@ public class SearchUtils {
             searchTerm.addSearchTerm(compositeSearchTerm);
         }
 
-        return null;
+        return searchTerm;
     }
 
     /**
