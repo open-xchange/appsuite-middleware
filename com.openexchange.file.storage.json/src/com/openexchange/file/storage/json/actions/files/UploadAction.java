@@ -73,7 +73,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 public class UploadAction extends AbstractWriteAction {
 
     /**
-     * Initialises a new {@link UploadAction}.
+     * Initializes a new {@link UploadAction}.
      */
     public UploadAction() {
         super();
