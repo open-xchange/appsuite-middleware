@@ -118,10 +118,8 @@ public class UpdatePerformer extends AbstractActionPerformer {
                 continue;
             }
             // TODO: event.setNotification(true);
-            int owner = session.getUserId();
-            if (analysis.getMessage().getOwner() > 0) {
-                owner = analysis.getMessage().getOwner();
-            }
+            final int owner = analysis.getMessage().getOwner() > 0 ? analysis.getMessage().getOwner() : session.getUserId();
+
             ensureAttendee(event, exceptionCreate ? change.getMasterEvent() : change.getCurrentEvent(), action, owner, session.getContextId(), attributes);
             Event original = determineOriginalEvent(change, processed, session);
             if (original != null) {
