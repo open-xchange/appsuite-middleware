@@ -54,7 +54,6 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.Utils.applyExceptionDates;
-import static com.openexchange.chronos.impl.Utils.asList;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getPersonalFolderIds;
 import static com.openexchange.chronos.impl.Utils.isInFolder;
@@ -62,10 +61,13 @@ import static com.openexchange.chronos.impl.Utils.isResolveOccurrences;
 import static com.openexchange.chronos.impl.Utils.mapEventOccurrences;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.DelegatingEvent;
@@ -82,6 +84,9 @@ import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.type.PrivateType;
+import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.folderstorage.type.SharedType;
 
 /**
  * {@link ResultTracker}
@@ -112,8 +117,8 @@ public class ResultTracker {
         this.session = session;
         this.folder = folder;
         this.timestamp = timestamp;
-        this.result = new InternalCalendarResult(session, getCalendarUserId(folder), folder);
         this.protection = protection;
+        this.result = new InternalCalendarResult(session, getCalendarUserId(folder), folder);
     }
 
     /**
@@ -144,25 +149,39 @@ public class ResultTracker {
      */
     public void trackCreation(Event createdEvent, Event originalSeriesMaster) throws OXException {
         /*
-         * track affected folders and add 'plain' event creation
+         * track affected folders and add 'plain' event creation, as well as (possibly expanded) 'userized' versions
          */
         result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(createdEvent.getAttendees()));
         result.addPlainCreation(createdEvent);
+        for (UserizedFolder visibleFolder : getVisibleFolderViews(createdEvent)) {
+            trackUserizedCreation(visibleFolder, createdEvent, originalSeriesMaster);
+        }
+    }
+
+    /**
+     * Tracks suitable results for a created event in the current internal calendar result, based on a specific folder representing the
+     * targeted view for userization of the event data.
+     *
+     * @param folder The folder representing the targeted view for userization of the event data
+     * @param createdEvent The created event
+     * @param originalSeriesMaster The series master event in case a new overridden instance was created, or <code>null</code>, otherwise
+     */
+    private void trackUserizedCreation(UserizedFolder folder, Event createdEvent, Event originalSeriesMaster) throws OXException {
         if (isInFolder(createdEvent, folder)) {
             /*
              * prepare 'userized' version of created event & expand event series if needed prior adding results
              */
             if (isSeriesMaster(createdEvent) && isResolveOccurrences(session)) {
-                result.addUserizedCreations(resolveOccurrences(userize(createdEvent)));
+                result.addUserizedCreations(resolveOccurrences(userize(createdEvent, folder)));
             } else {
-                result.addUserizedCreation(userize(createdEvent));
+                result.addUserizedCreation(userize(createdEvent, folder));
             }
         } else {
             /*
              * possible for a new change exception w/o the calendar user attending
              */
             if (isSeriesMaster(originalSeriesMaster) && isSeriesException(createdEvent)) {
-                Event originalUserizedMasterEvent = getOriginalUserizedEvent(originalSeriesMaster);
+                Event originalUserizedMasterEvent = getOriginalUserizedEvent(originalSeriesMaster, folder);
                 result.addUserizedDeletion(timestamp, new EventOccurrence(originalUserizedMasterEvent, createdEvent.getRecurrenceId()));
             }
         }
@@ -177,13 +196,24 @@ public class ResultTracker {
      */
     public void trackUpdate(Event originalEvent, Event updatedEvent) throws OXException {
         /*
-         * track affected folders and add a 'plain' event update
+         * track affected folders and add a 'plain' event update, as well as (possibly expanded) 'userized' versions
          */
         result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(originalEvent.getAttendees()), getPersonalFolderIds(updatedEvent.getAttendees()));
         result.addPlainUpdate(originalEvent, updatedEvent);
-        /*
-         * check whether original and updated event are visible in actual folder view & add corresponding result
-         */
+        for (UserizedFolder visibleFolder : getVisibleFolderViews(originalEvent, updatedEvent)) {
+            trackUserizedUpdate(visibleFolder, originalEvent, updatedEvent);
+        }
+    }
+
+    /**
+     * Tracks suitable results for an updated event in the current internal calendar result, based on a specific folder representing the
+     * targeted view for userization of the event data.
+     *
+     * @param folder The folder representing the targeted view for userization of the event data
+     * @param originalEvent The original event
+     * @param updatedEvent The updated event
+     */
+    private void trackUserizedUpdate(UserizedFolder folder, Event originalEvent, Event updatedEvent) throws OXException {
         if (isInFolder(originalEvent, folder)) {
             if (isInFolder(updatedEvent, folder)) {
                 /*
@@ -191,7 +221,7 @@ public class ResultTracker {
                  */
                 if (isResolveOccurrences(session) && (isSeriesMaster(originalEvent) || isSeriesMaster(updatedEvent))) {
                     if (isSeriesMaster(originalEvent) && isSeriesMaster(updatedEvent)) {
-                        for (Entry<Event, Event> entry : mapEventOccurrences(resolveOriginalUserizedOccurrences(originalEvent), resolveOccurrences(userize(updatedEvent)))) {
+                        for (Entry<Event, Event> entry : mapEventOccurrences(resolveOccurrences(getOriginalUserizedEvent(originalEvent, folder)), resolveOccurrences(userize(updatedEvent, folder)))) {
                             if (null == entry.getKey()) {
                                 result.addUserizedCreation(entry.getValue());
                             } else if (null == entry.getValue()) {
@@ -201,28 +231,28 @@ public class ResultTracker {
                             }
                         }
                     } else if (isSeriesMaster(originalEvent)) {
-                        for (Event originalOccurrence : resolveOriginalUserizedOccurrences(originalEvent)) {
+                        for (Event originalOccurrence : resolveOccurrences(getOriginalUserizedEvent(originalEvent, folder))) {
                             result.addUserizedDeletion(timestamp, originalOccurrence);
                         }
-                        result.addUserizedDeletion(timestamp, userize(originalEvent));
-                        result.addUserizedCreation(userize(updatedEvent));
+                        result.addUserizedDeletion(timestamp, userize(originalEvent, folder));
+                        result.addUserizedCreation(userize(updatedEvent, folder));
                     } else if (isSeriesMaster(updatedEvent)) {
-                        result.addUserizedDeletion(timestamp, userize(originalEvent));
-                        result.addUserizedCreations(resolveOccurrences(userize(updatedEvent)));
+                        result.addUserizedDeletion(timestamp, userize(originalEvent, folder));
+                        result.addUserizedCreations(resolveOccurrences(userize(updatedEvent, folder)));
                     }
                 } else {
-                    result.addUserizedUpdate(userize(originalEvent), userize(updatedEvent));
+                    result.addUserizedUpdate(userize(originalEvent, folder), userize(updatedEvent, folder));
                 }
             } else {
                 /*
                  * "delete" from calendar user's point of view
                  */
                 if (isSeriesMaster(originalEvent) && isResolveOccurrences(session)) {
-                    for (Event originalOccurrence : resolveOriginalUserizedOccurrences(originalEvent)) {
+                    for (Event originalOccurrence : resolveOccurrences(getOriginalUserizedEvent(originalEvent, folder))) {
                         result.addUserizedDeletion(timestamp, originalOccurrence);
                     }
                 } else {
-                    result.addUserizedDeletion(timestamp, userize(originalEvent));
+                    result.addUserizedDeletion(timestamp, userize(originalEvent, folder));
                 }
             }
         } else if (isInFolder(updatedEvent, folder)) {
@@ -231,9 +261,9 @@ public class ResultTracker {
              * in the new attendee's folder afterwards (after #needsExistenceCheckInTargetFolder() was false)
              */
             if (isSeriesMaster(updatedEvent) && isResolveOccurrences(session)) {
-                result.addUserizedCreations(resolveOccurrences(userize(updatedEvent)));
+                result.addUserizedCreations(resolveOccurrences(userize(updatedEvent, folder)));
             } else {
-                result.addUserizedCreation(userize(updatedEvent));
+                result.addUserizedCreation(userize(updatedEvent, folder));
             }
         }
     }
@@ -247,18 +277,85 @@ public class ResultTracker {
     public void trackDeletion(Event deletedEvent) throws OXException {
         result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(deletedEvent.getAttendees()));
         result.addPlainDeletion(timestamp, deletedEvent);
+        for (UserizedFolder visibleFolder : getVisibleFolderViews(deletedEvent)) {
+            trackUserizedDeletion(visibleFolder, deletedEvent);
+        }
+    }
+
+    /**
+     * Tracks suitable results for a deleted event in the current internal calendar result, based on a specific folder representing the
+     * targeted view for userization of the event data.
+     *
+     * @param folder The folder representing the targeted view for userization of the event data
+     * @param deletedEvent The deleted event
+     */
+    private void trackUserizedDeletion(UserizedFolder folder, Event deletedEvent) throws OXException {
+        Event originalUserizedEvent = getOriginalUserizedEvent(deletedEvent, folder);
         if (isSeriesMaster(deletedEvent) && isResolveOccurrences(session)) {
-            for (Event deletedOccurrence : resolveOriginalUserizedOccurrences(deletedEvent)) {
+            for (Event deletedOccurrence : resolveOccurrences(originalUserizedEvent)) {
                 result.addUserizedDeletion(timestamp, deletedOccurrence);
             }
         } else {
-            result.addUserizedDeletion(timestamp, getOriginalUserizedEvent(deletedEvent));
+            result.addUserizedDeletion(timestamp, originalUserizedEvent);
         }
+    }
+
+    /**
+     * Gets the folders representing all possible <i>views</i> on the event data the current session user has.
+     *
+     * @param event The event
+     * @return A list of all folders in which the event appears for the current session user
+     */
+    private List<UserizedFolder> getVisibleFolderViews(Event event) throws OXException {
+        if (PublicType.getInstance().equals(folder.getType()) || false == CalendarUtils.isGroupScheduled(event)) {
+            return Collections.singletonList(folder);
+        }
+        List<UserizedFolder> visibleFolders = Utils.getVisibleFolders(session, PrivateType.getInstance(), SharedType.getInstance());
+        List<UserizedFolder> folderViews = new ArrayList<UserizedFolder>();
+        for (String folderId : getPersonalFolderIds(event.getAttendees())) {
+            UserizedFolder matchingFolder = visibleFolders.stream().filter(folder -> folderId.equals(folder.getID())).findAny().orElse(null);
+            if (null != matchingFolder) {
+                folderViews.add(matchingFolder);
+            }
+        }
+        return folderViews;
+    }
+
+    /**
+     * Gets the folders representing all possible <i>views</i> for an original and updated event data the current session user has.
+     *
+     * @param originalEvent The original event data
+     * @param updatedEvent The updated event data
+     * @return A list of all folders in which the event appears for the current session user
+     */
+    private List<UserizedFolder> getVisibleFolderViews(Event originalEvent, Event updatedEvent) throws OXException {
+        Set<String> affectedFolderIds = new HashSet<String>();
+        if (null != originalEvent.getFolderId()) {
+            affectedFolderIds.add(originalEvent.getFolderId());
+        } else {
+            affectedFolderIds.addAll(getPersonalFolderIds(originalEvent.getAttendees()));
+        }
+        if (null != updatedEvent.getFolderId()) {
+            affectedFolderIds.add(updatedEvent.getFolderId());
+        } else {
+            affectedFolderIds.addAll(getPersonalFolderIds(updatedEvent.getAttendees()));
+        }
+        if (1 == affectedFolderIds.size() && affectedFolderIds.iterator().next().equals(folder.getID())) {
+            return Collections.singletonList(folder);
+        }
+        List<UserizedFolder> visibleFolders = Utils.getVisibleFolders(session);
+        List<UserizedFolder> folderViews = new ArrayList<UserizedFolder>();
+        for (String folderId : affectedFolderIds) {
+            UserizedFolder matchingFolder = visibleFolders.stream().filter(folder -> folderId.equals(folder.getID())).findAny().orElse(null);
+            if (null != matchingFolder) {
+                folderViews.add(matchingFolder);
+            }
+        }
+        return folderViews;
     }
 
     private List<Event> resolveOccurrences(Event master) throws OXException {
         Iterator<Event> iterator = Utils.resolveOccurrences(session, master);
-
         List<Event> list = new ArrayList<Event>();
         while (iterator.hasNext()) {
             list.add(iterator.next());
@@ -267,12 +364,15 @@ public class ResultTracker {
         return list;
     }
 
-    private List<Event> resolveOriginalUserizedOccurrences(Event masterEvent) throws OXException {
-        Event userizedOriginalMasterEvent = getOriginalUserizedEvent(masterEvent);
-        return asList(Utils.resolveOccurrences(session, userizedOriginalMasterEvent));
-    }
-
-    private Event getOriginalUserizedEvent(Event event) throws OXException {
+    /**
+     * Gets the original, <i>userized</i> version of an event, representing a specific user's point of view on the original event data, by
+     * loading the auxiliary event within a separate database transaction (assuming the current, modifying one is not yet committed).
+     *
+     * @param event The event to load the original userized data for
+     * @param folder The folder representing the view on the event
+     * @return The original userized version of the event
+     */
+    private Event getOriginalUserizedEvent(Event event, UserizedFolder folder) throws OXException {
         Connection oldConnection = session.get(AbstractStorageOperation.PARAM_CONNECTION, Connection.class);
         session.set(AbstractStorageOperation.PARAM_CONNECTION, null);
         try {
@@ -301,11 +401,12 @@ public class ResultTracker {
      * </ul>
      *
      * @param event The event to userize
+     * @param folder The folder representing the view on the event
      * @return The <i>userized</i> event
      * @see Utils#applyExceptionDates
      * @see Utils#anonymizeIfNeeded
      */
-    private Event userize(Event event) throws OXException {
+    private Event userize(Event event, UserizedFolder folder) throws OXException {
         return userize(session, storage, event, getCalendarUserId(folder));
     }
 
