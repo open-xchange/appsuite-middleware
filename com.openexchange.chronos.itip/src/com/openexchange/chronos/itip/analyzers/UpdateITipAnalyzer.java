@@ -193,7 +193,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             change = new ITipChange();
             change.setException(true);
             change.setMaster(master);
-            
+
             exception.setSeriesId(update.getSeriesId());
 
             differ = true;
@@ -256,19 +256,18 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
                 }
             }
         }
-        if (analysis.getChanges().isEmpty() && analysis.getAnnotations().isEmpty()) {
+        if (!differ || analysis.getChanges().isEmpty() && analysis.getAnnotations().isEmpty()) {
             change = new ITipChange();
-            if (original == null) {
+            if (null == original) {
                 change.setNewEvent(update);
             } else {
                 change.setNewEvent(session.getUtilities().copyEvent(original, (EventField[]) null));
                 change.setCurrentEvent(original);
             }
-            change.setType(Type.UPDATE);
+            change.setType(ITipChange.Type.UPDATE);
             analysis.addChange(change);
-            analysis.recommendActions(ITipAction.ACCEPT, ITipAction.DECLINE, ITipAction.TENTATIVE, ITipAction.DELEGATE, ITipAction.COUNTER);
-
         }
+        
         return analysis;
     }
 
