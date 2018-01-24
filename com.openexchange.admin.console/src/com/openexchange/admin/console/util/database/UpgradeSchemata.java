@@ -235,8 +235,8 @@ public class UpgradeSchemata extends UtilAbstraction {
 
         // Sort arithmetically, that is by integer suffix of each database schema
         Comparator<Database> comparator = (o1, o2) -> {
-            Integer i1 = Integer.parseInt(o1.getScheme().substring(o1.getScheme().indexOf('_') + 1));
-            Integer i2 = Integer.parseInt(o2.getScheme().substring(o2.getScheme().indexOf('_') + 1));
+            Integer i1 = Integer.parseInt(o1.getScheme().substring(o1.getScheme().lastIndexOf('_') + 1));
+            Integer i2 = Integer.parseInt(o2.getScheme().substring(o2.getScheme().lastIndexOf('_') + 1));
             return i1.compareTo(i2);
         };
         Arrays.sort(databases, comparator);
