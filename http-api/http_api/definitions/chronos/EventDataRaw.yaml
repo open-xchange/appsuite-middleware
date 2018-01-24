@@ -140,7 +140,7 @@ flags:
   description: Flags indicating certain aspects of an event.
   items:
     type: string
-    enum: ["attachment", "alarms", "scheduled", "organizer", "attendee", "private", "confidential", "transparent", "event_tentative", "event_confirmed", "event_cancelled", "needs_action", "accepted", "declined", "tentative", "delegated", "series", "overridden" ]
+    enum: ["attachment", "alarms", "scheduled", "organizer", "attendee", "private", "confidential", "transparent", "event_tentative", "event_confirmed", "event_cancelled", "needs_action", "accepted", "declined", "tentative", "delegated", "series", "overridden", "first_occurrence", "last_occurrence" ]
     description: >
       Event Flags:
        * `attachment` - The event contains at least one attachment. 
