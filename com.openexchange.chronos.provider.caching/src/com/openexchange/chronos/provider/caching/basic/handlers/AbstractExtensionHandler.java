@@ -49,9 +49,8 @@
 
 package com.openexchange.chronos.provider.caching.basic.handlers;
 
+import static com.openexchange.java.Autoboxing.b;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import com.openexchange.chronos.Event;
@@ -77,23 +76,6 @@ import com.openexchange.session.Session;
  */
 abstract class AbstractExtensionHandler {
 
-    //@formatter:off
-    /** 
-     * Fields that are always included when searching for events 
-     */
-    static final List<EventField> DEFAULT_FIELDS_LIST = Arrays.asList(
-        EventField.ID, EventField.SUMMARY, EventField.DESCRIPTION, EventField.SERIES_ID, EventField.FOLDER_ID, 
-        EventField.RECURRENCE_ID, EventField.TIMESTAMP, EventField.CREATED_BY, EventField.CALENDAR_USER, 
-        EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE,
-        EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.ORGANIZER
-    );
-    //@formatter:on
-
-    /**
-     * Fields that are always included when searching for events
-     */
-    private static final EventField[] DEFAULT_FIELDS_ARRAY = DEFAULT_FIELDS_LIST.toArray(new EventField[DEFAULT_FIELDS_LIST.size()]);
-
     private final CalendarParameters parameters;
     private final Session session;
     private final CalendarAccount account;
@@ -102,7 +84,7 @@ abstract class AbstractExtensionHandler {
 
     /**
      * Initialises a new {@link AbstractExtensionHandler}.
-     * 
+     *
      * @param services The {@link ServiceLookup} instance
      * @param session The groupware {@link Session}
      * @param account The {@link CalendarAccount}
@@ -148,7 +130,7 @@ abstract class AbstractExtensionHandler {
 
     /**
      * Creates and returns the {@link SearchOptions}
-     * 
+     *
      * @return the {@link SearchOptions}
      */
     SearchOptions getSearchOptions() {
@@ -157,34 +139,36 @@ abstract class AbstractExtensionHandler {
 
     /**
      * <p>Prepares the event fields to request from the storage.</p>
-     * 
+     *
      * <p>If the requested fields is empty or <code>null</code>, then all {@link CalendarUtils#DEFAULT_FIELDS} are included.
      * The client may also define additional fields.
      * </p>
-     * 
+     *
      * @param requestedFields The fields requested by the client, or <code>null</code> to retrieve all fields
      * @param requiredFields Additionally required fields to add, or <code>null</code> if not defined
      * @return The fields to use when querying events from the storage
      */
     EventField[] getEventFields() {
-        return CalendarUtils.getFields(getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class, DEFAULT_FIELDS_ARRAY));
+        return CalendarUtils.getFields(parameters);
     }
 
     /**
      * Post process the specified events
-     * 
+     *
      * @param events A {@link List} with {@link Event}s to process
      * @return The processed {@link Event}s
      * @throws OXException
      */
     List<Event> postProcess(List<Event> events) throws OXException {
-        if (false == parameters.get(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.class, false)) {
-            return events;
-        }
+        boolean expandOccurrences = b(parameters.get(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.class, Boolean.FALSE));
         List<Event> processedEvents = new ArrayList<>(events.size());
         for (Event event : events) {
             event.setFlags(CalendarUtils.getFlags(event, getSession().getUserId()));
-            processedEvents.addAll(CalendarUtils.isSeriesMaster(event) ? resolveOccurrences(event) : Collections.singletonList(event));
+            if (CalendarUtils.isSeriesMaster(event) && expandOccurrences) {
+                processedEvents.addAll(resolveOccurrences(event));
+            } else {
+                processedEvents.add(event);
+            }
         }
         selfProtection.checkEventCollection(processedEvents);
         return processedEvents;
@@ -192,7 +176,7 @@ abstract class AbstractExtensionHandler {
 
     /**
      * Resolves/expands the occurrences of the master event
-     * 
+     *
      * @param event The master {@link Event}
      * @return The expanded series
      * @throws OXException if the expanded series contains too many {@link Event}s or

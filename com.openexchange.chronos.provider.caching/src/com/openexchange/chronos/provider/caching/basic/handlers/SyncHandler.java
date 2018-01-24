@@ -50,8 +50,6 @@
 package com.openexchange.chronos.provider.caching.basic.handlers;
 
 import static com.openexchange.java.Autoboxing.L;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -95,7 +93,7 @@ public class SyncHandler extends AbstractExtensionHandler {
 
     /**
      * Gets lists of new and updated as well as deleted events since a specific timestamp.
-     * 
+     *
      * @param updatedSince The timestamp since when the updates should be retrieved
      * @return The updates result yielding lists of new/modified and deleted events
      * @throws OXException if the operation fails
@@ -134,7 +132,7 @@ public class SyncHandler extends AbstractExtensionHandler {
 
     /**
      * Gets the sequence number, which is the highest last-modification timestamp of the account itself and its contents.
-     * 
+     *
      * @return The sequence number
      * @throws OXException
      */
@@ -162,7 +160,7 @@ public class SyncHandler extends AbstractExtensionHandler {
 
     /**
      * Resolve the specified resource
-     * 
+     *
      * @param resourceNameThe name of the resource to resolve
      * @return A {@link List} with the resolved {@link Event}s
      * @throws OXException if an error is occurred
@@ -182,24 +180,14 @@ public class SyncHandler extends AbstractExtensionHandler {
                 storage.getUtilities().loadAdditionalEventData(getSession().getUserId(), resolvedEvents, eventFields);
 
                 // Ensure that the series master event is the first element in the returned list
-                List<Event> retList = new ArrayList<>();
-                Iterator<Event> iterator = resolvedEvents.iterator();
-                while (iterator.hasNext()) {
-                    Event event = iterator.next();
-                    if (CalendarUtils.isSeriesMaster(event)) {
-                        retList.add(event);
-                        iterator.remove();
-                    }
-                }
-                retList.addAll(resolvedEvents);
-                return retList;
+                return CalendarUtils.sortSeriesMasterFirst(resolvedEvents);
             }
         }.executeQuery();
     }
 
     /**
      * Compiles the {@link SearchTerm}
-     * 
+     *
      * @param updatedSince The updated since timestamp
      * @return The compiled {@link SearchTerm}
      */
