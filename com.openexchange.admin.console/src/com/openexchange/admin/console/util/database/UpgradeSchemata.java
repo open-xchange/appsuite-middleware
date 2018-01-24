@@ -352,17 +352,20 @@ public class UpgradeSchemata extends UtilAbstraction {
      * @param schemaName
      * @throws TargetDatabaseException
      * @throws StorageException
-     * @throws NoSuchObjectException
      * @throws MissingServiceException
      * @throws RemoteException
      * @throws InvalidCredentialsException
      * @throws InvalidDataException
      */
-    private void disableSchema(String schemaName) throws StorageException, NoSuchObjectException, MissingServiceException, RemoteException, InvalidCredentialsException, InvalidDataException, TargetDatabaseException {
-        System.out.print("Disabling schema '" + schemaName + "'...");
-        schemaMoveUtil.disableSchema(credentials, schemaName);
-        schemaMoveUtil.invalidateContexts(credentials, schemaName, true);
-        ok();
+    private void disableSchema(String schemaName) throws StorageException, MissingServiceException, RemoteException, InvalidCredentialsException, InvalidDataException, TargetDatabaseException {
+        try {
+            System.out.print("Disabling schema '" + schemaName + "'...");
+            schemaMoveUtil.disableSchema(credentials, schemaName);
+            schemaMoveUtil.invalidateContexts(credentials, schemaName, true);
+            ok();
+        } catch (NoSuchObjectException e) {
+            System.out.println("Schema not found. Skipping");
+        }
     }
 
     /**
