@@ -149,14 +149,14 @@ public class InternalCalendarResult {
         /*
          * merge with existing create result for same event if already contained
          */
-        CreateResult existingCreation = findCreation(creations, event.getId(), event.getRecurrenceId());
+        CreateResult existingCreation = findCreation(creations, event.getFolderId(), event.getId(), event.getRecurrenceId());
         if (null != existingCreation && creations.remove(existingCreation)) {
             return this;
         }
         /*
          * merge with existing update result for same event if already contained, or treat as new delete result, otherwise
          */
-        UpdateResult existingUpdate = findUpdate(updates, event.getId(), event.getRecurrenceId());
+        UpdateResult existingUpdate = findUpdate(updates, event.getFolderId(), event.getId(), event.getRecurrenceId());
         if (null != existingUpdate && updates.remove(existingUpdate)) {
             event = existingUpdate.getOriginal();
         }
@@ -178,14 +178,14 @@ public class InternalCalendarResult {
         /*
          * merge with existing create result for same event if already contained
          */
-        CreateResult existingCreation = findCreation(userizedCreations, event.getId(), event.getRecurrenceId());
+        CreateResult existingCreation = findCreation(userizedCreations, event.getFolderId(), event.getId(), event.getRecurrenceId());
         if (null != existingCreation && userizedCreations.remove(existingCreation)) {
             return this;
         }
         /*
          * merge with existing update result for same event if already contained, or treat as new delete result, otherwise
          */
-        UpdateResult existingUpdate = findUpdate(userizedUpdates, event.getId(), event.getRecurrenceId());
+        UpdateResult existingUpdate = findUpdate(userizedUpdates, event.getFolderId(), event.getId(), event.getRecurrenceId());
         if (null != existingUpdate && userizedUpdates.remove(existingUpdate)) {
             event = existingUpdate.getOriginal();
         }
@@ -251,7 +251,7 @@ public class InternalCalendarResult {
         /*
          * merge with existing create result for same event if already contained
          */
-        CreateResult existingCreation = findCreation(creations, originalEvent.getId(), originalEvent.getRecurrenceId());
+        CreateResult existingCreation = findCreation(creations, originalEvent.getFolderId(), originalEvent.getId(), originalEvent.getRecurrenceId());
         if (null != existingCreation && creations.remove(existingCreation)) {
             creations.add(new CreateResultImpl(updatedEvent));
             return this;
@@ -259,7 +259,7 @@ public class InternalCalendarResult {
         /*
          * merge with existing update result for same event if already contained, or treat as new update result, otherwise
          */
-        UpdateResult existingUpdate = findUpdate(updates, originalEvent.getId(), originalEvent.getRecurrenceId());
+        UpdateResult existingUpdate = findUpdate(updates, originalEvent.getFolderId(), originalEvent.getId(), originalEvent.getRecurrenceId());
         if (null != existingUpdate && updates.remove(existingUpdate)) {
             originalEvent = existingUpdate.getOriginal();
         } else if (null == updates) {
@@ -280,7 +280,7 @@ public class InternalCalendarResult {
         /*
          * merge with existing create result for same event if already contained
          */
-        CreateResult existingCreation = findCreation(userizedCreations, originalEvent.getId(), originalEvent.getRecurrenceId());
+        CreateResult existingCreation = findCreation(userizedCreations, originalEvent.getFolderId(), originalEvent.getId(), originalEvent.getRecurrenceId());
         if (null != existingCreation && userizedCreations.remove(existingCreation)) {
             userizedCreations.add(new CreateResultImpl(updatedEvent));
             return this;
@@ -288,7 +288,7 @@ public class InternalCalendarResult {
         /*
          * merge with existing update result for same event if already contained, or treat as new update result, otherwise
          */
-        UpdateResult existingUpdate = findUpdate(userizedUpdates, originalEvent.getId(), originalEvent.getRecurrenceId());
+        UpdateResult existingUpdate = findUpdate(userizedUpdates, originalEvent.getFolderId(), originalEvent.getId(), originalEvent.getRecurrenceId());
         if (null != existingUpdate && userizedUpdates.remove(existingUpdate)) {
             originalEvent = existingUpdate.getOriginal();
         } else if (null == userizedUpdates) {
@@ -331,10 +331,11 @@ public class InternalCalendarResult {
         return Utils.getAffectedFoldersPerUser(session, affectedFolderIds);
     }
 
-    private static CreateResult findCreation(List<CreateResult> creations, String id, RecurrenceId recurrenceId) {
+    private static CreateResult findCreation(List<CreateResult> creations, String folderId, String id, RecurrenceId recurrenceId) {
         if (null != creations) {
             for (CreateResult creation : creations) {
-                if (id.equals(creation.getCreatedEvent().getId()) && Objects.equals(recurrenceId, creation.getCreatedEvent().getRecurrenceId())) {
+                Event event = creation.getCreatedEvent();
+                if (Objects.equals(folderId, event.getFolderId()) && Objects.equals(id, event.getId()) && Objects.equals(recurrenceId, event.getRecurrenceId())) {
                     return creation;
                 }
             }
@@ -342,10 +343,11 @@ public class InternalCalendarResult {
         return null;
     }
 
-    private static UpdateResult findUpdate(List<UpdateResult> updates, String id, RecurrenceId recurrenceId) {
+    private static UpdateResult findUpdate(List<UpdateResult> updates, String folderId, String id, RecurrenceId recurrenceId) {
         if (null != updates) {
             for (UpdateResult update : updates) {
-                if (id.equals(update.getOriginal().getId()) && Objects.equals(recurrenceId, update.getOriginal().getRecurrenceId())) {
+                Event event = update.getOriginal();
+                if (Objects.equals(folderId, event.getFolderId()) && Objects.equals(id, event.getId()) && Objects.equals(recurrenceId, event.getRecurrenceId())) {
                     return update;
                 }
             }
