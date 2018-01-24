@@ -195,7 +195,7 @@ public class ITipAnalysisResultConverter implements ResultConverter {
 
         Event currentEvent = change.getCurrentEvent();
         if (currentEvent != null) {
-            changeObject.put("newEvent", EventMapper.getInstance().serialize(currentEvent, EventMapper.getInstance().getAssignedFields(currentEvent), tz, session));
+            changeObject.put("currentEvent", EventMapper.getInstance().serialize(currentEvent, EventMapper.getInstance().getAssignedFields(currentEvent), tz, session));
         }
 
         Event masterEvent = change.getMasterEvent();

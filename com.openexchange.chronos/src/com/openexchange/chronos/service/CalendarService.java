@@ -331,6 +331,23 @@ public interface CalendarService {
     CalendarResult updateEvent(CalendarSession session, EventID eventID, Event event, long clientTimestamp) throws OXException;
 
     /**
+     * Updates an existing event in the name of the organizer (bypasses permission checks).
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
+     * </ul>
+     *
+     * @param session The calendar session
+     * @param eventID The identifier of the event to update
+     * @param event The event data to update
+     * @param clientTimestamp The last timestamp / sequence number known by the client to catch concurrent updates
+     * @return The update result
+     */
+    CalendarResult updateEventAsOrganizer(CalendarSession session, EventID eventID, Event event, long clientTimestamp) throws OXException;
+
+    /**
      * <i>Touches</i> an existing event by setting a new, current last modification timestamp.
      *
      * @param session The calendar session

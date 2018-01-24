@@ -116,6 +116,10 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
         if (id == null) {
             return null;
         }
+        return load(session, id);
+    }
+
+    private Event load(final CalendarSession session, String id) throws OXException {
         CalendarStorage storage = getStorage(session);
         Event event = storage.getEventStorage().loadEvent(id, null);
         event.setFlags(CalendarUtils.getFlags(event, session.getUserId()));
@@ -132,14 +136,8 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
     }
 
     @Override
-    public Event reloadEvent(final Event event, final CalendarSession session) throws OXException {
-        EventID eventId = new EventID(event.getFolderId(), event.getId());
-        return session.getCalendarService().getEvent(session, eventId.getFolderID(), eventId);
-    }
-
-    @Override
     public Event loadEvent(final Event event, final CalendarSession session) throws OXException {
-        return session.getCalendarService().getEvent(session, event.getFolderId(), new EventID(event.getFolderId(), event.getId()));
+        return load(session, event.getId());
     }
 
     @Override

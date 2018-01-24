@@ -76,6 +76,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,6 +103,7 @@ import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
+import com.openexchange.chronos.impl.Role;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
@@ -130,6 +132,25 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     protected final Date timestamp;
 
     protected final ResultTracker resultTracker;
+    protected EnumSet<Role> roles;
+
+    /**
+     * Initializes a new {@link AbstractUpdatePerformer}.
+     *
+     * @param storage The underlying calendar storage
+     * @param session The calendar session
+     * @param folder The calendar folder representing the current view on the events
+     * @param roles The {@link Role}s a user acts as.
+     */
+    protected AbstractUpdatePerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder, EnumSet<Role> roles) throws OXException {
+        super(session, storage);
+        this.folder = folder;
+        this.calendarUser = getCalendarUser(session, folder);
+        this.calendarUserId = calendarUser.getEntity();
+        this.timestamp = new Date();
+        this.resultTracker = new ResultTracker(storage, session, folder, timestamp.getTime(), getSelfProtection());
+        this.roles = roles;
+    }
 
     /**
      * Initializes a new {@link AbstractUpdatePerformer}.
@@ -139,12 +160,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * @param folder The calendar folder representing the current view on the events
      */
     protected AbstractUpdatePerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
-        super(session, storage);
-        this.folder = folder;
-        this.calendarUser = getCalendarUser(session, folder);
-        this.calendarUserId = calendarUser.getEntity();
-        this.timestamp = new Date();
-        this.resultTracker = new ResultTracker(storage, session, folder, timestamp.getTime(), getSelfProtection());
+        this(storage, session, folder, EnumSet.noneOf(Role.class));
     }
 
     /**
@@ -159,6 +175,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         this.calendarUserId = updatePerformer.calendarUserId;
         this.timestamp = updatePerformer.timestamp;
         this.resultTracker = updatePerformer.resultTracker;
+        this.roles = updatePerformer.roles;
     }
 
     /**
@@ -717,6 +734,9 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * @see Check#classificationAllowsUpdate
      */
     protected void requireDeletePermissions(Event originalEvent) throws OXException {
+        if (roles.contains(Role.ORGANIZER)) {
+            return;
+        }
         if (matches(originalEvent.getCreatedBy(), session.getUserId())) {
             requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_OWN_OBJECTS);
         } else {
@@ -737,6 +757,9 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      *             {@link CalendarExceptionCodes#RESTRICTED_BY_CLASSIFICATION}
      */
     protected void requireWritePermissions(Event originalEvent) throws OXException {
+        if (roles.contains(Role.ORGANIZER)) {
+            return;
+        }
         if (matches(originalEvent.getCreatedBy(), session.getUserId())) {
             requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, WRITE_OWN_OBJECTS, NO_PERMISSIONS);
         } else {

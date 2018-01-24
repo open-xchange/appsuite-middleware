@@ -62,6 +62,7 @@ import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -79,6 +80,7 @@ import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.InternalCalendarResult;
+import com.openexchange.chronos.impl.Role;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
@@ -102,6 +104,18 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
     private static final EventField[] SKIPPED_FIELDS = {
         EventField.CREATED, EventField.CREATED_BY, EventField.LAST_MODIFIED, EventField.TIMESTAMP, EventField.MODIFIED_BY, EventField.SEQUENCE, EventField.FLAGS
     };
+
+    /**
+     * Initializes a new {@link UpdatePerformer}.
+     *
+     * @param storage The underlying calendar storage
+     * @param session The calendar session
+     * @param folder The calendar folder representing the current view on the events
+     * @param roles The {@link Role}s a user acts as.
+     */
+    public UpdatePerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder, EnumSet<Role> roles) throws OXException {
+        super(storage, session, folder, roles);
+    }
 
     /**
      * Initializes a new {@link UpdatePerformer}.

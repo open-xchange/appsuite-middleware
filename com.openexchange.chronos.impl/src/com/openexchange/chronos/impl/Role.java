@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,43 +47,16 @@
  *
  */
 
-package com.openexchange.chronos.itip;
-
-import java.util.Date;
-import java.util.List;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.EventConflict;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+package com.openexchange.chronos.impl;
 
 /**
- * 
- * {@link ITipChange}
+ * {@link Role}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public interface ITipIntegrationUtility {
+public enum Role {
 
-    Event resolveUid(String uid, CalendarSession session) throws OXException;
-
-    List<EventConflict> getConflicts(Event event, CalendarSession session) throws OXException;
-
-    List<Event> getExceptions(Event original, Session session) throws OXException;
-
-    String getPrivateCalendarFolderId(CalendarSession session) throws OXException;
-
-    void createEvent(Event event, CalendarSession session) throws OXException;
-
-    void updateEvent(Event update, CalendarSession session, Date clientLastModified) throws OXException;
-
-    void changeConfirmationForExternalParticipant(Event update, ConfirmationChange change, CalendarSession session) throws OXException;
-
-    void deleteEvent(Event event, CalendarSession session, Date clientLastModified) throws OXException;
-
-    Event loadEvent(Event event, CalendarSession session) throws OXException;
-
-    String getFolderIdForUser(Session session, String eventId) throws OXException;
+    INTERNAL, EXTERNAL, ATTENDEE, ORGANIZER;
 
 }

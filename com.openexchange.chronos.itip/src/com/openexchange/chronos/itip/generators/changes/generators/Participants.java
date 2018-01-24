@@ -266,7 +266,8 @@ public class Participants implements ChangeDescriptionGenerator {
             if (itemUpdate.getUpdatedFields().contains(AttendeeField.PARTSTAT)) {
                 changeType = getChangeType(itemUpdate.getUpdate().getPartStat());
             }
-            if (false == getChangeType(itemUpdate.getOriginal().getPartStat()).equals(changeType)) {
+            ParticipationStatus partStat = itemUpdate.getOriginal().getPartStat();
+            if (partStat == null || !getChangeType(partStat).equals(changeType)) {
                 Attendee original = itemUpdate.getOriginal();
                 if (CalendarUtils.isInternal(original)) {
                     userIds.add(I(original.getEntity()));

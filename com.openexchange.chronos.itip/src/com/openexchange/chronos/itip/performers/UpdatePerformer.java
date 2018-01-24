@@ -139,13 +139,18 @@ public class UpdatePerformer extends AbstractActionPerformer {
                 ensureFolderId(event, session);
                 event.removeId();
                 event = createEvent(event, session);
-                event = util.reloadEvent(event, session);
+                event = util.loadEvent(event, session);
             }
 
             if (!change.isException()) {
                 processed.put(event.getUid(), event);
             }
 
+            writeMail(action, original, event, session, owner);
+            if (event.getId() == null && original.getId() != null) {
+                event.setId(original.getId());
+            }
+            
             writeMail(action, original, event, session, owner);
             result.add(event);
         }
@@ -166,6 +171,15 @@ public class UpdatePerformer extends AbstractActionPerformer {
         update.setFolderId(original.getFolderId());
         update.setId(original.getId());
 
+        if (!update.containsSequence()) {
+            update.setSequence(original.getSequence());
+        }
+        if (!update.containsUid()) {
+            update.setUid(original.getUid());
+        }
+        if (!update.containsOrganizer()) {
+            update.setOrganizer(original.getOrganizer());
+        }
         if (original.containsSeriesId()) {
             update.setSeriesId(original.getSeriesId());
         }
@@ -176,7 +190,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
         }
 
         if (write) {
-            CalendarResult calendarResult = session.getCalendarService().updateEvent(session, new EventID(update.getFolderId(), update.getId()), update, original.getTimestamp());
+            CalendarResult calendarResult = session.getCalendarService().updateEventAsOrganizer(session, new EventID(update.getFolderId(), update.getId()), update, original.getLastModified().getTime());
             update = intresetedInCreations ? calendarResult.getCreations().get(0).getCreatedEvent() : calendarResult.getUpdates().get(0).getUpdate();
         }
         return update;
