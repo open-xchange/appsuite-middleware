@@ -477,7 +477,7 @@ public class UpgradeSchemata extends UtilAbstraction {
 
         String skippedSchemata = (String) parser.getOptionValue(skipOption);
         if (skippedSchemata != null) {
-            String[] split = skippedSchemata.split(",");
+            String[] split = Strings.splitByComma(",");
             for (String s : split) {
                 this.skippedSchemata.add(s);
             }
