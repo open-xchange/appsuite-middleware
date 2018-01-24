@@ -120,7 +120,7 @@ public class SplitPerformer extends AbstractUpdatePerformer {
      * Performs the split operation.
      *
      * @param objectId The identifier of the event to split
-     * @param splitPoint The date or date-time where the split is to occur
+     * @param splitPoint The (minimum inclusive) date or date-time where the split is to occur
      * @param uid A new unique identifier to assign to the new part of the series, or <code>null</code> if not set
      * @param clientTimestamp The client timestamp to catch concurrent modifications
      * @return The split result
@@ -206,8 +206,8 @@ public class SplitPerformer extends AbstractUpdatePerformer {
         RecurrenceRule updatedRule = initRecurrenceRule(originalEvent.getRecurrenceRule());
         if (null != updatedRule.getCount()) {
             DefaultRecurrenceData detachedRecurrenceData = new DefaultRecurrenceData(detachedSeriesMaster.getRecurrenceRule(), originalEvent.getStartDate(), null);
-            iterator = session.getRecurrenceService().iterateRecurrenceIds(detachedRecurrenceData);
-            for (iterator = session.getRecurrenceService().iterateRecurrenceIds(detachedRecurrenceData); iterator.hasNext(); iterator.next());
+            for (iterator = session.getRecurrenceService().iterateRecurrenceIds(detachedRecurrenceData); iterator.hasNext(); iterator.next())
+                ;
             updatedRule.setCount(i(updatedRule.getCount()) - iterator.getPosition());
             updatedSeriesMaster.setRecurrenceRule(updatedRule.toString());
         }
