@@ -111,6 +111,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
         Map<String, Event> processed = new HashMap<String, Event>();
 
         for (ITipChange change : changes) {
+            boolean exceptionCreate = isExceptionCreate(change);
 
             Event event = change.getNewEvent();
             if (event == null) {
@@ -121,7 +122,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
             if (analysis.getMessage().getOwner() > 0) {
                 owner = analysis.getMessage().getOwner();
             }
-            ensureAttendee(event, change.isException() ? change.getMasterEvent() : change.getCurrentEvent(), action, owner, session.getContextId(), attributes);
+            ensureAttendee(event, exceptionCreate ? change.getMasterEvent() : change.getCurrentEvent(), action, owner, session.getContextId(), attributes);
             Event original = determineOriginalEvent(change, processed, session);
             if (original != null) {
                 ITipEventUpdate diff = change.getDiff();
@@ -130,7 +131,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
                 } else {
                     continue;
                 }
-            } else if (isExceptionCreate(change)) {
+            } else if (exceptionCreate) {
                 Event masterEvent = original = change.getMasterEvent();
                 event.setSeriesId(masterEvent.getSeriesId());
                 event = updateEvent(masterEvent, event, session, true);
