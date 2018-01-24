@@ -123,7 +123,6 @@ public class UpdatePerformer extends AbstractActionPerformer {
             }
             ensureAttendee(event, change.isException() ? change.getMasterEvent() : change.getCurrentEvent(), action, owner, session.getContextId(), attributes);
             Event original = determineOriginalEvent(change, processed, session);
-            Event forMail = event;
             if (original != null) {
                 ITipEventUpdate diff = change.getDiff();
                 if (null != diff && false == diff.isEmpty()) {
@@ -135,19 +134,18 @@ public class UpdatePerformer extends AbstractActionPerformer {
                 Event masterEvent = original = change.getMasterEvent();
                 event.setSeriesId(masterEvent.getSeriesId());
                 event = updateEvent(masterEvent, event, session, true);
-                forMail = event;
             } else {
                 ensureFolderId(event, session);
                 event.removeId();
                 event = createEvent(event, session);
-                forMail = util.reloadEvent(event, session);
+                event = util.reloadEvent(event, session);
             }
 
             if (!change.isException()) {
                 processed.put(event.getUid(), event);
             }
 
-            writeMail(action, original, forMail, session, owner);
+            writeMail(action, original, event, session, owner);
             result.add(event);
         }
 
