@@ -133,7 +133,11 @@ public class RdbCalendarStorageUtilities implements CalendarStorageUtilities {
             event.setAttendees(storage.getAttendeeStorage().loadAttendees(event.getId()));
         }
         if (null != event && (null == fields || contains(fields, EventField.ATTACHMENTS))) {
-            event.setAttachments(storage.getAttachmentStorage().loadAttachments(event.getId()));
+            try {
+                event.setAttachments(storage.getAttachmentStorage().loadAttachments(event.getId()));
+            } catch (UnsupportedOperationException e) {
+                // attachment storage not supported in account, skip
+            }
         }
         if (null != event && 0 < userId && (null == fields || contains(fields, EventField.ALARMS))) {
             event.setAlarms(storage.getAlarmStorage().loadAlarms(event, userId));
@@ -153,9 +157,13 @@ public class RdbCalendarStorageUtilities implements CalendarStorageUtilities {
                 }
             }
             if (null == fields || contains(fields, EventField.ATTACHMENTS)) {
-                Map<String, List<Attachment>> attachmentsById = storage.getAttachmentStorage().loadAttachments(objectIDs);
-                for (Event event : events) {
-                    event.setAttachments(attachmentsById.get(event.getId()));
+                try {
+                    Map<String, List<Attachment>> attachmentsById = storage.getAttachmentStorage().loadAttachments(objectIDs);
+                    for (Event event : events) {
+                        event.setAttachments(attachmentsById.get(event.getId()));
+                    }
+                } catch (UnsupportedOperationException e) {
+                    // attachment storage not supported in account, skip
                 }
             }
             if (0 < userId && (null == fields || contains(fields, EventField.ALARMS))) {
