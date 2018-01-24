@@ -208,4 +208,7 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
     // Mail server denies access
     public static final String AUTHORIZATION_FAILED_MSG_DISPLAY = "Mail server denies access.";
 
+    // The user tried to append or move a message to a mail folder, which does not exist.
+    public static final String TRYCREATE_MSG_DISPLAY = "Destination folder does not exist. Please try to create it and retry the operation.";
+
 }
