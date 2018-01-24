@@ -153,8 +153,12 @@ public class ResultTracker {
          */
         result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(createdEvent.getAttendees()));
         result.addPlainCreation(createdEvent);
-        for (UserizedFolder visibleFolder : getVisibleFolderViews(createdEvent)) {
-            trackUserizedCreation(visibleFolder, createdEvent, originalSeriesMaster);
+        if (includeAllFolderViews(session)) {
+            for (UserizedFolder visibleFolder : getVisibleFolderViews(createdEvent)) {
+                trackUserizedCreation(visibleFolder, createdEvent, originalSeriesMaster);
+            }
+        } else {
+            trackUserizedCreation(folder, createdEvent, originalSeriesMaster);
         }
     }
 
@@ -200,8 +204,12 @@ public class ResultTracker {
          */
         result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(originalEvent.getAttendees()), getPersonalFolderIds(updatedEvent.getAttendees()));
         result.addPlainUpdate(originalEvent, updatedEvent);
-        for (UserizedFolder visibleFolder : getVisibleFolderViews(originalEvent, updatedEvent)) {
-            trackUserizedUpdate(visibleFolder, originalEvent, updatedEvent);
+        if (includeAllFolderViews(session)) {
+            for (UserizedFolder visibleFolder : getVisibleFolderViews(originalEvent, updatedEvent)) {
+                trackUserizedUpdate(visibleFolder, originalEvent, updatedEvent);
+            }
+        } else {
+            trackUserizedUpdate(folder, originalEvent, updatedEvent);
         }
     }
 
@@ -277,8 +285,12 @@ public class ResultTracker {
     public void trackDeletion(Event deletedEvent) throws OXException {
         result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(deletedEvent.getAttendees()));
         result.addPlainDeletion(timestamp, deletedEvent);
-        for (UserizedFolder visibleFolder : getVisibleFolderViews(deletedEvent)) {
-            trackUserizedDeletion(visibleFolder, deletedEvent);
+        if (includeAllFolderViews(session)) {
+            for (UserizedFolder visibleFolder : getVisibleFolderViews(deletedEvent)) {
+                trackUserizedDeletion(visibleFolder, deletedEvent);
+            }
+        } else {
+            trackUserizedDeletion(folder, deletedEvent);
         }
     }
 
@@ -474,6 +486,16 @@ public class ResultTracker {
 
         };
         return anonymizeIfNeeded(session, event);
+    }
+
+    /**
+     * Gets a value indicating whether all possible folder views should be tracked in the <i>userized</i> results or not.
+     *
+     * @param session The calendar session
+     * @return <code>true</code> if all visible folder views should be included, <code>false</code>, otherwise
+     */
+    private static boolean includeAllFolderViews(CalendarSession session) {
+        return isResolveOccurrences(session);
     }
 
 }
