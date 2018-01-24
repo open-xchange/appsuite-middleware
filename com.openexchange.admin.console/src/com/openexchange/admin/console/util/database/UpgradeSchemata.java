@@ -277,7 +277,9 @@ public class UpgradeSchemata extends UtilAbstraction {
             }
         }
 
-        sb.setLength(sb.length() - 2);
+        if (sb.length() >= 2) {
+            sb.setLength(sb.length() - 2);
+        }
         System.out.println(sb.toString());
 
         return filtered;
