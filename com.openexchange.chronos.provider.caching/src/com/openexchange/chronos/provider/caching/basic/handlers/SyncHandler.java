@@ -50,9 +50,12 @@
 package com.openexchange.chronos.provider.caching.basic.handlers;
 
 import static com.openexchange.java.Autoboxing.L;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultUpdatesResult;
 import com.openexchange.chronos.common.SearchUtils;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -176,7 +179,20 @@ public class SyncHandler extends AbstractExtensionHandler {
                 EventField[] eventFields = getEventFields();
 
                 List<Event> resolvedEvents = storage.getEventStorage().searchEvents(searchTerm, getSearchOptions(), eventFields);
-                return postProcess(storage.getUtilities().loadAdditionalEventData(getSession().getUserId(), resolvedEvents, eventFields));
+                storage.getUtilities().loadAdditionalEventData(getSession().getUserId(), resolvedEvents, eventFields);
+
+                // Ensure that the series master event is the first element in the returned list
+                List<Event> retList = new ArrayList<>();
+                Iterator<Event> iterator = resolvedEvents.iterator();
+                while (iterator.hasNext()) {
+                    Event event = iterator.next();
+                    if (CalendarUtils.isSeriesMaster(event)) {
+                        retList.add(event);
+                        iterator.remove();
+                    }
+                }
+                retList.addAll(resolvedEvents);
+                return retList;
             }
         }.executeQuery();
     }
