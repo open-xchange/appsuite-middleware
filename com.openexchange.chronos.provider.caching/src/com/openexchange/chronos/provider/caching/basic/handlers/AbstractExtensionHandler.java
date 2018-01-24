@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.caching.basic.handlers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import com.openexchange.chronos.Event;
@@ -60,8 +61,8 @@ import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
@@ -75,10 +76,26 @@ import com.openexchange.session.Session;
  */
 abstract class AbstractExtensionHandler {
 
+    //@formatter:off
+    /** 
+     * Fields that are always included when searching for events 
+     */
+    static final List<EventField> DEFAULT_FIELDS_LIST = Arrays.asList(
+        EventField.ID, EventField.SUMMARY, EventField.DESCRIPTION, EventField.SERIES_ID, EventField.FOLDER_ID, 
+        EventField.RECURRENCE_ID, EventField.TIMESTAMP, EventField.CREATED_BY, EventField.CALENDAR_USER, 
+        EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE,
+        EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.ORGANIZER
+    );
+    //@formatter:on
+
+    /**
+     * Fields that are always included when searching for events
+     */
+    private static final EventField[] DEFAULT_FIELDS_ARRAY = DEFAULT_FIELDS_LIST.toArray(new EventField[DEFAULT_FIELDS_LIST.size()]);
+
     private final CalendarParameters parameters;
     private final Session session;
     private final CalendarAccount account;
-    private final CalendarSession calendarSession;
     private final SearchOptions searchOptions;
     private final SelfProtection selfProtection;
 
@@ -96,8 +113,7 @@ abstract class AbstractExtensionHandler {
         this.session = session;
         this.account = account;
         this.parameters = parameters;
-        this.calendarSession = Services.getService(CalendarService.class).init(session, parameters);
-        this.searchOptions = new SearchOptions(calendarSession);
+        this.searchOptions = new SearchOptions(parameters);
         LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
         this.selfProtection = SelfProtectionFactory.createSelfProtection(session, leanConfigurationService);
     }
@@ -130,15 +146,6 @@ abstract class AbstractExtensionHandler {
     }
 
     /**
-     * Gets the calendarSession
-     *
-     * @return The calendarSession
-     */
-    CalendarSession getCalendarSession() {
-        return calendarSession;
-    }
-
-    /**
      * Creates and returns the {@link SearchOptions}
      * 
      * @return the {@link SearchOptions}
@@ -159,7 +166,7 @@ abstract class AbstractExtensionHandler {
      * @return The fields to use when querying events from the storage
      */
     EventField[] getEventFields() {
-        return CalendarUtils.getFields(parameters);
+        return CalendarUtils.getFields(getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class, DEFAULT_FIELDS_ARRAY));
     }
 
     /**
@@ -199,7 +206,8 @@ abstract class AbstractExtensionHandler {
      *             if there is an error during the iteration of the series
      */
     private List<Event> resolveOccurrences(Event event) throws OXException {
-        Iterator<Event> itrerator = calendarSession.getRecurrenceService().iterateEventOccurrences(event, searchOptions.getFrom(), searchOptions.getUntil());
+        RecurrenceService recurrenceService = Services.getService(RecurrenceService.class);
+        Iterator<Event> itrerator = recurrenceService.iterateEventOccurrences(event, searchOptions.getFrom(), searchOptions.getUntil());
         List<Event> list = new ArrayList<Event>();
         while (itrerator.hasNext()) {
             list.add(itrerator.next());

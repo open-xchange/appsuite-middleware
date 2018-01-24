@@ -108,7 +108,7 @@ public class SyncHandler extends AbstractExtensionHandler {
                 EventField[] eventFields = getEventFields();
 
                 List<Event> newAndUpdated = null;
-                String[] ignore = getCalendarSession().get(CalendarParameters.PARAMETER_IGNORE, String[].class);
+                String[] ignore = getParameters().get(CalendarParameters.PARAMETER_IGNORE, String[].class);
 
                 CalendarStorageUtilities utilities = storage.getUtilities();
                 EventStorage eventStorage = storage.getEventStorage();
