@@ -52,7 +52,7 @@ package com.openexchange.chronos.itip.sender;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.itip.AppointmentNotificationPoolService;
+import com.openexchange.chronos.itip.EventNotificationPoolService;
 import com.openexchange.chronos.itip.generators.NotificationMail;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
@@ -63,10 +63,10 @@ public class PoolingMailSenderService implements MailSenderService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PoolingMailSenderService.class);
 
-    private final AppointmentNotificationPoolService pool;
+    private final EventNotificationPoolService pool;
     private final MailSenderService delegate;
 
-    public PoolingMailSenderService(AppointmentNotificationPoolService pool, MailSenderService delegate) {
+    public PoolingMailSenderService(EventNotificationPoolService pool, MailSenderService delegate) {
         this.pool = pool;
         this.delegate = delegate;
     }

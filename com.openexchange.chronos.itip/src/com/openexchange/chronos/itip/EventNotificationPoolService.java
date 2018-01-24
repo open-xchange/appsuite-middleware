@@ -56,11 +56,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
- * {@link AppointmentNotificationPoolService}
+ * {@link EventNotificationPoolService}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public interface AppointmentNotificationPoolService {
+public interface EventNotificationPoolService {
 
     public void enqueue(Event original, Event newAppointment, Session session, int sharedFolderOwner, CalendarUser principal) throws OXException;
 

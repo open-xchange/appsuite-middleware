@@ -53,7 +53,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.Constants;
 import com.openexchange.chronos.ical.ICalService;
-import com.openexchange.chronos.itip.AppointmentNotificationPool;
+import com.openexchange.chronos.itip.EventNotificationPool;
 import com.openexchange.chronos.itip.CalendarITipIntegrationUtility;
 import com.openexchange.chronos.itip.ITipActionPerformerFactoryService;
 import com.openexchange.chronos.itip.ITipAnalyzerService;
@@ -113,7 +113,7 @@ public class Activator extends HousekeepingActivator {
         NotificationMailGeneratorFactory generatorFactory = new NotificationMailGeneratorFactory(resolver, util, this, attachmentMemory);
 
         if (poolEnabled) {
-            AppointmentNotificationPool pool = new AppointmentNotificationPool(timers, generatorFactory, sender, detailInterval, stateChangeInterval, priorityInterval);
+            EventNotificationPool pool = new EventNotificationPool(timers, generatorFactory, sender, detailInterval, stateChangeInterval, priorityInterval);
             sender = new PoolingMailSenderService(pool, sender);
         }
 

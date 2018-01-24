@@ -81,13 +81,13 @@ import com.openexchange.session.Session;
 import com.openexchange.timer.TimerService;
 
 /**
- * {@link AppointmentNotificationPool}
+ * {@link EventNotificationPool}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class AppointmentNotificationPool implements AppointmentNotificationPoolService, Runnable {
+public class EventNotificationPool implements EventNotificationPoolService, Runnable {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AppointmentNotificationPool.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventNotificationPool.class);
 
     // TODO: Keep shared folder owner, if possible
 
@@ -106,7 +106,7 @@ public class AppointmentNotificationPool implements AppointmentNotificationPoolS
 
     private final Map<Integer, Map<NotificationParticipant, List<Event>>> sent = new HashMap<Integer, Map<NotificationParticipant, List<Event>>>();
 
-    public AppointmentNotificationPool(TimerService timer, NotificationMailGeneratorFactory generatorFactory, MailSenderService notificationMailer, int detailChangeInterval, int stateChangeInterval, int priorityInterval) {
+    public EventNotificationPool(TimerService timer, NotificationMailGeneratorFactory generatorFactory, MailSenderService notificationMailer, int detailChangeInterval, int stateChangeInterval, int priorityInterval) {
         this.generatorFactory = generatorFactory;
         this.notificationMailer = notificationMailer;
 
