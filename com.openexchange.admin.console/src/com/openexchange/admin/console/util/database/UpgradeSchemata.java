@@ -93,6 +93,7 @@ import com.openexchange.java.Strings;
  * {@link UpgradeSchemata}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since 7.10.0
  */
 public class UpgradeSchemata extends UtilAbstraction {
 
