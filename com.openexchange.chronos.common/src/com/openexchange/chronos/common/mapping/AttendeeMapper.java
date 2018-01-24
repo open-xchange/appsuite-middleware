@@ -415,7 +415,7 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
             @Override
             public void copy(Attendee from, Attendee to) throws OXException {
                 Transp value = get(from);
-                set(to, null == value ? null : TimeTransparency.TRANSPARENT.equals(value.getValue()) ? TimeTransparency.TRANSPARENT : TimeTransparency.OPAQUE);
+                set(to, null == value ? null : TimeTransparency.TRANSPARENT.getValue().equals(value.getValue()) ? TimeTransparency.TRANSPARENT : TimeTransparency.OPAQUE);
             }
 
             @Override
