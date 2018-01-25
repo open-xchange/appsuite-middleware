@@ -274,8 +274,8 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
     /**
      * Adds all existing Resources to the participant list of the update.
      *
-     * @param original
-     * @param update
+     * @param original The original event to get the resources from
+     * @param update The update to add resource to
      */
     private void addResourcesToUpdate(Event original, Event update) {
         if (original.getAttendees() == null || original.getAttendees().size() == 0) {
