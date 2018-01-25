@@ -176,8 +176,9 @@ public class UpgradeSchemata extends UtilAbstraction {
      * @throws IOException if an I/O error occurs
      */
     private void initialiseRMIServices(AdminParser parser) throws MalformedURLException, RemoteException, NotBoundException, IOException {
-        oxUtil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
-        schemaMoveUtil = (SchemaMoveRemote) Naming.lookup(RMI_HOSTNAME + SchemaMoveRemote.RMI_NAME);
+        String rmiHost = "rmi://" + jmxHost + ":" + jmxPort + "/"; 
+        oxUtil = (OXUtilInterface) Naming.lookup(rmiHost + OXUtilInterface.RMI_NAME);
+        schemaMoveUtil = (SchemaMoveRemote) Naming.lookup(rmiHost + SchemaMoveRemote.RMI_NAME);
         mbeanConnection = getMBeanConnection(parser);
     }
 
