@@ -64,8 +64,6 @@ public class ParticipantChange {
 
     private boolean partyCrasher;
 
-    private String delegateeOf;
-
     public ParticipationStatus getConfirmStatusUpdate() {
         return confirmStatusUpdate;
     }
@@ -89,13 +87,4 @@ public class ParticipantChange {
     public void setPartyCrasher(boolean partyCrasher) {
         this.partyCrasher = partyCrasher;
     }
-
-    public String getDelegateeOf() {
-        return delegateeOf;
-    }
-
-    public void setDelegateeOf(String delegateeOf) {
-        this.delegateeOf = delegateeOf;
-    }
-
 }
