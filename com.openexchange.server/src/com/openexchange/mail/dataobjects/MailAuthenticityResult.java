@@ -68,7 +68,7 @@ public final class MailAuthenticityResult {
     /** The default neutral result */
     public static final MailAuthenticityResult NEUTRAL_RESULT = new MailAuthenticityResult(MailAuthenticityStatus.NEUTRAL);
 
-    /** The 'not_analyzed' result (used for case where an error occurred during the analysis */
+    /** The 'not_analyzed' result (used for case where an error occurred during the analysis or for e-mails before the cuf-off-date) */
     public static final MailAuthenticityResult NOT_ANALYZED_RESULT = new MailAuthenticityResult(MailAuthenticityStatus.NOT_ANALYZED);
 
     /** Map holding information about the result that does not accept <code>null</code> values */

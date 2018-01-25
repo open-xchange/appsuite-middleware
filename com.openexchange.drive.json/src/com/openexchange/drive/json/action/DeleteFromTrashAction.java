@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,61 +47,69 @@
  *
  */
 
-package com.openexchange.mail.json.compose;
+package com.openexchange.drive.json.action;
 
+import java.util.ArrayList;
 import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link ComposeTransportResult} - The result for transporting one or more messages plus providing the message representation that is
- * supposed to be saved into standard Sent folder.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * {@link DeleteFromTrashAction}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public interface ComposeTransportResult {
+public class DeleteFromTrashAction extends AbstractDriveAction {
 
-    /**
-     * Gets the messages that shall be transported.
-     *
-     * @return The messages to transport
-     */
-    List<? extends ComposedMailMessage> getTransportMessages();
+    @Override
+    public AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
 
-    /**
-     * Gets the message representation that is supposed to be saved into standard Sent folder.
-     *
-     * @return The sent message
-     */
-    ComposedMailMessage getSentMessage();
+        Object data = requestData.getData();
+        if (data == null) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        }
+        if (!(data instanceof JSONObject)) {
+            throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
+        }
 
-    /**
-     * Signals whether first transport message is equal to the message representation that is supposed to be saved into standard Sent folder.
-     *
-     * @return <code>true</code> if transport is equal to sent version; otherwise <code>false</code>
-     */
-    boolean isTransportEqualToSent();
+        JSONObject body = (JSONObject) data;
 
-    /**
-     * Commits this transport result to signal successful execution
-     *
-     * @throws OXException If commit fails
-     */
-    void commit() throws OXException;
+        List<String> files = new ArrayList<>();
+        List<String> folders = new ArrayList<>();
+        try {
+            if (body.has("files")) {
+                JSONArray filesArray = body.getJSONArray("files");
+                for (Object o : filesArray) {
+                    if (!(o instanceof String)) {
+                        AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+                    }
+                    files.add((String) o);
+                }
+            }
 
-    /**
-     * Rolls-back this transport result to signal failed execution
-     *
-     * @throws OXException If roll-back fails
-     */
-    void rollback() throws OXException;
+            if (body.has("folders")) {
+                JSONArray foldersArray = body.getJSONArray("folders");
+                for (Object o : foldersArray) {
+                    if (!(o instanceof String)) {
+                        AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+                    }
+                    folders.add((String) o);
+                }
+            }
+        } catch (JSONException e) {
+            AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+        }
 
-    /**
-     * Finishes this transport result to clear up any used resources.
-     *
-     * @throws OXException If finishing fails
-     */
-    void finish() throws OXException;
+        getDriveService().getUtility().removeFromTrash(session, files, folders);
+        return new AJAXRequestResult(null, "json");
+    }
 
 }

@@ -341,7 +341,11 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Mail server %1$s denies access for login %2$s.
      */
-    AUTHORIZATION_FAILED("Mail server %1$s denies access for login %2$s.", CATEGORY_PERMISSION_DENIED, 1036, MimeMailExceptionMessage.AUTHORIZATION_FAILED_MSG_DISPLAY)
+    AUTHORIZATION_FAILED("Mail server %1$s denies access for login %2$s.", CATEGORY_PERMISSION_DENIED, 1036, MimeMailExceptionMessage.AUTHORIZATION_FAILED_MSG_DISPLAY),
+    /**
+     * Destination folder does not exist. Please try to create it and retry the operation.
+     */
+    TRYCREATE("Destination folder does not exist. Please try to create it and retry the operation.", CATEGORY_USER_INPUT, 1037, MimeMailExceptionMessage.TRYCREATE_MSG_DISPLAY)
 
     ;
 

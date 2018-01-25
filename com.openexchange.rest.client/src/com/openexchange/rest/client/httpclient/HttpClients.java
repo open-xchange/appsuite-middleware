@@ -249,7 +249,7 @@ public final class HttpClients {
             .setConnectionManager(ccm)
             .setDefaultRequestConfig(RequestConfig.custom().setConnectTimeout(config.connectionTimeout).setSocketTimeout(config.socketReadTimeout).setProxy(config.proxy).build());
         if (config.denyLocalRedirect) {
-            clientBuilder.setRedirectStrategy(DenyLocalRedirectStrategy.INSTANCE);
+            clientBuilder.setRedirectStrategy(DenyLocalRedirectStrategy.DENY_LOCAL_INSTANCE);
         }
         if (null != config.userAgent) {
             clientBuilder.setUserAgent(config.userAgent);
@@ -846,7 +846,7 @@ public final class HttpClients {
 
     private static class DenyLocalRedirectStrategy extends DefaultRedirectStrategy {
 
-        static final DenyLocalRedirectStrategy INSTANCE = new DenyLocalRedirectStrategy();
+        static final DenyLocalRedirectStrategy DENY_LOCAL_INSTANCE = new DenyLocalRedirectStrategy();
 
         private DenyLocalRedirectStrategy() {
             super();

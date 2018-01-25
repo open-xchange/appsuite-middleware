@@ -20,5 +20,6 @@ Import-Package: com.google.common.collect,
  com.openexchange.share,
  com.openexchange.share.notification,
  com.openexchange.share.recipient,
+ com.openexchange.tools.iterator,
  com.openexchange.tools.session,
  org.json

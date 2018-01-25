@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,61 +47,49 @@
  *
  */
 
-package com.openexchange.mail.json.compose;
+package com.openexchange.drive;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
- * {@link ComposeTransportResult} - The result for transporting one or more messages plus providing the message representation that is
- * supposed to be saved into standard Sent folder.
+ * {@link TrashContent}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public interface ComposeTransportResult {
+public class TrashContent {
+
+    private final FileStorageFolder[] subfolders;
+    private final SearchIterator<File> files;
+
 
     /**
-     * Gets the messages that shall be transported.
-     *
-     * @return The messages to transport
+     * Initializes a new {@link TrashContent}.
      */
-    List<? extends ComposedMailMessage> getTransportMessages();
+    public TrashContent(FileStorageFolder[] subfolders, SearchIterator<File> searchIterator) {
+        super();
+        this.subfolders = subfolders;
+        this.files = searchIterator;
+    }
 
     /**
-     * Gets the message representation that is supposed to be saved into standard Sent folder.
+     * Gets the sub-folders
      *
-     * @return The sent message
+     * @return The sub-folders
      */
-    ComposedMailMessage getSentMessage();
+    public FileStorageFolder[] getSubfolders() {
+        return subfolders;
+    }
 
     /**
-     * Signals whether first transport message is equal to the message representation that is supposed to be saved into standard Sent folder.
+     * Gets the files
      *
-     * @return <code>true</code> if transport is equal to sent version; otherwise <code>false</code>
+     * @return The files
      */
-    boolean isTransportEqualToSent();
-
-    /**
-     * Commits this transport result to signal successful execution
-     *
-     * @throws OXException If commit fails
-     */
-    void commit() throws OXException;
-
-    /**
-     * Rolls-back this transport result to signal failed execution
-     *
-     * @throws OXException If roll-back fails
-     */
-    void rollback() throws OXException;
-
-    /**
-     * Finishes this transport result to clear up any used resources.
-     *
-     * @throws OXException If finishing fails
-     */
-    void finish() throws OXException;
+    public SearchIterator<File> getFiles() {
+        return files;
+    }
 
 }

@@ -204,6 +204,11 @@ public class AJAXConfig extends AbstractConfig {
          */
         TEST_MAIL_DIR("testMailDir"),
 
+        /**
+         * Directory which contains test files
+         */
+        TEST_INFOSTORE_DIR("testInfostoreDir"),
+
         MAIL_PORT("mailPort"),
 
         ;

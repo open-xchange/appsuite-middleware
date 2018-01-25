@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,61 +47,27 @@
  *
  */
 
-package com.openexchange.mail.json.compose;
+package com.openexchange.drive.json.action;
 
-import java.util.List;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 
 /**
- * {@link ComposeTransportResult} - The result for transporting one or more messages plus providing the message representation that is
- * supposed to be saved into standard Sent folder.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * {@link GetTrashContentAction}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public interface ComposeTransportResult {
+public class GetTrashContentAction extends AbstractDriveAction {
 
-    /**
-     * Gets the messages that shall be transported.
-     *
-     * @return The messages to transport
-     */
-    List<? extends ComposedMailMessage> getTransportMessages();
-
-    /**
-     * Gets the message representation that is supposed to be saved into standard Sent folder.
-     *
-     * @return The sent message
-     */
-    ComposedMailMessage getSentMessage();
-
-    /**
-     * Signals whether first transport message is equal to the message representation that is supposed to be saved into standard Sent folder.
-     *
-     * @return <code>true</code> if transport is equal to sent version; otherwise <code>false</code>
-     */
-    boolean isTransportEqualToSent();
-
-    /**
-     * Commits this transport result to signal successful execution
-     *
-     * @throws OXException If commit fails
-     */
-    void commit() throws OXException;
-
-    /**
-     * Rolls-back this transport result to signal failed execution
-     *
-     * @throws OXException If roll-back fails
-     */
-    void rollback() throws OXException;
-
-    /**
-     * Finishes this transport result to clear up any used resources.
-     *
-     * @throws OXException If finishing fails
-     */
-    void finish() throws OXException;
+    @Override
+    public AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
+        JSONObject result = getDriveService().getUtility().getTrashContent(session);
+        return new AJAXRequestResult(result, "json");
+    }
 
 }
