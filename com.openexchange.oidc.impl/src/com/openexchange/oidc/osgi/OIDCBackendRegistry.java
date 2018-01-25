@@ -297,4 +297,8 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
         }
         context.ungetService(reference);
     }
+    
+    public List<OIDCBackend> getAllRegisteredBackends() {
+        return this.backends;
+    }
 }

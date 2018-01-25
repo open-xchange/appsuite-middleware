@@ -230,7 +230,7 @@ public class OIDCWebSSoProviderImplTest {
     }
 
     @Test
-    public void authenticateUser_NoStoredAuthenticationTest() {
+    public void authenticateUser_NoStoredAuthenticationTest() throws OXException{
         Mockito.when(this.mockedStateManagement.getAndRemoveAuthenticationInfo(Matchers.anyString())).thenReturn(null);
         try {
             this.provider.authenticateUser(mockedRequest, mockedResponse);
@@ -398,7 +398,7 @@ public class OIDCWebSSoProviderImplTest {
     }
 
     @Test
-    public void logoutSSOUser_NoStoredStateFailTest() {
+    public void logoutSSOUser_NoStoredStateFailTest() throws OXException {
         String state = "state";
         Mockito.when(mockedRequest.getParameter(OIDCTools.STATE)).thenReturn(state);
         Mockito.when(this.mockedStateManagement.getAndRemoveLogoutRequestInfo(state)).thenReturn(null);

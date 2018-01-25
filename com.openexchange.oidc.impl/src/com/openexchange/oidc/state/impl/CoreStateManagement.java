@@ -53,6 +53,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.exception.OXException;
+import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.hz.PortableAuthenticationRequest;
 import com.openexchange.oidc.hz.PortableLogoutRequest;
 import com.openexchange.oidc.state.AuthenticationRequestInfo;
@@ -69,13 +71,8 @@ public class CoreStateManagement implements StateManagement {
 
     private static final Logger LOG = LoggerFactory.getLogger(CoreStateManagement.class);
 
-    // TODO: QS-VS: Add dedicate Hazelcast configuration files for the used Hazelcast maps; see com.openexchange.sessionstorage.hazelcast/conf/hazelcast/sessions.properties
-    // Those configuration files specify backup count, max. idle seconds, etc.
-    // Otherwise defauls are used, which might not apply well
-    // In addition: Using shorter map names might be more adequate as .properties file carries that map name
-
-    private static final String HAZELCAST_AUTHREQUEST_INFO_MAP = "oidcAuthenticationRequestInfos";
-    private static final String HAZELCAST_LOGOUT_REQUEST_INFO_MAP = "oidcLogoutRequestInfos";
+    private static final String HAZELCAST_AUTHREQUEST_INFO_MAP = "oidcAuthInfos";
+    private static final String HAZELCAST_LOGOUT_REQUEST_INFO_MAP = "oidcLogoutInfos";
 
     private final HazelcastInstance hazelcast;
 
@@ -85,15 +82,25 @@ public class CoreStateManagement implements StateManagement {
     }
 
     @Override
-    public void addAuthenticationRequest(AuthenticationRequestInfo authenticationRequestInfo, long ttl, TimeUnit timeUnit) {
+    public void addAuthenticationRequest(AuthenticationRequestInfo authenticationRequestInfo, long ttl, TimeUnit timeUnit) throws OXException {
         LOG.trace("addAuthenticationRequest(AuthenticationRequestInfo: {})", authenticationRequestInfo.getState());
-        hazelcast.getMap(HAZELCAST_AUTHREQUEST_INFO_MAP).put(authenticationRequestInfo.getState(), new PortableAuthenticationRequest(authenticationRequestInfo), ttl , timeUnit);
+        try {
+            hazelcast.getMap(HAZELCAST_AUTHREQUEST_INFO_MAP).put(authenticationRequestInfo.getState(), new PortableAuthenticationRequest(authenticationRequestInfo), ttl , timeUnit);
+        } catch (RuntimeException e) {
+            throw OIDCExceptionCode.HAZELCAST_EXCEPTION.create(HAZELCAST_AUTHREQUEST_INFO_MAP, e);
+        }
     }
 
     @Override
-    public AuthenticationRequestInfo getAndRemoveAuthenticationInfo(String state) {
+    public AuthenticationRequestInfo getAndRemoveAuthenticationInfo(String state) throws OXException {
         LOG.trace("getAndRemoveAuthenticationInfo(state: {})", state);
-        PortableAuthenticationRequest portable = (PortableAuthenticationRequest) hazelcast.getMap(HAZELCAST_AUTHREQUEST_INFO_MAP).remove(state);
+        PortableAuthenticationRequest portable = null;
+        try {
+            portable = (PortableAuthenticationRequest) hazelcast.getMap(HAZELCAST_AUTHREQUEST_INFO_MAP).remove(state);
+        } catch (RuntimeException e) {
+            throw OIDCExceptionCode.HAZELCAST_EXCEPTION.create(HAZELCAST_AUTHREQUEST_INFO_MAP, e);
+        }
+        
         if (null == portable) {
             return null;
         }
@@ -101,15 +108,24 @@ public class CoreStateManagement implements StateManagement {
     }
 
     @Override
-    public void addLogoutRequest(LogoutRequestInfo logoutRequestInfo, long ttl, TimeUnit timeUnit) {
+    public void addLogoutRequest(LogoutRequestInfo logoutRequestInfo, long ttl, TimeUnit timeUnit) throws OXException {
         LOG.trace("addLogoutRequest({})", logoutRequestInfo.getState());
-        hazelcast.getMap(HAZELCAST_LOGOUT_REQUEST_INFO_MAP).put(logoutRequestInfo.getState(), new PortableLogoutRequest(logoutRequestInfo), ttl , timeUnit);
+        try {
+            hazelcast.getMap(HAZELCAST_LOGOUT_REQUEST_INFO_MAP).put(logoutRequestInfo.getState(), new PortableLogoutRequest(logoutRequestInfo), ttl , timeUnit);
+        } catch (RuntimeException e) {
+            throw OIDCExceptionCode.HAZELCAST_EXCEPTION.create(HAZELCAST_LOGOUT_REQUEST_INFO_MAP, e);
+        }
     }
 
     @Override
-    public LogoutRequestInfo getAndRemoveLogoutRequestInfo(String state) {
+    public LogoutRequestInfo getAndRemoveLogoutRequestInfo(String state) throws OXException {
         LOG.trace("getAndRemoveLogoutRequestInfo(state: {})", state);
-        PortableLogoutRequest portableLogoutRequest = (PortableLogoutRequest) hazelcast.getMap(HAZELCAST_LOGOUT_REQUEST_INFO_MAP).remove(state);
+        PortableLogoutRequest portableLogoutRequest = null;
+        try {
+            portableLogoutRequest = (PortableLogoutRequest) hazelcast.getMap(HAZELCAST_LOGOUT_REQUEST_INFO_MAP).remove(state);
+        } catch (RuntimeException e) {
+            throw OIDCExceptionCode.HAZELCAST_EXCEPTION.create(HAZELCAST_LOGOUT_REQUEST_INFO_MAP, e);
+        }
         if (null == portableLogoutRequest) {
             return null;
         }

@@ -50,6 +50,7 @@
 package com.openexchange.oidc.state;
 
 import java.util.concurrent.TimeUnit;
+import com.openexchange.exception.OXException;
 
 /**
  * Manager of all client states, that try to login or logout with OpenID features.
@@ -66,8 +67,7 @@ public interface StateManagement {
      * @param ttl The time to live
      * @param timeUnit The time unit of <code>ttl</code>
      */
-    //TODO QS-VS: Alle interfaces werfen OXExceptions, die abgefangen werden müssen
-    void addAuthenticationRequest(AuthenticationRequestInfo authenticationRequestInfo, long ttl, TimeUnit timeUnit);
+    void addAuthenticationRequest(AuthenticationRequestInfo authenticationRequestInfo, long ttl, TimeUnit timeUnit) throws OXException;
 
     /**
      * Load the {@link AuthenticationRequestInfo} which is identified by the state.
@@ -75,7 +75,7 @@ public interface StateManagement {
      * @param state The state to identify the {@link AuthenticationRequestInfo}
      * @return The {@link AuthenticationRequestInfo}
      */
-    AuthenticationRequestInfo getAndRemoveAuthenticationInfo(String state);
+    AuthenticationRequestInfo getAndRemoveAuthenticationInfo(String state) throws OXException;
 
     /**
      * Add the given {@link LogoutRequestInfo} to a hazelcast IMap, which is managed
@@ -85,7 +85,7 @@ public interface StateManagement {
      * @param ttl The time to live
      * @param timeUnit The time unit of <code>ttl</code>
      */
-    void addLogoutRequest(LogoutRequestInfo logoutRequestInfo, long ttl, TimeUnit timeUnit);
+    void addLogoutRequest(LogoutRequestInfo logoutRequestInfo, long ttl, TimeUnit timeUnit) throws OXException;
 
     /**
      * Load the stored {@link LogoutRequestInfo} from hazelcasts {@link IMap} by
@@ -94,6 +94,6 @@ public interface StateManagement {
      * @param state The identifier of the {@link LogoutRequestInfo}
      * @return The {@link LogoutRequestInfo}
      */
-    LogoutRequestInfo getAndRemoveLogoutRequestInfo(String state);
+    LogoutRequestInfo getAndRemoveLogoutRequestInfo(String state) throws OXException;
 
 }

@@ -236,15 +236,7 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
      * @return The {@link int} value
      */
     protected int loadIntProperty(final OIDCBackendProperty backendProperty) {
-        Integer result = null;
-        if (!Strings.isEmpty(this.customPropertyPrefix)) {
-            // TODO QS-VS: Does not work this way. Requesting getIntProperty() for a non-existing property will yield a NullPointerException in LeanConfigurationServiceImpl.getIntProperty(Property)
-            result = this.leanConfigurationService.getIntProperty(this.getCustomProperty(backendProperty));
-        }
-        if (result == null) {
-            result = this.leanConfigurationService.getIntProperty(backendProperty);
-        }
-        return result;
+        return Integer.parseInt(this.loadStringProperty(backendProperty));
     }
 
     /**
@@ -255,15 +247,7 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
      * @return The {@link boolean} value
      */
     protected boolean loadBooleanProperty(final OIDCBackendProperty backendProperty) {
-        Boolean result = null;
-        if (!Strings.isEmpty(this.customPropertyPrefix)) {
-            // TODO QS-VS: Does not work this way. Requesting getBooleanProperty() for a non-existing property will yield a NullPointerException in LeanConfigurationServiceImpl.getBooleanProperty(Property)
-            result = this.leanConfigurationService.getBooleanProperty(this.getCustomProperty(backendProperty));
-        }
-        if (result == null) {
-            result = this.leanConfigurationService.getBooleanProperty(backendProperty);
-        }
-        return result;
+        return Boolean.parseBoolean(this.loadStringProperty(backendProperty));
     }
 
     protected Property getCustomProperty(final OIDCBackendProperty backendProperty) {

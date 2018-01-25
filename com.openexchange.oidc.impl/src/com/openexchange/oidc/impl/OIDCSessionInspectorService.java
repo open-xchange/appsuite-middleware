@@ -1,15 +1,11 @@
 package com.openexchange.oidc.impl;
 
-import java.util.Map.Entry;
-import java.util.SortedMap;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.oidc.OIDCBackend;
 import com.openexchange.oidc.OIDCExceptionCode;
-import com.openexchange.oidc.osgi.OIDCBackendRegistry;
 import com.openexchange.oidc.tools.OIDCTools;
 import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
@@ -26,12 +22,10 @@ import com.openexchange.session.inspector.SessionInspectorService;
  */
 public class OIDCSessionInspectorService implements SessionInspectorService{
 
-    private final OIDCBackendRegistry oidcBackends;
-    private final BundleContext context;
+    private final List<OIDCBackend> oidcBackends;
 
-    public OIDCSessionInspectorService(OIDCBackendRegistry oidcBackends, BundleContext context) {
+    public OIDCSessionInspectorService(List<OIDCBackend> oidcBackends) {
         this.oidcBackends = oidcBackends;
-        this.context = context;
     }
 
     @Override
@@ -49,20 +43,17 @@ public class OIDCSessionInspectorService implements SessionInspectorService{
     }
 
     private OIDCBackend loadBackendForSession(Session session) throws OXException{
-        // TODO QS-VS better make com.openexchange.oidc.osgi.OIDCBackendRegistry.backends available to avoid excessive utilization of OSGi look-up stuff
-        SortedMap<ServiceReference<OIDCBackend>,OIDCBackend> tracked = this.oidcBackends.getTracked();
         String backendPath = (String) session.getParameter(OIDCTools.BACKEND_PATH);
         if (null == backendPath) {
             return null;
         }
-        String sessionBackendPath = backendPath;
-        for (Entry<ServiceReference<OIDCBackend>, OIDCBackend> entry : tracked.entrySet()) {
-            OIDCBackend backend = this.context.getService(entry.getKey());
-            if (backend.getPath().equals(sessionBackendPath)) {
+        
+        for (OIDCBackend backend : this.oidcBackends) {
+            if (backend.getPath().equals(backendPath)) {
                 return backend;
             }
         }
-        throw OIDCExceptionCode.UNABLE_TO_FIND_BACKEND_FOR_SESSION.create(sessionBackendPath);
+        throw OIDCExceptionCode.UNABLE_TO_FIND_BACKEND_FOR_SESSION.create(backendPath);
     }
 
     @Override

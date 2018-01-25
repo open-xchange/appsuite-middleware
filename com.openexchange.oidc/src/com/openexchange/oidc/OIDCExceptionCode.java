@@ -144,7 +144,12 @@ public enum OIDCExceptionCode implements OXExceptionCode {
     /**
      * "The OpenID-Provider responded with an error: '%1$s'"
      */
-    OP_SERVER_ERROR("The OpenID-Provider responded with an error: '%1$s'", Category.CATEGORY_ERROR, 21);
+    OP_SERVER_ERROR("The OpenID-Provider responded with an error: '%1$s'", Category.CATEGORY_ERROR, 21),
+    
+    /**
+     * "An error occured while accessing an IMap: '%1$s'"
+     */
+    HAZELCAST_EXCEPTION("An error occured while accessing an IMap: '%1$s'", Category.CATEGORY_ERROR, 22);
     
     private final String message;
     private final String displayMessage;

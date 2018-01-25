@@ -51,6 +51,7 @@ package com.openexchange.oidc.impl;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.Before;
@@ -107,12 +108,15 @@ public class OIDCSessionInspectorServiceTest {
 
     private OIDCSessionInspectorService inspector;
 
+    @Mock
+    private List<OIDCBackend> mockedBackendList;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         Mockito.when(this.mockedBackend.getBackendConfig()).thenReturn(this.mockedBackendConfig);
-        this.inspector = PowerMockito.spy(new OIDCSessionInspectorService(this.mockedOidcBackends, this.mockedBundleContext));
-
+        Mockito.when(this.mockedOidcBackends.getAllRegisteredBackends()).thenReturn(this.mockedBackendList);
+        this.inspector = PowerMockito.spy(new OIDCSessionInspectorService(this.mockedBackendList));
     }
 
     @Test

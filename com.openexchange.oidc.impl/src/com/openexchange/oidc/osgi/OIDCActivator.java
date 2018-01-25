@@ -80,7 +80,7 @@ import com.openexchange.user.UserService;
  */
 public class OIDCActivator extends HousekeepingActivator{
 
-    private OIDCBackendRegistry oidcBackends;
+    private OIDCBackendRegistry oidcBackendRegistry;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -105,9 +105,9 @@ public class OIDCActivator extends HousekeepingActivator{
     }
 
     private void getOIDCBackends(ServiceLookup services) {
-        if (this.oidcBackends == null) {
-            this.oidcBackends = new OIDCBackendRegistry(context, services);
-            this.oidcBackends.open();
+        if (this.oidcBackendRegistry == null) {
+            this.oidcBackendRegistry = new OIDCBackendRegistry(context, services);
+            this.oidcBackendRegistry.open();
         }
     }
 
@@ -120,7 +120,7 @@ public class OIDCActivator extends HousekeepingActivator{
         if (config.isEnabled().booleanValue()) {
             logger.info("Starting core OpenID Connect support... ");
             getOIDCBackends(this);
-            registerService(SessionInspectorService.class, new OIDCSessionInspectorService(oidcBackends, context), null);
+            registerService(SessionInspectorService.class, new OIDCSessionInspectorService(oidcBackendRegistry.getAllRegisteredBackends()), null);
             registerService(CustomPortableFactory.class, new PortableAuthenticationRequestFactory(), null);
             registerService(CustomPortableFactory.class, new PortableLogoutRequestFactory(), null);
         } else {
@@ -136,9 +136,9 @@ public class OIDCActivator extends HousekeepingActivator{
 
     @Override
     protected synchronized void stopBundle() throws Exception {
-        OIDCBackendRegistry oidcBackends = this.oidcBackends;
+        OIDCBackendRegistry oidcBackends = this.oidcBackendRegistry;
         if (null != oidcBackends) {
-            this.oidcBackends = null;
+            this.oidcBackendRegistry = null;
             oidcBackends.close();
         }
         Services.setServices(null);

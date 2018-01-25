@@ -514,7 +514,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         LOG.trace("getAutologinByCookieURL(HttpServletRequest request: {}, HttpServletResponse response, Reservation reservation.token: {}, Cookie oidcAtologinCookie: {}, boolean respondWithJson)", request.getRequestURI(), reservation.getToken(), oidcAtologinCookie != null ? oidcAtologinCookie.getValue() : "null", respondWithJson);
         if (oidcAtologinCookie != null) {
             try {
-                Session session = this.getSessionFromAutologinCookie(oidcAtologinCookie);
+                Session session = this.getSessionFromAutologinCookie(oidcAtologinCookie, request);
                 if (session != null) {
                     this.updateSession(session, reservation.getState());
                     // the getRedirectLocationForSession does also the validation check of the session
@@ -539,7 +539,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         return false;
     }
 
-    private Session getSessionFromAutologinCookie(Cookie oidcAtologinCookie) throws OXException {
+    private Session getSessionFromAutologinCookie(Cookie oidcAtologinCookie, HttpServletRequest request) throws OXException {
         LOG.trace("getSessionFromAutologinCookie(Cookie oidcAtologinCookie: {})", oidcAtologinCookie.getValue());
         Session session = null;
         SessiondService sessiondService = Services.getService(SessiondService.class);
@@ -547,7 +547,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         if (sessions.size() > 0) {
             session = sessiondService.getSession(sessions.iterator().next());
         }
-        // TODO: QS-VS Validate session; see SAMLLoginRequestHandler.tryAutoLogin(HttpServletRequest, HttpServletResponse, Reservation, SAMLBackend)
+        OIDCTools.validateSession(session, request);
         return session;
     }
 

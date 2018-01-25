@@ -84,6 +84,7 @@ import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.exception.OXException;
@@ -184,17 +185,15 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         String deeplink = request.getParameter("hash");
 
         if (!Strings.isEmpty(redirectURL) && !Strings.isEmpty(deeplink)) {
-            // TODO: QS-VS URL-encode appended query parameters (if not done yet); e.g. using com.openexchange.ajax.AJAXUtility.encodeUrl(String, boolean, boolean, String)
-            redirectURL += "&" + deeplink.substring(1);
+            redirectURL += "&" + AJAXUtility.encodeUrl(deeplink.substring(1), true);
         }
-
         return redirectURL;
     }
 
     private String getAutologinByCookieURL(HttpServletRequest request, HttpServletResponse response, Cookie oidcAtologinCookie) throws OXException {
         LOG.trace("getAutologinByCookieURL(HttpServletRequest request: {}, HttpServletResponse response, Cookie oidcAtologinCookie: {})", request.getRequestURI(), oidcAtologinCookie != null ? oidcAtologinCookie.getValue() : "null");
         if (oidcAtologinCookie != null) {
-            Session session = this.getSessionFromAutologinCookie(oidcAtologinCookie);
+            Session session = this.getSessionFromAutologinCookie(oidcAtologinCookie, request);
             if (session != null) {
                 return this.getRedirectLocationForSession(request, session);
             }
@@ -211,7 +210,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         return null;
     }
 
-    private Session getSessionFromAutologinCookie(Cookie oidcAtologinCookie) throws OXException {
+    private Session getSessionFromAutologinCookie(Cookie oidcAtologinCookie, HttpServletRequest request) throws OXException {
         LOG.trace("getSessionFromAutologinCookie(Cookie oidcAtologinCookie: {})", oidcAtologinCookie.getValue());
         Session session = null;
         SessiondService sessiondService = Services.getService(SessiondService.class);
@@ -219,7 +218,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         if (sessions.size() > 0) {
             session = sessiondService.getSession(sessions.iterator().next());
         }
-        // TODO: QS-VS Validate session; see SAMLLoginRequestHandler.tryAutoLogin(HttpServletRequest, HttpServletResponse, Reservation, SAMLBackend)
+        OIDCTools.validateSession(session, request);
         return session;
     }
 
@@ -247,7 +246,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         return requestString;
     }
 
-    private void addAuthRequestToStateManager(State state, Nonce nonce, HttpServletRequest request) {
+    private void addAuthRequestToStateManager(State state, Nonce nonce, HttpServletRequest request)  throws OXException {
         LOG.trace("addAuthRequestToStateManager(State state: {}, Nonce nonce: {}, HttpServletRequest request: {})", state.getValue(), nonce.getValue(), request.getRequestURI());
         String deepLink = request.getParameter("deep_link");
         String uiClientID = OIDCTools.getUiClient(request);
@@ -415,7 +414,8 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         if (session == null) {
             throw OIDCExceptionCode.INVALID_LOGOUT_REQUEST.create("Invalid session parameter, no session found.");
         }
-        // TODO: QS-VS Further validate session (check against secret cookie, etc.); see SessionUtility
+        OIDCTools.validateSession(session, request);
+        
         return session;
     }
 
