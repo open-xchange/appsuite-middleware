@@ -176,7 +176,7 @@ public class UpgradeSchemata extends UtilAbstraction {
      * @throws IOException if an I/O error occurs
      */
     private void initialiseRMIServices(AdminParser parser) throws MalformedURLException, RemoteException, NotBoundException, IOException {
-        String rmiHost = "rmi://" + jmxHost + ":" + jmxPort + "/"; 
+        String rmiHost = "rmi://" + jmxHost + ":1099/";
         oxUtil = (OXUtilInterface) Naming.lookup(rmiHost + OXUtilInterface.RMI_NAME);
         schemaMoveUtil = (SchemaMoveRemote) Naming.lookup(rmiHost + SchemaMoveRemote.RMI_NAME);
         mbeanConnection = getMBeanConnection(parser);
@@ -479,6 +479,13 @@ public class UpgradeSchemata extends UtilAbstraction {
         server.setName(serverName);
 
         startFromSchema = (String) parser.getOptionValue(schemaNameOption);
+        if (Strings.isNotEmpty(startFromSchema)) {
+            if (startFromSchema.lastIndexOf('_') < 0) {
+                System.err.println("Invalid/Malformed schema name: '" + startFromSchema + "'");
+                parser.printUsage();
+                System.exit(1);
+            }
+        }
 
         force = parser.hasOption(forceOption);
 
