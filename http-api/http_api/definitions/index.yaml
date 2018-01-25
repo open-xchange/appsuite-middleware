@@ -177,6 +177,13 @@ AlarmTriggerResponse:
   $ref: ./chronos/AlarmTriggerResponse.yaml
 AlarmTriggerData:
   $ref: ./chronos/AlarmTriggerData.yaml
+# Module: chronos-accounts
+CalendarAccountData:
+  $ref: ./chronos-accounts/CalendarAccountData.yaml
+CalendarAccountProbeData:
+  $ref: ./chronos-accounts/CalendarAccountProbeData.yaml
+CalendarAccountProbeResponse:
+  $ref: ./chronos-accounts/CalendarAccountProbeResponse.yaml
 # Module: chronos-availability
 AvailabilityData:
   $ref: ./chronos-availability/AvailabilityData.yaml
