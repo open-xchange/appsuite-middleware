@@ -328,6 +328,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
                             nup.setPartStat(up2.getPartStat());
                             nup.setComment(up2.getComment());
                             nup.setUri(up2.getUri());
+                            nup.setCuType(up2.getCuType());
 
                             pChange.setComment(up2.getComment());
                             pChange.setConfirmStatusUpdate(up2.getPartStat());

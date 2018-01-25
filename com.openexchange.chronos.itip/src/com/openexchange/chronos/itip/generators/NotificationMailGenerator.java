@@ -62,6 +62,7 @@ import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
@@ -431,6 +432,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         attendee.setEntity((onBehalfOf != null ? onBehalfOf : actor).getIdentifier());
         attendee.setPartStat(confirmStatus);
         attendee.setUri(CalendarUtils.getURI(mail.getSender().getEmail()));
+        attendee.setCuType(CalendarUserType.INDIVIDUAL);
         reply.setAttendees(Arrays.asList(attendee));
         if (CalendarUtils.isSeriesException(reply)) {
             message.addException(reply);
@@ -938,7 +940,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
         @Override
         public NotificationMail generateCreateMailFor(final NotificationParticipant participant) throws OXException {
-            if(CalendarUtils.isSeriesException(updated)) {
+            if (CalendarUtils.isSeriesException(updated)) {
                 return counter(counter(participant), ITipRole.ORGANIZER);
             }
             return null;
