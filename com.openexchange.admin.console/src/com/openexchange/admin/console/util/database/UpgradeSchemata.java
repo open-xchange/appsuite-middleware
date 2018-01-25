@@ -500,7 +500,7 @@ public class UpgradeSchemata extends UtilAbstraction {
         }
 
         // Parse the optional JMX host
-        jmxHost = parseHost(parser, rmiHostOption, "localhost");
+        jmxHost = parseHost(parser, jmxHostNameOption, "localhost");
         // Parse the optional JMX port
         jmxPort = parsePort(parser, jmxPortNameOption, 9999);
 
