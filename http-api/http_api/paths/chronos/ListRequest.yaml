@@ -8,7 +8,6 @@
       - application/json
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
-      - $ref: "#/parameters/QueryParamChronosFolder"
       - $ref: "#/parameters/QueryParamChronosFields"
       - $ref: "#/parameters/QueryParamChronosExtendedEntities"
       - in: body
