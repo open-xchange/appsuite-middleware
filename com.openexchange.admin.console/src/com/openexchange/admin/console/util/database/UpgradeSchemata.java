@@ -109,10 +109,14 @@ public class UpgradeSchemata extends UtilAbstraction {
     private CLIOption jmxPasswordNameOption;
     private CLIOption forceOption;
     private CLIOption skipOption;
+    private CLIOption rmiHostOption;
+    private CLIOption rmiPortOption;
 
     private Server server;
     private String jmxHost;
     private int jmxPort;
+    private String rmiHost;
+    private int rmiPort;
     private boolean force;
 
     private Credentials credentials;
@@ -176,9 +180,9 @@ public class UpgradeSchemata extends UtilAbstraction {
      * @throws IOException if an I/O error occurs
      */
     private void initialiseRMIServices(AdminParser parser) throws MalformedURLException, RemoteException, NotBoundException, IOException {
-        String rmiHost = "rmi://" + jmxHost + ":1099/";
-        oxUtil = (OXUtilInterface) Naming.lookup(rmiHost + OXUtilInterface.RMI_NAME);
-        schemaMoveUtil = (SchemaMoveRemote) Naming.lookup(rmiHost + SchemaMoveRemote.RMI_NAME);
+        String rmiUrl = "rmi://" + rmiHost + ":" + rmiPort + "/";
+        oxUtil = (OXUtilInterface) Naming.lookup(rmiUrl + OXUtilInterface.RMI_NAME);
+        schemaMoveUtil = (SchemaMoveRemote) Naming.lookup(rmiUrl + SchemaMoveRemote.RMI_NAME);
         mbeanConnection = getMBeanConnection(parser);
     }
 
@@ -479,12 +483,10 @@ public class UpgradeSchemata extends UtilAbstraction {
         server.setName(serverName);
 
         startFromSchema = (String) parser.getOptionValue(schemaNameOption);
-        if (Strings.isNotEmpty(startFromSchema)) {
-            if (startFromSchema.lastIndexOf('_') < 0) {
-                System.err.println("Invalid/Malformed schema name: '" + startFromSchema + "'");
-                parser.printUsage();
-                System.exit(1);
-            }
+        if (Strings.isNotEmpty(startFromSchema) && startFromSchema.lastIndexOf('_') < 0) {
+            System.err.println("Invalid/Malformed schema name: '" + startFromSchema + "'");
+            parser.printUsage();
+            System.exit(1);
         }
 
         force = parser.hasOption(forceOption);
@@ -497,36 +499,62 @@ public class UpgradeSchemata extends UtilAbstraction {
             }
         }
 
+        // Parse the optional JMX host
+        jmxHost = parseHost(parser, rmiHostOption, "localhost");
         // Parse the optional JMX port
-        jmxPort = 9999;
-        if (parser.hasOption(jmxPortNameOption)) {
-            String val = (String) parser.getOptionValue(jmxPortNameOption);
-            if (null != val) {
-                try {
-                    jmxPort = Integer.parseInt(val.trim());
-                } catch (NumberFormatException e) {
-                    System.err.println("Port parameter is not a number: " + val);
-                    parser.printUsage();
-                    System.exit(1);
-                }
-                if (jmxPort < 1 || jmxPort > 65535) {
-                    System.err.println("Port parameter is out of range: " + val + ". Valid range is from 1 to 65535.");
-                    parser.printUsage();
-                    System.exit(1);
-                }
-            }
-        }
+        jmxPort = parsePort(parser, jmxPortNameOption, 9999);
 
-        // Parser the optional JMX host
-        jmxHost = "localhost";
-        if (parser.hasOption(jmxHostNameOption)) {
-            String tmp = (String) parser.getOptionValue(jmxHostNameOption);
-            if (null != tmp) {
-                jmxHost = tmp.trim();
-            }
-        }
+        // Parse the optional RMI host
+        rmiHost = parseHost(parser, rmiHostOption, "localhost");
+        // Parse the optional RMI port
+        rmiPort = parsePort(parser, rmiPortOption, 1099);
 
         credentials = credentialsparsing(parser);
+    }
+
+    /**
+     * Parses the host from the specified {@link CLIOption}
+     * 
+     * @param parser The {@link AdminParser}
+     * @param option The {@link CLIOption}
+     * @param defaultValue The default value
+     * @return The hostname or the default value
+     */
+    private String parseHost(AdminParser parser, CLIOption option, String defaultValue) {
+        if (parser.hasOption(option)) {
+            String tmp = (String) parser.getOptionValue(rmiHostOption);
+            return Strings.isNotEmpty(tmp) ? tmp.trim() : defaultValue;
+        }
+        return defaultValue;
+    }
+
+    /**
+     * Parses the port from the specified {@link CLIOption}
+     * 
+     * @param parser The {@link AdminParser}
+     * @param option The {@link CLIOption}
+     * @param defaultValue The default value
+     * @return the port or the default value
+     */
+    private int parsePort(AdminParser parser, CLIOption option, int defaultValue) {
+        int port = defaultValue;
+        String value = (String) parser.getOptionValue(option);
+        if (Strings.isEmpty(value)) {
+            return port;
+        }
+        try {
+            port = Integer.parseInt(value.trim());
+        } catch (NumberFormatException e) {
+            System.err.println("Port parameter is not a number: " + value);
+            parser.printUsage();
+            System.exit(1);
+        }
+        if (port < 1 || port > 65535) {
+            System.err.println("Port parameter is out of range: " + value + ". Valid range is from 1 to 65535.");
+            parser.printUsage();
+            System.exit(1);
+        }
+        return port;
     }
 
     /**
@@ -543,6 +571,8 @@ public class UpgradeSchemata extends UtilAbstraction {
         schemaNameOption = setShortLongOpt(parser, 'm', "schema-name", "The optional schema name to continue from", true, NeededQuadState.possibly);
         forceOption = setShortLongOpt(parser, 'f', "force", "Forces the upgrade even if the updates fail in some schemata", false, NeededQuadState.notneeded);
         skipOption = setShortLongOpt(parser, 'k', "skip-schemata", "Defines the names of the schemata as a comma separated list that should be skipped during the upgrade phase", true, NeededQuadState.possibly);
+        rmiHostOption = setShortLongOpt(parser, 'r', "rmi-host", "Defines the RMI host name (default:localhost)", true, NeededQuadState.possibly);
+        rmiPortOption = setShortLongOpt(parser, 't', "rmi-port", "Defines the RMI port (default:1099)", true, NeededQuadState.possibly);
 
         setDefaultCommandLineOptionsWithoutContextID(parser);
     }
