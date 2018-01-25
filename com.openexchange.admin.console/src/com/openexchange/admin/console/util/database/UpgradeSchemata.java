@@ -383,7 +383,7 @@ public class UpgradeSchemata extends UtilAbstraction {
             // If the 'schema-name' is present it means that there is a continuation which implies
             // that a server was previously registered, thus simply use the already existing server.
             Server s = listServer[0];
-            if (!Strings.isEmpty(startFromSchema)) {
+            if (Strings.isNotEmpty(startFromSchema)) {
                 System.out.println("The server '" + s.getName() + "' with id '" + s.getId() + "' will be used to point the updated schemata after the update tasks complete.");
                 System.out.println(PROMPT);
                 prompt();
