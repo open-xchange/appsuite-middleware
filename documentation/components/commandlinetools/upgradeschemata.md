@@ -28,10 +28,6 @@ The `upgradeschemata` command line tool performs a database upgrade from 7.6.3 t
  Admin username
  - ``-P,--adminpass <adminpass>``<br>
  Admin password
- - ``-r,--rmi-host <rmi-host>``<br>
- Defines the RMI host name (default:localhost)
- - ``-t,--rmi-port <rmi-port>``<br>
- Defines the RMI port (default:1099)
 
 ### Examples
 
