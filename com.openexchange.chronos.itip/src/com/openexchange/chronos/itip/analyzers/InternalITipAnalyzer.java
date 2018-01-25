@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.itip.analyzers;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -77,8 +78,7 @@ public class InternalITipAnalyzer extends AbstractITipAnalyzer {
 
     @Override
     public List<ITipMethod> getMethods() {
-
-        return null;
+        return Collections.emptyList();
     }
 
     @Override
