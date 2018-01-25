@@ -150,11 +150,6 @@ public class UpdatePerformer extends AbstractActionPerformer {
             }
 
             writeMail(action, original, event, session, owner);
-            if (event.getId() == null && original.getId() != null) {
-                event.setId(original.getId());
-            }
-
-            writeMail(action, original, event, session, owner);
             result.add(event);
         }
 
@@ -199,7 +194,10 @@ public class UpdatePerformer extends AbstractActionPerformer {
              * + Party crasher creates event in own folder
              * + To create exceptions master needs to be updated. Nevertheless the created exception must be returned
              */
-            if (null == (update = calendarResult.getCreations().get(0).getCreatedEvent())) {
+            if (false == calendarResult.getCreations().isEmpty()) {
+                update = calendarResult.getCreations().get(0).getCreatedEvent();
+            }
+            if (null == update && false == calendarResult.getUpdates().isEmpty()) {
                 update = calendarResult.getUpdates().get(0).getUpdate();
             }
         }
@@ -255,6 +253,8 @@ public class UpdatePerformer extends AbstractActionPerformer {
             Attendee attendee = CalendarUtils.find(attendees, owner);
             if (null == attendee) {
                 attendee = loadAttendee(session, owner);
+            } else {
+                attendees.remove(attendee);
             }
 
             // Update from attributes
@@ -264,7 +264,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
             if (Strings.isNotEmpty(message)) {
                 attendee.setComment(message);
             }
-
+            attendees.add(attendee);
             event.setAttendees(attendees);
         } catch (OXException e) {
             LOGGER.error("Could not resolve user with identifier {}", Integer.valueOf(owner), e);
