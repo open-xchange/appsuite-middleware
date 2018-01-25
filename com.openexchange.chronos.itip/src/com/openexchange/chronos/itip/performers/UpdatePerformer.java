@@ -53,16 +53,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipAnalysis;
@@ -70,7 +72,6 @@ import com.openexchange.chronos.itip.ITipAttributes;
 import com.openexchange.chronos.itip.ITipChange;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
 import com.openexchange.chronos.itip.generators.ITipMailGeneratorFactory;
-import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.sender.MailSenderService;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -79,14 +80,15 @@ import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.user.UserService;
+import com.openexchange.groupware.tools.mappings.Mapping;
+import com.openexchange.java.Strings;
 
 /**
  * 
  * {@link ITipChange}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.10.0
  */
 public class UpdatePerformer extends AbstractActionPerformer {
@@ -111,28 +113,31 @@ public class UpdatePerformer extends AbstractActionPerformer {
         Map<String, Event> processed = new HashMap<String, Event>();
 
         for (ITipChange change : changes) {
-            boolean exceptionCreate = isExceptionCreate(change);
 
             Event event = change.getNewEvent();
             if (event == null) {
+                LOGGER.debug("No event found to process.");
                 continue;
             }
+
             // TODO: event.setNotification(true);
             final int owner = analysis.getMessage().getOwner() > 0 ? analysis.getMessage().getOwner() : session.getUserId();
+            boolean exceptionCreate = isExceptionCreate(change);
 
-            ensureAttendee(event, exceptionCreate ? change.getMasterEvent() : change.getCurrentEvent(), action, owner, session.getContextId(), attributes);
+            ensureAttendee(event, exceptionCreate ? change.getMasterEvent() : change.getCurrentEvent(), action, owner, attributes, session);
             Event original = determineOriginalEvent(change, processed, session);
+
             if (original != null) {
                 ITipEventUpdate diff = change.getDiff();
                 if (null != diff && false == diff.isEmpty()) {
-                    event = updateEvent(original, event, session, false);
+                    event = updateEvent(original, event, session);
                 } else {
                     continue;
                 }
             } else if (exceptionCreate) {
                 Event masterEvent = original = change.getMasterEvent();
                 event.setSeriesId(masterEvent.getSeriesId());
-                event = updateEvent(masterEvent, event, session, true);
+                event = updateEvent(masterEvent, event, session);
             } else {
                 ensureFolderId(event, session);
                 event.removeId();
@@ -148,7 +153,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
             if (event.getId() == null && original.getId() != null) {
                 event.setId(original.getId());
             }
-            
+
             writeMail(action, original, event, session, owner);
             result.add(event);
         }
@@ -156,7 +161,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
         return result;
     }
 
-    private Event updateEvent(Event original, Event event, CalendarSession session, boolean intresetedInCreations) throws OXException {
+    private Event updateEvent(Event original, Event event, CalendarSession session) throws OXException {
         EventUpdate diff = session.getUtilities().compare(original, event, true, (EventField[]) null);
 
         Event update = new Event();
@@ -189,7 +194,14 @@ public class UpdatePerformer extends AbstractActionPerformer {
 
         if (write) {
             CalendarResult calendarResult = session.getCalendarService().updateEventAsOrganizer(session, new EventID(update.getFolderId(), update.getId()), update, original.getLastModified().getTime());
-            update = intresetedInCreations ? calendarResult.getCreations().get(0).getCreatedEvent() : calendarResult.getUpdates().get(0).getUpdate();
+            /*
+             * Check creations first because;
+             * + Party crasher creates event in own folder
+             * + To create exceptions master needs to be updated. Nevertheless the created exception must be returned
+             */
+            if (null == (update = calendarResult.getCreations().get(0).getCreatedEvent())) {
+                update = calendarResult.getUpdates().get(0).getUpdate();
+            }
         }
         return update;
     }
@@ -207,97 +219,116 @@ public class UpdatePerformer extends AbstractActionPerformer {
         return createResult.getCreations().get(0).getCreatedEvent();
     }
 
-    private void ensureAttendee(Event event, Event currentEvent, ITipAction action, int owner, int contextId, ITipAttributes attributes) {
-        ParticipationStatus confirm = null;
+    /*
+     * ==============================================================================
+     * =============================== HELPERS ======================================
+     * ==============================================================================
+     */
+
+    /**
+     * Ensures that the given user is attendee of the event
+     * 
+     * @param event The event to check if the user is in
+     * @param currentEvent The original event
+     * @param action The {@link ITipAction} to be performed
+     * @param owner The user identifier
+     * @param attributes The update {@link ITipAttributes}
+     * @param session The {@link CalendarSession}
+     */
+    private void ensureAttendee(Event event, Event currentEvent, ITipAction action, int owner, ITipAttributes attributes, CalendarSession session) {
+        ParticipationStatus confirm = getParticipantStatus(currentEvent, action, owner);
+        String message = null;
+        if (attributes != null && attributes.getConfirmationMessage() != null && Strings.isNotEmpty(attributes.getConfirmationMessage().trim())) {
+            message = attributes.getConfirmationMessage();
+        }
+
+        try {
+            List<Attendee> attendees;
+            if (null != currentEvent && currentEvent.getTimestamp() > event.getTimestamp()) {
+                // Current event exists and was modified since the organizer send the mail. Using the current set of attendees from database
+                attendees = new LinkedList<>(currentEvent.getAttendees());
+            } else {
+                attendees = new LinkedList<>(event.getAttendees());
+            }
+
+            // Get attendee to add
+            Attendee attendee = CalendarUtils.find(attendees, owner);
+            if (null == attendee) {
+                attendee = loadAttendee(session, owner);
+            }
+
+            // Update from attributes
+            if (null != confirm) {
+                attendee.setPartStat(confirm);
+            }
+            if (Strings.isNotEmpty(message)) {
+                attendee.setComment(message);
+            }
+
+            event.setAttendees(attendees);
+        } catch (OXException e) {
+            LOGGER.error("Could not resolve user with identifier {}", Integer.valueOf(owner), e);
+        }
+    }
+
+    private ParticipationStatus getParticipantStatus(Event currentEvent, ITipAction action, int owner) {
         switch (action) {
             case ACCEPT:
             case ACCEPT_AND_IGNORE_CONFLICTS:
             case CREATE:
-                confirm = ParticipationStatus.ACCEPTED;
-                break;
+                return ParticipationStatus.ACCEPTED;
             case DECLINE:
-                confirm = ParticipationStatus.DECLINED;
-                break;
+                return ParticipationStatus.DECLINED;
             case TENTATIVE:
-                confirm = ParticipationStatus.TENTATIVE;
-                break;
+                return ParticipationStatus.TENTATIVE;
             case UPDATE:
-                confirm = getCurrentConfirmation(currentEvent, owner);
-                break;
+                // Might return null
+                return getFieldValue(currentEvent, owner, AttendeeField.PARTSTAT, ParticipationStatus.class);
             default:
-                confirm = ParticipationStatus.NEEDS_ACTION;
+                // Fall through
         }
-
-        String message = null;
-        if (attributes != null && attributes.getConfirmationMessage() != null && !attributes.getConfirmationMessage().trim().equals("")) {
-            message = attributes.getConfirmationMessage();
-        } else {
-            message = getCurrentMessage(currentEvent, owner);
-        }
-
-        boolean found = false;
-        for (Attendee attendee : event.getAttendees()) {
-            if (attendee.getEntity() == owner) {
-                if (null != confirm) {
-                    attendee.setPartStat(confirm);
-                }
-                if (message != null) {
-                    attendee.setComment(message);
-                }
-                found = true;
-                break;
-            }
-        }
-
-        if (!found) {
-            Attendee attendee = new Attendee();
-            attendee.setEntity(owner);
-            if (confirm != null) {
-                attendee.setPartStat(confirm);
-            }
-            if (message != null) {
-                attendee.setComment(message);
-            }
-            try {
-                User user = Services.getService(UserService.class, true).getUser(owner, contextId);
-                attendee.setCn(user.getDisplayName());
-                attendee.setEMail(user.getMail());
-                attendee.setUri(CalendarUtils.getURI(user.getMail()));
-                attendee.setCuType(CalendarUserType.INDIVIDUAL);
-            } catch (OXException e) {
-                LOGGER.error("Could not resolve user with identifier {}", Integer.valueOf(owner), e);
-            }
-            event.getAttendees().add(attendee);
-        }
-
+        return ParticipationStatus.NEEDS_ACTION;
     }
 
-    private String getCurrentMessage(Event event, int userId) {
-        if (event == null || event.getAttendees() == null || event.getAttendees().isEmpty()) {
-            return null;
-        }
+    /**
+     * Loads a specific user
+     * 
+     * @param session The {@link CalendarSession}
+     * @param userId The user to load
+     * @return The user as {@link Attendee}
+     * @throws OXException If the user can't be found
+     */
+    private Attendee loadAttendee(CalendarSession session, int userId) throws OXException {
+        return session.getEntityResolver().prepareUserAttendee(userId);
+    }
 
-        for (Attendee attendee : event.getAttendees()) {
-            if (attendee.getEntity() == userId) {
-                return attendee.getComment();
+    /**
+     * Get a specific value from a specific attendee
+     * 
+     * @param event The event containing the attendees
+     * @param userId The identifier of the attendee
+     * @param field The {@link AttendeeField} to get the value from
+     * @param clazz The class to cast the value to
+     * @return The value of the field or the default value if the field is <code>null</code>, an error occurs or the attendee is not set
+     */
+    private <T> T getFieldValue(Event event, int userId, AttendeeField field, Class<T> clazz) {
+        try {
+            if (containsAttendees(event)) {
+                Attendee attendee = CalendarUtils.find(event.getAttendees(), userId);
+                if (null != attendee) {
+                    Mapping<? extends Object, Attendee> mapping = AttendeeMapper.getInstance().get(field);
+                    return clazz.cast(mapping.get(attendee));
+                }
             }
+        } catch (OXException | ClassCastException e) {
+            // Fall through
+            LOGGER.debug("Could not get value for field {} of attendee with id {}", field, Integer.valueOf(userId), e);
         }
-
         return null;
     }
 
-    private ParticipationStatus getCurrentConfirmation(Event event, int userId) {
-        if (event == null || event.getAttendees() == null || event.getAttendees().isEmpty()) {
-            return null;
-        }
-
-        for (Attendee attendee : event.getAttendees()) {
-            if (attendee.getEntity() == userId) {
-                return attendee.getPartStat();
-            }
-        }
-
-        return null;
+    private boolean containsAttendees(Event event) {
+        return event != null && event.getAttendees() != null && false == event.getAttendees().isEmpty();
     }
 
     private boolean isExceptionCreate(ITipChange change) {
