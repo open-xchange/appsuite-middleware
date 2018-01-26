@@ -287,7 +287,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
             default:
                 // Fall through
         }
-        return ParticipationStatus.NEEDS_ACTION;
+        return null;
     }
 
     /**

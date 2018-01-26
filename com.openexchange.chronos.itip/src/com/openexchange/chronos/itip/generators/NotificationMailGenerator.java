@@ -429,10 +429,12 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             }
         }
         Attendee attendee = new Attendee();
-        attendee.setEntity((onBehalfOf != null ? onBehalfOf : actor).getIdentifier());
+        NotificationParticipant notificationParticipant = onBehalfOf != null ? onBehalfOf : actor;
+        attendee.setEntity(notificationParticipant.getIdentifier());
         attendee.setPartStat(confirmStatus);
         attendee.setUri(CalendarUtils.getURI(mail.getSender().getEmail()));
         attendee.setCuType(CalendarUserType.INDIVIDUAL);
+        attendee.setCn(notificationParticipant.getDisplayName());
         reply.setAttendees(Arrays.asList(attendee));
         if (CalendarUtils.isSeriesException(reply)) {
             message.addException(reply);

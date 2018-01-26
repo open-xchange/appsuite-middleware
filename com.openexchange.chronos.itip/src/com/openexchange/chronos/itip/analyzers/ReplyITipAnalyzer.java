@@ -50,15 +50,14 @@
 package com.openexchange.chronos.itip.analyzers;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnnotation;
@@ -134,7 +133,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
             if (participantChange != null) {
                 participantChange.setComment(message.getComment());
             }
-            if (participantChange != null || method == ITipMethod.COUNTER) {
+            if (participantChange != null) {
                 final ITipChange change = new ITipChange();
                 change.setNewEvent(update);
                 change.setCurrentEvent(original);
@@ -234,41 +233,34 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
         }
         Attendee reply = updatedAttendees.get(0);
 
+        List<Attendee> attendees = new LinkedList<Attendee>();
+
         // Party crasher?
         boolean partyCrasher = true;
         for (Attendee attendee : originalAttendees) {
-            if (compareAttendees(attendee, reply, new AttendeeField[] { AttendeeField.URI })) {
+            if (reply.getUri().equals(attendee.getUri())) {
                 // Nope, we already know the replaying attendee
                 partyCrasher = false;
                 // Did something change?
-                if (false == attendee.getComment().equals(reply.getComment()) || false == attendee.getPartStat().equals(reply.getPartStat())) {
+                if (attendee.containsComment() && attendee.getComment().equals(reply.getComment()) && attendee.containsPartStat() && attendee.getPartStat().equals(reply.getPartStat())) {
                     return null;
+                } else {
+                    attendees.add(reply);
                 }
-                break;
+            } else {
+                attendees.add(attendee);
             }
         }
         pChange.setComment(reply.getComment());
         pChange.setConfirmStatusUpdate(reply.getPartStat());
         pChange.setPartyCrasher(partyCrasher);
 
-        return pChange;
-    }
+        if (partyCrasher) {
+            attendees.add(reply);
+        }
 
-    private boolean compareAttendees(Attendee a, Attendee b, AttendeeField... fields) throws OXException {
-        AttendeeMapper mapper = AttendeeMapper.getInstance();
-        AttendeeField[] differences;
-        if (null == fields || 1 >= fields.length) {
-            differences = mapper.getDifferentFields(a, b);
-        } else {
-            List<AttendeeField> values = Arrays.asList(AttendeeField.values());
-            for (AttendeeField field : fields) {
-                values.remove(field);
-            }
-            differences = mapper.getDifferentFields(a, b, true, values.toArray(new AttendeeField[] {})).toArray(new AttendeeField[] {});
-        }
-        if (0 == differences.length) {
-            return true;
-        }
-        return false;
+        update.setAttendees(attendees);
+
+        return pChange;
     }
 }
