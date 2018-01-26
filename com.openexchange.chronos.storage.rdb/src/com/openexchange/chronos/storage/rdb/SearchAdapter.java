@@ -146,7 +146,10 @@ public class SearchAdapter {
      * @return A self reference
      */
     public SearchAdapter append(List<SearchFilter> filters) throws OXException {
-        if (null != filters) {
+        if (null != filters && 0 < filters.size()) {
+            if (0 == stringBuilder.length()) {
+                stringBuilder.append("TRUE");
+            }
             for (SearchFilter filter : filters) {
                 append(filter);
             }
