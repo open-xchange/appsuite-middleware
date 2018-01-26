@@ -229,6 +229,11 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * appropriate parent folder identifier assigned.
      * <p/>
      * <b>Note:</b> Only events from the internal <i>groupware</i> calendar provider are considered.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * </ul>
      *
      * @param eventId The identifier of the event to resolve
      * @return The resolved event from the user's point of view, or <code>null</code> if not found

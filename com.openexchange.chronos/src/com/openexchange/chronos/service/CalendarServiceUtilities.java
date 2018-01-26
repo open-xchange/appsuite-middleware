@@ -89,6 +89,11 @@ public interface CalendarServiceUtilities {
     /**
      * Resolves an event identifier to an event, and returns it in the perspective of the current session's user, i.e. having an
      * appropriate parent folder identifier assigned.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * </ul>
      *
      * @param session The calendar session
      * @param id The identifier of the event to resolve

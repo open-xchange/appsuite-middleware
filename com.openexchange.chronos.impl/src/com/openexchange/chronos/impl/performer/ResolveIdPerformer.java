@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
@@ -111,6 +112,7 @@ public class ResolveIdPerformer extends AbstractQueryPerformer {
             requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         }
         event.setFolderId(folderId);
+        event.setFlags(getFlags(event, getCalendarUserId(folder)));
         /*
          * return event, anonymized as needed
          */
