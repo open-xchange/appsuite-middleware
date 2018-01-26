@@ -486,8 +486,8 @@ public class AbstractOIDCBackendTest {
         PowerMockito.doReturn(mockedCookie).when(OIDCTools.class, "loadAutologinCookie", Matchers.any(HttpServletRequest.class), Matchers.any(LoginConfiguration.class));
         PowerMockito.doNothing().when(abstractBackend, "sendRedirect", Matchers.any(Session.class), Matchers.any(HttpServletRequest.class), Matchers.any(HttpServletResponse.class), Matchers.any(Boolean.class));
         
-        PowerMockito.doReturn(null).when(abstractBackend, PowerMockito.method(AbstractOIDCBackend.class, "getSessionFromAutologinCookie", Cookie.class))
-        .withArguments(mockedCookie);
+        PowerMockito.doReturn(null).when(abstractBackend, PowerMockito.method(AbstractOIDCBackend.class, "getSessionFromAutologinCookie", Cookie.class, HttpServletRequest.class))
+        .withArguments(mockedCookie, mockedRequest);
         
         Mockito.when(mockedCookie.clone()).thenReturn(mockedCookie);
         
@@ -532,8 +532,8 @@ public class AbstractOIDCBackendTest {
         PowerMockito.doReturn(mockedCookie).when(OIDCTools.class, "loadAutologinCookie", Matchers.any(HttpServletRequest.class), Matchers.any(LoginConfiguration.class));
         PowerMockito.doNothing().when(abstractBackend, "sendRedirect", Matchers.any(Session.class), Matchers.any(HttpServletRequest.class), Matchers.any(HttpServletResponse.class), Matchers.any(Boolean.class));
         
-        PowerMockito.doReturn(mockedSession).when(abstractBackend, PowerMockito.method(AbstractOIDCBackend.class, "getSessionFromAutologinCookie", Cookie.class))
-        .withArguments(mockedCookie);
+        PowerMockito.doReturn(mockedSession).when(abstractBackend, PowerMockito.method(AbstractOIDCBackend.class, "getSessionFromAutologinCookie", Cookie.class, HttpServletRequest.class))
+        .withArguments(mockedCookie, mockedRequest);
         
         Mockito.when(mockedCookie.clone()).thenReturn(mockedCookie);
         
@@ -581,8 +581,8 @@ public class AbstractOIDCBackendTest {
         PowerMockito.doReturn(mockedCookie).when(OIDCTools.class, "loadAutologinCookie", Matchers.any(HttpServletRequest.class), Matchers.any(LoginConfiguration.class));
         PowerMockito.doNothing().when(abstractBackend, "sendRedirect", Matchers.any(Session.class), Matchers.any(HttpServletRequest.class), Matchers.any(HttpServletResponse.class), Matchers.any(Boolean.class));
         
-        PowerMockito.doReturn(mockedSession).when(abstractBackend, PowerMockito.method(AbstractOIDCBackend.class, "getSessionFromAutologinCookie", Cookie.class))
-        .withArguments(mockedCookie);
+        PowerMockito.doReturn(mockedSession).when(abstractBackend, PowerMockito.method(AbstractOIDCBackend.class, "getSessionFromAutologinCookie", Cookie.class, HttpServletRequest.class))
+        .withArguments(mockedCookie, mockedRequest);
         
         Mockito.when(mockedCookie.clone()).thenReturn(mockedCookie);
         
@@ -631,8 +631,8 @@ public class AbstractOIDCBackendTest {
         PowerMockito.doReturn(mockedCookie).when(OIDCTools.class, "loadAutologinCookie", Matchers.any(HttpServletRequest.class), Matchers.any(LoginConfiguration.class));
         PowerMockito.doNothing().when(abstractBackend, "sendRedirect", Matchers.any(Session.class), Matchers.any(HttpServletRequest.class), Matchers.any(HttpServletResponse.class), Matchers.any(Boolean.class));
         
-        PowerMockito.doReturn(mockedSession).when(abstractBackend, PowerMockito.method(AbstractOIDCBackend.class, "getSessionFromAutologinCookie", Cookie.class))
-        .withArguments(mockedCookie);
+        PowerMockito.doReturn(mockedSession).when(abstractBackend, PowerMockito.method(AbstractOIDCBackend.class, "getSessionFromAutologinCookie", Cookie.class, HttpServletRequest.class))
+        .withArguments(mockedCookie, mockedRequest);
         
         Mockito.when(mockedCookie.clone()).thenReturn(mockedCookie);
         
@@ -683,8 +683,8 @@ public class AbstractOIDCBackendTest {
         PowerMockito.doReturn(mockedCookie).when(OIDCTools.class, "loadAutologinCookie", Matchers.any(HttpServletRequest.class), Matchers.any(LoginConfiguration.class));
         PowerMockito.doNothing().when(abstractBackend, "sendRedirect", Matchers.any(Session.class), Matchers.any(HttpServletRequest.class), Matchers.any(HttpServletResponse.class), Matchers.any(Boolean.class));
         
-        PowerMockito.doReturn(mockedSession).when(abstractBackend, PowerMockito.method(AbstractOIDCBackend.class, "getSessionFromAutologinCookie", Cookie.class))
-        .withArguments(mockedCookie);
+        PowerMockito.doReturn(mockedSession).when(abstractBackend, PowerMockito.method(AbstractOIDCBackend.class, "getSessionFromAutologinCookie", Cookie.class, HttpServletRequest.class))
+        .withArguments(mockedCookie, mockedRequest);
         
         Mockito.when(mockedCookie.clone()).thenReturn(mockedCookie);
         
@@ -735,8 +735,8 @@ public class AbstractOIDCBackendTest {
         PowerMockito.doReturn(mockedCookie).when(OIDCTools.class, "loadAutologinCookie", Matchers.any(HttpServletRequest.class), Matchers.any(LoginConfiguration.class));
         PowerMockito.doNothing().when(abstractBackend, "sendRedirect", Matchers.any(Session.class), Matchers.any(HttpServletRequest.class), Matchers.any(HttpServletResponse.class), Matchers.any(Boolean.class));
         
-        PowerMockito.doReturn(mockedSession).when(abstractBackend, PowerMockito.method(AbstractOIDCBackend.class, "getSessionFromAutologinCookie", Cookie.class))
-        .withArguments(mockedCookie);
+        PowerMockito.doReturn(mockedSession).when(abstractBackend, PowerMockito.method(AbstractOIDCBackend.class, "getSessionFromAutologinCookie", Cookie.class, HttpServletRequest.class))
+        .withArguments(mockedCookie, mockedRequest);
         
         Mockito.when(mockedCookie.clone()).thenReturn(mockedCookie);
         

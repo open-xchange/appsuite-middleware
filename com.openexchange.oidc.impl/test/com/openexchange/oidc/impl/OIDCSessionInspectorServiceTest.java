@@ -51,6 +51,7 @@ package com.openexchange.oidc.impl;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -74,6 +75,7 @@ import com.openexchange.oidc.osgi.OIDCBackendRegistry;
 import com.openexchange.oidc.tools.OIDCTools;
 import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
+import com.openexchange.session.inspector.SessionInspectorService;
 
 /**
  * {@link OIDCSessionInspectorServiceTest} Testclass for {@link OIDCSessionInspectorService}
@@ -129,10 +131,11 @@ public class OIDCSessionInspectorServiceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void onSessionHit_NoBackendTrackedTest() throws Exception {
+        SessionInspectorService emptyInspector = new OIDCSessionInspectorService(Collections.<OIDCBackend>emptyList());
         Mockito.when(this.mockedSession.getParameter(OIDCTools.BACKEND_PATH)).thenReturn("backendPath");
         Mockito.when(this.mockedBundleContext.getService(Matchers.any(ServiceReference.class))).thenReturn("wrongPath");
         try {
-            this.inspector.onSessionHit(this.mockedSession, this.mockedRequest, this.mockedResponse);
+            emptyInspector.onSessionHit(this.mockedSession, this.mockedRequest, this.mockedResponse);
         } catch (OXException e) {
             assertTrue("Wrong error message thrown.", e.getExceptionCode() == OIDCExceptionCode.UNABLE_TO_FIND_BACKEND_FOR_SESSION);
             return;
