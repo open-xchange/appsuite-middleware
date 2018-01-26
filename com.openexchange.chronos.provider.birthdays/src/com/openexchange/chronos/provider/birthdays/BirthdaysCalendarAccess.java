@@ -88,6 +88,7 @@ import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
@@ -336,11 +337,21 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
             }
         }
         /*
+         * apply offset & limit for search
+         */
+        SortOptions sortOptions;
+        SearchOptions searchOptions = new SearchOptions(parameters);
+        if (0 < searchOptions.getOffset() || 0 < searchOptions.getLimit()) {
+            sortOptions = new SortOptions(searchOptions.getOffset(), searchOptions.getLimit());
+        } else {
+            sortOptions = SortOptions.EMPTY;
+        }
+        /*
          * perform search
          */
         SearchIterator<Contact> searchIterator = null;
         try {
-            return SearchIterators.asList(searchIterator = services.getService(ContactService.class).searchContacts(session, searchTerm));
+            return SearchIterators.asList(searchIterator = services.getService(ContactService.class).searchContacts(session, searchTerm, sortOptions));
         } finally {
             SearchIterators.close(searchIterator);
         }
