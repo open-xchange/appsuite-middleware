@@ -67,7 +67,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.DefaultMapper;
 import com.openexchange.groupware.tools.mappings.DefaultMapping;
 import com.openexchange.groupware.tools.mappings.Mapping;
-import com.openexchange.java.Strings;
 
 /**
  * {@link AttendeeMapper}
@@ -287,14 +286,6 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
             }
         });
         mappings.put(AttendeeField.COMMENT, new DefaultMapping<String, Attendee>() {
-            
-            @Override
-            public boolean equals(Attendee object1, Attendee object2) {
-                if (Strings.isEmpty(object1.getComment()) && Strings.isEmpty(object2.getComment())) {
-                    return true;
-                }
-                return super.equals(object1, object2);
-            }
 
             @Override
             public boolean isSet(Attendee object) {

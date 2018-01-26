@@ -291,14 +291,6 @@ public class AttendeeMapper extends DefaultDbMapper<Attendee, AttendeeField> {
             }
         });
         mappings.put(AttendeeField.COMMENT, new VarCharMapping<Attendee>("comment", "Comment") {
-            
-            @Override
-            public boolean equals(Attendee object1, Attendee object2) {
-                if (Strings.isEmpty(object1.getComment()) && Strings.isEmpty(object2.getComment())) {
-                    return true;
-                }
-                return super.equals(object1, object2);
-            }
 
             @Override
             public void set(Attendee attendee, String value) {
