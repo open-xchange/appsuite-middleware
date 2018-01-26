@@ -49,10 +49,8 @@
 
 package com.openexchange.chronos.common;
 
-import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
@@ -118,37 +116,19 @@ public class SearchUtils {
      * @return The search term, or <code>null</code> if the passed queries yield no search criteria
      */
     public static SearchTerm<?> buildSearchTerm(List<String> queries) throws OXException {
-        return buildSearchTerm(queries, -1);
-    }
-
-    /**
-     * Constructs a search term for a list of calendar queries. Each query is surrounded with wildcards implicitly, matched against a
-     * certain set of event fields and explicitly checked against the specified minimum length.
-     *
-     * @param queries The queries to get the search term for
-     * @param minimumPatternLength The minimum allowed length of the pattern. If negative then the pattern length check is not applied
-     * @return The search term, or <code>null</code> if the passed queries yield no search criteria
-     */
-    public static SearchTerm<?> buildSearchTerm(List<String> queries, int minimumPatternLength) throws OXException {
-        boolean checkMinimumPatternLength = minimumPatternLength >= 0;
-
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
-        if (null == queries) {
-            return 0 == searchTerm.getOperands().length ? null : 1 == searchTerm.getOperands().length ? searchTerm.getOperands()[0] : searchTerm;
-        }
-        for (String query : queries) {
-            if (isWildcardOnly(query)) {
-                continue;
+        if (null != queries) {
+            for (String query : queries) {
+                if (false == isWildcardOnly(query)) {
+                    String pattern = addWildcards(query, true, true);
+                    searchTerm.addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
+                        .addSearchTerm(getSearchTerm(EventField.SUMMARY, SingleOperation.EQUALS, pattern))
+                        .addSearchTerm(getSearchTerm(EventField.DESCRIPTION, SingleOperation.EQUALS, pattern))
+                        .addSearchTerm(getSearchTerm(EventField.CATEGORIES, SingleOperation.EQUALS, pattern))
+                    );
+                }
             }
-
-            String pattern = addWildcards(checkMinimumPatternLength ? checkMinimumSearchPatternLength(query, minimumPatternLength) : query, true, true);
-            CompositeSearchTerm compositeSearchTerm = new CompositeSearchTerm(CompositeOperation.OR);
-            compositeSearchTerm.addSearchTerm(getSearchTerm(EventField.SUMMARY, SingleOperation.EQUALS, pattern));
-            compositeSearchTerm.addSearchTerm(getSearchTerm(EventField.DESCRIPTION, SingleOperation.EQUALS, pattern));
-            compositeSearchTerm.addSearchTerm(getSearchTerm(EventField.CATEGORIES, SingleOperation.EQUALS, pattern));
-            searchTerm.addSearchTerm(compositeSearchTerm);
         }
-
         return 0 == searchTerm.getOperands().length ? null : 1 == searchTerm.getOperands().length ? searchTerm.getOperands()[0] : searchTerm;
     }
 
@@ -160,16 +140,6 @@ public class SearchUtils {
      */
     public static boolean isWildcardOnly(String query) {
         return Strings.isEmpty(query) || "*".equals(query);
-    }
-
-    /**
-     * Surrounds the specified pattern with wildcards
-     *
-     * @param pattern The pattern to surround with wildcards
-     * @return The updated pattern
-     */
-    public static String surroundWithWildcards(String pattern) {
-        return addWildcards(pattern, true, true);
     }
 
     /**
@@ -196,18 +166,4 @@ public class SearchUtils {
         return pattern;
     }
 
-    /**
-     * Checks that the supplied search pattern length is equal to or greater than a configured minimum.
-     *
-     * @param minimumPatternLength, The minimum search pattern length, or <code>0</code> for no limitation
-     * @param pattern The pattern to check
-     * @return The passed pattern, after the length was checked
-     * @throws OXException {@link CalendarExceptionCodes#QUERY_TOO_SHORT}
-     */
-    public static String checkMinimumSearchPatternLength(String pattern, int minimumPatternLength) throws OXException {
-        if (null != pattern && 0 < minimumPatternLength && pattern.length() < minimumPatternLength) {
-            throw CalendarExceptionCodes.QUERY_TOO_SHORT.create(I(minimumPatternLength), pattern);
-        }
-        return pattern;
-    }
 }
