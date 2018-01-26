@@ -75,13 +75,13 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "cid INT4 UNSIGNED NOT NULL," +
                 "id INT4 UNSIGNED NOT NULL," +
                 "user INT4 UNSIGNED NOT NULL," +
-                "provider VARCHAR(64) NOT NULL," +
+                "provider VARCHAR(64) COLLATE utf8mb4_bin NOT NULL," +
                 "modified BIGINT(20) NOT NULL," +
                 "internalConfig BLOB," +
                 "userConfig BLOB," +
                 "PRIMARY KEY (cid,id,user)," +
                 "KEY user (cid,user,provider)" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
         );
         tablesByName.put("calendar_event_sequence",
             "CREATE TABLE calendar_event_sequence (" +
@@ -89,7 +89,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "account INT4 UNSIGNED NOT NULL," +
                 "id INT4 UNSIGNED NOT NULL," +
                 "PRIMARY KEY (cid,account)" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
         );
         tablesByName.put("calendar_alarm_sequence",
             "CREATE TABLE calendar_alarm_sequence (" +
@@ -97,7 +97,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "account INT4 UNSIGNED NOT NULL," +
                 "id INT4 UNSIGNED NOT NULL," +
                 "PRIMARY KEY (cid,account)" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
         );
         tablesByName.put("calendar_event",
             "CREATE TABLE calendar_event (" +
@@ -105,9 +105,9 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "account INT4 UNSIGNED NOT NULL," +
                 "id INT4 UNSIGNED NOT NULL," +
                 "user INT4 UNSIGNED DEFAULT NULL," +
-                "folder VARCHAR(255) DEFAULT NULL," +
+                "folder VARCHAR(255) COLLATE utf8mb4_bin DEFAULT NULL," +
                 "series INT4 UNSIGNED DEFAULT NULL," +
-                "uid VARCHAR(1024) DEFAULT NULL," +
+                "uid VARCHAR(1024) COLLATE utf8mb4_bin DEFAULT NULL," +
                 "relatedTo VARCHAR(767) DEFAULT NULL," +
                 "timestamp BIGINT(20) NOT NULL," +
                 "created BIGINT(20)," +
@@ -122,7 +122,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "rrule VARCHAR(255) DEFAULT NULL," +
                 "exDate TEXT DEFAULT NULL," +
                 "overriddenDate TEXT DEFAULT NULL," +
-                "recurrence VARCHAR(32) DEFAULT NULL," +
+                "recurrence VARCHAR(32) COLLATE utf8mb4_bin DEFAULT NULL," +
                 "sequence INT4 UNSIGNED DEFAULT NULL," +
                 "transp INT4 UNSIGNED DEFAULT NULL," +
                 "class VARCHAR(64) DEFAULT NULL," +
@@ -137,7 +137,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "geo POINT DEFAULT NULL," +
                 "rangeFrom BIGINT(20) NOT NULL," +
                 "rangeUntil BIGINT(20) NOT NULL," +
-                "filename VARCHAR(1024) DEFAULT NULL," +
+                "filename VARCHAR(1024) COLLATE utf8mb4_bin DEFAULT NULL," +
                 "extendedProperties BLOB DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,id)," +
                 "KEY `range` (cid,account,rangeFrom,rangeUntil)," +
@@ -146,7 +146,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "KEY folder (cid,account,folder(191))," +
                 "KEY uid (cid,account,uid(191))," +
                 "KEY filename (cid,account,filename(191))" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
         );
         tablesByName.put("calendar_event_tombstone",
             "CREATE TABLE calendar_event_tombstone (" +
@@ -154,9 +154,9 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "account INT4 UNSIGNED NOT NULL," +
                 "id INT4 UNSIGNED NOT NULL," +
                 "user INT4 UNSIGNED DEFAULT NULL," +
-                "folder VARCHAR(255) DEFAULT NULL," +
+                "folder VARCHAR(255) COLLATE utf8mb4_bin DEFAULT NULL," +
                 "series INT4 UNSIGNED DEFAULT NULL," +
-                "uid VARCHAR(1024) DEFAULT NULL," +
+                "uid VARCHAR(1024) COLLATE utf8mb4_bin DEFAULT NULL," +
                 "relatedTo VARCHAR(767) DEFAULT NULL," +
                 "timestamp BIGINT(20) NOT NULL," +
                 "created BIGINT(20)," +
@@ -171,7 +171,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "rrule VARCHAR(255) DEFAULT NULL," +
                 "exDate TEXT DEFAULT NULL," +
                 "overriddenDate TEXT DEFAULT NULL," +
-                "recurrence VARCHAR(32) DEFAULT NULL," +
+                "recurrence VARCHAR(32) COLLATE utf8mb4_bin DEFAULT NULL," +
                 "sequence INT4 UNSIGNED DEFAULT NULL," +
                 "transp INT4 UNSIGNED DEFAULT NULL," +
                 "class VARCHAR(64) DEFAULT NULL," +
@@ -186,7 +186,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "geo POINT DEFAULT NULL," +
                 "rangeFrom BIGINT(20) NOT NULL," +
                 "rangeUntil BIGINT(20) NOT NULL," +
-                "filename VARCHAR(1024) DEFAULT NULL," +
+                "filename VARCHAR(1024) COLLATE utf8mb4_bin DEFAULT NULL," +
                 "extendedProperties BLOB DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,id)," +
                 "KEY `range` (cid,account,rangeFrom,rangeUntil)," +
@@ -195,7 +195,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "KEY folder (cid,account,folder(191))," +
                 "KEY uid (cid,account,uid(191))," +
                 "KEY filename (cid,account,filename(191))" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
         );
         tablesByName.put("calendar_attendee",
             "CREATE TABLE calendar_attendee (" +
@@ -203,9 +203,9 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "account INT4 UNSIGNED NOT NULL," +
                 "event INT4 UNSIGNED NOT NULL," +
                 "entity INT4 NOT NULL," +
-                "uri VARCHAR(512) NOT NULL," +
+                "uri VARCHAR(512) COLLATE utf8mb4_bin NOT NULL," +
                 "cn VARCHAR(512) DEFAULT NULL," +
-                "folder VARCHAR(255) DEFAULT NULL," +
+                "folder VARCHAR(255) COLLATE utf8mb4_bin DEFAULT NULL," +
                 "cuType VARCHAR(255) DEFAULT NULL," +
                 "role VARCHAR(255) DEFAULT NULL," +
                 "partStat VARCHAR(255) DEFAULT NULL," +
@@ -217,7 +217,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "PRIMARY KEY (cid,account,event,entity)," +
                 "KEY uri (cid,account,event,uri(191))," +
                 "KEY folder (cid,account,entity,folder(191))" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
         );
         tablesByName.put("calendar_attendee_tombstone",
             "CREATE TABLE calendar_attendee_tombstone (" +
@@ -225,9 +225,9 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "account INT4 UNSIGNED NOT NULL," +
                 "event INT4 UNSIGNED NOT NULL," +
                 "entity INT4 NOT NULL," +
-                "uri VARCHAR(512) NOT NULL," +
+                "uri VARCHAR(512) COLLATE utf8mb4_bin NOT NULL," +
                 "cn VARCHAR(512) DEFAULT NULL," +
-                "folder VARCHAR(255) DEFAULT NULL," +
+                "folder VARCHAR(255) COLLATE utf8mb4_bin DEFAULT NULL," +
                 "cuType VARCHAR(255) DEFAULT NULL," +
                 "role VARCHAR(255) DEFAULT NULL," +
                 "partStat VARCHAR(255) DEFAULT NULL," +
@@ -239,16 +239,16 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "PRIMARY KEY (cid,account,event,entity)," +
                 "KEY uri (cid,account,event,uri(191))," +
                 "KEY folder (cid,account,entity,folder(191))" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
         );
         tablesByName.put("calendar_alarm",
             "CREATE TABLE calendar_alarm (" +
                 "cid INT4 UNSIGNED NOT NULL," +
                 "account INT4 UNSIGNED NOT NULL," +
                 "id INT4 UNSIGNED NOT NULL," +
-                "event VARCHAR(128) NOT NULL," +
+                "event VARCHAR(128) COLLATE utf8mb4_bin NOT NULL," +
                 "user INT4 UNSIGNED NOT NULL," +
-                "uid VARCHAR(767) DEFAULT NULL," +
+                "uid VARCHAR(767) COLLATE utf8mb4_bin DEFAULT NULL," +
                 "relatedTo VARCHAR(767) DEFAULT NULL," +
                 "acknowledged BIGINT(20) DEFAULT NULL," +
                 "action VARCHAR(32) NOT NULL," +
@@ -259,7 +259,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "extendedProperties BLOB DEFAULT NULL," +
                 "PRIMARY KEY (cid,account,id)," +
                 "KEY event_user (cid,account,event,user)" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
         );
         tablesByName.put("calendar_alarm_trigger",
             "CREATE TABLE calendar_alarm_trigger (" +
@@ -267,18 +267,18 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "account INT4 UNSIGNED NOT NULL," +
                 "alarm INT4 UNSIGNED NOT NULL," +
                 "user INT4 UNSIGNED NOT NULL," +
-                "eventId VARCHAR(128) NOT NULL," +
-                "folder VARCHAR(255) NOT NULL,"+
+                "eventId VARCHAR(128) COLLATE utf8mb4_bin NOT NULL," +
+                "folder VARCHAR(255) COLLATE utf8mb4_bin NOT NULL,"+
                 "triggerDate BIGINT(20) NOT NULL," +
                 "action VARCHAR(32) NOT NULL," +
-                "recurrence VARCHAR(32) DEFAULT NULL," +
+                "recurrence VARCHAR(32) COLLATE utf8mb4_bin DEFAULT NULL," +
                 "floatingTimezone VARCHAR(255) DEFAULT NULL," +
                 "relatedTime BIGINT(20) DEFAULT NULL," +
                 "pushed BOOL DEFAULT FALSE," +
                 "PRIMARY KEY (cid,account,alarm)," +
                 "KEY triggerDate (cid,account,user,triggerDate)," +
                 "KEY event (cid,account,user,eventId)" +
-            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
         );
 
         // Disabled until further notice
@@ -306,14 +306,14 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
 //                "extendedProperties BLOB DEFAULT NULL," +
 //                "PRIMARY KEY (cid,user,id)," +
 //                "KEY uid (cid,user,uid(191))" +
-//            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
+//            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
 //        );
 //        tablesByName.put("calendar_available_sequence",
 //            "CREATE TABLE calendar_available_sequence (" +
 //                "cid INT4 UNSIGNED NOT NULL," +
 //                "id INT4 UNSIGNED NOT NULL," +
 //                "PRIMARY KEY (cid)" +
-//            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;"
+//            ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;"
 //        );
         return tablesByName; //@formatter:on
     }
