@@ -73,7 +73,7 @@ import javax.management.remote.JMXServiceURL;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CLIOption;
-import com.openexchange.admin.console.util.UtilAbstraction;
+import com.openexchange.admin.console.ObjectNamingAbstraction;
 import com.openexchange.admin.exceptions.TargetDatabaseException;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -95,7 +95,7 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since 7.10.0
  */
-public class UpgradeSchemata extends UtilAbstraction {
+public class UpgradeSchemata extends ObjectNamingAbstraction {
 
     private static final String PROMPT = "Type 'abort' to abort the upgrade process, or 'continue' to proceed ['abort'/'continue']:";
     private static final String ABORT = "abort";
@@ -278,7 +278,7 @@ public class UpgradeSchemata extends UtilAbstraction {
             }
         }
 
-        if (sb.length() >= 2) {
+        if (!skippedSchemata.isEmpty()) {
             sb.setLength(sb.length() - 2);
         }
         System.out.println(sb.toString());
@@ -365,7 +365,7 @@ public class UpgradeSchemata extends UtilAbstraction {
             schemaMoveUtil.invalidateContexts(credentials, schemaName, true);
             ok();
         } catch (NoSuchObjectException e) {
-            System.out.println("Schema not found. Skipping");
+            System.out.println("Schema " + schemaName + " not found. Skipping");
         }
     }
 
