@@ -231,8 +231,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     private static final String INBOX_ID = "INBOX";
 
-    private static final int MAX_NUMBER_OF_MESSAGES_2_CACHE = 50;
-
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailServletInterfaceImpl.class);
 
     /*-
@@ -2143,21 +2141,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 // Check if a certain range/page is requested
                 if (IndexRange.NULL != indexRange) {
                     SearchIterator<MailMessage> it = getMessageRange(searchTerm, fields, headers, fullName, indexRange, sortField, orderDir, accountId);
-
-                    /*
-                     * Set account information
-                     */
-                    List<MailMessage> l = new LinkedList<>();
-                    for (int i = it.size(); i-- > 0;) {
-                        final MailMessage mail = it.next();
-                        if (mail != null) {
-                            if (!mail.containsAccountId() || mail.getAccountId() < 0) {
-                                mail.setAccountId(accountId);
-                            }
-                            l.add(mail);
-                        }
-                    }
-                    return new SearchIteratorDelegator<>(l);
+                    return setAccountInformation(accountId, it);
                 }
 
                 mails = mailAccess.getMessageStorage().searchMessages(fullName, indexRange, sortField, orderDir, searchTerm, FIELDS_ID_INFO);
@@ -2290,6 +2274,20 @@ final class MailServletInterfaceImpl extends MailServletInterface {
          */
         List<MailMessage> l = new LinkedList<>();
         for (MailMessage mail : mails) {
+            if (mail != null) {
+                if (!mail.containsAccountId() || mail.getAccountId() < 0) {
+                    mail.setAccountId(accountId);
+                }
+                l.add(mail);
+            }
+        }
+        return new SearchIteratorDelegator<>(l);
+    }
+
+    private SearchIterator<MailMessage> setAccountInformation(int accountId, SearchIterator<MailMessage> mails) throws OXException {
+        List<MailMessage> l = new LinkedList<>();
+        for (int i = mails.size(); i-- > 0;) {
+            final MailMessage mail = mails.next();
             if (mail != null) {
                 if (!mail.containsAccountId() || mail.getAccountId() < 0) {
                     mail.setAccountId(accountId);
