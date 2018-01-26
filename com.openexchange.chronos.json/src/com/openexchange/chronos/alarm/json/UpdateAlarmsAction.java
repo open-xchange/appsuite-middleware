@@ -55,14 +55,12 @@ import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.json.action.ChronosAction;
 import com.openexchange.chronos.json.converter.CalendarResultConverter;
 import com.openexchange.chronos.json.converter.mapper.AlarmMapper;
-import com.openexchange.chronos.json.fields.ChronosJsonFields;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarResult;
@@ -104,11 +102,8 @@ public class UpdateAlarmsAction extends ChronosAction {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
         try {
-            JSONArray jsonArray = ((JSONObject) requestBody).optJSONArray(ChronosJsonFields.ALARMS);
-            if (null == jsonArray) {
-                return null;
-            }
-            List<Alarm> alarms = new ArrayList<Alarm>(jsonArray.length());
+            JSONArray jsonArray = ((JSONArray) requestBody);
+            List<Alarm> alarms = new ArrayList<>(jsonArray.length());
             for (int i = 0; i < jsonArray.length(); i++) {
                 alarms.add(AlarmMapper.getInstance().deserialize(jsonArray.getJSONObject(i), AlarmMapper.getInstance().getMappedFields(), timeZone));
             }

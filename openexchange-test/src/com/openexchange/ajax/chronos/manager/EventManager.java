@@ -96,7 +96,7 @@ public class EventManager extends AbstractManager {
     private long lastTimeStamp;
 
     private static final boolean EXPAND_SERIES = false;
-    
+
     private static final SimpleDateFormat UTC_DATE_FORMATTER = new SimpleDateFormat("yyyyMMdd'T'HHmmss");
 
     /**
@@ -337,7 +337,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Retrieves all events within the specified interval in the specified folder
-     * 
+     *
      * @param from The starting date
      * @param until The ending date
      * @param expand Flag to expand occurrences
@@ -351,7 +351,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Retrieves all events within the specified interval in the specified folder
-     * 
+     *
      * @param from The starting date
      * @param until The ending date
      * @param expand Flag to expand occurrences
@@ -378,7 +378,7 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error occurs
      */
     public List<EventData> listEvents(List<EventId> ids) throws ApiException {
-        EventsResponse listResponse = userApi.getChronosApi().getEventList(userApi.getSession(), ids, null, false);
+        EventsResponse listResponse = userApi.getChronosApi().getEventList (userApi.getSession(),defaultFolder, ids, null, false);
         return checkResponse(listResponse.getErrorDesc(), listResponse.getError(), listResponse.getData());
     }
 
@@ -414,10 +414,11 @@ public class EventManager extends AbstractManager {
      * @param eventData The data of the event
      * @return The updated event
      * @throws ApiException if an API error is occurred
+     * @throws ChronosApiException if a Chronos API error is occurred
      */
-    public EventData updateEvent(EventData eventData) throws ApiException {
+    public EventData updateEvent(EventData eventData, boolean expectException) throws ApiException, ChronosApiException {
         ChronosCalendarResultResponse updateResponse = userApi.getChronosApi().updateEvent(userApi.getSession(), defaultFolder, eventData.getId(), eventData, System.currentTimeMillis(), null, null, true, false, false, null, null, EXPAND_SERIES);
-        return handleUpdate(updateResponse);
+        return handleUpdate(updateResponse, expectException);
     }
 
     /**
@@ -427,10 +428,11 @@ public class EventManager extends AbstractManager {
      * @param the recurrence identifier
      * @return The updated event
      * @throws ApiException if an API error is occurred
+     * @throws ChronosApiException if a Chronos API error is occurred
      */
-    public EventData updateOccurenceEvent(EventData eventData, String recurrenceId) throws ApiException {
+    public EventData updateOccurenceEvent(EventData eventData, String recurrenceId, boolean expectException) throws ApiException, ChronosApiException {
         ChronosCalendarResultResponse updateResponse = userApi.getChronosApi().updateEvent(userApi.getSession(), defaultFolder, eventData.getId(), eventData, System.currentTimeMillis(), recurrenceId, null, true, false, false, null, null, EXPAND_SERIES);
-        return handleUpdate(updateResponse);
+        return handleUpdate(updateResponse, expectException);
     }
 
     /**
@@ -458,7 +460,7 @@ public class EventManager extends AbstractManager {
 
     /**
      * Gets all changed events in the specified folder since the given timestamp.
-     * 
+     *
      * @param since The timestamp
      * @param expand Flag to expand any recurring events
      * @param folderId The folder identifier
@@ -468,10 +470,10 @@ public class EventManager extends AbstractManager {
     public UpdatesResult getUpdates(Date since, boolean expand, String folderId) throws ApiException {
         return getUpdates(since, null, null, expand, folderId);
     }
-    
+
     /**
      * Gets all changed events in the specified folder since the given timestamp.
-     * 
+     *
      * @param since The timestamp
      * @param expand Flag to expand any recurring events
      * @param folderId The folder identifier
@@ -631,8 +633,13 @@ public class EventManager extends AbstractManager {
      *
      * @param updateEvent The result
      * @return The updated event
+     * @throws ChronosApiException if a Chronos API error is occurred
      */
-    private EventData handleUpdate(ChronosCalendarResultResponse updateEvent) {
+    private EventData handleUpdate(ChronosCalendarResultResponse updateEvent, boolean expectException) throws ChronosApiException {
+        if (expectException) {
+            assertNotNull("An error was expected", updateEvent.getError());
+            throw new ChronosApiException(updateEvent.getCode(), updateEvent.getError());
+        }
         CalendarResult calendarResult = checkResponse(updateEvent.getErrorDesc(), updateEvent.getError(), updateEvent.getData());
         List<EventData> updates = calendarResult.getUpdated();
         assertTrue(updates.size() == 1);

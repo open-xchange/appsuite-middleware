@@ -49,8 +49,16 @@
 
 package com.openexchange.ajax.chronos;
 
+import static org.junit.Assert.assertTrue;
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
+import com.openexchange.testing.httpclient.models.Alarm;
+import com.openexchange.testing.httpclient.models.Attendee;
+import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
+import com.openexchange.testing.httpclient.models.EventData;
 
 /**
  * {@link AbstractAttendeeTest}
@@ -82,6 +90,22 @@ public class AbstractAttendeeTest extends AbstractChronosTest {
     @Override
     public void tearDown() throws Exception {
         super.tearDown();
+    }
+
+    protected EventData updateAlarms(String eventId, long timestamp, List<Alarm> body, String recurrenceId) throws Exception {
+        ChronosCalendarResultResponse calendarResult = user2.getChronosApi().updateAlarms(user2.getSession(), folderId2, eventId, timestamp, body, recurrenceId, false);
+        List<EventData> updates = calendarResult.getData().getUpdated();
+        assertTrue(updates.size() == 1);
+        return updates.get(0);
+    }
+
+    public List<Attendee> addAdditionalAttendee(EventData expectedEventData) {
+        ArrayList<Attendee> atts = new ArrayList<>(2);
+        atts.addAll(expectedEventData.getAttendees());
+        Attendee attendee2 = AttendeeFactory.createIndividual(user2.getCalUser()/*, testUser2.getLogin()*/);
+        attendee2.setPartStat("ACCEPTED");
+        atts.add(attendee2);
+        return atts;
     }
 
 }
