@@ -387,8 +387,9 @@ public class EventManager extends AbstractManager {
      *
      * @param eventId The {@link EventId}
      * @throws ApiException if an API error is occurred
+     * @throws ChronosApiException if a Chronos API error is occurred
      */
-    public void deleteEvent(EventId eventId) throws ApiException {
+    public void deleteEvent(EventId eventId) throws ApiException, ChronosApiException {
         ChronosCalendarResultResponse deleteResponse = userApi.getChronosApi().deleteEvent(userApi.getSession(), System.currentTimeMillis(), Collections.singletonList(eventId), null, null, EXPAND_SERIES, false);
         assertNull(deleteResponse.getErrorDesc(), deleteResponse.getError());
         forgetEventId(eventId);
@@ -556,9 +557,14 @@ public class EventManager extends AbstractManager {
      * @param eventId The event identifier
      * @param attendeeAndAlarm The status of the attendee
      * @throws ApiException if an API error occurs
+     * @throws ChronosApiException if a Chronos API error is occurred
      */
-    public void updateAttendee(String eventId, AttendeeAndAlarm attendeeAndAlarm) throws ApiException {
+    public void updateAttendee(String eventId, AttendeeAndAlarm attendeeAndAlarm, boolean expectException) throws ApiException, ChronosApiException {
         ChronosCalendarResultResponse updateAttendee = userApi.getChronosApi().updateAttendee(userApi.getSession(), defaultFolder, eventId, lastTimeStamp, attendeeAndAlarm, null, false, true, false, null, null, EXPAND_SERIES);
+        if (expectException) {
+            assertNotNull("An error was expected", updateAttendee.getError());
+            throw new ChronosApiException(updateAttendee.getCode(), updateAttendee.getError());
+        }
         checkResponse(updateAttendee.getError(), updateAttendee.getErrorDesc(), updateAttendee.getData());
         lastTimeStamp = updateAttendee.getTimestamp();
     }

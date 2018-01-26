@@ -64,13 +64,15 @@ import com.openexchange.ajax.chronos.manager.ChronosApiException;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
 import com.openexchange.testing.httpclient.models.Alarm;
 import com.openexchange.testing.httpclient.models.Attendee;
-import com.openexchange.testing.httpclient.models.AttendeeAndAlarm;
 import com.openexchange.testing.httpclient.models.EventData;
 import com.openexchange.testing.httpclient.models.EventId;
 import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
 
 /**
  * {@link RestrictedAttendeePermissionsTest}
+ *
+ * Tests the attendee scheduling resource restrictions as described in the RFC
+ * @see <a href="https://tools.ietf.org/html/rfc6638#section-3.1">RFC 6638, section 3.1</a>
  *
  * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
  * @since v7.10.0
@@ -89,7 +91,7 @@ public class RestrictedAttendeePermissionsTest extends AbstractAttendeeTest {
     }
 
     @Test
-    public void testAttendeeAlarms() throws Exception {
+    public void testAttendeeAlarmsChanges() throws Exception {
         // attendee should be able to adjust his alarms
         EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testAddSingleAlarm"));
         String expectedEventId = expectedEventData.getId();
@@ -100,11 +102,6 @@ public class RestrictedAttendeePermissionsTest extends AbstractAttendeeTest {
         EventData eventToUpdate = eventManager2.getEvent(expectedEventId);
 
         assertEquals(2, eventToUpdate.getAttendees().size());
-        for (Attendee attendee : eventToUpdate.getAttendees()) {
-            if (attendee.getEntity() == user2.getCalUser()) {
-                attendee.setMember(null);
-            }
-        }
         eventManager2.setLastTimeStamp(eventManager.getLastTimeStamp());
         List<Alarm> body = new ArrayList<>();
         body.add(AlarmFactory.createAlarm("-PT20M", RelatedEnum.START));
@@ -151,18 +148,8 @@ public class RestrictedAttendeePermissionsTest extends AbstractAttendeeTest {
         EventData eventToUpdate = eventManager2.getEvent(expectedEventId);
 
         assertEquals(2, eventToUpdate.getAttendees().size());
-        AttendeeAndAlarm body = new AttendeeAndAlarm();
-        for (Attendee attendee : eventToUpdate.getAttendees()) {
-            if (attendee.getEntity() == user2.getCalUser()) {
-                attendee.setPartStat("TENTATIVE");
-                attendee.setMember(null);
-                body.attendee(attendee);
-            }
-        }
-
-        body.addAlarmsItem(AlarmFactory.createAlarm("-PT20M", RelatedEnum.START));
         eventManager2.setLastTimeStamp(eventManager.getLastTimeStamp());
-        eventManager2.updateAttendee(expectedEventId, body);
+        eventManager2.updateAttendee(expectedEventId, createAttendeeAndAlarm(eventToUpdate, user2.getCalUser()), false);
 
         updatedEvent = eventManager.getEvent(expectedEventId);
 
@@ -174,8 +161,9 @@ public class RestrictedAttendeePermissionsTest extends AbstractAttendeeTest {
 
     @Test
     public void testAttendeePermissionRestrictions() throws Exception {
-        // attendee should not be able to do everything else
+        // attendee should not be able to do anything else
         EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testPermissionSingle"));
+        String expectedEventId = expectedEventData.getId();
         expectedEventData.setAttendees(addAdditionalAttendee(expectedEventData));
         EventData updatedEvent = eventManager.updateEvent(expectedEventData, false);
         Calendar start = Calendar.getInstance();
@@ -184,6 +172,13 @@ public class RestrictedAttendeePermissionsTest extends AbstractAttendeeTest {
         try {
             updatedEvent = eventManager2.updateEvent(updatedEvent, true);
             fail("No exception was thrown");
+        } catch (ChronosApiException e) {
+            assertNotNull(e);
+            assertEquals("CAL-4038", e.getErrorCode());
+        }
+        eventManager2.setLastTimeStamp(eventManager.getLastTimeStamp());
+        try {
+            eventManager2.updateAttendee(expectedEventId, createAttendeeAndAlarm(updatedEvent, defaultUserApi.getCalUser()), true);
         } catch (ChronosApiException e) {
             assertNotNull(e);
             assertEquals("CAL-4038", e.getErrorCode());

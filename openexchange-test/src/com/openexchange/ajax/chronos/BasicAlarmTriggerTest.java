@@ -352,7 +352,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         body.attendee(attendee2);
 
         body.addAlarmsItem(AlarmFactory.createAlarm("-PT20M", RelatedEnum.START));
-        eventManager2.updateAttendee(eventU2.getId(), body);
+        eventManager2.updateAttendee(eventU2.getId(), body, false);
 
         // Now user 2 should have a trigger
         triggers = eventManager2.getAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2));
@@ -443,7 +443,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         body.attendee(attendee2);
 
         body.addAlarmsItem(AlarmFactory.createAlarm("-PT20M", RelatedEnum.START));
-        eventManager2.updateAttendee(exceptionEvent.getId(), body);
+        eventManager2.updateAttendee(exceptionEvent.getId(), body, false);
 
         // Now user 2 should have a trigger again
         triggers = eventManager2.getAlarmTrigger(currentTime + TimeUnit.DAYS.toMillis(2));

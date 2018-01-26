@@ -52,13 +52,16 @@ package com.openexchange.ajax.chronos;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.ajax.chronos.factory.AlarmFactory;
 import com.openexchange.ajax.chronos.factory.AttendeeFactory;
 import com.openexchange.ajax.chronos.manager.EventManager;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.Alarm;
 import com.openexchange.testing.httpclient.models.Attendee;
+import com.openexchange.testing.httpclient.models.AttendeeAndAlarm;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
 import com.openexchange.testing.httpclient.models.EventData;
+import com.openexchange.testing.httpclient.models.Trigger.RelatedEnum;
 
 /**
  * {@link AbstractAttendeeTest}
@@ -68,7 +71,6 @@ import com.openexchange.testing.httpclient.models.EventData;
  */
 public class AbstractAttendeeTest extends AbstractChronosTest {
 
-    protected String folderId;
     protected String folderId2;
     protected UserApi user2;
     protected EventManager eventManager2;
@@ -76,7 +78,6 @@ public class AbstractAttendeeTest extends AbstractChronosTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        folderId = createAndRememberNewFolder(defaultUserApi, defaultUserApi.getSession(), getDefaultFolder(), defaultUserApi.getCalUser().intValue());
         ApiClient client = generateClient(testUser2);
         rememberClient(client);
         EnhancedApiClient enhancedClient = generateEnhancedClient(testUser2);
@@ -107,5 +108,20 @@ public class AbstractAttendeeTest extends AbstractChronosTest {
         atts.add(attendee2);
         return atts;
     }
+
+    protected AttendeeAndAlarm createAttendeeAndAlarm(EventData updatedEvent, int attendeeId) {
+        AttendeeAndAlarm body = new AttendeeAndAlarm();
+        for (Attendee attendee : updatedEvent.getAttendees()) {
+            if (attendee.getEntity() == attendeeId) {
+                attendee.setPartStat("TENTATIVE");
+                attendee.setMember(null);
+                body.attendee(attendee);
+            }
+        }
+        body.addAlarmsItem(AlarmFactory.createAlarm("-PT20M", RelatedEnum.START));
+        return body;
+    }
+
+
 
 }
