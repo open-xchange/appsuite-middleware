@@ -51,6 +51,7 @@ package com.openexchange.groupware.datahandler.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import com.openexchange.ajax.requesthandler.ResultConverterRegistry;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.service.CalendarService;
@@ -76,7 +77,7 @@ public class DataHandlerActivator extends HousekeepingActivator {
      */
     private static final String STR_IDENTIFIER = "identifier";
 
-    private static final Class<?>[] NEEDED_CLASSES = { ICalService.class, ICalParser.class, CalendarCollectionService.class, IDBasedCalendarAccessFactory.class, CalendarService.class };
+    private static final Class<?>[] NEEDED_CLASSES = { ICalService.class, ICalParser.class, CalendarCollectionService.class, IDBasedCalendarAccessFactory.class, CalendarService.class, ResultConverterRegistry.class };
 
     @Override
     protected Class<?>[] getNeededServices() {
