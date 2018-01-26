@@ -49,22 +49,16 @@
 
 package com.openexchange.chronos.itip.analyzers;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
-import java.util.TimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.common.mapping.EventMapper;
-import com.openexchange.chronos.common.mapping.EventUpdateImpl;
+import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnnotation;
@@ -73,43 +67,45 @@ import com.openexchange.chronos.itip.ITipChange.Type;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
 import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.chronos.itip.ITipMethod;
-import com.openexchange.chronos.itip.ITipSpecialHandling;
 import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.itip.ParticipantChange;
-import com.openexchange.chronos.itip.generators.ArgumentType;
-import com.openexchange.chronos.itip.generators.Sentence;
 import com.openexchange.chronos.itip.generators.TypeWrapper;
-import com.openexchange.chronos.itip.generators.changes.ChangeDescriber;
-import com.openexchange.chronos.itip.generators.changes.generators.Details;
-import com.openexchange.chronos.itip.generators.changes.generators.Rescheduling;
-import com.openexchange.chronos.itip.generators.changes.generators.Transparency;
-import com.openexchange.chronos.itip.osgi.Services;
-import com.openexchange.chronos.itip.tools.ITipEventUpdate;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.ItemUpdate;
-import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.user.UserService;
 
 /**
- * {@link ReplyITipAnalyzer}
+ * {@link ReplyITipAnalyzer} - 'Reply' is a action only performed as answer on a 'request'
+ * For details see <a href="https://tools.ietf.org/html/rfc2446#section-3.2.3">RFC 2446</a>
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco
- *         Laguna</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  */
 public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(ReplyITipAnalyzer.class);
 
     public ReplyITipAnalyzer(final ITipIntegrationUtility util) {
         super(util);
     }
 
     @Override
-    public ITipAnalysis analyze(final ITipMessage message, final Map<String, String> header, final TypeWrapper wrapper, final Locale locale, final User user, final Context ctx, final CalendarSession session) throws OXException {
+    public List<ITipMethod> getMethods() {
+        return Arrays.asList(ITipMethod.REPLY);
+    }
 
+    @Override
+    public ITipAnalysis analyze(final ITipMessage message, final Map<String, String> header, final TypeWrapper wrapper, final Locale locale, final User user, final Context ctx, final CalendarSession session) throws OXException {
         final ITipAnalysis analysis = new ITipAnalysis();
         analysis.setMessage(message);
+
+        ITipMethod method = message.getMethod();
+        if (false == method.equals(ITipMethod.REPLY)) {
+            LOGGER.error("Wrong analyzer for provided iTip method {}", method);
+            analysis.addAnnotation(new ITipAnnotation(Messages.NONE, locale));
+            return analysis;
+        }
 
         final Event update = message.getEvent();
 
@@ -119,7 +115,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
         } else {
             for (final Event event : message.exceptions()) {
                 uid = event.getUid();
-                if (uid != null) {
+                if (null != uid) {
                     break;
                 }
             }
@@ -134,18 +130,18 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
         }
 
         if (update != null) {
-            final ParticipantChange participantChange = applyParticipantChange(update, original, message.getMethod(), message);
+            final ParticipantChange participantChange = applyParticipantChange(update, original, message);
             if (participantChange != null) {
                 participantChange.setComment(message.getComment());
             }
-            if (participantChange != null || message.getMethod() == ITipMethod.COUNTER) {
+            if (participantChange != null || method == ITipMethod.COUNTER) {
                 final ITipChange change = new ITipChange();
                 change.setNewEvent(update);
                 change.setCurrentEvent(original);
 
                 change.setType(Type.UPDATE);
                 change.setParticipantChange(participantChange);
-                describeReplyDiff(message, change, wrapper, session);
+                describeDiff(change, wrapper, session, message);
                 analysis.addChange(change);
             }
         }
@@ -157,7 +153,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
             change.setException(true);
             change.setMaster(original);
             if (matchingException != null) {
-                ParticipantChange participantChange = applyParticipantChange(exception, matchingException, message.getMethod(), message);
+                ParticipantChange participantChange = applyParticipantChange(exception, matchingException, message);
 
                 change = new ITipChange();
                 change.setException(true);
@@ -169,18 +165,18 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
                     participantChange.setComment(message.getComment());
                     change.setParticipantChange(participantChange);
                 }
-                describeReplyDiff(message, change, wrapper, session);
+                describeDiff(change, wrapper, session, message);
 
                 analysis.addChange(change);
             } else {
-                ParticipantChange participantChange = applyParticipantChange(exception, original, message.getMethod(), message);
+                ParticipantChange participantChange = applyParticipantChange(exception, original, message);
                 change.setCurrentEvent(original);
                 change.setNewEvent(exception);
                 change.setType(Type.CREATE);
                 if (participantChange != null) {
                     change.setParticipantChange(participantChange);
                 }
-                describeReplyDiff(message, change, wrapper, session);
+                describeDiff(change, wrapper, session, message);
                 analysis.addChange(change);
 
                 //analysis.addAnnotation(new ITipAnnotation(Messages.CHANGE_PARTICIPANT_STATE_IN_UNKNOWN_APPOINTMENT, locale));
@@ -188,8 +184,6 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
         }
         if (containsPartyCrasher(analysis)) {
             analysis.recommendAction(ITipAction.ACCEPT_PARTY_CRASHER);
-        } else if (message.getMethod() == ITipMethod.COUNTER) {
-            analysis.recommendActions(ITipAction.UPDATE, ITipAction.DECLINECOUNTER);
         } else {
             if (containsChangesForUpdate(analysis)) {
                 analysis.recommendAction(ITipAction.UPDATE);
@@ -219,46 +213,6 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
         return false;
     }
 
-    private void describeReplyDiff(final ITipMessage message, final ITipChange change, final TypeWrapper wrapper, final CalendarSession session) throws OXException {
-        final ContextService contexts = Services.getService(ContextService.class);
-        final UserService users = Services.getService(UserService.class);
-
-        final Context ctx = contexts.getContext(session.getContextId());
-        final User user = users.getUser(session.getUserId(), ctx);
-        final Locale locale = user.getLocale();
-        final TimeZone tz = TimeZone.getTimeZone(user.getTimeZone());
-
-        if (message.getMethod() == ITipMethod.COUNTER) {
-
-            final ITipEventUpdate diff = change.getDiff();
-            String displayName = null;
-            ParticipationStatus newStatus = null;
-
-            // External Participant
-
-            outer: for (ItemUpdate<Attendee, AttendeeField> attendeeUpdate : diff.getAttendeeUpdates().getUpdatedItems()) {
-                for (AttendeeField attendeeField : attendeeUpdate.getUpdatedFields()) {
-                    if (attendeeField.equals(AttendeeField.PARTSTAT)) {
-                        newStatus = attendeeUpdate.getUpdate().getPartStat();
-                        displayName = attendeeUpdate.getOriginal().getCn() == null ? attendeeUpdate.getOriginal().getEMail() : attendeeUpdate.getOriginal().getCn();
-                        break outer;
-                    }
-                }
-            }
-
-            if (newStatus != null) {
-                change.setIntroduction(new Sentence(Messages.COUNTER_REPLY_INTRO).add(displayName, ArgumentType.PARTICIPANT).addStatus(newStatus).getMessage(wrapper, locale));
-            }
-
-            final ChangeDescriber cd = new ChangeDescriber(new Rescheduling(), new Details(), new Transparency());
-
-            change.setDiffDescription(cd.getChanges(ctx, change.getCurrentEvent(), change.getNewEvent(), diff, wrapper, locale, tz));
-
-        } else {
-            describeDiff(change, wrapper, session, message);
-        }
-    }
-
     private boolean containsPartyCrasher(final ITipAnalysis analysis) {
         for (final ITipChange change : analysis.getChanges()) {
             if (change.getParticipantChange() != null && change.getParticipantChange().isPartyCrasher()) {
@@ -268,126 +222,53 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
         return false;
     }
 
-    private ParticipantChange applyParticipantChange(final Event update, final Event original, final ITipMethod method, final ITipMessage message) throws OXException {
-
-        discardAllButFirst(update);
-
+    private ParticipantChange applyParticipantChange(final Event update, final Event original, final ITipMessage message) throws OXException {
         final ParticipantChange pChange = new ParticipantChange();
-        boolean noChange = true;
 
-        if (method == ITipMethod.COUNTER) {
-            // Alright, the counter may overwrite any field
-            ITipEventUpdate diff = new ITipEventUpdate(new EventUpdateImpl(original, update, true, new EventField[] { EventField.ATTENDEES }));
-            Set<EventField> skipFields = skipFieldsInCounter(message);
+        List<Attendee> originalAttendees = original.getAttendees();
+        List<Attendee> updatedAttendees = update.getAttendees();
 
-            for (EventField field : EventField.values()) {
-                if (skipFields.contains(field)) {
-                    continue; // Skip
-                }
-                if (field != EventField.ATTENDEES && !diff.getUpdatedFields().contains(field)) {
-                    if (original.isSet(field)) {
-                        EventMapper.getInstance().copy(original, update, new EventField[] { field });
-                    }
-                }
-            }
-
-            if (message.hasFeature(ITipSpecialHandling.MICROSOFT)) {
-                // Explicitely ignore title update
-                update.setSummary(original.getSummary());
-            }
-        } else if (!update.containsRecurrenceId()) {
-            // The Reply may only override participant states
-            final ITipEventUpdate diff = new ITipEventUpdate(new EventUpdateImpl(original, update, true, new EventField[] { EventField.ATTENDEES }));
-            for (EventField updatedField : diff.getUpdatedFields()) {
-                EventMapper.getInstance().copy(diff.getUpdate(), update, new EventField[] { updatedField });
-            }
-        } else {
-            // TODO hier wir
+        if (updatedAttendees.size() != 1) {
+            // Not RFC conform
+            throw new OXException();
         }
+        Attendee reply = updatedAttendees.get(0);
 
-        List<Attendee> newUsers = new ArrayList<>();
-        List<Attendee> users = original.getAttendees();
-        Set<String> notFound = new HashSet<>();
-        List<Attendee> users3 = update.getAttendees();
-        if (users3 != null) {
-            for (Attendee user : users3) {
-                notFound.add(user.getEMail());
+        // Party crasher?
+        boolean partyCrasher = true;
+        for (Attendee attendee : originalAttendees) {
+            if (compareAttendees(attendee, reply, new AttendeeField[] { AttendeeField.URI })) {
+                // Nope, we already know the replaying attendee
+                partyCrasher = false;
+                // Did something change?
+                if (false == attendee.getComment().equals(reply.getComment()) || false == attendee.getPartStat().equals(reply.getPartStat())) {
+                    return null;
+                }
+                break;
             }
         }
-
-        if (users != null) {
-            for (final Attendee up : users) {
-                notFound.remove(up.getEMail());
-                boolean added = false;
-                List<Attendee> users2 = update.getAttendees();
-                if (users2 != null) {
-                    for (Attendee up2 : users2) {
-                        if (up2.getEntity() == up.getEntity()) {
-                            Attendee nup = new Attendee();
-                            nup.setEntity(up.getEntity());
-                            nup.setPartStat(up2.getPartStat());
-                            nup.setComment(up2.getComment());
-                            nup.setUri(up2.getUri());
-                            nup.setCuType(up2.getCuType());
-
-                            pChange.setComment(up2.getComment());
-                            pChange.setConfirmStatusUpdate(up2.getPartStat());
-
-                            newUsers.add(nup);
-                            added = true;
-                            noChange = false;
-                        }
-                    }
-                }
-
-                if (!added) {
-                    newUsers.add(up);
-                }
-            }
-
-            if (users3 != null) {
-                for (String nf : notFound) {
-                    for (Attendee participant : users3) {
-                        if (nf.equalsIgnoreCase(participant.getEMail())) {
-
-                            newUsers.add(participant);
-                            pChange.setPartyCrasher(true);
-
-                            noChange = false;
-                        }
-                    }
-                }
-            }
-        }
-
-        update.setAttendees(newUsers);
-
-        if (noChange) {
-            return null;
-        }
+        pChange.setComment(reply.getComment());
+        pChange.setConfirmStatusUpdate(reply.getPartStat());
+        pChange.setPartyCrasher(partyCrasher);
 
         return pChange;
     }
 
-    private Set<EventField> skipFieldsInCounter(final ITipMessage message) {
-        final Set<EventField> skipList = new HashSet<>();
-        if (message.hasFeature(ITipSpecialHandling.MICROSOFT)) {
-            skipList.add(EventField.SUMMARY);
+    private boolean compareAttendees(Attendee a, Attendee b, AttendeeField... fields) throws OXException {
+        AttendeeMapper mapper = AttendeeMapper.getInstance();
+        AttendeeField[] differences;
+        if (null == fields || 1 >= fields.length) {
+            differences = mapper.getDifferentFields(a, b);
+        } else {
+            List<AttendeeField> values = Arrays.asList(AttendeeField.values());
+            for (AttendeeField field : fields) {
+                values.remove(field);
+            }
+            differences = mapper.getDifferentFields(a, b, true, values.toArray(new AttendeeField[] {})).toArray(new AttendeeField[] {});
         }
-        return skipList;
-    }
-
-    private void discardAllButFirst(final Event update) {
-        List<Attendee> attendees = update.getAttendees();
-        if (attendees != null && attendees.size() > 1) {
-            Attendee first = attendees.get(0);
-            update.setAttendees(Collections.singletonList(first));
+        if (0 == differences.length) {
+            return true;
         }
+        return false;
     }
-
-    @Override
-    public List<ITipMethod> getMethods() {
-        return Arrays.asList(ITipMethod.REPLY);
-    }
-
 }
