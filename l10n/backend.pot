@@ -989,21 +989,15 @@ msgstr ""
 msgid "Your device configuration"
 msgstr ""
 
-#. %1$s, %2$s %3$s on %4$s %5$s
+#. %1$s, %2$s on %3$s %4$s
 #. E.g. App Suite UI, Chrome 61 on Windows 10
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:65
-msgid "%1$s, %2$s %3$s on %4$s %5$s"
-msgstr ""
-
-#. %1$s, %2$s %3$s on %4$s
-#. E.g. App Suite UI, Chrome 61 on Windows
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:69
 msgid "%1$s, %2$s %3$s on %4$s"
 msgstr ""
 
 #. %1$s on %2$s %3$s
 #. E.g. App Suite UI on Windows 10
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:73
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:69
 msgid "%1$s on %2$s %3$s"
 msgstr ""
 
@@ -1013,14 +1007,14 @@ msgstr ""
 #. E.g. Drive Client
 #. This simple message does not need to be translated. It is used to transport data to the frontend. Just put the same value in it for
 #. all translations or remove it from the PO file.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:77
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:73
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:81
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:94
 msgid "%1$s"
 msgstr ""
 
 #. Microsoft Exchange ActiveSync Client
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:80
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:76
 msgid "Microsoft Exchange ActiveSync Client"
 msgstr ""
 
