@@ -88,7 +88,7 @@ public class DAVClientInfo implements ClientInfo {
     }
 
     @Override
-    public String toString(Locale locale) {
+    public String getDisplayName(Locale locale) {
         return app;
     }
 

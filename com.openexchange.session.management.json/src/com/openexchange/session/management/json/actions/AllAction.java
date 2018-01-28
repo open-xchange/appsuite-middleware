@@ -175,7 +175,7 @@ public class AllAction implements AJAXActionService {
             if (null != service) {
                 ClientInfo info = service.getClientInfo(session.getSession());
                 if (null != info) {
-                    deviceInfo.put("displayName", info.toString(locale));
+                    deviceInfo.put("displayName", info.getDisplayName(locale));
                     JSONObject os = new JSONObject(2);
                     os.put("name", info.getOSFamily());
                     os.put("version", info.getOSVersion());

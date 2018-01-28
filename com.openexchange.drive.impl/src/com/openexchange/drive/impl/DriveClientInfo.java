@@ -83,7 +83,7 @@ public class DriveClientInfo implements ClientInfo {
     }
 
     @Override
-    public String toString(Locale locale) {
+    public String getDisplayName(Locale locale) {
         String app = DriveConfig.getInstance().getShortProductName();
         StringHelper helper = StringHelper.valueOf(locale);
         if (Strings.isNotEmpty(appVersion) && Strings.isNotEmpty(platform) && Strings.isNotEmpty(platformVersion)) {

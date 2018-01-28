@@ -86,10 +86,31 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
         }
         ReadableUserAgent readableUserAgent = userAgentParser.parse((String) session.getParameter(Session.PARAM_USER_AGENT));
         if (null != readableUserAgent) {
-            String osFamily = readableUserAgent.getOperatingSystem().getFamilyName();
-            String osVersion = new StringBuilder().append(readableUserAgent.getOperatingSystem().getVersionNumber().getMajor()).append(".").append(readableUserAgent.getOperatingSystem().getVersionNumber().getMinor()).toString();
+            String osVersion = null;
+            String osFamily = null;
+            if (null != readableUserAgent.getOperatingSystem()) {
+                osFamily = readableUserAgent.getOperatingSystem().getFamilyName();
+                String osVersionMajor = readableUserAgent.getOperatingSystem().getVersionNumber().getMajor();
+                String osVersionMinor = readableUserAgent.getOperatingSystem().getVersionNumber().getMinor();
+                if (Strings.isNotEmpty(osVersionMajor)) {
+                    if (Strings.isNotEmpty(osVersionMinor)) {
+                        osVersion = new StringBuilder(osVersionMajor).append(".").append(osVersionMinor).toString();
+                    } else {
+                        osVersion = osVersionMajor;
+                    }
+                }
+            }
+            String clientVersion = null;
             String client = readableUserAgent.getName();
-            String clientVersion = new StringBuilder().append(readableUserAgent.getVersionNumber().getMajor()).append(".").append(readableUserAgent.getVersionNumber().getMinor()).toString();
+            String clientVersionMajor = readableUserAgent.getVersionNumber().getMajor();
+            String clientVersionMinor = readableUserAgent.getVersionNumber().getMinor();
+            if (Strings.isNotEmpty(clientVersionMajor)) {
+                if (Strings.isNotEmpty(clientVersionMinor)) {
+                    clientVersion = new StringBuilder(clientVersionMajor).append(".").append(clientVersionMinor).toString();
+                } else {
+                    clientVersion = clientVersionMajor;
+                }
+            }
             return new DAVClientInfo(userAgent.getReadableName(), osFamily, osVersion, client, clientVersion);
         }
         return new DAVClientInfo(userAgent.getReadableName());

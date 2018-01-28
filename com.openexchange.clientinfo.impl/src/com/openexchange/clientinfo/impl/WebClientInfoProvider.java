@@ -49,6 +49,9 @@
 
 package com.openexchange.clientinfo.impl;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.ajax.Client;
 import com.openexchange.clientinfo.ClientInfo;
 import com.openexchange.clientinfo.ClientInfoProvider;
@@ -74,6 +77,15 @@ public class WebClientInfoProvider implements ClientInfoProvider {
     private final String OX6 = "OX6 UI";
     private final ServiceLookup services;
 
+    private final Map<String, String> osMapping;
+
+    private static final String OS_FAMILY_WINDOWS  = "windows";
+    private static final String OS_FAMILY_MACOS = "os x";
+    private static final String OS_FAMILY_LINUX = "linux";
+    private static final String OS_FAMILY_ANDROID = "android";
+    private static final String OS_FAMILY_IOS = "ios";
+
+
     /**
      * Initializes a new {@link WebClientInfoProvider}.
      *
@@ -82,6 +94,17 @@ public class WebClientInfoProvider implements ClientInfoProvider {
     public WebClientInfoProvider(ServiceLookup services) {
         super();
         this.services = services;
+        this.osMapping = this.createOSMapping();
+    }
+
+    private Map<String, String> createOSMapping() {
+        Map<String, String> map = new HashMap<>();
+        map.put("6.0", "Windows Vista");
+        map.put("6.1", "Windows 7");
+        map.put("6.2", "Windows 8");
+        map.put("6.3", "Windows 8.1");
+        map.put("10.0", "Windows 10");
+        return Collections.unmodifiableMap(map);
     }
 
     @Override
@@ -113,22 +136,56 @@ public class WebClientInfoProvider implements ClientInfoProvider {
                 OperatingSystem operatingSystem = info.getOperatingSystem();
                 String os = null;
                 String osVersion = null;
+                StringBuilder osReadableName = new StringBuilder();
                 if (null != operatingSystem) {
                     os = operatingSystem.getFamilyName();
+                    if (Strings.isNotEmpty(os)) {
+                        os = os.toLowerCase();
+                    }
                     String osVersionMajor = operatingSystem.getVersionNumber().getMajor();
                     String osVersionMinor = operatingSystem.getVersionNumber().getMinor();
+                    switch (os) {
+                        case OS_FAMILY_WINDOWS:
+                            osReadableName.append(osMapping.get(getVersionNumber(operatingSystem)));
+                            break;
+                        case OS_FAMILY_MACOS:
+                            try {
+                                int major = Integer.parseInt(osVersionMajor);
+                                int minor = Integer.parseInt(osVersionMinor);
+                                if (major >= 10 && minor >= 12) {
+                                    osReadableName.append("macOS ").append(osVersionMajor).append(".").append(osVersionMinor);
+                                }
+                            } catch (NumberFormatException e) {
+                                osReadableName.append("MacOS X");
+                            }
+                        case OS_FAMILY_ANDROID:
+                            osReadableName.append("Android ").append(osVersionMajor);
+                            if (Strings.isNotEmpty(osVersionMinor)) {
+                                osReadableName.append(".").append(osVersionMinor);
+                            }
+                            break;
+                        case OS_FAMILY_LINUX:
+                            osReadableName.append("Linux");
+                            break;
+                        case OS_FAMILY_IOS:
+                            osReadableName.append("iOS ").append(osVersionMajor);
+                            if (Strings.isNotEmpty(osVersionMinor)) {
+                                osReadableName.append(".").append(osVersionMinor);
+                            }
+                            break;
+                    }
                     if (Strings.isNotEmpty(osVersionMajor)) {
-                        StringBuilder sb = new StringBuilder(osVersionMajor);
                         if (Strings.isNotEmpty(osVersionMinor)) {
-                            sb.append(".").append(osVersionMinor);
+                            osVersion = new StringBuilder(osVersionMajor).append(".").append(osVersionMinor).toString();
+                        } else {
+                            osVersion = osVersionMajor;
                         }
-                        osVersion = sb.toString();
                     }
                 }
                 String browser = info.getName();
                 String browserVersion = info.getVersionNumber().getMajor();
 
-                return new WebClientInfo(client, os, osVersion, browser, browserVersion);
+                return new WebClientInfo(client, osReadableName.toString(), os, osVersion, browser, browserVersion);
             }
         }
 
@@ -143,7 +200,14 @@ public class WebClientInfoProvider implements ClientInfoProvider {
         } else if (Client.OX6_UI.getClientId().equals(clientId)) {
             client = OX6;
         }
-        return new WebClientInfo(client, null, null, null, null);
+        return new WebClientInfo(client, null, null, null, null, null);
+    }
+
+    private String getVersionNumber(OperatingSystem operatingSystem) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(operatingSystem.getVersionNumber().getMajor());
+        sb.append(operatingSystem.getVersionNumber().getMinor());
+        return sb.toString();
     }
 
 }

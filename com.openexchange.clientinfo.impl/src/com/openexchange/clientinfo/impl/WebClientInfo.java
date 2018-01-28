@@ -66,31 +66,27 @@ public class WebClientInfo implements ClientInfo {
 
     private final String client;
     private final String platform;
+    private final String platformFamily;
     private final String platformVersion;
     private final String browser;
     private final String browserVersion;
-    //    private final ReadableUserAgent info;
 
-    public WebClientInfo(String client, String platform, String platformVersion, String browser, String browserVersion) {
+    public WebClientInfo(String client, String platform, String platformFamily, String platformVersion, String browser, String browserVersion) {
         this.client = client;
         this.platform = platform;
+        this.platformFamily = platformFamily;
         this.platformVersion = platformVersion;
         this.browser = browser;
         this.browserVersion = browserVersion;
     }
 
     @Override
-    public String toString(Locale locale) {
+    public String getDisplayName(Locale locale) {
         StringHelper helper = StringHelper.valueOf(locale);
         String out;
         if (Strings.isNotEmpty(platform)) {
-            if (Strings.isNotEmpty(platformVersion)) {
-                out = helper.getString(ClientInfoStrings.DEFAULT_CLIENT_INFO_MESSAGE);
-                return String.format(out, client, browser, browserVersion, platform, platformVersion);
-            } else {
-                out = helper.getString(ClientInfoStrings.DEFAULT_CLIENT_INFO_WITHOUT_PLATFORN_VERSION_MESSAGE);
-                return String.format(out, client, browser, browserVersion, platform);
-            }
+            out = helper.getString(ClientInfoStrings.DEFAULT_CLIENT_INFO_MESSAGE);
+            return String.format(out, client, browser, browserVersion, platform);
         } else if (Strings.isNotEmpty(browser) && Strings.isNotEmpty(browserVersion)) {
             out = helper.getString(ClientInfoStrings.CLIENT_BROWSER_INFO_MESSAGE);
             return String.format(out, client, browser, browserVersion);
@@ -107,8 +103,8 @@ public class WebClientInfo implements ClientInfo {
 
     @Override
     public String getOSFamily() {
-        if (Strings.isNotEmpty(platform)) {
-            return platform.toLowerCase();
+        if (Strings.isNotEmpty(platformFamily)) {
+            return platformFamily.toLowerCase();
         }
         return null;
     }

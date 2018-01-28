@@ -68,7 +68,7 @@ public class USMEASClientInfo implements ClientInfo {
     }
 
     @Override
-    public String toString(Locale locale) {
+    public String getDisplayName(Locale locale) {
         return ClientInfoStrings.USM_EAS_CLIENT;
     }
 

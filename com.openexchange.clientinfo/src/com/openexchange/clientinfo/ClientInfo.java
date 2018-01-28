@@ -73,7 +73,7 @@ public interface ClientInfo {
      * @param locale The user's locale
      * @return The client's description
      */
-    String toString(Locale locale);
+    String getDisplayName(Locale locale);
 
     /**
      * Gets OS family
