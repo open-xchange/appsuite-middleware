@@ -49,7 +49,10 @@
 
 package com.openexchange.chronos.provider.composition.impl;
 
+import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeFolderIdsPerAccountId;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,6 +62,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -69,12 +73,17 @@ import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.FreeBusyProvider;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
+import com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling;
 import com.openexchange.chronos.provider.extensions.WarningsAware;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPoolCompletionService;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tx.TransactionAware;
@@ -357,6 +366,29 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
     }
 
     /**
+     * Gets the relative representation of a list of unique composite folder identifiers, mapped to their associated calendar account.
+     * <p/>
+     * {@link IDMangling#ROOT_FOLDER_IDS} are passed as-is implicitly, mapped to the default account.
+     *
+     * @param uniqueFolderIds The unique composite folder identifiers, e.g. <code>cal://4/35</code>
+     * @return The relative folder identifiers, mapped to their associated calendar account
+     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_FOLDER} if the account identifier can't be extracted from a passed composite identifier
+     */
+    protected Map<CalendarAccount, List<String>> getRelativeFolderIdsPerAccount(List<String> folderIds) throws OXException {
+        if (null == folderIds) {
+            return null;
+        }
+        Map<Integer, List<String>> folderIdsPerAccountId = getRelativeFolderIdsPerAccountId(folderIds.toArray(new String[folderIds.size()]));
+        List<CalendarAccount> accounts = getAccounts(I2i(folderIdsPerAccountId.keySet()));
+        Map<CalendarAccount, List<String>> folderIdsPerAccount = new HashMap<CalendarAccount, List<String>>(folderIdsPerAccountId.size());
+        for (Entry<Integer, List<String>> entry : folderIdsPerAccountId.entrySet()) {
+            CalendarAccount account = accounts.stream().filter(a -> i(entry.getKey()) == a.getAccountId()).findFirst().orElse(null);
+            folderIdsPerAccount.put(account, entry.getValue());
+        }
+        return folderIdsPerAccount;
+    }
+
+    /**
      * Gets a specific calendar account.
      *
      * @param accountId The identifier of the account to get
@@ -368,6 +400,16 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
             throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(I(accountId));
         }
         return account;
+    }
+
+    /**
+     * Gets specific calendar accounts.
+     *
+     * @param accountIds The identifiers of the account to get
+     * @return The calendar accounts
+     */
+    protected List<CalendarAccount> getAccounts(int[] accountIds) throws OXException {
+        return requireService(CalendarAccountService.class, services).getAccounts(session, accountIds, this);
     }
 
     /**
@@ -405,6 +447,19 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
      */
     protected List<FreeBusyProvider> getFreeBusyProviders() {
         return providerRegistry.getFreeBusyProviders();
+    }
+
+    /**
+     * Gets the completion service to manage asynchronous operations on multiple calendar accounts.
+     *
+     * @return The completion service
+     */
+    protected static <V> CompletionService<V> getCompletionService() {
+        ThreadPoolService threadPool = ThreadPools.getThreadPool();
+        if (null == threadPool) {
+            return new CallerRunsCompletionService<V>();
+        }
+        return new ThreadPoolCompletionService<V>(threadPool);
     }
 
     private <T extends CalendarAccess> boolean supports(CalendarAccount account, Class<T> extensionClass) throws OXException {

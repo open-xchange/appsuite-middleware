@@ -219,7 +219,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
             }
         }
 
-        List<Event> events = calendarAccess.searchEvents(null != folderIDs ? folderIDs.toArray(new String[folderIDs.size()]) : null, filters, searchRequest.getQueries());
+        List<Event> events = calendarAccess.searchEvents(folderIDs, filters, searchRequest.getQueries());
         /*
          * select suitable occurrences for series events
          */

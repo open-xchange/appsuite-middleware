@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.provider.composition;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -179,7 +180,28 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * @param folderId The fully qualified identifier of the folder to get the events from
      * @return The events
      */
-    List<Event> getEventsInFolder(String folderId) throws OXException;
+    default List<Event> getEventsInFolder(String folderId) throws OXException {
+        return getEventsInFolders(Collections.singletonList(folderId));
+    }
+
+    /**
+     * Gets all events from one or more specific calendar folders.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
+     * <li>{@link CalendarParameters#PARAMETER_INCLUDE_PRIVATE}</li>
+     * </ul>
+     *
+     * @param folderId The fully qualified identifiers of the folders to get the events from
+     * @return The events
+     */
+    List<Event> getEventsInFolders(List<String> folderIds) throws OXException;
 
     /**
      * Gets all events of the session's user attends in.
@@ -263,7 +285,7 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * @param queries The queries to search for, or <code>null</code> if not specified
      * @return The found events, or an empty list if there are none
      */
-    List<Event> searchEvents(String[] folderIds, List<SearchFilter> filters, List<String> queries) throws OXException;
+    List<Event> searchEvents(List<String> folderIds, List<SearchFilter> filters, List<String> queries) throws OXException;
 
     /**
      * Gets lists of new and updated as well as deleted events since a specific timestamp in a folder.
