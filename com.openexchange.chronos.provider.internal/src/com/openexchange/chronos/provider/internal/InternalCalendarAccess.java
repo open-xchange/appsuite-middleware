@@ -341,7 +341,7 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
 
     @Override
     public List<AlarmTrigger> getAlarmTriggers(Set<String> actions) throws OXException {
-        return getCalendarService().getAlarmTrigger(session, actions);
+        return getCalendarService().getAlarmTriggers(session, actions);
     }
 
     @Override

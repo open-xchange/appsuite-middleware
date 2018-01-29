@@ -497,7 +497,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public List<AlarmTrigger> getAlarmTrigger(CalendarSession session, Set<String> actions) throws OXException {
+    public List<AlarmTrigger> getAlarmTriggers(CalendarSession session, Set<String> actions) throws OXException {
         List<AlarmTrigger> triggers = new InternalCalendarStorageOperation<List<AlarmTrigger>>(session) {
 
             @Override

@@ -134,7 +134,7 @@ public final class UpdatesAction extends AbstractReminderAction {
             calendarSession.set(CalendarParameters.PARAMETER_RANGE_END, new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7)));
             UpdatesResult updatedEventsOfUser = calendarService.getUpdatedEventsOfUser(calendarSession, timestamp.getTime());
 
-            List<AlarmTrigger> triggers = calendarService.getAlarmTrigger(calendarSession, Collections.singleton("DISPLAY"));
+            List<AlarmTrigger> triggers = calendarService.getAlarmTriggers(calendarSession, Collections.singleton("DISPLAY"));
             List<Integer> updatedAlarmIds = new ArrayList<>();
             for(Event eve : updatedEventsOfUser.getNewAndModifiedEvents()){
                 for(Alarm alarm: eve.getAlarms()){

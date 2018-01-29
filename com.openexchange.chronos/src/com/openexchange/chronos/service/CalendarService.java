@@ -459,7 +459,7 @@ public interface CalendarService {
      * @return A list of {@link AlarmTrigger}
      * @throws OXException
      */
-    List<AlarmTrigger> getAlarmTrigger(CalendarSession session, Set<String> actions) throws OXException;
+    List<AlarmTrigger> getAlarmTriggers(CalendarSession session, Set<String> actions) throws OXException;
 
     /**
      * Retrieves the {@link IFileHolder} with the specified managed identifier from the {@link Event}

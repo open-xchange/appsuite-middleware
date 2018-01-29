@@ -154,7 +154,7 @@ public final class RangeAction extends AbstractReminderAction {
         CalendarSession calSession = calService.init(session);
         calSession.set(CalendarParameters.PARAMETER_RANGE_END, until);
 
-        List<AlarmTrigger> alarmTrigger = calService.getAlarmTrigger(calSession, Collections.singleton("DISPLAY"));
+        List<AlarmTrigger> alarmTrigger = calService.getAlarmTriggers(calSession, Collections.singleton("DISPLAY"));
         for (AlarmTrigger trigger : alarmTrigger) {
             convertAlarmTrigger2Reminder(calSession, trigger, reminderWriter, jsonResponseArray);
         }
