@@ -345,9 +345,7 @@ public class CalendarDataMigration {
         for (Entry<String, Map<Integer, List<Alarm>>> entry : alarms.entrySet()) {
             for (Entry<Integer, List<Alarm>> alarmsPerUser : entry.getValue().entrySet()) {
                 for (Alarm alarm : alarmsPerUser.getValue()) {
-                    if (false == alarm.containsId() || 0 == alarm.getId()) {
-                        alarm.setId(destinationStorage.nextId());
-                    }
+                    alarm.setId(destinationStorage.nextId());
                     if (false == alarm.containsUid() || null == alarm.getUid()) {
                         alarm.setUid(UUID.randomUUID().toString());
                     }
