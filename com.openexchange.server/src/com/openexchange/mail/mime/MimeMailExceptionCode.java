@@ -338,6 +338,14 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
      * Mail server %1$s unexpectedly closed connection for user %2$s.
      */
     CONNECTION_CLOSED("Mail server %1$s unexpectedly closed connection for user %2$s.", CATEGORY_SERVICE_DOWN, 1035, MimeMailExceptionMessage.CONNECTION_CLOSED_MSG_DISPLAY),
+    /**
+     * Mail server %1$s denies access for login %2$s.
+     */
+    AUTHORIZATION_FAILED("Mail server %1$s denies access for login %2$s.", CATEGORY_PERMISSION_DENIED, 1036, MimeMailExceptionMessage.AUTHORIZATION_FAILED_MSG_DISPLAY),
+    /**
+     * Destination folder does not exist. Please try to create it and retry the operation.
+     */
+    TRYCREATE("Destination folder does not exist. Please try to create it and retry the operation.", CATEGORY_USER_INPUT, 1037, MimeMailExceptionMessage.TRYCREATE_MSG_DISPLAY)
 
     ;
 

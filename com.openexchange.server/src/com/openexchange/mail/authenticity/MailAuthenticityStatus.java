@@ -69,11 +69,13 @@ public enum MailAuthenticityStatus {
      */
     NEUTRAL("Neutral", "neutral"),
     /**
-     * Nothing has been analyzed
+     * Nothing has been analyzed (Used in case of an error or
+     * for e-mails before the defined cut-off-date)
+     * 
      */
     NOT_ANALYZED("Not Analyzed", "not-analyzed"),
     /**
-     * None (explicitly used for mail before the defined cut-off-date)
+     * None
      */
     NONE("None", "none"),
     /**

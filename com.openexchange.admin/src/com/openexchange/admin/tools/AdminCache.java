@@ -507,7 +507,15 @@ public class AdminCache {
         Class.forName(driver);
         // give database some time to react (in seconds)
         DriverManager.setLoginTimeout(120);
-        return DriverManager.getConnection(url, user, password);
+        java.util.Properties defaults = new java.util.Properties();
+        if (user != null) {
+            defaults.put("user", user);
+        }
+        if (password != null) {
+            defaults.put("password", password);
+        }
+        defaults.setProperty("useSSL", "false");
+        return DriverManager.getConnection(url, defaults);
     }
 
     private static final Pattern pattern = Pattern.compile("[\\?\\&]([\\p{ASCII}&&[^=\\&]]*)=([\\p{ASCII}&&[^=\\&]]*)");
@@ -517,9 +525,10 @@ public class AdminCache {
         DriverManager.setLoginTimeout(120);
         final int paramStart = url.indexOf('?');
         final String newUrl;
-        final Properties props = new Properties();
-        props.put("user", user);
-        props.put("password", password);
+        final Properties defaults = new Properties();
+        defaults.put("user", user);
+        defaults.put("password", password);
+        defaults.setProperty("useSSL", "false");
         if (-1 != paramStart) {
             final Matcher matcher = pattern.matcher(url);
             newUrl = url.substring(0, paramStart);
@@ -528,7 +537,7 @@ public class AdminCache {
                 final String value = matcher.group(2);
                 if (name != null && name.length() > 0 && value != null && value.length() > 0 && !name.toLowerCase().endsWith("timeout")) {
                     try {
-                        props.put(name, URLDecoder.decode(value, "UTF-8"));
+                        defaults.put(name, URLDecoder.decode(value, "UTF-8"));
                     } catch (final UnsupportedEncodingException e) {
                         // Should not happen for UTF-8.
                         log.error("", e);
@@ -538,7 +547,7 @@ public class AdminCache {
         } else {
             newUrl = url;
         }
-        return DriverManager.getConnection(newUrl, props);
+        return DriverManager.getConnection(newUrl, defaults);
     }
 
     public void closeSimpleConnection(Connection con) {

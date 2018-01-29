@@ -197,7 +197,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     private final boolean supportsPermanentListeners;
     private volatile IMAPFolder imapFolderInUse;
     private volatile Map<String, Object> additionalProps;
-    private volatile long lastLockRefreshNanos;
+    private volatile long lastLockRefreshMillis;
     private volatile boolean interrupted;
     private volatile boolean idling;
 
@@ -217,7 +217,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         this.control = control;
         this.pushMode = pushMode;
         additionalProps = null;
-        lastLockRefreshNanos = System.nanoTime();
+        lastLockRefreshMillis = System.currentTimeMillis();
     }
 
     private boolean isUserValid() {
@@ -583,10 +583,10 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
      * @return <code>true</code> if refresh is needed; otherwise <code>false</code>
      */
     private boolean doRefreshLock() {
-        long last = lastLockRefreshNanos;
-        long nanos = System.nanoTime();
-        if (nanos - last > TimeUnit.MILLISECONDS.toNanos(TIMEOUT_THRESHOLD_MILLIS)) {
-            lastLockRefreshNanos = nanos;
+        long last = lastLockRefreshMillis;
+        long now = System.currentTimeMillis();
+        if (now - last > TIMEOUT_THRESHOLD_MILLIS) {
+            lastLockRefreshMillis = now;
             return true;
         }
         return false;

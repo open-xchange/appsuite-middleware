@@ -1212,6 +1212,10 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         } catch (final OXContextException e) {
             LOGGER.error("", e);
             throw e;
+        } catch (final RuntimeException e) {
+            // Last resort...
+            LOGGER.error("", e);
+            throw new StorageException("Moving context filestore failed due to an internal error");
         } finally {
             oxcox.enable(ctx);
         }

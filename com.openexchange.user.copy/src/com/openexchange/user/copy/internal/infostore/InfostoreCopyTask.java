@@ -182,8 +182,8 @@ public class InfostoreCopyTask implements CopyUserTaskService {
         final Map<DocumentMetadata, List<DocumentMetadata>> originDocuments = loadInfostoreDocumentsFromDB(infostoreFolders, srcCon, i(srcCtxId));
         QuotaFileStorage srcFileStorage = null;
         QuotaFileStorage dstFileStorage = null;
-        srcFileStorage = qfsf.getQuotaFileStorage(copyTools.getSourceUserId(), srcCtxId, Info.drive());
-        dstFileStorage = qfsf.getQuotaFileStorage(dstUsrId, dstCtxId, Info.drive());
+        srcFileStorage = qfsf.getQuotaFileStorage(copyTools.getSourceUserId(), srcCtxId, Info.administrative()); // Avoid considering unified quota
+        dstFileStorage = qfsf.getQuotaFileStorage(dstUsrId, dstCtxId, Info.administrative()); // Avoid considering unified quota
 
         copyFiles(originDocuments, srcFileStorage, dstFileStorage);
         exchangeFolderIds(originDocuments, folderMapping, dstCon, i(dstCtxId));

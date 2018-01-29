@@ -69,17 +69,18 @@ abstract class AbstractClusterLockServiceImpl implements ClusterLockService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractClusterLockServiceImpl.class);
 
-    /** Defines the threshold for the lock refresh in seconds */
-    private static final long REFRESH_LOCK_THRESHOLD = TimeUnit.SECONDS.toMillis(20);
+    /** Defines the threshold for the lock refresh in milliseconds */
+    private static final long REFRESH_LOCK_THRESHOLD_MILLIS = TimeUnit.SECONDS.toMillis(20);
 
-    /** Defines the TTL for a cluster lock in seconds */
-    private static final long LOCK_TTL = TimeUnit.SECONDS.toMillis(30);
+    /** Defines the TTL for a cluster lock in milliseconds */
+    private static final long LOCK_TTL_MILLIS = TimeUnit.SECONDS.toMillis(30);
 
+    /** The service look-up */
     protected final ServiceLookup services;
 
     /**
-     * Initialises a new {@link AbstractClusterLockServiceImpl}.
-     * 
+     * Initializes a new {@link AbstractClusterLockServiceImpl}.
+     *
      * @param services The {@link ServiceLookup} instance
      */
     protected AbstractClusterLockServiceImpl(ServiceLookup services) {
@@ -89,18 +90,18 @@ abstract class AbstractClusterLockServiceImpl implements ClusterLockService {
 
     /**
      * Verifies whether the lease time was expired
-     * 
+     *
      * @param timeNow The time now
      * @param timeThen The time then
      * @return <code>true</code> if the lease time was expired; <code>false</code> otherwise
      */
     protected boolean leaseExpired(long timeNow, long timeThen) {
-        return (timeNow - timeThen > LOCK_TTL);
+        return (timeNow - timeThen > LOCK_TTL_MILLIS);
     }
 
     /**
      * Runs the specified {@link ClusterTask} with the specified {@link RetryPolicy} and the specified refresh lock {@link Runnable} task
-     * 
+     *
      * @param clusterTask The {@link ClusterTask} to execute
      * @param retryPolicy The {@link RetryPolicy}
      * @param refreshLockTask The {@link Runnable} refresh lock task
@@ -116,7 +117,7 @@ abstract class AbstractClusterLockServiceImpl implements ClusterLockService {
                 if (lockAcquired) {
                     LOGGER.debug("Cluster lock for cluster task '{}' acquired with retry policy '{}'", clusterTask.getTaskName(), retryPolicy.getClass().getSimpleName());
                     TimerService service = services.getService(TimerService.class);
-                    timerTask = service.scheduleAtFixedRate(refreshLockTask, REFRESH_LOCK_THRESHOLD, REFRESH_LOCK_THRESHOLD, TimeUnit.NANOSECONDS);
+                    timerTask = service.scheduleAtFixedRate(refreshLockTask, REFRESH_LOCK_THRESHOLD_MILLIS, REFRESH_LOCK_THRESHOLD_MILLIS, TimeUnit.MILLISECONDS);
                     T t = clusterTask.perform();
                     LOGGER.debug("Cluster task '{}' completed.", clusterTask.getTaskName());
                     return t;

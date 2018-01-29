@@ -13,7 +13,7 @@ default:
 
     forgotPassword: false
 
-    copyright: '(c) 2016-2020 OX Software GmbH'
+    copyright: '(c) 2016-2018 OX Software GmbH'
 
     staySignedIn: true
 

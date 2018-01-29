@@ -52,6 +52,7 @@ package com.openexchange.groupware.userconfiguration;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.session.Session;
 import com.openexchange.userconf.UserConfigurationService;
 
 /**
@@ -187,6 +188,30 @@ public abstract class UserConfigurationStorage {
 
     /**
      * Determines the instance of <code>UserConfiguration</code> that
+     * corresponds to given session.
+     *
+     * @param session The session providing user/context information
+     * @return the instance of <code>UserConfiguration</code>
+     * @throws OXException If user's configuration could not be determined
+     */
+    public UserConfiguration getUserConfiguration(Session session) throws OXException {
+        return getUserConfiguration(session, null);
+    }
+
+    /**
+     * Determines the instance of <code>UserConfiguration</code> that
+     * corresponds to given session. If <code>groups</code> argument is set,
+     * user's groups need not to be loaded from user storage
+     *
+     * @param session The session providing user/context information
+     * @param groups The optional groups of the user
+     * @return the instance of <code>UserConfiguration</code>
+     * @throws OXException If user's configuration could not be determined
+     */
+    public abstract UserConfiguration getUserConfiguration(Session session, int[] groups) throws OXException;
+
+    /**
+     * Determines the instance of <code>UserConfiguration</code> that
      * corresponds to given user ID. If <code>groups</code> argument is set,
      * user's groups need not to be loaded from user storage
      *
@@ -229,7 +254,5 @@ public abstract class UserConfigurationStorage {
      * @throws OXException If removal fails
      */
     public abstract void invalidateCache(int userId, Context ctx) throws OXException;
-
-
 
 }

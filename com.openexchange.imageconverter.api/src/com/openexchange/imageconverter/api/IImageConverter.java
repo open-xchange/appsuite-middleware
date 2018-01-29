@@ -65,8 +65,6 @@ public interface IImageConverter {
      * Creates a new image group with the given key and context. If a group with the same key
      * already exists, its single target images will be overwritten based on the source image from
      * the given {@link InputStream}
-     * {@link InputStream}
-
      * @param key
      * @param srcImageStm
      * @param context (optional, default <code>null</code>)

@@ -929,9 +929,10 @@ public class IMAPStore extends Store
 	    if (null != responseCode) {
 	        // Verify login really failed due to an authentication/authorization issue
             switch (responseCode) {
-                case AUTHENTICATIONFAILED: /* fall-through */
-                case AUTHORIZATIONFAILED:
+                case AUTHENTICATIONFAILED:
                     throw new AuthenticationFailedException(cex.getResponse().getRest(), cex);
+                case AUTHORIZATIONFAILED:
+                    throw new javax.mail.AuthorizationFailedException(cex.getResponse().getRest(), cex);
                 default:
                     throw new MessagingException(cex.getMessage(), cex);
             }

@@ -2,7 +2,6 @@
 
 Name:           open-xchange-meta
 BuildArch:      noarch
-#!BuildIgnore:  post-build-checks
 Version:        @OXVERSION@
 %define         ox_release 1
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>

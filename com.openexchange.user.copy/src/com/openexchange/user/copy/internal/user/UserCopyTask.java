@@ -57,6 +57,9 @@ import java.util.Map;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.Info;
+import com.openexchange.filestore.unified.UnifiedQuotaService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.RdbUserPermissionBitsStorage;
@@ -139,6 +142,11 @@ public class UserCopyTask implements CopyUserTaskService {
                 // Cannot copy a user whose files belong to another user in source context
                 throw UserCopyExceptionCodes.FILE_STORAGE_CONFLICT.create(fileStorageOwner, srcCtx.getContextId());
             }
+            String qfsMode = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(srcUsrId, srcCtx.getContextId(), Info.drive()).getMode();
+            if (UnifiedQuotaService.MODE.equals(qfsMode)) {
+                // Cannot copy a user using unified quota
+                throw UserCopyExceptionCodes.UNIFIED_QUOTA_CONFLICT.create(srcUsrId, srcCtx.getContextId());
+            }
 
             dstUsrId = userService.createUser(dstCon, dstCtx, srcUser);
             User dstUser = userService.getUser(dstCon, dstUsrId, dstCtx);
@@ -167,6 +175,9 @@ public class UserCopyTask implements CopyUserTaskService {
             error = false;
             return mapping;
         } catch (final OXException e) {
+            if (UserCopyExceptionCodes.prefix().equals(e.getPrefix())) {
+                throw e;
+            }
             throw UserCopyExceptionCodes.USER_SERVICE_PROBLEM.create(e);
         } finally {
             if (error && filestoreUsageEntryCreated) {

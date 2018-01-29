@@ -784,12 +784,12 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                     public Void call() throws Exception {
                         MailAccountStorageService mass = Services.optService(MailAccountStorageService.class);
                         if (null != mass) {
-                            mass.incrementFailedTransportAuthCount(smtpConfig.getAccountId(), session.getUserId(), session.getContextId());
+                            mass.incrementFailedTransportAuthCount(smtpConfig.getAccountId(), session.getUserId(), session.getContextId(), e);
                         }
                         return null;
                     }
                 };
-                ThreadPools.getThreadPool().submit(task);
+                ThreadPools.submitElseExecute(task);
             }
 
             if ("No authentication mechanisms supported by both server and client".equals(e.getMessage())) {
@@ -1002,17 +1002,18 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 throw MimeMailException.handleMessagingException(e);
             } catch (MessagingException e) {
                 exception = e;
-                if (e.getNextException() instanceof javax.activation.UnsupportedDataTypeException) {
+                Exception nextException = e.getNextException();
+                if (nextException instanceof javax.activation.UnsupportedDataTypeException) {
                     // Check for "no object DCH for MIME type xxxxx/yyyy"
-                    final String message = e.getNextException().getMessage();
+                    final String message = nextException.getMessage();
                     if (message.toLowerCase().indexOf("no object dch") >= 0) {
                         // Not able to recover from JAF's "no object DCH for MIME type xxxxx/yyyy" error
                         // Perform the alternative transport with custom JAF DataHandler
                         LOG.warn(message.replaceFirst("[dD][cC][hH]", Matcher.quoteReplacement("javax.activation.DataContentHandler")));
                         return transportAlt(messageToSend, recipients, transport, smtpConfig);
                     }
-                } else if (e.getNextException() instanceof IOException) {
-                    if (e.getNextException().getMessage().equals("Maximum message size is exceeded.")) {
+                } else if (nextException instanceof IOException) {
+                    if (nextException.getMessage().equals("Maximum message size is exceeded.")) {
                         throw MailExceptionCode.MAX_MESSAGE_SIZE_EXCEEDED.create(getSize(getMaxMailSize(), 0, false, true));
                     }
                 }

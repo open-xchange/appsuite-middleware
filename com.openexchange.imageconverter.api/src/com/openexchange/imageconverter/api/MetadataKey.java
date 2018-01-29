@@ -256,6 +256,7 @@ public enum MetadataKey {
     // Group Header
     HEADER_PIXEL_WIDTH(MetadataGroup.HEADER, "Header Pixel Width", 0x9001),
     HEADER_PIXEL_HEIGHT(MetadataGroup.HEADER, "Header Pixel Height", 0x9002),
+    HEADER_FORMAT_NAME(MetadataGroup.HEADER, "Header Format Name", 0x9010),
 
     // Group Thumbnail
     THUMBNAIL_OFFSET(MetadataGroup.THUMBNAIL, "Thumbnail Offset", 0x0201),

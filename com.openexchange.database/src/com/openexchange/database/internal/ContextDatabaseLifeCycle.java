@@ -164,12 +164,14 @@ public class ContextDatabaseLifeCycle implements PoolLifeCycle {
             result = stmt.executeQuery();
             if (result.next()) {
                 retval = new ConnectionData();
-                retval.props = new Properties();
+                Properties defaults = new Properties();
+                retval.props = defaults;
+                defaults.put("useSSL", "false");
                 int pos = 1;
                 retval.url = result.getString(pos++);
                 retval.driverClass = result.getString(pos++);
-                retval.props.put("user", result.getString(pos++));
-                retval.props.put("password", result.getString(pos++));
+                defaults.put("user", result.getString(pos++));
+                defaults.put("password", result.getString(pos++));
                 retval.block = result.getBoolean(pos++);
                 retval.max = result.getInt(pos++);
                 retval.min = result.getInt(pos++);

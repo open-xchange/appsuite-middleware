@@ -1605,10 +1605,10 @@ msgstr ""
 msgid "Your device configuration"
 msgstr ""
 
-#. %1$s, %2$s %3$s on %4$s %5$s
+#. %1$s, %2$s on %3$s %4$s
 #. E.g. App Suite UI, Chrome 61 on Windows 10
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:65
-msgid "%1$s, %2$s %3$s on %4$s %5$s"
+msgid "%1$s, %2$s %3$s on %4$s"
 msgstr ""
 
 #. %1$s on %2$s %3$s
@@ -8795,6 +8795,18 @@ msgid ""
 "again later."
 msgstr ""
 
+#. Mail server denies access
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:209
+msgid "Mail server denies access."
+msgstr ""
+
+#. The user tried to append or move a message to a mail folder, which does not exist.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:212
+msgid ""
+"Destination folder does not exist. Please try to create it and retry the "
+"operation."
+msgstr ""
+
 #. The message advertising that everything is fine with checked account
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:71
 msgid "All fine"
@@ -10336,6 +10348,13 @@ msgstr ""
 msgid ""
 "The user's files are owned by user %1$s in source context %2$s. Please set "
 "individual or context-associated file storage first."
+msgstr ""
+
+#. The user %1$s in source context %2$s does use Unified Quota and therefore cannot be copied.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.user.copy/src/com/openexchange/user/copy/UserCopyExceptionMessages.java:68
+msgid ""
+"The user %1$s in source context %2$s does use Unified Quota and therefore "
+"cannot be copied."
 msgstr ""
 
 #. The provided feedback score is invalid. Please choose a number > 0.
