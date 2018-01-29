@@ -108,7 +108,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "folder VARCHAR(255) COLLATE utf8mb4_bin DEFAULT NULL," +
                 "series INT4 UNSIGNED DEFAULT NULL," +
                 "uid VARCHAR(1024) COLLATE utf8mb4_bin DEFAULT NULL," +
-                "relatedTo VARCHAR(767) DEFAULT NULL," +
+                "relatedTo VARCHAR(767) COLLATE utf8mb4_bin DEFAULT NULL," +
                 "timestamp BIGINT(20) NOT NULL," +
                 "created BIGINT(20)," +
                 "createdBy INT4 UNSIGNED," +
@@ -157,7 +157,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "folder VARCHAR(255) COLLATE utf8mb4_bin DEFAULT NULL," +
                 "series INT4 UNSIGNED DEFAULT NULL," +
                 "uid VARCHAR(1024) COLLATE utf8mb4_bin DEFAULT NULL," +
-                "relatedTo VARCHAR(767) DEFAULT NULL," +
+                "relatedTo VARCHAR(767) COLLATE utf8mb4_bin DEFAULT NULL," +
                 "timestamp BIGINT(20) NOT NULL," +
                 "created BIGINT(20)," +
                 "createdBy INT4 UNSIGNED," +
@@ -249,7 +249,7 @@ public class ChronosCreateTableService extends AbstractCreateTableImpl {
                 "event VARCHAR(128) COLLATE utf8mb4_bin NOT NULL," +
                 "user INT4 UNSIGNED NOT NULL," +
                 "uid VARCHAR(767) COLLATE utf8mb4_bin DEFAULT NULL," +
-                "relatedTo VARCHAR(767) DEFAULT NULL," +
+                "relatedTo VARCHAR(767) COLLATE utf8mb4_bin DEFAULT NULL," +
                 "acknowledged BIGINT(20) DEFAULT NULL," +
                 "action VARCHAR(32) NOT NULL," +
                 "repetition VARCHAR(64) DEFAULT NULL," +
