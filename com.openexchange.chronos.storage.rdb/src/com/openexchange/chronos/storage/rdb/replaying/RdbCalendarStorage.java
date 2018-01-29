@@ -78,10 +78,8 @@ public class RdbCalendarStorage implements CalendarStorage {
     /**
      * Initializes a new {@link RdbCalendarStorage}.
      *
-     * @param context The context
-     * @param entityResolver The entity resolver to use
-     * @param dbProvider The database provider to use
-     * @param txPolicy The transaction policy
+     * @param delegate The delegate storage
+     * @param legacyDelegate The legacy delegate storage
      */
     public RdbCalendarStorage(CalendarStorage delegate, CalendarStorage legacyDelegate) {
         super();
