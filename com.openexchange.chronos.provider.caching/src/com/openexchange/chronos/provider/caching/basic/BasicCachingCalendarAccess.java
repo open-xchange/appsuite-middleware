@@ -77,6 +77,7 @@ import com.openexchange.chronos.provider.caching.internal.response.DedicatedEven
 import com.openexchange.chronos.provider.caching.internal.response.SingleEventResponseGenerator;
 import com.openexchange.chronos.provider.extensions.BasicSearchAware;
 import com.openexchange.chronos.provider.extensions.BasicSyncAware;
+import com.openexchange.chronos.provider.extensions.CachedAware;
 import com.openexchange.chronos.provider.extensions.WarningsAware;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
@@ -93,7 +94,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
  */
-public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess, BasicSearchAware, BasicSyncAware, WarningsAware {
+public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess, BasicSearchAware, BasicSyncAware, WarningsAware, CachedAware {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BasicCachingCalendarAccess.class);
 
