@@ -16,7 +16,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 38
+%define        ox_release 39
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -62,6 +62,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc malpol
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Mon Jan 29 2018 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2018-02-05 (4553)
 * Fri Dec 08 2017 Carsten Hoeger <choeger@open-xchange.com>
 Build for Patch 2017-12-11 (4471)
 * Mon Oct 23 2017 Carsten Hoeger <choeger@open-xchange.com>
