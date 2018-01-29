@@ -52,7 +52,7 @@ package com.openexchange.ajax.config.actions;
 /**
  * Enumeration containing path of GUI preferences tree. Entries should be sorted
  * by path except all GUI stuff that comes first.
- * 
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public enum Tree {
@@ -472,8 +472,10 @@ public enum Tree {
 
     ActiveSync("/modules/com.openexchange.usm.eas/module"),
 
+    @Deprecated
     OLOX20Module("/modules/olox20/module"),
 
+    @Deprecated
     OLOX20Active("/modules/olox20/active");
 
     private final String path;
