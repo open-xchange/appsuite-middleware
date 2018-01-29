@@ -63,6 +63,7 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
+import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.handlers.SearchHandler;
 import com.openexchange.chronos.provider.caching.basic.handlers.SyncHandler;
@@ -189,6 +190,10 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     @Override
     public List<Event> getEvents() throws OXException {
+        if (this.parameters.contains(CalendarParameters.PARAMETER_UPDATE_CACHE) && this.parameters.get(CalendarParameters.PARAMETER_UPDATE_CACHE, Boolean.class, Boolean.FALSE).booleanValue()) {
+            CachingCalendarUtils.invalidateCache(account);
+            saveConfig();
+        }
         AccountUpdateState executionList = getLatestUpdateState();
 
         new CachingExecutor(this, executionList).cache(this.warnings);
