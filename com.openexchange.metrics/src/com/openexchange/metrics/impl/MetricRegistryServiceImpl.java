@@ -53,22 +53,22 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 import com.codahale.metrics.jmx.JmxReporter;
-import com.openexchange.metrics.MetricService;
+import com.openexchange.metrics.MetricRegistryService;
 
 /**
- * {@link MetricServiceImpl}
+ * {@link MetricRegistryServiceImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MetricServiceImpl implements MetricService {
+public class MetricRegistryServiceImpl implements MetricRegistryService {
 
     private final MetricRegistry metricRegistry;
     private final JmxReporter jmxReporter;
 
     /**
-     * Initialises a new {@link MetricServiceImpl}.
+     * Initialises a new {@link MetricRegistryServiceImpl}.
      */
-    public MetricServiceImpl() {
+    public MetricRegistryServiceImpl() {
         super();
         metricRegistry = new MetricRegistry();
 
@@ -93,11 +93,33 @@ public class MetricServiceImpl implements MetricService {
         return metricRegistry.meter(meterName);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.MetricRegistryService#registerMeter(java.lang.Class, java.lang.String)
+     */
+    @Override
+    public <T> Meter registerMeter(Class<T> clazz, String meterName) {
+        return metricRegistry.meter(MetricRegistry.name(clazz, meterName));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.metrics.MetricService#registerTimer(java.lang.String)
      */
     @Override
     public Timer registerTimer(String timerName) {
         return metricRegistry.timer(timerName);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.MetricRegistryService#registerTimer(java.lang.Class, java.lang.String)
+     */
+    @Override
+    public <T> Timer registerTimer(Class<T> clazz, String timerName) {
+        return metricRegistry.timer(MetricRegistry.name(clazz, timerName));
     }
 }

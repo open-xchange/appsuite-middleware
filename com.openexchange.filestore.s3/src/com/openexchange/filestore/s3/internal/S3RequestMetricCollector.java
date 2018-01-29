@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,56 +47,34 @@
  *
  */
 
-package com.openexchange.metrics.osgi;
+package com.openexchange.filestore.s3.internal;
 
-import com.openexchange.metrics.MetricRegistryService;
-import com.openexchange.metrics.impl.MetricRegistryServiceImpl;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.amazonaws.Request;
+import com.amazonaws.Response;
+import com.amazonaws.metrics.RequestMetricCollector;
 
 /**
- * {@link MetricActivator}
+ * {@link S3RequestMetricCollector}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MetricActivator extends HousekeepingActivator {
+public class S3RequestMetricCollector extends RequestMetricCollector {
 
     /**
-     * Initialises a new {@link MetricActivator}.
+     * Initialises a new {@link S3RequestMetricCollector}.
      */
-    public MetricActivator() {
+    public S3RequestMetricCollector() {
         super();
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+     * @see com.amazonaws.metrics.RequestMetricCollector#collectMetrics(com.amazonaws.Request, com.amazonaws.Response)
      */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    public void collectMetrics(Request<?> request, Response<?> response) {
+        System.err.println(request.getHttpMethod());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(MetricRegistryService.class, new MetricRegistryServiceImpl());
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
-     */
-    @Override
-    protected void stopBundle() throws Exception {
-        MetricRegistryService metricService = getService(MetricRegistryService.class);
-        ((MetricRegistryServiceImpl) metricService).shutDown();
-        unregisterService(MetricRegistryService.class);
-        super.stopBundle();
-    }
 }

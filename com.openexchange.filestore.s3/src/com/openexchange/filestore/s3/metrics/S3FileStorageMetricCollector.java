@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,31 +47,80 @@
  *
  */
 
-package com.openexchange.metrics;
+package com.openexchange.filestore.s3.metrics;
 
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.Timer;
+import com.amazonaws.metrics.MetricCollector;
+import com.amazonaws.metrics.RequestMetricCollector;
+import com.amazonaws.metrics.ServiceMetricCollector;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link MetricService}
+ * {@link S3FileStorageMetricCollector}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface MetricService {
+public class S3FileStorageMetricCollector extends MetricCollector {
+
+    private final S3FileStorageRequestMetricCollector s3FileStorageRequestMetricCollector;
 
     /**
-     * Registers a new {@link Meter} with the specified name
-     * 
-     * @param meterName The {@link Meter} name
-     * @return The created {@link Meter}
+     * Initialises a new {@link S3FileStorageMetricCollector}.
      */
-    Meter registerMeter(String meterName);
+    public S3FileStorageMetricCollector(String filestoreId, ServiceLookup services) {
+        super();
+        s3FileStorageRequestMetricCollector = new S3FileStorageRequestMetricCollector(filestoreId, services);
+    }
 
-    /**
-     * Registers a new {@link Timer} with the specified name
+    /*
+     * (non-Javadoc)
      * 
-     * @param timerName The {@link Timer} name
-     * @return The created {@link Timer}
+     * @see com.amazonaws.metrics.MetricCollector#start()
      */
-    Timer registerTimer(String timerName);
+    @Override
+    public boolean start() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.amazonaws.metrics.MetricCollector#stop()
+     */
+    @Override
+    public boolean stop() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.amazonaws.metrics.MetricCollector#isEnabled()
+     */
+    @Override
+    public boolean isEnabled() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.amazonaws.metrics.MetricCollector#getRequestMetricCollector()
+     */
+    @Override
+    public RequestMetricCollector getRequestMetricCollector() {
+        return s3FileStorageRequestMetricCollector;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.amazonaws.metrics.MetricCollector#getServiceMetricCollector()
+     */
+    @Override
+    public ServiceMetricCollector getServiceMetricCollector() {
+        return ServiceMetricCollector.NONE;
+    }
 }

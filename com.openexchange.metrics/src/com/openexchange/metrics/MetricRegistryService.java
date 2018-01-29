@@ -47,56 +47,51 @@
  *
  */
 
-package com.openexchange.metrics.osgi;
+package com.openexchange.metrics;
 
-import com.openexchange.metrics.MetricRegistryService;
-import com.openexchange.metrics.impl.MetricRegistryServiceImpl;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.Timer;
 
 /**
- * {@link MetricActivator}
+ * {@link MetricRegistryService}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MetricActivator extends HousekeepingActivator {
+public interface MetricRegistryService {
 
     /**
-     * Initialises a new {@link MetricActivator}.
-     */
-    public MetricActivator() {
-        super();
-    }
-
-    /*
-     * (non-Javadoc)
+     * Registers a new {@link Meter} with the specified name
      * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+     * @param meterName The {@link Meter} name
+     * @return The created {@link Meter}
      */
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
+    Meter registerMeter(String meterName);
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Registers a new {@link Meter} with the specified name and for
+     * the specified {@link Class}
      * 
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
+     * @param clazz The {@link Class} for which the metric will be registered
+     * @param meterName The name of the {@link Meter}
+     * @return The created {@link Meter}
      */
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(MetricRegistryService.class, new MetricRegistryServiceImpl());
-    }
+    <T> Meter registerMeter(Class<T> clazz, String meterName);
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Registers a new {@link Timer} with the specified name
      * 
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
+     * @param timerName The {@link Timer} name
+     * @return The created {@link Timer}
      */
-    @Override
-    protected void stopBundle() throws Exception {
-        MetricRegistryService metricService = getService(MetricRegistryService.class);
-        ((MetricRegistryServiceImpl) metricService).shutDown();
-        unregisterService(MetricRegistryService.class);
-        super.stopBundle();
-    }
+    Timer registerTimer(String timerName);
+
+    /**
+     * Registers a new {@link Timer} with the specified name and for
+     * the specified {@link Class}
+     * 
+     * @param clazz The {@link Class} for which the metric will be registered
+     * @param timerName The {@link Timer} name
+     * @return The created {@link Timer}
+     */
+    <T> Timer registerTimer(Class<T> clazz, String timerName);
 }

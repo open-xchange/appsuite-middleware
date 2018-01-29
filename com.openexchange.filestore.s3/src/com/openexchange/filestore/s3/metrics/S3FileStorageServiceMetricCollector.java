@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,56 +47,45 @@
  *
  */
 
-package com.openexchange.metrics.osgi;
+package com.openexchange.filestore.s3.metrics;
 
-import com.openexchange.metrics.MetricRegistryService;
-import com.openexchange.metrics.impl.MetricRegistryServiceImpl;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.amazonaws.metrics.ByteThroughputProvider;
+import com.amazonaws.metrics.ServiceLatencyProvider;
+import com.amazonaws.metrics.ServiceMetricCollector;
 
 /**
- * {@link MetricActivator}
+ * {@link S3FileStorageServiceMetricCollector}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MetricActivator extends HousekeepingActivator {
+public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector {
 
     /**
-     * Initialises a new {@link MetricActivator}.
+     * Initialises a new {@link S3FileStorageServiceMetricCollector}.
      */
-    public MetricActivator() {
+    public S3FileStorageServiceMetricCollector() {
         super();
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+     * @see com.amazonaws.metrics.ServiceMetricCollector#collectByteThroughput(com.amazonaws.metrics.ByteThroughputProvider)
      */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    public void collectByteThroughput(ByteThroughputProvider provider) {
+        // TODO Auto-generated method stub
+
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
+     * @see com.amazonaws.metrics.ServiceMetricCollector#collectLatency(com.amazonaws.metrics.ServiceLatencyProvider)
      */
     @Override
-    protected void startBundle() throws Exception {
-        registerService(MetricRegistryService.class, new MetricRegistryServiceImpl());
-    }
+    public void collectLatency(ServiceLatencyProvider provider) {
+        // TODO Auto-generated method stub
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
-     */
-    @Override
-    protected void stopBundle() throws Exception {
-        MetricRegistryService metricService = getService(MetricRegistryService.class);
-        ((MetricRegistryServiceImpl) metricService).shutDown();
-        unregisterService(MetricRegistryService.class);
-        super.stopBundle();
     }
 }

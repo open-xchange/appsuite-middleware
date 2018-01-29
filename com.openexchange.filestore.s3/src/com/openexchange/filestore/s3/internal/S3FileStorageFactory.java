@@ -73,6 +73,7 @@ import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration;
+import com.amazonaws.metrics.AwsSdkMetrics;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3Builder;
 import com.amazonaws.services.s3.AmazonS3Client;
@@ -90,6 +91,7 @@ import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageProvider;
+import com.openexchange.filestore.s3.metrics.S3FileStorageMetricCollector;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
@@ -246,6 +248,12 @@ public class S3FileStorageFactory implements FileStorageProvider {
                 clientBuilder = builder;
                 encrypted = true;
             }
+        }
+        // Check for metric collection
+        boolean metricCollection = configService.getBoolProperty(getPropertyName(sb, filestoreID, "metricCollection"), false);
+        if (metricCollection) {
+            // Enable metric collection by override the default metrics
+            AwsSdkMetrics.setMetricCollector(new S3FileStorageMetricCollector(filestoreID, services));
         }
         /*
          * configure client
