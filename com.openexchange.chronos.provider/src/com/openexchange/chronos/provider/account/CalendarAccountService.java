@@ -145,11 +145,20 @@ public interface CalendarAccountService {
      *
      * @param session The current user session
      * @param id The identifier of the account to load
-     * @return The loaded calendar account, or <code>null</code> if not found
+     * @return The loaded calendar account
      * @param parameters Additional calendar parameters, or <code>null</code> if not set
-     * @throws OXException if permission check fails
      */
     CalendarAccount getAccount(Session session, int id, CalendarParameters parameters) throws OXException;
+
+    /**
+     * Gets multiple existing calendar accounts.
+     *
+     * @param session The current user session
+     * @param ids The identifiers of the account to load
+     * @return The loaded calendar accounts
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
+     */
+    List<CalendarAccount> getAccounts(Session session, int[] ids, CalendarParameters parameters) throws OXException;
 
     /**
      * Gets a list of all calendar accounts stored for a specific user.

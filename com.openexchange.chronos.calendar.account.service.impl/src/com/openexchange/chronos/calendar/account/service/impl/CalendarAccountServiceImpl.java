@@ -52,6 +52,7 @@ package com.openexchange.chronos.calendar.account.service.impl;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -270,30 +271,41 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
 
     @Override
     public CalendarAccount getAccount(Session session, int id, CalendarParameters parameters) throws OXException {
-        CalendarAccount storedAccount = new OSGiCalendarStorageOperation<CalendarAccount>(services, session.getContextId(), -1, parameters) {
+        return getAccounts(session, new int[] { id }, parameters).get(0);
+    }
+
+    @Override
+    public List<CalendarAccount> getAccounts(Session session, int[] ids, CalendarParameters parameters) throws OXException {
+        CalendarAccount[] storedAccounts = new OSGiCalendarStorageOperation<CalendarAccount[]>(services, session.getContextId(), -1, parameters) {
 
             @Override
-            protected CalendarAccount call(CalendarStorage storage) throws OXException {
-                return storage.getAccountStorage().loadAccount(session.getUserId(), id);
+            protected CalendarAccount[] call(CalendarStorage storage) throws OXException {
+                CalendarAccount[] accounts = new CalendarAccount[ids.length];
+                for (int i = 0; i < ids.length; i++) {
+                    accounts[i] = storage.getAccountStorage().loadAccount(session.getUserId(), ids[i]);
+                }
+                return accounts;
             }
         }.executeQuery();
-        if (null == storedAccount && CalendarAccount.DEFAULT_ACCOUNT.getAccountId() == id) {
-            if (isGuest(session)) {
-                /*
-                 * return a virtual default calendar account for guest users
-                 */
-                storedAccount = getVirtualDefaultAccount(session);
-            } else {
-                /*
-                 * get default account from list to implicitly trigger pending auto-provisioning tasks of the default account
-                 */
-                storedAccount = find(getAccounts(session, parameters), CalendarAccount.DEFAULT_ACCOUNT.getProviderId());
+        for (int i = 0; i < storedAccounts.length; i++) {
+            if (null == storedAccounts[i] && CalendarAccount.DEFAULT_ACCOUNT.getAccountId() == ids[i]) {
+                if (isGuest(session)) {
+                    /*
+                     * return a virtual default calendar account for guest users
+                     */
+                    storedAccounts[i] = getVirtualDefaultAccount(session);
+                } else {
+                    /*
+                     * get default account from list to implicitly trigger pending auto-provisioning tasks of the default account
+                     */
+                    storedAccounts[i] = find(getAccounts(session, parameters), CalendarAccount.DEFAULT_ACCOUNT.getProviderId());
+                }
+            }
+            if (null == storedAccounts[i]) {
+                throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(ids[i]);
             }
         }
-        if (null == storedAccount) {
-            throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(id);
-        }
-        return storedAccount;
+        return Arrays.asList(storedAccounts);
     }
 
     @Override
@@ -301,7 +313,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         /*
          * get accounts from storage
          */
-        List<CalendarAccount> accounts = filterUnaccessible(session, getAccounts(session.getContextId(), session.getUserId()));
+        List<CalendarAccount> accounts = filterInaccessible(session, getAccounts(session.getContextId(), session.getUserId()));
         /*
          * check for pending provisioning tasks
          */
@@ -538,7 +550,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         }
     }
 
-    private List<CalendarAccount> filterUnaccessible(Session session, List<CalendarAccount> accounts) throws OXException {
+    private List<CalendarAccount> filterInaccessible(Session session, List<CalendarAccount> accounts) throws OXException {
         if (null != accounts && 0 < accounts.size()) {
             CalendarProviderRegistry providerRegistry = getProviderRegistry();
             for (Iterator<CalendarAccount> iterator = accounts.iterator(); iterator.hasNext();) {
