@@ -398,7 +398,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
         } else {
             removed = attendees.remove(0);
         }
-        eventManager.updateEvent(exceptionEvent, false);
+        eventManager.updateEvent(exceptionEvent);
 
         // Check again if trigger times are correct
         triggers = getAndCheckAlarmTrigger(2); // The alarm of the series and the alarm for the exception
@@ -418,7 +418,7 @@ public class BasicAlarmTriggerTest extends AbstractUserTimezoneAlarmTriggerTest 
          * 5. Re-add user 2
          */
         attendees.add(removed);
-        eventManager.updateEvent(exceptionEvent, false);
+        eventManager.updateEvent(exceptionEvent);
         eventManager2.setLastTimeStamp(eventManager.getLastTimeStamp());
 
         // Check again if trigger times are correct

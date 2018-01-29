@@ -107,7 +107,7 @@ public class BasicAlarmTest extends AbstractAlarmTest {
         updateData.setId(actualEventData.getId());
 
         // Update the event and add the alarm
-        expectedEventData = eventManager.updateEvent(updateData, false);
+        expectedEventData = eventManager.updateEvent(updateData);
 
         // Assert that the alarm was successfully added
         getAndAssertAlarms(expectedEventData, 1);
@@ -125,7 +125,7 @@ public class BasicAlarmTest extends AbstractAlarmTest {
         updateData.setAlarms(Collections.singletonList(AlarmFactory.createDisplayAlarm("-PT30M")));
         updateData.setId(actualEventData.getId());
 
-        expectedEventData = eventManager.updateEvent(updateData, false);
+        expectedEventData = eventManager.updateEvent(updateData);
 
         actualEventData = getAndAssertAlarms(expectedEventData, 1);
         assertEquals("-PT30M", actualEventData.getAlarms().get(0).getTrigger().getDuration());
@@ -149,7 +149,7 @@ public class BasicAlarmTest extends AbstractAlarmTest {
             updateData.setAlarms(Collections.singletonList(alarm));
             updateData.setId(actualEventData.getId());
 
-            expectedEventData = eventManager.updateEvent(updateData, false);
+            expectedEventData = eventManager.updateEvent(updateData);
 
             actualEventData = getAndAssertAlarms(expectedEventData, 1);
 
@@ -166,7 +166,7 @@ public class BasicAlarmTest extends AbstractAlarmTest {
             updateData.setAlarms(Collections.singletonList(alarm));
             updateData.setId(actualEventData.getId());
 
-            expectedEventData = eventManager.updateEvent(updateData, false);
+            expectedEventData = eventManager.updateEvent(updateData);
 
             actualEventData = getAndAssertAlarms(expectedEventData, 1);
 
@@ -182,7 +182,7 @@ public class BasicAlarmTest extends AbstractAlarmTest {
             updateData.setAlarms(Collections.singletonList(alarm));
             updateData.setId(actualEventData.getId());
 
-            expectedEventData = eventManager.updateEvent(updateData, false);
+            expectedEventData = eventManager.updateEvent(updateData);
 
             actualEventData = getAndAssertAlarms(expectedEventData, 1);
 

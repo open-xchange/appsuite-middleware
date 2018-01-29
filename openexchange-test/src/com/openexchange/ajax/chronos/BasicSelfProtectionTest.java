@@ -126,7 +126,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
         Assert.assertEquals(excpectedErrorCode, updateResponse.getCode());
 
         // Do a successful update
-        eventManager.updateEvent(eventData, false);
+        eventManager.updateEvent(eventData);
 
         // Query updates with expand 'true'
         ChronosUpdatesResponse updatesResponse = defaultUserApi.getChronosApi().getUpdates(defaultUserApi.getSession(), folderId, timestamp, fromStr, untilStr, null, null, null, true, true, false);

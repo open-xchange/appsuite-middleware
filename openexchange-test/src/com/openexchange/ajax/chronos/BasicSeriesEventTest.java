@@ -179,7 +179,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         expectedEventData.setEndDate(DateTimeUtil.incrementDateTimeData(expectedEventData.getEndDate(), 5000));
 
         // Update
-        EventData updatedEvent = eventManager.updateEvent(expectedEventData, false);
+        EventData updatedEvent = eventManager.updateEvent(expectedEventData);
 
         assertNotEquals("The timestamp matches", expectedEventData.getLastModified(), updatedEvent.getLastModified());
         assertNotEquals("The sequence matches", expectedEventData.getSequence(), updatedEvent.getSequence());
@@ -222,7 +222,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
         updatedData.setEndDate(DateTimeUtil.incrementDateTimeData(allEvents.get(2).getEndDate(), 5000));
         updatedData.setId(occurence.getId());
 
-        EventData updatedEvent = eventManager.updateOccurenceEvent(updatedData, occurence.getRecurrenceId(), false);
+        EventData updatedEvent = eventManager.updateOccurenceEvent(updatedData, occurence.getRecurrenceId());
 
         UpdatesResult updates = eventManager.getUpdates(new Date(updatedEvent.getTimestamp()));
 

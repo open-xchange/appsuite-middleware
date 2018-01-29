@@ -97,7 +97,7 @@ public class RestrictedAttendeePermissionsTest extends AbstractAttendeeTest {
         String expectedEventId = expectedEventData.getId();
 
         expectedEventData.setAttendees(addAdditionalAttendee(expectedEventData));
-        eventManager.updateEvent(expectedEventData, false);
+        eventManager.updateEvent(expectedEventData);
 
         EventData eventToUpdate = eventManager2.getEvent(expectedEventId);
 
@@ -118,7 +118,7 @@ public class RestrictedAttendeePermissionsTest extends AbstractAttendeeTest {
         String expectedEventId = expectedEventData.getId();
 
         expectedEventData.setAttendees(addAdditionalAttendee(expectedEventData));
-        EventData updatedEvent = eventManager.updateEvent(expectedEventData, false);
+        EventData updatedEvent = eventManager.updateEvent(expectedEventData);
 
         List<Attendee> attendeeList = updatedEvent.getAttendees();
         assertEquals(2, attendeeList.size());
@@ -143,7 +143,7 @@ public class RestrictedAttendeePermissionsTest extends AbstractAttendeeTest {
         String expectedEventId = expectedEventData.getId();
 
         expectedEventData.setAttendees(addAdditionalAttendee(expectedEventData));
-        EventData updatedEvent = eventManager.updateEvent(expectedEventData, false);
+        EventData updatedEvent = eventManager.updateEvent(expectedEventData);
 
         EventData eventToUpdate = eventManager2.getEvent(expectedEventId);
 
@@ -165,7 +165,7 @@ public class RestrictedAttendeePermissionsTest extends AbstractAttendeeTest {
         EventData expectedEventData = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testPermissionSingle"));
         String expectedEventId = expectedEventData.getId();
         expectedEventData.setAttendees(addAdditionalAttendee(expectedEventData));
-        EventData updatedEvent = eventManager.updateEvent(expectedEventData, false);
+        EventData updatedEvent = eventManager.updateEvent(expectedEventData);
         Calendar start = Calendar.getInstance();
         start.setTimeInMillis(System.currentTimeMillis());
         updatedEvent.setStartDate(DateTimeUtil.getDateTime(start));

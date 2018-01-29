@@ -103,7 +103,7 @@ public class AbstractAttendeeTest extends AbstractChronosTest {
     public List<Attendee> addAdditionalAttendee(EventData expectedEventData) {
         ArrayList<Attendee> atts = new ArrayList<>(2);
         atts.addAll(expectedEventData.getAttendees());
-        Attendee attendee2 = AttendeeFactory.createIndividual(user2.getCalUser()/*, testUser2.getLogin()*/);
+        Attendee attendee2 = AttendeeFactory.createIndividual(user2.getCalUser());
         attendee2.setPartStat("ACCEPTED");
         atts.add(attendee2);
         return atts;

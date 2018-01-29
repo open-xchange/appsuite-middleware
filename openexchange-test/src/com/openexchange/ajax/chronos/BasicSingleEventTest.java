@@ -140,7 +140,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         EventData event = eventManager.createEvent(initialEvent);
         event.setEndDate(DateTimeUtil.incrementDateTimeData(event.getEndDate(), 5000));
 
-        EventData updatedEvent = eventManager.updateEvent(event, false);
+        EventData updatedEvent = eventManager.updateEvent(event);
 
         assertNotEquals("The timestamp matches", event.getLastModified(), updatedEvent.getLastModified());
         assertNotEquals("The sequence matches", event.getSequence(), updatedEvent.getSequence());
@@ -293,7 +293,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         updateData.setAttachments(Collections.singletonList(retainedAttachment));
 
         // Update the event
-        actualEventData = eventManager.updateEvent(updateData, false);
+        actualEventData = eventManager.updateEvent(updateData);
         // Get...
         EventData exEventData = eventManager.getEvent(actualEventData.getId());
         // ...and assert

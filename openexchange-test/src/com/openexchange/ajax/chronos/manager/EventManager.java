@@ -378,7 +378,7 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error occurs
      */
     public List<EventData> listEvents(List<EventId> ids) throws ApiException {
-        EventsResponse listResponse = userApi.getChronosApi().getEventList (userApi.getSession(),defaultFolder, ids, null, false);
+        EventsResponse listResponse = userApi.getChronosApi().getEventList(userApi.getSession(), defaultFolder, ids, null, false);
         return checkResponse(listResponse.getErrorDesc(), listResponse.getError(), listResponse.getData());
     }
 
@@ -417,6 +417,19 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      * @throws ChronosApiException if a Chronos API error is occurred
      */
+    public EventData updateEvent(EventData eventData) throws ApiException, ChronosApiException {
+        return updateEvent(eventData);
+    }
+
+    /**
+     * Updates the specified event and ignores conflicts
+     *
+     * @param eventData The data of the event
+     * @param expectException Whether an exception is expected or not
+     * @return The updated event
+     * @throws ApiException if an API error is occurred
+     * @throws ChronosApiException if a Chronos API error is occurred
+     */
     public EventData updateEvent(EventData eventData, boolean expectException) throws ApiException, ChronosApiException {
         ChronosCalendarResultResponse updateResponse = userApi.getChronosApi().updateEvent(userApi.getSession(), defaultFolder, eventData.getId(), eventData, System.currentTimeMillis(), null, null, true, false, false, null, null, EXPAND_SERIES);
         return handleUpdate(updateResponse, expectException);
@@ -427,6 +440,20 @@ public class EventManager extends AbstractManager {
      *
      * @param eventData The data of the event
      * @param the recurrence identifier
+     * @return The updated event
+     * @throws ApiException if an API error is occurred
+     * @throws ChronosApiException if a Chronos API error is occurred
+     */
+    public EventData updateOccurenceEvent(EventData eventData, String recurrenceId) throws ApiException, ChronosApiException {
+        return updateOccurenceEvent(eventData, recurrenceId);
+    }
+
+    /**
+     * Updates the specified recurrence event and ignores conflicts
+     *
+     * @param eventData The data of the event
+     * @param the recurrence identifier
+     * @param expectException Whether an exception is expected or not
      * @return The updated event
      * @throws ApiException if an API error is occurred
      * @throws ChronosApiException if a Chronos API error is occurred
