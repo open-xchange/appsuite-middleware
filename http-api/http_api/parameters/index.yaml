@@ -157,9 +157,6 @@ gblPathParamConfigNode:
     - modules/olox20
     - modules/olox20/active
     - modules/olox20/module
-    - modules/com.openexchange.oxupdater
-    - modules/com.openexchange.oxupdater/module
-    - modules/com.openexchange.oxupdater/active
     - modules/com.openexchange.passwordchange
     - modules/com.openexchange.passwordchange/showStrength
     - modules/com.openexchange.passwordchange/minLength

@@ -90,6 +90,7 @@ public enum Permission {
     PUBLICATION(UserConfiguration.PUBLICATION, "Publication"),
     ACTIVE_SYNC(UserConfiguration.ACTIVE_SYNC, "ActiveSync"),
     USM(UserConfiguration.USM, "USM"),
+    @Deprecated
     OLOX20(UserConfiguration.OLOX20, "OLOX20"),
     DENIED_PORTAL(UserConfiguration.DENIED_PORTAL, "DeniedPortal"),
     CALDAV(UserConfiguration.CALDAV, "CalDAV"),

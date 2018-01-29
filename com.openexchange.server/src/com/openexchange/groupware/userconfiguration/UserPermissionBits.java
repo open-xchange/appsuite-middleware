@@ -214,6 +214,7 @@ public class UserPermissionBits implements Serializable, Cloneable {
     /**
      * The permission bit for OLOX v2.0 access.
      */
+    @Deprecated
     public static final int OLOX20 = 1 << 27;
 
     /**
@@ -811,6 +812,7 @@ public class UserPermissionBits implements Serializable, Cloneable {
     /**
      * Checks if this user configuration indicates that the user may use OLOX2.0.
      */
+    @Deprecated
     public boolean hasOLOX20() {
         return hasPermission(OLOX20);
     }
@@ -818,6 +820,7 @@ public class UserPermissionBits implements Serializable, Cloneable {
     /**
      * Sets if this user is able to user OLOX2.0.
      */
+    @Deprecated
     public void setOLOX20(final boolean olox20) {
         setPermission(olox20, OLOX20);
     }
