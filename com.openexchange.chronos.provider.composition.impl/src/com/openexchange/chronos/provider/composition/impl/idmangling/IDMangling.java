@@ -68,6 +68,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.AccountAwareCalendarFolder;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
+import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventID;
@@ -381,9 +382,12 @@ public class IDMangling {
      * @return The unique folder identifier
      */
     public static String getUniqueFolderId(int accountId, String relativeFolderId) {
-        if (null == relativeFolderId || (CalendarAccount.DEFAULT_ACCOUNT.getAccountId() == accountId &&
-            ROOT_FOLDER_IDS.contains(relativeFolderId) || relativeFolderId.startsWith(SHARED_PREFIX))) {
-            return relativeFolderId;
+        if (CalendarAccount.DEFAULT_ACCOUNT.getAccountId() == accountId) {
+            if (ROOT_FOLDER_IDS.contains(relativeFolderId) || relativeFolderId.startsWith(SHARED_PREFIX)) {
+                return relativeFolderId;
+            }
+        } else if (null == relativeFolderId) {
+            return mangleFolderId(accountId, BasicCalendarAccess.FOLDER_ID);
         }
         return mangleFolderId(accountId, relativeFolderId);
     }

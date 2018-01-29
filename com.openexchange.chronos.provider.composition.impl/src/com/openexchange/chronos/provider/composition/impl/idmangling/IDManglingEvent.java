@@ -79,6 +79,11 @@ public class IDManglingEvent extends DelegatingEvent {
     }
 
     @Override
+    public boolean containsFolderId() {
+        return true;
+    }
+
+    @Override
     public String getFolderId() {
         return newFolderId;
     }
@@ -87,5 +92,5 @@ public class IDManglingEvent extends DelegatingEvent {
     public String toString() {
         return "IDManglingEvent [newFolderId=" + newFolderId + ", delegate=" + delegate + "]";
     }
-    
+
 }
