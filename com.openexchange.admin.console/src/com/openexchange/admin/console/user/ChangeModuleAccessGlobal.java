@@ -89,9 +89,9 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
 
     private final UserModuleAccess removeAccess;
 
-    private int filter;
-
     private String filterString;
+
+    private String accessCombinationName;
 
     public static void main(final String[] args) {
         new ChangeModuleAccessGlobal(args);
@@ -114,7 +114,7 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
         try {
             setOptions(parser);
             parse(parser, args);
-            prepare(parser);
+            prepare();
             execute();
             printSuccessMessage();
         } catch (Exception e) {
@@ -175,19 +175,18 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
         this.accessPublicFolderEditable = setLongOpt(admp, OPT_ACCESS_PUBLIC_FOLDER_EDITABLE, "on/off", "Whether public folder(s) is/are editable (Default is off). Applies only to context admin user.", true, required, extended);
     }
 
-    private void prepare(AdminParser parser) throws MalformedURLException, RemoteException, NotBoundException, CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException, MissingOptionException, InvalidDataException {
+    private void prepare() throws MalformedURLException, RemoteException, NotBoundException  {
         oxusr = getUserInterface();
     }
 
     private void execute() throws InvalidCredentialsException, StorageException, RemoteException, InvalidDataException {
-        oxusr.changeModuleAccessGlobal(filterString, addAccess, removeAccess, auth);
-    }
+        UserModuleAccess add = new UserModuleAccess();
+        add.disableAll();
+        add.setGlobalAddressBookDisabled(false);
+        UserModuleAccess remove = new UserModuleAccess();
+        remove.disableAll();
+        remove.setGlobalAddressBookDisabled(false);
 
-    private void parse(AdminParser parser, String[] args) throws CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException, MissingOptionException, InvalidDataException, RemoteException {
-        parser.ownparse(args);
-        auth = credentialsparsing(parser);
-
-        final String accessCombinationName = parseAndSetAccessCombinationName(parser);
         if (null != accessCombinationName) {
             final UserModuleAccess moduleAccess = oxusr.moduleAccessForName(accessCombinationName.trim());
 
@@ -199,12 +198,22 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
                 throw new InvalidDataException("Unable to set Global Address Book Permission.");
             }
 
-            moduleAccess.transferTo(addAccess, removeAccess);
-            addAccess.setGlobalAddressBookDisabled(false);
-            removeAccess.setGlobalAddressBookDisabled(false);
-
-
+            moduleAccess.transferTo(add, remove);
+            add.setGlobalAddressBookDisabled(false);
+            remove.setGlobalAddressBookDisabled(false);
         }
+
+        UserModuleAccess dummy = new UserModuleAccess();
+        addAccess.transferTo(add, dummy);
+        removeAccess.transferTo(remove, dummy);
+        oxusr.changeModuleAccessGlobal(filterString, add, remove, auth);
+    }
+
+    private void parse(AdminParser parser, String[] args) throws CLIParseException, CLIIllegalOptionValueException, CLIUnknownOptionException, MissingOptionException, InvalidDataException, RemoteException {
+        parser.ownparse(args);
+        auth = credentialsparsing(parser);
+
+        accessCombinationName = parseAndSetAccessCombinationName(parser);
 
         if (parser.getOptionValue(accessCalendarOption) != null) {
             if (accessOption2Boolean(parser, accessCalendarOption)) {
