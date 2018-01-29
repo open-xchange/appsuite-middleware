@@ -184,9 +184,9 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
     RESTRICTED_BY_CLASSIFICATION("Access to event restricted by classification [folder %1$s, id %2$s, classification %3$s]", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 4037),
     /**
      * <li>This modification can only be performed by the organizer of the event.</li>
-     * <li>Modification restricted to organizer [folder %1$s, id %2$s]</li>
+     * <li>Modification restricted to organizer [folder %1$s, id %2$s, organizerUri %3s, organizerCn %4$s]</li>
      */
-    NOT_ORGANIZER("Modification restricted to organizer [folder %1$s, id %2$s]", NOT_ORGANIZER_MSG, Category.CATEGORY_PERMISSION_DENIED, 4038),
+    NOT_ORGANIZER("Modification restricted to organizer [folder %1$s, id %2$s, organizerUri %3s, organizerCn %4$s]", NOT_ORGANIZER_MSG, Category.CATEGORY_PERMISSION_DENIED, 4038),
     /**
      * <li>The supplied folder is not supported. Please select a valid folder and try again.</li>
      * <li>Unsupported folder [folder %1$s, content type %2$s]</li>

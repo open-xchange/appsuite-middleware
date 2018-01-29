@@ -767,7 +767,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         }
         Check.classificationAllowsUpdate(folder, originalEvent);
         if (isAttendeeSchedulingResource(originalEvent, calendarUserId) && session.getConfig().isRestrictAllowedAttendeeChanges()) {
-            throw CalendarExceptionCodes.NOT_ORGANIZER.create(folder.getID(), originalEvent.getId());
+            throw CalendarExceptionCodes.NOT_ORGANIZER.create(folder.getID(), originalEvent.getId(), originalEvent.getOrganizer().getUri(), originalEvent.getOrganizer().getSentBy());
         }
     }
 
