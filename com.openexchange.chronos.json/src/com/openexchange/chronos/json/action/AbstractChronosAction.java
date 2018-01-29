@@ -59,6 +59,7 @@ import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDE
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER_BY;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_END;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_START;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_UPDATE_CACHE;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.Date;
@@ -254,6 +255,8 @@ public abstract class AbstractChronosAction implements AJAXActionService {
                 return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_NOTIFICATION, Boolean.valueOf(value));
             case PARAMETER_MASK_ID:
                 return new AbstractMap.SimpleEntry<String, String>(PARAMETER_MASK_ID, value);
+            case PARAMETER_UPDATE_CACHE:
+                return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_UPDATE_CACHE, Boolean.valueOf(value));
             default:
                 return null;
         }

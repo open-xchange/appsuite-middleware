@@ -53,6 +53,7 @@ import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIEL
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_INCLUDE_PRIVATE;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER_BY;
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_UPDATE_CACHE;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -86,7 +87,7 @@ public class AllAction extends ChronosAction {
 
     private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet(PARAM_RANGE_START, PARAM_RANGE_END);
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_EXPAND, PARAMETER_ORDER_BY, PARAMETER_ORDER, PARAMETER_FIELDS, PARAMETER_INCLUDE_PRIVATE);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_EXPAND, PARAMETER_ORDER_BY, PARAMETER_ORDER, PARAMETER_FIELDS, PARAMETER_INCLUDE_PRIVATE, PARAMETER_UPDATE_CACHE);
 
     private static final String PARAMETER_FOLDERS = "folders";
 

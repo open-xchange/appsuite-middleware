@@ -199,6 +199,13 @@ public interface CalendarParameters {
     static final String UID_CONFLICT_STRATEGY = "uidConflictStrategy";
 
     /**
+     * {@link Boolean}
+     * <p/>
+     * Indicates whether cached calendar data should forcibly be updated prior performing the operation or not.
+     */
+    static final String PARAMETER_UPDATE_CACHE = "updateCache";
+
+    /**
      * {@link Integer}
      * <p/>
      * The principal id in an itip context
