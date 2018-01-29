@@ -51,12 +51,14 @@ package com.openexchange.chronos.provider.caching.internal.response;
 
 import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import static com.openexchange.chronos.common.CalendarUtils.getSearchTerm;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -75,21 +77,22 @@ import com.openexchange.search.internal.operands.ColumnFieldOperand;
  */
 public class ChangeExceptionsResponseGenerator extends ResponseGenerator {
 
-    String folderId;
     final String seriesId;
 
-    public ChangeExceptionsResponseGenerator(CachingCalendarAccess cachedCalendarAccess, String folderId, String seriesId) {
+    public ChangeExceptionsResponseGenerator(BasicCachingCalendarAccess cachedCalendarAccess, String seriesId) {
         super(cachedCalendarAccess);
-        this.folderId = folderId;
         this.seriesId = seriesId;
     }
 
     public List<Event> generate() throws OXException {
-        return new OSGiCalendarStorageOperation<List<Event>>(Services.getServiceLookup(), this.cachedCalendarAccess.getSession().getContext().getContextId(), this.cachedCalendarAccess.getAccount().getAccountId()) {
+        return new OSGiCalendarStorageOperation<List<Event>>(Services.getServiceLookup(), this.cachedCalendarAccess.getCalendarSession().getContextId(), this.cachedCalendarAccess.getAccount().getAccountId()) {
 
             @Override
             protected List<Event> call(CalendarStorage storage) throws OXException {
                 EventField[] fields = getFields(cachedCalendarAccess.getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class));
+                List<EventField> fieldList = new ArrayList<EventField>(Arrays.asList(fields));
+                fieldList.add(EventField.FOLDER_ID);
+                fields = fieldList.toArray(new EventField[fieldList.size()]);
 
                 Event event = storage.getEventStorage().loadEvent(seriesId, fields);
                 if (null == event) {
@@ -98,7 +101,7 @@ public class ChangeExceptionsResponseGenerator extends ResponseGenerator {
                 /*
                  * construct search term to lookup all change exceptions
                  */
-                CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(getSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, folderId)).addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.EQUALS, seriesId)).addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)));
+                CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.EQUALS, seriesId)).addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)));
                 /*
                  * perform search & filter the results based on user's access permissions
                  */
@@ -109,7 +112,6 @@ public class ChangeExceptionsResponseGenerator extends ResponseGenerator {
                 changeExceptions = storage.getUtilities().loadAdditionalEventData(cachedCalendarAccess.getAccount().getUserId(), changeExceptions, fields);
                 for (Event changeException : changeExceptions) {
                     changeException.setFlags(getFlags(event, cachedCalendarAccess.getAccount().getUserId()));
-                    changeException.setFolderId(folderId);
                 }
                 return changeExceptions;
             }

@@ -76,8 +76,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     ChronosQuotaTest.class,
     TimezoneAlarmTriggerTest.class,
     ICalEventImportExportTest.class,
-    ICalCalendarProviderTest.class,
-    RestrictedAttendeePermissionsTest.class
+    RestrictedAttendeePermissionsTest.class,
+    BasicICalCalendarProviderTest.class
     // @formatter:on
 
 })

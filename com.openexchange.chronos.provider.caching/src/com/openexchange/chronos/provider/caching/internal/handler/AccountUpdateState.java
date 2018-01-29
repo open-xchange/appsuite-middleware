@@ -49,35 +49,43 @@
 
 package com.openexchange.chronos.provider.caching.internal.handler;
 
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
-
 /**
- * {@link FolderProcessingType} defines some types of processing that will be evaluated based on the calendars defined {@link CachingCalendarAccess#getRefreshInterval()}
+ * {@link AccountUpdateState}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public enum FolderProcessingType {
+public class AccountUpdateState {
+
+    private final long lastUpdated;
+    private final long refreshInterval;
+    private final ProcessingType currentType;
+
+    public AccountUpdateState(long lastUpdated, long refreshInterval, ProcessingType type) {
+        this.lastUpdated = lastUpdated;
+        this.currentType = type;
+        this.refreshInterval = refreshInterval;
+    }
 
     /**
-     * Indicates that it is the first processing for the given {@link CalendarAccount}.
+     * Gets the lastUpdated
+     *
+     * @return The lastUpdated
      */
-    INITIAL_INSERT,
+    public long getLastUpdated() {
+        return lastUpdated;
+    }
 
     /**
-     * Indicates that there has already been an ({@link #INITIAL_INSERT}) but the consumed {@link Event}s have to be updated because the refresh interval is exceeded.
+     * Gets the currentType
+     *
+     * @return The currentType
      */
-    UPDATE,
+    public ProcessingType getType() {
+        return currentType;
+    }
 
-    /**
-     * Indicates that there has already been an ({@link #INITIAL_INSERT}) and the persisted data should be used because the refresh interval is not exceeded.
-     */
-    READ_DB,
-
-    /**
-     * Indicates that the folder has been removed
-     */
-    DELETE
+    public long getRefreshInterval() {
+        return refreshInterval;
+    }
 }

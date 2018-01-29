@@ -67,11 +67,12 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.TruncationAwareCalendarStorage;
 import com.openexchange.chronos.service.CollectionUpdate;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.chronos.service.ItemUpdate;
@@ -94,13 +95,13 @@ import com.openexchange.session.Session;
  */
 public class UpdateHandler extends AbstractHandler {
 
-    public UpdateHandler(CachingCalendarAccess cachedCalendarAccess) {
+    public UpdateHandler(BasicCachingCalendarAccess cachedCalendarAccess) {
         super(cachedCalendarAccess);
     }
 
-    private void processDiff(String folderId, TruncationAwareCalendarStorage calendarStorage, EventUpdates diff) throws OXException {
+    private void processDiff(TruncationAwareCalendarStorage calendarStorage, EventUpdates diff) throws OXException {
         delete(calendarStorage, diff);
-        create(folderId, calendarStorage, diff);
+        create(calendarStorage, diff);
         update(calendarStorage, diff);
     }
 
@@ -116,7 +117,7 @@ public class UpdateHandler extends AbstractHandler {
 
     protected void delete(TruncationAwareCalendarStorage calendarStorage, Event originalEvent) throws OXException {
         if (isSeriesMaster(originalEvent)) {
-            deleteExceptions(calendarStorage, originalEvent.getFolderId(), originalEvent.getSeriesId(), getChangeExceptionDates(calendarStorage, originalEvent.getSeriesId()));
+            deleteExceptions(calendarStorage, originalEvent.getSeriesId(), getChangeExceptionDates(calendarStorage, originalEvent.getSeriesId()));
         }
         /*
          * delete event data from storage
@@ -135,13 +136,13 @@ public class UpdateHandler extends AbstractHandler {
         return CalendarUtils.getRecurrenceIds(changeExceptions);
     }
 
-    protected void deleteExceptions(TruncationAwareCalendarStorage calendarStorage, String folderId, String seriesID, Collection<RecurrenceId> exceptionDates) throws OXException {
-        for (Event originalExceptionEvent : loadExceptionData(calendarStorage, folderId, seriesID, exceptionDates)) {
+    protected void deleteExceptions(TruncationAwareCalendarStorage calendarStorage, String seriesID, Collection<RecurrenceId> exceptionDates) throws OXException {
+        for (Event originalExceptionEvent : loadExceptionData(calendarStorage, seriesID, exceptionDates)) {
             delete(calendarStorage, originalExceptionEvent);
         }
     }
 
-    protected List<Event> loadExceptionData(TruncationAwareCalendarStorage calendarStorage, String folderId, String seriesID, Collection<RecurrenceId> recurrenceIDs) throws OXException {
+    protected List<Event> loadExceptionData(TruncationAwareCalendarStorage calendarStorage, String seriesID, Collection<RecurrenceId> recurrenceIDs) throws OXException {
         List<Event> exceptions = new ArrayList<Event>();
         if (null != recurrenceIDs && 0 < recurrenceIDs.size()) {
             for (RecurrenceId recurrenceID : recurrenceIDs) {
@@ -149,18 +150,17 @@ public class UpdateHandler extends AbstractHandler {
                 if (null == exception) {
                     throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(seriesID, String.valueOf(recurrenceID));
                 }
-                exception.setFolderId(folderId);
                 exceptions.add(exception);
             }
         }
-        return calendarStorage.getUtilities().loadAdditionalEventData(this.cachedCalendarAccess.getSession().getUserId(), exceptions, getFields());
+        return calendarStorage.getUtilities().loadAdditionalEventData(this.cachedCalendarAccess.getCalendarSession().getUserId(), exceptions, getFields());
     }
 
-    private void create(String folderId, TruncationAwareCalendarStorage calendarStorage, EventUpdates diff) throws OXException {
+    private void create(TruncationAwareCalendarStorage calendarStorage, EventUpdates diff) throws OXException {
         if (diff.getAddedItems().isEmpty()) {
             return;
         }
-        create(folderId, calendarStorage, diff.getAddedItems());
+        create(calendarStorage, diff.getAddedItems());
     }
 
     private void update(TruncationAwareCalendarStorage calendarStorage, EventUpdates diff) throws OXException {
@@ -189,7 +189,7 @@ public class UpdateHandler extends AbstractHandler {
 
     private void updateAlarms(TruncationAwareCalendarStorage calendarStorage, Event event, CollectionUpdate<Alarm, AlarmField> alarmUpdates) throws OXException {
         if (!alarmUpdates.isEmpty()) {
-            int userId = cachedCalendarAccess.getSession().getUserId();
+            int userId = cachedCalendarAccess.getCalendarSession().getUserId();
             AlarmStorage alarmStorage = calendarStorage.getAlarmStorage();
             if (!alarmUpdates.getAddedItems().isEmpty()) {
                 for (Alarm alarm : alarmUpdates.getAddedItems()) {
@@ -235,32 +235,33 @@ public class UpdateHandler extends AbstractHandler {
                     Attendee newUpdatedAttendee = AttendeeMapper.getInstance().copy(original, updated, AttendeeField.URI);
                     updatedAttendees.add(newUpdatedAttendee);
                 }
-                calendarStorage.updateAttendees(eventId, updatedAttendees);
+                EntityResolver entityResolver = this.cachedCalendarAccess.getCalendarSession().getEntityResolver();
+                calendarStorage.updateAttendees(eventId, entityResolver.prepare(updatedAttendees));
             }
         }
     }
 
     @Override
-    public ExternalCalendarResult getExternalEvents(String folderId) throws OXException {
-        return getAndPrepareExtEvents(folderId);
+    public ExternalCalendarResult getExternalEvents() throws OXException {
+        return getAndPrepareExtEvents();
     }
 
     @Override
-    public List<Event> getExistingEvents(String folderId) throws OXException {
-        return getExistingEventsInFolder(folderId);
+    public List<Event> getExistingEvents() throws OXException {
+        return getExistingEventsForAccount();
     }
 
     @Override
-    public void persist(final String folderId, final EventUpdates diff) throws OXException {
+    public void persist(final EventUpdates diff) throws OXException {
         if (diff.isEmpty()) {
             return;
         }
-        final Session session = this.cachedCalendarAccess.getSession();
-        new OSGiCalendarStorageOperation<Void>(Services.getServiceLookup(), this.cachedCalendarAccess.getSession().getContext().getContextId(), this.cachedCalendarAccess.getAccount().getAccountId()) {
+        final Session session = this.cachedCalendarAccess.getCalendarSession().getSession();
+        new OSGiCalendarStorageOperation<Void>(Services.getServiceLookup(), this.cachedCalendarAccess.getCalendarSession().getContextId(), this.cachedCalendarAccess.getAccount().getAccountId()) {
 
             @Override
             protected Void call(CalendarStorage storage) throws OXException {
-                processDiff(folderId, new TruncationAwareCalendarStorage(storage, session), diff);
+                processDiff(new TruncationAwareCalendarStorage(storage, session), diff);
 
                 return null;
             }

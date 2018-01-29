@@ -56,6 +56,7 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -69,10 +70,10 @@ import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProvid
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.chronos.schedjoules.api.auxiliary.SchedJoulesCalendar;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 
 /**
  * {@link BasicSchedJoulesCalendarAccess}
@@ -99,13 +100,13 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
     /**
      * Initialises a new {@link BasicSchedJoulesCalendarAccess}.
      *
-     * @param session The groupware {@link Session}
+     * @param calendarSession The {@link CalendarSession}
      * @param account The {@link CalendarAccount}
      * @param parameters The optional {@link CalendarParameters}
      * @throws OXException If the context cannot be resolved
      */
-    protected BasicSchedJoulesCalendarAccess(ServiceLookup services, Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super(services, session, account, parameters);
+    protected BasicSchedJoulesCalendarAccess(ServiceLookup services, CalendarSession calendarSession, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        super(services, calendarSession, account, parameters);
     }
 
     @Override
@@ -138,12 +139,12 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
     }
 
     @Override
-    protected void handleExceptions(OXException e) {
+    public void handleExceptions(OXException e) {
         // no-op
     }
 
     @Override
-    protected ExternalCalendarResult getAllEvents() throws OXException {
+    public ExternalCalendarResult getAllEvents() throws OXException {
         String itemId = account.getUserConfiguration().optString(SchedJoulesFields.ITEM_ID);
         JSONObject internalConfig = account.getInternalConfiguration();
         try {
@@ -152,7 +153,7 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
             URL url = getFeedURL(internalConfig);
 
             SchedJoulesService schedJoulesService = services.getService(SchedJoulesService.class);
-            SchedJoulesCalendar calendar = schedJoulesService.getCalendar(session.getContextId(), url, eTag, lastModified);
+            SchedJoulesCalendar calendar = schedJoulesService.getCalendar(calendarSession.getContextId(), url, eTag, lastModified);
             if (eTag.equals(calendar.getETag())) {
                 return new ExternalCalendarResult(false, Collections.emptyList());
             }
@@ -221,9 +222,14 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
     private String getUserKey() throws OXException {
         String key = account.getInternalConfiguration().optString(SchedJoulesFields.USER_KEY);
         if (Strings.isEmpty(key)) {
-            throw SchedJoulesProviderExceptionCodes.MISSING_USER_KEY.create(account.getAccountId(), session.getUserId(), session.getContextId());
+            throw SchedJoulesProviderExceptionCodes.MISSING_USER_KEY.create(account.getAccountId(), calendarSession.getUserId(), calendarSession.getContextId());
         }
         return key;
     }
 
+    @Override
+    public List<OXException> getWarnings() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

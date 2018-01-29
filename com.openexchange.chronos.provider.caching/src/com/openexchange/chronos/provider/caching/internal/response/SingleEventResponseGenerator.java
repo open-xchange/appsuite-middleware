@@ -51,13 +51,16 @@ package com.openexchange.chronos.provider.caching.internal.response;
 
 import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.RecurrenceService;
@@ -73,31 +76,31 @@ import com.openexchange.exception.OXException;
  */
 public class SingleEventResponseGenerator extends ResponseGenerator {
 
-    final String folderId;
     final String eventId;
     final RecurrenceId recurrenceId;
 
-    public SingleEventResponseGenerator(CachingCalendarAccess cachedCalendarAccess, String folderId, String eventId, RecurrenceId recurrenceId) {
+    public SingleEventResponseGenerator(BasicCachingCalendarAccess cachedCalendarAccess, String eventId, RecurrenceId recurrenceId) {
         super(cachedCalendarAccess);
-        this.folderId = folderId;
         this.eventId = eventId;
         this.recurrenceId = recurrenceId;
     }
 
     public Event generate() throws OXException {
-        return new OSGiCalendarStorageOperation<Event>(Services.getServiceLookup(), this.cachedCalendarAccess.getSession().getContext().getContextId(), this.cachedCalendarAccess.getAccount().getAccountId()) {
+        return new OSGiCalendarStorageOperation<Event>(Services.getServiceLookup(), this.cachedCalendarAccess.getCalendarSession().getContextId(), this.cachedCalendarAccess.getAccount().getAccountId()) {
 
             @Override
             protected Event call(CalendarStorage storage) throws OXException {
                 EventField[] fields = getFields(cachedCalendarAccess.getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class));
-                Event event = storage.getEventStorage().loadEvent(getEventId(), fields);
+                List<EventField> fieldList = new ArrayList<EventField>(Arrays.asList(fields));
+                fieldList.add(EventField.FOLDER_ID);
+                fields = fieldList.toArray(new EventField[fieldList.size()]);
+                Event event = storage.getEventStorage().loadEvent(eventId, fields);
                 if (event == null) {
-                    throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(getEventId());
+                    throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(eventId);
                 }
 
                 event = storage.getUtilities().loadAdditionalEventData(cachedCalendarAccess.getAccount().getUserId(), event, fields);
                 event.setFlags(getFlags(event, cachedCalendarAccess.getAccount().getUserId()));
-                event.setFolderId(folderId);
                 if (null != recurrenceId) {
                     if (isSeriesMaster(event)) {
                         Event exceptionEvent = storage.getEventStorage().loadException(eventId, recurrenceId, fields);
@@ -116,17 +119,5 @@ public class SingleEventResponseGenerator extends ResponseGenerator {
                 return event;
             }
         }.executeQuery();
-    }
-
-    protected String getEventId() {
-        return eventId;
-    }
-
-    protected RecurrenceId getRecurrenceId() {
-        return recurrenceId;
-    }
-
-    protected String getFolderId() {
-        return folderId;
     }
 }

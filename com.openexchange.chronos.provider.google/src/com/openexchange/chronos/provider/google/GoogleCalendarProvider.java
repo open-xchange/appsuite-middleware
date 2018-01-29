@@ -77,6 +77,8 @@ import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.google.access.GoogleCalendarAccess;
 import com.openexchange.chronos.provider.google.access.GoogleOAuthAccess;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.oauth.OAuthService;
@@ -298,7 +300,9 @@ public class GoogleCalendarProvider implements BasicCalendarProvider {
 
     @Override
     public BasicCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        return new GoogleCalendarAccess(services, session, account, parameters, true);
+        CalendarService calendarService = services.getService(CalendarService.class);
+        CalendarSession calendarSession = calendarService.init(session, parameters);
+        return new GoogleCalendarAccess(services, calendarSession, account, parameters, true);
     }
 
 }

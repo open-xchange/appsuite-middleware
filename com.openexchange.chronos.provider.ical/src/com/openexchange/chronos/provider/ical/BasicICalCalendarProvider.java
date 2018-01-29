@@ -75,10 +75,14 @@ import com.openexchange.chronos.provider.ical.auth.ICalAuthParser;
 import com.openexchange.chronos.provider.ical.conn.ICalFeedClient;
 import com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionCodes;
 import com.openexchange.chronos.provider.ical.result.GetResponse;
+import com.openexchange.chronos.provider.ical.result.GetResponseState;
 import com.openexchange.chronos.provider.ical.utils.ICalProviderUtils;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -94,8 +98,7 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BasicICalCalendarProvider.class);
     private ServiceLookup services;
-    
-    
+
     /**
      * Initialises a new {@link BasicICalCalendarProvider}.
      * 
@@ -113,7 +116,7 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
 
     @Override
     public String getDisplayName(Locale locale) {
-        return "iCalendar Feeds";
+        return StringHelper.valueOf(locale).getString(ICalCalendarStrings.PROVIDER_NAME);
     }
 
     @Override
@@ -123,7 +126,10 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
 
     @Override
     public BasicCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        return new BasicICalCalendarAccess(services, session, account, parameters);
+        CalendarService calendarService = services.getService(CalendarService.class);
+        CalendarSession calendarSession = calendarService.init(session, parameters);
+
+        return new BasicICalCalendarAccess(services, calendarSession, account, parameters);
     }
 
     @Override
@@ -163,6 +169,10 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
         ICalCalendarFeedConfig feedConfig = new ICalCalendarFeedConfig.EncryptedBuilder(session, new JSONObject(settings.getConfig()), new JSONObject()).build();
         ICalFeedClient feedClient = new ICalFeedClient(session, feedConfig);
         GetResponse feedResponse = feedClient.executeRequest();
+        if (feedResponse.getState() == GetResponseState.REMOVED) {
+            throw ICalProviderExceptionCodes.NO_FEED.create(feedConfig.getFeedUrl());
+        }
+
         Long refreshInterval = null;
         if (Strings.isNotEmpty(feedResponse.getRefreshInterval())) {
             try {
@@ -224,6 +234,14 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
         if (AuthType.BASIC.equals(iCalFeedConfig.getAuthInfo().getAuthType())) {
             ICalAuthParser.encrypt(config, session.getPassword());
         }
+        if (config.hasAndNotNull(ICalCalendarConstants.REFRESH_INTERVAL)) {
+            Object opt = config.opt(ICalCalendarConstants.REFRESH_INTERVAL);
+            try {
+                Number refreshInterval = (Number) opt;
+            } catch (ClassCastException e) {
+                throw ICalProviderExceptionCodes.BAD_PARAMETER.create(ICalCalendarConstants.REFRESH_INTERVAL, opt);
+            }
+        }
         /*
          * prepare & return internal config, taking over client-supplied values if applicable
          */
@@ -247,7 +265,7 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
          * check & adjust passed user config as needed
          */
         if (settings.containsConfig()) {
-        JSONObject config = settings.getConfig();
+            JSONObject config = settings.getConfig();
             if (null == config || false == config.hasAndNotNull(URI)) {
                 throw ICalProviderExceptionCodes.MISSING_FEED_URI.create();
             }
@@ -297,4 +315,19 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
         return oldFeedConfig.mandatoryChanges(newFeedConfig);
     }
 
+    @Override
+    public void checkAllowedUpdate(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException {
+        ICalCalendarFeedConfig oldFeedConfig = new ICalCalendarFeedConfig.DecryptedBuilder(session, new JSONObject(originUserConfiguration), new JSONObject()).build();
+        JSONObject newUserConfigurationCopy = new JSONObject(newUserConfiguration);
+        ICalCalendarFeedConfig newFeedConfig = new ICalCalendarFeedConfig.EncryptedBuilder(session, newUserConfigurationCopy, new JSONObject()).build();
+
+        if (!newFeedConfig.getFeedUrl().equalsIgnoreCase(oldFeedConfig.getFeedUrl())) {
+            throw ICalProviderExceptionCodes.NOT_ALLOWED_CHANGE.create("URI");
+        }
+    }
+
+    @Override
+    public int getDefaultMaxAccounts() {
+        return 50;
+    }
 }

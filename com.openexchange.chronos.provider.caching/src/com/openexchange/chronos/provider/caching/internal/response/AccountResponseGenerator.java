@@ -50,14 +50,14 @@
 package com.openexchange.chronos.provider.caching.internal.response;
 
 import static com.openexchange.chronos.common.CalendarUtils.getFlags;
-import static com.openexchange.chronos.common.CalendarUtils.getSearchTerm;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import com.google.common.collect.Lists;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.RecurrenceService;
@@ -65,39 +65,37 @@ import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
 import com.openexchange.exception.OXException;
-import com.openexchange.search.SearchTerm;
-import com.openexchange.search.SingleSearchTerm.SingleOperation;
 
 /**
- * {@link FolderEventsResponseGenerator}
+ * {@link AccountResponseGenerator}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class FolderEventsResponseGenerator extends ResponseGenerator {
+public class AccountResponseGenerator extends ResponseGenerator {
 
-    final String folderId;
-
-    public FolderEventsResponseGenerator(CachingCalendarAccess cachedCalendarAccess, String folderId) {
+    public AccountResponseGenerator(BasicCachingCalendarAccess cachedCalendarAccess) {
         super(cachedCalendarAccess);
-        this.folderId = folderId;
     }
 
     public List<Event> generate() throws OXException {
-        return new OSGiCalendarStorageOperation<List<Event>>(Services.getServiceLookup(), this.cachedCalendarAccess.getSession().getContext().getContextId(), this.cachedCalendarAccess.getAccount().getAccountId()) {
+        return new OSGiCalendarStorageOperation<List<Event>>(Services.getServiceLookup(), this.cachedCalendarAccess.getCalendarSession().getContextId(), this.cachedCalendarAccess.getAccount().getAccountId()) {
 
             @Override
             protected List<Event> call(CalendarStorage storage) throws OXException {
-                SearchTerm<?> searchTerm = getSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, getFolderId());
                 CalendarParameters parameters = cachedCalendarAccess.getParameters();
                 EventField[] fields = getFields(parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class));
+                List<EventField> fieldList = new ArrayList<EventField>(Arrays.asList(fields));
+                fieldList.add(EventField.FOLDER_ID);
+                fields = fieldList.toArray(new EventField[fieldList.size()]);
+
                 SearchOptions searchOptions = new SearchOptions(parameters);
-                List<Event> events = storage.getEventStorage().searchEvents(searchTerm, searchOptions, fields);
+
+                List<Event> events = storage.getEventStorage().searchEvents(null, searchOptions, fields);
                 List<Event> enhancedEvents = storage.getUtilities().loadAdditionalEventData(cachedCalendarAccess.getAccount().getUserId(), events, fields);
                 List<Event> allEvents = new ArrayList<>();
                 for (Event event : enhancedEvents) {
                     event.setFlags(getFlags(event, cachedCalendarAccess.getAccount().getUserId()));
-                    event.setFolderId(folderId);
                     if (CalendarUtils.isSeriesMaster(event) && isResolveOccurrences(parameters)) {
                         allEvents.addAll(Lists.newArrayList(Services.getService(RecurrenceService.class).iterateEventOccurrences(event, getFrom(parameters), getUntil(parameters))));
                     } else {
@@ -108,9 +106,4 @@ public class FolderEventsResponseGenerator extends ResponseGenerator {
             }
         }.executeQuery();
     }
-
-    protected String getFolderId() {
-        return folderId;
-    }
-
 }

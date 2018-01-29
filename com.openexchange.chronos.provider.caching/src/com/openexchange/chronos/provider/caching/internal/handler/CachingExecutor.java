@@ -51,16 +51,15 @@ package com.openexchange.chronos.provider.caching.internal.handler;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.Check;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.DiffAwareExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.EmptyUidUpdates;
 import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.exception.OXException;
@@ -78,56 +77,54 @@ public class CachingExecutor {
     private static final EventField[] FIELDS_TO_IGNORE = new EventField[] { EventField.CREATED_BY, EventField.FOLDER_ID, EventField.ID, EventField.CALENDAR_USER, EventField.CREATED, EventField.MODIFIED_BY, EventField.EXTENDED_PROPERTIES, EventField.TIMESTAMP };
     private static final EventField[] EQUALS_IDENTIFIER = new EventField[] { EventField.UID, EventField.RECURRENCE_ID };
 
-    private final Set<FolderUpdateState> executionList;
-    private final CachingCalendarAccess cachingCalendarAccess;
+    private final AccountUpdateState executionTask;
+    private final BasicCachingCalendarAccess cachingCalendarAccess;
 
-    public CachingExecutor(CachingCalendarAccess cachingCalendarAccess, Set<FolderUpdateState> executionList) {
-        this.cachingCalendarAccess = cachingCalendarAccess;
-        this.executionList = executionList;
+    public CachingExecutor(BasicCachingCalendarAccess basicCachingCalendarAccess, AccountUpdateState executionTask) {
+        this.cachingCalendarAccess = basicCachingCalendarAccess;
+        this.executionTask = executionTask;
     }
 
-    public void cache(List<OXException> warnings) {
-        if (executionList == null) {
+    public void cache(List<OXException> warnings) throws OXException {
+        if (executionTask == null) {
             LOG.warn("Nothing to cache as the provided execution list is null.");
             return;
         }
-        for (FolderUpdateState folderUpdateState : executionList) {
-            CachingHandler cachingHandler = CachingHandlerFactory.getInstance().get(folderUpdateState.getType(), cachingCalendarAccess);
-            String calendarFolderId = folderUpdateState.getFolderId();
+        CachingHandler cachingHandler = CachingHandlerFactory.getInstance().get(executionTask.getType(), cachingCalendarAccess);
 
-            try {
-                ExternalCalendarResult externalCalendarResult = cachingHandler.getExternalEvents(calendarFolderId);
-                if (externalCalendarResult.isUpdated()) {
-                    List<Event> existingEvents = cachingHandler.getExistingEvents(calendarFolderId);
-                    EventUpdates diff = null;
+        try {
+            ExternalCalendarResult externalCalendarResult = cachingHandler.getExternalEvents();
+            if (externalCalendarResult.isUpdated()) {
+                List<Event> existingEvents = cachingHandler.getExistingEvents();
+                EventUpdates diff = null;
 
-                    if (externalCalendarResult instanceof DiffAwareExternalCalendarResult) {
-                        diff = ((DiffAwareExternalCalendarResult) externalCalendarResult).calculateDiff(existingEvents);
+                if (externalCalendarResult instanceof DiffAwareExternalCalendarResult) {
+                    diff = ((DiffAwareExternalCalendarResult) externalCalendarResult).calculateDiff(existingEvents);
+                } else {
+                    List<Event> externalEvents = externalCalendarResult.getEvents();
+                    cleanupEvents(externalEvents);
+
+                    boolean containsUID = containsUid(externalEvents);
+                    if (containsUID) {
+                        diff = generateEventDiff(existingEvents, externalEvents);
                     } else {
-                        List<Event> externalEvents = externalCalendarResult.getEvents();
-                        cleanupEvents(externalEvents);
-
-                        boolean containsUID = containsUid(externalEvents);
-                        if (containsUID) {
-                            diff = generateEventDiff(existingEvents, externalEvents);
-                        } else {
-                            //FIXME generate reproducible UID for upcoming refreshes
-                            diff = new EmptyUidUpdates(existingEvents, externalEvents);
-                        }
-                    }
-
-                    if (!diff.isEmpty()) {
-                        cachingHandler.persist(calendarFolderId, diff);
+                        //FIXME generate reproducible UID for upcoming refreshes
+                        diff = new EmptyUidUpdates(existingEvents, externalEvents);
                     }
                 }
-                cachingHandler.updateLastUpdated(calendarFolderId, System.currentTimeMillis());
-            } catch (OXException e) {
-                LOG.info("Unable to update cache for folder {} in account {}: {}", calendarFolderId, cachingCalendarAccess.getAccount().getAccountId(), e.getMessage(), e);
-                warnings.add(e);
 
-                handleInternally(cachingHandler, calendarFolderId, e);
-                this.cachingCalendarAccess.handleExceptions(calendarFolderId, e);
+                if (!diff.isEmpty()) {
+                    cachingHandler.persist(diff);
+                }
             }
+            cachingHandler.updateLastUpdated(System.currentTimeMillis());
+        } catch (OXException e) {
+            LOG.info("Unable to update cache for account {}: {}", cachingCalendarAccess.getAccount().getAccountId(), e.getMessage(), e);
+            warnings.add(e);
+
+            handleInternally(cachingHandler, e);
+            this.cachingCalendarAccess.handleExceptions(e);
+            throw e;
         }
     }
 
@@ -143,13 +140,13 @@ public class CachingExecutor {
         }
     }
 
-    private void handleInternally(CachingHandler cachingHandler, String calendarFolderId, OXException e) {
+    private void handleInternally(CachingHandler cachingHandler, OXException e) {
         if (e.getExceptionCode() == null || e.getExceptionCode().equals(CalendarExceptionCodes.AUTH_FAILED.create(""))) {
             return;
         }
         long timeoutInMillis = TimeUnit.MINUTES.toMillis(this.cachingCalendarAccess.getRetryAfterErrorInterval());
         long nextProcessingAfter = System.currentTimeMillis() + timeoutInMillis;
-        cachingHandler.updateLastUpdated(calendarFolderId, nextProcessingAfter);
+        cachingHandler.updateLastUpdated(nextProcessingAfter);
     }
 
     /**

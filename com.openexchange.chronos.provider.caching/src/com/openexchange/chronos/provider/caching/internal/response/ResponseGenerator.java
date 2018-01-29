@@ -52,7 +52,7 @@ package com.openexchange.chronos.provider.caching.internal.response;
 import java.util.Date;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 
 /**
@@ -65,9 +65,9 @@ public class ResponseGenerator {
 
     private static EventField[] IGNORED_FIELDS = { EventField.ATTACHMENTS };
 
-    protected final CachingCalendarAccess cachedCalendarAccess;
+    protected final BasicCachingCalendarAccess cachedCalendarAccess;
 
-    public ResponseGenerator(CachingCalendarAccess cachedCalendarAccess) {
+    public ResponseGenerator(BasicCachingCalendarAccess cachedCalendarAccess) {
         this.cachedCalendarAccess = cachedCalendarAccess;
     }
 

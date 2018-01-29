@@ -83,6 +83,7 @@ import com.openexchange.chronos.provider.google.converter.GoogleEventConverter;
 import com.openexchange.chronos.provider.google.exception.GoogleExceptionCodes;
 import com.openexchange.chronos.provider.google.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataArguments;
@@ -106,7 +107,6 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
     private static final Logger LOG = LoggerFactory.getLogger(GoogleCalendarAccess.class);
 
     private final GoogleOAuthAccess oauthAccess;
-    private final CalendarParameters parameters;
     private final long refreshInterval;
     private final long requestTimeout;
 
@@ -119,21 +119,19 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
      * @param parameters The calendar parameters
      * @throws OXException
      */
-    public GoogleCalendarAccess(ServiceLookup services, Session session, CalendarAccount account, CalendarParameters parameters, boolean checkConfig) throws OXException {
-        super(services, session, account, parameters);
-        this.parameters = parameters;
-        this.account = account;
-        refreshInterval = GoogleCalendarConfig.getResfrehInterval(session);
-        requestTimeout = GoogleCalendarConfig.getRequestTimeout(session);
+    public GoogleCalendarAccess(ServiceLookup services, CalendarSession calendarSession, CalendarAccount account, CalendarParameters parameters, boolean checkConfig) throws OXException {
+        super(services, calendarSession, account, parameters);
+        refreshInterval = GoogleCalendarConfig.getResfrehInterval(calendarSession.getSession());
+        requestTimeout = GoogleCalendarConfig.getRequestTimeout(calendarSession.getSession());
         try {
-            oauthAccess = new GoogleOAuthAccess(account.getUserConfiguration().getInt(GoogleCalendarConfigField.OAUTH_ID), session);
+            oauthAccess = new GoogleOAuthAccess(account.getUserConfiguration().getInt(GoogleCalendarConfigField.OAUTH_ID), calendarSession.getSession());
             oauthAccess.initialize();
         } catch (JSONException e) {
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
 
         if (checkConfig) {
-            initCalendarFolder(session);
+            initCalendarFolder(calendarSession.getSession());
         }
     }
 
@@ -322,17 +320,8 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
     }
 
     @Override
-    protected void handleExceptions(OXException e) {
-        // Nothing to do
-    }
-
-    @Override
-    protected ExternalCalendarResult getAllEvents() throws OXException {
+    public ExternalCalendarResult getAllEvents() throws OXException {
         return new GoogleCalendarResult(this);
-    }
-
-    protected CalendarAccount getAccount() {
-        return account;
     }
 
     @Override
@@ -351,4 +340,15 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
         settings.setSubscribed(true);
         return settings;
     }
+
+    @Override
+    public void handleExceptions(OXException e) {
+    }
+
+    @Override
+    public List<OXException> getWarnings() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

@@ -52,8 +52,8 @@ package com.openexchange.chronos.provider.caching.internal.handler.impl;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.exception.OXException;
 
@@ -65,27 +65,27 @@ import com.openexchange.exception.OXException;
  */
 public class ReadOnlyHandler extends AbstractHandler {
 
-    public ReadOnlyHandler(CachingCalendarAccess cachedCalendarAccess) {
+    public ReadOnlyHandler(BasicCachingCalendarAccess cachedCalendarAccess) {
         super(cachedCalendarAccess);
     }
 
     @Override
-    public ExternalCalendarResult getExternalEvents(String folderId) throws OXException {
+    public ExternalCalendarResult getExternalEvents() throws OXException {
         return new ExternalCalendarResult(false, Collections.emptyList());
     }
 
     @Override
-    public List<Event> getExistingEvents(String folderId) throws OXException {
-        return getExistingEventsInFolder(folderId);
+    public List<Event> getExistingEvents() throws OXException {
+        return getExistingEventsForAccount();
     }
 
     @Override
-    public void persist(String folderId, EventUpdates diff) throws OXException {
+    public void persist(EventUpdates diff) throws OXException {
         // do not persist anything
     }
 
     @Override
-    public void updateLastUpdated(String folderId, long timestamp) {
+    public void updateLastUpdated(long timestamp) {
         // nothing to update
     }
 }

@@ -47,14 +47,14 @@
  *
  */
 
-package com.openexchange.chronos.provider.caching.internal.handler;
+package com.openexchange.chronos.provider.caching.basic;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertEquals;
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import org.dmfs.rfc5545.DateTime;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
@@ -66,11 +66,12 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.impl.TestCachingCalendarAccessImpl;
+import com.openexchange.chronos.provider.caching.internal.CachingCalendarAccessConstants;
 import com.openexchange.chronos.provider.caching.internal.Services;
+import com.openexchange.chronos.provider.caching.internal.handler.AccountUpdateState;
+import com.openexchange.chronos.provider.caching.internal.handler.ProcessingType;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
@@ -81,24 +82,16 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * {@link CachingExecutorTest}
+ * {@link BasicCachingCalendarAccessTest}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ CachingHandlerFactory.class, ServerSessionAdapter.class, Services.class })
-public class CachingExecutorTest {
+@PrepareForTest({ ServerSessionAdapter.class, Services.class })
+public class BasicCachingCalendarAccessTest {
 
     protected TestCachingCalendarAccessImpl cachingCalendarAccess;
-
-    private CachingExecutor executor;
-
-    @Mock
-    private CachingHandler handler;
-
-    @Mock
-    private CachingHandlerFactory factory;
 
     @Mock
     protected CalendarSession session;
@@ -121,23 +114,12 @@ public class CachingExecutorTest {
     @Mock
     private Connection connection;
 
-    private List<Event> existingEvents = new ArrayList<>();
-
-    private ExternalCalendarResult externalCalendarResult = new ExternalCalendarResult(true, Collections.emptyList());
-    private List<Event> externalEvents = new ArrayList<>();
-
-    private AccountUpdateState lastAccountStates = null;
-
-    private List<OXException> warnings = new ArrayList<>();
+    private final Map<String, Object> cachingConfigMap = new HashMap<>();
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        PowerMockito.mockStatic(CachingHandlerFactory.class);
-        Mockito.when(CachingHandlerFactory.getInstance()).thenReturn(factory);
-        Mockito.when(factory.get(Matchers.any(), Matchers.any())).thenReturn(handler);
-        
         PowerMockito.mockStatic(ServerSessionAdapter.class);
         PowerMockito.when(ServerSessionAdapter.valueOf((com.openexchange.session.Session) Matchers.any())).thenReturn(serverSession);
 
@@ -146,80 +128,93 @@ public class CachingExecutorTest {
         PowerMockito.when(Services.getService(DatabaseService.class)).thenReturn(databaseService);
         PowerMockito.when(databaseService.getWritable((Context) Matchers.any())).thenReturn(connection);
 
-
-        Mockito.when(handler.getExistingEvents()).thenReturn(existingEvents);
-        Mockito.when(handler.getExternalEvents()).thenReturn(externalCalendarResult);
-
-        Mockito.when(account.getInternalConfiguration()).thenReturn(new JSONObject());
         cachingCalendarAccess = new TestCachingCalendarAccessImpl(session, account, parameters);
 
-        lastAccountStates =new AccountUpdateState(new Long(System.currentTimeMillis()), 1, ProcessingType.UPDATE);
+        Mockito.when(account.getInternalConfiguration()).thenReturn(new JSONObject());
     }
 
     @Test
-    public void testCache_executionSetNotAvailable_nothingTodo() throws OXException {
-        executor = new CachingExecutor(cachingCalendarAccess, null);
+    public void testGetLatestUpdateStates_emptyConfiguration_noCachingState() throws OXException {
+        AccountUpdateState latestUpdateStates = cachingCalendarAccess.getLatestUpdateState();
 
-        executor.cache(warnings);
-
-        assertFalse(cachingCalendarAccess.isConfigSaved());
-        Mockito.verify(factory, Mockito.never()).get(Matchers.any(), Matchers.any());
+        assertEquals(ProcessingType.INITIAL_INSERT, latestUpdateStates.getType());
     }
 
     @Test
-    public void testCache_emptyExecutionSet_nothingTodo() throws OXException {
-        executor = new CachingExecutor(cachingCalendarAccess, null);
+    public void testGetLatestUpdateStates_noCacheConfiguration_returnInitialInsert() throws OXException, JSONException {
+        JSONObject cachingConfig = new JSONObject();
+        cachingConfig.put(CachingCalendarAccessConstants.CACHING, cachingConfig);
 
-        executor.cache(warnings);
+        AccountUpdateState latestUpdateStates = cachingCalendarAccess.getLatestUpdateState();
 
-        assertFalse(cachingCalendarAccess.isConfigSaved());
-        Mockito.verify(factory, Mockito.never()).get(Matchers.any(), Matchers.any());
+        assertEquals(ProcessingType.INITIAL_INSERT, latestUpdateStates.getType());
     }
 
     @Test
-    public void testCache_existingAndExternalEmpty_nothingToPersist() throws OXException {
-        executor = new CachingExecutor(cachingCalendarAccess, lastAccountStates);
+    public void testGetLatestUpdateStates_cchedButRequestedInReadTime_returnUpdateState() throws OXException, JSONException {
+        Map<String, Object> latestUpdate = new HashMap<>();
+        latestUpdate.put(CachingCalendarAccessConstants.LAST_UPDATE, System.currentTimeMillis());
+        JSONObject cachingConfig = new JSONObject();
+        cachingConfig.put(CachingCalendarAccessConstants.CACHING, latestUpdate);
+        Mockito.when(account.getInternalConfiguration()).thenReturn(cachingConfig);
 
-        executor.cache(warnings);
+        AccountUpdateState latestUpdateStates = cachingCalendarAccess.getLatestUpdateState();
 
-        assertFalse(cachingCalendarAccess.isConfigSaved());
-        Mockito.verify(factory, Mockito.times(1)).get(Matchers.any(), Matchers.any());
-        Mockito.verify(handler, Mockito.never()).persist(Matchers.any());
+        assertEquals(ProcessingType.READ_DB, latestUpdateStates.getType());
     }
 
     @Test
-    public void testCache_externalHasNewEvents_persist() throws OXException {
-        executor = new CachingExecutor(cachingCalendarAccess, lastAccountStates);
+    public void testGetLatestUpdateStates_cachedAndRefreshPeriodExceeded_returnUpdateState() throws OXException, JSONException {
+        Map<String, Object> latestUpdate = new HashMap<>();
+        latestUpdate.put(CachingCalendarAccessConstants.LAST_UPDATE, System.currentTimeMillis() - TimeUnit.DAYS.toMillis(14L));
+        JSONObject cachingConfig = new JSONObject();
+        cachingConfig.put(CachingCalendarAccessConstants.CACHING, latestUpdate);
+        Mockito.when(account.getInternalConfiguration()).thenReturn(cachingConfig);
 
-        Event e = new Event();
-        e.setUid("available");
-        e.setStartDate(new DateTime(System.currentTimeMillis()));
-        e.setTimestamp(System.currentTimeMillis());
-        externalEvents.add(e);
-        externalCalendarResult = new ExternalCalendarResult(true, externalEvents);
-        Mockito.when(handler.getExternalEvents()).thenReturn(externalCalendarResult);
+        AccountUpdateState latestUpdateStates = cachingCalendarAccess.getLatestUpdateState();
 
-        executor.cache(warnings);
-
-        Mockito.verify(factory, Mockito.times(1)).get(Matchers.any(), Matchers.any());
-        Mockito.verify(handler, Mockito.times(1)).persist(Matchers.any());
+        assertEquals(ProcessingType.UPDATE, latestUpdateStates.getType());
     }
 
     @Test
-    public void testCache_existingHasEventsButExternalNot_persist() throws OXException {
-        executor = new CachingExecutor(cachingCalendarAccess, lastAccountStates);
+    public void testGetLatestUpdateStates_knownWithoutLastUpdateTimestamp_shouldNotHappenButReturnInitialUpdate() throws OXException, JSONException {
+        Map<String, Object> latestUpdate = new HashMap<>();
+        JSONObject cachingConfig = new JSONObject();
+        cachingConfig.put(CachingCalendarAccessConstants.CACHING, latestUpdate);
+        Mockito.when(account.getInternalConfiguration()).thenReturn(cachingConfig);
 
-        Event e = new Event();
-        e.setUid("available");
-        e.setStartDate(new DateTime(System.currentTimeMillis()));
-        e.setTimestamp(System.currentTimeMillis());
-        existingEvents.add(e);
-        Mockito.when(handler.getExistingEvents()).thenReturn(existingEvents);
+        AccountUpdateState latestUpdateStates = cachingCalendarAccess.getLatestUpdateState();
 
-        executor.cache(warnings);
-
-        Mockito.verify(factory, Mockito.times(1)).get(Matchers.any(), Matchers.any());
-        Mockito.verify(handler, Mockito.times(1)).persist(Matchers.any());
+        assertEquals(ProcessingType.INITIAL_INSERT, latestUpdateStates.getType());
     }
 
+    @Test
+    public void testGetLatestUpdateStates_configNullAndProviderIntervalBiggerThanOneDay_useFromProvider() throws OXException {
+        final long refreshInterval = 600000;
+        cachingCalendarAccess = new TestCachingCalendarAccessImpl(session, account, parameters) {
+
+            @Override
+            public long getRefreshInterval() {
+                return refreshInterval;
+            }
+        };
+        long cascadedRefreshInterval = cachingCalendarAccess.getCascadedRefreshInterval();
+
+        assertEquals(refreshInterval, cascadedRefreshInterval);
+    }
+
+    @Test
+    public void testGetLatestUpdateStates_configEmptyAndProviderIntervalBiggerThanOneDay_useFromProvider() throws OXException {
+        final long refreshInterval = 600000;
+        cachingCalendarAccess = new TestCachingCalendarAccessImpl(session, account, parameters) {
+
+            @Override
+            public long getRefreshInterval() {
+                return refreshInterval;
+            }
+        };
+        long cascadedRefreshInterval = cachingCalendarAccess.getCascadedRefreshInterval();
+
+        assertEquals(refreshInterval, cascadedRefreshInterval);
+    }
 }

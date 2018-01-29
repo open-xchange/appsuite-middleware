@@ -51,12 +51,12 @@ package com.openexchange.ajax.chronos;
 
 
 /**
- * {@link ICalCalendarProviderTestConstants}
+ * {@link BasicICalCalendarProviderTestConstants}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class ICalCalendarProviderTestConstants {
+public class BasicICalCalendarProviderTestConstants {
     // @formatter:off
     
     // contains 38 events
@@ -691,7 +691,267 @@ public class ICalCalendarProviderTestConstants {
         "END:VEVENT\n" + 
         "END:VCALENDAR\n" + 
         "";
-    
+
+    public static final String FEED_WITH_CHANGE_EXCEPTION = "BEGIN:VCALENDAR\n" + 
+        "VERSION:2.0\n" + 
+        "PRODID:-//Open-Xchange//7.10.0-Rev1//EN\n" + 
+        "BEGIN:VTIMEZONE\n" + 
+        "TZID:Europe/Berlin\n" + 
+        "TZURL:http://tzurl.org/zoneinfo-outlook/Europe/Berlin\n" + 
+        "X-LIC-LOCATION:Europe/Berlin\n" + 
+        "BEGIN:DAYLIGHT\n" + 
+        "TZOFFSETFROM:+0100\n" + 
+        "TZOFFSETTO:+0200\n" + 
+        "TZNAME:CEST\n" + 
+        "DTSTART:19700329T020000\n" + 
+        "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU\n" + 
+        "END:DAYLIGHT\n" + 
+        "BEGIN:STANDARD\n" + 
+        "TZOFFSETFROM:+0200\n" + 
+        "TZOFFSETTO:+0100\n" + 
+        "TZNAME:CET\n" + 
+        "DTSTART:19701025T030000\n" + 
+        "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\n" + 
+        "END:STANDARD\n" + 
+        "END:VTIMEZONE\n" + 
+        "BEGIN:VEVENT\n" + 
+        "DTSTAMP:20170802T115927Z\n" + 
+        "ATTENDEE;CN=\"caesar, caesar\";PARTSTAT=ACCEPTED;CUTYPE=INDIVIDUAL:mailto:cae\n" + 
+        " sar@context7.oxoe.int\n" + 
+        "ATTENDEE;CN=\"dora, dora\";PARTSTAT=NEEDS-ACTION;CUTYPE=INDIVIDUAL:mailto:dor\n" + 
+        " a@context7.oxoe.int\n" + 
+        "CLASS:PUBLIC\n" + 
+        "CREATED:20170802T115927Z\n" + 
+        "DTEND;TZID=Europe/Berlin:20140901T110000\n" + 
+        "DTSTART;TZID=Europe/Berlin:20140901T100000\n" + 
+        "LAST-MODIFIED:20170802T115927Z\n" + 
+        "ORGANIZER;CN=\"caesar, caesar\";SENT-BY=\"mailto:dora@context7.oxoe.int\":mailt\n" + 
+        " o:caesar@context7.oxoe.int\n" + 
+        "SEQUENCE:0\n" + 
+        "SUMMARY:testOtherPrivateToThirdPartySubfolderWithParticipants\n" + 
+        "TRANSP:OPAQUE\n" + 
+        "UID:8faae68e-540d-45d7-b50f-a920e0ebf14d\n" + 
+        "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\n" + 
+        "END:VEVENT\n" + 
+        "BEGIN:VEVENT\n" + 
+        "DTSTAMP:20170802T120022Z\n" + 
+        "ATTENDEE;CN=\"dora, dora\";PARTSTAT=NEEDS-ACTION;CUTYPE=INDIVIDUAL:mailto:dor\n" + 
+        " a@context7.oxoe.int\n" + 
+        "ATTENDEE;CN=\"emil, emil\";PARTSTAT=ACCEPTED;CUTYPE=INDIVIDUAL:mailto:emil@co\n" + 
+        " ntext7.oxoe.int\n" + 
+        "CLASS:PUBLIC\n" + 
+        "CREATED:20170802T120021Z\n" + 
+        "DTEND;TZID=Europe/Berlin:20140901T110000\n" + 
+        "DTSTART;TZID=Europe/Berlin:20140901T100000\n" + 
+        "LAST-MODIFIED:20170802T120022Z\n" + 
+        "ORGANIZER;CN=\"emil, emil\";SENT-BY=\"mailto:dora@context7.oxoe.int\":mailto:em\n" + 
+        " il@context7.oxoe.int\n" + 
+        "SEQUENCE:0\n" + 
+        "SUMMARY:testOtherPrivateToOtherSubfolder\n" + 
+        "TRANSP:OPAQUE\n" + 
+        "UID:7fb109aa-f885-47ad-97bd-f221c60671d9\n" + 
+        "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\n" + 
+        "END:VEVENT\n" + 
+        "BEGIN:VEVENT\n" + 
+        "DTSTAMP:20170802T120026Z\n" + 
+        "ATTENDEE;CN=\"berta, berta\";PARTSTAT=ACCEPTED;CUTYPE=INDIVIDUAL:mailto:berta\n" + 
+        " @context7.oxoe.int\n" + 
+        "ATTENDEE;CN=\"dora, dora\";PARTSTAT=ACCEPTED;CUTYPE=INDIVIDUAL:mailto:dora@co\n" + 
+        " ntext7.oxoe.int\n" + 
+        "CLASS:PUBLIC\n" + 
+        "CREATED:20170802T120026Z\n" + 
+        "DTEND;TZID=Europe/Berlin:20170802T150000\n" + 
+        "DTSTART;TZID=Europe/Berlin:20170802T140000\n" + 
+        "LAST-MODIFIED:20170802T120026Z\n" + 
+        "ORGANIZER;CN=\"dora, dora\":mailto:dora@context7.oxoe.int\n" + 
+        "SEQUENCE:0\n" + 
+        "SUMMARY:Appointment for bug 16194\n" + 
+        "TRANSP:OPAQUE\n" + 
+        "UID:cb2ac160-9aaa-4dba-a5c8-ce309c079c0f\n" + 
+        "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\n" + 
+        "END:VEVENT\n" + 
+        "BEGIN:VEVENT\n" + 
+        "DTSTAMP:20170802T120033Z\n" + 
+        "ATTENDEE;CN=Standard group;PARTSTAT=ACCEPTED;CUTYPE=GROUP:urn:uuid:00000007\n" + 
+        " -0000-0001-00fc-c0e11e000002\n" + 
+        "ATTENDEE;CN=Context Administrator;PARTSTAT=NEEDS-ACTION;CUTYPE=INDIVIDUAL;M\n" + 
+        " EMBER=\"urn:uuid:00000007-0000-0001-00fc-c0e11e000002\":mailto:oxadmin@conte\n" + 
+        " xt7.oxoe.int\n" + 
+        "ATTENDEE;CN=\"anton, anton\";PARTSTAT=NEEDS-ACTION;CUTYPE=INDIVIDUAL;MEMBER=\"\n" + 
+        " urn:uuid:00000007-0000-0001-00fc-c0e11e000002\":mailto:anton@context7.oxoe.\n" + 
+        " int\n" + 
+        "ATTENDEE;CN=\"berta, berta\";PARTSTAT=ACCEPTED;CUTYPE=INDIVIDUAL:mailto:berta\n" + 
+        " @context7.oxoe.int\n" + 
+        "ATTENDEE;CN=\"caesar, caesar\";PARTSTAT=ACCEPTED;CUTYPE=INDIVIDUAL;MEMBER=\"ur\n" + 
+        " n:uuid:00000007-0000-0001-00fc-c0e11e000002\":mailto:caesar@context7.oxoe.i\n" + 
+        " nt\n" + 
+        "ATTENDEE;CN=\"dora, dora\";PARTSTAT=NEEDS-ACTION;CUTYPE=INDIVIDUAL;MEMBER=\"ur\n" + 
+        " n:uuid:00000007-0000-0001-00fc-c0e11e000002\":mailto:dora@context7.oxoe.int\n" + 
+        " \n" + 
+        "ATTENDEE;CN=\"no-reply, no-reply\";PARTSTAT=NEEDS-ACTION;CUTYPE=INDIVIDUAL;ME\n" + 
+        " MBER=\"urn:uuid:00000007-0000-0001-00fc-c0e11e000002\":mailto:no-reply@conte\n" + 
+        " xt7.oxoe.int\n" + 
+        "CLASS:PUBLIC\n" + 
+        "CREATED:20170802T120032Z\n" + 
+        "DTEND;TZID=Europe/Berlin:20151101T100000\n" + 
+        "DTSTART;TZID=Europe/Berlin:20151101T090000\n" + 
+        "LAST-MODIFIED:20170802T120033Z\n" + 
+        "ORGANIZER;CN=\"berta, berta\":mailto:berta@context7.oxoe.int\n" + 
+        "SEQUENCE:0\n" + 
+        "SUMMARY:Bug41794Test\n" + 
+        "TRANSP:OPAQUE\n" + 
+        "UID:5c1b4a48-4e6c-462d-9c71-66d51734ea96\n" + 
+        "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\n" + 
+        "END:VEVENT\n" + 
+        "BEGIN:VEVENT\n" + 
+        "DTSTAMP:20170803T113210Z\n" + 
+        "ATTENDEE;CN=\"dora, dora\";PARTSTAT=ACCEPTED;CUTYPE=INDIVIDUAL:mailto:dora@co\n" + 
+        " ntext7.oxoe.int\n" + 
+        "CLASS:PUBLIC\n" + 
+        "CREATED:20170803T113210Z\n" + 
+        "DTEND;TZID=Europe/Berlin:20140901T110000\n" + 
+        "DTSTART;TZID=Europe/Berlin:20140901T100000\n" + 
+        "LAST-MODIFIED:20170803T113210Z\n" + 
+        "ORGANIZER;CN=\"dora, dora\";SENT-BY=\"mailto:anton@context7.oxoe.int\":mailto:d\n" + 
+        " ora@context7.oxoe.int\n" + 
+        "SEQUENCE:0\n" + 
+        "SUMMARY:testOtherSubfolderToThirdPartySubfolder\n" + 
+        "TRANSP:OPAQUE\n" + 
+        "UID:0112519a-2f81-4afd-a8eb-0ecb78d2ca7b\n" + 
+        "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\n" + 
+        "END:VEVENT\n" + 
+        "BEGIN:VEVENT\n" + 
+        "DTSTAMP:20170803T114556Z\n" + 
+        "ATTENDEE;CN=Standard group;PARTSTAT=ACCEPTED;CUTYPE=GROUP:urn:uuid:00000007\n" + 
+        " -0000-0001-00fc-c0e11e000002\n" + 
+        "ATTENDEE;CN=Context Administrator;PARTSTAT=NEEDS-ACTION;CUTYPE=INDIVIDUAL;M\n" + 
+        " EMBER=\"urn:uuid:00000007-0000-0001-00fc-c0e11e000002\":mailto:oxadmin@conte\n" + 
+        " xt7.oxoe.int\n" + 
+        "ATTENDEE;CN=\"berta, berta\";PARTSTAT=NEEDS-ACTION;CUTYPE=INDIVIDUAL:mailto:b\n" + 
+        " erta@context7.oxoe.int\n" + 
+        "ATTENDEE;CN=\"caesar, caesar\";PARTSTAT=NEEDS-ACTION;CUTYPE=INDIVIDUAL;MEMBER\n" + 
+        " =\"urn:uuid:00000007-0000-0001-00fc-c0e11e000002\":mailto:caesar@context7.ox\n" + 
+        " oe.int\n" + 
+        "ATTENDEE;CN=\"dora, dora\";PARTSTAT=NEEDS-ACTION;CUTYPE=INDIVIDUAL;MEMBER=\"ur\n" + 
+        " n:uuid:00000007-0000-0001-00fc-c0e11e000002\":mailto:dora@context7.oxoe.int\n" + 
+        " \n" + 
+        "ATTENDEE;CN=\"emil, emil\";PARTSTAT=NEEDS-ACTION;CUTYPE=INDIVIDUAL;MEMBER=\"ur\n" + 
+        " n:uuid:00000007-0000-0001-00fc-c0e11e000002\":mailto:emil@context7.oxoe.int\n" + 
+        " \n" + 
+        "ATTENDEE;CN=\"no-reply, no-reply\";PARTSTAT=NEEDS-ACTION;CUTYPE=INDIVIDUAL;ME\n" + 
+        " MBER=\"urn:uuid:00000007-0000-0001-00fc-c0e11e000002\":mailto:no-reply@conte\n" + 
+        " xt7.oxoe.int\n" + 
+        "ATTENDEE;CN=test-resource-1;PARTSTAT=ACCEPTED;CUTYPE=RESOURCE:urn:uuid:0000\n" + 
+        " 0007-0000-0009-00fc-c0e11e000003\n" + 
+        "CATEGORIES:testcat1,testcat2,testcat3\n" + 
+        "CLASS:PUBLIC\n" + 
+        "CREATED:20170803T114556Z\n" + 
+        "DESCRIPTION:note\n" + 
+        "DTEND;VALUE=DATE:20170804\n" + 
+        "DTSTART;VALUE=DATE:20170803\n" + 
+        "LAST-MODIFIED:20170803T114556Z\n" + 
+        "LOCATION:Location\n" + 
+        "ORGANIZER:mailto:someone.else@example.com\n" + 
+        "SEQUENCE:0\n" + 
+        "SUMMARY:testListWithAllFields\n" + 
+        "TRANSP:TRANSPARENT\n" + 
+        "UID:1234567890abcdef1501760756455\n" + 
+        "X-MICROSOFT-CDO-ALLDAYEVENT:TRUE\n" + 
+        "X-MICROSOFT-CDO-BUSYSTATUS:FREE\n" + 
+        "END:VEVENT\n" + 
+        "BEGIN:VEVENT\n" + 
+        "DTSTAMP:20170803T114613Z\n" + 
+        "ATTENDEE;CN=\"caesar, caesar\";PARTSTAT=ACCEPTED;CUTYPE=INDIVIDUAL:mailto:cae\n" + 
+        " sar@context7.oxoe.int\n" + 
+        "ATTENDEE;CN=\"dora, dora\";PARTSTAT=NEEDS-ACTION;CUTYPE=INDIVIDUAL:mailto:dor\n" + 
+        " a@context7.oxoe.int\n" + 
+        "CLASS:PUBLIC\n" + 
+        "CREATED:20170803T114612Z\n" + 
+        "DTEND;TZID=Europe/Berlin:20140901T110000\n" + 
+        "DTSTART;TZID=Europe/Berlin:20140901T100000\n" + 
+        "LAST-MODIFIED:20170803T114613Z\n" + 
+        "ORGANIZER;CN=\"caesar, caesar\";SENT-BY=\"mailto:emil@context7.oxoe.int\":mailt\n" + 
+        " o:caesar@context7.oxoe.int\n" + 
+        "SEQUENCE:0\n" + 
+        "SUMMARY:testOtherPrivateToOwnPrivateWithParticipants\n" + 
+        "TRANSP:OPAQUE\n" + 
+        "UID:1134966a-a95b-44ef-bade-4270298b9bd8\n" + 
+        "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\n" + 
+        "END:VEVENT\n" + 
+        "BEGIN:VEVENT\n" + 
+        "DTSTAMP:20180125T115944Z\n" + 
+        "ATTENDEE;CN=\"dora, dora\";PARTSTAT=ACCEPTED;CUTYPE=INDIVIDUAL:mailto:dora@co\n" + 
+        " ntext7.oxoe.int\n" + 
+        "CLASS:PUBLIC\n" + 
+        "CREATED:20180125T115835Z\n" + 
+        "DTEND;TZID=Europe/Berlin:20180123T130000\n" + 
+        "DTSTART;TZID=Europe/Berlin:20180123T123000\n" + 
+        "LAST-MODIFIED:20180125T115944Z\n" + 
+        "ORGANIZER;CN=\"dora, dora\":mailto:dora@context7.oxoe.int\n" + 
+        "RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TU\n" + 
+        "SEQUENCE:0\n" + 
+        "SUMMARY:Test-Series\n" + 
+        "TRANSP:OPAQUE\n" + 
+        "UID:da554dcc-2c4b-4e11-a360-e3b2d3ca0408\n" + 
+        "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\n" + 
+        "BEGIN:VALARM\n" + 
+        "TRIGGER:-PT15M\n" + 
+        "UID:0f9c2d0e-a005-4c9b-850e-fdb15531996a\n" + 
+        "ACTION:DISPLAY\n" + 
+        "DESCRIPTION:Reminder\n" + 
+        "END:VALARM\n" + 
+        "END:VEVENT\n" + 
+        "BEGIN:VEVENT\n" + 
+        "DTSTAMP:20180125T115934Z\n" + 
+        "ATTENDEE;CN=\"dora, dora\";PARTSTAT=ACCEPTED;CUTYPE=INDIVIDUAL:mailto:dora@co\n" + 
+        " ntext7.oxoe.int\n" + 
+        "CLASS:PUBLIC\n" + 
+        "CREATED:20180125T115934Z\n" + 
+        "DTEND;TZID=Europe/Berlin:20180131T130000\n" + 
+        "DTSTART;TZID=Europe/Berlin:20180131T123000\n" + 
+        "LAST-MODIFIED:20180125T115934Z\n" + 
+        "ORGANIZER;CN=\"dora, dora\":mailto:dora@context7.oxoe.int\n" + 
+        "RECURRENCE-ID:20180130T113000Z\n" + 
+        "RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TU\n" + 
+        "SEQUENCE:1\n" + 
+        "SUMMARY:Test-Series - shifted day\n" + 
+        "TRANSP:OPAQUE\n" + 
+        "UID:da554dcc-2c4b-4e11-a360-e3b2d3ca0408\n" + 
+        "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\n" + 
+        "BEGIN:VALARM\n" + 
+        "TRIGGER:-PT15M\n" + 
+        "UID:a5733b0f-b94c-481f-b3f0-1ba76949dd72\n" + 
+        "ACTION:DISPLAY\n" + 
+        "DESCRIPTION:Reminder\n" + 
+        "END:VALARM\n" + 
+        "END:VEVENT\n" + 
+        "BEGIN:VEVENT\n" + 
+        "DTSTAMP:20180125T115955Z\n" + 
+        "ATTENDEE;CN=\"dora, dora\";PARTSTAT=ACCEPTED;CUTYPE=INDIVIDUAL:mailto:dora@co\n" + 
+        " ntext7.oxoe.int\n" + 
+        "CLASS:PUBLIC\n" + 
+        "CREATED:20180125T115944Z\n" + 
+        "DTEND;TZID=Europe/Berlin:20180206T110000\n" + 
+        "DTSTART;TZID=Europe/Berlin:20180206T103000\n" + 
+        "LAST-MODIFIED:20180125T115955Z\n" + 
+        "ORGANIZER;CN=\"dora, dora\":mailto:dora@context7.oxoe.int\n" + 
+        "RECURRENCE-ID:20180206T113000Z\n" + 
+        "RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TU\n" + 
+        "SEQUENCE:2\n" + 
+        "SUMMARY:Test-Series - shifted time\n" + 
+        "TRANSP:OPAQUE\n" + 
+        "UID:da554dcc-2c4b-4e11-a360-e3b2d3ca0408\n" + 
+        "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\n" + 
+        "BEGIN:VALARM\n" + 
+        "TRIGGER:-PT15M\n" + 
+        "UID:d13da3c9-7ea3-48d7-a468-9f985e6edfc8\n" + 
+        "ACTION:DISPLAY\n" + 
+        "DESCRIPTION:Reminder\n" + 
+        "END:VALARM\n" + 
+        "END:VEVENT\n" + 
+        "END:VCALENDAR\n" + 
+        "";
+
     // contains 102 events
     public static final String RESPONSE_WITH_ADDITIONAL_PROPERTIES = "BEGIN:VCALENDAR\n" + 
         "PRODID:-//Google Inc//Google Calendar 70.9054//EN\n" + 

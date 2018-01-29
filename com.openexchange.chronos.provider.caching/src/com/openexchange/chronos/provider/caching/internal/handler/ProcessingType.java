@@ -49,62 +49,29 @@
 
 package com.openexchange.chronos.provider.caching.internal.handler;
 
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.provider.CalendarAccount;
+
 /**
- * {@link FolderUpdateState}
+ * {@link ProcessingType} defines some types of processing that will be evaluated based on the calendars defined {@link CachingCalendarAccess#getRefreshInterval()}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class FolderUpdateState implements Comparable<FolderUpdateState> {
-
-    private final String folderId;
-    private final long lastUpdated;
-    private final long refreshInterval;
-    private final FolderProcessingType currentType;
-
-    public FolderUpdateState(String folderId, long lastUpdated, long refreshInterval, FolderProcessingType type) {
-        this.folderId = folderId;
-        this.lastUpdated = lastUpdated;
-        this.currentType = type;
-        this.refreshInterval = refreshInterval;
-    }
+public enum ProcessingType {
 
     /**
-     * Gets the lastUpdated
-     *
-     * @return The lastUpdated
+     * Indicates that it is the first processing for the given {@link CalendarAccount}.
      */
-    public long getLastUpdated() {
-        return lastUpdated;
-    }
+    INITIAL_INSERT,
 
     /**
-     * Gets the currentType
-     *
-     * @return The currentType
+     * Indicates that there has already been an ({@link #INITIAL_INSERT}) but the consumed {@link Event}s have to be updated because the refresh interval is exceeded.
      */
-    public FolderProcessingType getType() {
-        return currentType;
-    }
+    UPDATE,
 
     /**
-     * Gets the folderId
-     *
-     * @return The folderId
+     * Indicates that there has already been an ({@link #INITIAL_INSERT}) and the persisted data should be used because the refresh interval is not exceeded.
      */
-    public String getFolderId() {
-        return folderId;
-    }
-
-    @Override
-    public int compareTo(FolderUpdateState o) {
-        if (this.folderId.equals(o.getFolderId())) {
-            return 0;
-        }
-        return 1;
-    }
-
-    public long getRefreshInterval() {
-        return refreshInterval;
-    }
+    READ_DB,
 }

@@ -54,6 +54,7 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTI
 import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.dmfs.rfc5545.Duration;
 import org.json.JSONObject;
@@ -68,11 +69,11 @@ import com.openexchange.chronos.provider.ical.properties.ICalCalendarProviderPro
 import com.openexchange.chronos.provider.ical.result.GetResponse;
 import com.openexchange.chronos.provider.ical.result.GetResponseState;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 
 /**
  *
@@ -92,15 +93,15 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
      * Initializes a new {@link BasicICalCalendarAccess}.
      * 
      * @param services The {@link ServiceLookup} instance
-     * @param session The calendar session
+     * @param calendarSession The calendar session
      * @param account The calendar account
      * @param parameters The calendar parameters
      */
-    public BasicICalCalendarAccess(ServiceLookup services, Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super(services, session, account, parameters);
+    public BasicICalCalendarAccess(ServiceLookup services, CalendarSession calendarSession, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        super(services, calendarSession, account, parameters);
         JSONObject userConfiguration = new JSONObject(account.getUserConfiguration());
-        this.iCalFeedConfig = new ICalCalendarFeedConfig.DecryptedBuilder(session, userConfiguration, getICalConfiguration()).build();
-        this.feedClient = new ICalFeedClient(session, iCalFeedConfig);
+        this.iCalFeedConfig = new ICalCalendarFeedConfig.DecryptedBuilder(calendarSession.getSession(), userConfiguration, getICalConfiguration()).build();
+        this.feedClient = new ICalFeedClient(calendarSession.getSession(), iCalFeedConfig);
     }
 
     @Override
@@ -125,6 +126,18 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
 
     @Override
     protected long getRefreshInterval() throws OXException {
+        JSONObject userConfig = account.getUserConfiguration();
+        if (userConfig != null && userConfig.hasAndNotNull(ICalCalendarConstants.REFRESH_INTERVAL)) {
+            try {
+                Number userInterval = (Number) userConfig.opt(ICalCalendarConstants.REFRESH_INTERVAL);
+                if (userInterval != null && userInterval.longValue() > 0) {
+                    return userInterval.longValue();
+                }
+            } catch (ClassCastException e) {
+                LOG.warn("Unable to parse refresh interval '{}' taken from user config.", userConfig.opt(ICalCalendarConstants.REFRESH_INTERVAL), e);
+            }
+        }
+
         JSONObject iCalConfiguration = getICalConfiguration();
 
         if (iCalConfiguration != null && !iCalConfiguration.isEmpty()) {
@@ -133,16 +146,16 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
                 return calendarProviderInterval.longValue();
             }
         }
-        return services.getService(LeanConfigurationService.class).getLongProperty(session.getUserId(), session.getContextId(), ICalCalendarProviderProperties.refreshInterval);
+        return services.getService(LeanConfigurationService.class).getLongProperty(calendarSession.getUserId(), calendarSession.getContextId(), ICalCalendarProviderProperties.refreshInterval);
     }
 
     @Override
-    protected void handleExceptions(OXException e) {
+    public void handleExceptions(OXException e) {
         //nothing to handle
     }
 
     @Override
-    protected ExternalCalendarResult getAllEvents() throws OXException {
+    public ExternalCalendarResult getAllEvents() throws OXException {
         GetResponse getResult = feedClient.executeRequest();
         String etag = iCalFeedConfig.getEtag();
 
@@ -159,7 +172,7 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
     }
 
     @Override
-    protected long getRetryAfterErrorInterval() {
+    public long getRetryAfterErrorInterval() {
         return TimeUnit.MINUTES.toMinutes(60);
     }
 
@@ -216,4 +229,12 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
         return icalConfig;
     }
 
+    @Override
+    public void close() {}
+
+    @Override
+    public List<OXException> getWarnings() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

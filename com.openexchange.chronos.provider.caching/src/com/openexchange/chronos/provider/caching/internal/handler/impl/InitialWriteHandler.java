@@ -55,8 +55,8 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.TruncationAwareCalendarStorage;
 import com.openexchange.chronos.service.EventUpdates;
@@ -64,7 +64,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -75,30 +74,30 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class InitialWriteHandler extends AbstractHandler {
 
-    public InitialWriteHandler(CachingCalendarAccess cachedCalendarAccess) {
+    public InitialWriteHandler(BasicCachingCalendarAccess cachedCalendarAccess) {
         super(cachedCalendarAccess);
     }
 
     @Override
-    public ExternalCalendarResult getExternalEvents(String folderId) throws OXException {
-        return getAndPrepareExtEvents(folderId);
+    public ExternalCalendarResult getExternalEvents() throws OXException {
+        return getAndPrepareExtEvents();
     }
 
     @Override
-    public List<Event> getExistingEvents(String folderId) throws OXException {
+    public List<Event> getExistingEvents() throws OXException {
         return Collections.emptyList();
     }
 
     @Override
-    public void persist(String folderId, EventUpdates diff) throws OXException {
+    public void persist(EventUpdates diff) throws OXException {
         boolean committed = false;
         DatabaseService dbService = Services.getService(DatabaseService.class);
         Connection writeConnection = null;
-        Context context = this.cachedCalendarAccess.getSession().getContext();
+        int contextId = this.cachedCalendarAccess.getCalendarSession().getContextId();
         try {
-            writeConnection = dbService.getWritable(context);
+            writeConnection = dbService.getWritable(contextId);
             writeConnection.setAutoCommit(false);
-            create(folderId, new TruncationAwareCalendarStorage(initStorage(new SimpleDBProvider(writeConnection, writeConnection)), this.cachedCalendarAccess.getSession()), diff.getAddedItems());
+            create(new TruncationAwareCalendarStorage(initStorage(new SimpleDBProvider(writeConnection, writeConnection)), this.cachedCalendarAccess.getCalendarSession().getSession()), diff.getAddedItems());
 
             writeConnection.commit();
             committed = true;
@@ -112,10 +111,10 @@ public class InitialWriteHandler extends AbstractHandler {
                 if (!committed) {
                     Databases.rollback(writeConnection);
                     Databases.autocommit(writeConnection);
-                    dbService.backWritableAfterReading(context, writeConnection);
+                    dbService.backWritableAfterReading(contextId, writeConnection);
                 } else {
                     Databases.autocommit(writeConnection);
-                    dbService.backWritable(context, writeConnection);
+                    dbService.backWritable(contextId, writeConnection);
                 }
             }
         }

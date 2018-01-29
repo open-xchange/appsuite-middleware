@@ -217,6 +217,27 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      * @throws ChronosApiException if a Chronos API error is occurred
      */
+    public EventData getEvent(String folderId, String eventId) throws ApiException, ChronosApiException {
+        return getEvent(folderId, eventId, null, false);
+    }
+
+    public EventData getEvent(String folderId, String eventId, String recurrenceId, boolean expectException) throws ApiException, ChronosApiException {
+        EventResponse eventsResponse = userApi.getChronosApi().getEvent(userApi.getSession(), eventId, folderId, recurrenceId, null, null);
+        if (expectException) {
+            assertNotNull("An error was expected", eventsResponse.getError());
+            throw new ChronosApiException(eventsResponse.getCode(), eventsResponse.getError());
+        }
+        return eventsResponse.getData();
+    }
+
+    /**
+     * Get an event
+     *
+     * @param eventId The {@link EventId}
+     * @return the {@link EventData}
+     * @throws ApiException if an API error is occurred
+     * @throws ChronosApiException if a Chronos API error is occurred
+     */
     public EventData getEvent(String eventId) throws ApiException, ChronosApiException {
         return getEvent(eventId, false);
     }
@@ -360,13 +381,17 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error occurs
      */
     public List<EventData> getAllEvents(Date from, Date until, boolean expand, String folder, SortOrder sortOrder) throws ApiException {
+        return getAllEvents(from, until, expand, folder, sortOrder, null);
+    }
+
+    public List<EventData> getAllEvents(Date from, Date until, boolean expand, String folder, SortOrder sortOrder, String fields) throws ApiException {
         String sort = null;
         String order = null;
         if (sortOrder != null) {
             sort = sortOrder.getBy().name();
             order = sortOrder.isDescending() ? SortOrder.Order.DESC.name() : SortOrder.Order.ASC.name();
         }
-        EventsResponse eventsResponse = userApi.getChronosApi().getAllEvents(userApi.getSession(), DateTimeUtil.getZuluDateTime(from.getTime()).getValue(), DateTimeUtil.getZuluDateTime(until.getTime()).getValue(), folder, null, order, sort, expand, true, false);
+        EventsResponse eventsResponse = userApi.getChronosApi().getAllEvents(userApi.getSession(), DateTimeUtil.getZuluDateTime(from.getTime()).getValue(), DateTimeUtil.getZuluDateTime(until.getTime()).getValue(), folder, fields, order, sort, expand, true, false);
         return checkResponse(eventsResponse.getErrorDesc(), eventsResponse.getError(), eventsResponse.getData());
     }
 
@@ -378,7 +403,11 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error occurs
      */
     public List<EventData> listEvents(List<EventId> ids) throws ApiException {
-        EventsResponse listResponse = userApi.getChronosApi().getEventList(userApi.getSession(), defaultFolder, ids, null, false);
+        return listEvents(defaultFolder, ids);
+    }
+
+    public List<EventData> listEvents(String folderId, List<EventId> ids) throws ApiException {
+        EventsResponse listResponse = userApi.getChronosApi().getEventList(userApi.getSession(), folderId, ids, null, Boolean.FALSE);
         return checkResponse(listResponse.getErrorDesc(), listResponse.getError(), listResponse.getData());
     }
 
@@ -735,4 +764,9 @@ public class EventManager extends AbstractManager {
     public void setLastTimeStamp(long lastTimeStamp) {
         this.lastTimeStamp = lastTimeStamp;
     }
+
+    public static boolean isSeriesMaster(EventData event) {
+        return null != event && null != event.getId() && event.getId().equals(event.getSeriesId()) && null == event.getRecurrenceId();
+    }
+
 }

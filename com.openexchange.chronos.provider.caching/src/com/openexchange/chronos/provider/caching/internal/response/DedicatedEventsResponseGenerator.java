@@ -49,28 +49,24 @@
 
 package com.openexchange.chronos.provider.caching.internal.response;
 
-import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import static com.openexchange.chronos.common.CalendarUtils.getSearchTerm;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
-import com.openexchange.chronos.provider.caching.internal.handler.utils.HandlerHelper;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.RecurrenceService;
@@ -80,7 +76,6 @@ import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
 import com.openexchange.exception.OXException;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
-import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 
 /**
@@ -91,47 +86,37 @@ import com.openexchange.search.SingleSearchTerm.SingleOperation;
  */
 public class DedicatedEventsResponseGenerator extends ResponseGenerator {
 
-    private final List<EventID> eventIDs;
+    final List<EventID> eventIDs;
 
-    public DedicatedEventsResponseGenerator(CachingCalendarAccess cachedCalendarAccess, List<EventID> eventIDs) {
+    public DedicatedEventsResponseGenerator(BasicCachingCalendarAccess cachedCalendarAccess, List<EventID> eventIDs) {
         super(cachedCalendarAccess);
         this.eventIDs = eventIDs;
     }
 
     public List<Event> generate() throws OXException {
-        return new OSGiCalendarStorageOperation<List<Event>>(Services.getServiceLookup(), this.cachedCalendarAccess.getSession().getContext().getContextId(), this.cachedCalendarAccess.getAccount().getAccountId()) {
+        return new OSGiCalendarStorageOperation<List<Event>>(Services.getServiceLookup(), this.cachedCalendarAccess.getCalendarSession().getContextId(), this.cachedCalendarAccess.getAccount().getAccountId()) {
 
             @Override
             protected List<Event> call(CalendarStorage storage) throws OXException {
-                final Map<String, List<EventID>> idsPerFolder = HandlerHelper.sortEventIDsPerFolderId(getEventIDs());
-                Map<String, List<Event>> eventsPerFolderId = new HashMap<String, List<Event>>(idsPerFolder.size());
-                for (Entry<String, List<EventID>> entry : idsPerFolder.entrySet()) {
-                    eventsPerFolderId.put(entry.getKey(), readEventsInFolder(storage, entry.getKey(), entry.getValue()));
-                }
-                List<Event> orderedEvents = new ArrayList<Event>(getEventIDs().size());
-                for (EventID eventID : getEventIDs()) {
-                    List<Event> eventsInFolder = eventsPerFolderId.get(eventID.getFolderID());
-                    Event event = find(eventsInFolder, eventID.getObjectID(), eventID.getRecurrenceID());
-                    if (null == event) {
-                        org.slf4j.LoggerFactory.getLogger(DedicatedEventsResponseGenerator.class).debug("Event with {} not found, skipping.", eventID);
-                    }
-                    orderedEvents.add(event);
-                }
+                List<Event> readEvents = readEvents(storage);
+                
                 EventField[] fields = getFields(cachedCalendarAccess.getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class));
-                return storage.getUtilities().loadAdditionalEventData(cachedCalendarAccess.getAccount().getUserId(), orderedEvents, fields);
+                List<EventField> fieldList = new ArrayList<EventField>(Arrays.asList(fields));
+                fieldList.add(EventField.FOLDER_ID);
+                fields = fieldList.toArray(new EventField[fieldList.size()]);
+
+                return storage.getUtilities().loadAdditionalEventData(cachedCalendarAccess.getAccount().getUserId(), readEvents, fields);
             }
 
         }.executeQuery();
     }
 
-    protected List<Event> readEventsInFolder(CalendarStorage calendarStorage, String folderId, List<EventID> eventIDs) throws OXException {
+    protected List<Event> readEvents(CalendarStorage calendarStorage) throws OXException {
         Set<String> objectIDs = new HashSet<String>(eventIDs.size());
         for (EventID eventID : eventIDs) {
-            if (folderId.equals(eventID.getFolderID())) {
-                objectIDs.add(eventID.getObjectID());
-            }
+            objectIDs.add(eventID.getObjectID());
         }
-        List<Event> events = readEventsInFolder(calendarStorage, folderId, objectIDs.toArray(new String[objectIDs.size()]), null);
+        List<Event> events = readEvents(calendarStorage, objectIDs.toArray(new String[objectIDs.size()]));
         List<Event> orderedEvents = new ArrayList<Event>(eventIDs.size());
         for (EventID eventID : eventIDs) {
             Event event = CalendarUtils.find(events, eventID.getObjectID());
@@ -139,7 +124,6 @@ public class DedicatedEventsResponseGenerator extends ResponseGenerator {
                 continue;
             }
             RecurrenceId recurrenceId = eventID.getRecurrenceID();
-            event.setFolderId(folderId);
             event.setFlags(getFlags(event, cachedCalendarAccess.getAccount().getUserId()));
             if (null != recurrenceId) {
                 if (isSeriesMaster(event)) {
@@ -163,9 +147,8 @@ public class DedicatedEventsResponseGenerator extends ResponseGenerator {
         return orderedEvents;
     }
 
-    protected List<Event> readEventsInFolder(CalendarStorage calendarStorage, String folderId, String[] objectIDs, Date updatedSince) throws OXException {
-        SearchTerm<?> folderSearchTerm = getSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, folderId);
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(folderSearchTerm);
+    protected List<Event> readEvents(CalendarStorage calendarStorage, String[] objectIDs) throws OXException {
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
         if (null != objectIDs) {
             if (0 == objectIDs.length) {
                 return Collections.emptyList();
@@ -179,18 +162,10 @@ public class DedicatedEventsResponseGenerator extends ResponseGenerator {
                 searchTerm.addSearchTerm(orTerm);
             }
         }
-        if (null != updatedSince) {
-            searchTerm.addSearchTerm(getSearchTerm(EventField.LAST_MODIFIED, SingleOperation.GREATER_THAN, updatedSince));
-        }
         EventField[] fields = getFields(this.cachedCalendarAccess.getParameters().get(CalendarParameters.PARAMETER_FIELDS, EventField[].class));
         SearchOptions searchOptions = new SearchOptions(this.cachedCalendarAccess.getParameters());
         List<Event> events = calendarStorage.getEventStorage().searchEvents(searchTerm, searchOptions, fields);
         events = calendarStorage.getUtilities().loadAdditionalEventData(cachedCalendarAccess.getAccount().getUserId(), events, fields);
         return events;
     }
-
-    protected List<EventID> getEventIDs() {
-        return eventIDs;
-    }
-
 }

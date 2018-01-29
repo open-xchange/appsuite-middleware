@@ -54,6 +54,7 @@ import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountSe
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.google.GoogleCalendarProvider;
 import com.openexchange.chronos.provider.google.migration.GoogleSubscriptionsMigrationTask;
+import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
@@ -77,7 +78,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class[] { GenericConfigurationStorageService.class, CalendarStorageFactory.class, ContextService.class, FolderUserPropertyStorage.class, GroupService.class, UserService.class, FolderService.class };
+        return new Class[] { GenericConfigurationStorageService.class, CalendarStorageFactory.class, ContextService.class, FolderUserPropertyStorage.class, GroupService.class, UserService.class, FolderService.class, CalendarService.class };
     }
 
     @Override

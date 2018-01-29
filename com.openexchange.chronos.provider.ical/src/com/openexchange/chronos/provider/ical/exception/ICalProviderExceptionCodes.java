@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.ical.exception;
 
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.BAD_FEED_URI_MSG;
+import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.BAD_PARAMETER_MSG;
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.FEED_SIZE_EXCEEDED_MSG;
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.FEED_URI_NOT_ALLOWED_MSG;
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.MISSING_FEED_URI_MSG;
@@ -97,6 +98,11 @@ public enum ICalProviderExceptionCodes implements DisplayableOXExceptionCode {
      */
     NOT_ALLOWED_CHANGE("The field %1$s cannot be changed.", NOT_ALLOWED_CHANGE_MSG, Category.CATEGORY_USER_INPUT, 4044),
     /**
+     * <li>The field '%1$s' contains an unexpected value '%2$s'.</li>
+     * <li>The field '%1$s' contains an unexpected value '%2$s'.</li>
+     */
+    BAD_PARAMETER("The field '%1$s' contains an unexpected value '%2$s'.", BAD_PARAMETER_MSG, Category.CATEGORY_USER_INPUT, 4045),
+    /**
      * <li>Unfortunately your requested feed cannot be used due to size limitations.</li>
      * <li>The requested feed with URI %1$s does exceed the configured maximum size. Allowed %2$s bytes but was %3$s bytes.</li>
      */
@@ -131,7 +137,6 @@ public enum ICalProviderExceptionCodes implements DisplayableOXExceptionCode {
      * <li>A remote server error occurred: %1$s</li>
      */
     REMOTE_SERVER_ERROR("A remote server error occurred: %1$s", ICalProviderExceptionMessages.REMOTE_SERVER_ERROR_MSG, CATEGORY_ERROR, 5033),
-
 
     ;
 

@@ -49,14 +49,13 @@
 
 package com.openexchange.chronos.provider.caching.internal.handler;
 
-import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
-import com.openexchange.chronos.provider.caching.internal.handler.impl.DeleteHandler;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.handler.impl.InitialWriteHandler;
 import com.openexchange.chronos.provider.caching.internal.handler.impl.ReadOnlyHandler;
 import com.openexchange.chronos.provider.caching.internal.handler.impl.UpdateHandler;
 
 /**
- * The {@link CachingHandlerFactory} returns the {@link CachingHandler} based on the provided {@link FolderProcessingType}
+ * The {@link CachingHandlerFactory} returns the {@link CachingHandler} based on the provided {@link ProcessingType}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
@@ -69,14 +68,12 @@ public class CachingHandlerFactory {
         return SINGLETON;
     }
 
-    public CachingHandler get(FolderProcessingType type, CachingCalendarAccess cachingCalendarAccess) {
+    public CachingHandler get(ProcessingType type, BasicCachingCalendarAccess cachingCalendarAccess) {
         switch (type) {
             case INITIAL_INSERT:
                 return new InitialWriteHandler(cachingCalendarAccess);
             case UPDATE:
                 return new UpdateHandler(cachingCalendarAccess);
-            case DELETE:
-                return new DeleteHandler(cachingCalendarAccess);
             case READ_DB:
             default:
                 return new ReadOnlyHandler(cachingCalendarAccess);

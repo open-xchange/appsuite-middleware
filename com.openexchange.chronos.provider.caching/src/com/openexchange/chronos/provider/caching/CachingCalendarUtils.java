@@ -65,19 +65,19 @@ public class CachingCalendarUtils {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CachingCalendarUtils.class);
 
     /**
-     * (Only) Adapts the internal configuration for the given {@link CalendarAccount} folder id so that the next request might update the data persisted for given folder. Make sure that the new account configuration will be persisted.
+     * (Only) Adapts the internal configuration for the given {@link CalendarAccount} account so that the next request might update the persisted data.
+     * <p>
+     * <b>Make sure that the new account configuration will be persisted.</b>
      * 
      * @param calendarAccount The calendar account to invalidate the cache should be invalidated
-     * @param folderId The id of the folder to invalidate the cache for
      */
-    public static void invalidateFolderCache(CalendarAccount calendarAccount, String folderId) {
+    public static void invalidateCache(CalendarAccount calendarAccount) {
         JSONObject internalConfiguration = calendarAccount.getInternalConfiguration();
         if (internalConfiguration.hasAndNotNull(CachingCalendarAccessConstants.CACHING)) {
             try {
                 JSONObject caching = internalConfiguration.getJSONObject(CachingCalendarAccessConstants.CACHING);
-                if (caching.hasAndNotNull(folderId)) {
-                    JSONObject folderConfig = caching.getJSONObject(folderId);
-                    folderConfig.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, 0);
+                if (caching != null) {
+                    caching.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, 0);
                 }
             } catch (JSONException e) {
                 LOG.error("Unable to retrieve caching information for calendar account {} with provider {}: {}", calendarAccount.getAccountId(), calendarAccount.getProviderId(), e.getMessage(), e);

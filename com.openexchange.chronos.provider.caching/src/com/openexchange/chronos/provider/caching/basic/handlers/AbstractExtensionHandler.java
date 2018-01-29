@@ -77,7 +77,7 @@ import com.openexchange.session.Session;
 abstract class AbstractExtensionHandler {
 
     private final CalendarParameters parameters;
-    private final Session session;
+    private final CalendarSession calendarSession;
     private final CalendarAccount account;
     private final SearchOptions searchOptions;
     private final SelfProtection selfProtection;
@@ -86,19 +86,19 @@ abstract class AbstractExtensionHandler {
      * Initialises a new {@link AbstractExtensionHandler}.
      *
      * @param services The {@link ServiceLookup} instance
-     * @param session The groupware {@link Session}
+     * @param calendarSession The groupware {@link Session}
      * @param account The {@link CalendarAccount}
      * @param calendarParameters The {@link CalendarParameters}
      * @throws OXException if the property {@link CalendarSession} cannot be initialised
      */
-    public AbstractExtensionHandler(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public AbstractExtensionHandler(CalendarSession calendarSession, CalendarAccount account, CalendarParameters parameters) throws OXException {
         super();
-        this.session = session;
+        this.calendarSession = calendarSession;
         this.account = account;
         this.parameters = parameters;
         this.searchOptions = new SearchOptions(parameters);
         LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
-        this.selfProtection = SelfProtectionFactory.createSelfProtection(session, leanConfigurationService);
+        this.selfProtection = SelfProtectionFactory.createSelfProtection(calendarSession.getSession(), leanConfigurationService);
     }
 
     /**
@@ -116,7 +116,7 @@ abstract class AbstractExtensionHandler {
      * @return The session
      */
     Session getSession() {
-        return session;
+        return calendarSession.getSession();
     }
 
     /**

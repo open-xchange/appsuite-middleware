@@ -52,12 +52,13 @@ package com.openexchange.chronos.provider.caching.impl;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.provider.CalendarAccount;
-import com.openexchange.chronos.provider.CalendarFolder;
-import com.openexchange.chronos.provider.caching.CachingCalendarAccess;
+import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
  * {@link TestCachingCalendarAccessImpl}
@@ -65,12 +66,12 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class TestCachingCalendarAccessImpl extends CachingCalendarAccess {
+public class TestCachingCalendarAccessImpl extends BasicCachingCalendarAccess {
 
     private boolean configSaved = false;
 
-    public TestCachingCalendarAccessImpl(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super(session, account, parameters);
+    public TestCachingCalendarAccessImpl(CalendarSession session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        super(Services.getServiceLookup(), session, account, parameters);
     }
 
     /*
@@ -87,32 +88,10 @@ public class TestCachingCalendarAccessImpl extends CachingCalendarAccess {
     /*
      * (non-Javadoc)
      *
-     * @see com.openexchange.chronos.provider.CalendarAccess#getFolder(java.lang.String)
-     */
-    @Override
-    public CalendarFolder getFolder(String folderId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.chronos.provider.CalendarAccess#getVisibleFolders()
-     */
-    @Override
-    public List<CalendarFolder> getVisibleFolders() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     *
      * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#getRefreshInterval()
      */
     @Override
-    public long getRefreshInterval(String folderId) {
+    public long getRefreshInterval() {
         return 60;
     }
 
@@ -122,7 +101,7 @@ public class TestCachingCalendarAccessImpl extends CachingCalendarAccess {
      * @see com.openexchange.chronos.provider.caching.CachingCalendarAccess#getEvents(java.lang.String)
      */
     @Override
-    public ExternalCalendarResult getAllEvents(String folderId) throws OXException {
+    public ExternalCalendarResult getAllEvents() throws OXException {
         return new ExternalCalendarResult(false, Collections.emptyList());
     }
 
@@ -141,27 +120,25 @@ public class TestCachingCalendarAccessImpl extends CachingCalendarAccess {
     }
 
     @Override
-    public void handleExceptions(String calendarFolderId, OXException e) {
+    public void handleExceptions(OXException e) {
         // TODO Auto-generated method stub
 
     }
 
     @Override
-    public String updateFolder(String folderId, CalendarFolder folder, long clientTimestamp) throws OXException {
+    public CalendarSettings getSettings() {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public String createFolder(CalendarFolder folder) throws OXException {
+    public List<OXException> getWarnings() {
         // TODO Auto-generated method stub
         return null;
     }
-
+    
     @Override
-    public void deleteFolder(String folderId, long clientTimestamp) throws OXException {
-        // TODO Auto-generated method stub
-
+    protected boolean acquireUpdateLock() throws OXException {
+        return true;
     }
-
 }

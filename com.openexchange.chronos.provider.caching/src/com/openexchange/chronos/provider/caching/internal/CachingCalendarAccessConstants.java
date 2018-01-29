@@ -60,15 +60,20 @@ public final class CachingCalendarAccessConstants {
     /**
      * The general key for persisting the caching information
      */
-    public static final String CACHING = "folderCaching";
+    public static final String CACHING = "caching";
 
     /**
-     * The key for persisting if the folder is currently blocked by another request
+     * The key for persisting if the account is currently blocked by another request
      */
     public static final String BLOCKED = "blocked";
 
     /**
-     * The key for persisting the folders last update information
+     * The key for persisting accounts last update information
      */
     public static final String LAST_UPDATE = "lastUpdate";
+
+    /**
+     * The key for persisting the information about a current lock
+     */
+    public static final String LOCKED_FOR_UPDATE_UNTIL = "lockedForUpdateUntil";
 }

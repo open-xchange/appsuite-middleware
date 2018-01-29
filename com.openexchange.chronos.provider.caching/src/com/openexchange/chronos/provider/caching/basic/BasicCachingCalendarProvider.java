@@ -70,8 +70,6 @@ import com.openexchange.session.Session;
  */
 public abstract class BasicCachingCalendarProvider implements BasicCalendarProvider {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BasicCachingCalendarProvider.class);
-
     @Override
     public final JSONObject configureAccount(Session session, CalendarSettings settings, CalendarParameters parameters) throws OXException {
         //Nothing caching specific to do
@@ -112,11 +110,9 @@ public abstract class BasicCachingCalendarProvider implements BasicCalendarProvi
         JSONObject internalConfiguration = account.getInternalConfiguration();
         if (settings.containsConfig() && triggerCacheInvalidation(session, account.getUserConfiguration(), settings.getConfig())) {
             if (internalConfiguration.hasAndNotNull(CachingCalendarAccessConstants.CACHING)) {
-                JSONObject folders = internalConfiguration.optJSONObject(CachingCalendarAccessConstants.CACHING);
-                for (String folderId : folders.keySet()) {
-                    JSONObject lastUpdate = new JSONObject();
-                    lastUpdate.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, 0);
-                    folders.putSafe(folderId, lastUpdate);
+                JSONObject accountCaching = internalConfiguration.optJSONObject(CachingCalendarAccessConstants.CACHING);
+                if (accountCaching != null) {
+                    accountCaching.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, 0);
                 }
             }
         }
@@ -129,7 +125,19 @@ public abstract class BasicCachingCalendarProvider implements BasicCalendarProvi
     }
 
     /**
-     * Returns if a reconfiguration of the account should trigger a cache invalidation (for all folders of the account!) to ensure all associated calendar data will be updated with the next request.
+     * Checks if the desired update contains fields that shouldn't be allowed to change.
+     * 
+     * @param session The user's session
+     * @param originUserConfiguration Previously stored user configuration
+     * @param newUserConfiguration New user configuration
+     * @throws OXException should be thrown when unchangeable fields might be changed
+     */
+    public void checkAllowedUpdate(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException {
+        // overwrite if desired
+    }
+
+    /**
+     * Returns if a reconfiguration of the account should trigger a cache invalidation (for the account!) to ensure all associated calendar data will be updated with the next request.
      *
      * @param session The user's session
      * @param originUserConfiguration Previously stored user configuration
