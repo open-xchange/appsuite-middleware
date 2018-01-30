@@ -74,6 +74,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DataAwareRecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -250,6 +251,12 @@ public class SplitPerformer extends AbstractUpdatePerformer {
             if (0 <= compare(originalChangeException.getRecurrenceId().getValue(), splitPoint, timeZone)) {
                 Event exceptionUpdate = EventMapper.getInstance().copy(originalChangeException, null, EventField.ID);
                 exceptionUpdate.setRelatedTo(relatedTo);
+                {
+                    // workaround to hide a possibly incorrect recurrence position in passed recurrence id for legacy storage
+                    // TODO: remove once no longer needed
+                    DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(updatedSeriesMaster.getRecurrenceRule(), updatedSeriesMaster.getStartDate(), null);
+                    exceptionUpdate.setRecurrenceId(new DataAwareRecurrenceId(recurrenceData, originalChangeException.getRecurrenceId().getValue()));
+                }
                 Consistency.setModified(session, timestamp, exceptionUpdate, session.getUserId());
                 storage.getEventStorage().updateEvent(exceptionUpdate);
                 resultTracker.trackUpdate(originalChangeException, loadEventData(originalChangeException.getId()));
