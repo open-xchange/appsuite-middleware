@@ -49,6 +49,9 @@
 
 package com.openexchange.filestore.s3.metrics;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import com.amazonaws.Request;
 import com.amazonaws.Response;
 import com.amazonaws.http.HttpMethodName;
@@ -67,25 +70,24 @@ import com.openexchange.server.ServiceLookup;
  */
 public class S3FileStorageRequestMetricCollector extends RequestMetricCollector {
 
-    private final ServiceLookup services;
-
-    private Meter headRequestMeter;
+    private final Map<HttpMethodName, Meter> methodCounterMetrics;
 
     /**
      * Initialises a new {@link S3FileStorageRequestMetricCollector}.
      */
     public S3FileStorageRequestMetricCollector(String filestoreId, ServiceLookup services) {
         super();
-        this.services = services;
-        registerRequestMetrics();
-    }
-
-    /**
-     * 
-     */
-    private void registerRequestMetrics() {
+        Map<HttpMethodName, Meter> map = new HashMap<>();
         MetricRegistryService metricRegistryService = services.getService(MetricRegistryService.class);
-        headRequestMeter = metricRegistryService.registerMeter(HttpMethodName.HEAD.name());
+        map.put(HttpMethodName.HEAD, metricRegistryService.registerMeter(HttpMethodName.HEAD.name()));
+        map.put(HttpMethodName.GET, metricRegistryService.registerMeter(HttpMethodName.GET.name()));
+        map.put(HttpMethodName.POST, metricRegistryService.registerMeter(HttpMethodName.POST.name()));
+        map.put(HttpMethodName.PUT, metricRegistryService.registerMeter(HttpMethodName.PUT.name()));
+        map.put(HttpMethodName.DELETE, metricRegistryService.registerMeter(HttpMethodName.DELETE.name()));
+        map.put(HttpMethodName.OPTIONS, metricRegistryService.registerMeter(HttpMethodName.OPTIONS.name()));
+        map.put(HttpMethodName.PATCH, metricRegistryService.registerMeter(HttpMethodName.PATCH.name()));
+
+        methodCounterMetrics = Collections.unmodifiableMap(map);
     }
 
     /*
@@ -111,22 +113,10 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
 
     private void countMethod(Request<?> request) {
         HttpMethodName httpMethod = request.getHttpMethod();
-        switch (httpMethod) {
-            case HEAD:
-                headRequestMeter.mark();
-                break;
-            case GET:
-                break;
-            case POST:
-                break;
-            case PUT:
-                break;
-            case DELETE:
-                break;
-            case OPTIONS:
-            case PATCH:
-            default:
-                break;
+        Meter meter = methodCounterMetrics.get(httpMethod);
+        if (meter == null) {
+            return;
         }
+        meter.mark();
     }
 }
