@@ -403,11 +403,7 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error occurs
      */
     public List<EventData> listEvents(List<EventId> ids) throws ApiException {
-        return listEvents(defaultFolder, ids);
-    }
-
-    public List<EventData> listEvents(String folderId, List<EventId> ids) throws ApiException {
-        EventsResponse listResponse = userApi.getChronosApi().getEventList(userApi.getSession(), folderId, ids, null, Boolean.FALSE);
+        EventsResponse listResponse = userApi.getChronosApi().getEventList(userApi.getSession(), ids, null, Boolean.FALSE);
         return checkResponse(listResponse.getErrorDesc(), listResponse.getError(), listResponse.getData());
     }
 

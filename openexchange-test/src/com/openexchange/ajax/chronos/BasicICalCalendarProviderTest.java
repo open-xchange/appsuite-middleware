@@ -650,7 +650,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
 
         List<EventId> ids = createEventIDs(allEvents, 5, newFolderId);
 
-        List<EventData> listedEvents = eventManager.listEvents(newFolderId, ids);
+        List<EventData> listedEvents = eventManager.listEvents(ids);
         assertEquals(5, listedEvents.size());
     }
 
