@@ -72,7 +72,7 @@ public class MetricRegistryServiceImpl implements MetricRegistryService {
         super();
         metricRegistry = new MetricRegistry();
 
-        jmxReporter = JmxReporter.forRegistry(metricRegistry).build();
+        jmxReporter = JmxReporter.forRegistry(metricRegistry).inDomain("com.openexchange.metrics").build();
         jmxReporter.start();
     }
 
