@@ -375,7 +375,7 @@ public class DataWriter {
      * @param jsonArray The JSON array to put into
      * @param condition conditionally write the value.
      */
-    static void writeValue(final String value, final JSONArray jsonArray, final boolean condition) {
+    public static void writeValue(final String value, final JSONArray jsonArray, final boolean condition) {
         if (condition) {
             writeValue(value, jsonArray);
         } else {

@@ -307,6 +307,7 @@ public final class HttpClients {
                 }
             });
         }
+        clientBuilder.useSystemProperties();
         return clientBuilder.build();
     }
 

@@ -51,7 +51,7 @@ package com.openexchange.dav.mixins;
 
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.resources.CommonFolderCollection;
+import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.type.PublicType;
@@ -72,14 +72,14 @@ public class Invite extends SingleXMLPropertyMixin {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Invite.class);
 
-    private final CommonFolderCollection<?> collection;
+    private final FolderCollection<?> collection;
 
     /**
      * Initializes a new {@link Invite}.
      *
      * @param collection The collection
      */
-    public Invite(CommonFolderCollection<?> collection) {
+    public Invite(FolderCollection<?> collection) {
         super(DAVProtocol.DAV_NS.getURI(), "invite");
         this.collection = collection;
     }

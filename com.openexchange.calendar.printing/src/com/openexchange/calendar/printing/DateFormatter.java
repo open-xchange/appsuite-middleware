@@ -56,8 +56,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
-
-import com.openexchange.calendar.itip.Messages;
 import com.openexchange.i18n.tools.StringHelper;
 
 public class DateFormatter {
@@ -68,7 +66,7 @@ public class DateFormatter {
 	protected Locale locale;
 	protected TimeZone timezone;
 	protected final TimeZone utc = TimeZone.getTimeZone("UTC");
-
+	
 	public DateFormatter(Locale locale, TimeZone tz) {
 		super();
 		if (locale != null && tz != null) {
@@ -110,7 +108,7 @@ public class DateFormatter {
 
 	public String formatInterval(Date startDate, Date endDate, boolean isFulltime) {
 		if (isFulltime) {
-			return StringHelper.valueOf(locale).getString(Messages.FULL_TIME);
+			return StringHelper.valueOf(locale).getString(CalendarPrintingStrings.FULL_TIME);
 		}
 		// TODO: Longer than a day
 	

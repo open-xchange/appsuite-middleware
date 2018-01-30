@@ -67,7 +67,7 @@ public class CPCalendarTest {
 
     @Before
     public void setUp() throws Exception {
-        calendar = new CPCalendar();
+        calendar = CPCalendar.getCalendar();
     }
 
     @Test

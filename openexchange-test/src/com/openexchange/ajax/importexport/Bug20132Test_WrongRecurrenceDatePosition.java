@@ -46,7 +46,7 @@ public class Bug20132Test_WrongRecurrenceDatePosition extends ManagedAppointment
         assertEquals(1, warnings.size());
         String message = warnings.get(0).getMessage();
         assertTrue(message.contains("truncated"));
-        assertTrue(message.contains("Here comes a long (actually too long) story"));
+        assertTrue(message.contains("field Summary, limit 255, current 490"));
         //System.out.println(message);
     }
 }

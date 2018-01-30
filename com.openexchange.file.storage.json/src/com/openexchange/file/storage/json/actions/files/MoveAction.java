@@ -150,7 +150,8 @@ public class MoveAction extends AbstractWriteAction {
         try {
             List<String> conflicting = new ArrayList<String>(pairs.size());
             for (IdVersionPair pair : pairs) {
-                if (pair.getIdentifier() == null) {
+                String fileId = pair.getIdentifier();
+                if (fileId == null) {
                     // Resource denotes a folder
                     String folderId = pair.getFolderId();
                     FileStorageFolder srcFolder = folderAccess.getFolder(new FolderID(folderId));
@@ -185,8 +186,7 @@ public class MoveAction extends AbstractWriteAction {
                     deleteableFolders.addLast(folderId);
                 } else {
                     // Resource denotes a file
-                    String id = pair.getIdentifier();
-                    oldFiles.add(id);
+                    oldFiles.add(fileId);
                 }
             }
 
@@ -214,7 +214,7 @@ public class MoveAction extends AbstractWriteAction {
             if ((warnings != null) && (!warnings.isEmpty()) && (!ignoreWarnings)) {
                 result.setException(FileStorageExceptionCodes.FILE_MOVE_ABORTED.create());
             }
-            
+
             if (ignoreWarnings) {
                 for (String fid : oldFiles) {
                     moveFile(fid, destFolder, fileAccess);

@@ -4295,22 +4295,44 @@ public class CalendarMySQL implements CalendarSqlImp {
     @Override
     public final long attachmentAction(final int folderId, final int oid, final int uid, final Session session, final Context c, final int numberOfAttachments) throws OXException {
         checkNotReadOnly(session);
+        long last_modified = 0L;
+        final Connection con = DBPool.pickupWriteable(c);
+        try {
+            con.setAutoCommit(false);
+            last_modified = attachmentAction(folderId, oid, uid, session, c, numberOfAttachments, con);
+            con.commit();
+        } catch (OXException e) {
+            rollback(con);
+            throw e;
+        } catch (SQLException sqle) {
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
+        } finally {
+            autocommit(con);
+            DBPool.closeWriterSilent(c, con);
+        }
+        return last_modified;
+    }
+
+    @Override
+    public final long attachmentAction(final int folderId, final int oid, final int uid, final Session session, final Context c, final int numberOfAttachments, final Connection writeCon) throws OXException {
+        checkNotReadOnly(session);
+        if (null == writeCon) {
+            return attachmentAction(folderId, oid, uid, session, c, numberOfAttachments);
+        }
         int changes;
         PreparedStatement pst = null;
         int amount = 0;
         ResultSet rs = null;
         PreparedStatement prep = null;
         long last_modified = 0L;
-        final Connection con = DBPool.pickupWriteable(c);
         try {
-            con.setAutoCommit(false);
             final StringBuilder sb = new StringBuilder(96);
             sb.append("SELECT intfield08 FROM prg_dates WHERE intfield01=");
             sb.append(oid);
             sb.append(" AND cid=");
             sb.append(c.getContextId());
             sb.append(" FOR UPDATE");
-            prep = getPreparedStatement(con, sb.toString());
+            prep = getPreparedStatement(writeCon, sb.toString());
             rs = prep.executeQuery();
             if (rs.next()) {
                 amount = rs.getInt(1);
@@ -4328,7 +4350,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         new Throwable());
                 throw new OXException();
             }
-            pst = con.prepareStatement("UPDATE prg_dates SET changing_date=?,changed_from=?,intfield08=? WHERE intfield01=? AND cid=?");
+            pst = writeCon.prepareStatement("UPDATE prg_dates SET changing_date=?,changed_from=?,intfield08=? WHERE intfield01=? AND cid=?");
             last_modified = System.currentTimeMillis();
             pst.setLong(1, last_modified);
             pst.setInt(2, uid);
@@ -4348,15 +4370,11 @@ public class CalendarMySQL implements CalendarSqlImp {
                 "Result of attachmentAction was ", Autoboxing.I(changes), ". Check prg_dates oid:cid:uid ", Autoboxing.I(oid),
                 Character.valueOf(CalendarOperation.COLON), Autoboxing.I(c.getContextId()), Character.valueOf(CalendarOperation.COLON),
                 Autoboxing.I(uid) }));
-            con.commit();
         } catch (final SQLException sqle) {
-            rollback(con);
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
         } finally {
             closeSQLStuff(prep);
             closeSQLStuff(pst);
-            autocommit(con);
-            DBPool.closeWriterSilent(c, con);
         }
         final CalendarDataObject edao = new CalendarDataObject();
         edao.setParentFolderID(folderId);

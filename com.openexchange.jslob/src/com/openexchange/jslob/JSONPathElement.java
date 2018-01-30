@@ -170,10 +170,6 @@ public final class JSONPathElement {
             } else {
                 retval = jCurrent.get(name);
             }
-            if (retval instanceof JSONValue) {
-                // Not a leaf
-                return null;
-            }
             return retval;
         } catch (final JSONException e) {
             return null;

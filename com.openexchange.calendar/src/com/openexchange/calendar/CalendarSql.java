@@ -1457,6 +1457,11 @@ public class CalendarSql implements AppointmentSQLInterface {
     }
 
     @Override
+    public final long attachmentAction(final int folderId, final int oid, final int uid, final Session session, final Context c, final int numberOfAttachments, AttachmentBatch batch, Connection writeCon) throws OXException {
+        return cimp.attachmentAction(folderId, oid, uid, session, c, numberOfAttachments, writeCon);
+    }
+
+    @Override
     public SearchIterator<Appointment> getFreeBusyInformation(final int uid, final int type, final Date start, final Date end) throws OXException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();

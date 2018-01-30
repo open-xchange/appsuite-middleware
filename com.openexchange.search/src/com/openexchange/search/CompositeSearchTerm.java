@@ -272,9 +272,11 @@ public class CompositeSearchTerm implements SearchTerm<SearchTerm<?>> {
      * Adds specified search term.
      *
      * @param searchTerm The search term to add.
+     * @return A self reference
      */
-    public void addSearchTerm(final SearchTerm<?> searchTerm) {
+    public CompositeSearchTerm addSearchTerm(final SearchTerm<?> searchTerm) {
         operands.add(searchTerm);
+        return this;
     }
 
     @Override

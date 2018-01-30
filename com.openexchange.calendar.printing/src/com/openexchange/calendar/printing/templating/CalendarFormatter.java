@@ -57,7 +57,7 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
-import com.openexchange.calendar.itip.Messages;
+import com.openexchange.calendar.printing.CalendarPrintingStrings;
 import com.openexchange.i18n.tools.StringHelper;
 
 
@@ -146,7 +146,7 @@ public class CalendarFormatter {
 
     public String formatInterval(Map<String, Object> appointment) {
         if (isFullTime()) {
-            return StringHelper.valueOf(locale).getString(Messages.FULL_TIME);
+            return StringHelper.valueOf(locale).getString(CalendarPrintingStrings.FULL_TIME);
         }
         // TODO: Longer than a day
         Date startDate = new Date((Long) appointment.get("start_date"));

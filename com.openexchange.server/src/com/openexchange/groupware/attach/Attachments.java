@@ -49,20 +49,19 @@
 
 package com.openexchange.groupware.attach;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.impl.AttachmentBaseImpl;
 import com.openexchange.groupware.attach.impl.OverridableAttachmentAuthorization;
 import com.openexchange.groupware.attach.impl.OverridableAttachmentListener;
-import com.openexchange.groupware.calendar.CalendarAttachments;
 import com.openexchange.groupware.contact.ContactsAttachment;
 import com.openexchange.groupware.tasks.TaskAttachmentListener;
 import com.openexchange.groupware.tasks.TaskAuthorization;
 import com.openexchange.tools.service.ServicePriorityConflictException;
 import com.openexchange.tools.service.SpecificServiceChooser;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 public abstract class Attachments {
 
@@ -80,7 +79,6 @@ public abstract class Attachments {
             contactAuth.registerForEverything(new ContactsAttachment(), 0);
 
             final SpecificServiceChooser<AttachmentAuthorization> appointmentAuth = new SpecificServiceChooser<AttachmentAuthorization>();
-            appointmentAuth.registerForEverything(new CalendarAttachments(), 0);
 
             authz.put(Types.TASK, taskAuth);
             authz.put(Types.CONTACT, contactAuth);
@@ -94,7 +92,6 @@ public abstract class Attachments {
             contactListener.registerForEverything(new ContactsAttachment(), 0);
 
             final SpecificServiceChooser<AttachmentListener> appointmentListener = new SpecificServiceChooser<AttachmentListener>();
-            appointmentListener.registerForEverything(new CalendarAttachments(), 0);
 
             listener.put(Types.TASK, taskListener);
             listener.put(Types.CONTACT, contactListener);
@@ -130,4 +127,15 @@ public abstract class Attachments {
     public static AttachmentBase getInstance(final DBProvider provider) {
         return new AttachmentBaseImpl(provider);
     }
+
+    public static AttachmentBase getInstance(DBProvider provider, boolean applyDefaults) {
+        if (applyDefaults) {
+            AttachmentBaseImpl attachmentBase = new AttachmentBaseImpl(impl);
+            attachmentBase.setProvider(provider);
+            return attachmentBase;
+        } else {
+            return new AttachmentBaseImpl(provider);
+        }
+    }
+
 }

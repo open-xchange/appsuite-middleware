@@ -2581,9 +2581,17 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
         try {
             tool.changeAccessCombination(permissionBits, addBits, removeBits);
+            CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+            cacheService.getCache("User").clear();
+            cacheService.getCache("UserPermissionBits").clear();
+            cacheService.getCache("UserConfiguration").clear();
+            cacheService.getCache("UserSettingMail").clear();
+            cacheService.getCache("Capabilities").clear();
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;
+        } catch (OXException e) {
+            LOGGER.error("", e);
         }
 
         // TODO: How to notify via EventSystemService ?

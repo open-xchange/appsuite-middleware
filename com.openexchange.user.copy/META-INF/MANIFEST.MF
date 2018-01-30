@@ -6,8 +6,12 @@ Bundle-Version: 7.10.0
 Bundle-Activator: com.openexchange.user.copy.osgi.Activator
 Bundle-Vendor: Open-Xchange
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.openexchange.context,
+Import-Package: com.openexchange.chronos,
+ com.openexchange.chronos.provider,
+ com.openexchange.chronos.service,
+ com.openexchange.context,
  com.openexchange.database,
+ com.openexchange.database.provider,
  com.openexchange.exception,
  com.openexchange.file.storage,
  com.openexchange.filestore,
@@ -39,6 +43,9 @@ Import-Package: com.openexchange.context,
  com.openexchange.mail.usersetting,
  com.openexchange.mailaccount,
  com.openexchange.osgi,
+ com.openexchange.search,
+ com.openexchange.search.internal.operands,
+ com.openexchange.server,
  com.openexchange.sql.tools,
  com.openexchange.tools.arrays,
  com.openexchange.tools.file,
@@ -51,8 +58,12 @@ Import-Package: com.openexchange.context,
  gnu.trove.map,
  gnu.trove.map.hash,
  org.apache.commons.logging,
+ org.dmfs.rfc5545,
  org.eclipse.osgi.framework.console,
+ org.json,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.user.copy
+Require-Bundle: com.openexchange.chronos.storage,
+ com.openexchange.chronos.common

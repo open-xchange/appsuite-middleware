@@ -105,14 +105,15 @@ public interface DbMapping<T, O> extends Mapping<T, O> {
 	int getSqlType();
 
 	/**
-	 * Sets the value of the mapped property in a prepared statement.
-	 *
-	 * @param statement the prepared statement to populate
-	 * @param parameterIndex the parameter index in the statement
-	 * @param object the object to read the value from
-	 * @throws SQLException
-	 */
-	void set(PreparedStatement statement, int parameterIndex, O object) throws SQLException;
+     * Sets the value of the mapped property in a prepared statement.
+     *
+     * @param statement the prepared statement to populate
+     * @param parameterIndex the parameter index in the statement
+     * @param object the object to read the value from
+     * @return the number of set parameters
+     * @throws SQLException
+     */
+    int set(PreparedStatement statement, int parameterIndex, O object) throws SQLException;
 
     /**
      * Sets the value of the mapped property in an object.

@@ -49,7 +49,8 @@
 
 package com.openexchange.audit.impl;
 
-import java.sql.Date;
+import java.util.Collections;
+import org.dmfs.rfc5545.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,10 +63,11 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.audit.configuration.AuditConfiguration;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -125,11 +127,13 @@ public class AuditEventHandlerTest {
 
     private final String objectTitle = "theObjectTitle";
 
-    private final Date date = new Date(2011, 12, 12);
+    private final DateTime date = new DateTime(System.currentTimeMillis());
 
     private Contact contact;
 
     private UserService userService;
+
+    private CalendarUser calendarUser;
 
     @Before
     public void setUp() throws Exception {
@@ -149,6 +153,10 @@ public class AuditEventHandlerTest {
         this.commonEvent = PowerMockito.mock(CommonEvent.class);
         this.context = PowerMockito.mock(Context.class);
         this.log = PowerMockito.mock(org.slf4j.Logger.class);
+
+        this.calendarUser = new CalendarUser();
+        this.calendarUser.setEntity(userId);
+        this.calendarUser.setCn("user name");
 
         this.stringBuilder = new StringBuilder();
     }
@@ -334,20 +342,24 @@ public class AuditEventHandlerTest {
             }
         };
 
-        Appointment appointment = PowerMockito.mock(Appointment.class);
-        Mockito.when(commonEvent.getActionObj()).thenReturn(appointment);
+        Mockito.when(userService.getUser(userId, context).getDisplayName()).thenReturn("TestUser");
+
+        com.openexchange.chronos.Event event = PowerMockito.mock(com.openexchange.chronos.Event.class);
+        Mockito.when(commonEvent.getAction()).thenReturn(CommonEvent.INSERT);
+        Mockito.when(commonEvent.getActionObj()).thenReturn(event);
         Mockito.when(commonEvent.getContextId()).thenReturn(this.contextId);
         Mockito.when(commonEvent.getUserId()).thenReturn(this.userId);
-        Mockito.when(appointment.getObjectID()).thenReturn(this.objectId);
-        Mockito.when(appointment.getCreatedBy()).thenReturn(this.userId);
-        Mockito.when(appointment.getModifiedBy()).thenReturn(this.userId);
-        Mockito.when(appointment.getTitle()).thenReturn(this.objectTitle);
-        Mockito.when(appointment.getStartDate()).thenReturn(this.date);
-        Mockito.when(appointment.getEndDate()).thenReturn(this.date);
+        Mockito.when(event.getId()).thenReturn(String.valueOf(this.objectId));
+        Mockito.when(event.getCreatedBy()).thenReturn(this.calendarUser);
+        Mockito.when(event.getModifiedBy()).thenReturn(this.calendarUser);
+        Mockito.when(event.getSummary()).thenReturn(this.objectTitle);
+        Mockito.when(event.getStartDate()).thenReturn(this.date);
+        Mockito.when(event.getEndDate()).thenReturn(this.date);
+        Mockito.when(event.getAttendees()).thenReturn(Collections.singletonList(new Attendee()));
 
         this.auditEventHandler.handleAppointmentCommonEvent(commonEvent, context, stringBuilder);
 
-        Assert.assertTrue(stringBuilder.toString().startsWith("OBJECT TYPE: APPOINTMENT; "));
+        Assert.assertTrue(stringBuilder.toString().startsWith("OBJECT TYPE: EVENT; "));
     }
 
     @Test
@@ -360,16 +372,55 @@ public class AuditEventHandlerTest {
             }
         };
 
-        Appointment appointment = PowerMockito.mock(Appointment.class);
-        Mockito.when(commonEvent.getActionObj()).thenReturn(appointment);
+        Mockito.when(userService.getUser(userId, context).getDisplayName()).thenReturn("TestUser");
+
+        com.openexchange.chronos.Event event = PowerMockito.mock(com.openexchange.chronos.Event.class);
+        Mockito.when(commonEvent.getAction()).thenReturn(CommonEvent.INSERT);
+        Mockito.when(commonEvent.getActionObj()).thenReturn(event);
         Mockito.when(commonEvent.getContextId()).thenReturn(this.contextId);
         Mockito.when(commonEvent.getUserId()).thenReturn(this.userId);
-        Mockito.when(appointment.getObjectID()).thenReturn(this.objectId);
-        Mockito.when(appointment.getCreatedBy()).thenReturn(this.userId);
-        Mockito.when(appointment.getModifiedBy()).thenReturn(this.userId);
-        Mockito.when(appointment.getTitle()).thenReturn(this.objectTitle);
-        Mockito.when(appointment.getStartDate()).thenReturn(this.date);
-        Mockito.when(appointment.getEndDate()).thenReturn(this.date);
+        Mockito.when(event.getId()).thenReturn(String.valueOf(this.objectId));
+        Mockito.when(event.getCreatedBy()).thenReturn(this.calendarUser);
+        Mockito.when(event.getModifiedBy()).thenReturn(this.calendarUser);
+        Mockito.when(event.getSummary()).thenReturn(this.objectTitle);
+        Mockito.when(event.getStartDate()).thenReturn(this.date);
+        Mockito.when(event.getEndDate()).thenReturn(this.date);
+        Attendee attendee = new Attendee();
+        attendee.setCn("InvitedTestUser");
+        Mockito.when(event.getAttendees()).thenReturn(Collections.singletonList(attendee));
+
+        this.auditEventHandler.handleAppointmentCommonEvent(commonEvent, context, stringBuilder);
+
+        Assert.assertTrue(stringBuilder.toString().contains("CONTEXT ID: " + this.contextId));
+        Assert.assertTrue(stringBuilder.toString().contains("END DATE: " + this.date));
+    }
+
+    @Test
+    public void testHandleAppointmentCommonEvent_EverythingFine() throws Exception {
+        this.auditEventHandler = new AuditEventHandler(userService) {
+
+            @Override
+            protected String getPathToRoot(int folderId, Session sessionObj) {
+                return "";
+            }
+        };
+
+        Mockito.when(userService.getUser(userId, context).getDisplayName()).thenReturn("TestUser");
+
+        com.openexchange.chronos.Event event = PowerMockito.mock(com.openexchange.chronos.Event.class);
+        Mockito.when(commonEvent.getAction()).thenReturn(CommonEvent.DELETE);
+        Mockito.when(commonEvent.getActionObj()).thenReturn(event);
+        Mockito.when(commonEvent.getContextId()).thenReturn(this.contextId);
+        Mockito.when(commonEvent.getUserId()).thenReturn(this.userId);
+        Mockito.when(event.getId()).thenReturn(String.valueOf(this.objectId));
+        Mockito.when(event.getCreatedBy()).thenReturn(this.calendarUser);
+        Mockito.when(event.getModifiedBy()).thenReturn(this.calendarUser);
+        Mockito.when(event.getSummary()).thenReturn(this.objectTitle);
+        Mockito.when(event.getStartDate()).thenReturn(this.date);
+        Mockito.when(event.getEndDate()).thenReturn(this.date);
+        Attendee attendee = new Attendee();
+        attendee.setCn("InvitedTestUser");
+        Mockito.when(event.getAttendees()).thenReturn(Collections.singletonList(attendee));
 
         this.auditEventHandler.handleAppointmentCommonEvent(commonEvent, context, stringBuilder);
 

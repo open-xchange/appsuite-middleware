@@ -164,7 +164,7 @@ public class MoveTestNew extends AbstractAppointmentTest {
             if(null != clientC) {
                 clientC.logout();
                 clientC = null;
-            }
+            }            
         } finally {
             super.tearDown();
         }
@@ -615,11 +615,7 @@ public class MoveTestNew extends AbstractAppointmentTest {
         assertEquals("Wrong amount of participants.", 3, loaded.getParticipants().length);
     }
 
-    /*
-     * The following tests are not yet fully supported.
-     */
-
-    // TODO: Fix!
+    @Test
     public void _testOtherPrivateToThirdPartySubfolder() throws Exception {
         Appointment app = generateAppointment("testOtherPrivateToThirdPartySubfolder", folderB, idB);
         catm.insert(app);
@@ -638,7 +634,6 @@ public class MoveTestNew extends AbstractAppointmentTest {
         assertEquals("Wrong amount of participants.", 2, loaded.getParticipants().length);
     }
 
-    // TODO: Fix!
     @Test
     public void testOtherSubfolderToThirdPartySubfolder() throws Exception {
         Appointment app = generateAppointment("testOtherSubfolderToThirdPartySubfolder", folderB1);
@@ -662,16 +657,11 @@ public class MoveTestNew extends AbstractAppointmentTest {
         assertEquals("Wrong folder id.", folderC1.getObjectID(), loaded.getParentFolderID());
         assertEquals("Wrong amount of participants.", 2, loaded.getParticipants().length);
 
-        //        loaded = get(app, folderB, ctmB);
-        //        assertEquals("Wrong folder id.", folderB.getObjectID(), loaded.getParentFolderID());
-        //        assertEquals("Wrong amount of participants.", 2, loaded.getParticipants().length);
-
-        loaded = get(app, folderB1, ctmB);
-        assertEquals("Wrong folder id.", folderB1.getObjectID(), loaded.getParentFolderID());
+        loaded = get(app, folderB, ctmB);
+        assertEquals("Wrong folder id.", folderB.getObjectID(), loaded.getParentFolderID());
         assertEquals("Wrong amount of participants.", 2, loaded.getParticipants().length);
     }
 
-    // TODO: Fix!
     @Test
     public void testOtherPrivateToThirdPartySubfolderWithParticipants() throws Exception {
         Appointment app = generateAppointment("testOtherPrivateToThirdPartySubfolderWithParticipants", folderB, getClient().getValues().getUserId(), idB, idC);
@@ -705,16 +695,11 @@ public class MoveTestNew extends AbstractAppointmentTest {
         assertEquals("Wrong folder id.", folderB.getObjectID(), loaded.getParentFolderID());
         assertEquals("Wrong amount of participants.", 3, loaded.getParticipants().length);
 
-        //        loaded = get(app, folderC1, ctmC);
-        //        assertEquals("Wrong folder id.", folderC1.getObjectID(), loaded.getParentFolderID());
-        //        assertEquals("Wrong amount of participants.", 3, loaded.getParticipants().length);
-
-        loaded = get(app, folderC, ctmC);
-        assertEquals("Wrong folder id.", folderC.getObjectID(), loaded.getParentFolderID());
+        loaded = get(app, folderC1, ctmC);
+        assertEquals("Wrong folder id.", folderC1.getObjectID(), loaded.getParentFolderID());
         assertEquals("Wrong amount of participants.", 3, loaded.getParticipants().length);
     }
 
-    // TODO: Fix!
     @Test
     public void testOtherSubfolderToThirdPartyPrivate() throws Exception {
         Appointment app = generateAppointment("testOtherSubfolderToThirdPartyPrivate", folderB1);
@@ -738,12 +723,8 @@ public class MoveTestNew extends AbstractAppointmentTest {
         assertEquals("Wrong folder id.", folderC.getObjectID(), loaded.getParentFolderID());
         assertEquals("Wrong amount of participants.", 2, loaded.getParticipants().length);
 
-        //        loaded = get(app, folderB, ctmB);
-        //        assertEquals("Wrong folder id.", folderB.getObjectID(), loaded.getParentFolderID());
-        //        assertEquals("Wrong amount of participants.", 2, loaded.getParticipants().length);
-
-        loaded = get(app, folderB1, ctmB);
-        assertEquals("Wrong folder id.", folderB1.getObjectID(), loaded.getParentFolderID());
+        loaded = get(app, folderB, ctmB);
+        assertEquals("Wrong folder id.", folderB.getObjectID(), loaded.getParentFolderID());
         assertEquals("Wrong amount of participants.", 2, loaded.getParticipants().length);
     }
 
@@ -766,7 +747,6 @@ public class MoveTestNew extends AbstractAppointmentTest {
         assertEquals("Wrong amount of participants.", 2, loaded.getParticipants().length);
     }
 
-    // TODO: Fix!
     @Test
     public void testOtherSubfolderToThirdPartySubfolderWithParticipants() throws Exception {
         Appointment app = generateAppointment("testOtherPrivateToOtherSubfolder", folderB1, getClient().getValues().getUserId(), idB, idC);
@@ -793,32 +773,19 @@ public class MoveTestNew extends AbstractAppointmentTest {
         assertEquals("Wrong folder id.", folderA.getObjectID(), loaded.getParentFolderID());
         assertEquals("Wrong amount of participants.", 3, loaded.getParticipants().length);
 
-        //        loaded = get(app, folderC1, ctmC);
-        //        assertEquals("Wrong folder id.", folderC1.getObjectID(), loaded.getParentFolderID());
-        //        assertEquals("Wrong amount of participants.", 3, loaded.getParticipants().length);
-
-        loaded = get(app, folderC, ctmC);
-        assertEquals("Wrong folder id.", folderC.getObjectID(), loaded.getParentFolderID());
+        loaded = get(app, folderC1, ctmC);
+        assertEquals("Wrong folder id.", folderC1.getObjectID(), loaded.getParentFolderID());
         assertEquals("Wrong amount of participants.", 3, loaded.getParticipants().length);
 
-        //        loaded = get(app, folderB, catm);
-        //        assertEquals("Wrong folder id.", folderB.getObjectID(), loaded.getParentFolderID());
-        //        assertEquals("Wrong amount of participants.", 3, loaded.getParticipants().length);
-
-        loaded = get(app, folderB1, catm);
-        assertEquals("Wrong folder id.", folderB1.getObjectID(), loaded.getParentFolderID());
+        loaded = get(app, folderB, catm);
+        assertEquals("Wrong folder id.", folderB.getObjectID(), loaded.getParentFolderID());
         assertEquals("Wrong amount of participants.", 3, loaded.getParticipants().length);
 
-        //        loaded = get(app, folderB, ctmB);
-        //        assertEquals("Wrong folder id.", folderB.getObjectID(), loaded.getParentFolderID());
-        //        assertEquals("Wrong amount of participants.", 3, loaded.getParticipants().length);
-
-        loaded = get(app, folderB1, ctmB);
-        assertEquals("Wrong folder id.", folderB1.getObjectID(), loaded.getParentFolderID());
+        loaded = get(app, folderB, ctmB);
+        assertEquals("Wrong folder id.", folderB.getObjectID(), loaded.getParentFolderID());
         assertEquals("Wrong amount of participants.", 3, loaded.getParticipants().length);
     }
 
-    // TODO: Fix!
     @Test
     public void testOtherSubfolderToThirdPartyPrivateWithParticipants() throws Exception {
         Appointment app = generateAppointment("testOtherSubfolderToThirdPartyPrivateWithParticipants", folderB1, getClient().getValues().getUserId(), idB, idC);
@@ -848,20 +815,12 @@ public class MoveTestNew extends AbstractAppointmentTest {
         assertEquals("Wrong folder id.", folderA.getObjectID(), loaded.getParentFolderID());
         assertEquals("Wrong amount of participants.", 3, loaded.getParticipants().length);
 
-        //        loaded = get(app, folderB, ctmB);
-        //        assertEquals("Wrong folder id.", folderB.getObjectID(), loaded.getParentFolderID());
-        //        assertEquals("Wrong amount of participants.", 3, loaded.getParticipants().length);
-
-        loaded = get(app, folderB1, ctmB);
-        assertEquals("Wrong folder id.", folderB1.getObjectID(), loaded.getParentFolderID());
+        loaded = get(app, folderB, ctmB);
+        assertEquals("Wrong folder id.", folderB.getObjectID(), loaded.getParentFolderID());
         assertEquals("Wrong amount of participants.", 3, loaded.getParticipants().length);
 
-        //      loaded = get(app, folderB, catm);
-        //      assertEquals("Wrong folder id.", folderB.getObjectID(), loaded.getParentFolderID());
-        //      assertEquals("Wrong amount of participants.", 3, loaded.getParticipants().length);
-
-        loaded = get(app, folderB1, catm);
-        assertEquals("Wrong folder id.", folderB1.getObjectID(), loaded.getParentFolderID());
+        loaded = get(app, folderB, catm);
+        assertEquals("Wrong folder id.", folderB.getObjectID(), loaded.getParentFolderID());
         assertEquals("Wrong amount of participants.", 3, loaded.getParticipants().length);
     }
 

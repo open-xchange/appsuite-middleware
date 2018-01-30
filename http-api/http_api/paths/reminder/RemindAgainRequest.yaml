@@ -11,6 +11,7 @@
       - in: query
         name: id
         type: integer
+        format: int64
         description: The ID of the reminder whose alarm date shall be changed.
         required: true
       - in: body

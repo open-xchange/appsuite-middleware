@@ -107,6 +107,7 @@ import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.threadpool.ThreadPools;
@@ -699,7 +700,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                  */
                 GuestInfo guestInfo = comparedPermissions.getGuestInfo(guestID);
                 Permission guestPermission = comparedPermissions.getAddedGuestPermission(guestID);
-                checkGuestPermission(folder, guestPermission, guestInfo);
+                checkGuestPermission(session, folder, guestPermission, guestInfo);
                 if (isAnonymous(guestInfo)) {
                     /*
                      * allow only one anonymous permission
@@ -728,7 +729,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                  */
                 GuestInfo guestInfo = comparedPermissions.getGuestInfo(guestID);
                 Permission guestPermission = comparedPermissions.getModifiedGuestPermission(guestID);
-                checkGuestPermission(folder, guestPermission, guestInfo);
+                checkGuestPermission(session, folder, guestPermission, guestInfo);
             }
         }
         /*
@@ -788,19 +789,20 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     /**
      * Checks if a specific guest permission is allowed for a folder or not.
      *
+     * @param session The current session
      * @param folder The folder where the permission should be applied to
      * @param permission The guest permission
      * @param guestInfo The guest information for the added permission
      * @throws OXException
      */
-    private static void checkGuestPermission(Folder folder, Permission permission, GuestInfo guestInfo) throws OXException {
+    private static void checkGuestPermission(ServerSession session, Folder folder, Permission permission, GuestInfo guestInfo) throws OXException {
         if (isAnonymous(guestInfo)) {
             /*
              * allow only one anonymous permission with "read-only" permission bits, matching the guest's fixed target
              */
             checkIsLinkPermission(folder, permission);
             // Only check not inherited permissions because inherited permissions are only applied internally and doesn't needed to be checked
-            if(permission.getType() != FolderPermissionType.INHERITED && isNotEqualsTarget(folder, guestInfo.getLinkTarget())) {
+            if(permission.getType() != FolderPermissionType.INHERITED && isNotEqualsTarget(session, folder, guestInfo.getLinkTarget())) {
                 throw invalidPermissions(folder, permission);
             }
         } else if (isReadOnlySharing(folder)) {
@@ -851,8 +853,26 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         }
     }
 
-    private static boolean isNotEqualsTarget(Folder folder, ShareTarget target) {
-        return !(new ShareTarget(folder.getContentType().getModule(), folder.getID()).equals(target));
+    private static boolean isNotEqualsTarget(ServerSession session, Folder folder, ShareTarget target) throws OXException {
+        ShareTarget folderTarget = new ShareTarget(folder.getContentType().getModule(), folder.getID());
+        if (folderTarget.equals(target)) {
+            return false;
+        }
+        /*
+         * also try adjusted share target & underlying real folder
+         */
+        ShareTarget adjustedTarget = FolderStorageServices.getService(ModuleSupport.class).adjustTarget(folderTarget, session, session.getUserId());
+        if (adjustedTarget.equals(target)) {
+            return false;
+        }
+        if (false == adjustedTarget.getFolderToLoad().equals(adjustedTarget.getFolder())) {
+            ShareTarget realTarget = new ShareTarget(adjustedTarget);
+            realTarget.setFolder(adjustedTarget.getFolderToLoad());
+            if (realTarget.equals(target)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static boolean isAnonymous(GuestInfo guestInfo) {

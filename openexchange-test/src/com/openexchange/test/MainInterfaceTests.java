@@ -121,7 +121,7 @@ import com.openexchange.test.concurrent.ParallelSuite;
     OAuthProviderTests.class,
     com.openexchange.ajax.userfeedback.StoreTest.class,
     com.openexchange.ajax.sessionmanagement.SessionManagementSuite.class,
-
+    com.openexchange.ajax.chronos.ChronosTestSuite.class
 })
 public final class MainInterfaceTests {
 

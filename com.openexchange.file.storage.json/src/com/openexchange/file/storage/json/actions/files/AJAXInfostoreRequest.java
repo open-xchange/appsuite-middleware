@@ -756,7 +756,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     }
 
     protected void parseNotification() throws OXException {
-        if (null == notificationTransport && data.isMultipartContent()) {
+        if (null == notificationTransport && (data.isMultipartContent() || !data.hasUploadStreamProvider())) {
             JSONObject object = getBodyAsJSONObject();
             JSONObject jNotification = object.optJSONObject("notification");
             if (jNotification != null) {
@@ -798,104 +798,100 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             return;
         }
 
-        try {
-            if (data.isMultipartContent() || data.getUploadStream() == null) {
-                JSONObject jFile;
-                requireFileMetadata();
-                JSONObject object = getBodyAsJSONObject();
+        if (data.isMultipartContent() || !data.hasUploadStreamProvider()) {
+            JSONObject jFile;
+            requireFileMetadata();
+            JSONObject object = getBodyAsJSONObject();
 
-                if (object.hasAndNotNull("file")) {
-                    try {
-                        jFile = object.getJSONObject("file");
-                    } catch (JSONException e) {
-                        throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
-                    }
-                } else {
-                    jFile = object;
+            if (object.hasAndNotNull("file")) {
+                try {
+                    jFile = object.getJSONObject("file");
+                } catch (JSONException e) {
+                    throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
                 }
+            } else {
+                jFile = object;
+            }
 
-                // Disallow to manually set weird MIME type
-                {
-                    Object mimeType = jFile.opt(File.Field.FILE_MIMETYPE.getName());
-                    if (null != mimeType) {
-                        String cts = mimeType.toString();
-                        if (Strings.isEmpty(cts)) {
-                            jFile.remove(File.Field.FILE_MIMETYPE.getName());
-                        } else {
-                            try {
-                                ContentType contentType = new ContentType(cts, true);
-                                if (contentType.contains("multipart/") || contentType.containsBoundaryParameter()) {
-                                    // deny weird MIME types
-                                    throw FileStorageExceptionCodes.DENIED_MIME_TYPE.create();
-                                }
-                            } catch (Exception e) {
-                                // MIME type could not be safely parsed
-                                throw FileStorageExceptionCodes.DENIED_MIME_TYPE.create(e, e.getMessage());
+            // Disallow to manually set weird MIME type
+            {
+                Object mimeType = jFile.opt(File.Field.FILE_MIMETYPE.getName());
+                if (null != mimeType) {
+                    String cts = mimeType.toString();
+                    if (Strings.isEmpty(cts)) {
+                        jFile.remove(File.Field.FILE_MIMETYPE.getName());
+                    } else {
+                        try {
+                            ContentType contentType = new ContentType(cts, true);
+                            if (contentType.contains("multipart/") || contentType.containsBoundaryParameter()) {
+                                // deny weird MIME types
+                                throw FileStorageExceptionCodes.DENIED_MIME_TYPE.create();
                             }
+                        } catch (Exception e) {
+                            // MIME type could not be safely parsed
+                            throw FileStorageExceptionCodes.DENIED_MIME_TYPE.create(e, e.getMessage());
                         }
                     }
                 }
+            }
 
-                UploadFile uploadFile = null;
-                {
-                    long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
-                    if (data.hasUploads(-1, maxSize > 0 ? maxSize : -1L)) {
-                        uploadFile = data.getFiles(-1, maxSize > 0 ? maxSize : -1L).get(0);
-                    }
+            UploadFile uploadFile = null;
+            {
+                long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
+                if (data.hasUploads(-1, maxSize > 0 ? maxSize : -1L)) {
+                    uploadFile = data.getFiles(-1, maxSize > 0 ? maxSize : -1L).get(0);
                 }
+            }
 
-                if (data.getUploadEvent() != null) {
-                    final List<UploadFile> list = data.getUploadEvent().getUploadFilesByFieldName("file");
-                    if (list != null && !list.isEmpty()) {
-                        uploadFile = list.get(0);
-                    }
+            if (data.getUploadEvent() != null) {
+                final List<UploadFile> list = data.getUploadEvent().getUploadFilesByFieldName("file");
+                if (list != null && !list.isEmpty()) {
+                    uploadFile = list.get(0);
                 }
+            }
 
-                FileMetadataParser parser = FileMetadataParser.getInstance();
-                file = parser.parse(jFile);
-                fields = parser.getFields(jFile);
-                if (uploadFile != null) {
-                    if (!fields.contains(File.Field.FILENAME) || file.getFileName() == null || file.getFileName().trim().length() == 0) {
-                        file.setFileName(uploadFile.getPreparedFileName());
-                        fields.add(File.Field.FILENAME);
-                    }
-
-                    if (!fields.contains(File.Field.FILE_MIMETYPE)) {
-                        file.setFileMIMEType(uploadFile.getContentType());
-                        fields.add(File.Field.FILE_MIMETYPE);
-                    }
-
-                    file.setFileSize(uploadFile.getSize());
-                    fields.add(File.Field.FILE_SIZE);
-                    // TODO: Guess Content-Type
-                }
-
-                final String fileDisplay = data.getParameter("filedisplay");
-                if (fileDisplay != null && fileDisplay.trim().length() > 0 && (file.getFileName() == null || file.getFileName().trim().length() == 0)) {
-                    file.setFileName(fileDisplay);
+            FileMetadataParser parser = FileMetadataParser.getInstance();
+            file = parser.parse(jFile);
+            fields = parser.getFields(jFile);
+            if (uploadFile != null) {
+                if (!fields.contains(File.Field.FILENAME) || file.getFileName() == null || file.getFileName().trim().length() == 0) {
+                    file.setFileName(uploadFile.getPreparedFileName());
                     fields.add(File.Field.FILENAME);
                 }
 
-                if (has("id") && !fields.contains(File.Field.ID)) {
-                    file.setId(getId());
-                    fields.add(File.Field.ID);
+                if (!fields.contains(File.Field.FILE_MIMETYPE)) {
+                    file.setFileMIMEType(uploadFile.getContentType());
+                    fields.add(File.Field.FILE_MIMETYPE);
                 }
 
-                if (jFile.has("content")) {
-                    try {
-                        contentData = jFile.opt("content").toString().getBytes("UTF-8");
-
-                        file.setFileSize(contentData.length);
-                        fields.add(File.Field.FILE_SIZE);
-                    } catch (UnsupportedEncodingException e) {
-                        // IGNORE;
-                    }
-                }
-            } else {
-                parsePutUpload();
+                file.setFileSize(uploadFile.getSize());
+                fields.add(File.Field.FILE_SIZE);
+                // TODO: Guess Content-Type
             }
-        } catch (IOException e) {
-            throw FileStorageExceptionCodes.IO_ERROR.create(e.getMessage(), e);
+
+            final String fileDisplay = data.getParameter("filedisplay");
+            if (fileDisplay != null && fileDisplay.trim().length() > 0 && (file.getFileName() == null || file.getFileName().trim().length() == 0)) {
+                file.setFileName(fileDisplay);
+                fields.add(File.Field.FILENAME);
+            }
+
+            if (has("id") && !fields.contains(File.Field.ID)) {
+                file.setId(getId());
+                fields.add(File.Field.ID);
+            }
+
+            if (jFile.has("content")) {
+                try {
+                    contentData = jFile.opt("content").toString().getBytes("UTF-8");
+
+                    file.setFileSize(contentData.length);
+                    fields.add(File.Field.FILE_SIZE);
+                } catch (UnsupportedEncodingException e) {
+                    // IGNORE;
+                }
+            }
+        } else {
+            parsePutUpload();
         }
     }
 

@@ -308,9 +308,11 @@ public class SingleSearchTerm implements SearchTerm<Operand<?>> {
      * Adds specified operand to this search term.
      *
      * @param operand The operand to add.
+     * @return A self reference
      */
-    public void addOperand(final Operand<?> operand) {
+    public SingleSearchTerm addOperand(final Operand<?> operand) {
         operands.add(operand);
+        return this;
     }
 
     @Override
