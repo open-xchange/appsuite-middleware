@@ -83,8 +83,6 @@ if [ ${1:-0} -eq 2 ]; then
     ox_remove_property com.openexchange.subscribe.crawler.webde.autorunInterval /opt/open-xchange/etc/crawler.properties
 
     # SoftwareChange_Request-2942
-    ox_add_property com.openexchange.subscribe.google.calendar.autorunInterval 1d /opt/open-xchange/etc/googlesubscribe.properties
-    ox_add_property com.openexchange.subscribe.google.contact.autorunInterval 1d /opt/open-xchange/etc/googlesubscribe.properties
     ox_add_property com.openexchange.subscribe.socialplugin.xing.autorunInterval 1d /opt/open-xchange/etc/xingsubscribe.properties
 fi
 
