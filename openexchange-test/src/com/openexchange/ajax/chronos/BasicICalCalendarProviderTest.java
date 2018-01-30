@@ -540,7 +540,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
                 return null;
             }
         };
-        List<Callable<Void>> callables = Arrays.asList(callable, callable, callable);
+        List<Callable<Void>> callables = Arrays.asList(callable, callable, callable, callable, callable, callable);
         executor.invokeAll(callables).stream().map(future -> {
             try {
                 return future.get();

@@ -57,21 +57,28 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import org.json.JSONObject;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.Check;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
+import com.openexchange.chronos.provider.caching.DiffAwareExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.handlers.SearchHandler;
 import com.openexchange.chronos.provider.caching.basic.handlers.SyncHandler;
 import com.openexchange.chronos.provider.caching.internal.CachingCalendarAccessConstants;
 import com.openexchange.chronos.provider.caching.internal.Services;
-import com.openexchange.chronos.provider.caching.internal.handler.AccountUpdateState;
-import com.openexchange.chronos.provider.caching.internal.handler.CachingExecutor;
+import com.openexchange.chronos.provider.caching.internal.handler.CachingHandler;
 import com.openexchange.chronos.provider.caching.internal.handler.ProcessingType;
+import com.openexchange.chronos.provider.caching.internal.handler.impl.InitialWriteHandler;
+import com.openexchange.chronos.provider.caching.internal.handler.impl.ReadOnlyHandler;
+import com.openexchange.chronos.provider.caching.internal.handler.impl.UpdateHandler;
+import com.openexchange.chronos.provider.caching.internal.handler.utils.EmptyUidUpdates;
 import com.openexchange.chronos.provider.caching.internal.response.AccountResponseGenerator;
 import com.openexchange.chronos.provider.caching.internal.response.ChangeExceptionsResponseGenerator;
 import com.openexchange.chronos.provider.caching.internal.response.DedicatedEventsResponseGenerator;
@@ -83,6 +90,7 @@ import com.openexchange.chronos.provider.extensions.WarningsAware;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
@@ -91,6 +99,7 @@ import com.openexchange.server.ServiceLookup;
 /**
  * {@link BasicCachingCalendarAccess}
  *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.10.0
@@ -171,21 +180,44 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     @Override
     public final Event getEvent(String eventId, RecurrenceId recurrenceId) throws OXException {
-        AccountUpdateState executionList = getLatestUpdateState();
-
-        new CachingExecutor(this, executionList).cache(this.warnings);
-        saveConfig();
-
-        return new SingleEventResponseGenerator(this, eventId, recurrenceId).generate();
+        //TODO use abstract methods and inner classes for callback that generates the ResponseGenerator
+        ProcessingType type = getProcessingType();
+        if (type == ProcessingType.READ_DB) {
+            return new SingleEventResponseGenerator(this, eventId, recurrenceId).generate();
+        }
+        boolean holdsLock = acquireUpdateLock();
+        try {
+            if (holdsLock) {
+                handle();
+                saveConfig();
+            }
+            return new SingleEventResponseGenerator(this, eventId, recurrenceId).generate();
+        } finally {
+            if (holdsLock) {
+                releaseUpdateLock();
+            }
+        }
     }
 
     @Override
     public final List<Event> getEvents(List<EventID> eventIDs) throws OXException {
-        AccountUpdateState executionList = getLatestUpdateState();
-        new CachingExecutor(this, executionList).cache(this.warnings);
-        saveConfig();
-
-        return new DedicatedEventsResponseGenerator(this, eventIDs).generate();
+        //TODO use abstract methods and inner classes for callback that generates the ResponseGenerator
+        ProcessingType type = getProcessingType();
+        if (type == ProcessingType.READ_DB) {
+            return new DedicatedEventsResponseGenerator(this, eventIDs).generate();
+        }
+        boolean holdsLock = acquireUpdateLock();
+        try {
+            if (holdsLock) {
+                handle();
+                saveConfig();
+            }
+            return new DedicatedEventsResponseGenerator(this, eventIDs).generate();
+        } finally {
+            if (holdsLock) {
+                releaseUpdateLock();
+            }
+        }
     }
 
     @Override
@@ -194,36 +226,110 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             CachingCalendarUtils.invalidateCache(account);
             saveConfig();
         }
-        AccountUpdateState executionList = getLatestUpdateState();
-
-        new CachingExecutor(this, executionList).cache(this.warnings);
-        saveConfig();
-
-        return new AccountResponseGenerator(this).generate();
+        //TODO use abstract methods and inner classes for callback that generates the ResponseGenerator
+        ProcessingType type = getProcessingType();
+        if (type == ProcessingType.READ_DB) {
+            return new AccountResponseGenerator(this).generate();
+        }
+        boolean holdsLock = acquireUpdateLock();
+        try {
+            if (holdsLock) {
+                handle();
+                saveConfig();
+            }
+            return new AccountResponseGenerator(this).generate();
+        } finally {
+            if (holdsLock) {
+                releaseUpdateLock();
+            }
+        }
     }
 
     @Override
     public final List<Event> getChangeExceptions(String seriesId) throws OXException {
-        AccountUpdateState executionList = getLatestUpdateState();
+        //TODO use abstract methods and inner classes for callback that generates the ResponseGenerator
+        ProcessingType type = getProcessingType();
+        if (type == ProcessingType.READ_DB) {
+            return new ChangeExceptionsResponseGenerator(this, seriesId).generate();
+        }
 
-        new CachingExecutor(this, executionList).cache(this.warnings);
-        saveConfig();
+        boolean holdsLock = acquireUpdateLock();
+        try {
+            if (holdsLock) {
+                handle();
+                saveConfig();
+            }
+            return new ChangeExceptionsResponseGenerator(this, seriesId).generate();
+        } finally {
+            if (holdsLock) {
+                releaseUpdateLock();
+            }
+        }
+    }
 
-        return new ChangeExceptionsResponseGenerator(this, seriesId).generate();
+    private void handle() throws OXException {
+        CachingHandler cachingHandler = get();
+        try {
+            ExternalCalendarResult externalCalendarResult = cachingHandler.getExternalEvents();
+            if (externalCalendarResult.isUpdated()) {
+                List<Event> existingEvents = cachingHandler.getExistingEvents();
+                EventUpdates diff = null;
+
+                if (externalCalendarResult instanceof DiffAwareExternalCalendarResult) {
+                    diff = ((DiffAwareExternalCalendarResult) externalCalendarResult).calculateDiff(existingEvents);
+                } else {
+                    List<Event> externalEvents = externalCalendarResult.getEvents();
+                    cleanupEvents(externalEvents);
+
+                    boolean containsUID = containsUid(externalEvents);
+                    if (containsUID) {
+                        diff = generateEventDiff(existingEvents, externalEvents);
+                    } else {
+                        //FIXME generate reproducible UID for upcoming refreshes
+                        diff = new EmptyUidUpdates(existingEvents, externalEvents);
+                    }
+                }
+
+                if (!diff.isEmpty()) {
+                    cachingHandler.persist(diff);
+                }
+            }
+            cachingHandler.updateLastUpdated(System.currentTimeMillis());
+        } catch (OXException e) {
+            LOG.info("Unable to update cache for account {}: {}", account.getAccountId(), e.getMessage(), e);
+            warnings.add(e);
+
+            handleInternally(cachingHandler, e);
+            handleExceptions(e);
+            throw e;
+        }
     }
 
     /**
      * Saves the current configuration for the account if it has been changed while processing
      */
     protected void saveConfig() {
-        if (Objects.equals(originInternalConfiguration, getAccount().getInternalConfiguration()) && Objects.equals(originUserConfiguration, getAccount().getUserConfiguration())) {
+        if (Objects.equals(originInternalConfiguration, account.getInternalConfiguration()) && Objects.equals(originUserConfiguration, account.getUserConfiguration())) {
             return;
         }
         try {
             AdministrativeCalendarAccountService accountService = Services.getService(AdministrativeCalendarAccountService.class);
-            accountService.updateAccount(getCalendarSession().getContextId(), getCalendarSession().getUserId(), getAccount().getAccountId(), getAccount().getInternalConfiguration(), getAccount().getUserConfiguration(), getAccount().getLastModified().getTime());
+            account = accountService.updateAccount(getCalendarSession().getContextId(), getCalendarSession().getUserId(), account.getAccountId(), account.getInternalConfiguration(), account.getUserConfiguration(), account.getLastModified().getTime());
         } catch (OXException e) {
             LOG.error("Unable to save configuration: {}", e.getMessage(), e);
+        }
+    }
+
+    public CachingHandler get() throws OXException {
+        ProcessingType type = getProcessingType();
+        switch (type) {
+            case INITIAL_INSERT:
+                return new InitialWriteHandler(this);
+            case UPDATE:
+                return new UpdateHandler(this);
+            case READ_DB:
+            default:
+                return new ReadOnlyHandler(this);
         }
     }
 
@@ -233,31 +339,22 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      * @return {@link ProcessingType} that indicates the following steps of processing
      * @throws OXException
      */
-    protected final AccountUpdateState getLatestUpdateState() throws OXException {
-        JSONObject caching = getAccount().getInternalConfiguration().optJSONObject(CachingCalendarAccessConstants.CACHING);
+    protected final ProcessingType getProcessingType() throws OXException {
+        JSONObject caching = account.getInternalConfiguration().optJSONObject(CachingCalendarAccessConstants.CACHING);
         long refreshInterval = getCascadedRefreshInterval();
         if (caching == null) {
-            if (acquireUpdateLock()) {
-                return new AccountUpdateState(0, refreshInterval, ProcessingType.INITIAL_INSERT);
-            }
-            return new AccountUpdateState(0, refreshInterval, ProcessingType.READ_DB);
+            return ProcessingType.INITIAL_INSERT;
         }
 
         Number lastUpdate = (Number) caching.opt(CachingCalendarAccessConstants.LAST_UPDATE);
         if (lastUpdate == null || lastUpdate.longValue() < 0) {
-            if (acquireUpdateLock()) {
-                return new AccountUpdateState(0, refreshInterval, ProcessingType.INITIAL_INSERT);
-            }
-            return new AccountUpdateState(0, refreshInterval, ProcessingType.READ_DB);
+            return ProcessingType.INITIAL_INSERT;
         }
         long currentTimeMillis = System.currentTimeMillis();
         if (TimeUnit.MINUTES.toMillis(refreshInterval) < currentTimeMillis - lastUpdate.longValue()) {
-            if (acquireUpdateLock()) {
-                return new AccountUpdateState(lastUpdate.longValue(), refreshInterval, ProcessingType.UPDATE);
-            }
-            return new AccountUpdateState(lastUpdate.longValue(), refreshInterval, ProcessingType.READ_DB);
+            return ProcessingType.UPDATE;
         }
-        return new AccountUpdateState(lastUpdate.longValue(), refreshInterval, ProcessingType.READ_DB);
+        return ProcessingType.READ_DB;
     }
 
     protected long getCascadedRefreshInterval() {
@@ -281,6 +378,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      */
     protected boolean acquireUpdateLock() throws OXException {
         long now = System.currentTimeMillis();
+
         JSONObject internalConfig = account.getInternalConfiguration();
         if (null == internalConfig) {
             internalConfig = new JSONObject();
@@ -311,7 +409,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         } catch (OXException e) {
             if (CalendarExceptionCodes.CONCURRENT_MODIFICATION.equals(e)) {
                 /*
-                 * account updated in the meantime; refresh & don't update now
+                 * account updated in the meantime; keep old config to not have "lockedForUpdateUntil" set and reuse c
                  */
                 LOG.debug("Concurrent modification while attempting to persist lock for account {}, aborting.", I(account.getAccountId()));
                 account = Services.getService(CalendarAccountService.class).getAccount(calendarSession.getSession(), account.getAccountId(), parameters);
@@ -319,6 +417,84 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             }
             throw e;
         }
+    }
+
+    /**
+     * Releases a previously acquired lock for updating the account's cached calendar data.
+     *
+     * @return <code>true</code> if a lock was removed successfully, <code>false</code>, otherwise
+     */
+    private boolean releaseUpdateLock() throws OXException {
+        JSONObject internalConfig = account.getInternalConfiguration();
+
+        if (internalConfig != null) {
+            JSONObject caching = internalConfig.optJSONObject(CachingCalendarAccessConstants.CACHING);
+            if (caching != null && caching.remove("lockedForUpdateUntil") != null) {
+                /*
+                 * update lock removed from config, update account config in storage
+                 */
+                AdministrativeCalendarAccountService accountService = Services.getService(AdministrativeCalendarAccountService.class);
+                try {
+                    account = accountService.updateAccount(calendarSession.getContextId(), calendarSession.getUserId(), account.getAccountId(), internalConfig, null, account.getLastModified().getTime());
+                    LOG.debug("Successfully released lock for account {}.", I(account.getAccountId()));
+                    return true;
+                } catch (OXException e) {
+                    if (CalendarExceptionCodes.CONCURRENT_MODIFICATION.equals(e)) {
+                        /*
+                         * account updated in the meantime; refresh & don't update now
+                         */
+                        LOG.debug("Concurrent modification while attempting to release lock for account {}, aborting.", I(account.getAccountId()));
+                        account = Services.getService(CalendarAccountService.class).getAccount(calendarSession.getSession(), account.getAccountId(), parameters);
+                        return false;
+                    }
+                    throw e;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void cleanupEvents(List<Event> externalEvents) {
+        List<Event> addedItems = new ArrayList<Event>(externalEvents);
+        for (Event event : addedItems) {
+            try {
+                Check.mandatoryFields(event, EventField.START_DATE, EventField.TIMESTAMP);
+            } catch (OXException e) {
+                LOG.debug("Removed event with uid {} from list to add because of the following corrupt data: {}", event.getUid(), e.getMessage());
+                externalEvents.remove(event);
+            }
+        }
+    }
+
+    private void handleInternally(CachingHandler cachingHandler, OXException e) {
+        if (e.getExceptionCode() == null || e.getExceptionCode().equals(CalendarExceptionCodes.AUTH_FAILED.create(""))) {
+            return;
+        }
+        long timeoutInMillis = TimeUnit.MINUTES.toMillis(getRetryAfterErrorInterval());
+        long nextProcessingAfter = System.currentTimeMillis() + timeoutInMillis;
+        cachingHandler.updateLastUpdated(nextProcessingAfter);
+    }
+
+    /**
+     * Returns if all provided {@link Event}s do contain a UID
+     *
+     * @param events A list of {@link Event}s to check for the UID
+     * @return <code>true</code> if all {@link Event}s do have a UID; <code>false</code> if at least one {@link Event} is missing the UID field
+     */
+    private boolean containsUid(List<Event> events) {
+        for (Event event : events) {
+            if (!event.containsUid()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static final EventField[] FIELDS_TO_IGNORE = new EventField[] { EventField.CREATED_BY, EventField.FOLDER_ID, EventField.ID, EventField.CALENDAR_USER, EventField.CREATED, EventField.MODIFIED_BY, EventField.EXTENDED_PROPERTIES, EventField.TIMESTAMP };
+    private static final EventField[] EQUALS_IDENTIFIER = new EventField[] { EventField.UID, EventField.RECURRENCE_ID };
+
+    private EventUpdates generateEventDiff(List<Event> persistedEvents, List<Event> updatedEvents) throws OXException {
+        return CalendarUtils.getEventUpdates(persistedEvents, updatedEvents, true, FIELDS_TO_IGNORE, EQUALS_IDENTIFIER);
     }
 
     /*
