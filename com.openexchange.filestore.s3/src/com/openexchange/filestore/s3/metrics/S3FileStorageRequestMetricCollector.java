@@ -79,14 +79,9 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
         super();
         Map<HttpMethodName, Meter> map = new HashMap<>();
         MetricRegistryService metricRegistryService = services.getService(MetricRegistryService.class);
-        map.put(HttpMethodName.HEAD, metricRegistryService.registerMeter(HttpMethodName.HEAD.name()));
-        map.put(HttpMethodName.GET, metricRegistryService.registerMeter(HttpMethodName.GET.name()));
-        map.put(HttpMethodName.POST, metricRegistryService.registerMeter(HttpMethodName.POST.name()));
-        map.put(HttpMethodName.PUT, metricRegistryService.registerMeter(HttpMethodName.PUT.name()));
-        map.put(HttpMethodName.DELETE, metricRegistryService.registerMeter(HttpMethodName.DELETE.name()));
-        map.put(HttpMethodName.OPTIONS, metricRegistryService.registerMeter(HttpMethodName.OPTIONS.name()));
-        map.put(HttpMethodName.PATCH, metricRegistryService.registerMeter(HttpMethodName.PATCH.name()));
-
+        for (HttpMethodName method : HttpMethodName.values()) {
+            map.put(method, metricRegistryService.registerMeter(this.getClass(), filestoreId + "." + method.name()));
+        }
         methodCounterMetrics = Collections.unmodifiableMap(map);
     }
 
@@ -98,6 +93,26 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
     @Override
     public void collectMetrics(Request<?> request, Response<?> response) {
         countMethod(request);
+        measureDuration(request);
+    }
+
+    /**
+     * 
+     * @param request
+     */
+    private void countMethod(Request<?> request) {
+        HttpMethodName httpMethod = request.getHttpMethod();
+        Meter meter = methodCounterMetrics.get(httpMethod);
+        if (meter == null) {
+            return;
+        }
+        meter.mark();
+    }
+
+    /**
+     * @param request
+     */
+    private void measureDuration(Request<?> request) {
         for (MetricType type : AwsSdkMetrics.getPredefinedMetrics()) {
             if (type instanceof Field) {
                 Field predefined = (Field) type;
@@ -109,14 +124,5 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
                 }
             }
         }
-    }
-
-    private void countMethod(Request<?> request) {
-        HttpMethodName httpMethod = request.getHttpMethod();
-        Meter meter = methodCounterMetrics.get(httpMethod);
-        if (meter == null) {
-            return;
-        }
-        meter.mark();
     }
 }
