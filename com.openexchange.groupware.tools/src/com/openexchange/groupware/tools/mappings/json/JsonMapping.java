@@ -74,11 +74,11 @@ public interface JsonMapping<T, O> extends Mapping<T, O> {
 	String getAjaxName();
 
 	/**
-	 * Gets the column ID of the mapped property.
-	 *
-	 * @return the column ID
-	 */
-	int getColumnID();
+     * Gets the column ID of the mapped property or null.
+     *
+     * @return the column ID or null
+     */
+    Integer getColumnID();
 
 	/**
 	 * Serializes the value of the mapped property from an object and sets it
@@ -87,8 +87,9 @@ public interface JsonMapping<T, O> extends Mapping<T, O> {
 	 * @param object the object to read the value from
 	 * @param jsonObject the JSON object to populate
 	 * @throws JSONException
+	 * @throws OXException
 	 */
-	void serialize(O from, JSONObject to) throws JSONException;
+	void serialize(O from, JSONObject to) throws JSONException, OXException;
 
 	/**
 	 * Serializes the value of the mapped property from an object and sets it
@@ -98,8 +99,9 @@ public interface JsonMapping<T, O> extends Mapping<T, O> {
 	 * @param jsonObject the JSON object to populate
 	 * @param timeZone the client time zone to consider
 	 * @throws JSONException
+	 * @throws OXException
 	 */
-	void serialize(O from, JSONObject to, TimeZone timeZone) throws JSONException;
+	void serialize(O from, JSONObject to, TimeZone timeZone) throws JSONException, OXException;
 
 	/**
 	 * Serializes the value of the mapped property from an object and sets it
@@ -110,8 +112,9 @@ public interface JsonMapping<T, O> extends Mapping<T, O> {
 	 * @param timeZone the client time zone to consider
 	 * @param session the underlying session
 	 * @throws JSONException
+	 * @throws OXException
 	 */
-	void serialize(O from, JSONObject to, TimeZone timeZone, Session session) throws JSONException;
+	void serialize(O from, JSONObject to, TimeZone timeZone, Session session) throws JSONException, OXException;
 
     /**
      * Deserializes the value of the mapped property from a JSON object and
@@ -144,7 +147,8 @@ public interface JsonMapping<T, O> extends Mapping<T, O> {
 	 * @param session the underlying session
 	 * @return the serialized value
 	 * @throws JSONException
+	 * @throws OXException
 	 */
-	Object serialize(O from, TimeZone timeZone, Session session) throws JSONException;
+	Object serialize(O from, TimeZone timeZone, Session session) throws JSONException, OXException;
 
 }

@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The chronos alarm handling
+Bundle-SymbolicName: com.openexchange.chronos.alarm
+Bundle-Version: 7.10.0
+Bundle-Activator: com.openexchange.chronos.alarm.osgi.Activator
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.chronos.exception,
+ com.openexchange.chronos.provider,
+ com.openexchange.chronos.provider.account,
+ com.openexchange.chronos.service,
+ com.openexchange.chronos.storage,
+ com.openexchange.database,
+ com.openexchange.database.provider,
+ com.openexchange.exception,
+ com.openexchange.groupware.container,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.ldap,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.user,
+ org.osgi.framework,
+ org.slf4j

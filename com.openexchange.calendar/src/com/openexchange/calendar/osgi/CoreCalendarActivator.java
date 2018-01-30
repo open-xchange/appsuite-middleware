@@ -53,9 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import com.openexchange.caching.CacheService;
-import com.openexchange.calendar.CalendarAdministration;
 import com.openexchange.calendar.CalendarMySQL;
-import com.openexchange.calendar.CalendarQuotaProvider;
 import com.openexchange.calendar.CalendarReminderDelete;
 import com.openexchange.calendar.api.AppointmentSqlFactory;
 import com.openexchange.calendar.api.CalendarCollection;
@@ -66,12 +64,10 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.reminder.TargetService;
 import com.openexchange.java.Streams;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.quota.QuotaProvider;
 
 /**
  * {@link CoreCalendarActivator}
@@ -101,10 +97,8 @@ public class CoreCalendarActivator extends HousekeepingActivator {
 
         CalendarMySQL.setServiceLookup(this);
 
-        registerService(QuotaProvider.class, new CalendarQuotaProvider(new CalendarMySQL(), this));
         registerService(AppointmentSqlFactoryService.class, factory, null);
         registerService(CalendarCollectionService.class, new CalendarCollection(), null);
-        registerService(CalendarAdministrationService.class, new CalendarAdministration(), null);
         final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
         props.put(TargetService.MODULE_PROPERTY, I(Types.APPOINTMENT));
         registerService(TargetService.class, new CalendarReminderDelete(), props);

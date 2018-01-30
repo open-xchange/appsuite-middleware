@@ -1,0 +1,27 @@
+/chronos?action=list:
+  put:
+    operationId: getEventList
+    tags:
+      - Chronos
+    summary: Gets a list of events.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/QueryParamChronosFields"
+      - $ref: "#/parameters/QueryParamChronosExtendedEntities"
+      - in: body
+        name: body
+        description: A JSON array of JSON objects with the id and optionally the recurrence position of the event.
+        required: true
+        schema:
+          type: array
+          items: 
+            $ref: "#/definitions/EventId"
+    responses:
+      200:
+        description: |
+          A JSON object containing an array with events. In case of errors the responsible fields in the
+          response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/EventsResponse"

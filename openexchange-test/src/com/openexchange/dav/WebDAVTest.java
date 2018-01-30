@@ -115,7 +115,7 @@ import com.openexchange.oauth.provider.rmi.client.ClientDto;
  */
 public abstract class WebDAVTest extends AbstractAJAXSession {
 
-    private static final boolean AUTODISCOVER_AUTH = false;
+    private static final boolean AUTODISCOVER_AUTH = true;
 
     protected static final int TIMEOUT = 10000;
 
@@ -152,7 +152,7 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
             AJAXConfig.init();
             DavPropertyNameSet props = new DavPropertyNameSet();
             props.add(PropertyNames.CURRENT_USER_PRINCIPAL);
-            propFind = new PropFindMethod(Config.getBaseUri() + '/', DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+            propFind = new PropFindMethod(Config.getBaseUri() + "/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
             if (HttpServletResponse.SC_UNAUTHORIZED == new HttpClient().executeMethod(propFind)) {
                 for (Header header : propFind.getResponseHeaders("WWW-Authenticate")) {
                     if (header.getValue().startsWith("Bearer")) {
@@ -204,6 +204,7 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
 
     // --- END: Optional OAuth Configuration --------------------------------------------------------------------------------
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();

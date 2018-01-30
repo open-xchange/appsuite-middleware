@@ -749,10 +749,15 @@ public class DefaultDispatcher implements Dispatcher {
     public AJAXActionServiceFactory lookupFactory(final String module) {
         AJAXActionServiceFactory serviceFactory = actionFactories.get(module);
         if (null == serviceFactory) {
-            final int pos = module.indexOf('/');
-            if (pos > 0) {
-                // Fallback for backwards compatibility. File Download Actions sometimes append the filename to the module.
-                serviceFactory = actionFactories.get(module.substring(0, pos));
+            String candidate = module;
+            int index = candidate.lastIndexOf('/');
+            while (index > 0) {
+                candidate = candidate.substring(0, index);
+                serviceFactory = actionFactories.get(candidate);
+                if (null != serviceFactory) {
+                    break;
+                }
+                index = candidate.lastIndexOf('/');
             }
         }
         return serviceFactory;

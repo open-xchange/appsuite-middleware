@@ -75,6 +75,7 @@ public class Bug35610Test extends AbstractAJAXSession {
 
     private int nextYear;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -101,7 +102,7 @@ public class Bug35610Test extends AbstractAJAXSession {
     @Test
     public void testTimeChange() throws Exception {
         catm.insert(app);
-        ctm2.confirm(app, Appointment.ACCEPT, "yay");
+        ctm2.confirm(ctm2.getPrivateFolder(), app.getObjectID(), app.getLastModified(), Appointment.ACCEPT, "yay");
 
         Appointment exception = catm.createIdentifyingCopy(app);
         exception.setRecurrenceType(Appointment.NO_RECURRENCE);
@@ -129,7 +130,7 @@ public class Bug35610Test extends AbstractAJAXSession {
     @Test
     public void testNoTimeChange() throws Exception {
         catm.insert(app);
-        ctm2.confirm(app, Appointment.ACCEPT, "yay");
+        ctm2.confirm(ctm2.getPrivateFolder(), app.getObjectID(), app.getLastModified(), Appointment.ACCEPT, "yay");
 
         Appointment exception = catm.createIdentifyingCopy(app);
         exception.setRecurrenceType(Appointment.NO_RECURRENCE);
@@ -154,6 +155,7 @@ public class Bug35610Test extends AbstractAJAXSession {
         }
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

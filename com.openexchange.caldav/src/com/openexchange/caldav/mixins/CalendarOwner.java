@@ -51,7 +51,7 @@ package com.openexchange.caldav.mixins;
 
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.dav.mixins.PrincipalURL;
-import com.openexchange.dav.resources.CommonFolderCollection;
+import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
@@ -76,14 +76,14 @@ public class CalendarOwner extends SingleXMLPropertyMixin {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarOwner.class);
 
-    private final CommonFolderCollection<?> collection;
+    private final FolderCollection<?> collection;
 
     /**
      * Initializes a new {@link CalendarOwner}.
      *
      * @param collection The underlying folder collection to represent the calendar owner for
      */
-    public CalendarOwner(CommonFolderCollection<?> collection) {
+    public CalendarOwner(FolderCollection<?> collection) {
         super(CaldavProtocol.CAL_NS.getURI(), "calendar-owner");
         this.collection = collection;
     }

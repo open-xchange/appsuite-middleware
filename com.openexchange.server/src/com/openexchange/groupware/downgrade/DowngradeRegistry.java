@@ -59,10 +59,8 @@ import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.infostore.InfostoreDowngrade;
 import com.openexchange.groupware.tasks.TasksDowngrade;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.downgrade.OXFolderDowngradeListener;
 
 /**
@@ -188,7 +186,6 @@ public final class DowngradeRegistry {
 	}
 
 	private void init() {
-        registerDowngradeListener(ServerServiceRegistry.getInstance().getService(CalendarAdministrationService.class).getDowngradeListener());
         registerDowngradeListener(new InfostoreDowngrade());
         registerDowngradeListener(new TasksDowngrade());
 		/*

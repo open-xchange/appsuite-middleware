@@ -954,6 +954,15 @@ public class DefaultShareService implements ShareService {
         if (false == targetUser.isGuest()) {
             return new InternalUserShareInfo(context.getContextId(), targetUser, target, dstTarget, false);
         }
+        /*
+         * (re-)adjust persisted link permission association for anonymous guests if required
+         */
+        if (AnonymousRecipient.class.isInstance(recipient) && false == dstTarget.getFolderToLoad().equals(dstTarget.getFolder())) {
+            ShareTarget realTarget = new ShareTarget(dstTarget);
+            realTarget.setFolder(dstTarget.getFolderToLoad());
+            services.getService(UserService.class).setAttribute(connectionHelper.getConnection(), ShareTool.LINK_TARGET_USER_ATTRIBUTE,
+                ShareTool.targetToJSON(realTarget).toString(), targetUser.getId(), context, false);
+        }
         ShareTargetPath targetPath = moduleSupport.getPath(target, session);
         return new DefaultShareInfo(services, context.getContextId(), targetUser, target, dstTarget, targetPath, false);
     }

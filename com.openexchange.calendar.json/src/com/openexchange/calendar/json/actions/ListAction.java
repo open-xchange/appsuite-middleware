@@ -49,40 +49,20 @@
 
 package com.openexchange.calendar.json.actions;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import org.json.JSONArray;
+import java.util.Set;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.CalendarFields;
-import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.calendar.RecurringResultInterface;
-import com.openexchange.groupware.calendar.RecurringResultsInterface;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorException;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.TIntIntMap;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-
 
 /**
  * {@link ListAction}
@@ -92,191 +72,41 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 @OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
 public final class ListAction extends AppointmentAction {
 
-    private static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(ListAction.class);
+    private static final Set<String> REQUIRED_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
+        AJAXServlet.PARAMETER_COLUMNS
+    );
+
+    private static final Set<String> OPTIONAL_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
+        AJAXServlet.PARAMETER_RECURRENCE_MASTER, AJAXServlet.PARAMETER_TIMEZONE
+    );
 
     /**
      * Initializes a new {@link ListAction}.
-     * @param services
+     *
+     * @param services A service lookup reference
      */
-    public ListAction(final ServiceLookup services) {
+    public ListAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final AppointmentAJAXRequest req) throws OXException, JSONException {
-        Date timestamp = new Date(0);
+    protected Set<String> getRequiredParameters() {
+        return REQUIRED_PARAMETERS;
+    }
 
-        Date lastModified = null;
+    @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
 
-        SearchIterator<Appointment> it = null;
-
-        final TIntObjectMap<TIntList> recurrencePositionMap = new TIntObjectHashMap<TIntList>();
-        final JSONArray jData = req.getData();
-        if (null == jData) {
-            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+    @Override
+    protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
+        if (false == session.contains(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES)) {
+            session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.TRUE);
         }
-        final boolean bRecurrenceMaster = req.parseBoolean(RECURRENCE_MASTER);
-
-        final TIntIntMap objectIdMap = new TIntIntHashMap();
-        for (int a = 0; a < jData.length(); a++) {
-            JSONObject jObject = null;
-            try {
-                jObject = jData.getJSONObject(a);
-            } catch (final JSONException e) {
-                throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, jData.toString());
-            }
-
-            final int objectId = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_ID);
-            final int folderId = DataParser.checkInt(jObject, AJAXServlet.PARAMETER_FOLDERID);
-
-            objectIdMap.put(objectId, folderId);
-
-            // for backward compatibility supporting both recurrence position parameters
-            int tempRecurrencePosition = DataParser.parseInt(jObject, CalendarFields.RECURRENCE_POSITION);
-            if (tempRecurrencePosition == 0) {
-                tempRecurrencePosition = DataParser.parseInt(jObject, CalendarFields.OLD_RECURRENCE_POSITION);
-
-                if (tempRecurrencePosition > 0) {
-                    LOG.warn("found old recurrence position field in request");
-                }
-            }
-
-            if (tempRecurrencePosition > 0) {
-                final int recurrencePosition = tempRecurrencePosition;
-                TIntList recurrencePosList = null;
-                if (recurrencePositionMap.containsKey(objectId)) {
-                    recurrencePosList = recurrencePositionMap.get(objectId);
-                } else {
-                    recurrencePosList = new TIntArrayList();
-                }
-                recurrencePosList.add(recurrencePosition);
-                recurrencePositionMap.put(objectId, recurrencePosList);
-            }
-        }
-
-        final int size = objectIdMap.size();
-        final int[][] objectIdAndFolderId = new int[size][2];
-        {
-            int i = 0;
-            for (final int objectId : objectIdMap.keys()) {
-                objectIdAndFolderId[i][0] = objectId;
-                objectIdAndFolderId[i++][1] = objectIdMap.get(objectId);
-            }
-        }
-
-        final AppointmentSqlFactoryService factoryService = getService();
-        if (null == factoryService) {
-            throw ServiceExceptionCode.absentService(AppointmentSqlFactoryService.class);
-        }
-        final AppointmentSQLInterface appointmentsql = factoryService.createAppointmentSql(req.getSession());
-        final CalendarCollectionService recColl = getService(CalendarCollectionService.class);
-        it = appointmentsql.getObjectsById(objectIdAndFolderId, _appointmentFields);
-        final List<Appointment> appointmentList = new ArrayList<Appointment>(16);
-        try {
-            int counter = 0;
-            while (it.hasNext()) {
-                Appointment appointment = it.next();
-                if (null == appointment) {
-                    continue;
-                }
-
-                final Date startDate = appointment.getStartDate();
-                final Date endDate = appointment.getEndDate();
-
-                if (appointment.getRecurrenceType() != CalendarObject.NONE && appointment.getRecurrencePosition() == 0) {
-                    if (bRecurrenceMaster) {
-                        RecurringResultsInterface recuResults = null;
-                        try {
-                            recuResults = recColl.calculateFirstRecurring(appointment);
-                        } catch (final OXException e) {
-                            LOG.error("Can not calculate recurrence {}:{}", appointment.getObjectID(), req.getSession().getContextId(), e);
-                            appointmentList.add(appointment);
-                        }
-
-                        if (recuResults != null && recuResults.size() == 1) {
-                            appointment.setStartDate(new Date(recuResults.getRecurringResult(0).getStart()));
-                            appointment.setEndDate(new Date(recuResults.getRecurringResult(0).getEnd()));
-
-                            appointmentList.add(appointment);
-                        } else {
-                            LOG.warn("cannot load first recurring appointment from appointment object: {} / {}\n\n\n", appointment.getRecurrenceType(), appointment.getObjectID());
-                        }
-                    } else {
-                        // Commented this because this is done in CalendarOperation.next():726 that calls extractRecurringInformation()
-                        // appointment.calculateRecurrence();
-                        if (recurrencePositionMap.containsKey(appointment.getObjectID())) {
-                            final TIntList recurrencePosList = recurrencePositionMap.get(appointment.getObjectID());
-
-                            final int listSize = recurrencePosList.size();
-                            for (int a = 0; a < listSize; a++) {
-                                appointment = appointment.clone();
-                                appointment.setStartDate(startDate);
-                                appointment.setEndDate(endDate);
-                                final RecurringResultsInterface recuResults = recColl.calculateRecurring(
-                                    appointment,
-                                    0,
-                                    0,
-                                    recurrencePosList.get(a));
-                                if (recuResults.size() > 0) {
-                                    final RecurringResultInterface result = recuResults.getRecurringResult(0);
-                                    appointment.setStartDate(new Date(result.getStart()));
-                                    appointment.setEndDate(new Date(result.getEnd()));
-                                    appointment.setRecurrencePosition(result.getPosition());
-                                } else {
-                                    throw OXException.notFound("no recurrence appointment found at pos: " + counter);
-                                }
-
-                                appointmentList.add(appointment);
-                            }
-                        } else {
-                            RecurringResultsInterface recuResults = null;
-                            try {
-                                recuResults = recColl.calculateFirstRecurring(appointment);
-                            } catch (final OXException e) {
-                                LOG.error("Can not calculate recurrence {}:{}", appointment.getObjectID(), req.getSession().getContextId(), e);
-                                appointmentList.add(appointment);
-                            }
-                            if (recuResults != null && recuResults.size() > 0) {
-                                final RecurringResultInterface result = recuResults.getRecurringResult(0);
-                                appointment.setStartDate(new Date(result.getStart()));
-                                appointment.setEndDate(new Date(result.getEnd()));
-                                appointment.setRecurrencePosition(result.getPosition());
-                            } else if (recuResults != null) {
-                                throw OXException.notFound("no recurrence appointment found at pos: " + counter);
-                            }
-
-                            if (appointment.getFullTime() && appointment.getStartDate().getTime() == appointment.getEndDate().getTime()) {
-                                appointment.setEndDate(new Date(appointment.getStartDate().getTime() + DAY_MILLIS));
-                            }
-
-                            appointmentList.add(appointment);
-                        }
-                    }
-                } else {
-                    appointmentList.add(appointment);
-                }
-
-                lastModified = appointment.getLastModified();
-
-                if (timestamp.getTime() < lastModified.getTime()) {
-                    timestamp = lastModified;
-                }
-
-                counter++;
-            }
-
-            return new AJAXRequestResult(appointmentList, timestamp, "appointment");
-        } catch (final SearchIteratorException e) {
-            throw e;
-        } catch (final OXException e) {
-            LOG.error("", e);
-            throw e;
-        } finally {
-            if (it != null) {
-                it.close();
-            }
-        }
+        List<EventID> requestedIDs = parseRequestedIDs(session, request);
+        List<Event> events = session.getCalendarService().getEvents(session, requestedIDs);
+        return getAppointmentResultWithTimestamp(getEventConverter(session), events, requestedIDs);
     }
 
 }

@@ -345,6 +345,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      */
     public static final String PARAMETER_COLUMNS = "columns";
 
+    /**
+     * Similar to {@link #PARAMETER_COLUMNS} this field provides the fields of an event that should be returned.
+     */
+    public static final String PARAMETER_CHRONOS_FIELDS = "fields";
+
     public static final String PARAMETER_SEARCHPATTERN = "pattern";
 
     public static final String PARAMETER_TIMESTAMP = "timestamp";

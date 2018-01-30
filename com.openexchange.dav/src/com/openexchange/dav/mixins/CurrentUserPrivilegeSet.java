@@ -69,9 +69,25 @@ public class CurrentUserPrivilegeSet implements PropertyMixin {
 
     private final List<Privilege> privileges;
 
+    /**
+     * Initializes a new {@link CurrentUserPrivilegeSet}.
+     *
+     * @param permission The underlying folder permissions
+     */
     public CurrentUserPrivilegeSet(Permission permission) {
+        this(permission, false);
+    }
+
+    /**
+     * Initializes a new {@link CurrentUserPrivilegeSet}.
+     *
+     * @param permission The underlying folder permissions
+     * @param allowWriteProperties <code>true</code> to add the {@link #WRITE_PROPERTIES}-privilege regardless of the underlying
+     *            permission, <code>false</code>, otherwise
+     */
+    public CurrentUserPrivilegeSet(Permission permission, boolean allowWriteProperties) {
         super();
-        this.privileges = Privilege.getApplying(permission);
+        this.privileges = Privilege.getApplying(permission, true);
     }
 
     public CurrentUserPrivilegeSet(Privilege...privileges) {

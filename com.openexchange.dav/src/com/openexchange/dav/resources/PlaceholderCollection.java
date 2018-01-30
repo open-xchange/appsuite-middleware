@@ -65,23 +65,24 @@ import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.mixins.CalendarColor;
 import com.openexchange.dav.mixins.SupportedCalendarComponentSet;
+import com.openexchange.dav.reports.SyncStatus;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.IncorrectString;
 import com.openexchange.exception.OXException.ProblematicAttribute;
-import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.BasicPermission;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.database.contentType.CalendarContentType;
+import com.openexchange.folderstorage.calendar.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
-import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 /**
@@ -90,7 +91,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.1
  */
-public class PlaceholderCollection<T extends CommonObject> extends CommonFolderCollection<T> {
+public class PlaceholderCollection<T> extends FolderCollection<T> {
 
     private String displayName;
     private ContentType contentType;
@@ -111,6 +112,11 @@ public class PlaceholderCollection<T extends CommonObject> extends CommonFolderC
         this.contentType = contentType;
         this.treeID = treeID;
         this.meta = new HashMap<String, Object>();
+    }
+
+    @Override
+    public AbstractResource getChild(String name) throws WebdavProtocolException {
+        throw WebdavProtocolException.generalError(constructPathForChildResource(name), HttpServletResponse.SC_NOT_FOUND);
     }
 
     @Override
@@ -177,7 +183,7 @@ public class PlaceholderCollection<T extends CommonObject> extends CommonFolderC
         try {
             FolderService folderService = factory.requireService(FolderService.class);
             UserizedFolder parentFolder = folderService.getDefaultFolder(factory.getUser(), treeID, contentType, factory.getSession(), null);
-            AbstractFolder folder = getFolderToUpdate();
+            ParameterizedFolder folder = getFolderToUpdate();
             folder.setParentID(parentFolder.getID());
             folder.setName(displayName);
             folder.setType(parentFolder.getType());
@@ -220,13 +226,10 @@ public class PlaceholderCollection<T extends CommonObject> extends CommonFolderC
     }
 
     @Override
-    protected Collection<T> getModifiedObjects(Date since) throws OXException {
-        return Collections.emptyList();
-    }
-
-    @Override
-    protected Collection<T> getDeletedObjects(Date since) throws OXException {
-        return Collections.emptyList();
+    protected SyncStatus<WebdavResource> getSyncStatus(Date since) throws OXException {
+        SyncStatus<WebdavResource> multistatus = new SyncStatus<WebdavResource>();
+        multistatus.setToken(Long.toString(since.getTime()));
+        return multistatus;
     }
 
     @Override
@@ -254,6 +257,11 @@ public class PlaceholderCollection<T extends CommonObject> extends CommonFolderC
         permission.setMaxPermissions();
         permission.setEntity(entity);
         return permission;
+    }
+
+    @Override
+    protected WebdavPath constructPathForChildResource(T object) {
+        return null;
     }
 
 }

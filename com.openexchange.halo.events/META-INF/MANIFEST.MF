@@ -1,0 +1,32 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Events for Contact Halo
+Bundle-SymbolicName: com.openexchange.halo.events
+Bundle-Version: 7.10.0
+Bundle-Activator: com.openexchange.halo.events.osgi.EventsHaloActivator
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.fields,
+ com.openexchange.ajax.requesthandler,
+ com.openexchange.chronos,
+ com.openexchange.chronos.common,
+ com.openexchange.chronos.provider.composition,
+ com.openexchange.chronos.service,
+ com.openexchange.exception,
+ com.openexchange.groupware.container,
+ com.openexchange.groupware.ldap,
+ com.openexchange.groupware.search,
+ com.openexchange.groupware.userconfiguration,
+ com.openexchange.halo,
+ com.openexchange.java.util,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.servlet,
+ com.openexchange.tools.session,
+ com.openexchange.tx,
+ org.dmfs.rfc5545,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j

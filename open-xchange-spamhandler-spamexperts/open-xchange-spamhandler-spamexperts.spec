@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:	@OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL_2.0
@@ -58,6 +58,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %doc com.openexchange.spamhandler.spamexperts/ChangeLog
 
 %changelog
+* Fri Dec 01 2017 Marcus Klein <marcus.klein@open-xchange.com>
+First preview for 7.10.0 release
 * Thu Oct 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.10.0 release
 * Fri May 19 2017 Marcus Klein <marcus.klein@open-xchange.com>

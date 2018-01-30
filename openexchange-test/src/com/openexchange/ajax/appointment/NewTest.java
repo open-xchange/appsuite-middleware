@@ -49,22 +49,21 @@
 
 package com.openexchange.ajax.appointment;
 
-import static org.junit.Assert.*;
-import java.io.StringWriter;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
-import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.AppointmentTest;
 import com.openexchange.ajax.group.GroupTest;
 import com.openexchange.ajax.resource.ResourceTools;
-import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.GroupParticipant;
@@ -311,13 +310,6 @@ public class NewTest extends AppointmentTest {
         UserParticipant userParticipant = new UserParticipant(userParticipantId);
         participants[1] = userParticipant;
         appointmentObj.setParticipants(participants);
-
-        final StringWriter stringWriter = new StringWriter();
-        final JSONObject jsonObj = new JSONObject();
-        final AppointmentWriter appointmentwriter = new AppointmentWriter(getClient().getValues().getTimeZone());
-        appointmentwriter.writeAppointment(appointmentObj, jsonObj);
-        stringWriter.write(jsonObj.toString());
-        stringWriter.flush();
 
         int objectId = catm.insert(appointmentObj).getObjectID();
         appointmentObj.setObjectID(objectId);

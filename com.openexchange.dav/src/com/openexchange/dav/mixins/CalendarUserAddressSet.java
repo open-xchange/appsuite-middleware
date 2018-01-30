@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.mail.internet.AddressException;
+import com.openexchange.chronos.ResourceId;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.ldap.User;

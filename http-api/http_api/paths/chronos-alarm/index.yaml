@@ -1,0 +1,5 @@
+requests:
+  - PendingRequest.yaml
+  - SnoozeRequest.yaml
+  - AcknowledgeRequest.yaml
+  - UpdateAlarmsRequest.yaml

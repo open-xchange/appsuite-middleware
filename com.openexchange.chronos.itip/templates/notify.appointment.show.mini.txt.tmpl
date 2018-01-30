@@ -1,0 +1,24 @@
+====[       ${mail.event.summary!""}       ]====
+
+${labels.timezoneInfo!""}
+
+${labels.whenLabel} ${formatters.dateSpec} ${formatters.interval}
+<#if mail.event.location??>
+${labels.whereLabel} ${mail.event.location!""}
+</#if>
+
+
+<#if mail.event.description??>
+====================================
+${mail.event.description!""}
+====================================
+</#if>
+
+
+== ${labels.detailsLabel} ==
+
+${labels.showAsLabel} ${labels.showAs}
+${labels.createdLabel} ${formatters.created} - ${formatters.created}
+
+
+${labels.justification!""}

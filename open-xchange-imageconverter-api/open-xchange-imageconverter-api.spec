@@ -14,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -51,6 +51,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Fri Dec 01 2017 Kai Ahrens <kai.ahrens@open-xchange.com>
+First preview for 7.10.0 release
 * Thu Oct 12 2017 Kai Ahrens <kai.ahrens@open-xchange.com>
 prepare for 7.10.0 release
 * Wed Aug 09 2017 Kai Ahrens <kai.ahrens@open-xchange.com>
