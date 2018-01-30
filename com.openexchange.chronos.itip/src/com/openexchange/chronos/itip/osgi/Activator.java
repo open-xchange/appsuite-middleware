@@ -53,8 +53,8 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.Constants;
 import com.openexchange.chronos.ical.ICalService;
-import com.openexchange.chronos.itip.EventNotificationPool;
 import com.openexchange.chronos.itip.CalendarITipIntegrationUtility;
+import com.openexchange.chronos.itip.EventNotificationPool;
 import com.openexchange.chronos.itip.ITipActionPerformerFactoryService;
 import com.openexchange.chronos.itip.ITipAnalyzerService;
 import com.openexchange.chronos.itip.analyzers.DefaultITipAnalyzerService;
@@ -69,6 +69,7 @@ import com.openexchange.chronos.itip.sender.MailSenderService;
 import com.openexchange.chronos.itip.sender.PoolingMailSenderService;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.config.ConfigurationService;
@@ -81,7 +82,7 @@ import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
 
 /**
- * 
+ *
  * {@link Activator}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
@@ -91,7 +92,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, TimerService.class, ContextService.class, CalendarStorageFactory.class, RecurrenceService.class, UserService.class, ResourceService.class, ICalService.class, CalendarService.class, HtmlService.class, TemplateService.class };
+        return new Class<?>[] { ConfigurationService.class, TimerService.class, ContextService.class, CalendarStorageFactory.class, RecurrenceService.class, UserService.class, ResourceService.class, ICalService.class, CalendarService.class, HtmlService.class, TemplateService.class, CalendarUtilities.class };
     }
 
     @Override
@@ -117,10 +118,10 @@ public class Activator extends HousekeepingActivator {
             sender = new PoolingMailSenderService(pool, sender);
         }
 
-        Dictionary<String, Object> analyzerProps = new Hashtable<String, Object>();
+        Dictionary<String, Object> analyzerProps = new Hashtable<>();
         analyzerProps.put(Constants.SERVICE_RANKING, DefaultITipAnalyzerService.RANKING); // Default
         registerService(ITipAnalyzerService.class, new DefaultITipAnalyzerService(util), analyzerProps);
-        Dictionary<String, Object> factoryProps = new Hashtable<String, Object>();
+        Dictionary<String, Object> factoryProps = new Hashtable<>();
         factoryProps.put(Constants.SERVICE_RANKING, DefaultITipActionPerformerFactoryService.RANKING); // Default
         registerService(ITipActionPerformerFactoryService.class, new DefaultITipActionPerformerFactoryService(util, sender, generatorFactory), factoryProps);
 
