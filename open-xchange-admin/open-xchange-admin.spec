@@ -149,7 +149,9 @@ if [ ${1:-0} -eq 2 ]; then
     ox_add_property LOCK_ON_WRITE_CONTEXT_INTO_PAYLOAD_DB false /opt/open-xchange/etc/plugin/hosting.properties
 
     # SoftwareChange_Request-4351
-    sed -i 's/# webdavxml (interface for OXtender for Microsoft Outlook, used by KDE for synchronization)$/# webdavxml (interface for OXtender for Microsoft Outlook, used by KDE for synchronization) [DEPRECATED]/' /opt/open-xchange/etc/ModuleAccessDefinitions.properties
+    PFILE=/opt/open-xchange/etc/ModuleAccessDefinitions.properties
+    expression='# webdavxml (interface for OXtender for Microsoft Outlook, used by KDE for synchronization)'
+    $(contains "^${expression}$" $PFILE) && sed -i "s/^${expression}$/${expression} [DEPRECATED]/" $PFILE
 
     ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 fi
