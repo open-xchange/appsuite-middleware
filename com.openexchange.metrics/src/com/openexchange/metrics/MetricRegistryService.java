@@ -97,11 +97,38 @@ public interface MetricRegistryService {
      */
     <T> Timer registerTimer(Class<T> clazz, String timerName);
 
+    /**
+     * Registers the specified {@link Gauge} with the specified name
+     * 
+     * @param gaugeName the {@link Gauge}'s name
+     * @param gauge The {@link Gauge}
+     */
     <T> void registerGauge(String gaugeName, Gauge<T> gauge);
 
+    /**
+     * Registers the specified {@link Gauge} with the specified name and {@link Class}
+     * 
+     * @param clazz The {@link Class} for the {@link Gauge}
+     * @param gaugeName the {@link Gauge}'s name
+     * @param gauge The {@link Gauge}
+     */
     <T, V> void registerGauge(Class<T> clazz, String gaugeName, Gauge<V> gauge);
 
+    /**
+     * Registers a new {@link Histogram} with the specified name
+     * 
+     * @param histogramName the {@link Histogram}'s name
+     * @return The created {@link Histogram}
+     */
     Histogram registerHistogram(String histogramName);
 
+    /**
+     * Registers a new {@link Histogram} with the specified name and for
+     * the specified {@link Class}
+     * 
+     * @param clazz The {@link Class} for which the metric will be registered
+     * @param timerName The {@link Histogram} name
+     * @return The created {@link Histogram}
+     */
     <T> Histogram registerHistogram(Class<T> clazz, String histogramName);
 }
