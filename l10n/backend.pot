@@ -5045,6 +5045,13 @@ msgstr ""
 msgid "Moving a recurring appointment to another folder is not supported."
 msgstr ""
 
+#. *
+#. * The calendar is currently under maintenance. Please try again later.
+#.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:218
+msgid "The calendar is currently under maintenance. Please try again later."
+msgstr ""
+
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
 msgid "Invalid E-Mail address."
 msgstr ""
