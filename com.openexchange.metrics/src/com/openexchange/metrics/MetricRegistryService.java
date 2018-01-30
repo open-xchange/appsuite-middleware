@@ -49,6 +49,7 @@
 
 package com.openexchange.metrics;
 
+import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 
@@ -94,4 +95,8 @@ public interface MetricRegistryService {
      * @return The created {@link Timer}
      */
     <T> Timer registerTimer(Class<T> clazz, String timerName);
+
+    <T> void registerGauge(String gaugeName, Gauge<T> gauge);
+
+    <T, V> void registerGauge(Class<T> clazz, String gaugeName, Gauge<V> gauge);
 }

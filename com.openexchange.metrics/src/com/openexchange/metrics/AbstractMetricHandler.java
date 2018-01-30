@@ -58,5 +58,5 @@ import com.openexchange.exception.OXException;
  */
 abstract class AbstractMetricHandler {
 
-    abstract <T> T call() throws OXException;
+    public abstract <T> T call() throws OXException;
 }

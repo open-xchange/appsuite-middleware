@@ -49,6 +49,7 @@
 
 package com.openexchange.metrics.impl;
 
+import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
@@ -121,5 +122,25 @@ public class MetricRegistryServiceImpl implements MetricRegistryService {
     @Override
     public <T> Timer registerTimer(Class<T> clazz, String timerName) {
         return metricRegistry.timer(MetricRegistry.name(clazz, timerName));
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.MetricRegistryService#registerGauge(java.lang.String, com.codahale.metrics.Gauge)
+     */
+    @Override
+    public <T> void registerGauge(String gaugeName, Gauge<T> gauge) {
+        metricRegistry.register(gaugeName, gauge);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.MetricRegistryService#registerGauge(java.lang.Class, java.lang.String, com.codahale.metrics.Gauge)
+     */
+    @Override
+    public <T, V> void registerGauge(Class<T> clazz, String gaugeName, Gauge<V> gauge) {
+        metricRegistry.register(MetricRegistry.name(clazz, gaugeName), gauge);
     }
 }

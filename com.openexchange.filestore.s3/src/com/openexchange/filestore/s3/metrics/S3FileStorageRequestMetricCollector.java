@@ -52,14 +52,17 @@ package com.openexchange.filestore.s3.metrics;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import com.amazonaws.Request;
 import com.amazonaws.Response;
 import com.amazonaws.http.HttpMethodName;
 import com.amazonaws.metrics.AwsSdkMetrics;
 import com.amazonaws.metrics.MetricType;
 import com.amazonaws.metrics.RequestMetricCollector;
+import com.amazonaws.util.AWSRequestMetrics;
 import com.amazonaws.util.AWSRequestMetrics.Field;
-import com.codahale.metrics.Meter;
+import com.codahale.metrics.Timer;
 import com.openexchange.metrics.MetricRegistryService;
 import com.openexchange.server.ServiceLookup;
 
@@ -70,19 +73,27 @@ import com.openexchange.server.ServiceLookup;
  */
 public class S3FileStorageRequestMetricCollector extends RequestMetricCollector {
 
-    private final Map<HttpMethodName, Meter> methodCounterMetrics;
+    private final Map<HttpMethodName, Timer> methodDurationMetrics;
+    private final Map<HttpMethodName, AtomicLong> methodTotalDurationMetrics;
 
     /**
      * Initialises a new {@link S3FileStorageRequestMetricCollector}.
      */
     public S3FileStorageRequestMetricCollector(String filestoreId, ServiceLookup services) {
         super();
-        Map<HttpMethodName, Meter> map = new HashMap<>();
+        Map<HttpMethodName, Timer> duration = new HashMap<>();
+        Map<HttpMethodName, AtomicLong> ttMap = new HashMap<>();
         MetricRegistryService metricRegistryService = services.getService(MetricRegistryService.class);
         for (HttpMethodName method : HttpMethodName.values()) {
-            map.put(method, metricRegistryService.registerMeter(this.getClass(), filestoreId + "." + method.name()));
+            duration.put(method, metricRegistryService.registerTimer(this.getClass(), filestoreId + "." + method.name()));
+
+            AtomicLong totalTime = new AtomicLong();
+            metricRegistryService.registerGauge(this.getClass(), filestoreId + "." + method.name() + ".totalSeconds", () -> totalTime.get());
+            ttMap.put(method, totalTime);
         }
-        methodCounterMetrics = Collections.unmodifiableMap(map);
+        methodDurationMetrics = Collections.unmodifiableMap(duration);
+        methodTotalDurationMetrics = Collections.unmodifiableMap(ttMap);
+
     }
 
     /*
@@ -92,36 +103,29 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
      */
     @Override
     public void collectMetrics(Request<?> request, Response<?> response) {
-        countMethod(request);
-        measureDuration(request);
-    }
-
-    /**
-     * 
-     * @param request
-     */
-    private void countMethod(Request<?> request) {
-        HttpMethodName httpMethod = request.getHttpMethod();
-        Meter meter = methodCounterMetrics.get(httpMethod);
-        if (meter == null) {
-            return;
-        }
-        meter.mark();
+        timeRequest(request);
     }
 
     /**
      * @param request
      */
-    private void measureDuration(Request<?> request) {
+    private void timeRequest(Request<?> request) {
         for (MetricType type : AwsSdkMetrics.getPredefinedMetrics()) {
-            if (type instanceof Field) {
-                Field predefined = (Field) type;
-                switch (predefined) {
-                    case ClientExecuteTime:
-                        System.err.println("client execution time");
-                    default:
-                        break;
-                }
+            if (!(type instanceof Field)) {
+                continue;
+            }
+
+            AWSRequestMetrics metrics = request.getAWSRequestMetrics();
+            long longValue = metrics.getTimingInfo().getTimeTakenMillisIfKnown().longValue();
+            Field predefined = (Field) type;
+            switch (predefined) {
+                case ClientExecuteTime:
+                    Timer timer = methodDurationMetrics.get(request.getHttpMethod());
+                    timer.update(longValue, TimeUnit.MILLISECONDS);
+                    AtomicLong atomicLong = methodTotalDurationMetrics.get(request.getHttpMethod());
+                    atomicLong.addAndGet(longValue / 1000);
+                default:
+                    break;
             }
         }
     }
