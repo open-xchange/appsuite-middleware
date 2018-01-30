@@ -50,6 +50,7 @@
 package com.openexchange.metrics;
 
 import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Timer;
 
@@ -99,4 +100,8 @@ public interface MetricRegistryService {
     <T> void registerGauge(String gaugeName, Gauge<T> gauge);
 
     <T, V> void registerGauge(Class<T> clazz, String gaugeName, Gauge<V> gauge);
+
+    Histogram registerHistogram(String histogramName);
+
+    <T> Histogram registerHistogram(Class<T> clazz, String histogramName);
 }

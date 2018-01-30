@@ -50,6 +50,7 @@
 package com.openexchange.metrics.impl;
 
 import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
@@ -131,7 +132,22 @@ public class MetricRegistryServiceImpl implements MetricRegistryService {
      */
     @Override
     public <T> void registerGauge(String gaugeName, Gauge<T> gauge) {
-        metricRegistry.register(gaugeName, gauge);
+        Gauge<T> oldGauge = metricRegistry.getGauges().get(gaugeName);
+        if (oldGauge == null) {
+            try {
+                metricRegistry.register(gaugeName, gauge);
+                return;
+            } catch (IllegalArgumentException e) {
+                Gauge<T> addedOld = metricRegistry.getGauges().get(gaugeName);
+                if (addedOld.equals(gauge)) {
+                    return;
+                }
+            }
+        } else if (oldGauge.getValue().equals(gauge.getValue())) {
+            return;
+        }
+
+        throw new IllegalArgumentException("Meeeeh");
     }
 
     /*
@@ -142,5 +158,25 @@ public class MetricRegistryServiceImpl implements MetricRegistryService {
     @Override
     public <T, V> void registerGauge(Class<T> clazz, String gaugeName, Gauge<V> gauge) {
         metricRegistry.register(MetricRegistry.name(clazz, gaugeName), gauge);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.MetricRegistryService#registerHistogram(java.lang.String)
+     */
+    @Override
+    public Histogram registerHistogram(String histogramName) {
+        return metricRegistry.histogram(histogramName);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.MetricRegistryService#registerHistogram(java.lang.Class, java.lang.String)
+     */
+    @Override
+    public <T> Histogram registerHistogram(Class<T> clazz, String histogramName) {
+        return metricRegistry.histogram(MetricRegistry.name(clazz, histogramName));
     }
 }

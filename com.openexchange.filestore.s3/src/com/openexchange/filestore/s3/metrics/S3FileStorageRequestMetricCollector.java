@@ -88,12 +88,11 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
             duration.put(method, metricRegistryService.registerTimer(this.getClass(), filestoreId + "." + method.name()));
 
             AtomicLong totalTime = new AtomicLong();
-            metricRegistryService.registerGauge(this.getClass(), filestoreId + "." + method.name() + ".totalSeconds", () -> totalTime.get());
+            metricRegistryService.registerGauge(filestoreId + "." + method.name() + ".totalMilliseconds", () -> totalTime.get());
             ttMap.put(method, totalTime);
         }
         methodDurationMetrics = Collections.unmodifiableMap(duration);
         methodTotalDurationMetrics = Collections.unmodifiableMap(ttMap);
-
     }
 
     /*
@@ -123,7 +122,7 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
                     Timer timer = methodDurationMetrics.get(request.getHttpMethod());
                     timer.update(longValue, TimeUnit.MILLISECONDS);
                     AtomicLong atomicLong = methodTotalDurationMetrics.get(request.getHttpMethod());
-                    atomicLong.addAndGet(longValue / 1000);
+                    atomicLong.addAndGet(longValue);
                 default:
                     break;
             }

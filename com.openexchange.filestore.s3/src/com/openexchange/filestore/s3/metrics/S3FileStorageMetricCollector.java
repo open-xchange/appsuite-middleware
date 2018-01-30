@@ -62,6 +62,7 @@ import com.openexchange.server.ServiceLookup;
 public class S3FileStorageMetricCollector extends MetricCollector {
 
     private final S3FileStorageRequestMetricCollector s3FileStorageRequestMetricCollector;
+    private S3FileStorageServiceMetricCollector s3FileStorageServiceMetricCollector;
 
     /**
      * Initialises a new {@link S3FileStorageMetricCollector}.
@@ -69,6 +70,7 @@ public class S3FileStorageMetricCollector extends MetricCollector {
     public S3FileStorageMetricCollector(String filestoreId, ServiceLookup services) {
         super();
         s3FileStorageRequestMetricCollector = new S3FileStorageRequestMetricCollector(filestoreId, services);
+        s3FileStorageServiceMetricCollector = new S3FileStorageServiceMetricCollector(filestoreId, services);
     }
 
     /*
@@ -78,8 +80,7 @@ public class S3FileStorageMetricCollector extends MetricCollector {
      */
     @Override
     public boolean start() {
-        // TODO Auto-generated method stub
-        return false;
+        return true;
     }
 
     /*
@@ -89,7 +90,6 @@ public class S3FileStorageMetricCollector extends MetricCollector {
      */
     @Override
     public boolean stop() {
-        // TODO Auto-generated method stub
         return false;
     }
 
@@ -100,8 +100,7 @@ public class S3FileStorageMetricCollector extends MetricCollector {
      */
     @Override
     public boolean isEnabled() {
-        // TODO Auto-generated method stub
-        return false;
+        return true;
     }
 
     /*
@@ -121,6 +120,6 @@ public class S3FileStorageMetricCollector extends MetricCollector {
      */
     @Override
     public ServiceMetricCollector getServiceMetricCollector() {
-        return ServiceMetricCollector.NONE;
+        return s3FileStorageServiceMetricCollector;
     }
 }
