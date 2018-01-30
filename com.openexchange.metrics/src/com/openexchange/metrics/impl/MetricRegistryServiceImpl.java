@@ -132,22 +132,7 @@ public class MetricRegistryServiceImpl implements MetricRegistryService {
      */
     @Override
     public <T> void registerGauge(String gaugeName, Gauge<T> gauge) {
-        Gauge<T> oldGauge = metricRegistry.getGauges().get(gaugeName);
-        if (oldGauge == null) {
-            try {
-                metricRegistry.register(gaugeName, gauge);
-                return;
-            } catch (IllegalArgumentException e) {
-                Gauge<T> addedOld = metricRegistry.getGauges().get(gaugeName);
-                if (addedOld.equals(gauge)) {
-                    return;
-                }
-            }
-        } else if (oldGauge.getValue().equals(gauge.getValue())) {
-            return;
-        }
-
-        throw new IllegalArgumentException("Meeeeh");
+        metricRegistry.gauge(gaugeName, () -> gauge);
     }
 
     /*
@@ -157,7 +142,7 @@ public class MetricRegistryServiceImpl implements MetricRegistryService {
      */
     @Override
     public <T, V> void registerGauge(Class<T> clazz, String gaugeName, Gauge<V> gauge) {
-        metricRegistry.register(MetricRegistry.name(clazz, gaugeName), gauge);
+        metricRegistry.gauge(MetricRegistry.name(clazz, gaugeName), () -> gauge);
     }
 
     /*
