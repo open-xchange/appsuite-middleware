@@ -136,8 +136,8 @@ public class RdbAttendeeStorage implements AttendeeStorage {
 
     @Override
     public void insertAttendees(Map<String, List<Attendee>> attendeesByEventId) throws OXException {
-        delegate.insertAttendeeTombstones(attendeesByEventId);
-        legacyDelegate.insertAttendeeTombstones(attendeesByEventId);
+        delegate.insertAttendees(attendeesByEventId);
+        legacyDelegate.insertAttendees(attendeesByEventId);
     }
 
     @Override
