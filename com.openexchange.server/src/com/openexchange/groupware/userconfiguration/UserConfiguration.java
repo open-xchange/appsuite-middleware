@@ -520,6 +520,15 @@ public class UserConfiguration implements Serializable, Cloneable {
     }
 
     /**
+     * Returns if user is a guest
+     *
+     * @return <code>true</code> if user is a Guest
+     */
+    public boolean isGuest() {
+        return capabilities.contains("guest");
+    }
+
+    /**
      * Determines all accessible modules as defined in user configuration. The returned array of <code>int</code> is sorted according to
      * <code>{@link Arrays#sort(int[])}</code>, thus <code>{@link Arrays#binarySearch(int[], int)}</code> can be used to detect if a user
      * holds module access to a certain module (or invoke <code>{@link UserConfiguration#hasModuleAccess(int)}</code>).

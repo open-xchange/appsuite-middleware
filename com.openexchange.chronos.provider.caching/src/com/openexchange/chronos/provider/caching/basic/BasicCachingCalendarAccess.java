@@ -180,44 +180,14 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     @Override
     public final Event getEvent(String eventId, RecurrenceId recurrenceId) throws OXException {
-        //TODO use abstract methods and inner classes for callback that generates the ResponseGenerator
-        ProcessingType type = getProcessingType();
-        if (type == ProcessingType.READ_DB) {
-            return new SingleEventResponseGenerator(this, eventId, recurrenceId).generate();
-        }
-        boolean holdsLock = acquireUpdateLock();
-        try {
-            if (holdsLock) {
-                handle();
-                saveConfig();
-            }
-            return new SingleEventResponseGenerator(this, eventId, recurrenceId).generate();
-        } finally {
-            if (holdsLock) {
-                releaseUpdateLock();
-            }
-        }
+        cache();
+        return new SingleEventResponseGenerator(this, eventId, recurrenceId).generate();
     }
 
     @Override
     public final List<Event> getEvents(List<EventID> eventIDs) throws OXException {
-        //TODO use abstract methods and inner classes for callback that generates the ResponseGenerator
-        ProcessingType type = getProcessingType();
-        if (type == ProcessingType.READ_DB) {
-            return new DedicatedEventsResponseGenerator(this, eventIDs).generate();
-        }
-        boolean holdsLock = acquireUpdateLock();
-        try {
-            if (holdsLock) {
-                handle();
-                saveConfig();
-            }
-            return new DedicatedEventsResponseGenerator(this, eventIDs).generate();
-        } finally {
-            if (holdsLock) {
-                releaseUpdateLock();
-            }
-        }
+        cache();
+        return new DedicatedEventsResponseGenerator(this, eventIDs).generate();
     }
 
     @Override
@@ -226,48 +196,34 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             CachingCalendarUtils.invalidateCache(account);
             saveConfig();
         }
-        //TODO use abstract methods and inner classes for callback that generates the ResponseGenerator
-        ProcessingType type = getProcessingType();
-        if (type == ProcessingType.READ_DB) {
-            return new AccountResponseGenerator(this).generate();
-        }
-        boolean holdsLock = acquireUpdateLock();
-        try {
-            if (holdsLock) {
-                handle();
-                saveConfig();
-            }
-            return new AccountResponseGenerator(this).generate();
-        } finally {
-            if (holdsLock) {
-                releaseUpdateLock();
-            }
-        }
+        cache();
+        return new AccountResponseGenerator(this).generate();
     }
 
     @Override
     public final List<Event> getChangeExceptions(String seriesId) throws OXException {
-        //TODO use abstract methods and inner classes for callback that generates the ResponseGenerator
-        ProcessingType type = getProcessingType();
-        if (type == ProcessingType.READ_DB) {
-            return new ChangeExceptionsResponseGenerator(this, seriesId).generate();
-        }
+        cache();
+        return new ChangeExceptionsResponseGenerator(this, seriesId).generate();
+    }
 
-        boolean holdsLock = acquireUpdateLock();
-        try {
-            if (holdsLock) {
-                handle();
-                saveConfig();
-            }
-            return new ChangeExceptionsResponseGenerator(this, seriesId).generate();
-        } finally {
-            if (holdsLock) {
-                releaseUpdateLock();
+    private void cache() throws OXException {
+        ProcessingType type = getProcessingType();
+        if (type != ProcessingType.READ_DB) {
+            boolean holdsLock = acquireUpdateLock();
+            try {
+                if (holdsLock) {
+                    executeUpdate();
+                    saveConfig();
+                }
+            } finally {
+                if (holdsLock) {
+                    releaseUpdateLock();
+                }
             }
         }
     }
 
-    private void handle() throws OXException {
+    private void executeUpdate() throws OXException {
         CachingHandler cachingHandler = get();
         try {
             ExternalCalendarResult externalCalendarResult = cachingHandler.getExternalEvents();
@@ -507,7 +463,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         if ((null == filters || filters.isEmpty()) && (null == queries || queries.isEmpty())) {
             return getEvents();
         }
-        getEvents();
+        cache();
         return new SearchHandler(calendarSession, account, parameters).searchEvents(filters, queries);
     }
 
@@ -518,7 +474,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      */
     @Override
     public UpdatesResult getUpdatedEvents(long updatedSince) throws OXException {
-        getEvents();
+        cache();
         return new SyncHandler(calendarSession, account, parameters).getUpdatedEvents(updatedSince);
     }
 
@@ -529,7 +485,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      */
     @Override
     public long getSequenceNumber() throws OXException {
-        getEvents();
+        cache();
         return new SyncHandler(calendarSession, account, parameters).getSequenceNumber();
     }
 
@@ -540,7 +496,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      */
     @Override
     public List<Event> resolveResource(String resourceName) throws OXException {
-        getEvents();
+        cache();
         return new SyncHandler(calendarSession, account, parameters).resolveResource(resourceName);
     }
 }
