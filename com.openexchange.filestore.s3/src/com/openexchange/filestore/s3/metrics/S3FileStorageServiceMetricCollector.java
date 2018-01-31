@@ -53,7 +53,7 @@ import java.util.concurrent.TimeUnit;
 import com.amazonaws.metrics.ByteThroughputProvider;
 import com.amazonaws.metrics.ServiceLatencyProvider;
 import com.amazonaws.metrics.ServiceMetricCollector;
-import com.codahale.metrics.Histogram;
+import com.codahale.metrics.Meter;
 import com.openexchange.metrics.MetricRegistryService;
 import com.openexchange.server.ServiceLookup;
 
@@ -65,7 +65,7 @@ import com.openexchange.server.ServiceLookup;
 public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector {
 
     private static final double NANO_PER_SEC = TimeUnit.SECONDS.toNanos(1);
-    private final Histogram throughputMetric;
+    private final Meter throughputMetric;
 
     /**
      * Initialises a new {@link S3FileStorageServiceMetricCollector}.
@@ -73,7 +73,7 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
     public S3FileStorageServiceMetricCollector(String filestoreId, ServiceLookup services) {
         super();
         MetricRegistryService registryService = services.getService(MetricRegistryService.class);
-        throughputMetric = registryService.registerHistogram(this.getClass(), filestoreId + ".throughput");
+        throughputMetric = registryService.registerMeter(this.getClass(), filestoreId + ".throughput");
     }
 
     /*
@@ -83,8 +83,8 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
      */
     @Override
     public void collectByteThroughput(final ByteThroughputProvider provider) {
-        double bytesPerSec = bytesPerSecond(provider.getByteCount(), provider.getDurationNano());
-        throughputMetric.update(new Double(bytesPerSec).longValue());
+        //double bytesPerSec = bytesPerSecond(provider.getByteCount(), provider.getDurationNano());
+        throughputMetric.mark(new Double(provider.getByteCount()).longValue());
     }
 
     /*
