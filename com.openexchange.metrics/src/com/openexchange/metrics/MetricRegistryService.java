@@ -127,7 +127,7 @@ public interface MetricRegistryService {
 
     /**
      * Registers a new {@link Histogram} with the specified name.
-     * If another {@link Historgram} with the same name is already registered
+     * If another {@link Histogram} with the same name is already registered
      * it will be returned instead.
      * 
      * @param histogramName the {@link Histogram}'s name
