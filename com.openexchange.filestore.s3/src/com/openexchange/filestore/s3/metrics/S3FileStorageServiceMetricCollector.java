@@ -71,7 +71,7 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
     public S3FileStorageServiceMetricCollector(String filestoreId, ServiceLookup services) {
         super();
         MetricRegistryService registryService = services.getService(MetricRegistryService.class);
-        throughputMetric = registryService.registerMeter(this.getClass(), filestoreId + ".throughput");
+        throughputMetric = registryService.registerMeter(() -> "s3", filestoreId + ".throughput");
     }
 
     /*

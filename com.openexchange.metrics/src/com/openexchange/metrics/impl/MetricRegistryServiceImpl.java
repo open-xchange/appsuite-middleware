@@ -53,8 +53,9 @@ import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.SharedMetricRegistries;
 import com.codahale.metrics.Timer;
-import com.codahale.metrics.jmx.JmxReporter;
+import com.openexchange.metrics.MetricAware;
 import com.openexchange.metrics.MetricRegistryService;
 
 /**
@@ -64,25 +65,19 @@ import com.openexchange.metrics.MetricRegistryService;
  */
 public class MetricRegistryServiceImpl implements MetricRegistryService {
 
-    private final MetricRegistry metricRegistry;
-    private final JmxReporter jmxReporter;
-
     /**
      * Initialises a new {@link MetricRegistryServiceImpl}.
      */
     public MetricRegistryServiceImpl() {
         super();
-        metricRegistry = new MetricRegistry();
-        
-        jmxReporter = JmxReporter.forRegistry(metricRegistry).inDomain("com.openexchange.metrics").build();
-        jmxReporter.start();
     }
 
     /**
-     * Shutdown the service
+     * Shuts down the service
      */
     public void shutDown() {
-        jmxReporter.stop();
+        // TODO: Shutdown/stop jmx reporters
+        SharedMetricRegistries.clear();
     }
 
     /*
@@ -91,77 +86,46 @@ public class MetricRegistryServiceImpl implements MetricRegistryService {
      * @see com.openexchange.metrics.MetricService#registerMeter(java.lang.String)
      */
     @Override
-    public Meter registerMeter(String meterName) {
-        return metricRegistry.meter(meterName);
+    public Meter registerMeter(MetricAware metricAware, String meterName) {
+        return getOrCreate(metricAware).meter(meterName);
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.metrics.MetricRegistryService#registerMeter(java.lang.Class, java.lang.String)
+     * @see com.openexchange.metrics.MetricRegistryService#registerTimer(com.openexchange.metrics.MetricAware, java.lang.String)
      */
     @Override
-    public <T> Meter registerMeter(Class<T> clazz, String meterName) {
-        return metricRegistry.meter(MetricRegistry.name(clazz, meterName));
+    public Timer registerTimer(MetricAware metricAware, String timerName) {
+        return getOrCreate(metricAware).timer(MetricRegistry.name(timerName));
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.metrics.MetricService#registerTimer(java.lang.String)
+     * @see com.openexchange.metrics.MetricRegistryService#registerGauge(com.openexchange.metrics.MetricAware, java.lang.String, com.codahale.metrics.Gauge)
      */
     @Override
-    public Timer registerTimer(String timerName) {
-        return metricRegistry.timer(timerName);
+    public <V> void registerGauge(MetricAware metricAware, String gaugeName, Gauge<V> gauge) {
+        getOrCreate(metricAware).gauge(MetricRegistry.name(gaugeName), () -> gauge);
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.metrics.MetricRegistryService#registerTimer(java.lang.Class, java.lang.String)
+     * @see com.openexchange.metrics.MetricRegistryService#registerHistogram(com.openexchange.metrics.MetricAware, java.lang.String)
      */
     @Override
-    public <T> Timer registerTimer(Class<T> clazz, String timerName) {
-        return metricRegistry.timer(MetricRegistry.name(clazz, timerName));
+    public Histogram registerHistogram(MetricAware metricAware, String histogramName) {
+        return getOrCreate(metricAware).histogram(MetricRegistry.name(histogramName));
     }
 
-    /*
-     * (non-Javadoc)
+    /**
      * 
-     * @see com.openexchange.metrics.MetricRegistryService#registerGauge(java.lang.String, com.codahale.metrics.Gauge)
+     * @param metricAware
+     * @return
      */
-    @Override
-    public <T> void registerGauge(String gaugeName, Gauge<T> gauge) {
-        metricRegistry.gauge(gaugeName, () -> gauge);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.MetricRegistryService#registerGauge(java.lang.Class, java.lang.String, com.codahale.metrics.Gauge)
-     */
-    @Override
-    public <T, V> void registerGauge(Class<T> clazz, String gaugeName, Gauge<V> gauge) {
-        metricRegistry.gauge(MetricRegistry.name(clazz, gaugeName), () -> gauge);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.MetricRegistryService#registerHistogram(java.lang.String)
-     */
-    @Override
-    public Histogram registerHistogram(String histogramName) {
-        return metricRegistry.histogram(histogramName);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.MetricRegistryService#registerHistogram(java.lang.Class, java.lang.String)
-     */
-    @Override
-    public <T> Histogram registerHistogram(Class<T> clazz, String histogramName) {
-        return metricRegistry.histogram(MetricRegistry.name(clazz, histogramName));
+    private MetricRegistry getOrCreate(MetricAware metricAware) {
+        return SharedMetricRegistries.getOrCreate(metricAware.getComponentName());
     }
 }

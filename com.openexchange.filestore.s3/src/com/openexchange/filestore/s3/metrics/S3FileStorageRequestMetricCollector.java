@@ -85,10 +85,10 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
         Map<HttpMethodName, AtomicLong> ttMap = new HashMap<>();
         MetricRegistryService metricRegistryService = services.getService(MetricRegistryService.class);
         for (HttpMethodName method : HttpMethodName.values()) {
-            duration.put(method, metricRegistryService.registerTimer(this.getClass(), filestoreId + "." + method.name()));
+            duration.put(method, metricRegistryService.registerTimer(() -> "s3", filestoreId + "." + method.name()));
 
             AtomicLong totalTime = new AtomicLong();
-            metricRegistryService.registerGauge(filestoreId + "." + method.name() + ".totalMilliseconds", () -> totalTime.get());
+            metricRegistryService.registerGauge(() -> "s3", filestoreId + "." + method.name() + ".totalMilliseconds", () -> totalTime.get());
             ttMap.put(method, totalTime);
         }
         methodDurationMetrics = Collections.unmodifiableMap(duration);
