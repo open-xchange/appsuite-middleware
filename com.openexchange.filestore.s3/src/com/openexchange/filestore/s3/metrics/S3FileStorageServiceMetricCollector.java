@@ -49,7 +49,6 @@
 
 package com.openexchange.filestore.s3.metrics;
 
-import java.util.concurrent.TimeUnit;
 import com.amazonaws.metrics.ByteThroughputProvider;
 import com.amazonaws.metrics.ServiceLatencyProvider;
 import com.amazonaws.metrics.ServiceMetricCollector;
@@ -64,7 +63,6 @@ import com.openexchange.server.ServiceLookup;
  */
 public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector {
 
-    private static final double NANO_PER_SEC = TimeUnit.SECONDS.toNanos(1);
     private final Meter throughputMetric;
 
     /**
@@ -83,7 +81,6 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
      */
     @Override
     public void collectByteThroughput(final ByteThroughputProvider provider) {
-        //double bytesPerSec = bytesPerSecond(provider.getByteCount(), provider.getDurationNano());
         throughputMetric.mark(new Double(provider.getByteCount()).longValue());
     }
 
@@ -95,22 +92,5 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
     @Override
     public void collectLatency(final ServiceLatencyProvider provider) {
         // no-op
-    }
-
-    /**
-     * Returns the number of bytes per second, given the byte count and
-     * duration in nano seconds. Duration of zero nanosecond will be treated
-     * as 1 nanosecond.
-     */
-    double bytesPerSecond(final double byteCount, double durationNano) {
-        if (byteCount < 0 || durationNano < 0) {
-            throw new IllegalArgumentException("Neither the byte count nor the duration must be negative!");
-        }
-
-        // Defend against division by zero
-        if (durationNano == 0) {
-            durationNano = 1.0;
-        }
-        return (byteCount / durationNano) * NANO_PER_SEC;
     }
 }

@@ -62,73 +62,88 @@ import com.codahale.metrics.Timer;
 public interface MetricRegistryService {
 
     /**
-     * Registers a new {@link Meter} with the specified name
+     * Registers a new {@link Meter} with the specified name. If another
+     * {@link Meter} with the same name is already registered it will be returned
+     * instead.
      * 
      * @param meterName The {@link Meter} name
-     * @return The created {@link Meter}
+     * @return The created {@link Meter} or a pre-existing one
      */
     Meter registerMeter(String meterName);
 
     /**
      * Registers a new {@link Meter} with the specified name and for
-     * the specified {@link Class}
+     * the specified {@link Class}. If another {@link Meter} with the
+     * same name is already registered it will be returned instead.
      * 
      * @param clazz The {@link Class} for which the metric will be registered
      * @param meterName The name of the {@link Meter}
-     * @return The created {@link Meter}
+     * @return The created {@link Meter} or a pre-existing one
      */
     <T> Meter registerMeter(Class<T> clazz, String meterName);
 
     /**
-     * Registers a new {@link Timer} with the specified name
+     * Registers a new {@link Timer} with the specified name. If another
+     * {@link Timer} with the same name is already registered it will be returned
+     * instead.
      * 
      * @param timerName The {@link Timer} name
-     * @return The created {@link Timer}
+     * @return The created {@link Timer} or a pre-existing one
      */
     Timer registerTimer(String timerName);
 
     /**
      * Registers a new {@link Timer} with the specified name and for
-     * the specified {@link Class}
+     * the specified {@link Class}. If another {@link Timer} with the
+     * same name and {@link Class} is already registered it will be
+     * returned instead.
      * 
      * @param clazz The {@link Class} for which the metric will be registered
      * @param timerName The {@link Timer} name
-     * @return The created {@link Timer}
+     * @return The created {@link Timer} or a pre-existing one
      */
     <T> Timer registerTimer(Class<T> clazz, String timerName);
 
     /**
-     * Registers the specified {@link Gauge} with the specified name
+     * Registers the specified {@link Gauge} with the specified name.
+     * If another {@link Gauge} with the same name is already registered
+     * it will be returned instead.
      * 
      * @param gaugeName the {@link Gauge}'s name
-     * @param gauge The {@link Gauge}
+     * @param gauge The {@link Gauge} or a pre-existing one
      */
     <T> void registerGauge(String gaugeName, Gauge<T> gauge);
 
     /**
      * Registers the specified {@link Gauge} with the specified name and {@link Class}
+     * If another {@link Gauge} with the same name and {@link Class} is already registered
+     * it will be returned instead.
      * 
      * @param clazz The {@link Class} for the {@link Gauge}
      * @param gaugeName the {@link Gauge}'s name
-     * @param gauge The {@link Gauge}
+     * @param gauge The {@link Gauge} or a pre-existing one
      */
     <T, V> void registerGauge(Class<T> clazz, String gaugeName, Gauge<V> gauge);
 
     /**
-     * Registers a new {@link Histogram} with the specified name
+     * Registers a new {@link Histogram} with the specified name.
+     * If another {@link Historgram} with the same name is already registered
+     * it will be returned instead.
      * 
      * @param histogramName the {@link Histogram}'s name
-     * @return The created {@link Histogram}
+     * @return The created {@link Histogram} or a pre-existing one
      */
     Histogram registerHistogram(String histogramName);
 
     /**
      * Registers a new {@link Histogram} with the specified name and for
-     * the specified {@link Class}
+     * the specified {@link Class}. If another {@link Histogram} with the
+     * same name and {@link Class} is already registered it will be returned
+     * instead.
      * 
      * @param clazz The {@link Class} for which the metric will be registered
      * @param timerName The {@link Histogram} name
-     * @return The created {@link Histogram}
+     * @return The created {@link Histogram} or a pre-existing one
      */
     <T> Histogram registerHistogram(Class<T> clazz, String histogramName);
 }
