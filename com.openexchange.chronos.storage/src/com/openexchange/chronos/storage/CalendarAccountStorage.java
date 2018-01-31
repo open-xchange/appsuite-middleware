@@ -104,6 +104,15 @@ public interface CalendarAccountStorage {
     CalendarAccount loadAccount(int userId, int accountId) throws OXException;
 
     /**
+     * Loads multiple existing calendar accounts.
+     *
+     * @param userId The identifier of the user to get the account for
+     * @param accountIds The identifiers of the accounts to load
+     * @return The loaded calendar accounts
+     */
+    CalendarAccount[] loadAccounts(int userId, int[] accountIds) throws OXException;
+
+    /**
      * Loads a list of all calendar accounts stored for a specific user.
      *
      * @param userId The identifier of the user to get the accounts for

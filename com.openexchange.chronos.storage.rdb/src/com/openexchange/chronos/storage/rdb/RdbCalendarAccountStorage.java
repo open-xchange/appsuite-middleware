@@ -183,6 +183,26 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
     }
 
     @Override
+    public CalendarAccount[] loadAccounts(int userId, int[] accountIds) throws OXException {
+        if (null == accountIds) {
+            return null;
+        }
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            CalendarAccount[] accounts = new CalendarAccount[accountIds.length];
+            for (int i = 0; i < accountIds.length; i++) {
+                accounts[i] = selectAccount(connection, context.getContextId(), accountIds[i], userId);
+            }
+            return accounts;
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    @Override
     public void deleteAccount(int userId, int accountId) throws OXException {
         int updated = 0;
         Connection connection = null;
