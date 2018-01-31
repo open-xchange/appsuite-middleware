@@ -151,7 +151,6 @@ import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.DataHandlerWrapper;
 import com.openexchange.mail.mime.converters.FileBackedMimeBodyPart;
-import com.openexchange.mail.mime.converters.FileBackedMimeMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailPart;
 import com.openexchange.mail.mime.datasource.FileDataSource;
@@ -2590,30 +2589,9 @@ public final class MimeMessageUtility {
             File tempFile = sink.getTempFile();
             MimeMessage tmp;
             if (null == tempFile) {
-                tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream()) {
-
-                    @Override
-                    public Date getReceivedDate() throws MessagingException {
-                        if (null != optReceivedDate) {
-                            return optReceivedDate;
-                        }
-
-                        return retainDate ? getSentDate() : super.getReceivedDate();
-                    }
-                };
+                tmp = new InMemoryMimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream(), optReceivedDate, retainDate);
             } else {
-                tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, optReceivedDate) {
-
-                    @Override
-                    public Date getReceivedDate() throws MessagingException {
-                        Date optReceivedDate = super.getReceivedDate();
-                        if (null != optReceivedDate) {
-                            return optReceivedDate;
-                        }
-
-                        return retainDate ? getSentDate() : super.getReceivedDate();
-                    }
-                };
+                tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, optReceivedDate, retainDate);
             }
             closeSink = false;
             return tmp;
@@ -2720,15 +2698,9 @@ public final class MimeMessageUtility {
             File tempFile = sink.getTempFile();
             MimeMessage tmp;
             if (null == tempFile) {
-                tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream()) {
-
-                    @Override
-                    public Date getReceivedDate() throws MessagingException {
-                        return null == optReceivedDate ? super.getReceivedDate() : optReceivedDate;
-                    }
-                };
+                tmp = new InMemoryMimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream(), optReceivedDate, false);
             } else {
-                tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, optReceivedDate);
+                tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, optReceivedDate, false);
             }
             closeSink = false;
             return tmp;
@@ -2991,16 +2963,9 @@ public final class MimeMessageUtility {
             File tempFile = sink.getTempFile();
             MimeMessage tmp;
             if (null == tempFile) {
-                tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream()) {
-
-                    @Override
-                    public Date getReceivedDate() throws MessagingException {
-                        return msg.getReceivedDate();
-                    }
-                };
+                tmp = new InMemoryMimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream(), msg.getReceivedDate(), false);
             } else {
-                FileBackedMimeMessage fbm = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, msg.getReceivedDate());
-                tmp = fbm;
+                tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, msg.getReceivedDate(), false);
             }
             closeSink = false;
             return tmp;
@@ -3022,6 +2987,47 @@ public final class MimeMessageUtility {
             }
         }
     }
+
+    private static final class FileBackedMimeMessage extends com.openexchange.mail.mime.converters.FileBackedMimeMessage {
+
+        private final boolean retainDate;
+
+        FileBackedMimeMessage(javax.mail.Session session, File tempFile, Date receivedDate, boolean retainDate) throws MessagingException, IOException {
+            super(session, tempFile, receivedDate);
+            this.retainDate = retainDate;
+        }
+
+        @Override
+        public Date getReceivedDate() throws MessagingException {
+            Date optReceivedDate = super.getReceivedDate();
+            if (null != optReceivedDate) {
+                return optReceivedDate;
+            }
+
+            return retainDate ? getSentDate() : super.getReceivedDate();
+        }
+    } // End of class FileBackedMimeMessage
+
+    private static final class InMemoryMimeMessage extends MimeMessage {
+
+        private final Date optReceivedDate;
+        private final boolean retainDate;
+
+        InMemoryMimeMessage(javax.mail.Session session, InputStream is, Date optReceivedDate, boolean retainDate) throws MessagingException {
+            super(session, is);
+            this.optReceivedDate = optReceivedDate;
+            this.retainDate = retainDate;
+        }
+
+        @Override
+        public Date getReceivedDate() throws MessagingException {
+            if (null != optReceivedDate) {
+                return optReceivedDate;
+            }
+
+            return retainDate ? getSentDate() : super.getReceivedDate();
+        }
+    } // End of class InMemoryMimeMessage
 
     /**
      * The special poison address that denies a message being sent via
