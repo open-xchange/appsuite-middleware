@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -61,6 +62,7 @@ import org.json.JSONException;
 import org.json.JSONInputStream;
 import org.json.JSONObject;
 import com.openexchange.caching.CacheService;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.DefaultCalendarAccount;
 import com.openexchange.chronos.storage.CalendarAccountStorage;
@@ -118,6 +120,15 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
         super(context, dbProvider, txPolicy);
     }
 
+    /**
+     * Gets the underlying transaction policy.
+     *
+     * @return The transaction policy
+     */
+    public DBTransactionPolicy getTransactionPolicy() {
+        return txPolicy;
+    }
+
     @Override
     public int nextId() throws OXException {
         int value;
@@ -154,13 +165,22 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
     }
 
     @Override
-    public void updateAccount(CalendarAccount account) throws OXException {
+    public void updateAccount(CalendarAccount account, long clientTimestamp) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated = updateAccount(connection, context.getContextId(), account);
+            updated = updateAccount(connection, context.getContextId(), account, clientTimestamp);
+            if (0 == updated) {
+                CalendarAccount storedAccount = selectAccount(connection, context.getContextId(), account.getAccountId(), account.getUserId());
+                if (null == storedAccount) {
+                    throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(I(account.getAccountId()));
+                }
+                if (storedAccount.getLastModified().getTime() > clientTimestamp) {
+                    throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(storedAccount.getAccountId()), clientTimestamp, storedAccount.getLastModified().getTime());
+                }
+            }
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e);
@@ -183,12 +203,41 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
     }
 
     @Override
-    public void deleteAccount(int userId, int accountId) throws OXException {
+    public CalendarAccount[] loadAccounts(int userId, int[] accountIds) throws OXException {
+        if (null == accountIds) {
+            return null;
+        }
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            CalendarAccount[] accounts = new CalendarAccount[accountIds.length];
+            for (int i = 0; i < accountIds.length; i++) {
+                accounts[i] = selectAccount(connection, context.getContextId(), accountIds[i], userId);
+            }
+            return accounts;
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    @Override
+    public void deleteAccount(int userId, int accountId, long clientTimestamp) throws OXException {
         int updated = 0;
         Connection connection = null;
         try {
             connection = dbProvider.getWriteConnection(context);
-            updated = deleteAccount(connection, context.getContextId(), accountId, userId);
+            updated = deleteAccount(connection, context.getContextId(), accountId, userId, clientTimestamp);
+            if (0 == updated) {
+                CalendarAccount storedAccount = selectAccount(connection, context.getContextId(), accountId, userId);
+                if (null == storedAccount) {
+                    throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(I(accountId));
+                }
+                if (storedAccount.getLastModified().getTime() > clientTimestamp) {
+                    throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(storedAccount.getAccountId()), clientTimestamp, storedAccount.getLastModified().getTime());
+                }
+            }
         } catch (SQLException e) {
             throw asOXException(e);
         } finally {
@@ -252,7 +301,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
                 stmt.setInt(2, account.getAccountId());
                 stmt.setString(3, account.getProviderId());
                 stmt.setInt(4, account.getUserId());
-                stmt.setLong(5, account.getLastModified().getTime());
+                stmt.setLong(5, System.currentTimeMillis());
                 stmt.setBinaryStream(6, internalConfigStream);
                 stmt.setBinaryStream(7, userConfigStream);
                 return logExecuteUpdate(stmt);
@@ -262,7 +311,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
         }
     }
 
-    private static int updateAccount(Connection connection, int cid, CalendarAccount account) throws SQLException, OXException {
+    private static int updateAccount(Connection connection, int cid, CalendarAccount account, long clientTimestamp) throws SQLException, OXException {
         StringBuilder stringBuilder = new StringBuilder("UPDATE calendar_account SET modified=?");
         JSONObject internalConfig = account.getInternalConfiguration();
         JSONObject userConfig = account.getUserConfiguration();
@@ -272,7 +321,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
         if (null != userConfig) {
             stringBuilder.append(",userConfig=?");
         }
-        stringBuilder.append(" WHERE cid=? AND id=? AND user=?;");
+        stringBuilder.append(" WHERE cid=? AND id=? AND user=? AND modified<=?;");
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             InputStream internalConfigStream = null;
@@ -280,7 +329,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
             try {
                 internalConfigStream = null != internalConfig ? serialize(internalConfig) : null;
                 userConfigStream = null != userConfig ? serialize(userConfig) : null;
-                stmt.setLong(parameterIndex++, account.getLastModified().getTime());
+                stmt.setLong(parameterIndex++, System.currentTimeMillis());
                 if (null != internalConfigStream) {
                     stmt.setBinaryStream(parameterIndex++, internalConfigStream);
                 }
@@ -290,6 +339,7 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
                 stmt.setInt(parameterIndex++, cid);
                 stmt.setInt(parameterIndex++, account.getAccountId());
                 stmt.setInt(parameterIndex++, account.getUserId());
+                stmt.setLong(parameterIndex++, clientTimestamp);
                 return logExecuteUpdate(stmt);
             } finally {
                 Streams.close(internalConfigStream, userConfigStream);
@@ -297,12 +347,13 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
         }
     }
 
-    private static int deleteAccount(Connection connection, int cid, int id, int user) throws SQLException, OXException {
-        String sql = "DELETE FROM calendar_account WHERE cid=? AND id=? AND user=?;";
+    private static int deleteAccount(Connection connection, int cid, int id, int user, long clientTimestamp) throws SQLException, OXException {
+        String sql = "DELETE FROM calendar_account WHERE cid=? AND id=? AND user=? AND modified<=?;";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, cid);
             stmt.setInt(2, id);
             stmt.setInt(3, user);
+            stmt.setLong(4, clientTimestamp);
             return logExecuteUpdate(stmt);
         }
     }

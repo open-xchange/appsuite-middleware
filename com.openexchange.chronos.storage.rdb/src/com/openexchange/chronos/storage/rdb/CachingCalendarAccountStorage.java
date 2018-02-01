@@ -50,6 +50,7 @@
 package com.openexchange.chronos.storage.rdb;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,6 +64,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.DefaultCalendarAccount;
 import com.openexchange.chronos.storage.CalendarAccountStorage;
+import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 
 
@@ -109,19 +111,22 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
     }
 
     @Override
-    public void updateAccount(CalendarAccount account) throws OXException {
-        delegate.updateAccount(account);
+    public void updateAccount(CalendarAccount account, long clientTimestamp) throws OXException {
+        delegate.updateAccount(account, clientTimestamp);
         invalidateAccount(account.getUserId(), account.getAccountId());
     }
 
     @Override
-    public void deleteAccount(int userId, int accountId) throws OXException {
-        delegate.deleteAccount(userId, accountId);
+    public void deleteAccount(int userId, int accountId, long clientTimestamp) throws OXException {
+        delegate.deleteAccount(userId, accountId, clientTimestamp);
         invalidateAccount(userId, accountId);
     }
 
     @Override
     public CalendarAccount loadAccount(int userId, int accountId) throws OXException {
+        if (bypassCache()) {
+            return delegate.loadAccount(userId, accountId);
+        }
         CacheKey key = getAccountKey(userId, accountId);
         CalendarAccount account = optClonedAccount(cache.get(key));
         if (null == account) {
@@ -134,7 +139,43 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
     }
 
     @Override
+    public CalendarAccount[] loadAccounts(int userId, int[] accountIds) throws OXException {
+        if (bypassCache()) {
+            return delegate.loadAccounts(userId, accountIds);
+        }
+        List<Integer> accountsToLoad = new ArrayList<Integer>(accountIds.length);
+        CalendarAccount[] accounts = new CalendarAccount[accountIds.length];
+        for (int i = 0; i < accountIds.length; i++) {
+            CacheKey key = getAccountKey(userId, accountIds[i]);
+            CalendarAccount account = optClonedAccount(cache.get(key));
+            if (null == account) {
+                accountsToLoad.add(I(accountIds[i]));
+            } else {
+                accounts[i] = account;
+            }
+        }
+        if (0 < accountsToLoad.size()) {
+            for (CalendarAccount account : delegate.loadAccounts(userId, I2i(accountsToLoad))) {
+                if (null == account) {
+                    continue;
+                }
+                cache.put(getAccountKey(userId, account.getAccountId()), clone(account), false);
+                for (int i = 0; i < accountIds.length; i++) {
+                    if (accountIds[i] == account.getAccountId()) {
+                        accounts[i] = account;
+                        break;
+                    }
+                }
+            }
+        }
+        return accounts;
+    }
+
+    @Override
     public List<CalendarAccount> loadAccounts(int userId) throws OXException {
+        if (bypassCache()) {
+            return delegate.loadAccounts(userId);
+        }
         /*
          * try and get accounts via cached account id list fro user
          */
@@ -142,13 +183,12 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
         int[] accountIds = optClonedAccountIds(cache.get(accountIdsKey));
         if (null != accountIds) {
             List<CalendarAccount> accounts = new ArrayList<CalendarAccount>(accountIds.length);
-            for (int accountId : accountIds) {
-                CalendarAccount account = loadAccount(userId, accountId);
+            for (CalendarAccount account : loadAccounts(userId, accountIds)) {
                 if (null == account) {
                     /*
                      * stale reference in cached user's account list, invalidate & try again
                      */
-                    LOG.warn("Detected stale reference {} in account list for user {} in context {}, invalidating cache.", I(accountId), I(userId), I(contextId));
+                    LOG.warn("Detected stale reference in account list for user {} in context {}, invalidating cache.", I(userId), I(contextId));
                     cache.remove(accountIdsKey);
                     return loadAccounts(userId);
                 }
@@ -198,6 +238,10 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
 
     private CacheKey getAccountIdsKey(int userId) {
         return cacheService.newCacheKey(contextId, userId);
+    }
+
+    private boolean bypassCache() {
+        return DBTransactionPolicy.NO_TRANSACTIONS.equals(delegate.getTransactionPolicy());
     }
 
     private static CalendarAccount optClonedAccount(Object cachedAccount) throws OXException {

@@ -363,12 +363,12 @@ public class CalendarFolderStorage implements FolderStorage {
 
     @Override
     public String[] getDeletedFolderIDs(String treeId, Date timeStamp, StorageParameters storageParameters) throws OXException {
-        throw new UnsupportedOperationException("CalendarFolderStorage.getDeletedFolderIDs()");
+        return new String[0];
     }
 
     @Override
     public String[] getModifiedFolderIDs(String treeId, Date timeStamp, ContentType[] includeContentTypes, StorageParameters storageParameters) throws OXException {
-        throw new UnsupportedOperationException("CalendarFolderStorage.getModifiedFolderIDs()");
+        return new String[0];
     }
 
     /**

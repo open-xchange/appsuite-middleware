@@ -49,7 +49,7 @@
 package com.openexchange.chronos.provider.caching.internal;
 
 /**
- * 
+ *
  * {@link CachingCalendarAccessConstants}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -76,4 +76,10 @@ public final class CachingCalendarAccessConstants {
      * The key for persisting the information about a current lock
      */
     public static final String LOCKED_FOR_UPDATE_UNTIL = "lockedForUpdateUntil";
+
+    /**
+     * The key for persisting the information about who owns the current lock
+     */
+    public static final String LOCKED_FOR_UPDATE_BY = "lockedForUpdateBy";
+
 }

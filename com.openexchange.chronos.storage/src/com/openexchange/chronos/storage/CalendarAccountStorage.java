@@ -83,16 +83,18 @@ public interface CalendarAccountStorage {
      * Updates an existing calendar account.
      *
      * @param account The account data to update
+     * @param clientTimestamp The last timestamp known by the client to catch concurrent updates
      */
-    void updateAccount(CalendarAccount account) throws OXException;
+    void updateAccount(CalendarAccount account, long clientTimestamp) throws OXException;
 
     /**
      * Deletes an existing calendar account.
      *
      * @param userId The identifier of the user to delete the account for
      * @param accountId The identifier of the account to delete
+     * @param clientTimestamp The last timestamp known by the client to catch concurrent updates
      */
-    void deleteAccount(int userId, int accountId) throws OXException;
+    void deleteAccount(int userId, int accountId, long clientTimestamp) throws OXException;
 
     /**
      * Loads an existing calendar account.
@@ -102,6 +104,15 @@ public interface CalendarAccountStorage {
      * @return The loaded calendar account, or <code>null</code> if not found
      */
     CalendarAccount loadAccount(int userId, int accountId) throws OXException;
+
+    /**
+     * Loads multiple existing calendar accounts.
+     *
+     * @param userId The identifier of the user to get the account for
+     * @param accountIds The identifiers of the accounts to load
+     * @return The loaded calendar accounts
+     */
+    CalendarAccount[] loadAccounts(int userId, int[] accountIds) throws OXException;
 
     /**
      * Loads a list of all calendar accounts stored for a specific user.

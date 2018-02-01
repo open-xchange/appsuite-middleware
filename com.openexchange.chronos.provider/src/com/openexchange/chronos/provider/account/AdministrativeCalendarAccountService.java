@@ -108,9 +108,9 @@ public interface AdministrativeCalendarAccountService {
      * @param id The identifier of the account to update
      * @param internalConfig The provider-specific <i>internal</i> configuration data for the calendar account, or <code>null</code> to skip
      * @param userConfig The provider-specific <i>user</i> configuration data for the calendar account, or <code>null</code> to skip
-     * @param timestamp The last-known timestamp of the account to catch concurrent modifications, or {@link CalendarUtils#DISTANT_FUTURE} to circumvent the check
+     * @param clientTimestamp The last-known timestamp of the account to catch concurrent modifications, or {@link CalendarUtils#DISTANT_FUTURE} to circumvent the check
      * @return The updated calendar account
      */
-    CalendarAccount updateAccount(int contextId, int userId, int id, JSONObject internalConfig, JSONObject userConfig, long timestamp) throws OXException;
+    CalendarAccount updateAccount(int contextId, int userId, int id, JSONObject internalConfig, JSONObject userConfig, long clientTimestamp) throws OXException;
 
 }

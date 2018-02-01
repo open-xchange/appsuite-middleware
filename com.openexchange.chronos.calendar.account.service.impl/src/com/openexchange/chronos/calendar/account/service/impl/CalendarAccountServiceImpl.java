@@ -79,11 +79,14 @@ import com.openexchange.chronos.provider.folder.FolderCalendarProvider;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.storage.CalendarAccountStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -218,22 +221,16 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
     }
 
     @Override
-    public void deleteAccount(Session session, int id, long timestamp, CalendarParameters parameters) throws OXException {
+    public void deleteAccount(Session session, int id, long clientTimestamp, CalendarParameters parameters) throws OXException {
         /*
          * get & check stored calendar account
          */
-        CalendarAccount storedAccount = new OSGiCalendarStorageOperation<CalendarAccount>(services, session.getContextId(), -1) {
-
-            @Override
-            protected CalendarAccount call(CalendarStorage storage) throws OXException {
-                return storage.getAccountStorage().loadAccount(session.getUserId(), id);
-            }
-        }.executeQuery();
+        CalendarAccount storedAccount = getAccount(session, id, parameters);
         if (null == storedAccount) {
             throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(id);
         }
-        if (null != storedAccount.getLastModified() && storedAccount.getLastModified().getTime() > timestamp) {
-            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(id), timestamp, storedAccount.getLastModified().getTime());
+        if (null != storedAccount.getLastModified() && storedAccount.getLastModified().getTime() > clientTimestamp) {
+            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(id), clientTimestamp, storedAccount.getLastModified().getTime());
         }
         CalendarProvider calendarProvider = getProviderRegistry().getCalendarProvider(storedAccount.getProviderId());
         if (null != calendarProvider && AutoProvisioningCalendarProvider.class.isInstance(calendarProvider)) {
@@ -250,10 +247,10 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
             @Override
             protected Void call(CalendarStorage storage) throws OXException {
                 CalendarAccount account = storage.getAccountStorage().loadAccount(session.getUserId(), id);
-                if (null != account.getLastModified() && account.getLastModified().getTime() > timestamp) {
-                    throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(id), timestamp, account.getLastModified().getTime());
+                if (null != account.getLastModified() && account.getLastModified().getTime() > clientTimestamp) {
+                    throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(id), clientTimestamp, account.getLastModified().getTime());
                 }
-                storage.getAccountStorage().deleteAccount(session.getUserId(), id);
+                storage.getAccountStorage().deleteAccount(session.getUserId(), id, clientTimestamp);
                 return null;
             }
         }.executeUpdate();
@@ -276,17 +273,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
 
     @Override
     public List<CalendarAccount> getAccounts(Session session, int[] ids, CalendarParameters parameters) throws OXException {
-        CalendarAccount[] storedAccounts = new OSGiCalendarStorageOperation<CalendarAccount[]>(services, session.getContextId(), -1, parameters) {
-
-            @Override
-            protected CalendarAccount[] call(CalendarStorage storage) throws OXException {
-                CalendarAccount[] accounts = new CalendarAccount[ids.length];
-                for (int i = 0; i < ids.length; i++) {
-                    accounts[i] = storage.getAccountStorage().loadAccount(session.getUserId(), ids[i]);
-                }
-                return accounts;
-            }
-        }.executeQuery();
+        CalendarAccount[] storedAccounts = initAccountStorage(session.getContextId()).loadAccounts(session.getUserId(), ids);
         for (int i = 0; i < storedAccounts.length; i++) {
             if (null == storedAccounts[i] && CalendarAccount.DEFAULT_ACCOUNT.getAccountId() == ids[i]) {
                 if (isGuest(session)) {
@@ -357,38 +344,20 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
 
     @Override
     public List<CalendarAccount> getAccounts(int contextId, int userId) throws OXException {
-        return sort(new OSGiCalendarStorageOperation<List<CalendarAccount>>(services, contextId, -1) {
-
-            @Override
-            protected List<CalendarAccount> call(CalendarStorage storage) throws OXException {
-                return storage.getAccountStorage().loadAccounts(userId);
-            }
-        }.executeQuery());
+        return sort(initAccountStorage(contextId).loadAccounts(userId));
     }
 
     @Override
     public List<CalendarAccount> getAccounts(int contextId, int[] userIds, String providerId) throws OXException {
-        return sort(new OSGiCalendarStorageOperation<List<CalendarAccount>>(services, contextId, -1) {
-
-            @Override
-            protected List<CalendarAccount> call(CalendarStorage storage) throws OXException {
-                return storage.getAccountStorage().loadAccounts(userIds, providerId);
-            }
-        }.executeQuery());
+        return sort(initAccountStorage(contextId).loadAccounts(userIds, providerId));
     }
 
     @Override
     public CalendarAccount getAccount(int contextId, int userId, String providerId) throws OXException {
-        return new OSGiCalendarStorageOperation<CalendarAccount>(services, contextId, -1) {
-
-            @Override
-            protected CalendarAccount call(CalendarStorage storage) throws OXException {
-                if (CalendarAccount.DEFAULT_ACCOUNT.getProviderId().equals(providerId)) {
-                    return storage.getAccountStorage().loadAccount(userId, CalendarAccount.DEFAULT_ACCOUNT.getAccountId());
-                }
-                return storage.getAccountStorage().loadAccount(userId, providerId);
-            }
-        }.executeQuery();
+        if (CalendarAccount.DEFAULT_ACCOUNT.getProviderId().equals(providerId)) {
+            return initAccountStorage(contextId).loadAccount(userId, CalendarAccount.DEFAULT_ACCOUNT.getAccountId());
+        }
+        return initAccountStorage(contextId).loadAccount(userId, providerId);
     }
 
     @Override
@@ -405,12 +374,9 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
                 if (null != account.getLastModified() && account.getLastModified().getTime() > clientTimestamp) {
                     throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(accountId), clientTimestamp, account.getLastModified().getTime());
                 }
-                Date now = new Date();
-                CalendarAccount accountUpdate = new DefaultCalendarAccount(account.getProviderId(), account.getAccountId(), account.getUserId(), internalConfig, userConfig, now);
-                storage.getAccountStorage().updateAccount(accountUpdate);
-                return new DefaultCalendarAccount(account.getProviderId(), account.getAccountId(), account.getUserId(),
-                    null != internalConfig ? internalConfig : account.getInternalConfiguration(),
-                    null != userConfig ? userConfig : account.getUserConfiguration(), now);
+                CalendarAccount accountUpdate = new DefaultCalendarAccount(account.getProviderId(), account.getAccountId(), account.getUserId(), internalConfig, userConfig, new Date());
+                storage.getAccountStorage().updateAccount(accountUpdate, clientTimestamp);
+                return storage.getAccountStorage().loadAccount(userId, accountId);
             }
         }.executeUpdate();
         invalidateStorage(contextId, userId, accountId);
@@ -482,9 +448,8 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         } else {
             accountId = storage.nextId();
         }
-        DefaultCalendarAccount account = new DefaultCalendarAccount(providerId, accountId, userId, internalConfig, userConfig, new Date());
-        storage.insertAccount(account);
-        return account;
+        storage.insertAccount(new DefaultCalendarAccount(providerId, accountId, userId, internalConfig, userConfig, new Date()));
+        return storage.loadAccount(userId, accountId);
     }
 
     private CalendarProvider getProvider(String providerId) throws OXException {
@@ -501,6 +466,18 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
             throw ServiceExceptionCode.absentService(CalendarProviderRegistry.class);
         }
         return providerRegistry;
+    }
+
+    /**
+     * Initializes the calendar account storage for a specific context with default settings, i.e. no special transaction policy.
+     *
+     * @param contextId The context identifier
+     * @return The account storage
+     */
+    private CalendarAccountStorage initAccountStorage(int contextId) throws OXException {
+        Context context = requireService(ContextService.class, services).getContext(contextId);
+        CalendarStorage storage = requireService(CalendarStorageFactory.class, services).create(context, -1, null);
+        return storage.getAccountStorage();
     }
 
     private static CalendarAccount find(Collection<CalendarAccount> accounts, String providerId) {
@@ -524,14 +501,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
     }
 
     private void invalidateStorage(int contextId, int userId, int accountId) throws OXException {
-        new OSGiCalendarStorageOperation<Void>(services, contextId, -1) {
-
-            @Override
-            protected Void call(CalendarStorage storage) throws OXException {
-                storage.getAccountStorage().invalidateAccount(contextId, accountId);
-                return null;
-            }
-        }.executeQuery();
+        initAccountStorage(contextId).invalidateAccount(userId, accountId);
     }
 
     private int getMaxAccounts(CalendarProvider provider, int contextId, int userId) throws OXException {

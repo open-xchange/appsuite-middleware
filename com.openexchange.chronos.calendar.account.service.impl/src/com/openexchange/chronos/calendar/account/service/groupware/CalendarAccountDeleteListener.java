@@ -54,6 +54,7 @@ import java.sql.Connection;
 import java.util.List;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.calendar.account.service.impl.CalendarAccountServiceImpl;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -112,7 +113,7 @@ public class CalendarAccountDeleteListener implements DeleteListener {
             /*
              * delete account data from storage, then let provider perform any additional cleanup tasks
              */
-            calendarStorage.getAccountStorage().deleteAccount(storedAccount.getUserId(), storedAccount.getAccountId());
+            calendarStorage.getAccountStorage().deleteAccount(storedAccount.getUserId(), storedAccount.getAccountId(), CalendarUtils.DISTANT_FUTURE);
             CalendarProvider calendarProvider = providerRegistry.getCalendarProvider(storedAccount.getProviderId());
             if (null == calendarProvider) {
                 LoggerFactory.getLogger(CalendarAccountServiceImpl.class).warn("Provider '{}' not available, skipping additional cleanup tasks for deleted account {}.",
