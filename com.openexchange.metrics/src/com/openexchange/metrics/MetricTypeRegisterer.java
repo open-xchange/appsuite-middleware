@@ -60,5 +60,15 @@ import com.codahale.metrics.MetricRegistry.MetricSupplier;
  */
 public interface MetricTypeRegisterer {
 
+    /**
+     * Registers the a {@link Metric} with the specified name in the specified {@link MetricRegistry}
+     * and with the specified (optional) {@link MetricSupplier}. If another {@link Metric} with the same
+     * specification (name + metric supplier) already exists, then that {@link Metric} will be returned instead.
+     * 
+     * @param name The name of the {@link Metric}
+     * @param metricRegistry The {@link MetricRegistry}
+     * @param metricSupplier The optional {@link MetricSupplier}
+     * @return The created {@link Metric} or a pre-existing one
+     */
     Metric register(String name, MetricRegistry metricRegistry, MetricSupplier<? extends Metric> metricSupplier);
 }

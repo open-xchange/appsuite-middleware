@@ -75,6 +75,7 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
     /**
      * Initialises a new {@link MetricCollectorRegistryImpl}.
      */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public MetricCollectorRegistryImpl() {
         super();
         registerers = new HashMap<>();
@@ -99,6 +100,7 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
             registerers.get(metadata.getMetricType()).register(metadata.getMetricName(), metricRegistry, metadata.getMetricSupplier());
         }
 
+        // TODO: implement JMX Reporter
         JmxReporter reporter = JmxReporter.forRegistry(metricRegistry).inDomain("com.openexchange.metrics." + metricCollector.getComponentName()).build();
         reporter.start();
     }

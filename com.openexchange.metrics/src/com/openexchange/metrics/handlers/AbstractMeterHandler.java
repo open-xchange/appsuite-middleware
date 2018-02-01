@@ -47,23 +47,35 @@
  *
  */
 
-package com.openexchange.metrics;
+package com.openexchange.metrics.handlers;
 
+import com.codahale.metrics.Meter;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link MetricWrapperExecutor}
+ * {@link AbstractMeterHandler}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface MetricWrapperExecutor<M> {
+public abstract class AbstractMeterHandler extends AbstractMetricHandler implements MetricWrapperExecutor<Meter> {
 
     /**
-     * Wraps the operation that needs to be executed and measured
-     * 
-     * @param metric
-     * @return
-     * @throws OXException
+     * Initialises a new {@link AbstractMeterHandler}.
      */
-    <T> T execute(M metric) throws OXException;
+    public AbstractMeterHandler() {
+        super();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.MetricWrapperExecutor#execute(java.lang.Object)
+     */
+    @Override
+    public <T> T execute(Meter meter) throws OXException {
+        if (meter != null) {
+            meter.mark();
+        }
+        return call();
+    }
 }

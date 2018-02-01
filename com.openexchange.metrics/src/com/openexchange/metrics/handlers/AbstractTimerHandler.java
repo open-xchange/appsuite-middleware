@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.metrics;
+package com.openexchange.metrics.handlers;
 
 import com.codahale.metrics.Timer;
 import com.openexchange.exception.OXException;

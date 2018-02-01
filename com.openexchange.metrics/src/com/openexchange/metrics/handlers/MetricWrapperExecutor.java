@@ -47,63 +47,24 @@
  *
  */
 
-package com.openexchange.metrics;
+package com.openexchange.metrics.handlers;
 
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.Timer;
+import com.codahale.metrics.Metric;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link MetricRegistryService}
+ * {@link MetricWrapperExecutor}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface MetricRegistryService {
+public interface MetricWrapperExecutor<M extends Metric> {
 
     /**
-     * Registers a new {@link Meter} with the specified name for the specified component.
-     * If another {@link Meter} is already registered with the same name and for the same
-     * component it will be returned instead.
+     * Wraps the operation that needs to be executed and measured
      * 
-     * @param componentName The name of the component for which to utilise the {@link Meter}
-     * @param meterName The {@link Meter}'s name
-     * @return The created {@link Meter} or a pre-existing one
+     * @param metric The {@link Metric} to execute
+     * @return The outcome of the operation
+     * @throws OXException if an error is occurred
      */
-    Meter registerMeter(MetricAware metricAware, String meterName);
-
-    /**
-     * Registers a new {@link Timer} with the specified name and for
-     * the specified {@link Class}. If another {@link Timer} with the
-     * same name and {@link Class} is already registered it will be
-     * returned instead.
-     * 
-     * @param clazz The {@link Class} for which the metric will be registered
-     * @param timerName The {@link Timer} name
-     * @return The created {@link Timer} or a pre-existing one
-     */
-    Timer registerTimer(MetricAware metricAware, String timerName);
-
-    /**
-     * Registers the specified {@link Gauge} with the specified name and {@link Class}
-     * If another {@link Gauge} with the same name and {@link Class} is already registered
-     * it will be returned instead.
-     * 
-     * @param clazz The {@link Class} for the {@link Gauge}
-     * @param gaugeName the {@link Gauge}'s name
-     * @param gauge The {@link Gauge} or a pre-existing one
-     */
-    <V> void registerGauge(MetricAware metricAware, String gaugeName, Gauge<V> gauge);
-
-    /**
-     * Registers a new {@link Histogram} with the specified name and for
-     * the specified {@link Class}. If another {@link Histogram} with the
-     * same name and {@link Class} is already registered it will be returned
-     * instead.
-     * 
-     * @param clazz The {@link Class} for which the metric will be registered
-     * @param timerName The {@link Histogram} name
-     * @return The created {@link Histogram} or a pre-existing one
-     */
-    Histogram registerHistogram(MetricAware metricAware, String histogramName);
+    <T> T execute(M metric) throws OXException;
 }
