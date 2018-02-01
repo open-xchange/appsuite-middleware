@@ -133,12 +133,11 @@ public interface CalendarAccountService {
      *
      * @param session The current user session
      * @param id The identifier of the account to delete
-     * @param timestamp The timestamp that specifies the last modification of the account
-     * @param parameters Additional calendar parameters, or <code>null</code> if not set
+     * @param clientTimestamp The last timestamp known by the client to catch concurrent updates
      * @param parameters Additional calendar parameters, or <code>null</code> if not set
      * @throws OXException if permission check fails
      */
-    void deleteAccount(Session session, int id, long timestamp, CalendarParameters parameters) throws OXException;
+    void deleteAccount(Session session, int id, long clientTimestamp, CalendarParameters parameters) throws OXException;
 
     /**
      * Gets an existing calendar account.

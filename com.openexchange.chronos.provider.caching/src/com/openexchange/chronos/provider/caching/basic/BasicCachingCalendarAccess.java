@@ -348,26 +348,39 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
          * check if an update is already in progress
          */
         long lockedUntil = caching.optLong(CachingCalendarAccessConstants.LOCKED_FOR_UPDATE_UNTIL, 0L);
+        String lockedBy = caching.optString(CachingCalendarAccessConstants.LOCKED_FOR_UPDATE_BY, null);
         if (lockedUntil > now) {
-            LOG.debug("Account {} is already locked until {}, aborting lock acquisition.", I(account.getAccountId()), L(lockedUntil));
+            LOG.debug("Account {} is already locked until {} by {}, aborting lock acquisition.", I(account.getAccountId()), L(lockedUntil), lockedBy);
             return false;
         }
         /*
          * no running update detected, try entering exclusive update and persist lock for 10 minutes in account config
          */
+        lockedBy = Thread.currentThread().getName();
         lockedUntil = now + TimeUnit.MINUTES.toMillis(10);
         caching.putSafe(CachingCalendarAccessConstants.LOCKED_FOR_UPDATE_UNTIL, L(lockedUntil));
+        caching.putSafe(CachingCalendarAccessConstants.LOCKED_FOR_UPDATE_BY, lockedBy);
         AdministrativeCalendarAccountService accountService = Services.getService(AdministrativeCalendarAccountService.class);
         try {
             account = accountService.updateAccount(calendarSession.getContextId(), calendarSession.getUserId(), account.getAccountId(), internalConfig, null, account.getLastModified().getTime());
-            LOG.debug("Successfully acquired and persisted lock for account {} until {}.", I(account.getAccountId()), L(lockedUntil));
-            return true;
+            caching = account.getInternalConfiguration().optJSONObject(CachingCalendarAccessConstants.CACHING);
+            if (null == caching) {
+                return false;
+            }
+            String actualLockedBy = caching.optString(CachingCalendarAccessConstants.LOCKED_FOR_UPDATE_BY, null);
+            long actualLockedUntil = caching.optLong(CachingCalendarAccessConstants.LOCKED_FOR_UPDATE_UNTIL, 0L);
+            if (lockedBy.equals(actualLockedBy) && actualLockedUntil == lockedUntil) {
+                LOG.debug("Successfully acquired and persisted lock for account {} until {}.", I(account.getAccountId()), L(lockedUntil));
+                return true;
+            }
+            LOG.debug("Account {} is already locked until {} by {}, aborting lock acquisition.", I(account.getAccountId()), L(actualLockedUntil), actualLockedBy);
+            return false;
         } catch (OXException e) {
             if (CalendarExceptionCodes.CONCURRENT_MODIFICATION.equals(e)) {
                 /*
                  * account updated in the meantime; keep old config to not have "lockedForUpdateUntil" set and reuse c
                  */
-                LOG.debug("Concurrent modification while attempting to persist lock for account {}, aborting.", I(account.getAccountId()));
+                LOG.debug("Concurrent modification while attempting to persist lock for account {}, aborting.", I(account.getAccountId()), e);
                 account = Services.getService(CalendarAccountService.class).getAccount(calendarSession.getSession(), account.getAccountId(), parameters);
                 return false;
             }
@@ -385,7 +398,8 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
         if (internalConfig != null) {
             JSONObject caching = internalConfig.optJSONObject(CachingCalendarAccessConstants.CACHING);
-            if (caching != null && caching.remove("lockedForUpdateUntil") != null) {
+            if (caching != null && caching.remove(CachingCalendarAccessConstants.LOCKED_FOR_UPDATE_UNTIL) != null) {
+                caching.remove(CachingCalendarAccessConstants.LOCKED_FOR_UPDATE_BY);
                 /*
                  * update lock removed from config, update account config in storage
                  */
@@ -399,7 +413,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
                         /*
                          * account updated in the meantime; refresh & don't update now
                          */
-                        LOG.debug("Concurrent modification while attempting to release lock for account {}, aborting.", I(account.getAccountId()));
+                        LOG.debug("Concurrent modification while attempting to release lock for account {}, aborting.", I(account.getAccountId()), e);
                         account = Services.getService(CalendarAccountService.class).getAccount(calendarSession.getSession(), account.getAccountId(), parameters);
                         return false;
                     }

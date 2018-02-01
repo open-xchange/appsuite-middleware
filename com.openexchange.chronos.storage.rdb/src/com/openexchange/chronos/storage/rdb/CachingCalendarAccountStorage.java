@@ -64,6 +64,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.DefaultCalendarAccount;
 import com.openexchange.chronos.storage.CalendarAccountStorage;
+import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 
 
@@ -110,19 +111,22 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
     }
 
     @Override
-    public void updateAccount(CalendarAccount account) throws OXException {
-        delegate.updateAccount(account);
+    public void updateAccount(CalendarAccount account, long clientTimestamp) throws OXException {
+        delegate.updateAccount(account, clientTimestamp);
         invalidateAccount(account.getUserId(), account.getAccountId());
     }
 
     @Override
-    public void deleteAccount(int userId, int accountId) throws OXException {
-        delegate.deleteAccount(userId, accountId);
+    public void deleteAccount(int userId, int accountId, long clientTimestamp) throws OXException {
+        delegate.deleteAccount(userId, accountId, clientTimestamp);
         invalidateAccount(userId, accountId);
     }
 
     @Override
     public CalendarAccount loadAccount(int userId, int accountId) throws OXException {
+        if (bypassCache()) {
+            return delegate.loadAccount(userId, accountId);
+        }
         CacheKey key = getAccountKey(userId, accountId);
         CalendarAccount account = optClonedAccount(cache.get(key));
         if (null == account) {
@@ -136,6 +140,9 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
 
     @Override
     public CalendarAccount[] loadAccounts(int userId, int[] accountIds) throws OXException {
+        if (bypassCache()) {
+            return delegate.loadAccounts(userId, accountIds);
+        }
         List<Integer> accountsToLoad = new ArrayList<Integer>(accountIds.length);
         CalendarAccount[] accounts = new CalendarAccount[accountIds.length];
         for (int i = 0; i < accountIds.length; i++) {
@@ -166,6 +173,9 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
 
     @Override
     public List<CalendarAccount> loadAccounts(int userId) throws OXException {
+        if (bypassCache()) {
+            return delegate.loadAccounts(userId);
+        }
         /*
          * try and get accounts via cached account id list fro user
          */
@@ -228,6 +238,10 @@ public class CachingCalendarAccountStorage implements CalendarAccountStorage {
 
     private CacheKey getAccountIdsKey(int userId) {
         return cacheService.newCacheKey(contextId, userId);
+    }
+
+    private boolean bypassCache() {
+        return DBTransactionPolicy.NO_TRANSACTIONS.equals(delegate.getTransactionPolicy());
     }
 
     private static CalendarAccount optClonedAccount(Object cachedAccount) throws OXException {

@@ -97,7 +97,7 @@ class StorageUpdater {
 
     /**
      * Initializes a new {@link CalendarDeleteListener}.
-     * 
+     *
      * @param context The {@link Context}
      * @param attendeeId The identifier of the attendee
      * @param destinationUserId The identifier of the destination user. <code>null</code> to use the context admin
@@ -122,7 +122,7 @@ class StorageUpdater {
 
     /**
      * Removes the attendee from the event and updates it
-     * 
+     *
      * @param event The event to remove the attendee from
      * @throws OXException Various
      */
@@ -140,7 +140,7 @@ class StorageUpdater {
 
     /**
      * Removes the attendee from the events and update them
-     * 
+     *
      * @param events The events to remove the attendee from
      * @throws OXException Various
      */
@@ -152,7 +152,7 @@ class StorageUpdater {
 
     /**
      * Delete an event for the attendee
-     * 
+     *
      * @param event The event to delete
      * @param session The {@link Session}. Is used to remove the attachments for an event.
      * @throws OXException Various
@@ -168,7 +168,7 @@ class StorageUpdater {
 
     /**
      * Delete all given events for the attendee
-     * 
+     *
      * @param events The events to delete
      * @param session The {@link Session}. Is used to remove the attachments for an event.
      * @throws OXException Various
@@ -181,7 +181,7 @@ class StorageUpdater {
 
     /**
      * Check event fields where the attendee could be referenced in and replaces the attendee
-     * 
+     *
      * @param event The {@link Event} to update
      * @throws OXException Various
      */
@@ -207,7 +207,7 @@ class StorageUpdater {
 
     /**
      * Check event fields where the attendee could be referenced in and replaces the attendee
-     * 
+     *
      * @param events The {@link Event}s to update
      * @throws OXException Various
      */
@@ -219,7 +219,7 @@ class StorageUpdater {
 
     /**
      * Searches for all events in which the attendee participates in
-     * 
+     *
      * @return A {@link List} of {@link Event}s
      * @throws OXException If events can't be loaded
      */
@@ -229,7 +229,7 @@ class StorageUpdater {
 
     /**
      * Searches for events with the given {@link SearchTerm}
-     * 
+     *
      * @param searchTerm The {@link SearchTerm}
      * @return A {@link List} of {@link Event}s
      * @throws OXException If events can't be loaded
@@ -241,7 +241,7 @@ class StorageUpdater {
 
     /**
      * Notifies the {@link CalendarHandler}s
-     * 
+     *
      * @param session The {@link Session}
      * @throws OXException In case {@link Connection} can not be acquired
      */
@@ -251,10 +251,10 @@ class StorageUpdater {
 
     /**
      * Delete the default account for the attendee
-     * 
+     *
      * @throws OXException In case account can't be deleted
      */
     void deleteAccount() throws OXException {
-        storage.getAccountStorage().deleteAccount(attendeeId, CalendarAccount.DEFAULT_ACCOUNT.getAccountId());
+        storage.getAccountStorage().deleteAccount(attendeeId, CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), CalendarUtils.DISTANT_FUTURE);
     }
 }
