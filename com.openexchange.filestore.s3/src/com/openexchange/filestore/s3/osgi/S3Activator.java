@@ -73,17 +73,13 @@ public class S3Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, MetricCollectorRegistry.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(S3Activator.class);
         logger.info("Starting bundle: com.openexchange.filestore.s3");
-        S3FileStorageFactory factory = new S3FileStorageFactory(this);
-        registerService(FileStorageProvider.class, factory);
-        trackService(MetricCollectorRegistry.class);
-        openTrackers();
 
         // Check for metric collection
         boolean metricCollection = getService(ConfigurationService.class).getBoolProperty("com.openexchange.filestore.s3.metricCollection", false);
@@ -91,6 +87,9 @@ public class S3Activator extends HousekeepingActivator {
             // Enable metric collection by overriding the default metrics
             AwsSdkMetrics.setMetricCollector(new S3FileStorageMetricCollector(this));
         }
+
+        S3FileStorageFactory factory = new S3FileStorageFactory(this);
+        registerService(FileStorageProvider.class, factory);
     }
 
     @Override
