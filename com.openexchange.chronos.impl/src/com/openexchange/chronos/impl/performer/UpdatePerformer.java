@@ -61,7 +61,6 @@ import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map.Entry;
@@ -420,7 +419,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         }
         boolean realChange = false;
         for (EventField updatedField : updatedFields) {
-            if (Arrays.contains(SKIPPED_FIELDS, updatedField)) {
+            if (Arrays.contains(SKIPPED_FIELDS, updatedField) ||
+                EventField.ATTENDEES.equals(updatedField) || EventField.ALARMS.equals(updatedField) || EventField.ATTACHMENTS.equals(updatedField)) {
                 continue;
             }
             realChange = true;
@@ -429,7 +429,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (realChange) {
             requireWritePermissions(originalEvent);
         } else {
-            requireWritePermissions(originalEvent, Collections.singletonList(session.getEntityResolver().prepareUserAttendee(session.getUserId())));
+            requireWritePermissions(originalEvent, session.getEntityResolver().prepareUserAttendee(session.getUserId()));
         }
         storage.getEventStorage().updateEvent(deltaEvent);
         return true;
