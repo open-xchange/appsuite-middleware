@@ -63,6 +63,9 @@ import com.openexchange.metrics.MetricType;
  */
 public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector {
 
+    private static final String COUNTER_TOTAL_BYTES = "counter.totalBytes";
+    private static final String METER_THROUPUT = "meter.throuput";
+    
     private final MetricCollector internalCollector;
 
     /**
@@ -71,8 +74,8 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
     public S3FileStorageServiceMetricCollector(MetricCollector metricCollector) {
         super();
         internalCollector = metricCollector;
-        internalCollector.getMetricMetadata().add(new MetricMetadata(MetricType.METER, "meter.throuput"));
-        internalCollector.getMetricMetadata().add(new MetricMetadata(MetricType.METER, "counter.totalBytes"));
+        internalCollector.getMetricMetadata().add(new MetricMetadata(MetricType.METER, METER_THROUPUT));
+        internalCollector.getMetricMetadata().add(new MetricMetadata(MetricType.COUNTER, COUNTER_TOTAL_BYTES));
     }
 
     /*
@@ -82,8 +85,8 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
      */
     @Override
     public void collectByteThroughput(final ByteThroughputProvider provider) {
-        internalCollector.getMeter("meter.throughput").mark(new Double(provider.getByteCount()).longValue());
-        internalCollector.getCounter("counter.totalBytes").inc(provider.getByteCount());
+        internalCollector.getMeter(METER_THROUPUT).mark(new Double(provider.getByteCount()).longValue());
+        internalCollector.getCounter(COUNTER_TOTAL_BYTES).inc(provider.getByteCount());
     }
 
     /*
