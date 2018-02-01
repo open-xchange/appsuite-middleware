@@ -250,9 +250,9 @@ public class S3FileStorageFactory implements FileStorageProvider {
             }
         }
         // Check for metric collection
-        boolean metricCollection = configService.getBoolProperty(getPropertyName(sb, filestoreID, "metricCollection"), false);
+        boolean metricCollection = configService.getBoolProperty(sb.append("metricCollection").toString(), false);
         if (metricCollection) {
-            // Enable metric collection by override the default metrics
+            // Enable metric collection by overriding the default metrics
             AwsSdkMetrics.setMetricCollector(new S3FileStorageMetricCollector(filestoreID, services));
         }
         /*
