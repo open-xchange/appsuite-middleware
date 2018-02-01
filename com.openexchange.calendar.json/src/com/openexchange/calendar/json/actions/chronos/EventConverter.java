@@ -797,7 +797,7 @@ public abstract class EventConverter {
             appointment.setLocation(event.getLocation());
         }
         if (event.containsTransp()) {
-            appointment.setShownAs(Event2Appointment.getShownAs(event.getTransp()));
+            appointment.setShownAs(null == event.getTransp() ? 0 : Event2Appointment.getShownAs(event.getTransp()));
         }
         return appointment;
     }
