@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,53 +47,63 @@
  *
  */
 
-package com.openexchange.metrics.osgi;
+package com.openexchange.metrics;
 
-import com.openexchange.metrics.MetricCollectorRegistry;
-import com.openexchange.metrics.impl.MetricCollectorRegistryImpl;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.codahale.metrics.Metric;
+import com.codahale.metrics.MetricRegistry.MetricSupplier;
 
 /**
- * {@link MetricActivator}
+ * {@link MetricMetadata}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MetricActivator extends HousekeepingActivator {
+public class MetricMetadata {
+
+    private final String metricName;
+    private final MetricType metricType;
+    private final MetricSupplier<? extends Metric> metricSupplier;
 
     /**
-     * Initialises a new {@link MetricActivator}.
+     * Initialises a new {@link MetricMetadata}.
      */
-    public MetricActivator() {
+    public MetricMetadata(MetricType metricType, String metricName) {
+        this(metricType, metricName, null);
+    }
+
+    /**
+     * Initialises a new {@link MetricMetadata}.
+     */
+    public MetricMetadata(MetricType metricType, String metricName, MetricSupplier<? extends Metric> metricSupplier) {
         super();
+        this.metricType = metricType;
+        this.metricName = metricName;
+        this.metricSupplier = metricSupplier;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+    /**
+     * Gets the metric's name
+     *
+     * @return The metric's name
      */
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    public String getMetricName() {
+        return metricName;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
+    /**
+     * Gets the {@link MetricSupplier} or <code>null</code> if no {@link MetricSupplier} is specified
+     *
+     * @return The {@link MetricSupplier} or <code>null</code> if no {@link MetricSupplier} is specified
      */
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(MetricCollectorRegistry.class, new MetricCollectorRegistryImpl());
+    public MetricSupplier<? extends Metric> getMetricSupplier() {
+        return metricSupplier;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
+    /**
+     * Gets the {@link MetricType}
+     *
+     * @return The {@link MetricType}
      */
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
+    public MetricType getMetricType() {
+        return metricType;
     }
 }

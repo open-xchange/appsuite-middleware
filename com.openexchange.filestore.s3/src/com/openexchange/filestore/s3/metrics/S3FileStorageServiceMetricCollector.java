@@ -52,8 +52,10 @@ package com.openexchange.filestore.s3.metrics;
 import com.amazonaws.metrics.ByteThroughputProvider;
 import com.amazonaws.metrics.ServiceLatencyProvider;
 import com.amazonaws.metrics.ServiceMetricCollector;
-import com.codahale.metrics.Meter;
-import com.openexchange.metrics.MetricRegistryService;
+import com.openexchange.metrics.AbstractMetricCollector;
+import com.openexchange.metrics.MetricCollectorRegistry;
+import com.openexchange.metrics.MetricMetadata;
+import com.openexchange.metrics.MetricType;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -63,15 +65,18 @@ import com.openexchange.server.ServiceLookup;
  */
 public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector {
 
-    private final Meter throughputMetric;
+    private final S3ThrouputMetricCollector internalCollector;
+    private final String filestoreId;
 
     /**
      * Initialises a new {@link S3FileStorageServiceMetricCollector}.
      */
     public S3FileStorageServiceMetricCollector(String filestoreId, ServiceLookup services) {
         super();
-        MetricRegistryService registryService = services.getService(MetricRegistryService.class);
-        throughputMetric = registryService.registerMeter(() -> "s3", filestoreId + ".throughput");
+        this.filestoreId = filestoreId;
+        internalCollector = new S3ThrouputMetricCollector("s3.throuput");
+        internalCollector.getMetricMetadata().put("meter." + filestoreId, new MetricMetadata(MetricType.METER, "throuput"));
+        services.getService(MetricCollectorRegistry.class).registerCollector(internalCollector);
     }
 
     /*
@@ -81,7 +86,7 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
      */
     @Override
     public void collectByteThroughput(final ByteThroughputProvider provider) {
-        throughputMetric.mark(new Double(provider.getByteCount()).longValue());
+        internalCollector.getMeter("meter." + filestoreId).mark(new Double(provider.getByteCount()).longValue());
     }
 
     /*
@@ -92,5 +97,50 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
     @Override
     public void collectLatency(final ServiceLatencyProvider provider) {
         // no-op
+    }
+
+    private class S3ThrouputMetricCollector extends AbstractMetricCollector {
+
+        /**
+         * Initialises a new {@link S3ThrouputMetricCollector}.
+         * 
+         * @param componentName
+         */
+        public S3ThrouputMetricCollector(String componentName) {
+            super(componentName);
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.openexchange.metrics.MetricCollector#start()
+         */
+        @Override
+        public void start() {
+            // TODO Auto-generated method stub
+
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.openexchange.metrics.MetricCollector#stop()
+         */
+        @Override
+        public void stop() {
+            // TODO Auto-generated method stub
+
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.openexchange.metrics.MetricCollector#isEnabled()
+         */
+        @Override
+        public boolean isEnabled() {
+            // TODO Auto-generated method stub
+            return false;
+        }
     }
 }

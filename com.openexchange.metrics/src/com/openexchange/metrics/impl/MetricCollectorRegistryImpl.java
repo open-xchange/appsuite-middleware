@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,53 +47,60 @@
  *
  */
 
-package com.openexchange.metrics.osgi;
+package com.openexchange.metrics.impl;
 
+import java.util.HashMap;
+import java.util.Map;
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.MetricRegistry.MetricSupplier;
+import com.codahale.metrics.SharedMetricRegistries;
+import com.codahale.metrics.jmx.JmxReporter;
+import com.openexchange.metrics.AbstractMetricCollector;
+import com.openexchange.metrics.MetricCollector;
 import com.openexchange.metrics.MetricCollectorRegistry;
-import com.openexchange.metrics.impl.MetricCollectorRegistryImpl;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.metrics.MetricMetadata;
+import com.openexchange.metrics.MetricType;
+import com.openexchange.metrics.MetricTypeRegisterer;
 
 /**
- * {@link MetricActivator}
+ * {@link MetricCollectorRegistryImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MetricActivator extends HousekeepingActivator {
+public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
+
+    private final Map<MetricType, MetricTypeRegisterer> registerers;
 
     /**
-     * Initialises a new {@link MetricActivator}.
+     * Initialises a new {@link MetricCollectorRegistryImpl}.
      */
-    public MetricActivator() {
+    public MetricCollectorRegistryImpl() {
         super();
+        registerers = new HashMap<>();
+        registerers.put(MetricType.COUNTER, (name, metricRegistry, supplier) -> metricRegistry.counter(name));
+        registerers.put(MetricType.TIMER, (name, metricRegistry, supplier) -> metricRegistry.timer(name));
+        registerers.put(MetricType.METER, (name, metricRegistry, supplier) -> metricRegistry.meter(name));
+        registerers.put(MetricType.HISTOGRAM, (name, metricRegistry, supplier) -> metricRegistry.histogram(name));
+        registerers.put(MetricType.GAUGE, (name, metricRegistry, supplier) -> metricRegistry.gauge(name, (MetricSupplier<Gauge>) supplier));
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+     * @see com.openexchange.metrics.MetricCollectorRegistry#registerCollector(com.openexchange.metrics.MetricCollector)
      */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
+    public void registerCollector(MetricCollector metricCollector) {
+        MetricRegistry metricRegistry = SharedMetricRegistries.getOrCreate(metricCollector.getComponentName());
+        ((AbstractMetricCollector) metricCollector).setMetricRegistry(metricRegistry);
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(MetricCollectorRegistry.class, new MetricCollectorRegistryImpl());
-    }
+        for (String key : metricCollector.getMetricMetadata().keySet()) {
+            MetricMetadata metadata = metricCollector.getMetricMetadata().get(key);
+            registerers.get(metadata.getMetricType()).register(key, metricRegistry, metadata.getMetricSupplier());
+        }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
-     */
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
+        JmxReporter reporter = JmxReporter.forRegistry(metricRegistry).inDomain("com.openexchange.metrics." + metricCollector.getComponentName()).build();
+        reporter.start();
     }
 }

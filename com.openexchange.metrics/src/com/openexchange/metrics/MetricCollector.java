@@ -50,6 +50,11 @@
 package com.openexchange.metrics;
 
 import java.util.Map;
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Histogram;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.Timer;
 
 /**
  * {@link MetricCollector}
@@ -69,11 +74,6 @@ public interface MetricCollector {
     void stop();
 
     /**
-     * Collects metrics
-     */
-    void collectMetrics();
-
-    /**
      * Determines whether this collector was enabled via the configuration.
      * 
      * @return <code>true</code> if the collector is enabled via the configuration,
@@ -89,10 +89,20 @@ public interface MetricCollector {
     String getComponentName();
 
     /**
-     * Returns an unmodifiable {@link Map} with the {@link MetricType}s
-     * this collector is responsible for.
+     * Returns an unmodifiable {@link Map} with the {@link MetricMetadata}
+     * for this collector.
      * 
-     * @return an unmodifiable {@link Map} of {@link MetricType}s for this collector
+     * @return an unmodifiable {@link Map} of {@link MetricMetadata}s for this collector
      */
-    Map<String, MetricType> getMetricTypes();
+    Map<String, MetricMetadata> getMetricMetadata();
+
+    Histogram getHistogram(String name);
+
+    Timer getTimer(String name);
+
+    Counter getCounter(String name);
+
+    <T> Gauge<T> getGauge(String name, Class<T> clazz);
+
+    Meter getMeter(String name);
 }

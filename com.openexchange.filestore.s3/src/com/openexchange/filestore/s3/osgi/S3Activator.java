@@ -52,7 +52,7 @@ package com.openexchange.filestore.s3.osgi;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.filestore.s3.internal.S3FileStorageFactory;
-import com.openexchange.metrics.MetricRegistryService;
+import com.openexchange.metrics.MetricCollectorRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -80,7 +80,7 @@ public class S3Activator extends HousekeepingActivator {
         logger.info("Starting bundle: com.openexchange.filestore.s3");
         S3FileStorageFactory factory = new S3FileStorageFactory(this);
         registerService(FileStorageProvider.class, factory);
-        trackService(MetricRegistryService.class);
+        trackService(MetricCollectorRegistry.class);
         openTrackers();
     }
 

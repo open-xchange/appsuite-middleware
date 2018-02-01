@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,53 +47,18 @@
  *
  */
 
-package com.openexchange.metrics.osgi;
+package com.openexchange.metrics;
 
-import com.openexchange.metrics.MetricCollectorRegistry;
-import com.openexchange.metrics.impl.MetricCollectorRegistryImpl;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.codahale.metrics.Metric;
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.MetricRegistry.MetricSupplier;
 
 /**
- * {@link MetricActivator}
+ * {@link MetricTypeRegisterer}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MetricActivator extends HousekeepingActivator {
+public interface MetricTypeRegisterer {
 
-    /**
-     * Initialises a new {@link MetricActivator}.
-     */
-    public MetricActivator() {
-        super();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
-     */
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
-     */
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(MetricCollectorRegistry.class, new MetricCollectorRegistryImpl());
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
-     */
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-    }
+    Metric register(String name, MetricRegistry metricRegistry, MetricSupplier<? extends Metric> metricSupplier);
 }
