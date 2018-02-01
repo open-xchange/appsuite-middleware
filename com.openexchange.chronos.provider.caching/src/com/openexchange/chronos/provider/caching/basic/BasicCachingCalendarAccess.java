@@ -88,13 +88,13 @@ import com.openexchange.chronos.provider.extensions.BasicSyncAware;
 import com.openexchange.chronos.provider.extensions.CachedAware;
 import com.openexchange.chronos.provider.extensions.WarningsAware;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
  * {@link BasicCachingCalendarAccess}
@@ -110,7 +110,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     protected CalendarParameters parameters;
     protected CalendarAccount account;
-    protected CalendarSession calendarSession;
+    protected Session session;
     protected ServiceLookup services;
 
     private List<OXException> warnings = new ArrayList<>();
@@ -121,21 +121,21 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      * Initializes a new {@link BirthdaysCalendarAccess}.
      *
      * @param services The {@link ServiceLookup} instance
-     * @param calendarSession The session
+     * @param session The session
      * @param account The underlying calendar account
      * @param parameters Additional calendar parameters
      */
-    protected BasicCachingCalendarAccess(ServiceLookup services, CalendarSession calendarSession, CalendarAccount account, CalendarParameters parameters) {
+    protected BasicCachingCalendarAccess(ServiceLookup services, Session session, CalendarAccount account, CalendarParameters parameters) {
         this.services = services;
-        this.calendarSession = calendarSession;
+        this.session = session;
         this.account = account;
         this.parameters = parameters;
         this.originInternalConfiguration = new JSONObject(account.getInternalConfiguration());
         this.originUserConfiguration = new JSONObject(account.getUserConfiguration());
     }
 
-    public CalendarSession getCalendarSession() {
-        return calendarSession;
+    public Session getSession() {
+        return session;
     }
 
     public CalendarAccount getAccount() {
@@ -270,7 +270,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         }
         try {
             AdministrativeCalendarAccountService accountService = Services.getService(AdministrativeCalendarAccountService.class);
-            account = accountService.updateAccount(getCalendarSession().getContextId(), getCalendarSession().getUserId(), account.getAccountId(), account.getInternalConfiguration(), account.getUserConfiguration(), account.getLastModified().getTime());
+            account = accountService.updateAccount(getSession().getContextId(), getSession().getUserId(), account.getAccountId(), account.getInternalConfiguration(), account.getUserConfiguration(), account.getLastModified().getTime());
         } catch (OXException e) {
             LOG.error("Unable to save configuration: {}", e.getMessage(), e);
         }
@@ -362,7 +362,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         caching.putSafe(CachingCalendarAccessConstants.LOCKED_FOR_UPDATE_BY, lockedBy);
         AdministrativeCalendarAccountService accountService = Services.getService(AdministrativeCalendarAccountService.class);
         try {
-            account = accountService.updateAccount(calendarSession.getContextId(), calendarSession.getUserId(), account.getAccountId(), internalConfig, null, account.getLastModified().getTime());
+            account = accountService.updateAccount(session.getContextId(), session.getUserId(), account.getAccountId(), internalConfig, null, account.getLastModified().getTime());
             caching = account.getInternalConfiguration().optJSONObject(CachingCalendarAccessConstants.CACHING);
             if (null == caching) {
                 return false;
@@ -381,7 +381,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
                  * account updated in the meantime; keep old config to not have "lockedForUpdateUntil" set and reuse c
                  */
                 LOG.debug("Concurrent modification while attempting to persist lock for account {}, aborting.", I(account.getAccountId()), e);
-                account = Services.getService(CalendarAccountService.class).getAccount(calendarSession.getSession(), account.getAccountId(), parameters);
+                account = Services.getService(CalendarAccountService.class).getAccount(session, account.getAccountId(), parameters);
                 return false;
             }
             throw e;
@@ -405,7 +405,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
                  */
                 AdministrativeCalendarAccountService accountService = Services.getService(AdministrativeCalendarAccountService.class);
                 try {
-                    account = accountService.updateAccount(calendarSession.getContextId(), calendarSession.getUserId(), account.getAccountId(), internalConfig, null, account.getLastModified().getTime());
+                    account = accountService.updateAccount(session.getContextId(), session.getUserId(), account.getAccountId(), internalConfig, null, account.getLastModified().getTime());
                     LOG.debug("Successfully released lock for account {}.", I(account.getAccountId()));
                     return true;
                 } catch (OXException e) {
@@ -414,7 +414,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
                          * account updated in the meantime; refresh & don't update now
                          */
                         LOG.debug("Concurrent modification while attempting to release lock for account {}, aborting.", I(account.getAccountId()), e);
-                        account = Services.getService(CalendarAccountService.class).getAccount(calendarSession.getSession(), account.getAccountId(), parameters);
+                        account = Services.getService(CalendarAccountService.class).getAccount(session, account.getAccountId(), parameters);
                         return false;
                     }
                     throw e;
@@ -478,7 +478,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             return getEvents();
         }
         cache();
-        return new SearchHandler(calendarSession, account, parameters).searchEvents(filters, queries);
+        return new SearchHandler(session, account, parameters).searchEvents(filters, queries);
     }
 
     /*
@@ -489,7 +489,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     @Override
     public UpdatesResult getUpdatedEvents(long updatedSince) throws OXException {
         cache();
-        return new SyncHandler(calendarSession, account, parameters).getUpdatedEvents(updatedSince);
+        return new SyncHandler(session, account, parameters).getUpdatedEvents(updatedSince);
     }
 
     /*
@@ -500,7 +500,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     @Override
     public long getSequenceNumber() throws OXException {
         cache();
-        return new SyncHandler(calendarSession, account, parameters).getSequenceNumber();
+        return new SyncHandler(session, account, parameters).getSequenceNumber();
     }
 
     /*
@@ -511,6 +511,6 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     @Override
     public List<Event> resolveResource(String resourceName) throws OXException {
         cache();
-        return new SyncHandler(calendarSession, account, parameters).resolveResource(resourceName);
+        return new SyncHandler(session, account, parameters).resolveResource(resourceName);
     }
 }

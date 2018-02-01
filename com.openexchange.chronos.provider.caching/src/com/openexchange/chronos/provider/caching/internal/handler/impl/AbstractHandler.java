@@ -72,7 +72,7 @@ import com.openexchange.chronos.provider.caching.internal.CachingCalendarAccessC
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.provider.caching.internal.handler.CachingHandler;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.TruncationAwareCalendarStorage;
-import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
@@ -107,7 +107,7 @@ public abstract class AbstractHandler implements CachingHandler {
      * @return The calendar user
      */
     public CalendarUser getCalendarUser() {
-        CalendarSession session = cachedCalendarAccess.getCalendarSession();
+        com.openexchange.session.Session session = cachedCalendarAccess.getSession();
         CalendarUser calendarUser = new CalendarUser();
         calendarUser.setEntity(session.getUserId());
         calendarUser.setUri(ResourceId.forUser(session.getContextId(), session.getUserId()));
@@ -115,7 +115,7 @@ public abstract class AbstractHandler implements CachingHandler {
     }
 
     protected CalendarStorage initStorage(DBProvider dbProvider) throws OXException {
-        Context context = Services.getService(ContextService.class).getContext(this.cachedCalendarAccess.getCalendarSession().getContextId());
+        Context context = Services.getService(ContextService.class).getContext(this.cachedCalendarAccess.getSession().getContextId());
         return Services.getService(CalendarStorageFactory.class).create(context, this.cachedCalendarAccess.getAccount().getAccountId(), null, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
     }
 
@@ -139,7 +139,7 @@ public abstract class AbstractHandler implements CachingHandler {
         DatabaseService dbService = Services.getService(DatabaseService.class);
         Connection readConnection = null;
 
-        int contextId = this.cachedCalendarAccess.getCalendarSession().getContextId();
+        int contextId = this.cachedCalendarAccess.getSession().getContextId();
         try {
             readConnection = dbService.getReadOnly(contextId);
             CalendarStorage calendarStorage = initStorage(new SimpleDBProvider(readConnection, null));
@@ -189,17 +189,17 @@ public abstract class AbstractHandler implements CachingHandler {
         }
         calendarStorage.insertEvent(importedEvent);
         List<Attendee> attendees = importedEvent.getAttendees();
-        
+
         if (null != attendees && !attendees.isEmpty()) {
-            EntityResolver entityResolver = this.cachedCalendarAccess.getCalendarSession().getEntityResolver();
-            calendarStorage.insertAttendees(id, entityResolver.prepare(attendees));
+            EntityResolver entityResolver = optEntityResolver(this.cachedCalendarAccess.getSession().getContextId());
+            calendarStorage.insertAttendees(id, entityResolver != null ? entityResolver.prepare(attendees) : attendees);
         }
 
         if (null != importedEvent.getAlarms() && !importedEvent.getAlarms().isEmpty()) {
             for (Alarm alarm : importedEvent.getAlarms()) {
                 alarm.setId(calendarStorage.getAlarmStorage().nextId());
             }
-            calendarStorage.getAlarmStorage().insertAlarms(importedEvent, this.cachedCalendarAccess.getCalendarSession().getUserId(), importedEvent.getAlarms());
+            calendarStorage.getAlarmStorage().insertAlarms(importedEvent, this.cachedCalendarAccess.getSession().getUserId(), importedEvent.getAlarms());
         }
 
         if (1 < events.size()) {
@@ -216,7 +216,7 @@ public abstract class AbstractHandler implements CachingHandler {
                     for (Alarm alarm : importedChangeException.getAlarms()) {
                         alarm.setId(calendarStorage.getAlarmStorage().nextId());
                     }
-                    calendarStorage.getAlarmStorage().insertAlarms(importedChangeException, this.cachedCalendarAccess.getCalendarSession().getUserId(), importedChangeException.getAlarms());
+                    calendarStorage.getAlarmStorage().insertAlarms(importedChangeException, this.cachedCalendarAccess.getSession().getUserId(), importedChangeException.getAlarms());
                 }
             }
         }
@@ -235,5 +235,10 @@ public abstract class AbstractHandler implements CachingHandler {
         fields.addAll(Arrays.asList(all));
         fields.removeAll(IGNORED_FIELDS);
         return fields.toArray(new EventField[fields.size()]);
+    }
+
+    protected EntityResolver optEntityResolver(int contextId) throws OXException {
+        CalendarUtilities calendarUtilities = Services.getService(CalendarUtilities.class);
+        return null != calendarUtilities ? calendarUtilities.getEntityResolver(contextId) : null;
     }
 }

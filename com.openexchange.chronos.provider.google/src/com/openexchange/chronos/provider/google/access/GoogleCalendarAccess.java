@@ -83,7 +83,6 @@ import com.openexchange.chronos.provider.google.converter.GoogleEventConverter;
 import com.openexchange.chronos.provider.google.exception.GoogleExceptionCodes;
 import com.openexchange.chronos.provider.google.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataArguments;
@@ -119,19 +118,19 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
      * @param parameters The calendar parameters
      * @throws OXException
      */
-    public GoogleCalendarAccess(ServiceLookup services, CalendarSession calendarSession, CalendarAccount account, CalendarParameters parameters, boolean checkConfig) throws OXException {
-        super(services, calendarSession, account, parameters);
-        refreshInterval = GoogleCalendarConfig.getResfrehInterval(calendarSession.getSession());
-        requestTimeout = GoogleCalendarConfig.getRequestTimeout(calendarSession.getSession());
+    public GoogleCalendarAccess(ServiceLookup services, Session session, CalendarAccount account, CalendarParameters parameters, boolean checkConfig) throws OXException {
+        super(services, session, account, parameters);
+        refreshInterval = GoogleCalendarConfig.getResfrehInterval(session);
+        requestTimeout = GoogleCalendarConfig.getRequestTimeout(session);
         try {
-            oauthAccess = new GoogleOAuthAccess(account.getUserConfiguration().getInt(GoogleCalendarConfigField.OAUTH_ID), calendarSession.getSession());
+            oauthAccess = new GoogleOAuthAccess(account.getUserConfiguration().getInt(GoogleCalendarConfigField.OAUTH_ID), session);
             oauthAccess.initialize();
         } catch (JSONException e) {
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
 
         if (checkConfig) {
-            initCalendarFolder(calendarSession.getSession());
+            initCalendarFolder(session);
         }
     }
 

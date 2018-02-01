@@ -72,11 +72,11 @@ import com.openexchange.chronos.provider.caching.internal.CachingCalendarAccessC
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.provider.caching.internal.handler.ProcessingType;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -93,7 +93,7 @@ public class BasicCachingCalendarAccessTest {
     protected TestCachingCalendarAccessImpl cachingCalendarAccess;
 
     @Mock
-    protected CalendarSession session;
+    protected Session session;
 
     @Mock
     private ServerSession serverSession;

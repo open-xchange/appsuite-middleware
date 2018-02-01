@@ -54,7 +54,6 @@ import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountSe
 import com.openexchange.chronos.provider.schedjoules.BasicSchedJoulesCalendarProvider;
 import com.openexchange.chronos.provider.schedjoules.SchedJoulesUserServiceInterceptor;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
-import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
@@ -81,7 +80,7 @@ public class SchedJoulesProviderActivator extends HousekeepingActivator {
      */
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, AdministrativeCalendarAccountService.class, SchedJoulesService.class, CalendarService.class, DatabaseService.class };
+        return new Class<?>[] { UserService.class, AdministrativeCalendarAccountService.class, SchedJoulesService.class, DatabaseService.class };
     }
 
     /*

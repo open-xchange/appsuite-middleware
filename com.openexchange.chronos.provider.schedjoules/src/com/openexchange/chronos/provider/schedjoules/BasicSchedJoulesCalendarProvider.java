@@ -75,8 +75,6 @@ import com.openexchange.chronos.provider.schedjoules.exception.SchedJoulesProvid
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.chronos.schedjoules.exception.SchedJoulesAPIExceptionCodes;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.CalendarService;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -127,9 +125,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
 
     @Override
     public BasicCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        CalendarService calendarService = services.getService(CalendarService.class);
-        CalendarSession calendarSession = calendarService.init(session, parameters);
-        return new BasicSchedJoulesCalendarAccess(services, calendarSession, account, parameters);
+        return new BasicSchedJoulesCalendarAccess(services, session, account, parameters);
     }
 
     @Override
