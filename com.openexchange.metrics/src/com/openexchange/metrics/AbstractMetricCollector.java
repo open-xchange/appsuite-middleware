@@ -49,8 +49,8 @@
 
 package com.openexchange.metrics;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
@@ -67,7 +67,7 @@ import com.codahale.metrics.Timer;
 public abstract class AbstractMetricCollector implements MetricCollector {
 
     private MetricRegistry metricRegistry;
-    private final Map<String, MetricMetadata> metricMetadata;
+    private final Set<MetricMetadata> metricMetadata;
     private final String componentName;
 
     /**
@@ -76,7 +76,7 @@ public abstract class AbstractMetricCollector implements MetricCollector {
     public AbstractMetricCollector(String componentName) {
         super();
         this.componentName = componentName;
-        metricMetadata = new HashMap<>();
+        metricMetadata = new HashSet<>();
     }
 
     /**
@@ -104,7 +104,7 @@ public abstract class AbstractMetricCollector implements MetricCollector {
      * @see com.openexchange.metrics.MetricCollector#getMetricMetadata()
      */
     @Override
-    public Map<String, MetricMetadata> getMetricMetadata() {
+    public Set<MetricMetadata> getMetricMetadata() {
         return metricMetadata;
     }
 
@@ -115,7 +115,7 @@ public abstract class AbstractMetricCollector implements MetricCollector {
      */
     @Override
     public Histogram getHistogram(String name) {
-        return (Histogram) checkAndReturn(metricRegistry.getHistograms().get(name));
+        return (Histogram) checkAndReturn(metricRegistry.getHistograms().get(name), name);
     }
 
     /*
@@ -125,7 +125,7 @@ public abstract class AbstractMetricCollector implements MetricCollector {
      */
     @Override
     public Timer getTimer(String name) {
-        return (Timer) checkAndReturn(metricRegistry.getTimers().get(name));
+        return (Timer) checkAndReturn(metricRegistry.getTimers().get(name), name);
     }
 
     /*
@@ -135,7 +135,7 @@ public abstract class AbstractMetricCollector implements MetricCollector {
      */
     @Override
     public Counter getCounter(String name) {
-        return (Counter) checkAndReturn(metricRegistry.getCounters().get(name));
+        return (Counter) checkAndReturn(metricRegistry.getCounters().get(name), name);
     }
 
     /*
@@ -146,7 +146,7 @@ public abstract class AbstractMetricCollector implements MetricCollector {
     @Override
     @SuppressWarnings("unchecked")
     public <T> Gauge<T> getGauge(String name, Class<T> clazz) {
-        return (Gauge<T>) checkAndReturn(metricRegistry.getGauges().get(name));
+        return (Gauge<T>) checkAndReturn(metricRegistry.getGauges().get(name), name);
     }
 
     /*
@@ -156,17 +156,18 @@ public abstract class AbstractMetricCollector implements MetricCollector {
      */
     @Override
     public Meter getMeter(String name) {
-        return (Meter) checkAndReturn(metricRegistry.getMeters().get(name));
+        return (Meter) checkAndReturn(metricRegistry.getMeters().get(name), name);
     }
 
     /**
      * 
      * @param metric
+     * @param name TODO
      * @return
      */
-    private Metric checkAndReturn(Metric metric) {
+    private Metric checkAndReturn(Metric metric, String name) {
         if (metric == null) {
-            throw new IllegalArgumentException("The metric collector has no timer registered");
+            throw new IllegalArgumentException("The metric collector has no metric with the name '" + name + "' registered");
         }
         return metric;
     }

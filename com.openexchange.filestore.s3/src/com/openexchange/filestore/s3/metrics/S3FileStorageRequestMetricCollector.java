@@ -79,8 +79,8 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
         super();
         internalCollector = metricCollector;
         for (HttpMethodName method : HttpMethodName.values()) {
-            metricCollector.getMetricMetadata().put("timer." + method.name(), new MetricMetadata(MetricType.TIMER, "timer." + method.name()));
-            metricCollector.getMetricMetadata().put("counter." + method.name(), new MetricMetadata(MetricType.COUNTER, "counter." + method.name()));
+            metricCollector.getMetricMetadata().add(new MetricMetadata(MetricType.TIMER, "timer." + method.name()));
+            metricCollector.getMetricMetadata().add(new MetricMetadata(MetricType.COUNTER, "counter." + method.name()));
         }
     }
 

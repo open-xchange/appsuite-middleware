@@ -50,6 +50,7 @@
 package com.openexchange.metrics;
 
 import java.util.Map;
+import java.util.Set;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
@@ -94,7 +95,7 @@ public interface MetricCollector {
      * 
      * @return an unmodifiable {@link Map} of {@link MetricMetadata}s for this collector
      */
-    Map<String, MetricMetadata> getMetricMetadata();
+    Set<MetricMetadata> getMetricMetadata();
 
     Histogram getHistogram(String name);
 

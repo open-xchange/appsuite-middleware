@@ -95,9 +95,8 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
         MetricRegistry metricRegistry = SharedMetricRegistries.getOrCreate(metricCollector.getComponentName());
         ((AbstractMetricCollector) metricCollector).setMetricRegistry(metricRegistry);
 
-        for (String key : metricCollector.getMetricMetadata().keySet()) {
-            MetricMetadata metadata = metricCollector.getMetricMetadata().get(key);
-            registerers.get(metadata.getMetricType()).register(key, metricRegistry, metadata.getMetricSupplier());
+        for (MetricMetadata metadata : metricCollector.getMetricMetadata()) {
+            registerers.get(metadata.getMetricType()).register(metadata.getMetricName(), metricRegistry, metadata.getMetricSupplier());
         }
 
         JmxReporter reporter = JmxReporter.forRegistry(metricRegistry).inDomain("com.openexchange.metrics." + metricCollector.getComponentName()).build();

@@ -71,7 +71,8 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
     public S3FileStorageServiceMetricCollector(MetricCollector metricCollector) {
         super();
         internalCollector = metricCollector;
-        internalCollector.getMetricMetadata().put("meter.throughput", new MetricMetadata(MetricType.METER, "meter.throuput"));
+        internalCollector.getMetricMetadata().add(new MetricMetadata(MetricType.METER, "meter.throuput"));
+        internalCollector.getMetricMetadata().add(new MetricMetadata(MetricType.METER, "counter.totalBytes"));
     }
 
     /*
@@ -82,6 +83,7 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
     @Override
     public void collectByteThroughput(final ByteThroughputProvider provider) {
         internalCollector.getMeter("meter.throughput").mark(new Double(provider.getByteCount()).longValue());
+        internalCollector.getCounter("counter.totalBytes").inc(provider.getByteCount());
     }
 
     /*
