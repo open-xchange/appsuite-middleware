@@ -49,13 +49,16 @@
 
 package com.openexchange.metrics.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.MetricRegistry.MetricSupplier;
 import com.codahale.metrics.SharedMetricRegistries;
 import com.codahale.metrics.jmx.JmxReporter;
+import com.openexchange.exception.OXException;
 import com.openexchange.metrics.AbstractMetricCollector;
 import com.openexchange.metrics.MetricCollector;
 import com.openexchange.metrics.MetricCollectorRegistry;
@@ -71,6 +74,7 @@ import com.openexchange.metrics.MetricTypeRegisterer;
 public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
 
     private final Map<MetricType, MetricTypeRegisterer> registerers;
+    private final Map<String, MetricCollector> collectors;
 
     /**
      * Initialises a new {@link MetricCollectorRegistryImpl}.
@@ -78,12 +82,15 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public MetricCollectorRegistryImpl() {
         super();
-        registerers = new HashMap<>();
-        registerers.put(MetricType.COUNTER, (name, metricRegistry, supplier) -> metricRegistry.counter(name));
-        registerers.put(MetricType.TIMER, (name, metricRegistry, supplier) -> metricRegistry.timer(name));
-        registerers.put(MetricType.METER, (name, metricRegistry, supplier) -> metricRegistry.meter(name));
-        registerers.put(MetricType.HISTOGRAM, (name, metricRegistry, supplier) -> metricRegistry.histogram(name));
-        registerers.put(MetricType.GAUGE, (name, metricRegistry, supplier) -> metricRegistry.gauge(name, (MetricSupplier<Gauge>) supplier));
+        collectors = new ConcurrentHashMap<>();
+
+        Map<MetricType, MetricTypeRegisterer> r = new HashMap<>();
+        r.put(MetricType.COUNTER, (name, metricRegistry, supplier) -> metricRegistry.counter(name));
+        r.put(MetricType.TIMER, (name, metricRegistry, supplier) -> metricRegistry.timer(name));
+        r.put(MetricType.METER, (name, metricRegistry, supplier) -> metricRegistry.meter(name));
+        r.put(MetricType.HISTOGRAM, (name, metricRegistry, supplier) -> metricRegistry.histogram(name));
+        r.put(MetricType.GAUGE, (name, metricRegistry, supplier) -> metricRegistry.gauge(name, (MetricSupplier<Gauge>) supplier));
+        registerers = Collections.unmodifiableMap(r);
     }
 
     /*
@@ -92,7 +99,14 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
      * @see com.openexchange.metrics.MetricCollectorRegistry#registerCollector(com.openexchange.metrics.MetricCollector)
      */
     @Override
-    public void registerCollector(MetricCollector metricCollector) {
+    public void registerCollector(MetricCollector metricCollector) throws OXException {
+        MetricCollector existingMc = collectors.get(metricCollector.getComponentName());
+        if (existingMc != null) {
+            // TODO: Simple return instead of throwing an exception?
+            throw new OXException(1138, "There is already another metric collector registered with '" + metricCollector.getComponentName() + "'");
+        }
+        collectors.put(metricCollector.getComponentName(), metricCollector);
+
         MetricRegistry metricRegistry = SharedMetricRegistries.getOrCreate(metricCollector.getComponentName());
         ((AbstractMetricCollector) metricCollector).setMetricRegistry(metricRegistry);
 
@@ -103,5 +117,15 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
         // TODO: implement JMX Reporter
         JmxReporter reporter = JmxReporter.forRegistry(metricRegistry).inDomain("com.openexchange.metrics." + metricCollector.getComponentName()).build();
         reporter.start();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.MetricCollectorRegistry#getCollector(java.lang.String)
+     */
+    @Override
+    public MetricCollector getCollector(String componentName) {
+        return collectors.get(componentName);
     }
 }
