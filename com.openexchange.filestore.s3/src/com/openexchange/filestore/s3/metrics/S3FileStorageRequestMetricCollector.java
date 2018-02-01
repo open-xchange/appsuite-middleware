@@ -50,22 +50,18 @@
 package com.openexchange.filestore.s3.metrics;
 
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 import com.amazonaws.Request;
 import com.amazonaws.Response;
 import com.amazonaws.http.HttpMethodName;
 import com.amazonaws.metrics.AwsSdkMetrics;
-import com.amazonaws.metrics.MetricType;
 import com.amazonaws.metrics.RequestMetricCollector;
 import com.amazonaws.util.AWSRequestMetrics;
 import com.amazonaws.util.AWSRequestMetrics.Field;
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.MetricRegistry.MetricSupplier;
+import com.codahale.metrics.Counter;
 import com.codahale.metrics.Timer;
-import com.openexchange.metrics.AbstractMetricCollector;
-import com.openexchange.metrics.MetricCollectorRegistry;
+import com.openexchange.metrics.MetricCollector;
 import com.openexchange.metrics.MetricMetadata;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.metrics.MetricType;
 
 /**
  * {@link S3FileStorageRequestMetricCollector}
@@ -74,21 +70,18 @@ import com.openexchange.server.ServiceLookup;
  */
 public class S3FileStorageRequestMetricCollector extends RequestMetricCollector {
 
-    private final S3RequestMetricCollector internalCollector;
+    private final MetricCollector internalCollector;
 
     /**
      * Initialises a new {@link S3FileStorageRequestMetricCollector}.
      */
-    public S3FileStorageRequestMetricCollector(String filestoreId, ServiceLookup services) {
+    public S3FileStorageRequestMetricCollector(MetricCollector metricCollector) {
         super();
-        internalCollector = new S3RequestMetricCollector("s3.requests");
+        internalCollector = metricCollector;
         for (HttpMethodName method : HttpMethodName.values()) {
-            internalCollector.getMetricMetadata().put("timer." + method.name(), new MetricMetadata(com.openexchange.metrics.MetricType.TIMER, "filestoreId." + method.name()));
-            AtomicLong totalTime = new AtomicLong();
-            MetricSupplier<Gauge<AtomicLong>> metricSupplier = () -> () -> totalTime;
-            internalCollector.getMetricMetadata().put("gauge." + method.name(), new MetricMetadata(com.openexchange.metrics.MetricType.GAUGE, "filestoreId." + method.name(), metricSupplier));
+            metricCollector.getMetricMetadata().put("timer." + method.name(), new MetricMetadata(MetricType.TIMER, "timer." + method.name()));
+            metricCollector.getMetricMetadata().put("counter." + method.name(), new MetricMetadata(MetricType.COUNTER, "counter." + method.name()));
         }
-        services.getService(MetricCollectorRegistry.class).registerCollector(internalCollector);
     }
 
     /*
@@ -105,7 +98,7 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
      * @param request
      */
     private void timeRequest(Request<?> request) {
-        for (MetricType type : AwsSdkMetrics.getPredefinedMetrics()) {
+        for (com.amazonaws.metrics.MetricType type : AwsSdkMetrics.getPredefinedMetrics()) {
             if (!(type instanceof Field)) {
                 continue;
             }
@@ -117,56 +110,11 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
                 case ClientExecuteTime:
                     Timer timer = internalCollector.getTimer("timer." + request.getHttpMethod().name());
                     timer.update(longValue, TimeUnit.MILLISECONDS);
-                    AtomicLong atomicLong = internalCollector.getGauge("gauge." + request.getHttpMethod().name(), AtomicLong.class).getValue();
-                    atomicLong.addAndGet(longValue);
+                    Counter counter = internalCollector.getCounter("counter." + request.getHttpMethod().name());
+                    counter.inc(longValue);
                 default:
                     break;
             }
-        }
-    }
-
-    private class S3RequestMetricCollector extends AbstractMetricCollector {
-
-        /**
-         * Initialises a new {@link S3RequestMetricCollector}.
-         * 
-         * @param componentName
-         */
-        public S3RequestMetricCollector(String componentName) {
-            super(componentName);
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.openexchange.metrics.MetricCollector#start()
-         */
-        @Override
-        public void start() {
-            // TODO Auto-generated method stub
-
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.openexchange.metrics.MetricCollector#stop()
-         */
-        @Override
-        public void stop() {
-            // TODO Auto-generated method stub
-
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.openexchange.metrics.MetricCollector#isEnabled()
-         */
-        @Override
-        public boolean isEnabled() {
-            // TODO Auto-generated method stub
-            return false;
         }
     }
 }

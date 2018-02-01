@@ -49,9 +49,11 @@
 
 package com.openexchange.filestore.s3.metrics;
 
-import com.amazonaws.metrics.MetricCollector;
 import com.amazonaws.metrics.RequestMetricCollector;
 import com.amazonaws.metrics.ServiceMetricCollector;
+import com.openexchange.metrics.AbstractMetricCollector;
+import com.openexchange.metrics.MetricCollector;
+import com.openexchange.metrics.MetricCollectorRegistry;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -59,7 +61,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class S3FileStorageMetricCollector extends MetricCollector {
+public class S3FileStorageMetricCollector extends com.amazonaws.metrics.MetricCollector {
 
     private final S3FileStorageRequestMetricCollector s3FileStorageRequestMetricCollector;
     private S3FileStorageServiceMetricCollector s3FileStorageServiceMetricCollector;
@@ -69,8 +71,11 @@ public class S3FileStorageMetricCollector extends MetricCollector {
      */
     public S3FileStorageMetricCollector(String filestoreId, ServiceLookup services) {
         super();
-        s3FileStorageRequestMetricCollector = new S3FileStorageRequestMetricCollector(filestoreId, services);
-        s3FileStorageServiceMetricCollector = new S3FileStorageServiceMetricCollector(filestoreId, services);
+        MetricCollector internalCollector = new S3InternalMetricCollector();
+        s3FileStorageRequestMetricCollector = new S3FileStorageRequestMetricCollector(internalCollector);
+        s3FileStorageServiceMetricCollector = new S3FileStorageServiceMetricCollector(internalCollector);
+
+        services.getService(MetricCollectorRegistry.class).registerCollector(internalCollector);
     }
 
     /*
@@ -121,5 +126,47 @@ public class S3FileStorageMetricCollector extends MetricCollector {
     @Override
     public ServiceMetricCollector getServiceMetricCollector() {
         return s3FileStorageServiceMetricCollector;
+    }
+
+    private class S3InternalMetricCollector extends AbstractMetricCollector {
+
+        /**
+         * Initialises a new {@link S3FileStorageMetricCollector.S3InternalMetricCollector}.
+         */
+        public S3InternalMetricCollector() {
+            super("s3");
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.openexchange.metrics.MetricCollector#start()
+         */
+        @Override
+        public void start() {
+            // TODO Auto-generated method stub
+
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.openexchange.metrics.MetricCollector#stop()
+         */
+        @Override
+        public void stop() {
+            // TODO Auto-generated method stub
+
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.openexchange.metrics.MetricCollector#isEnabled()
+         */
+        @Override
+        public boolean isEnabled() {
+            return false;
+        }
     }
 }

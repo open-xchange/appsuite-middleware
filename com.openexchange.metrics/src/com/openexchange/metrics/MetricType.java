@@ -53,6 +53,7 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry.MetricSupplier;
 import com.codahale.metrics.Timer;
 
 /**
@@ -75,10 +76,12 @@ public enum MetricType {
      */
     METER,
     /**
-     * A {@link Gauge} is the simplest metric type. It just returns a <i>value</i>. If, for
+     * <p>A {@link Gauge} is the simplest metric type. It just returns a <i>value</i>. If, for
      * example, the component has a value which is maintained by a third-party
      * library, it easily be exposed by registering a Gauge instance which
-     * returns that value.
+     * returns that value.</p>
+     * <p>{@link Gauge} is the only metric that requires a {@link MetricSupplier}
+     * to be passed along with the {@link MetricMetadata}.</p>
      */
     GAUGE,
     /**
