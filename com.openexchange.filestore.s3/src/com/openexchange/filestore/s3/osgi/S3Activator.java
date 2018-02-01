@@ -49,9 +49,11 @@
 
 package com.openexchange.filestore.s3.osgi;
 
+import com.amazonaws.metrics.AwsSdkMetrics;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.filestore.s3.internal.S3FileStorageFactory;
+import com.openexchange.filestore.s3.metrics.S3FileStorageMetricCollector;
 import com.openexchange.metrics.MetricCollectorRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -82,6 +84,13 @@ public class S3Activator extends HousekeepingActivator {
         registerService(FileStorageProvider.class, factory);
         trackService(MetricCollectorRegistry.class);
         openTrackers();
+
+        // Check for metric collection
+        boolean metricCollection = getService(ConfigurationService.class).getBoolProperty("com.openexchange.filestore.s3.metricCollection", false);
+        if (metricCollection) {
+            // Enable metric collection by overriding the default metrics
+            AwsSdkMetrics.setMetricCollector(new S3FileStorageMetricCollector(this));
+        }
     }
 
     @Override

@@ -249,12 +249,6 @@ public class S3FileStorageFactory implements FileStorageProvider {
                 encrypted = true;
             }
         }
-        // Check for metric collection
-        boolean metricCollection = configService.getBoolProperty(sb.append("metricCollection").toString(), false);
-        if (metricCollection) {
-            // Enable metric collection by overriding the default metrics
-            AwsSdkMetrics.setMetricCollector(new S3FileStorageMetricCollector(filestoreID, services));
-        }
         /*
          * configure client
          */

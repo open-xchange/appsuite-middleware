@@ -69,7 +69,7 @@ public class S3FileStorageMetricCollector extends com.amazonaws.metrics.MetricCo
     /**
      * Initialises a new {@link S3FileStorageMetricCollector}.
      */
-    public S3FileStorageMetricCollector(String filestoreId, ServiceLookup services) {
+    public S3FileStorageMetricCollector(ServiceLookup services) {
         super();
         MetricCollector internalCollector = new S3InternalMetricCollector();
         s3FileStorageRequestMetricCollector = new S3FileStorageRequestMetricCollector(internalCollector);
