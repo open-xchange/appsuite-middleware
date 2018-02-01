@@ -267,8 +267,9 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
     @Override
     public List<WebdavResource> filter(Filter filter) throws WebdavProtocolException {
         List<Object> arguments = new ArrayList<Object>(2);
-        if (false == FilterAnalyzer.VEVENT_RANGE_QUERY_ANALYZER.match(filter, arguments)) {
-            throw protocolException(getUrl(), HttpServletResponse.SC_NOT_IMPLEMENTED);
+        if (false == FilterAnalyzer.VEVENT_RANGE_QUERY_ANALYZER.match(filter, arguments) && 
+            false == FilterAnalyzer.VTODO_RANGE_QUERY_ANALYZER.match(filter, arguments)) {
+            throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "supported-filter", getUrl(), HttpServletResponse.SC_FORBIDDEN);
         }
         Date from = 0 < arguments.size() ? toDate(arguments.get(0)) : null;
         Date minDateTime = this.minDateTime.getMinDateTime();
