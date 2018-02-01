@@ -57,6 +57,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -72,6 +73,8 @@ import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.DefaultCalendarAccount;
+import com.openexchange.chronos.service.CalendarUtilities;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorage;
 import com.openexchange.chronos.storage.CalendarAvailabilityStorageFactory;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -184,10 +187,9 @@ public class ChronosCalendarCopyTask implements CopyUserTaskService {
         insertDestinationAttendees(attendees);
         //Alarms
         Map<String, Map<Integer, List<Alarm>>> alarmByEventByUser = exchangeAlarmIds(alarmByEvent, dstEventMapping, srcUsrId, dstUsrId);
-        insertDestinationAlarms(alarmByEventByUser);
+        insertDestinationAlarms(new ArrayList<>(dstEventMapping.values()), alarmByEventByUser, attendees);
         //AlarmTrigger
-        List<Event> dstEvents = new ArrayList<>(dstEventMapping.values());
-        insertDestinationAlarmTriggers(alarmByEventByUser, dstEvents);
+        insertDestinationAlarmTriggers(alarmByEventByUser, new ArrayList<>(dstEventMapping.values()));
         //PerUserProperties
         List<FolderProperties> properties = loadSourceFolderProperties(srcCon, srcCtx.getContextId(), srcUsrId, sourceFolderIds);
         exchangePropertyIds(properties, dstCtx.getContextId(), dstUsrId, folderMapping);
@@ -261,7 +263,7 @@ public class ChronosCalendarCopyTask implements CopyUserTaskService {
     }
 
     private Map<String, Event> exchangeEventIds(List<Event> srcEventList, Context dstCtx, int dstUsrId, int srcUsrId) throws OXException {
-        Map<String, Event> dstEventList = new HashMap<>(srcEventList.size());
+        Map<String, Event> dstEventList = new LinkedHashMap<>(srcEventList.size());
         for (Entry<String, List<Event>> entry : getEventsByUID(srcEventList, false).entrySet()) {
             List<Event> eventGroup = sortSeriesMasterFirst(entry.getValue());
             String srcSeriesMasterId = "";
@@ -292,6 +294,14 @@ public class ChronosCalendarCopyTask implements CopyUserTaskService {
                 srcEvent.setCreatedBy(calendarUser);
                 srcEvent.setModifiedBy(calendarUser);
                 srcEvent.setOrganizer(organizer);
+                srcEvent.setFolderId(srcEvent.getFolderId());
+                srcEvent.setRecurrenceId(srcEvent.getRecurrenceId());
+                srcEvent.setColor(srcEvent.getColor());
+                srcEvent.setTransp(srcEvent.getTransp());
+                srcEvent.setDeleteExceptionDates(srcEvent.getDeleteExceptionDates());
+                srcEvent.setChangeExceptionDates(srcEvent.getChangeExceptionDates());
+                srcEvent.setCategories(srcEvent.getCategories());
+                srcEvent.setFilename(srcEvent.getFilename());
                 dstEventList.put(srcEventId, srcEvent);
             }
         }
@@ -385,8 +395,19 @@ public class ChronosCalendarCopyTask implements CopyUserTaskService {
         dstCalendarStorage.getAttendeeStorage().insertAttendees(eventAttendeeMapping);
     }
 
-    private void insertDestinationAlarms(Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId) throws OXException {
-        dstCalendarStorage.getAlarmStorage().insertAlarms(alarmsByUserByEventId);
+    private void insertDestinationAlarms(List<Event> dstEvents, Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId, Map<String, List<Attendee>> attendees) throws OXException {
+        for (Event event : dstEvents) {
+            for (Entry<Integer, List<Alarm>> entry : alarmsByUserByEventId.get(event.getId()).entrySet()) {
+                for (Attendee attendee : attendees.get(event.getId())) {
+                    if (attendee.getEntity() == entry.getKey()) {
+                        event.setFolderId(attendee.getFolderId());
+                    }
+                }
+                Map<Integer, List<Alarm>> map = new HashMap<>();
+                map.put(entry.getKey(), entry.getValue());
+                dstCalendarStorage.getAlarmStorage().insertAlarms(event, map);
+            }
+        }
     }
 
     private void insertDestinationAlarmTriggers(Map<String, Map<Integer, List<Alarm>>> alarmByEventByUser, List<Event> eventList) throws OXException {
@@ -463,7 +484,7 @@ public class ChronosCalendarCopyTask implements CopyUserTaskService {
 
     private CalendarStorage createCalendarStorage(Context ctx, int accountId, final Connection readCon, final Connection writeCon) throws OXException {
         SimpleDBProvider simpleDBProvider = new SimpleDBProvider(readCon, writeCon);
-        return services.getService(CalendarStorageFactory.class).create(ctx, accountId, null, simpleDBProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+        return services.getService(CalendarStorageFactory.class).create(ctx, accountId, getEntityResolver(ctx), simpleDBProvider, DBTransactionPolicy.NO_TRANSACTIONS);
     }
 
     private CalendarAvailabilityStorage createCalendarAvailabilityStorage(Context ctx, final Connection readCon, final Connection writeCon) throws OXException {
@@ -477,6 +498,10 @@ public class ChronosCalendarCopyTask implements CopyUserTaskService {
 
     private String[] convertEventIds(Set<String> set) {
         return set.toArray(new String[set.size()]);
+    }
+
+    private EntityResolver getEntityResolver(Context ctx) throws OXException {
+        return services.getService(CalendarUtilities.class).getEntityResolver(ctx.getContextId());
     }
 
     private class FolderProperties {

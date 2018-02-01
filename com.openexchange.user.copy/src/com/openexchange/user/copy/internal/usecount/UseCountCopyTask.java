@@ -49,8 +49,8 @@
 
 package com.openexchange.user.copy.internal.usecount;
 
-import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -65,7 +65,7 @@ import com.openexchange.user.copy.CopyUserTaskService;
 import com.openexchange.user.copy.ObjectMapping;
 import com.openexchange.user.copy.UserCopyExceptionCodes;
 import com.openexchange.user.copy.internal.CopyTools;
-import com.openexchange.user.copy.internal.calendar.CalendarCopyTask;
+import com.openexchange.user.copy.internal.chronos.calendar.ChronosCalendarCopyTask;
 import com.openexchange.user.copy.internal.connection.ConnectionFetcherTask;
 import com.openexchange.user.copy.internal.contact.ContactCopyTask;
 import com.openexchange.user.copy.internal.context.ContextLoadTask;
@@ -92,7 +92,7 @@ public class UseCountCopyTask implements CopyUserTaskService {
     @Override
     public String[] getAlreadyCopied() {
         return new String[] { UserCopyTask.class.getName(), ContextLoadTask.class.getName(), ConnectionFetcherTask.class.getName(), FolderCopyTask.class.getName(),
-            CalendarCopyTask.class.getName(), ContactCopyTask.class.getName(), TaskCopyTask.class.getName() };
+            ChronosCalendarCopyTask.class.getName(), ContactCopyTask.class.getName(), TaskCopyTask.class.getName() };
     }
 
     @Override
