@@ -72,7 +72,6 @@ import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAcces
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.TruncationAwareCalendarStorage;
 import com.openexchange.chronos.service.CollectionUpdate;
-import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.chronos.service.ItemUpdate;
@@ -235,8 +234,7 @@ public class UpdateHandler extends AbstractHandler {
                     Attendee newUpdatedAttendee = AttendeeMapper.getInstance().copy(original, updated, AttendeeField.URI);
                     updatedAttendees.add(newUpdatedAttendee);
                 }
-                EntityResolver entityResolver = optEntityResolver(this.cachedCalendarAccess.getSession().getContextId());
-                calendarStorage.updateAttendees(eventId, entityResolver != null ? entityResolver.prepare(updatedAttendees) : updatedAttendees);
+                calendarStorage.updateAttendees(eventId, updatedAttendees);
             }
         }
     }
