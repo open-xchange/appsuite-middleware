@@ -51,6 +51,7 @@ package com.openexchange.filestore.s3.metrics;
 
 import com.amazonaws.metrics.RequestMetricCollector;
 import com.amazonaws.metrics.ServiceMetricCollector;
+import com.openexchange.exception.OXException;
 import com.openexchange.metrics.AbstractMetricCollector;
 import com.openexchange.metrics.MetricCollector;
 import com.openexchange.metrics.MetricCollectorRegistry;
@@ -68,8 +69,9 @@ public class S3FileStorageMetricCollector extends com.amazonaws.metrics.MetricCo
 
     /**
      * Initialises a new {@link S3FileStorageMetricCollector}.
+     * @throws OXException 
      */
-    public S3FileStorageMetricCollector(ServiceLookup services) {
+    public S3FileStorageMetricCollector(ServiceLookup services) throws OXException {
         super();
         MetricCollector internalCollector = new S3InternalMetricCollector();
         s3FileStorageRequestMetricCollector = new S3FileStorageRequestMetricCollector(internalCollector);
