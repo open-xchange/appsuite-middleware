@@ -72,8 +72,6 @@ import com.openexchange.chronos.provider.caching.internal.CachingCalendarAccessC
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.provider.caching.internal.handler.CachingHandler;
 import com.openexchange.chronos.provider.caching.internal.handler.utils.TruncationAwareCalendarStorage;
-import com.openexchange.chronos.service.CalendarUtilities;
-import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.context.ContextService;
@@ -191,8 +189,7 @@ public abstract class AbstractHandler implements CachingHandler {
         List<Attendee> attendees = importedEvent.getAttendees();
 
         if (null != attendees && !attendees.isEmpty()) {
-            EntityResolver entityResolver = optEntityResolver(this.cachedCalendarAccess.getSession().getContextId());
-            calendarStorage.insertAttendees(id, entityResolver != null ? entityResolver.prepare(attendees) : attendees);
+            calendarStorage.insertAttendees(id, attendees);
         }
 
         if (null != importedEvent.getAlarms() && !importedEvent.getAlarms().isEmpty()) {
@@ -235,10 +232,5 @@ public abstract class AbstractHandler implements CachingHandler {
         fields.addAll(Arrays.asList(all));
         fields.removeAll(IGNORED_FIELDS);
         return fields.toArray(new EventField[fields.size()]);
-    }
-
-    protected EntityResolver optEntityResolver(int contextId) throws OXException {
-        CalendarUtilities calendarUtilities = Services.getService(CalendarUtilities.class);
-        return null != calendarUtilities ? calendarUtilities.getEntityResolver(contextId) : null;
     }
 }

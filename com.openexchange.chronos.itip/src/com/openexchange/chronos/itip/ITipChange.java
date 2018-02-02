@@ -189,7 +189,7 @@ public class ITipChange {
 
     private void autodiff() throws OXException {
         if (currentEvent != null && newEvent != null && type == Type.UPDATE) {
-            diff = new ITipEventUpdate(new EventUpdateImpl(currentEvent, newEvent, true, AbstractITipAnalyzer.SKIP));
+            diff = new ITipEventUpdate(currentEvent, newEvent, true, AbstractITipAnalyzer.SKIP);
         }
 
         if (isException && master != null && newEvent != null && type == Type.CREATE) {
@@ -202,7 +202,7 @@ public class ITipChange {
                 while (recurrenceIterator.hasNext() && position >= recurrenceIterator.getPosition()) {
                     Event event = recurrenceIterator.next();
                     if (position == recurrenceIterator.getPosition()) {
-                        diff = new ITipEventUpdate(new EventUpdateImpl(event, newEvent, true, AbstractITipAnalyzer.SKIP));
+                        diff = new ITipEventUpdate(event, newEvent, true, AbstractITipAnalyzer.SKIP);
                         return;
                     }
                 }

@@ -130,7 +130,7 @@ public class AttachmentUtils {
      */
     public static int getModuleId(ContentType contentType) {
         if (null != contentType) {
-            if (CalendarContentType.getInstance().equals(contentType) || 
+            if (CalendarContentType.getInstance().equals(contentType) ||
                 com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance().equals(contentType)) {
                 return com.openexchange.groupware.Types.APPOINTMENT;
             }
@@ -256,7 +256,7 @@ public class AttachmentUtils {
      * @param size The indicated size in bytes of the attachment
      * @return The added attachment's metadata
      */
-    public static AttachmentMetadata addAttachment(AttachmentBase attachments, FolderCollection<?> collection, InputStream inputStream, int objectID, String contentType, String fileName, long size) throws OXException {
+    public static AttachmentMetadata addAttachment(AttachmentBase attachments, FolderCollection<?> collection, InputStream inputStream, int folderID, int objectID, String contentType, String fileName, long size) throws OXException {
         long maxSize = AttachmentConfig.getMaxUploadSize();
         if (0 < maxSize) {
             if (maxSize < size) {
@@ -271,7 +271,7 @@ public class AttachmentUtils {
         metadata.setFilename(fileName);
         metadata.setModuleId(getModuleId(collection.getFolder().getContentType()));
         metadata.setFilesize(size);
-        metadata.setFolderId(Integer.parseInt(collection.getFolder().getID()));
+        metadata.setFolderId(folderID);
         attachments.attachToObject(metadata, inputStream, factory.getSession(), factory.getContext(), factory.getUser(), factory.getUserConfiguration());
         return metadata;
     }

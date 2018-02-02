@@ -313,7 +313,7 @@ public abstract class DAVObjectResource<T> extends DAVResource {
      * @return The added attachment's metadata
      */
     protected AttachmentMetadata addAttachment(AttachmentBase attachments, InputStream inputStream, T targetObject, String contentType, String fileName, long size) throws OXException {
-        return AttachmentUtils.addAttachment(attachments, parent, inputStream, getId(targetObject), contentType, fileName, size);
+        return AttachmentUtils.addAttachment(attachments, parent, inputStream, getId(parent), getId(targetObject), contentType, fileName, size);
     }
 
 }

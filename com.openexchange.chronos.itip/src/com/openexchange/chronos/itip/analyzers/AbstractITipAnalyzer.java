@@ -310,7 +310,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
             // Can be the same object .. so omit roundtrip of diff
             return false;
         }
-        final ITipEventUpdate diff = new ITipEventUpdate(new EventUpdateImpl(original, update, true, AbstractITipAnalyzer.SKIP));
+        final ITipEventUpdate diff = new ITipEventUpdate(original, update, true, AbstractITipAnalyzer.SKIP);
         return !diff.getUpdatedFields().isEmpty();
     }
 
@@ -400,7 +400,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
     public boolean rescheduling(final ITipAnalysis analysis) throws OXException {
         for (final ITipChange change : analysis.getChanges()) {
             if (change.getType() == Type.CREATE && change.isException()) {
-                final ITipEventUpdate diff = new ITipEventUpdate(new EventUpdateImpl(change.getCurrentEvent(), change.getNewEvent(), true, (EventField[]) null));
+                final ITipEventUpdate diff = new ITipEventUpdate(change.getCurrentEvent(), change.getNewEvent(), true, (EventField[]) null);
                 if (diff.containsAnyChangeOf(new EventField[] { EventField.START_DATE, EventField.END_DATE })) {
                     return true;
                 }

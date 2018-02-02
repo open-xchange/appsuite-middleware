@@ -51,6 +51,7 @@ package com.openexchange.chronos.calendar.account.service.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.osgi.Tools.requireService;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -85,6 +86,8 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.cascade.ConfigViews;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.provider.DBTransactionPolicy;
+import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceExceptionCode;
@@ -273,7 +276,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
 
     @Override
     public List<CalendarAccount> getAccounts(Session session, int[] ids, CalendarParameters parameters) throws OXException {
-        CalendarAccount[] storedAccounts = initAccountStorage(session.getContextId()).loadAccounts(session.getUserId(), ids);
+        CalendarAccount[] storedAccounts = initAccountStorage(session.getContextId(), parameters).loadAccounts(session.getUserId(), ids);
         for (int i = 0; i < storedAccounts.length; i++) {
             if (null == storedAccounts[i] && CalendarAccount.DEFAULT_ACCOUNT.getAccountId() == ids[i]) {
                 if (isGuest(session)) {
@@ -344,20 +347,20 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
 
     @Override
     public List<CalendarAccount> getAccounts(int contextId, int userId) throws OXException {
-        return sort(initAccountStorage(contextId).loadAccounts(userId));
+        return sort(initAccountStorage(contextId, null).loadAccounts(userId));
     }
 
     @Override
     public List<CalendarAccount> getAccounts(int contextId, int[] userIds, String providerId) throws OXException {
-        return sort(initAccountStorage(contextId).loadAccounts(userIds, providerId));
+        return sort(initAccountStorage(contextId, null).loadAccounts(userIds, providerId));
     }
 
     @Override
     public CalendarAccount getAccount(int contextId, int userId, String providerId) throws OXException {
         if (CalendarAccount.DEFAULT_ACCOUNT.getProviderId().equals(providerId)) {
-            return initAccountStorage(contextId).loadAccount(userId, CalendarAccount.DEFAULT_ACCOUNT.getAccountId());
+            return initAccountStorage(contextId, null).loadAccount(userId, CalendarAccount.DEFAULT_ACCOUNT.getAccountId());
         }
-        return initAccountStorage(contextId).loadAccount(userId, providerId);
+        return initAccountStorage(contextId, null).loadAccount(userId, providerId);
     }
 
     @Override
@@ -472,12 +475,18 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
      * Initializes the calendar account storage for a specific context with default settings, i.e. no special transaction policy.
      *
      * @param contextId The context identifier
+     * @param parameters The calendar parameters, or <code>null</code> if no available
      * @return The account storage
      */
-    private CalendarAccountStorage initAccountStorage(int contextId) throws OXException {
+    private CalendarAccountStorage initAccountStorage(int contextId, CalendarParameters parameters) throws OXException {
+        CalendarStorageFactory storageFactory = requireService(CalendarStorageFactory.class, services);
         Context context = requireService(ContextService.class, services).getContext(contextId);
-        CalendarStorage storage = requireService(CalendarStorageFactory.class, services).create(context, -1, null);
-        return storage.getAccountStorage();
+        Connection connection = null == parameters ? null : parameters.get(Connection.class.getName(), Connection.class);
+        if (null != connection) {
+            SimpleDBProvider dbProvider = new SimpleDBProvider(connection, connection);
+            return storageFactory.create(context, -1, null, dbProvider, DBTransactionPolicy.NO_TRANSACTIONS).getAccountStorage();
+        }
+        return storageFactory.create(context, -1, null).getAccountStorage();
     }
 
     private static CalendarAccount find(Collection<CalendarAccount> accounts, String providerId) {
@@ -501,7 +510,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
     }
 
     private void invalidateStorage(int contextId, int userId, int accountId) throws OXException {
-        initAccountStorage(contextId).invalidateAccount(userId, accountId);
+        initAccountStorage(contextId, null).invalidateAccount(userId, accountId);
     }
 
     private int getMaxAccounts(CalendarProvider provider, int contextId, int userId) throws OXException {
