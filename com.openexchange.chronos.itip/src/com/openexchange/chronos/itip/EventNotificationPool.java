@@ -320,7 +320,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
 
         public ITipEventUpdate getDiff() throws OXException {
             if (diff == null) {
-                diff = new ITipEventUpdate(new EventUpdateImpl(oldAppointment, newAppointment, true, NotificationMailGenerator.DEFAULT_SKIP));
+                diff = new ITipEventUpdate(oldAppointment, newAppointment, true, NotificationMailGenerator.DEFAULT_SKIP);
             }
             return diff;
         }
@@ -381,7 +381,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
                 return HandlingSuggestion.DONE;
             }
             // Diff most recent and original version
-            ITipEventUpdate overallDiff = new ITipEventUpdate(new EventUpdateImpl(original, mostRecent, true, NotificationMailGenerator.DEFAULT_SKIP));
+            ITipEventUpdate overallDiff = new ITipEventUpdate(original, mostRecent, true, NotificationMailGenerator.DEFAULT_SKIP);
 
             if (overallDiff.isAboutStateChangesOnly()) {
                 if (!force && getInterval() < stateChangeInterval && getIntervalToStartDate() > priorityInterval) {
@@ -450,7 +450,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
         private boolean isAlreadyInformed(NotificationParticipant participant, Event mostRecent, int contextId) throws OXException {
             Event alreadySent = removeFromSent(participant, mostRecent, contextId);
             if (alreadySent != null) {
-                ITipEventUpdate diff = new ITipEventUpdate(new EventUpdateImpl(alreadySent, mostRecent, true, (EventField[]) null));
+                ITipEventUpdate diff = new ITipEventUpdate(alreadySent, mostRecent, true, (EventField[]) null);
                 return diff.getUpdatedFields().isEmpty();
             }
             return false;

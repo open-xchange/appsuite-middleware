@@ -185,7 +185,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         this.session = session;
 
         if (original != null) {
-            this.diff = new ITipEventUpdate(new EventUpdateImpl(original, updated, true, DEFAULT_SKIP));
+            this.diff = new ITipEventUpdate(original, updated, true, DEFAULT_SKIP);
         }
 
         if (actor.hasRole(ITipRole.ORGANIZER) || actor.hasRole(ITipRole.PRINCIPAL)) {
