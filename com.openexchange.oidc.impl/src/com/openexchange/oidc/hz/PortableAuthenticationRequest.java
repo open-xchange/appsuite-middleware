@@ -137,9 +137,11 @@ public class PortableAuthenticationRequest extends AbstractCustomPortable {
         Map<String, String> result = new HashMap<>();
         for (String uiInformation : readUTFArray) {
             int pos = uiInformation.indexOf(EQUAL_SIGN);
-            String key = uiInformation.substring(0, pos);
-            String value = uiInformation.substring(pos + EQUAL_SIGN.length());
-            result.put(key, value);
+            if (pos > 0) {
+                String key = uiInformation.substring(0, pos);
+                String value = uiInformation.substring(pos + EQUAL_SIGN.length());
+                result.put(key, value);
+            }
         }
         return result;
     }
