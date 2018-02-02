@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,29 +47,42 @@
  *
  */
 
-package com.openexchange.metrics;
+package com.openexchange.metrics.jmx.impl;
 
-import com.codahale.metrics.Metric;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.MetricRegistry.MetricSupplier;
+import javax.management.NotCompliantMBeanException;
+import com.codahale.metrics.Counter;
+import com.openexchange.management.AnnotatedStandardMBean;
+import com.openexchange.metrics.jmx.CounterMBean;
 
 /**
- * {@link MetricTypeRegisterer}
+ * {@link CounterMBeanImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface MetricTypeRegisterer {
+public class CounterMBeanImpl extends AnnotatedStandardMBean implements CounterMBean {
+
+    private static final String DESCRIPTION = "Counter MBean";
+    private final Counter counter;
 
     /**
-     * Registers the a {@link Metric} with the specified name in the specified {@link MetricRegistry}
-     * and with the specified (optional) {@link MetricSupplier}. If another {@link Metric} with the same
-     * specification (name + metric supplier) already exists, then that {@link Metric} will be returned instead.
+     * Initialises a new {@link CounterMBeanImpl}.
      * 
-     * @param componentName The name of the component
-     * @param metricName The name of the {@link Metric}
-     * @param metricRegistry The {@link MetricRegistry}
-     * @param metricSupplier The optional {@link MetricSupplier}
-     * @return The created {@link Metric} or a pre-existing one
+     * @param description
+     * @param mbeanInterface
+     * @throws NotCompliantMBeanException
      */
-    Metric register(String componentName, String metricName, MetricRegistry metricRegistry, MetricSupplier<? extends Metric> metricSupplier);
+    public CounterMBeanImpl(Counter counter) throws NotCompliantMBeanException {
+        super(DESCRIPTION, CounterMBean.class);
+        this.counter = counter;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.jmx.CounterMBean#getCount()
+     */
+    @Override
+    public long getCount() {
+        return counter.getCount();
+    }
 }

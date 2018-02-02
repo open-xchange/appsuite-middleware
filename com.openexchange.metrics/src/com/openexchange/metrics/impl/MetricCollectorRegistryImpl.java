@@ -53,18 +53,31 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.ObjectName;
+import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Histogram;
+import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.MetricRegistry.MetricSupplier;
 import com.codahale.metrics.SharedMetricRegistries;
-import com.codahale.metrics.jmx.JmxReporter;
+import com.codahale.metrics.Timer;
 import com.openexchange.exception.OXException;
+import com.openexchange.management.ManagementService;
 import com.openexchange.metrics.AbstractMetricCollector;
 import com.openexchange.metrics.MetricCollector;
 import com.openexchange.metrics.MetricCollectorRegistry;
 import com.openexchange.metrics.MetricMetadata;
 import com.openexchange.metrics.MetricType;
 import com.openexchange.metrics.MetricTypeRegisterer;
+import com.openexchange.metrics.jmx.impl.CounterMBeanImpl;
+import com.openexchange.metrics.jmx.impl.GaugeMBeanImpl;
+import com.openexchange.metrics.jmx.impl.HistogramMBeanImpl;
+import com.openexchange.metrics.jmx.impl.MeterMBeanImpl;
+import com.openexchange.metrics.jmx.impl.TimerMBeanImpl;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link MetricCollectorRegistryImpl}
@@ -73,6 +86,7 @@ import com.openexchange.metrics.MetricTypeRegisterer;
  */
 public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
 
+    private static final String DOMAIN_NAME = "com.openexchange.metrics";
     private final Map<MetricType, MetricTypeRegisterer> registerers;
     private final Map<String, MetricCollector> collectors;
 
@@ -80,17 +94,78 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
      * Initialises a new {@link MetricCollectorRegistryImpl}.
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public MetricCollectorRegistryImpl() {
+    public MetricCollectorRegistryImpl(ServiceLookup services) {
         super();
         collectors = new ConcurrentHashMap<>();
 
         Map<MetricType, MetricTypeRegisterer> r = new HashMap<>();
-        r.put(MetricType.COUNTER, (name, metricRegistry, supplier) -> metricRegistry.counter(name));
-        r.put(MetricType.TIMER, (name, metricRegistry, supplier) -> metricRegistry.timer(name));
-        r.put(MetricType.METER, (name, metricRegistry, supplier) -> metricRegistry.meter(name));
-        r.put(MetricType.HISTOGRAM, (name, metricRegistry, supplier) -> metricRegistry.histogram(name));
-        r.put(MetricType.GAUGE, (name, metricRegistry, supplier) -> metricRegistry.gauge(name, (MetricSupplier<Gauge>) supplier));
+        r.put(MetricType.COUNTER, (componentName, metricName, metricRegistry, supplier) -> {
+            Counter counter = metricRegistry.counter(metricName);
+            try {
+                ManagementService managementService = services.getService(ManagementService.class);
+                managementService.registerMBean(getObjectName(componentName, metricName), new CounterMBeanImpl(counter));
+            } catch (OXException | MalformedObjectNameException | NotCompliantMBeanException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            return counter;
+        });
+        r.put(MetricType.TIMER, (componentName, metricName, metricRegistry, supplier) -> {
+            Timer timer = metricRegistry.timer(metricName);
+            try {
+                ManagementService managementService = services.getService(ManagementService.class);
+                managementService.registerMBean(getObjectName(componentName, metricName), new TimerMBeanImpl(timer));
+            } catch (OXException | MalformedObjectNameException | NotCompliantMBeanException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            return timer;
+        });
+        r.put(MetricType.METER, (componentName, metricName, metricRegistry, supplier) -> {
+            Meter meter = metricRegistry.meter(metricName);
+            try {
+                ManagementService managementService = services.getService(ManagementService.class);
+                managementService.registerMBean(getObjectName(componentName, metricName), new MeterMBeanImpl(meter));
+            } catch (OXException | MalformedObjectNameException | NotCompliantMBeanException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            return meter;
+        });
+        r.put(MetricType.HISTOGRAM, (componentName, metricName, metricRegistry, supplier) -> {
+            Histogram histogram = metricRegistry.histogram(metricName);
+            try {
+                ManagementService managementService = services.getService(ManagementService.class);
+                managementService.registerMBean(getObjectName(componentName, metricName), new HistogramMBeanImpl(histogram));
+            } catch (OXException | MalformedObjectNameException | NotCompliantMBeanException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            return histogram;
+        });
+        r.put(MetricType.GAUGE, (componentName, metricName, metricRegistry, supplier) -> {
+            Gauge gauge = metricRegistry.gauge(metricName, (MetricSupplier<Gauge>) supplier);
+            try {
+                ManagementService managementService = services.getService(ManagementService.class);
+                managementService.registerMBean(getObjectName(componentName, metricName), new GaugeMBeanImpl(gauge));
+            } catch (OXException | MalformedObjectNameException | NotCompliantMBeanException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            return gauge;
+        });
         registerers = Collections.unmodifiableMap(r);
+    }
+
+    /**
+     * @return
+     * @throws MalformedObjectNameException
+     */
+    private ObjectName getObjectName(String componentName, String metricName) throws MalformedObjectNameException {
+        StringBuilder sb = new StringBuilder(DOMAIN_NAME);
+        sb.append(":00=").append(componentName);
+        sb.append(",name=").append(metricName);
+        return new ObjectName(sb.toString());
     }
 
     /*
@@ -111,12 +186,12 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
         ((AbstractMetricCollector) metricCollector).setMetricRegistry(metricRegistry);
 
         for (MetricMetadata metadata : metricCollector.getMetricMetadata()) {
-            registerers.get(metadata.getMetricType()).register(metadata.getMetricName(), metricRegistry, metadata.getMetricSupplier());
+            registerers.get(metadata.getMetricType()).register(metricCollector.getComponentName(), metadata.getMetricName(), metricRegistry, metadata.getMetricSupplier());
         }
 
         // TODO: implement JMX Reporter
-        JmxReporter reporter = JmxReporter.forRegistry(metricRegistry).inDomain("com.openexchange.metrics." + metricCollector.getComponentName()).build();
-        reporter.start();
+        //JmxReporter reporter = JmxReporter.forRegistry(metricRegistry).inDomain("com.openexchange.metrics." + metricCollector.getComponentName()).build();
+        //reporter.start();
     }
 
     /*

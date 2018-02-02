@@ -12,6 +12,7 @@ Export-Package: com.codahale.metrics,
  com.openexchange.metrics
 Import-Package: com.codahale.metrics,
  com.openexchange.exception,
+ com.openexchange.management,
  com.openexchange.osgi,
  com.openexchange.server,
  javax.management,

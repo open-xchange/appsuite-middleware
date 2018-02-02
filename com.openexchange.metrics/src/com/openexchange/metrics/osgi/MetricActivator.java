@@ -49,6 +49,7 @@
 
 package com.openexchange.metrics.osgi;
 
+import com.openexchange.management.ManagementService;
 import com.openexchange.metrics.MetricCollectorRegistry;
 import com.openexchange.metrics.impl.MetricCollectorRegistryImpl;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -74,7 +75,7 @@ public class MetricActivator extends HousekeepingActivator {
      */
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { ManagementService.class };
     }
 
     /*
@@ -84,7 +85,7 @@ public class MetricActivator extends HousekeepingActivator {
      */
     @Override
     protected void startBundle() throws Exception {
-        registerService(MetricCollectorRegistry.class, new MetricCollectorRegistryImpl());
+        registerService(MetricCollectorRegistry.class, new MetricCollectorRegistryImpl(this));
     }
 
     /*

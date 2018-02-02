@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,29 +47,93 @@
  *
  */
 
-package com.openexchange.metrics;
+package com.openexchange.metrics.jmx.impl;
 
-import com.codahale.metrics.Metric;
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.MetricRegistry.MetricSupplier;
+import javax.management.NotCompliantMBeanException;
+import com.codahale.metrics.Meter;
+import com.openexchange.metrics.jmx.MeterMBean;
 
 /**
- * {@link MetricTypeRegisterer}
+ * {@link MeterMBeanImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface MetricTypeRegisterer {
+public class MeterMBeanImpl extends AbstractMetricMBean implements MeterMBean {
+
+    private static final String DESCRIPTION = "Meter MBean";
+    private final double rateFactor = 0.0; //TODO: set accordingly
+    private final String rateUnit = "milliseconds"; //TODO: set accordingly
+    private final Meter meter;
 
     /**
-     * Registers the a {@link Metric} with the specified name in the specified {@link MetricRegistry}
-     * and with the specified (optional) {@link MetricSupplier}. If another {@link Metric} with the same
-     * specification (name + metric supplier) already exists, then that {@link Metric} will be returned instead.
+     * Initialises a new {@link MeterMBeanImpl}.
      * 
-     * @param componentName The name of the component
-     * @param metricName The name of the {@link Metric}
-     * @param metricRegistry The {@link MetricRegistry}
-     * @param metricSupplier The optional {@link MetricSupplier}
-     * @return The created {@link Metric} or a pre-existing one
+     * @param description
+     * @throws NotCompliantMBeanException
      */
-    Metric register(String componentName, String metricName, MetricRegistry metricRegistry, MetricSupplier<? extends Metric> metricSupplier);
+    public MeterMBeanImpl(Meter meter) throws NotCompliantMBeanException {
+        super(DESCRIPTION, MeterMBean.class);
+        this.meter = meter;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.jmx.MeterMBean#getCount()
+     */
+    @Override
+    public long getCount() {
+        return meter.getCount();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.jmx.MeterMBean#getMeanRate()
+     */
+    @Override
+    public double getMeanRate() {
+        return meter.getMeanRate() * rateFactor;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.jmx.MeterMBean#getOneMinuteRate()
+     */
+    @Override
+    public double getOneMinuteRate() {
+        return meter.getOneMinuteRate() * rateFactor;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.jmx.MeterMBean#getFiveMinuteRate()
+     */
+    @Override
+    public double getFiveMinuteRate() {
+        return meter.getFiveMinuteRate() * rateFactor;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.jmx.MeterMBean#getFifteenMinuteRate()
+     */
+    @Override
+    public double getFifteenMinuteRate() {
+        return meter.getFifteenMinuteRate() * rateFactor;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.jmx.MeterMBean#getRateUnit()
+     */
+    @Override
+    public String getRateUnit() {
+        return rateUnit;
+    }
+
 }
