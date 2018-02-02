@@ -49,6 +49,7 @@
 
 package com.openexchange.metrics;
 
+import java.util.concurrent.TimeUnit;
 import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry.MetricSupplier;
 
@@ -62,6 +63,8 @@ public class MetricMetadata {
     private final String metricName;
     private final MetricType metricType;
     private final MetricSupplier<? extends Metric> metricSupplier;
+    private String metricRate = "events";
+    private TimeUnit metricTimeUnit = TimeUnit.MILLISECONDS;
 
     /**
      * Initialises a new {@link MetricMetadata}.
@@ -78,6 +81,18 @@ public class MetricMetadata {
         this.metricType = metricType;
         this.metricName = metricName;
         this.metricSupplier = metricSupplier;
+    }
+
+    /**
+     * 
+     * Initialises a new {@link MetricMetadata}.
+     */
+    public MetricMetadata(MetricType metricType, String metricName, String metricRate, TimeUnit metricTimeUnit) {
+        this.metricType = metricType;
+        this.metricName = metricName;
+        this.metricTimeUnit = metricTimeUnit;
+        this.metricRate = metricRate;
+        this.metricSupplier = null;
     }
 
     /**
@@ -105,5 +120,23 @@ public class MetricMetadata {
      */
     public MetricType getMetricType() {
         return metricType;
+    }
+
+    /**
+     * Gets the metricRate
+     *
+     * @return The metricRate
+     */
+    public String getMetricRate() {
+        return metricRate;
+    }
+
+    /**
+     * Gets the metricTimeUnit
+     *
+     * @return The metricTimeUnit
+     */
+    public TimeUnit getMetricTimeUnit() {
+        return metricTimeUnit;
     }
 }

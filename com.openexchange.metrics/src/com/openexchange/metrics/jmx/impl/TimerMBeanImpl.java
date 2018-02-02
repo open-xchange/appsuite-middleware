@@ -49,6 +49,8 @@
 
 package com.openexchange.metrics.jmx.impl;
 
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 import javax.management.NotCompliantMBeanException;
 import com.codahale.metrics.Timer;
 import com.openexchange.metrics.jmx.TimerMBean;
@@ -62,19 +64,19 @@ public class TimerMBeanImpl extends AbstractMetricMBean implements TimerMBean {
 
     private static final String DESCRIPTION = "Timer MBean";
     private final Timer timer;
-    private final double durationFactor = 0.0; //TODO: set accordingly
-    private final String durationUnit = "milliseconds"; //TODO: set accordingly
+    private final double durationFactor;
+    private final String durationUnit;
 
     /**
      * Initialises a new {@link TimerMBeanImpl}.
      * 
-     * @param description
-     * @param mbeanInterface
      * @throws NotCompliantMBeanException
      */
-    public TimerMBeanImpl(Timer timer) throws NotCompliantMBeanException {
+    public TimerMBeanImpl(Timer timer, TimeUnit timeUnit) throws NotCompliantMBeanException {
         super(DESCRIPTION, TimerMBean.class);
         this.timer = timer;
+        this.durationFactor = 1.0 / timeUnit.toNanos(1);
+        this.durationUnit = timeUnit.toString().toLowerCase(Locale.US);
     }
 
     /*

@@ -49,6 +49,8 @@
 
 package com.openexchange.metrics.jmx.impl;
 
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 import javax.management.NotCompliantMBeanException;
 import com.codahale.metrics.Meter;
 import com.openexchange.metrics.jmx.MeterMBean;
@@ -61,19 +63,30 @@ import com.openexchange.metrics.jmx.MeterMBean;
 public class MeterMBeanImpl extends AbstractMetricMBean implements MeterMBean {
 
     private static final String DESCRIPTION = "Meter MBean";
-    private final double rateFactor = 0.0; //TODO: set accordingly
-    private final String rateUnit = "milliseconds"; //TODO: set accordingly
+    private final double rateFactor;
+    private final String rateUnit;
     private final Meter meter;
 
     /**
      * Initialises a new {@link MeterMBeanImpl}.
      * 
-     * @param description
      * @throws NotCompliantMBeanException
      */
-    public MeterMBeanImpl(Meter meter) throws NotCompliantMBeanException {
+    public MeterMBeanImpl(Meter meter, String rateItem, TimeUnit rateUnit) throws NotCompliantMBeanException {
         super(DESCRIPTION, MeterMBean.class);
         this.meter = meter;
+        this.rateFactor = rateUnit.toSeconds(1);
+        this.rateUnit = rateItem + "/" + calculateRateUnit(rateUnit);
+    }
+
+    /**
+     * 
+     * @param unit
+     * @return
+     */
+    private String calculateRateUnit(TimeUnit unit) {
+        final String s = unit.toString().toLowerCase(Locale.US);
+        return s.substring(0, s.length() - 1);
     }
 
     /*

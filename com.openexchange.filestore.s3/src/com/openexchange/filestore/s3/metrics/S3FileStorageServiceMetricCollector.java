@@ -49,6 +49,7 @@
 
 package com.openexchange.filestore.s3.metrics;
 
+import java.util.concurrent.TimeUnit;
 import com.amazonaws.metrics.ByteThroughputProvider;
 import com.amazonaws.metrics.ServiceLatencyProvider;
 import com.amazonaws.metrics.ServiceMetricCollector;
@@ -65,7 +66,7 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
 
     private static final String COUNTER_TOTAL_BYTES = "counter.totalBytes";
     private static final String METER_THROUPUT = "meter.throuput";
-    
+
     private final MetricCollector internalCollector;
 
     /**
@@ -74,7 +75,7 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
     public S3FileStorageServiceMetricCollector(MetricCollector metricCollector) {
         super();
         internalCollector = metricCollector;
-        internalCollector.getMetricMetadata().add(new MetricMetadata(MetricType.METER, METER_THROUPUT));
+        internalCollector.getMetricMetadata().add(new MetricMetadata(MetricType.METER, METER_THROUPUT, "bytes", TimeUnit.SECONDS));
         internalCollector.getMetricMetadata().add(new MetricMetadata(MetricType.COUNTER, COUNTER_TOTAL_BYTES));
     }
 

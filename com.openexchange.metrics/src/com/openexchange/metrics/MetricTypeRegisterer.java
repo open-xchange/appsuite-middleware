@@ -66,10 +66,10 @@ public interface MetricTypeRegisterer {
      * specification (name + metric supplier) already exists, then that {@link Metric} will be returned instead.
      * 
      * @param componentName The name of the component
-     * @param metricName The name of the {@link Metric}
+     * @param metricMetadata The metadata of the {@link Metric}
      * @param metricRegistry The {@link MetricRegistry}
      * @param metricSupplier The optional {@link MetricSupplier}
      * @return The created {@link Metric} or a pre-existing one
      */
-    Metric register(String componentName, String metricName, MetricRegistry metricRegistry, MetricSupplier<? extends Metric> metricSupplier);
+    Metric register(String componentName, MetricMetadata metricMetadata, MetricRegistry metricRegistry, MetricSupplier<? extends Metric> metricSupplier);
 }
