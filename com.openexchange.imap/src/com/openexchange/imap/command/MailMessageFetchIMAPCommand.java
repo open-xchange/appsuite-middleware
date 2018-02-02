@@ -89,6 +89,7 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.converters.AlternativeHasAttachmentSetter;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.converters.MimeMessageUtils;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -643,13 +644,21 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                 itemHandler.handleItem(item, m, LOG);
             }
         }
-        if (MimeMessageConverter.handleSetAttachmentViaFlags(mailConfig, m.getUserFlags())) {
-            MimeMessageConverter.setHasAttachmentViaUserFlags(m, m.getUserFlags());
-        } else if (determineAttachmentByHeader) {
-            final String cts = m.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
-            if (null != cts) {
-                m.setHasAttachment(new ContentType(cts).startsWith("multipart/mixed"));
-            }
+        try {
+            MimeMessageConverter.setHasAttachment(mailConfig, mail, m.getUserFlags(), new AlternativeHasAttachmentSetter() {
+
+                @Override
+                public void setAlternative(MailMessage localMail) throws OXException, MessagingException {
+                    if (determineAttachmentByHeader) {
+                        final String cts = localMail.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
+                        if (null != cts) {
+                            localMail.setHasAttachment(new ContentType(cts).startsWith("multipart/mixed"));
+                        }
+                    }
+                }
+            });
+        } catch (IOException e) {
+            LOG.warn("Unable to set 'hasAttachment'", e);
         }
 
         // Drop possible set "com.openexchange.mail.mailId" log property
@@ -1140,22 +1149,29 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             }
             msg.setContentType(contentType);
             msg.addHeader("Content-Type", contentType.toString(true));
-            if (MimeMessageConverter.handleSetAttachmentViaFlags(mailConfig, msg.getUserFlags())) {
-                MimeMessageConverter.setHasAttachmentViaUserFlags(msg, msg.getUserFlags());
-            } else {
-                boolean hasAttachment = MimeMessageUtility.hasAttachments(bs);
-                if (hasAttachment) {
-                    if (checkICal && hasICal(bs)) {
-                        msg.addHeader("X-ICAL", "true");
-                    }
 
-                    if (checkVCard && hasVCard(bs)) {
-                        msg.addHeader("X-VCARD", "true");
+            try {
+                MimeMessageConverter.setHasAttachment(mailConfig, msg, msg.getUserFlags(), new AlternativeHasAttachmentSetter() {
+
+                    @Override
+                    public void setAlternative(MailMessage localMail) throws OXException, MessagingException {
+                        boolean hasAttachment = MimeMessageUtility.hasAttachments(bs);
+                        if (hasAttachment) {
+                            if (checkICal && hasICal(bs)) {
+                                localMail.addHeader("X-ICAL", "true");
+                            }
+
+                            if (checkVCard && hasVCard(bs)) {
+                                localMail.addHeader("X-VCARD", "true");
+                            }
+                        } else if (treatEmbeddedAsAttachment) {
+                            hasAttachment = hasEmbedded(bs);
+                        }
+                        localMail.setHasAttachment(hasAttachment);
                     }
-                } else if (treatEmbeddedAsAttachment) {
-                    hasAttachment = hasEmbedded(bs);
-                }
-                msg.setHasAttachment(hasAttachment);
+                });
+            } catch (MessagingException | IOException e) {
+                LOG.warn("Unable to set 'hasAttachment'", e);
             }
         }
 
@@ -1214,30 +1230,35 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
         @Override
         public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException, OXException {
-            if (MimeMessageConverter.handleSetAttachmentViaFlags(mailConfig, message.getFlags().getUserFlags())) {
-                MimeMessageConverter.setHasAttachmentViaUserFlags(msg, message.getFlags().getUserFlags());
-            } else {
-                String contentType;
-                try {
-                    contentType = message.getContentType();
-                } catch (final MessagingException e) {
-                    final String[] header = message.getHeader("Content-Type");
-                    if (null != header && header.length > 0) {
-                        contentType = header[0];
-                    } else {
-                        contentType = null;
+            try {
+                MimeMessageConverter.setHasAttachment(mailConfig, msg, message.getFlags().getUserFlags(), new AlternativeHasAttachmentSetter() {
+
+                    @Override
+                    public void setAlternative(MailMessage localMail) throws OXException, MessagingException {
+                        String contentType;
+                        try {
+                            contentType = message.getContentType();
+                        } catch (final MessagingException e) {
+                            final String[] header = message.getHeader("Content-Type");
+                            if (null != header && header.length > 0) {
+                                contentType = header[0];
+                            } else {
+                                contentType = null;
+                            }
+                        }
+                        if (null == contentType) {
+                            localMail.setHasAttachment(false);
+                        } else {
+                            try {
+                                localMail.setHasAttachment(MimeMessageUtility.hasAttachments((Part) message.getContent()));
+                            } catch (final IOException e) {
+                                throw new MessagingException(e.getMessage(), e);
+                            }
+                        }
                     }
-                }
-                if (null == contentType) {
-                    msg.setHasAttachment(false);
-                } else {
-                    try {
-                        final ContentType ct = new ContentType(contentType);
-                        msg.setHasAttachment(MimeMessageUtility.hasAttachments((Part) message.getContent()));
-                    } catch (final IOException e) {
-                        throw new MessagingException(e.getMessage(), e);
-                    }
-                }
+                });
+            } catch (IOException e) {
+                LOG.warn("Unable to set 'hasAttachment'", e);
             }
         }
     }

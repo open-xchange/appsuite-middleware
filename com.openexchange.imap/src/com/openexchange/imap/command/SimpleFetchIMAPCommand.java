@@ -80,6 +80,7 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
+import com.openexchange.mail.mime.converters.AlternativeHasAttachmentSetter;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.converters.MimeMessageUtils;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -360,15 +361,22 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
             if (null != textPreviewMode) {
                 mail.setTextPreview(textPreviewProvider.getTextPreview(mail.getUid(), textPreviewMode));
             }
-            if (MimeMessageConverter.handleSetAttachmentViaFlags(mailConfig, mail.getUserFlags())) {
-                MimeMessageConverter.setHasAttachmentViaUserFlags(mail, mail.getUserFlags());
-            } else {
-                if (determineAttachmentByHeader) {
-                    final String cts = mail.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
-                    if (null != cts) {
-                        mail.setHasAttachment(new ContentType(cts).startsWith("multipart/mixed"));
+
+            try {
+                MimeMessageConverter.setHasAttachment(mailConfig, mail, mail.getUserFlags(), new AlternativeHasAttachmentSetter() {
+
+                    @Override
+                    public void setAlternative(MailMessage localMail) throws OXException, MessagingException {
+                        if (determineAttachmentByHeader) {
+                            final String cts = localMail.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
+                            if (null != cts) {
+                                localMail.setHasAttachment(new ContentType(cts).startsWith("multipart/mixed"));
+                            }
+                        }
                     }
-                }
+                });
+            } catch (IOException e) {
+                LOG.warn("Unable to set 'hasAttachment'", e);
             }
         } catch (final MessagingException e) {
             /*
@@ -806,6 +814,8 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
 
     private static final class BODYSTRUCTUREItemHandler implements FetchItemHandler {
 
+        private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BODYSTRUCTUREItemHandler.class);
+
         private final MailConfig mailConfig;
 
         BODYSTRUCTUREItemHandler(MailConfig mailConfig) {
@@ -815,54 +825,66 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
 
         @Override
         public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) throws OXException {
-            if (MimeMessageConverter.handleSetAttachmentViaFlags(mailConfig, msg.getUserFlags())) {
-                MimeMessageConverter.setHasAttachmentViaUserFlags(msg, msg.getUserFlags());
-            } else {
-                final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
-                final StringBuilder sb = new StringBuilder();
-                sb.append(bs.type).append('/').append(bs.subtype);
-                if (bs.cParams != null) {
-                    sb.append(bs.cParams);
-                }
-                try {
-                    final String contentType = sb.toString();
-                    msg.setContentType(new ContentType(contentType));
-                    msg.addHeader("Content-Type", contentType);
-                } catch (final OXException e) {
-                    logger.warn("", e);
-                    msg.setContentType(new ContentType(MimeTypes.MIME_DEFAULT));
-                    msg.addHeader("Content-Type", MimeTypes.MIME_DEFAULT);
-                }
-                msg.setHasAttachment(MimeMessageUtility.hasAttachments(bs));
+            try {
+                MimeMessageConverter.setHasAttachment(mailConfig, msg, msg.getUserFlags(), new AlternativeHasAttachmentSetter() {
+
+                    @Override
+                    public void setAlternative(MailMessage localMail) throws OXException, MessagingException {
+                        final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
+                        final StringBuilder sb = new StringBuilder();
+                        sb.append(bs.type).append('/').append(bs.subtype);
+                        if (bs.cParams != null) {
+                            sb.append(bs.cParams);
+                        }
+                        try {
+                            final String contentType = sb.toString();
+                            localMail.setContentType(new ContentType(contentType));
+                            localMail.addHeader("Content-Type", contentType);
+                        } catch (final OXException e) {
+                            logger.warn("", e);
+                            localMail.setContentType(new ContentType(MimeTypes.MIME_DEFAULT));
+                            localMail.addHeader("Content-Type", MimeTypes.MIME_DEFAULT);
+                        }
+                        localMail.setHasAttachment(MimeMessageUtility.hasAttachments(bs));
+                    }
+                });
+            } catch (IOException | MessagingException e) {
+                LOG.warn("Unable to set 'hasAttachment'", e);
             }
         }
 
         @Override
         public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException, OXException {
-            if (MimeMessageConverter.handleSetAttachmentViaFlags(mailConfig, message.getFlags().getUserFlags())) {
-                MimeMessageConverter.setHasAttachmentViaUserFlags(msg, message.getFlags().getUserFlags());
-            } else {
-                String contentType;
-                try {
-                    contentType = message.getContentType();
-                } catch (final MessagingException e) {
-                    final String[] header = message.getHeader("Content-Type");
-                    if (null != header && header.length > 0) {
-                        contentType = header[0];
-                    } else {
-                        contentType = null;
+            try {
+                MimeMessageConverter.setHasAttachment(mailConfig, msg, message.getFlags().getUserFlags(), new AlternativeHasAttachmentSetter() {
+
+                    @Override
+                    public void setAlternative(MailMessage localMail) throws OXException, MessagingException {
+                        String contentType;
+                        try {
+                            contentType = message.getContentType();
+                        } catch (final MessagingException e) {
+                            final String[] header = message.getHeader("Content-Type");
+                            if (null != header && header.length > 0) {
+                                contentType = header[0];
+                            } else {
+                                contentType = null;
+                            }
+                        }
+                        if (null == contentType) {
+                            localMail.setHasAttachment(false);
+                        } else {
+                            try {
+                                final ContentType ct = new ContentType(contentType);
+                                localMail.setHasAttachment(ct.startsWith("multipart/") && MimeMessageUtility.hasAttachments((Part) localMail.getContent()));
+                            } catch (final IOException e) {
+                                throw new MessagingException(e.getMessage(), e);
+                            }
+                        }
                     }
-                }
-                if (null == contentType) {
-                    msg.setHasAttachment(false);
-                } else {
-                    try {
-                        final ContentType ct = new ContentType(contentType);
-                        msg.setHasAttachment(ct.startsWith("multipart/") && MimeMessageUtility.hasAttachments((Part) message.getContent()));
-                    } catch (final IOException e) {
-                        throw new MessagingException(e.getMessage(), e);
-                    }
-                }
+                });
+            } catch (IOException e) {
+                LOG.warn("Unable to set 'hasAttachment'", e);
             }
         }
     };
