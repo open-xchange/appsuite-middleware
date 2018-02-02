@@ -15,7 +15,7 @@ BuildRequires:  ant-nodeps
 BuildRequires: open-xchange-oauth
 BuildRequires: open-xchange-halo
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -87,6 +87,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/linkedinsubscribe.properties
 
 %changelog
+* Fri Feb 02 2018 Marc Arens <marc.arens@open-xchange.com>
+Second preview for 7.10.0 release
 * Fri Dec 01 2017 Marc Arens <marc.arens@open-xchange.com>
 First preview for 7.10.0 release
 * Thu Oct 12 2017 Marc Arens <marc.arens@open-xchange.com>
