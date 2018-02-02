@@ -60,7 +60,7 @@ public class CalendarUser {
 
     protected String uri;
     protected String cn;
-    protected int entity;
+    protected int entity = -1; // initialize with -1 to avoid ambiguities with 'all users' default group 
     protected CalendarUser sentBy;
     protected String email;
 
