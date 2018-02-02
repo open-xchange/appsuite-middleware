@@ -125,7 +125,8 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
         final Stack<ServiceRegistration<?>> serviceRegistrations = new Stack<ServiceRegistration<?>>();
 
         if (false == backends.addIfAbsent(oidcBackend)) {
-            // Such a back-end already exists
+            // Such a back-end already exists. Release obtained service and return
+            this.context.ungetService(reference);
             return null;
         }
 
@@ -183,6 +184,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
         }
 
         // Return nothing...
+        this.context.ungetService(reference);
         return null;
     }
 
@@ -297,7 +299,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
         }
         context.ungetService(reference);
     }
-    
+
     public List<OIDCBackend> getAllRegisteredBackends() {
         return this.backends;
     }
