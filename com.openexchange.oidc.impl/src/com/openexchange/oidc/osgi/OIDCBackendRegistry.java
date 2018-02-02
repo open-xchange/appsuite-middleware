@@ -272,9 +272,9 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
     }
 
     @Override
-    public void removedService(ServiceReference<OIDCBackend> reference, OIDCBackend samlBackend) {
-        backends.remove(samlBackend);
-        Stack<String> servlets = backendServlets.remove(samlBackend);
+    public void removedService(ServiceReference<OIDCBackend> reference, OIDCBackend oidcBackend) {
+        backends.remove(oidcBackend);
+        Stack<String> servlets = backendServlets.remove(oidcBackend);
         try {
             if (null != servlets) {
                 HttpService httpService = services.getService(HttpService.class);
@@ -283,9 +283,9 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                 }
             }
         } catch (Exception e) {
-            LOG.error("Error while removing path for SAML Backend", e);
+            LOG.error("Error while removing path for OIDC Backend", e);
         }
-        Stack<ServiceRegistration<?>> registrations = backendServiceRegistrations.remove(samlBackend);
+        Stack<ServiceRegistration<?>> registrations = backendServiceRegistrations.remove(oidcBackend);
         try {
             if (null != registrations) {
                 while (!registrations.isEmpty()) {
@@ -293,7 +293,7 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
                 }
             }
         } catch (Exception e) {
-            LOG.error("Error while removing path for SAML Backend", e);
+            LOG.error("Error while removing path for OIDC Backend", e);
         }
         context.ungetService(reference);
     }
