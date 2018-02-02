@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,64 +47,45 @@
  *
  */
 
-package com.openexchange.chronos.provider.ical.osgi;
+package com.openexchange.mail.mime.converters;
 
-import static org.slf4j.LoggerFactory.getLogger;
-import com.openexchange.chronos.ical.ICalService;
-import com.openexchange.chronos.provider.CalendarProvider;
-import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
-import com.openexchange.chronos.provider.ical.BasicICalCalendarProvider;
-import com.openexchange.chronos.provider.ical.properties.ICalCalendarProviderReloadable;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.conversion.ConversionService;
-import com.openexchange.crypto.CryptoService;
-import com.openexchange.net.ssl.SSLSocketFactoryProvider;
-import com.openexchange.net.ssl.config.SSLConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.mail.api.MailConfig;
 
 /**
- *
- * {@link ICalCalendarProviderActivator}
+ * {@link ConverterConfig}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class ICalCalendarProviderActivator extends HousekeepingActivator {
+public class DefaultConverterConfig implements ConverterConfig {
 
-    /**
-     * Initializes a new {@link ICalCalendarProviderActivator}.
-     */
-    public ICalCalendarProviderActivator() {
+    private boolean considerFolder;
+    private final MailConfig mailConfig;
+    private boolean includeBody;
+
+    public DefaultConverterConfig(MailConfig mailConfig) {
+        this(mailConfig, true, false);
+    }
+
+    public DefaultConverterConfig(MailConfig mailConfig, boolean considerFolder, boolean includeBody) {
         super();
+        this.considerFolder = considerFolder;
+        this.mailConfig = mailConfig;
+        this.includeBody = includeBody;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ICalService.class, LeanConfigurationService.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class, CryptoService.class, ConversionService.class, AdministrativeCalendarAccountService.class };
+    public boolean isConsiderFolder() {
+        return considerFolder;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        try {
-            getLogger(ICalCalendarProviderActivator.class).info("starting bundle {}", context.getBundle());
-
-            Services.setServiceLookup(this);
-
-            registerService(CalendarProvider.class, new BasicICalCalendarProvider(this));
-            registerService(Reloadable.class, new ICalCalendarProviderReloadable());
-        } catch (Exception e) {
-            getLogger(ICalCalendarProviderActivator.class).error("error starting {}", context.getBundle(), e);
-            throw e;
-        }
+    public MailConfig getMailConfig() {
+        return mailConfig;
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        getLogger(ICalCalendarProviderActivator.class).info("stopping bundle {}", context.getBundle());
-
-        Services.setServiceLookup(null);
-        super.stopBundle();
+    public boolean isIncludeBody() {
+        return includeBody;
     }
-
 }

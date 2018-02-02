@@ -153,7 +153,7 @@ public class UpdateHandler extends AbstractHandler {
                 exceptions.add(exception);
             }
         }
-        return calendarStorage.getUtilities().loadAdditionalEventData(this.cachedCalendarAccess.getCalendarSession().getUserId(), exceptions, getFields());
+        return calendarStorage.getUtilities().loadAdditionalEventData(this.cachedCalendarAccess.getSession().getUserId(), exceptions, getFields());
     }
 
     private void create(TruncationAwareCalendarStorage calendarStorage, EventUpdates diff) throws OXException {
@@ -189,7 +189,7 @@ public class UpdateHandler extends AbstractHandler {
 
     private void updateAlarms(TruncationAwareCalendarStorage calendarStorage, Event event, CollectionUpdate<Alarm, AlarmField> alarmUpdates) throws OXException {
         if (!alarmUpdates.isEmpty()) {
-            int userId = cachedCalendarAccess.getCalendarSession().getUserId();
+            int userId = cachedCalendarAccess.getSession().getUserId();
             AlarmStorage alarmStorage = calendarStorage.getAlarmStorage();
             if (!alarmUpdates.getAddedItems().isEmpty()) {
                 for (Alarm alarm : alarmUpdates.getAddedItems()) {
@@ -235,8 +235,8 @@ public class UpdateHandler extends AbstractHandler {
                     Attendee newUpdatedAttendee = AttendeeMapper.getInstance().copy(original, updated, AttendeeField.URI);
                     updatedAttendees.add(newUpdatedAttendee);
                 }
-                EntityResolver entityResolver = this.cachedCalendarAccess.getCalendarSession().getEntityResolver();
-                calendarStorage.updateAttendees(eventId, entityResolver.prepare(updatedAttendees));
+                EntityResolver entityResolver = optEntityResolver(this.cachedCalendarAccess.getSession().getContextId());
+                calendarStorage.updateAttendees(eventId, entityResolver != null ? entityResolver.prepare(updatedAttendees) : updatedAttendees);
             }
         }
     }
@@ -256,8 +256,8 @@ public class UpdateHandler extends AbstractHandler {
         if (diff.isEmpty()) {
             return;
         }
-        final Session session = this.cachedCalendarAccess.getCalendarSession().getSession();
-        new OSGiCalendarStorageOperation<Void>(Services.getServiceLookup(), this.cachedCalendarAccess.getCalendarSession().getContextId(), this.cachedCalendarAccess.getAccount().getAccountId()) {
+        final Session session = this.cachedCalendarAccess.getSession();
+        new OSGiCalendarStorageOperation<Void>(Services.getServiceLookup(), this.cachedCalendarAccess.getSession().getContextId(), this.cachedCalendarAccess.getAccount().getAccountId()) {
 
             @Override
             protected Void call(CalendarStorage storage) throws OXException {

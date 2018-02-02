@@ -56,7 +56,6 @@ import com.openexchange.chronos.common.SearchUtils;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
@@ -78,8 +77,8 @@ public class SearchHandler extends AbstractExtensionHandler {
      * @param account The {@link CalendarAccount}
      * @param calendarParameters The {@link CalendarParameters}
      */
-    public SearchHandler(CalendarSession calendarSession, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super(calendarSession, account, parameters);
+    public SearchHandler(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        super(session, account, parameters);
     }
 
     /**

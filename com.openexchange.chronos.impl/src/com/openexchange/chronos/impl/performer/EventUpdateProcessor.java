@@ -57,6 +57,7 @@ import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getExceptionDateUpdates;
 import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
+import static com.openexchange.chronos.common.CalendarUtils.isAttendeeSchedulingResource;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
@@ -378,7 +379,7 @@ public class EventUpdateProcessor implements EventUpdate {
      * @param ignoredFields Optional event fields to ignore during the update
      * @return The changed event
      */
-    private static Event apply(Event originalEvent, Event updatedEvent, EventField... ignoredFields) throws OXException {
+    private Event apply(Event originalEvent, Event updatedEvent, EventField... ignoredFields) throws OXException {
         /*
          * determine relevant changes in passed event update
          */
@@ -393,7 +394,10 @@ public class EventUpdateProcessor implements EventUpdate {
          */
         updatedFields.remove(EventField.FOLDER_ID);
         updatedFields.remove(EventField.ALARMS);
-        //        assignedFields.remove(EventField.TRANSP);
+        if (isAttendeeSchedulingResource(originalEvent, calendarUser.getEntity())) {
+            //TODO: TRANSP is not yet handled as per-user property, so ignore changes in attendee scheduling resources for now
+            updatedFields.remove(EventField.TRANSP);
+        }
         /*
          * (virtually) apply all changes of the passed event update
          */

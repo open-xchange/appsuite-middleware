@@ -78,8 +78,6 @@ import com.openexchange.chronos.provider.ical.result.GetResponse;
 import com.openexchange.chronos.provider.ical.result.GetResponseState;
 import com.openexchange.chronos.provider.ical.utils.ICalProviderUtils;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.CalendarService;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.i18n.tools.StringHelper;
@@ -126,10 +124,7 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
 
     @Override
     public BasicCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        CalendarService calendarService = services.getService(CalendarService.class);
-        CalendarSession calendarSession = calendarService.init(session, parameters);
-
-        return new BasicICalCalendarAccess(services, calendarSession, account, parameters);
+        return new BasicICalCalendarAccess(services, session, account, parameters);
     }
 
     @Override

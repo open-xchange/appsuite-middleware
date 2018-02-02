@@ -51,11 +51,9 @@ package com.openexchange.user.copy.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-
 import com.openexchange.osgi.CompositeBundleActivator;
 import com.openexchange.user.copy.internal.additional.osgi.AdditionalCopyActivator;
 import com.openexchange.user.copy.internal.attachment.osgi.AttachmentCopyActivator;
-import com.openexchange.user.copy.internal.calendar.osgi.CalendarCopyActivator;
 import com.openexchange.user.copy.internal.chronos.calendar.osgi.ChronosCalendarCopyActivator;
 import com.openexchange.user.copy.internal.connection.osgi.ConnectionFetcherActivator;
 import com.openexchange.user.copy.internal.contact.osgi.ContactCopyActivator;
@@ -65,7 +63,6 @@ import com.openexchange.user.copy.internal.infostore.osgi.InfostoreCopyActivator
 import com.openexchange.user.copy.internal.mailaccount.osgi.MailAccountCopyActivator;
 import com.openexchange.user.copy.internal.messaging.osgi.MessagingCopyActivator;
 import com.openexchange.user.copy.internal.oauth.osgi.OAuthCopyActivator;
-import com.openexchange.user.copy.internal.reminder.osgi.ReminderCopyActivator;
 import com.openexchange.user.copy.internal.subscription.osgi.SubscriptionCopyActivator;
 import com.openexchange.user.copy.internal.tasks.osgi.TaskCopyActivator;
 import com.openexchange.user.copy.internal.usecount.osgi.UseCountCopyActivator;
@@ -88,7 +85,7 @@ public class Activator extends CompositeBundleActivator {
             new UserCopyActivator(),
             new FolderCopyActivator(),
             new ConnectionFetcherActivator(),
-            new CalendarCopyActivator(),
+            new ChronosCalendarCopyActivator(),
             new ContactCopyActivator(),
             new AttachmentCopyActivator(),
             new TaskCopyActivator(),
@@ -99,10 +96,8 @@ public class Activator extends CompositeBundleActivator {
             new AdditionalCopyActivator(),
             new CommandActivator(),
             new MailAccountCopyActivator(),
-            new ReminderCopyActivator(),
             new UWAActivator(),
-            new UseCountCopyActivator(),
-            new ChronosCalendarCopyActivator()
+            new UseCountCopyActivator()
         };
     }
 

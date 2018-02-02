@@ -76,6 +76,7 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
+import com.openexchange.mail.mime.converters.DefaultConverterConfig;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.server.ServiceLookup;
@@ -327,16 +328,16 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
                     if (content instanceof MailMessage) {
                         tmp = (MailMessage) content;
                     } else if (content instanceof MimeMessage) {
-                        tmp = MimeMessageConverter.convertMessage((MimeMessage) content, false);
+                        tmp = MimeMessageConverter.convertMessage((MimeMessage) content, new DefaultConverterConfig(mailAccess.getMailConfig(), false, false));
                     } else if (content instanceof InputStream) {
                         try {
-                            tmp = MimeMessageConverter.convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), (InputStream) content));
+                            tmp = MimeMessageConverter.convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), (InputStream) content), new DefaultConverterConfig(mailAccess.getMailConfig()));
                         } catch (MessagingException e) {
                             throw MimeMailException.handleMessagingException(e);
                         }
                     } else if (content instanceof String) {
                         try {
-                            tmp = MimeMessageConverter.convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), new ByteArrayInputStream(((String) content).getBytes("UTF-8"))));
+                            tmp = MimeMessageConverter.convertMessage(new MimeMessage(MimeDefaultSession.getDefaultSession(), new ByteArrayInputStream(((String) content).getBytes("UTF-8"))), new DefaultConverterConfig(mailAccess.getMailConfig()));
                         } catch (UnsupportedEncodingException e) {
                             throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
                         } catch (MessagingException e) {

@@ -136,9 +136,7 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
         /*
          * prepare default internal config
          */
-        JSONObject internalConfig = new JSONObject();
-        internalConfig.putSafe("color", "#0000cc");
-        return internalConfig;
+        return new JSONObject();
     }
 
     @Override

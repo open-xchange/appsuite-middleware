@@ -93,11 +93,11 @@ public class InitialWriteHandler extends AbstractHandler {
         boolean committed = false;
         DatabaseService dbService = Services.getService(DatabaseService.class);
         Connection writeConnection = null;
-        int contextId = this.cachedCalendarAccess.getCalendarSession().getContextId();
+        int contextId = this.cachedCalendarAccess.getSession().getContextId();
         try {
             writeConnection = dbService.getWritable(contextId);
             writeConnection.setAutoCommit(false);
-            create(new TruncationAwareCalendarStorage(initStorage(new SimpleDBProvider(writeConnection, writeConnection)), this.cachedCalendarAccess.getCalendarSession().getSession()), diff.getAddedItems());
+            create(new TruncationAwareCalendarStorage(initStorage(new SimpleDBProvider(writeConnection, writeConnection)), this.cachedCalendarAccess.getSession()), diff.getAddedItems());
 
             writeConnection.commit();
             committed = true;

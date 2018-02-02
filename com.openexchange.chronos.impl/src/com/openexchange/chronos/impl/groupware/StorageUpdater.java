@@ -127,7 +127,7 @@ class StorageUpdater {
      * @throws OXException Various
      */
     void removeAttendeeFrom(Event event) throws OXException {
-        Event updatedEvent = calendarUtilities.copyEvent(event, null);
+        Event updatedEvent = calendarUtilities.copyEvent(event, (EventField[]) null);
         updatedEvent.setModifiedBy(replacement);
         updatedEvent.setLastModified(date);
         updatedEvent.setTimestamp(date.getTime());
@@ -186,7 +186,7 @@ class StorageUpdater {
      * @throws OXException Various
      */
     void replaceAttendeeIn(Event event) throws OXException {
-        Event updatedEvent = calendarUtilities.copyEvent(event, null);
+        Event updatedEvent = calendarUtilities.copyEvent(event, (EventField[]) null);
         if (CalendarUtils.matches(event.getCreatedBy(), attendeeId)) {
             updatedEvent.setCreatedBy(replacement);
         }
@@ -255,6 +255,15 @@ class StorageUpdater {
      * @throws OXException In case account can't be deleted
      */
     void deleteAccount() throws OXException {
-        storage.getAccountStorage().deleteAccount(attendeeId, CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), CalendarUtils.DISTANT_FUTURE);
+        try {
+            storage.getAccountStorage().deleteAccount(attendeeId, CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), CalendarUtils.DISTANT_FUTURE);
+        } catch (OXException e) {
+            if ("CAL-4044".equals(e.getErrorCode())) {
+                // "Account not found [account %1$d]"; ignore
+                return;
+            }
+            throw e;
+        }
     }
+
 }

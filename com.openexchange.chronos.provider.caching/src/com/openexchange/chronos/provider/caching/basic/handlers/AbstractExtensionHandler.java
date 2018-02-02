@@ -61,7 +61,6 @@ import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.config.lean.LeanConfigurationService;
@@ -77,7 +76,7 @@ import com.openexchange.session.Session;
 abstract class AbstractExtensionHandler {
 
     private final CalendarParameters parameters;
-    private final CalendarSession calendarSession;
+    private final Session session;
     private final CalendarAccount account;
     private final SearchOptions searchOptions;
     private final SelfProtection selfProtection;
@@ -86,19 +85,19 @@ abstract class AbstractExtensionHandler {
      * Initialises a new {@link AbstractExtensionHandler}.
      *
      * @param services The {@link ServiceLookup} instance
-     * @param calendarSession The groupware {@link Session}
+     * @param sssion The groupware {@link Session}
      * @param account The {@link CalendarAccount}
      * @param calendarParameters The {@link CalendarParameters}
-     * @throws OXException if the property {@link CalendarSession} cannot be initialised
+     * @throws OXException
      */
-    public AbstractExtensionHandler(CalendarSession calendarSession, CalendarAccount account, CalendarParameters parameters) throws OXException {
+    public AbstractExtensionHandler(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         super();
-        this.calendarSession = calendarSession;
+        this.session = session;
         this.account = account;
         this.parameters = parameters;
         this.searchOptions = new SearchOptions(parameters);
         LeanConfigurationService leanConfigurationService = Services.getService(LeanConfigurationService.class);
-        this.selfProtection = SelfProtectionFactory.createSelfProtection(calendarSession.getSession(), leanConfigurationService);
+        this.selfProtection = SelfProtectionFactory.createSelfProtection(session, leanConfigurationService);
     }
 
     /**
@@ -116,7 +115,7 @@ abstract class AbstractExtensionHandler {
      * @return The session
      */
     Session getSession() {
-        return calendarSession.getSession();
+        return session;
     }
 
     /**

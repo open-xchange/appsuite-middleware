@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,60 +47,36 @@
  *
  */
 
-package com.openexchange.chronos.provider.schedjoules.osgi;
+package com.openexchange.mail.mime.converters;
 
-import com.openexchange.chronos.provider.CalendarProvider;
-import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
-import com.openexchange.chronos.provider.schedjoules.BasicSchedJoulesCalendarProvider;
-import com.openexchange.chronos.provider.schedjoules.SchedJoulesUserServiceInterceptor;
-import com.openexchange.chronos.schedjoules.SchedJoulesService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
-import com.openexchange.user.UserServiceInterceptor;
+import com.openexchange.mail.api.MailConfig;
 
 /**
- * {@link SchedJoulesProviderActivator}
+ * {@link ConverterConfig}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.0
  */
-public class SchedJoulesProviderActivator extends HousekeepingActivator {
+public interface ConverterConfig {
 
     /**
-     * Initialises a new {@link SchedJoulesProviderActivator}.
+     * Returns the {@link MailConfig} for the user
+     * 
+     * @return The {@link MailConfig}
      */
-    public SchedJoulesProviderActivator() {
-        super();
-    }
+    MailConfig getMailConfig();
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+    /**
+     * Returns if the folder should be considered while adding data to the mail
+     * 
+     * @return <code>true</code> if the folder should be considered; otherwise <code>false</code>
      */
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, AdministrativeCalendarAccountService.class, SchedJoulesService.class, DatabaseService.class };
-    }
+    boolean isConsiderFolder();
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
+    /**
+     * Returns if the body should be included while adding data to the mail
+     * 
+     * @return <code>true</code> if the body should be included; otherwise <code>false</code>
      */
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(CalendarProvider.class, new BasicSchedJoulesCalendarProvider(this));
-        registerService(UserServiceInterceptor.class, new SchedJoulesUserServiceInterceptor(this));
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
-     */
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-    }
+    boolean isIncludeBody();
 }

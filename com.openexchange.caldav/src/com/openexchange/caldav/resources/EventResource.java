@@ -690,6 +690,8 @@ public class EventResource extends DAVObjectResource<Event> {
      */
     private WebdavProtocolException getProtocolException(OXException e) {
         switch (e.getErrorCode()) {
+            case "CAL-4038":
+                return new PreconditionException(e, DAVProtocol.CAL_NS.getURI(), "allowed-attendee-scheduling-object-change", getUrl(), HttpServletResponse.SC_FORBIDDEN);
             case "CAL-4091":
             case "CAL-4092":
                 LOG.info("{}: PUT operation failed due to non-ignorable conflicts.", getUrl());

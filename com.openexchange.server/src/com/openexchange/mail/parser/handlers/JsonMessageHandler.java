@@ -115,7 +115,7 @@ import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.converters.MimeMessageConverter;
+import com.openexchange.mail.mime.converters.MimeMessageUtils;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.ContentProvider;
 import com.openexchange.mail.parser.MailMessageHandler;
@@ -874,7 +874,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                      */
                     int priority = MailMessage.PRIORITY_NORMAL;
                     if (null != entry.getValue()) {
-                        priority = MimeMessageConverter.parseImportance(entry.getValue());
+                        priority = MimeMessageUtils.parseImportance(entry.getValue());
                         jsonObject.put(PRIORITY, priority);
                     }
                 } else if (MessageHeaders.HDR_X_PRIORITY.equalsIgnoreCase(headerName)) {
@@ -884,7 +884,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                          */
                         int priority = MailMessage.PRIORITY_NORMAL;
                         if (null != entry.getValue()) {
-                            priority = MimeMessageConverter.parsePriority(entry.getValue());
+                            priority = MimeMessageUtils.parsePriority(entry.getValue());
                         }
                         jsonObject.put(PRIORITY, priority);
                     }

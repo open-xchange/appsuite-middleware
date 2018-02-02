@@ -50,7 +50,6 @@
 package com.openexchange.caldav;
 
 import static com.openexchange.chronos.common.AlarmUtils.addExtendedProperty;
-import static com.openexchange.chronos.common.CalendarUtils.addExtendedProperty;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
@@ -255,6 +254,26 @@ public class EventPatches {
                 if (null != attendee && false == attendee.containsComment()) {
                     attendee.setComment(String.valueOf(extendedProperty.getValue()));
                 }
+            }
+        }
+
+        /**
+         * Strips extended properties in case an update is performed on an <i>attendee scheduling object resource</i>, from the calendar
+         * user's point of view.
+         *
+         * @param eventResource The event resource
+         * @param importedEvent The event
+         */
+        private void stripExtendedProperties(EventResource eventResource, Event importedEvent) {
+            int calendarUserId;
+            try {
+                calendarUserId = eventResource.getParent().getCalendarUser().getId();
+            } catch (OXException e) {
+                LOG.warn("Error deriving calendar user from collection", e);
+                return;
+            }
+            if (null != eventResource.getEvent() && CalendarUtils.isAttendeeSchedulingResource(eventResource.getEvent(), calendarUserId)) {
+                importedEvent.removeExtendedProperties();
             }
         }
 
@@ -582,6 +601,7 @@ public class EventPatches {
                 adjustSnoozeExceptions(resource, importedEvent, importedChangeExceptions);
                 adjustAlarms(resource, importedEvent, null);
                 applyManagedAttachments(importedEvent);
+                stripExtendedProperties(resource, importedEvent);
             }
             if (null != importedChangeExceptions && 0 < importedChangeExceptions.size()) {
                 /*
@@ -593,6 +613,7 @@ public class EventPatches {
                     adjustAlarms(resource, importedChangeException, importedEvent);
                     applyManagedAttachments(importedChangeException);
                     removeAttachmentsFromExceptions(resource, importedChangeException);
+                    stripExtendedProperties(resource, importedChangeException);
                 }
             }
             return new CalDAVImport(resource.getUrl(), caldavImport.getCalender(), importedEvent, importedChangeExceptions);

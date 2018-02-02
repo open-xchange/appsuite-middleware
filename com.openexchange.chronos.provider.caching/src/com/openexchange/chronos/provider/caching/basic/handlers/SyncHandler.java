@@ -59,7 +59,6 @@ import com.openexchange.chronos.common.SearchUtils;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.service.UpdatesResult;
@@ -72,6 +71,7 @@ import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.session.Session;
 import com.openexchange.tools.arrays.Arrays;
 
 /**
@@ -87,8 +87,8 @@ public class SyncHandler extends AbstractExtensionHandler {
     /**
      * Initialises a new {@link SyncHandler}.
      */
-    public SyncHandler(CalendarSession calendarSession, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        super(calendarSession, account, parameters);
+    public SyncHandler(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        super(session, account, parameters);
     }
 
     /**

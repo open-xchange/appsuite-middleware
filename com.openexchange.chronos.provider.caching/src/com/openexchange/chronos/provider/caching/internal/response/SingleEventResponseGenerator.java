@@ -86,7 +86,7 @@ public class SingleEventResponseGenerator extends ResponseGenerator {
     }
 
     public Event generate() throws OXException {
-        return new OSGiCalendarStorageOperation<Event>(Services.getServiceLookup(), this.cachedCalendarAccess.getCalendarSession().getContextId(), this.cachedCalendarAccess.getAccount().getAccountId()) {
+        return new OSGiCalendarStorageOperation<Event>(Services.getServiceLookup(), this.cachedCalendarAccess.getSession().getContextId(), this.cachedCalendarAccess.getAccount().getAccountId()) {
 
             @Override
             protected Event call(CalendarStorage storage) throws OXException {
