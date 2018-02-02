@@ -71,8 +71,8 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
 
     private final static Logger LOG = LoggerFactory.getLogger(AbstractOIDCBackendConfig.class);
 
-    protected LeanConfigurationService leanConfigurationService;
-
+    /** The reference to tracked <code>LeanConfigurationService</code> */
+    protected final LeanConfigurationService leanConfigurationService;
 
     /**
      * customPropertyPrefix - If set, it identifies this {@link OIDCBackendConfig}. The set value
@@ -80,7 +80,7 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
      * See <code>com.openexchange.oidc.spi.AbstractOIDCBackendConfig.getCustomProperty(OIDCBackendProperty)</code>
      * for more information
      */
-    protected String customPropertyPrefix;
+    protected final String customPropertyPrefix;
 
     /**
      * Initializes a new {@link AbstractOIDCBackendConfig}. The {@link LeanConfigurationService} is
