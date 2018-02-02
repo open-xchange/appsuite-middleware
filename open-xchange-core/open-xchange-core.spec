@@ -154,6 +154,7 @@ Provides:      open-xchange-cluster-discovery-mdns = %{version}
 Obsoletes:     open-xchange-cluster-discovery-mdns < %{version}
 Provides:      open-xchange-cluster-discovery-static = %{version}
 Obsoletes:     open-xchange-cluster-discovery-static < %{version}
+Obsoletes:     open-xchange-freebusy < %{version}
 
 %description
 This package installs all essential bundles that are necessary to get a working backend installation. This are the bundles for the main
