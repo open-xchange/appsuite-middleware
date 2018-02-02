@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.oidc.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -58,19 +59,21 @@ import com.openexchange.server.ServiceLookup;
  * @since v7.10.0
  */
 public class Services {
-public static AtomicReference<ServiceLookup> services = new AtomicReference<ServiceLookup>();
-    
+
+    public static AtomicReference<ServiceLookup> services = new AtomicReference<ServiceLookup>();
+
     private Services() {
+        super();
     }
-    
+
     public static void setServices(ServiceLookup lookup) {
         services.set(lookup);
     }
-    
+
     public static <T> T getService(Class<T> klass) {
         return services.get().getService(klass);
     }
-    
+
     public static <T> T getOptionalService(Class<T> klass) {
         return services.get().getOptionalService(klass);
     }
