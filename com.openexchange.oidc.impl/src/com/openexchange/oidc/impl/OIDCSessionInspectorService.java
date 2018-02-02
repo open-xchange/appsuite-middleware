@@ -25,6 +25,7 @@ public class OIDCSessionInspectorService implements SessionInspectorService{
     private final List<OIDCBackend> oidcBackends;
 
     public OIDCSessionInspectorService(List<OIDCBackend> oidcBackends) {
+        super();
         this.oidcBackends = oidcBackends;
     }
 
@@ -47,7 +48,7 @@ public class OIDCSessionInspectorService implements SessionInspectorService{
         if (null == backendPath) {
             return null;
         }
-        
+
         for (OIDCBackend backend : this.oidcBackends) {
             if (backend.getPath().equals(backendPath)) {
                 return backend;

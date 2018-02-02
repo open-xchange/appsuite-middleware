@@ -48,6 +48,7 @@
  */
 package com.openexchange.oidc.osgi;
 
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
@@ -275,7 +276,12 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
 
     @Override
     public void removedService(ServiceReference<OIDCBackend> reference, OIDCBackend oidcBackend) {
-        backends.remove(oidcBackend);
+        boolean removed = backends.remove(oidcBackend);
+        if (false == removed) {
+            // Was not contained
+            return;
+        }
+
         Stack<String> servlets = backendServlets.remove(oidcBackend);
         try {
             if (null != servlets) {
@@ -300,7 +306,12 @@ public class OIDCBackendRegistry extends ServiceTracker<OIDCBackend, OIDCBackend
         context.ungetService(reference);
     }
 
+    /**
+     * Gets the unmodifiable list reference to the tracked back-ends.
+     *
+     * @return The unmodifiable list
+     */
     public List<OIDCBackend> getAllRegisteredBackends() {
-        return this.backends;
+        return Collections.unmodifiableList(this.backends);
     }
 }
