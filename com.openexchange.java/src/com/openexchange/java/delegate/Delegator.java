@@ -122,6 +122,54 @@ public class Delegator<C> {
         return b.build();
     }
 
+    /** The options for delegating to a certain method */
+    public static class Options {
+
+        /**
+         * Creates a new <code>Options</code> instance.
+         *
+         * @return The new <code>Options</code> instance
+         */
+        public static Options options() {
+            return new Options();
+        }
+
+        private static final Object[] EMPTY_ARGS = new Object[0];
+
+        // -------------------------------------------------------------------------------------
+
+        String optMethodName;
+        Object[] args;
+
+        Options() {
+            super();
+            optMethodName = null;
+            args = EMPTY_ARGS;
+        }
+
+        /**
+         * Sets the arguments to pass to delegate method.
+         *
+         * @param args The arguments
+         * @return This options
+         */
+        public Options withArgs(Object... args) {
+            this.args = args;
+            return this;
+        }
+
+        /**
+         * Sets the method name.
+         *
+         * @param methodName The method name
+         * @return This options
+         */
+        public Options withMethodName(String methodName) {
+            this.optMethodName = methodName;
+            return this;
+        }
+    }
+
     // -----------------------------------------------------------------------------------
 
     private final Object source;
@@ -173,6 +221,22 @@ public class Delegator<C> {
      */
     public Object getDelegate() {
         return delegate;
+    }
+
+    /**
+     * Delegates to the method invocation of the associated instance.
+     *
+     * @param options The options to pass
+     * @return The invocation result
+     * @throws DelegationException If delegation generally fails
+     * @throws DelegationExecutionException If execution itself fails; providing the causing exception
+     */
+    public final <T> T invoke(Options options) {
+        String methodName = null == options.optMethodName ? extractMethodName() : options.optMethodName;
+        Object[] args = options.args;
+        Method method = findMethod(methodName, args);
+        @SuppressWarnings("unchecked") T t = (T) invoke0(method, args);
+        return t;
     }
 
     /**
