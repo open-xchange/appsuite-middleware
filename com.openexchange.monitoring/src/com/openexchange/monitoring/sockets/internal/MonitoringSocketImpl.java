@@ -49,6 +49,7 @@
 
 package com.openexchange.monitoring.sockets.internal;
 
+import static com.openexchange.java.delegate.Delegator.Options.options;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
@@ -97,13 +98,13 @@ public class MonitoringSocketImpl extends SocketImpl {
 
     @Override
     public InputStream getInputStream() throws IOException {
-        InputStream real = delegator.invoke();
+        InputStream real = delegator.invoke(options().withMethodName("getInputStream"));
         return new SocketMonitoringInputStream(getSocket0(), real);
     }
 
     @Override
     public OutputStream getOutputStream() throws IOException {
-        OutputStream real = delegator.invoke();
+        OutputStream real = delegator.invoke(options().withMethodName("getOutputStream"));
         return new SocketMonitoringOutputStream(getSocket0(), real);
     }
 
@@ -112,7 +113,7 @@ public class MonitoringSocketImpl extends SocketImpl {
     @Override
     public void create(boolean stream) throws IOException {
         try {
-            delegator.invoke(Boolean.valueOf(stream));
+            delegator.invoke(options().withMethodName("create").withArgs(Boolean.valueOf(stream)));
         } catch (DelegationExecutionException e) {
             Throwable cause = e.getCause();
             if (cause instanceof IOException) {
@@ -126,7 +127,7 @@ public class MonitoringSocketImpl extends SocketImpl {
     public void connect(String host, int port) throws IOException {
         long st = System.currentTimeMillis();
         try {
-            delegator.invoke(host, Integer.valueOf(port));
+            delegator.invoke(options().withMethodName("connect").withArgs(host, Integer.valueOf(port)));
             SocketMonitoringSystem.getInstance().connected(getSocket0());
         } catch (DelegationExecutionException e) {
             Throwable cause = e.getCause();
@@ -148,7 +149,7 @@ public class MonitoringSocketImpl extends SocketImpl {
     public void connect(InetAddress address, int port) throws IOException {
         long st = System.currentTimeMillis();
         try {
-            delegator.invoke(address, Integer.valueOf(port));
+            delegator.invoke(options().withMethodName("connect").withArgs(address, Integer.valueOf(port)));
             SocketMonitoringSystem.getInstance().connected(getSocket0());
         } catch (DelegationExecutionException e) {
             Throwable cause = e.getCause();
@@ -170,7 +171,7 @@ public class MonitoringSocketImpl extends SocketImpl {
     public void connect(SocketAddress address, int timeout) throws IOException {
         long st = System.currentTimeMillis();
         try {
-            delegator.invoke(address, Integer.valueOf(timeout));
+            delegator.invoke(options().withMethodName("connect").withArgs(address, Integer.valueOf(timeout)));
             SocketMonitoringSystem.getInstance().connected(getSocket0());
         } catch (DelegationExecutionException e) {
             Throwable cause = e.getCause();
@@ -191,7 +192,7 @@ public class MonitoringSocketImpl extends SocketImpl {
     @Override
     public void bind(InetAddress host, int port) throws IOException {
         try {
-            delegator.invoke(host, Integer.valueOf(port));
+            delegator.invoke(options().withMethodName("bind").withArgs(host, Integer.valueOf(port)));
         } catch (DelegationExecutionException e) {
             Throwable cause = e.getCause();
             if (cause instanceof IOException) {
@@ -204,7 +205,7 @@ public class MonitoringSocketImpl extends SocketImpl {
     @Override
     public void listen(int backlog) throws IOException {
         try {
-            delegator.invoke(Integer.valueOf(backlog));
+            delegator.invoke(options().withMethodName("listen").withArgs(Integer.valueOf(backlog)));
         } catch (DelegationExecutionException e) {
             Throwable cause = e.getCause();
             if (cause instanceof IOException) {
@@ -217,7 +218,7 @@ public class MonitoringSocketImpl extends SocketImpl {
     @Override
     public void accept(SocketImpl s) throws IOException {
         try {
-            delegator.invoke(s);
+            delegator.invoke(options().withMethodName("accept").withArgs(s));
         } catch (DelegationExecutionException e) {
             Throwable cause = e.getCause();
             if (cause instanceof IOException) {
@@ -230,7 +231,7 @@ public class MonitoringSocketImpl extends SocketImpl {
     @Override
     public int available() throws IOException {
         try {
-            Integer result = delegator.invoke();
+            Integer result = delegator.invoke(options().withMethodName("available"));
             return result.intValue();
         } catch (DelegationExecutionException e) {
             Throwable cause = e.getCause();
@@ -245,7 +246,7 @@ public class MonitoringSocketImpl extends SocketImpl {
     public void close() throws IOException {
         try {
             Socket socket = getSocket0();
-            delegator.invoke();
+            delegator.invoke(options().withMethodName("close"));
             SocketMonitoringSystem.getInstance().closed(socket);
         } catch (DelegationExecutionException e) {
             Throwable cause = e.getCause();
@@ -259,7 +260,7 @@ public class MonitoringSocketImpl extends SocketImpl {
     @Override
     public void shutdownInput() throws IOException {
         try {
-            delegator.invoke();
+            delegator.invoke(options().withMethodName("shutdownInput"));
         } catch (DelegationExecutionException e) {
             Throwable cause = e.getCause();
             if (cause instanceof IOException) {
@@ -272,7 +273,7 @@ public class MonitoringSocketImpl extends SocketImpl {
     @Override
     public void shutdownOutput() throws IOException {
         try {
-            delegator.invoke();
+            delegator.invoke(options().withMethodName("shutdownOutput"));
         } catch (DelegationExecutionException e) {
             Throwable cause = e.getCause();
             if (cause instanceof IOException) {
@@ -284,30 +285,30 @@ public class MonitoringSocketImpl extends SocketImpl {
 
     @Override
     public FileDescriptor getFileDescriptor() {
-        return delegator.invoke();
+        return delegator.invoke(options().withMethodName("getFileDescriptor"));
     }
 
     @Override
     public InetAddress getInetAddress() {
-        return delegator.invoke();
+        return delegator.invoke(options().withMethodName("getInetAddress"));
     }
 
     @Override
     public int getPort() {
-        Integer result = delegator.invoke();
+        Integer result = delegator.invoke(options().withMethodName("getPort"));
         return result.intValue();
     }
 
     @Override
     public boolean supportsUrgentData() {
-        Boolean result = delegator.invoke();
+        Boolean result = delegator.invoke(options().withMethodName("supportsUrgentData"));
         return result.booleanValue();
     }
 
     @Override
     public void sendUrgentData(int data) throws IOException {
         try {
-            delegator.invoke(Integer.valueOf(data));
+            delegator.invoke(options().withMethodName("sendUrgentData").withArgs(Integer.valueOf(data)));
         } catch (DelegationExecutionException e) {
             Throwable cause = e.getCause();
             if (cause instanceof IOException) {
@@ -319,24 +320,24 @@ public class MonitoringSocketImpl extends SocketImpl {
 
     @Override
     public int getLocalPort() {
-        Integer result = delegator.invoke();
+        Integer result = delegator.invoke(options().withMethodName("getLocalPort"));
         return result.intValue();
     }
 
     @Override
     public String toString() {
-        return delegator.invoke();
+        return delegator.invoke(options().withMethodName("toString"));
     }
 
     @Override
     public void setPerformancePreferences(int connectionTime, int latency, int bandwidth) {
-        delegator.invoke(Integer.valueOf(connectionTime), Integer.valueOf(latency), Integer.valueOf(bandwidth));
+        delegator.invoke(options().withMethodName("setPerformancePreferences").withArgs(Integer.valueOf(connectionTime), Integer.valueOf(latency), Integer.valueOf(bandwidth)));
     }
 
     @Override
     public void setOption(int optID, Object value) throws SocketException {
         try {
-            delegator.invoke(Integer.valueOf(optID), value);
+            delegator.invoke(options().withMethodName("setOption").withArgs(Integer.valueOf(optID), value));
         } catch (DelegationExecutionException e) {
             Throwable cause = e.getCause();
             if (cause instanceof SocketException) {
@@ -351,7 +352,7 @@ public class MonitoringSocketImpl extends SocketImpl {
     @Override
     public Object getOption(int optID) throws SocketException {
         try {
-            return delegator.invoke(Integer.valueOf(optID));
+            return delegator.invoke(options().withMethodName("getOption").withArgs(Integer.valueOf(optID)));
         } catch (DelegationExecutionException e) {
             Throwable cause = e.getCause();
             if (cause instanceof SocketException) {
