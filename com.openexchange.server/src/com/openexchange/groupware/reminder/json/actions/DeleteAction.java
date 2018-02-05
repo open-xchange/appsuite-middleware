@@ -108,7 +108,7 @@ public final class DeleteAction extends AbstractReminderAction {
                     int eventIdInt = (int) longId;
                     CalendarService calendarService = ServerServiceRegistry.getInstance().getService(CalendarService.class);
                     CalendarSession calendarSession = calendarService.init(req.getSession());
-                    CalendarServiceUtilities calendarServiceUtilities = ServerServiceRegistry.getInstance().getService(CalendarServiceUtilities.class);
+                    CalendarServiceUtilities calendarServiceUtilities = calendarService.getUtilities();
                     Event event = calendarServiceUtilities.resolveByID(calendarSession, String.valueOf(eventIdInt));
                     List<Alarm> alarms = event.getAlarms();
                     for (Alarm alarm : alarms) {
