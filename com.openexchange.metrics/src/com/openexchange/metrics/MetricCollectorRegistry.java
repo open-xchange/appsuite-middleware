@@ -67,6 +67,14 @@ public interface MetricCollectorRegistry {
     void registerCollector(MetricCollector metricCollector) throws OXException;
 
     /**
+     * Unregisters the {@link MetricCollector} of the specified component
+     * 
+     * @param componentName the component name
+     * @throws OXException if an error is occurred during the unregistering process
+     */
+    void unregisterCollector(String componentName) throws OXException;
+
+    /**
      * Retrieves the {@link MetricCollector} that is registered
      * under the specified name. If no collector with that name exists
      * a <code>null</code> value will be returned to indicate that.

@@ -88,6 +88,17 @@ public abstract class AbstractMetricCollector implements MetricCollector {
         this.metricRegistry = metricRegistry;
     }
 
+    /**
+     * Returns the {@link MetricRegistry} of this {@link MetricCollector} or
+     * <code>null</code> if no {@link MetricRegistry} is assigned.
+     * 
+     * @return the {@link MetricRegistry} of this {@link MetricCollector} or
+     *         <code>null</code> if no {@link MetricRegistry} is assigned.
+     */
+    public MetricRegistry getMetricRegistry() {
+        return metricRegistry;
+    }
+
     /*
      * (non-Javadoc)
      * 

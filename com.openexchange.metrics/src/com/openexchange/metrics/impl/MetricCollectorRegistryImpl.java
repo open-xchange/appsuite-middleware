@@ -145,6 +145,28 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
     /*
      * (non-Javadoc)
      * 
+     * @see com.openexchange.metrics.MetricCollectorRegistry#unregisterCollector(java.lang.String)
+     */
+    @Override
+    public void unregisterCollector(String componentName) throws OXException {
+        MetricCollector removed = collectors.remove(componentName);
+        if (removed == null) {
+            return;
+        }
+
+        MetricRegistry metricRegistry = ((AbstractMetricCollector) removed).getMetricRegistry();
+        for (MetricMetadata metadata : removed.getMetricMetadata()) {
+            if (metricRegistry != null) {
+                metricRegistry.remove(metadata.getMetricName());
+            }
+            unregisterMBean(componentName, metadata);
+        }
+        SharedMetricRegistries.remove(componentName);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.metrics.MetricCollectorRegistry#getCollector(java.lang.String)
      */
     @Override
@@ -186,6 +208,22 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
         try {
             ManagementService managementService = services.getService(ManagementService.class);
             managementService.registerMBean(getObjectName(componentName, metricMetadata.getMetricName()), mbeanCreators.get(metricMetadata.getMetricType()).apply(metric, metricMetadata));
+        } catch (MalformedObjectNameException e) {
+            throw new OXException(e);
+        }
+    }
+
+    /**
+     * Unregisters an MBean with the specified component name
+     * 
+     * @param componentName The component's name
+     * @param metricMetadata The {@link MetricMetadata} of the {@link Metric}
+     * @throws OXException if the MBean for the specified {@link Metric} cannot be unregistered
+     */
+    private void unregisterMBean(String componentName, MetricMetadata metricMetadata) throws OXException {
+        try {
+            ManagementService managementService = services.getService(ManagementService.class);
+            managementService.unregisterMBean(getObjectName(componentName, metricMetadata.getMetricName()));
         } catch (MalformedObjectNameException e) {
             throw new OXException(e);
         }
