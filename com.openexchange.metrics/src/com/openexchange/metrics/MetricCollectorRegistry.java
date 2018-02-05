@@ -80,7 +80,8 @@ public interface MetricCollectorRegistry {
      * a <code>null</code> value will be returned to indicate that.
      * 
      * @param componentName The {@link MetricCollector}'s name
-     * @return The {@link MetricCollector} or <code>null</code> if none exists
+     * @return The {@link MetricCollector} or <code>null</code>
+     *         if no collector exists with the specified component name
      */
     MetricCollector getCollector(String componentName);
 }

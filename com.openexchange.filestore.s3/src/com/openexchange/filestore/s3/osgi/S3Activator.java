@@ -75,7 +75,7 @@ public class S3Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, LeanConfigurationService.class,  MetricCollectorRegistry.class };
+        return new Class<?>[] { ConfigurationService.class, LeanConfigurationService.class, MetricCollectorRegistry.class };
     }
 
     @Override
@@ -97,8 +97,10 @@ public class S3Activator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(S3Activator.class);
+
         getService(MetricCollectorRegistry.class).unregisterCollector("s3");
-        
+        AwsSdkMetrics.setMetricCollector(null);
+
         logger.info("Stopping bundle: com.openexchange.filestore.s3");
         super.stopBundle();
     }
