@@ -129,12 +129,27 @@ public class DefaultCalendarUtilities implements CalendarUtilities {
     }
 
     @Override
+    public boolean handleIncorrectString(OXException e, List<Attendee> attendees) {
+        boolean hasReplaced = false;
+        if (null != attendees) {
+            for (Attendee attendee : attendees) {
+                try {
+                    hasReplaced |= MappedIncorrectString.replace(e.getProblematics(), attendee, "");
+                } catch (ClassCastException | OXException x) {
+                    // ignore
+                }
+            }
+        }
+        return hasReplaced;
+    }
+
+    @Override
     public boolean handleDataTruncation(OXException e, Event event) {
         boolean hasTrimmed = false;
         if (null != event) {
             try {
                 hasTrimmed |= MappedTruncation.truncate(e.getProblematics(), event);
-            } catch (ClassCastException | OXException x1) {
+            } catch (ClassCastException | OXException x) {
                 // ignore
             }
         }
@@ -148,7 +163,7 @@ public class DefaultCalendarUtilities implements CalendarUtilities {
             for (Attendee attendee : attendees) {
                 try {
                     hasTrimmed |= MappedTruncation.truncate(e.getProblematics(), attendee);
-                } catch (ClassCastException | OXException x2) {
+                } catch (ClassCastException | OXException x) {
                     // ignore
                 }
             }
