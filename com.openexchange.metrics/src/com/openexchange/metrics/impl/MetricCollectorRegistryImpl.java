@@ -159,8 +159,9 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
      * @param metricCollector The {@link MetricCollector}
      * @param metadata The {@link MetricMetadata}
      * @param metricRegistry The {@link MetricRegistry}
+     * @throws OXException if the MBean for the specified {@link Metric} cannot be registered
      */
-    private void registerMetric(MetricCollector metricCollector, MetricMetadata metadata, MetricRegistry metricRegistry) {
+    private void registerMetric(MetricCollector metricCollector, MetricMetadata metadata, MetricRegistry metricRegistry) throws OXException {
         MetricType metricType = metadata.getMetricType();
         MetricTypeRegisterer metricTypeRegisterer = registerers.get(metricType);
         if (metricTypeRegisterer == null) {
@@ -179,14 +180,14 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
      * @param metric The {@link Metric} for which to create and register the MBean
      * @param componentName The component's name
      * @param metricMetadata The {@link MetricMetadata} of the {@link Metric}
+     * @throws OXException if the MBean for the specified {@link Metric} cannot be registered
      */
-    private void registerMBean(Metric metric, String componentName, MetricMetadata metricMetadata) {
+    private void registerMBean(Metric metric, String componentName, MetricMetadata metricMetadata) throws OXException {
         try {
             ManagementService managementService = services.getService(ManagementService.class);
             managementService.registerMBean(getObjectName(componentName, metricMetadata.getMetricName()), mbeanCreators.get(metricMetadata.getMetricType()).apply(metric, metricMetadata));
-        } catch (OXException | MalformedObjectNameException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        } catch (MalformedObjectNameException e) {
+            throw new OXException(e);
         }
     }
 
