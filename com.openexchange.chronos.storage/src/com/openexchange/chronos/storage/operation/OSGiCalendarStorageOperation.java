@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.storage.operation;
 
+import static com.openexchange.java.Autoboxing.b;
 import java.sql.Connection;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarUtilities;
@@ -74,6 +75,7 @@ public abstract class OSGiCalendarStorageOperation<T> extends CalendarStorageOpe
 
     private final ServiceLookup services;
     private final int accountId;
+    private final CalendarParameters parameters;
 
     /**
      * Initializes a new {@link OSGiCalendarStorageOperation}.
@@ -95,7 +97,9 @@ public abstract class OSGiCalendarStorageOperation<T> extends CalendarStorageOpe
      * The passed service lookup reference should yield the {@link ContextService}, the {@link DatabaseService} and the
      * {@link CalendarStorageFactory}, and optionally the {@link CalendarUtilities} service.
      * <p/>
-     * An existing, <i>external</i> database connection may be supplied as <code>java.sql.Connection</code> parameter.
+     * An existing, <i>external</i> database connection may be supplied as <code>java.sql.Connection</code> parameter.<br/>
+     * Additionally, {@link CalendarParameters#PARAMETER_AUTO_HANDLE_DATA_TRUNCATIONS} and
+     * {@link CalendarParameters#PARAMETER_AUTO_HANDLE_INCORRECT_STRINGS} are respected when defined.
      *
      * @param services A service lookup reference providing access for the needed services
      * @param contextId The context identifier
@@ -104,6 +108,7 @@ public abstract class OSGiCalendarStorageOperation<T> extends CalendarStorageOpe
      */
     protected OSGiCalendarStorageOperation(ServiceLookup services, int contextId, int accountId, CalendarParameters parameters) throws OXException {
         super(services.getService(DatabaseService.class), contextId, DEFAULT_RETRIES, optConnection(parameters));
+        this.parameters = parameters;
         this.services = services;
         this.accountId = accountId;
     }
@@ -112,7 +117,15 @@ public abstract class OSGiCalendarStorageOperation<T> extends CalendarStorageOpe
     protected CalendarStorage initStorage(DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException {
         Context context = services.getService(ContextService.class).getContext(contextId);
         CalendarStorageFactory storageFactory = services.getService(CalendarStorageFactory.class);
-        return storageFactory.create(context, accountId, optEntityResolver(), dbProvider, txPolicy);
+        CalendarStorage storage = storageFactory.create(context, accountId, optEntityResolver(), dbProvider, txPolicy);
+        if (null != parameters) {
+            boolean handleTruncations = b(parameters.get(CalendarParameters.PARAMETER_AUTO_HANDLE_DATA_TRUNCATIONS, Boolean.class, Boolean.FALSE));
+            boolean handleIncorrectStrings = b(parameters.get(CalendarParameters.PARAMETER_AUTO_HANDLE_INCORRECT_STRINGS, Boolean.class, Boolean.FALSE));
+            if (handleIncorrectStrings || handleTruncations) {
+                storage = storageFactory.makeResilient(storage, handleTruncations, handleIncorrectStrings);
+            }
+        }
+        return storage;
     }
 
     /**

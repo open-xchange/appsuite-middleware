@@ -119,4 +119,9 @@ public class RdbCalendarStorageFactory implements CalendarStorageFactory {
         return new com.openexchange.chronos.storage.rdb.RdbCalendarStorage(context, accountId, entityResolver, dbProvider, txPolicy);
     }
 
+    @Override
+    public CalendarStorage makeResilient(CalendarStorage storage, boolean handleTruncations, boolean handleIncorrectStrings) {
+        return new com.openexchange.chronos.storage.rdb.resilient.RdbCalendarStorage(services, storage, handleTruncations, handleIncorrectStrings);
+    }
+
 }

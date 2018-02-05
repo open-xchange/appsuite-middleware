@@ -51,10 +51,12 @@ package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.impl.AbstractStorageOperation.PARAM_CONNECTION;
 import static com.openexchange.chronos.impl.Utils.optConnection;
+import static com.openexchange.java.Autoboxing.b;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.impl.osgi.Services;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
@@ -109,8 +111,15 @@ public abstract class InternalCalendarStorageOperation<T> extends CalendarStorag
 
     @Override
     protected CalendarStorage initStorage(DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException {
+        boolean handleTruncations = b(session.get(CalendarParameters.PARAMETER_AUTO_HANDLE_DATA_TRUNCATIONS, Boolean.class, Boolean.FALSE));
+        boolean handleIncorrectStrings = b(session.get(CalendarParameters.PARAMETER_AUTO_HANDLE_INCORRECT_STRINGS, Boolean.class, Boolean.FALSE));
         Context context = ServerSessionAdapter.valueOf(session.getSession()).getContext();
-        return Services.getService(CalendarStorageFactory.class).create(context, Utils.ACCOUNT_ID, session.getEntityResolver(), dbProvider, txPolicy);
+        CalendarStorageFactory storageFactory = Services.getService(CalendarStorageFactory.class);
+        CalendarStorage storage = storageFactory.create(context, Utils.ACCOUNT_ID, session.getEntityResolver(), dbProvider, txPolicy);
+        if (handleIncorrectStrings || handleTruncations) {
+            storage = storageFactory.makeResilient(storage, handleTruncations, handleIncorrectStrings);
+        }
+        return storage;
     }
 
     private void collectWarnings(CalendarStorage storage) {

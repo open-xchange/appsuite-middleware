@@ -321,7 +321,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public void set(Event event, Integer value) {
-                if (null == value || 0 == value.intValue()) {
+                if (null == value || 0 >= value.intValue()) {
                     event.setCreatedBy(null);
                 } else {
                     CalendarUser calendarUser = new CalendarUser();
@@ -349,7 +349,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public void set(Event event, Integer value) {
-                if (null == value || 0 == value.intValue()) {
+                if (null == value || 0 >= value.intValue()) {
                     event.setModifiedBy(null);
                 } else {
                     CalendarUser calendarUser = new CalendarUser();
@@ -825,15 +825,15 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                      * iCal/chronos:    organizer ~ calendar owner , sent-by ~ user acting on behalf of organizer
                      */
                     statement.setString(parameterIndex, Event2Appointment.getEMailAddress(value.getSentBy().getUri()));
-                    statement.setInt(1 + parameterIndex, value.getSentBy().getEntity());
+                    statement.setInt(1 + parameterIndex, 0 > value.getSentBy().getEntity() ? 0 : value.getSentBy().getEntity());
                     statement.setString(2 + parameterIndex, Event2Appointment.getEMailAddress(value.getUri()));
-                    statement.setInt(3 + parameterIndex, value.getEntity());
+                    statement.setInt(3 + parameterIndex, 0 > value.getEntity() ? 0 : value.getEntity());
                 } else {
                     /*
                      * no different "sent-by" user, store in organizer columns
                      */
                     statement.setString(parameterIndex, Event2Appointment.getEMailAddress(value.getUri()));
-                    statement.setInt(1 + parameterIndex, value.getEntity());
+                    statement.setInt(1 + parameterIndex, 0 > value.getEntity() ? 0 : value.getEntity());
                     statement.setNull(2 + parameterIndex, Types.VARCHAR);
                     statement.setNull(3 + parameterIndex, Types.INTEGER);
                 }

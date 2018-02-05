@@ -83,4 +83,15 @@ public interface CalendarStorageFactory {
      */
     CalendarStorage create(Context context, int accountId, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException;
 
+    /**
+     * Wraps a calendar storage into a special <i>resilient</i> calendar storage that tries to automatically handle SQL <i>truncation</i>
+     * and <i>incorrect string</i> warnings by adjusting the affected strings, and retrying the operation.
+     *
+     * @param storage The calendar storage to wrap
+     * @param handleTruncations <code>true</code> to automatically handle data truncation warnings, <code>false</code>, otherwise
+     * @param handleIncorrectStrings <code>true</code> to automatically handle incorrect string warnings, <code>false</code>, otherwise
+     * @return The wrapped calendar storage
+     */
+    CalendarStorage makeResilient(CalendarStorage storage, boolean handleTruncations, boolean handleIncorrectStrings);
+
 }
