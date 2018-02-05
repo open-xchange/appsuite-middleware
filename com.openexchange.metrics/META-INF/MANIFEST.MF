@@ -9,8 +9,7 @@ Bundle-ClassPath: .,
  lib/metrics-core-4.0.3-SNAPSHOT.jar,
  lib/metrics-jmx-4.0.3-SNAPSHOT.jar
 Export-Package: com.codahale.metrics,
- com.openexchange.metrics,
- com.openexchange.metrics.handlers
+ com.openexchange.metrics
 Import-Package: com.codahale.metrics,
  com.openexchange.exception,
  com.openexchange.management,
