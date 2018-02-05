@@ -49,6 +49,7 @@
 
 package com.openexchange.filestore.s3.metrics;
 
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import com.amazonaws.Request;
 import com.amazonaws.Response;
@@ -79,8 +80,9 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
         super();
         internalCollector = metricCollector;
         for (HttpMethodName method : HttpMethodName.values()) {
-            metricCollector.getMetricMetadata().add(new MetricMetadata(MetricType.TIMER, "timer." + method.name()));
-            metricCollector.getMetricMetadata().add(new MetricMetadata(MetricType.COUNTER, "counter." + method.name()));
+            Set<MetricMetadata> metricMetadata = metricCollector.getMetricMetadata();
+            metricMetadata.add(new MetricMetadata(MetricType.TIMER, "timer." + method.name()));
+            metricMetadata.add(new MetricMetadata(MetricType.COUNTER, "counter." + method.name()));
         }
     }
 
@@ -95,7 +97,9 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
     }
 
     /**
-     * @param request
+     * Measures the the runtime of the specified {@link Request}
+     * 
+     * @param request The {@link Request} for which to measure the runtime
      */
     private void timeRequest(Request<?> request) {
         for (com.amazonaws.metrics.MetricType type : AwsSdkMetrics.getPredefinedMetrics()) {
@@ -108,9 +112,10 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
             Field predefined = (Field) type;
             switch (predefined) {
                 case ClientExecuteTime:
-                    Timer timer = internalCollector.getTimer("timer." + request.getHttpMethod().name());
+                    String methodName = request.getHttpMethod().name();
+                    Timer timer = internalCollector.getTimer("timer." + methodName);
                     timer.update(longValue, TimeUnit.MILLISECONDS);
-                    Counter counter = internalCollector.getCounter("counter." + request.getHttpMethod().name());
+                    Counter counter = internalCollector.getCounter("counter." + methodName);
                     counter.inc(longValue);
                 default:
                     break;
