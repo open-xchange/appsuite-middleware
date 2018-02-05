@@ -468,6 +468,7 @@ public enum Tree {
 
     MailFilter("/modules/mailfilter"),
 
+    @Deprecated
     OXUpdater("/modules/com.openexchange.oxupdater"),
 
     ActiveSync("/modules/com.openexchange.usm.eas/module"),
