@@ -77,7 +77,12 @@ public class S3FileStorageMetricCollector extends com.amazonaws.metrics.MetricCo
         s3FileStorageRequestMetricCollector = new S3FileStorageRequestMetricCollector(internalCollector);
         s3FileStorageServiceMetricCollector = new S3FileStorageServiceMetricCollector(internalCollector);
 
-        services.getService(MetricCollectorRegistry.class).registerCollector(internalCollector);
+        try {
+            services.getService(MetricCollectorRegistry.class).registerCollector(internalCollector);
+        } catch (OXException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     /*
