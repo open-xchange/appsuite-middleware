@@ -64,6 +64,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnalyzerService;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.conversion.ConversionService;
@@ -189,8 +190,11 @@ public abstract class AbstractITipAction implements AJAXActionService {
             }
         }
     }
-    
+
     protected CalendarSession initCalendarSession(ServerSession session) throws OXException {
-        return services.getService(CalendarService.class).init(session);
+        CalendarSession calendarSession = services.getService(CalendarService.class).init(session);
+        calendarSession.set(CalendarParameters.PARAMETER_AUTO_HANDLE_INCORRECT_STRINGS, Boolean.TRUE);
+        calendarSession.set(CalendarParameters.PARAMETER_AUTO_HANDLE_DATA_TRUNCATIONS, Boolean.TRUE);
+        return calendarSession;
     }
 }
