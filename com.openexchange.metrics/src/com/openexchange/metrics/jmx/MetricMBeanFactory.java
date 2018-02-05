@@ -50,8 +50,6 @@
 package com.openexchange.metrics.jmx;
 
 import javax.management.NotCompliantMBeanException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
@@ -72,50 +70,101 @@ import com.openexchange.metrics.jmx.impl.TimerMBeanImpl;
  */
 public final class MetricMBeanFactory {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MetricMBeanFactory.class);
-
+    /**
+     * Creates a new {@link CounterMBean} with the specified {@link Metric}
+     * 
+     * @param metric The {@link Metric} of type {@link Counter} for the {@link CounterMBean}
+     * @return The newly created {@link CounterMBean}
+     * @throws IllegalArgumentException if an invalid type of {@link Metric} is supplied or if the
+     *             {@link CounterMBean} does not follow JMX design patterns for Management Interfaces
+     */
     public static CounterMBean counter(Metric metric) {
+        checkInstance(metric, Counter.class);
         try {
             return new CounterMBeanImpl((Counter) metric);
         } catch (NotCompliantMBeanException e) {
-            LOG.error("The mbean could not be registered", e);
-            throw new IllegalArgumentException("Invalid metric specified for counter '" + metric.getClass() + "'");
+            throw new IllegalArgumentException("The CounterMBean is not a compliant MBean");
         }
     }
 
+    /**
+     * Creates a new {@link TimerMBean} with the specified {@link Metric}
+     * 
+     * @param metric The {@link Metric} of type {@link Timer} for the {@link TimerMBean}
+     * @return The newly created {@link TimerMBean}
+     * @throws IllegalArgumentException if an invalid type of {@link Metric} is supplied or if the
+     *             {@link TimerMBean} does not follow JMX design patterns for Management Interfaces
+     */
     public static TimerMBean timer(Metric metric, MetricMetadata metricMetadata) {
+        checkInstance(metric, Timer.class);
         try {
             return new TimerMBeanImpl((Timer) metric, metricMetadata.getMetricTimeUnit());
         } catch (NotCompliantMBeanException e) {
-            LOG.error("The mbean could not be registered", e);
-            throw new IllegalArgumentException("Invalid metric specified for timer '" + metric.getClass() + "'");
+            throw new IllegalArgumentException("The TimerMBean is not a compliant MBean");
         }
     }
 
+    /**
+     * Creates a new {@link MeterMBean} with the specified {@link Metric}
+     * 
+     * @param metric The {@link Metric} of type {@link Meter} for the {@link MeterMBean}
+     * @return The newly created {@link MeterMBean}
+     * @throws IllegalArgumentException if an invalid type of {@link Metric} is supplied or if the
+     *             {@link MeterMBean} does not follow JMX design patterns for Management Interfaces
+     */
     public static MeterMBean meter(Metric metric, MetricMetadata metricMetadata) {
+        checkInstance(metric, Meter.class);
         try {
             return new MeterMBeanImpl((Meter) metric, metricMetadata.getMetricRate(), metricMetadata.getMetricTimeUnit());
         } catch (NotCompliantMBeanException e) {
-            LOG.error("The mbean could not be registered", e);
-            throw new IllegalArgumentException("Invalid metric specified for meter '" + metric.getClass() + "'");
+            throw new IllegalArgumentException("The MeterMBean is not a compliant MBean");
         }
     }
 
+    /**
+     * Creates a new {@link HistogramMBean} with the specified {@link Metric}
+     * 
+     * @param metric The {@link Metric} of type {@link Histogram} for the {@link HistogramMBean}
+     * @return The newly created {@link HistogramMBean}
+     * @throws IllegalArgumentException if an invalid type of {@link Metric} is supplied or if the
+     *             {@link HistogramMBean} does not follow JMX design patterns for Management Interfaces
+     */
     public static HistogramMBean histogram(Metric metric) {
+        checkInstance(metric, Histogram.class);
         try {
             return new HistogramMBeanImpl((Histogram) metric);
         } catch (NotCompliantMBeanException e) {
-            LOG.error("The mbean could not be registered", e);
-            throw new IllegalArgumentException("Invalid metric specified for histogram '" + metric.getClass() + "'");
+            throw new IllegalArgumentException("The HistogramMBean is not a compliant MBean");
         }
     }
 
+    /**
+     * Creates a new {@link GaugeMBean} with the specified {@link Metric}
+     * 
+     * @param metric The {@link Metric} of type {@link Gauge} for the {@link GaugeMBean}
+     * @return The newly created {@link GaugeMBean}
+     * @throws IllegalArgumentException if an invalid type of {@link Metric} is supplied or if the
+     *             {@link GaugeMBean} does not follow JMX design patterns for Management Interfaces
+     */
     public static GaugeMBean gauge(Metric metric) {
+        checkInstance(metric, Gauge.class);
         try {
             return new GaugeMBeanImpl((Gauge<?>) metric);
         } catch (NotCompliantMBeanException e) {
-            LOG.error("The mbean could not be registered", e);
-            throw new IllegalArgumentException("Invalid metric specified for gauge '" + metric.getClass() + "'");
+            throw new IllegalArgumentException("The GaugeMBean is not a compliant MBean");
+        }
+    }
+
+    /**
+     * Checks if the instance of the specified {@link Metric} is assignable from the specified {@link Class}
+     * 
+     * @param metric The {@link Metric} to check
+     * @param clazz The expected assignable {@link Class}
+     * @throws IllegalArgumentException if the specified {@link Metric} is not assignable from the specified {@link Class}
+     */
+    private static void checkInstance(Metric metric, Class<?> clazz) {
+        if (!metric.getClass().isAssignableFrom(clazz)) {
+            throw new IllegalArgumentException("Invalid metric specified for '" + clazz.getSimpleName() + "' mbean: '" + metric.getClass() + "'");
         }
     }
 }
