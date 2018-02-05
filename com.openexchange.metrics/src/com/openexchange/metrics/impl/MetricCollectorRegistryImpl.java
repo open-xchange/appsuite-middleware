@@ -71,7 +71,6 @@ import com.openexchange.metrics.MetricCollector;
 import com.openexchange.metrics.MetricCollectorRegistry;
 import com.openexchange.metrics.MetricMetadata;
 import com.openexchange.metrics.MetricType;
-import com.openexchange.metrics.MetricTypeRegisterer;
 import com.openexchange.metrics.jmx.MetricMBean;
 import com.openexchange.metrics.jmx.MetricMBeanFactory;
 import com.openexchange.server.ServiceLookup;
@@ -86,7 +85,7 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
     private static final Logger LOG = LoggerFactory.getLogger(MetricCollectorRegistryImpl.class);
 
     private static final String DOMAIN_NAME = "com.openexchange.metrics";
-    private final Map<MetricType, MetricTypeRegisterer> registerers;
+    private final Map<MetricType, BiFunction<MetricMetadata, MetricRegistry, Metric>> registerers;
     private final ConcurrentMap<String, MetricCollector> collectors;
     private final Map<MetricType, BiFunction<Metric, MetricMetadata, MetricMBean>> mbeanCreators;
     private ServiceLookup services;
@@ -100,12 +99,12 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
         this.services = services;
         collectors = new ConcurrentHashMap<>();
 
-        Map<MetricType, MetricTypeRegisterer> r = new HashMap<>();
-        r.put(MetricType.COUNTER, (componentName, metricMetadata, metricRegistry) -> metricRegistry.counter(metricMetadata.getMetricName()));
-        r.put(MetricType.TIMER, (componentName, metricMetadata, metricRegistry) -> metricRegistry.timer(metricMetadata.getMetricName()));
-        r.put(MetricType.METER, (componentName, metricMetadata, metricRegistry) -> metricRegistry.meter(metricMetadata.getMetricName()));
-        r.put(MetricType.HISTOGRAM, (componentName, metricMetadata, metricRegistry) -> metricRegistry.histogram(metricMetadata.getMetricName()));
-        r.put(MetricType.GAUGE, (componentName, metricMetadata, metricRegistry) -> metricRegistry.gauge(metricMetadata.getMetricName(), (MetricSupplier<Gauge>) metricMetadata.getMetricSupplier()));
+        Map<MetricType, BiFunction<MetricMetadata, MetricRegistry, Metric>> r = new HashMap<>();
+        r.put(MetricType.COUNTER, (metricMetadata, metricRegistry) -> metricRegistry.counter(metricMetadata.getMetricName()));
+        r.put(MetricType.TIMER, (metricMetadata, metricRegistry) -> metricRegistry.timer(metricMetadata.getMetricName()));
+        r.put(MetricType.METER, (metricMetadata, metricRegistry) -> metricRegistry.meter(metricMetadata.getMetricName()));
+        r.put(MetricType.HISTOGRAM, (metricMetadata, metricRegistry) -> metricRegistry.histogram(metricMetadata.getMetricName()));
+        r.put(MetricType.GAUGE, (metricMetadata, metricRegistry) -> metricRegistry.gauge(metricMetadata.getMetricName(), (MetricSupplier<Gauge>) metricMetadata.getMetricSupplier()));
         registerers = Collections.unmodifiableMap(r);
 
         Map<MetricType, BiFunction<Metric, MetricMetadata, MetricMBean>> c = new HashMap<>();
@@ -185,14 +184,14 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
      */
     private void registerMetric(MetricCollector metricCollector, MetricMetadata metadata, MetricRegistry metricRegistry) throws OXException {
         MetricType metricType = metadata.getMetricType();
-        MetricTypeRegisterer metricTypeRegisterer = registerers.get(metricType);
+        BiFunction<MetricMetadata, MetricRegistry, Metric> metricTypeRegisterer = registerers.get(metricType);
         if (metricTypeRegisterer == null) {
             LOG.warn("No metric type registerer for '{}' was found.", metricType);
             return;
         }
 
         String componentName = metricCollector.getComponentName();
-        Metric metric = metricTypeRegisterer.register(componentName, metadata, metricRegistry);
+        Metric metric = metricTypeRegisterer.apply(metadata, metricRegistry);
         registerMBean(metric, componentName, metadata);
     }
 
