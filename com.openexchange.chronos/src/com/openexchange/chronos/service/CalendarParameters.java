@@ -55,6 +55,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 
 /**
  * {@link CalendarParameters}
@@ -197,6 +198,32 @@ public interface CalendarParameters {
      * appropriate exception is thrown (as per {@link UIDConflictStrategy#THROW}.
      */
     static final String UID_CONFLICT_STRATEGY = "uidConflictStrategy";
+
+    /**
+     * {@link Boolean}
+     * <p/>
+     * Configures whether possible incorrect string warnings that occurred in the storage layer should be handled automatically or not.
+     * <p/>
+     * If set to <code>true</code>, incorrect strings in the affected calendar data are replaced, and another attempt to store the data is
+     * performed implicitly, up to a fixed number of retry attempts. Defaults to <code>false</code>, so that an appropriate exception
+     * bubbles up.
+     *
+     * @see CalendarExceptionCodes#INCORRECT_STRING
+     */
+    static final String PARAMETER_AUTO_HANDLE_INCORRECT_STRINGS = "autoHandleIncorrectStrings";
+
+    /**
+     * {@link Boolean}
+     * <p/>
+     * Configures whether possible data truncation warnings that occurred in the storage layer should be handled automatically or not.
+     * <p/>
+     * If set to <code>true</code>, strings exceeding the storage capacity in the affected calendar data are truncated, and another
+     * attempt to store the data is performed implicitly, up to a fixed number of retry attempts. Defaults to <code>false</code>, so that
+     * an appropriate exception bubbles up.
+     *
+     * @see CalendarExceptionCodes#DATA_TRUNCATION
+     */
+    static final String PARAMETER_AUTO_HANDLE_DATA_TRUNCATIONS = "autoHandleDataTruncations";
 
     /**
      * {@link Boolean}
