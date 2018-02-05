@@ -57,7 +57,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class AbstractTimerHandler extends AbstractMetricHandler implements MetricWrapperExecutor<Timer> {
+public abstract class AbstractTimerHandler<T> extends AbstractMetricHandler<T> implements MetricWrapperExecutor<T, Timer> {
 
     /**
      * Initialises a new {@link AbstractTimerHandler}.
@@ -72,7 +72,7 @@ public abstract class AbstractTimerHandler extends AbstractMetricHandler impleme
      * @see com.openexchange.metrics.MetricHandler#handle(java.lang.Object)
      */
     @Override
-    public <T> T execute(Timer metric) throws OXException {
+    public T execute(Timer metric) throws OXException {
         Timer.Context context = null;
         if (metric != null) {
             context = metric.time();

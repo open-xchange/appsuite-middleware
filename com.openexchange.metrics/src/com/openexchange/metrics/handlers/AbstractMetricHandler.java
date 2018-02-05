@@ -56,7 +56,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-abstract class AbstractMetricHandler {
+abstract class AbstractMetricHandler<T> {
 
     /**
      * Initialises a new {@link AbstractMetricHandler}.
@@ -71,5 +71,5 @@ abstract class AbstractMetricHandler {
      * @return The outcome of the method
      * @throws OXException if an error is occurred
      */
-    public abstract <T> T call() throws OXException;
+    public abstract T call() throws OXException;
 }

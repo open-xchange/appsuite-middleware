@@ -57,7 +57,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class AbstractMeterHandler extends AbstractMetricHandler implements MetricWrapperExecutor<Meter> {
+public abstract class AbstractMeterHandler<T> extends AbstractMetricHandler<T> implements MetricWrapperExecutor<T, Meter> {
 
     /**
      * Initialises a new {@link AbstractMeterHandler}.
@@ -72,7 +72,7 @@ public abstract class AbstractMeterHandler extends AbstractMetricHandler impleme
      * @see com.openexchange.metrics.MetricWrapperExecutor#execute(java.lang.Object)
      */
     @Override
-    public <T> T execute(Meter meter) throws OXException {
+    public T execute(Meter meter) throws OXException {
         if (meter != null) {
             meter.mark();
         }

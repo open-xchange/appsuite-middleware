@@ -57,7 +57,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface MetricWrapperExecutor<M extends Metric> {
+public interface MetricWrapperExecutor<T, M extends Metric> {
 
     /**
      * Wraps the operation that needs to be executed and measured
@@ -66,5 +66,5 @@ public interface MetricWrapperExecutor<M extends Metric> {
      * @return The outcome of the operation
      * @throws OXException if an error is occurred
      */
-    <T> T execute(M metric) throws OXException;
+    T execute(M metric) throws OXException;
 }
