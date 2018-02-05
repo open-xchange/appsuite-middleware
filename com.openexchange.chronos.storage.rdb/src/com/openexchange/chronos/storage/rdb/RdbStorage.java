@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.storage.rdb;
 
-import static com.openexchange.chronos.common.CalendarUtils.ID_COMPARATOR;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.sql.Connection;
@@ -61,13 +60,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -90,7 +85,7 @@ import com.openexchange.tools.sql.DBUtils;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public abstract class RdbStorage {
+public abstract class RdbStorage extends CalendarStorageWarnings {
 
     /** A named logger instance */
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbStorage.class);
@@ -98,8 +93,6 @@ public abstract class RdbStorage {
     protected final Context context;
     protected final DBProvider dbProvider;
     protected final DBTransactionPolicy txPolicy;
-
-    private SortedMap<String, List<OXException>> warnings;
 
     /**
      * Initializes a new {@link RdbStorage}.
@@ -113,64 +106,6 @@ public abstract class RdbStorage {
         this.context = context;
         this.dbProvider = dbProvider;
         this.txPolicy = txPolicy;
-    }
-
-    /**
-     * Keeps track of a warning that occurred when processing the data of a specific event.
-     *
-     * @param eventId The identifier of the event the warning is associated with
-     * @param warning The warning
-     */
-    public void addWarning(String eventId, OXException warning) {
-        if (null == warnings) {
-            warnings = new TreeMap<String, List<OXException>>(ID_COMPARATOR);
-        }
-        com.openexchange.tools.arrays.Collections.put(warnings, eventId, warning);
-    }
-
-    /**
-     * Initializes and keeps track of a {@link CalendarExceptionCodes#IGNORED_INVALID_DATA} warning that occurred when processing the data
-     * of a specific event.
-     *
-     * @param eventId The identifier of the event the warning is associated with
-     * @param field The corresponding event field of the invalid data
-     * @param severity The problem severity
-     * @param message The message providing details of the warning
-     * @param cause The optional initial cause
-     */
-    public void addInvalidDataWaring(String eventId, EventField field, ProblemSeverity severity, String message, Throwable cause) {
-        OXException warning = CalendarExceptionCodes.IGNORED_INVALID_DATA.create(cause, eventId, field, String.valueOf(severity), message);
-        //        warning.setProperty(ProblemSeverity.class.getName(), severity.name());
-        if (0 > ProblemSeverity.NORMAL.compareTo(severity)) {
-            LOG.info(warning.getLogMessage());
-        } else {
-            LOG.debug(warning.getLogMessage());
-        }
-        addWarning(eventId, warning);
-    }
-
-    /**
-     * Gets any tracked warnings that occurred when processing the stored data.
-     *
-     * @return The warnings, mapped to the associated event identifier, or an empty map if there are none
-     */
-    public Map<String, List<OXException>> getWarnings() {
-        return null == warnings ? Collections.<String, List<OXException>> emptyMap() : warnings;
-    }
-
-    /**
-     * Gets any tracked warnings that occurred when processing the stored data and flushes them, so that subsequent invocations would
-     * return an empty map.
-     *
-     * @return The warnings, mapped to the associated event identifier, or an empty map if there are none
-     */
-    public Map<String, List<OXException>> getAndFlushWarnings() {
-        if (null == warnings) {
-            return Collections.emptyMap();
-        }
-        Map<String, List<OXException>> result = new TreeMap<String, List<OXException>>(warnings);
-        warnings = null;
-        return result;
     }
 
     /**
