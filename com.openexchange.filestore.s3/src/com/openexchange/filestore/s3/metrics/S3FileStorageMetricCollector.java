@@ -137,33 +137,13 @@ public class S3FileStorageMetricCollector extends com.amazonaws.metrics.MetricCo
 
     private class S3InternalMetricCollector extends AbstractMetricCollector {
 
+        private static final String COMPONENT_NAME = "s3";
+
         /**
          * Initialises a new {@link S3FileStorageMetricCollector.S3InternalMetricCollector}.
          */
         public S3InternalMetricCollector() {
-            super("s3");
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.openexchange.metrics.MetricCollector#start()
-         */
-        @Override
-        public void start() {
-            // TODO Auto-generated method stub
-
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.openexchange.metrics.MetricCollector#stop()
-         */
-        @Override
-        public void stop() {
-            // TODO Auto-generated method stub
-
+            super(COMPONENT_NAME);
         }
 
         /*
@@ -173,7 +153,7 @@ public class S3FileStorageMetricCollector extends com.amazonaws.metrics.MetricCo
          */
         @Override
         public boolean isEnabled() {
-            return false;
+            return services.getService(LeanConfigurationService.class).getBooleanProperty(S3FileStoreProperty.metricCollection);
         }
     }
 }

@@ -65,16 +65,6 @@ import com.codahale.metrics.Timer;
 public interface MetricCollector {
 
     /**
-     * Starts the collection of metrics
-     */
-    void start();
-
-    /**
-     * Stops the collection of metrics
-     */
-    void stop();
-
-    /**
      * Determines whether this collector was enabled via the configuration.
      * 
      * @return <code>true</code> if the collector is enabled via the configuration,
