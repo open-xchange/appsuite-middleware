@@ -69,7 +69,8 @@ public class S3FileStorageMetricCollector extends com.amazonaws.metrics.MetricCo
 
     /**
      * Initialises a new {@link S3FileStorageMetricCollector}.
-     * @throws OXException 
+     * 
+     * @throws OXException
      */
     public S3FileStorageMetricCollector(ServiceLookup services) throws OXException {
         super();
@@ -77,12 +78,7 @@ public class S3FileStorageMetricCollector extends com.amazonaws.metrics.MetricCo
         s3FileStorageRequestMetricCollector = new S3FileStorageRequestMetricCollector(internalCollector);
         s3FileStorageServiceMetricCollector = new S3FileStorageServiceMetricCollector(internalCollector);
 
-        try {
-            services.getService(MetricCollectorRegistry.class).registerCollector(internalCollector);
-        } catch (OXException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        services.getService(MetricCollectorRegistry.class).registerCollector(internalCollector);
     }
 
     /*

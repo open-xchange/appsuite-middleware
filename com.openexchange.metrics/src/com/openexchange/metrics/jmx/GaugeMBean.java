@@ -56,7 +56,7 @@ import com.codahale.metrics.Gauge;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface GaugeMBean {
+public interface GaugeMBean extends MetricMBean {
 
     /**
      * Returns the value of the {@link Gauge}

@@ -56,7 +56,7 @@ import com.codahale.metrics.Counter;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface CounterMBean {
+public interface CounterMBean extends MetricMBean {
 
     /**
      * Returns the current number of the {@link Counter}

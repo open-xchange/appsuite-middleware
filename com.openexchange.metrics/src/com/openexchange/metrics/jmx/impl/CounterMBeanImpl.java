@@ -51,7 +51,6 @@ package com.openexchange.metrics.jmx.impl;
 
 import javax.management.NotCompliantMBeanException;
 import com.codahale.metrics.Counter;
-import com.openexchange.management.AnnotatedStandardMBean;
 import com.openexchange.metrics.jmx.CounterMBean;
 
 /**
@@ -59,7 +58,7 @@ import com.openexchange.metrics.jmx.CounterMBean;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CounterMBeanImpl extends AnnotatedStandardMBean implements CounterMBean {
+public class CounterMBeanImpl extends AbstractMetricMBean implements CounterMBean {
 
     private static final String DESCRIPTION = "Counter MBean";
     private final Counter counter;

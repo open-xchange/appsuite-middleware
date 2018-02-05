@@ -51,7 +51,6 @@ package com.openexchange.metrics.jmx.impl;
 
 import javax.management.NotCompliantMBeanException;
 import com.codahale.metrics.Gauge;
-import com.openexchange.management.AnnotatedStandardMBean;
 import com.openexchange.metrics.jmx.GaugeMBean;
 
 /**
@@ -59,7 +58,7 @@ import com.openexchange.metrics.jmx.GaugeMBean;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class GaugeMBeanImpl extends AnnotatedStandardMBean implements GaugeMBean {
+public class GaugeMBeanImpl extends AbstractMetricMBean implements GaugeMBean {
 
     private static final String DESCRIPTION = "Gauge MBean";
     private final Gauge<?> gauge;

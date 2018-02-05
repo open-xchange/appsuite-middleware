@@ -54,7 +54,7 @@ package com.openexchange.metrics.jmx;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface TimerMBean {
+public interface TimerMBean extends MetricMBean {
 
     /**
      * Returns the lowest value in the snapshot.

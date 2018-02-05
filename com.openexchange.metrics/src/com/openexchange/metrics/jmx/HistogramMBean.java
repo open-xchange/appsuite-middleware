@@ -56,7 +56,7 @@ import com.codahale.metrics.Histogram;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface HistogramMBean {
+public interface HistogramMBean extends MetricMBean {
 
     /**
      * Returns the number of values recorded.

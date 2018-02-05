@@ -51,7 +51,6 @@ package com.openexchange.metrics.jmx.impl;
 
 import javax.management.NotCompliantMBeanException;
 import com.codahale.metrics.Histogram;
-import com.openexchange.management.AnnotatedStandardMBean;
 import com.openexchange.metrics.jmx.HistogramMBean;
 
 /**
@@ -59,7 +58,7 @@ import com.openexchange.metrics.jmx.HistogramMBean;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class HistogramMBeanImpl extends AnnotatedStandardMBean implements HistogramMBean {
+public class HistogramMBeanImpl extends AbstractMetricMBean implements HistogramMBean {
 
     private static final String DESCRIPTION = "Hitstogram MBean";
     private final Histogram histogram;
