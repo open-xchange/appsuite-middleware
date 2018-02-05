@@ -117,27 +117,6 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
         mbeanCreators = Collections.unmodifiableMap(c);
     }
 
-    private void registerMBean(Metric metric, String componentName, MetricMetadata metricMetadata) {
-        try {
-            ManagementService managementService = services.getService(ManagementService.class);
-            managementService.registerMBean(getObjectName(componentName, metricMetadata.getMetricName()), mbeanCreators.get(metricMetadata.getMetricType()).apply(metric, metricMetadata));
-        } catch (OXException | MalformedObjectNameException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * @return
-     * @throws MalformedObjectNameException
-     */
-    private ObjectName getObjectName(String componentName, String metricName) throws MalformedObjectNameException {
-        StringBuilder sb = new StringBuilder(DOMAIN_NAME);
-        sb.append(":00=").append(componentName);
-        sb.append(",name=").append(metricName);
-        return new ObjectName(sb.toString());
-    }
-
     /*
      * (non-Javadoc)
      * 
@@ -178,6 +157,14 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
         return collectors.get(componentName);
     }
 
+    /**
+     * Registers the specified {@link MetricCollector} with the specified {@link MetricMetadata} to the specified {@link MetricRegistry}
+     * and create an MBean for the {@link Metric}
+     * 
+     * @param metricCollector The {@link MetricCollector}
+     * @param metadata The {@link MetricMetadata}
+     * @param metricRegistry The {@link MetricRegistry}
+     */
     private void registerMetric(MetricCollector metricCollector, MetricMetadata metadata, MetricRegistry metricRegistry) {
         MetricType metricType = metadata.getMetricType();
         MetricTypeRegisterer metricTypeRegisterer = registerers.get(metricType);
@@ -189,5 +176,37 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
         String componentName = metricCollector.getComponentName();
         Metric metric = metricTypeRegisterer.register(componentName, metadata, metricRegistry);
         registerMBean(metric, componentName, metadata);
+    }
+
+    /**
+     * Creates and registers an MBean for the specified {@link Metric} under the specified component name
+     * 
+     * @param metric The {@link Metric} for which to create and register the MBean
+     * @param componentName The component's name
+     * @param metricMetadata The {@link MetricMetadata} of the {@link Metric}
+     */
+    private void registerMBean(Metric metric, String componentName, MetricMetadata metricMetadata) {
+        try {
+            ManagementService managementService = services.getService(ManagementService.class);
+            managementService.registerMBean(getObjectName(componentName, metricMetadata.getMetricName()), mbeanCreators.get(metricMetadata.getMetricType()).apply(metric, metricMetadata));
+        } catch (OXException | MalformedObjectNameException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Gets the {@link ObjectName} for the specified component and metric
+     * 
+     * @param componentName The component name
+     * @param metricName the metric name
+     * @return The created {@link ObjectName}
+     * @throws MalformedObjectNameException if the string passed as a parameter does not have the right format.
+     */
+    private ObjectName getObjectName(String componentName, String metricName) throws MalformedObjectNameException {
+        StringBuilder sb = new StringBuilder(DOMAIN_NAME);
+        sb.append(":00=").append(componentName);
+        sb.append(",name=").append(metricName);
+        return new ObjectName(sb.toString());
     }
 }
