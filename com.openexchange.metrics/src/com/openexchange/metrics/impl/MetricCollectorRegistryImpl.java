@@ -128,15 +128,10 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
             throw new IllegalArgumentException("Cannot register a 'null' metric collector");
         }
 
-        MetricCollector existingMc = collectors.get(metricCollector.getComponentName());
-        if (existingMc != null) {
-            // TODO: Simple return instead of throwing an exception?
-            throw new OXException(1138, "There is already another metric collector registered with '" + metricCollector.getComponentName() + "'");
-        }
-        MetricCollector raced = collectors.putIfAbsent(metricCollector.getComponentName(), metricCollector);
-        if (raced != null) {
-            // TODO: Simple return instead of throwing an exception?
-            throw new OXException(1138, "There is already another metric collector registered with '" + metricCollector.getComponentName() + "'");
+        MetricCollector existingMC = collectors.putIfAbsent(metricCollector.getComponentName(), metricCollector);
+        if (existingMC != null) {
+            LOG.warn("There is already another metric collector registered with '{}'", metricCollector.getComponentName());
+            return;
         }
 
         MetricRegistry metricRegistry = SharedMetricRegistries.getOrCreate(metricCollector.getComponentName());
