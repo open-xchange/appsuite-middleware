@@ -65,7 +65,7 @@ import com.openexchange.metrics.MetricType;
 public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector {
 
     private static final String COUNTER_TOTAL_BYTES = "counter.totalBytes";
-    private static final String METER_THROUPUT = "meter.throuput";
+    private static final String METER_THROUPUT = "meter.throughput";
 
     private final MetricCollector internalCollector;
 
