@@ -99,11 +99,11 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
         collectors = new HashMap<>();
 
         Map<MetricType, MetricTypeRegisterer> r = new HashMap<>();
-        r.put(MetricType.COUNTER, (componentName, metricMetadata, metricRegistry, supplier) -> metricRegistry.counter(metricMetadata.getMetricName()));
-        r.put(MetricType.TIMER, (componentName, metricMetadata, metricRegistry, supplier) -> metricRegistry.timer(metricMetadata.getMetricName()));
-        r.put(MetricType.METER, (componentName, metricMetadata, metricRegistry, supplier) -> metricRegistry.meter(metricMetadata.getMetricName()));
-        r.put(MetricType.HISTOGRAM, (componentName, metricMetadata, metricRegistry, supplier) -> metricRegistry.histogram(metricMetadata.getMetricName()));
-        r.put(MetricType.GAUGE, (componentName, metricMetadata, metricRegistry, supplier) -> metricRegistry.gauge(metricMetadata.getMetricName(), (MetricSupplier<Gauge>) supplier));
+        r.put(MetricType.COUNTER, (componentName, metricMetadata, metricRegistry) -> metricRegistry.counter(metricMetadata.getMetricName()));
+        r.put(MetricType.TIMER, (componentName, metricMetadata, metricRegistry) -> metricRegistry.timer(metricMetadata.getMetricName()));
+        r.put(MetricType.METER, (componentName, metricMetadata, metricRegistry) -> metricRegistry.meter(metricMetadata.getMetricName()));
+        r.put(MetricType.HISTOGRAM, (componentName, metricMetadata, metricRegistry) -> metricRegistry.histogram(metricMetadata.getMetricName()));
+        r.put(MetricType.GAUGE, (componentName, metricMetadata, metricRegistry) -> metricRegistry.gauge(metricMetadata.getMetricName(), (MetricSupplier<Gauge>) metricMetadata.getMetricSupplier()));
         registerers = Collections.unmodifiableMap(r);
 
         Map<MetricType, BiFunction<Metric, MetricMetadata, MetricMBean>> c = new HashMap<>();
@@ -177,7 +177,7 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
         }
 
         String componentName = metricCollector.getComponentName();
-        Metric metric = metricTypeRegisterer.register(componentName, metadata, metricRegistry, metadata.getMetricSupplier());
+        Metric metric = metricTypeRegisterer.register(componentName, metadata, metricRegistry);
         registerMBean(metric, componentName, metadata);
     }
 }

@@ -71,5 +71,5 @@ public interface MetricTypeRegisterer {
      * @param metricSupplier The optional {@link MetricSupplier}
      * @return The created {@link Metric} or a pre-existing one
      */
-    Metric register(String componentName, MetricMetadata metricMetadata, MetricRegistry metricRegistry, MetricSupplier<? extends Metric> metricSupplier);
+    Metric register(String componentName, MetricMetadata metricMetadata, MetricRegistry metricRegistry);
 }
