@@ -113,7 +113,7 @@ public class RdbCalendarStorageFactory implements CalendarStorageFactory {
                 LOG.debug("Using 'replaying' calendar storage for default account '0'.");
                 CalendarStorage legacyStorage = new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorage(context, entityResolver, dbProvider, txPolicy);
                 CalendarStorage storage = new com.openexchange.chronos.storage.rdb.RdbCalendarStorage(context, accountId, entityResolver, dbProvider, txPolicy);
-                return new com.openexchange.chronos.storage.rdb.replaying.RdbCalendarStorage(storage, legacyStorage);
+                return new com.openexchange.chronos.storage.rdb.replaying.RdbCalendarStorage(storage, makeResilient(legacyStorage, true, true));
             }
         }
         return new com.openexchange.chronos.storage.rdb.RdbCalendarStorage(context, accountId, entityResolver, dbProvider, txPolicy);
