@@ -51,7 +51,9 @@ package com.openexchange.filestore.s3.metrics;
 
 import com.amazonaws.metrics.RequestMetricCollector;
 import com.amazonaws.metrics.ServiceMetricCollector;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.s3.internal.S3FileStoreProperty;
 import com.openexchange.metrics.AbstractMetricCollector;
 import com.openexchange.metrics.MetricCollector;
 import com.openexchange.metrics.MetricCollectorRegistry;
@@ -66,6 +68,7 @@ public class S3FileStorageMetricCollector extends com.amazonaws.metrics.MetricCo
 
     private final S3FileStorageRequestMetricCollector s3FileStorageRequestMetricCollector;
     private S3FileStorageServiceMetricCollector s3FileStorageServiceMetricCollector;
+    private final ServiceLookup services;
 
     /**
      * Initialises a new {@link S3FileStorageMetricCollector}.
@@ -74,6 +77,7 @@ public class S3FileStorageMetricCollector extends com.amazonaws.metrics.MetricCo
      */
     public S3FileStorageMetricCollector(ServiceLookup services) throws OXException {
         super();
+        this.services = services;
         MetricCollector internalCollector = new S3InternalMetricCollector();
         s3FileStorageRequestMetricCollector = new S3FileStorageRequestMetricCollector(internalCollector);
         s3FileStorageServiceMetricCollector = new S3FileStorageServiceMetricCollector(internalCollector);
@@ -108,7 +112,7 @@ public class S3FileStorageMetricCollector extends com.amazonaws.metrics.MetricCo
      */
     @Override
     public boolean isEnabled() {
-        return true;
+        return services.getService(LeanConfigurationService.class).getBooleanProperty(S3FileStoreProperty.metricCollection);
     }
 
     /*

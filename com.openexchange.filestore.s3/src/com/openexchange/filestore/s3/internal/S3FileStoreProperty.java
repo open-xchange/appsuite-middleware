@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,59 +47,52 @@
  *
  */
 
-package com.openexchange.filestore.s3.osgi;
+package com.openexchange.filestore.s3.internal;
 
-import com.amazonaws.metrics.AwsSdkMetrics;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.filestore.FileStorageProvider;
-import com.openexchange.filestore.s3.internal.S3FileStorageFactory;
-import com.openexchange.filestore.s3.internal.S3FileStoreProperty;
-import com.openexchange.filestore.s3.metrics.S3FileStorageMetricCollector;
-import com.openexchange.metrics.MetricCollectorRegistry;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.config.lean.Property;
 
 /**
- * {@link S3Activator}
+ * {@link S3FileStoreProperty}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class S3Activator extends HousekeepingActivator {
+public enum S3FileStoreProperty implements Property {
 
     /**
-     * Initializes a new {@link S3Activator}.
+     * Flag to enable metric collection.
+     * Defaults to <code>false</code>
      */
-    public S3Activator() {
-        super();
+    metricCollection(false);
+
+    private final Object defaultValue;
+
+    private static final String PREFIX = "com.openexchange.filestore.s3.";
+
+    /**
+     * Initializes a new {@link CassandraProperty}.
+     */
+    private S3FileStoreProperty(Object defaultValue) {
+        this.defaultValue = defaultValue;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.lean.Property#getFQPropertyName()
+     */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, LeanConfigurationService.class,  MetricCollectorRegistry.class };
+    public String getFQPropertyName() {
+        return PREFIX + name();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.lean.Property#getDefaultValue()
+     */
     @Override
-    protected void startBundle() throws Exception {
-        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(S3Activator.class);
-        logger.info("Starting bundle: com.openexchange.filestore.s3");
-
-        // Check for metric collection
-        boolean metricCollection = getService(LeanConfigurationService.class).getBooleanProperty(S3FileStoreProperty.metricCollection);
-        if (metricCollection) {
-            // Enable metric collection by overriding the default metrics
-            AwsSdkMetrics.setMetricCollector(new S3FileStorageMetricCollector(this));
-        }
-
-        S3FileStorageFactory factory = new S3FileStorageFactory(this);
-        registerService(FileStorageProvider.class, factory);
+    public Object getDefaultValue() {
+        return defaultValue;
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(S3Activator.class);
-        getService(MetricCollectorRegistry.class).unregisterCollector("s3");
-        
-        logger.info("Stopping bundle: com.openexchange.filestore.s3");
-        super.stopBundle();
-    }
 }
