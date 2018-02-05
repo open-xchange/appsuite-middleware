@@ -65,6 +65,8 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class S3FileStorageMetricCollector extends com.amazonaws.metrics.MetricCollector {
+    
+    public static final String COMPONENT_NAME = "s3"; 
 
     private final S3FileStorageRequestMetricCollector s3FileStorageRequestMetricCollector;
     private S3FileStorageServiceMetricCollector s3FileStorageServiceMetricCollector;
@@ -136,8 +138,6 @@ public class S3FileStorageMetricCollector extends com.amazonaws.metrics.MetricCo
     }
 
     private class S3InternalMetricCollector extends AbstractMetricCollector {
-
-        private static final String COMPONENT_NAME = "s3";
 
         /**
          * Initialises a new {@link S3FileStorageMetricCollector.S3InternalMetricCollector}.

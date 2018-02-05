@@ -98,7 +98,7 @@ public class S3Activator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(S3Activator.class);
 
-        getService(MetricCollectorRegistry.class).unregisterCollector("s3");
+        getService(MetricCollectorRegistry.class).unregisterCollector(S3FileStorageMetricCollector.COMPONENT_NAME);
         AwsSdkMetrics.setMetricCollector(null);
 
         logger.info("Stopping bundle: com.openexchange.filestore.s3");
