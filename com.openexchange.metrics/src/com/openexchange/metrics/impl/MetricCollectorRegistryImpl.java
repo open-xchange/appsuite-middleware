@@ -129,8 +129,7 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
 
         MetricCollector existingMC = collectors.putIfAbsent(metricCollector.getComponentName(), metricCollector);
         if (existingMC != null) {
-            LOG.warn("There is already another metric collector registered with '{}'", metricCollector.getComponentName());
-            return;
+            throw new IllegalArgumentException("There is already another metric collector registered with component name '" + metricCollector.getComponentName() + "'.");
         }
 
         MetricRegistry metricRegistry = SharedMetricRegistries.getOrCreate(metricCollector.getComponentName());
