@@ -52,6 +52,8 @@ package com.openexchange.metrics.impl;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.BiFunction;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
@@ -85,7 +87,7 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
 
     private static final String DOMAIN_NAME = "com.openexchange.metrics";
     private final Map<MetricType, MetricTypeRegisterer> registerers;
-    private final Map<String, MetricCollector> collectors;
+    private final ConcurrentMap<String, MetricCollector> collectors;
     private final Map<MetricType, BiFunction<Metric, MetricMetadata, MetricMBean>> mbeanCreators;
     private ServiceLookup services;
 
@@ -96,7 +98,7 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
     public MetricCollectorRegistryImpl(ServiceLookup services) {
         super();
         this.services = services;
-        collectors = new HashMap<>();
+        collectors = new ConcurrentHashMap<>();
 
         Map<MetricType, MetricTypeRegisterer> r = new HashMap<>();
         r.put(MetricType.COUNTER, (componentName, metricMetadata, metricRegistry) -> metricRegistry.counter(metricMetadata.getMetricName()));
@@ -143,12 +145,20 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
      */
     @Override
     public void registerCollector(MetricCollector metricCollector) throws OXException {
+        if (metricCollector == null) {
+            throw new IllegalArgumentException("Cannot register a 'null' metric collector");
+        }
+
         MetricCollector existingMc = collectors.get(metricCollector.getComponentName());
         if (existingMc != null) {
             // TODO: Simple return instead of throwing an exception?
             throw new OXException(1138, "There is already another metric collector registered with '" + metricCollector.getComponentName() + "'");
         }
-        collectors.put(metricCollector.getComponentName(), metricCollector);
+        MetricCollector raced = collectors.putIfAbsent(metricCollector.getComponentName(), metricCollector);
+        if (raced != null) {
+            // TODO: Simple return instead of throwing an exception?
+            throw new OXException(1138, "There is already another metric collector registered with '" + metricCollector.getComponentName() + "'");
+        }
 
         MetricRegistry metricRegistry = SharedMetricRegistries.getOrCreate(metricCollector.getComponentName());
         ((AbstractMetricCollector) metricCollector).setMetricRegistry(metricRegistry);
@@ -172,7 +182,7 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
         MetricType metricType = metadata.getMetricType();
         MetricTypeRegisterer metricTypeRegisterer = registerers.get(metricType);
         if (metricTypeRegisterer == null) {
-            LOG.warn("No metric type registerer for '{}' was found", metricType);
+            LOG.warn("No metric type registerer for '{}' was found.", metricType);
             return;
         }
 
