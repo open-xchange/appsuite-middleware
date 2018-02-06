@@ -87,13 +87,53 @@ public interface MetricCollector {
      */
     Set<MetricMetadata> getMetricMetadata();
 
+    /**
+     * Retrieves the {@link Histogram} registered under the specified name
+     * or <code>null</code> if no such {@link Histogram} exists
+     * 
+     * @param name The name of the {@link Histogram}
+     * @return the {@link Histogram} registered under the specified name
+     *         or <code>null</code> if no such {@link Histogram} exists
+     */
     Histogram getHistogram(String name);
 
+    /**
+     * Retrieves the {@link Timer} registered under the specified name
+     * or <code>null</code> if no such {@link Timer} exists
+     * 
+     * @param name The name of the {@link Timer}
+     * @return the {@link Timer} registered under the specified name
+     *         or <code>null</code> if no such {@link Timer} exists
+     */
     Timer getTimer(String name);
 
+    /**
+     * Retrieves the {@link Counter} registered under the specified name
+     * or <code>null</code> if no such {@link Counter} exists
+     * 
+     * @param name The name of the {@link Counter}
+     * @return the {@link Counter} registered under the specified name
+     *         or <code>null</code> if no such {@link Counter} exists
+     */
     Counter getCounter(String name);
 
+    /**
+     * Retrieves the {@link Gauge} with the specified type {@link T} registered
+     * under the specified name or <code>null</code> if no such {@link Gauge} exists
+     * 
+     * @param name The name of the {@link Gauge}
+     * @return the {@link Gauge} with the specified type {@link T} registered
+     *         under the specified name or <code>null</code> if no such {@link Gauge} exists
+     */
     <T> Gauge<T> getGauge(String name, Class<T> clazz);
 
+    /**
+     * Retrieves the {@link Meter} registered under the specified name
+     * or <code>null</code> if no such {@link Meter} exists
+     * 
+     * @param name The name of the {@link Meter}
+     * @return the {@link Meter} registered under the specified name
+     *         or <code>null</code> if no such {@link Meter} exists
+     */
     Meter getMeter(String name);
 }
