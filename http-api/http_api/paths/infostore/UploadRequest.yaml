@@ -40,7 +40,7 @@
         name: filename
         type: string
         description: The name of the file.
-        required: false
+        required: true
       - in: query
         name: file_mimetype
         type: string

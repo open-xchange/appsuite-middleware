@@ -82,14 +82,15 @@ public class UploadAction extends AbstractWriteAction {
     @Override
     protected AJAXRequestResult handle(InfostoreRequest request) throws OXException {
 
+        if (Strings.isEmpty(request.getParameter(File.Field.FOLDER_ID.getName()))) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(File.Field.FOLDER_ID.getName());
+        }
+        if (Strings.isEmpty(request.getParameter(File.Field.FILENAME.getName()))) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(File.Field.FILENAME.getName());
+        }
         IDBasedFileAccess fileAccess = request.getFileAccess();
         File file = request.getFile();
         String originalFileName = file.getFileName();
-
-        // Check folder
-        if (Strings.isEmpty(file.getFolderId())) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(File.Field.FOLDER_ID.getName());
-        }
 
         if (file.getId() == null) {
             file.setId(FileStorageFileAccess.NEW);
