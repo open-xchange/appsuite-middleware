@@ -67,7 +67,6 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
-import com.openexchange.chronos.provider.caching.CachingCalendarUtils;
 import com.openexchange.chronos.provider.caching.DiffAwareExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.handlers.SearchHandler;
@@ -204,10 +203,6 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     @Override
     public List<Event> getEvents() throws OXException {
-        if (this.parameters.contains(CalendarParameters.PARAMETER_UPDATE_CACHE) && this.parameters.get(CalendarParameters.PARAMETER_UPDATE_CACHE, Boolean.class, Boolean.FALSE).booleanValue()) {
-            CachingCalendarUtils.invalidateCache(account);
-            saveConfig();
-        }
         cache();
         return new AccountResponseGenerator(this).generate();
     }
@@ -224,7 +219,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             boolean holdsLock = acquireUpdateLock();
             try {
                 if (holdsLock) {
-                    executeUpdate();
+                    executeUpdate(type);
                     saveConfig();
                 }
             } finally {
@@ -235,8 +230,8 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         }
     }
 
-    private void executeUpdate() throws OXException {
-        CachingHandler cachingHandler = get();
+    private void executeUpdate(ProcessingType type) throws OXException {
+        CachingHandler cachingHandler = get(type);
         try {
             ExternalCalendarResult externalCalendarResult = cachingHandler.getExternalEvents();
             if (externalCalendarResult.isUpdated()) {
@@ -262,7 +257,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
                     cachingHandler.persist(diff);
                 }
             }
-            cachingHandler.updateLastUpdated(System.currentTimeMillis());
+            cachingHandler.updateLastUpdated(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1));
         } catch (OXException e) {
             LOG.info("Unable to update cache for account {}: {}", account.getAccountId(), e.getMessage(), e);
             warnings.add(e);
@@ -288,8 +283,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         }
     }
 
-    public CachingHandler get() throws OXException {
-        ProcessingType type = getProcessingType();
+    public CachingHandler get(ProcessingType type) {
         switch (type) {
             case INITIAL_INSERT:
                 return new InitialWriteHandler(this);
@@ -320,6 +314,12 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         }
         long currentTimeMillis = System.currentTimeMillis();
         if (TimeUnit.MINUTES.toMillis(refreshInterval) < currentTimeMillis - lastUpdate.longValue()) {
+            return ProcessingType.UPDATE;
+        }
+        if (currentTimeMillis < lastUpdate.longValue()) {
+            return ProcessingType.READ_DB;
+        }
+        if (this.parameters.contains(CalendarParameters.PARAMETER_UPDATE_CACHE) && this.parameters.get(CalendarParameters.PARAMETER_UPDATE_CACHE, Boolean.class, Boolean.FALSE).booleanValue()) {
             return ProcessingType.UPDATE;
         }
         return ProcessingType.READ_DB;
