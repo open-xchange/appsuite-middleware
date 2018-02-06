@@ -582,16 +582,6 @@ public class EventResource extends DAVObjectResource<Event> {
      *         successfully and the update operation should not be tried again, or <code>null</code> if not recoverable at all
      */
     private Boolean handleOnUpdate(CalDAVImport caldavImport, OXException e) {
-        try {
-            switch (e.getErrorCode()) {
-                case "CAL-5071": // Incorrect string [string %1$s, field %2$s, column %3$s]
-                    return handleIncorrectString(caldavImport, e);
-                case "CAL-5070": // Data truncation [field %1$s, limit %2$d, current %3$d]
-                    return handleDataTruncation(caldavImport, e);
-            }
-        } catch (Exception x) {
-            LOG.warn("Error during automatic handling of {}", e.getErrorCode(), x);
-        }
         return null;
     }
 
@@ -608,42 +598,11 @@ public class EventResource extends DAVObjectResource<Event> {
             switch (e.getErrorCode()) {
                 case "CAL-4090": // UID conflict [uid %1$s, conflicting id %2$d]
                     return handleUIDConflict(caldavImport, e);
-                case "CAL-5071": // Incorrect string [string %1$s, field %2$s, column %3$s]
-                    return handleIncorrectString(caldavImport, e);
-                case "CAL-5070": // Data truncation [field %1$s, limit %2$d, current %3$d]
-                    return handleDataTruncation(caldavImport, e);
             }
         } catch (Exception x) {
             LOG.warn("Error during automatic handling of {}", e.getErrorCode(), x);
         }
         return null;
-    }
-
-    private Boolean handleIncorrectString(CalDAVImport caldavImport, OXException e) throws Exception {
-        /*
-         * replace mapped incorrect strings, indicate "try again" if replacements were possible
-         */
-        LOG.info("Incorrect string detected, replacing problematic characters and trying again.");
-        CalendarUtilities calendarUtilities = factory.requireService(CalendarUtilities.class);
-        boolean hasReplaced = calendarUtilities.handleIncorrectString(e, caldavImport.getEvent());
-        for (Event changeException : caldavImport.getChangeExceptions()) {
-            hasReplaced |= calendarUtilities.handleIncorrectString(e, changeException);
-        }
-        return hasReplaced ? Boolean.TRUE : null;
-    }
-
-    private Boolean handleDataTruncation(CalDAVImport caldavImport, OXException e) throws Exception {
-        /*
-         * trim mapped data truncations, indicate "try again" if possible
-         */
-        LOG.info("Data truncation detected, trimming problematic fields and trying again.");
-        CalendarUtilities calendarUtilities = factory.requireService(CalendarUtilities.class);
-        boolean hasTrimmed = calendarUtilities.handleDataTruncation(e, caldavImport.getEvent());
-        hasTrimmed |= calendarUtilities.handleDataTruncation(e, caldavImport.getEvent().getAttendees());
-        for (Event changeException : caldavImport.getChangeExceptions()) {
-            hasTrimmed |= calendarUtilities.handleDataTruncation(e, changeException);
-        }
-        return hasTrimmed ? Boolean.TRUE : null;
     }
 
     /**

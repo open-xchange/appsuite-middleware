@@ -121,10 +121,10 @@ The namespace looks like the following:
       * enabled – Specifies whether the user is allowed to publish items. (read only)
     * com.openexchange.subscribe
       * enabled – Specifies whether the user is allowed to subscribe sources. (read only)
-    * olox20
+    * olox20 [DEPRECATED]
       * active – Tells the UI if the user is allowed to use the OXtender for Microsoft Outlook 2. (read only)
       * module – Is set to false to prevent the UI from trying to load a plugin. (read only)
-    * com.openexchange.oxupdater
+    * com.openexchange.oxupdater [DEPRECATED]
       * module – Is true if the OXUpdater package is installed and started. (read only)
       * active – Is true if the user is allowed to download the OXUpdater. Otherwise it's false. (read only)
     * com.openexchange.passwordchange

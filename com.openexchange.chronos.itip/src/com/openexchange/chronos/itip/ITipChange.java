@@ -55,7 +55,6 @@ import java.util.List;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.mapping.EventUpdateImpl;
 import com.openexchange.chronos.itip.analyzers.AbstractITipAnalyzer;
 import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
@@ -90,8 +89,6 @@ public class ITipChange {
     private Event deleted;
 
     private boolean isException = false;
-
-    private ParticipantChange participantChange;
 
     private ITipEventUpdate diff;
 
@@ -172,14 +169,6 @@ public class ITipChange {
 
     public boolean isException() {
         return isException;
-    }
-
-    public ParticipantChange getParticipantChange() {
-        return participantChange;
-    }
-
-    public void setParticipantChange(ParticipantChange participantChange) {
-        this.participantChange = participantChange;
     }
 
     public ITipEventUpdate getDiff() throws OXException {

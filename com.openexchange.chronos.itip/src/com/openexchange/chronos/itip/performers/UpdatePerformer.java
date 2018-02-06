@@ -241,13 +241,8 @@ public class UpdatePerformer extends AbstractActionPerformer {
         }
 
         try {
-            List<Attendee> attendees;
-            if (null != currentEvent && currentEvent.getTimestamp() > event.getTimestamp()) {
-                // Current event exists and was modified since the organizer send the mail. Using the current set of attendees from database
-                attendees = new LinkedList<>(currentEvent.getAttendees());
-            } else {
-                attendees = new LinkedList<>(event.getAttendees());
-            }
+            // Trust analyze to provide accurate set of attendees and their status
+            List<Attendee> attendees = new LinkedList<>(event.getAttendees());
 
             // Get attendee to add
             Attendee attendee = CalendarUtils.find(attendees, owner);
