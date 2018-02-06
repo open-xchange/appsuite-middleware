@@ -122,7 +122,7 @@ public class EventsContactHalo extends AbstractContactHalo implements HaloContac
          * init calendar access, search matching events & return appropriate result
          */
         List<Event> events = initCalendarAccess(request).searchEvents(null, filters, null);
-        return new AJAXRequestResult(events, new Date(getMaximumTimestamp(events)), "event");
+        return new AJAXRequestResult(events, getMaximumTimestamp(events), "event");
     }
 
     private IDBasedCalendarAccess initCalendarAccess(AJAXRequestData request) throws OXException {

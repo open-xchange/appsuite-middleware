@@ -53,7 +53,6 @@ import static com.openexchange.chronos.common.CalendarUtils.getMaximumTimestamp;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import org.json.JSONArray;
@@ -110,7 +109,7 @@ public class ListAction extends ChronosAction {
                 eventIDs.add(parseIdParameter(ids.getJSONObject(x)));
             }
             List<Event> events = calendarAccess.getEvents(eventIDs);
-            return new AJAXRequestResult(events, new Date(getMaximumTimestamp(events)), EventResultConverter.INPUT_FORMAT);
+            return new AJAXRequestResult(events, getMaximumTimestamp(events), EventResultConverter.INPUT_FORMAT);
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e.getMessage(), e);
         }
