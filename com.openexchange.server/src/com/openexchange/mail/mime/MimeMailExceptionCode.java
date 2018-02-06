@@ -345,7 +345,23 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Destination folder does not exist. Please try to create it and retry the operation.
      */
-    TRYCREATE("Destination folder does not exist. Please try to create it and retry the operation.", CATEGORY_USER_INPUT, 1037, MimeMailExceptionMessage.TRYCREATE_MSG_DISPLAY)
+    TRYCREATE("Destination folder does not exist. Please try to create it and retry the operation.", CATEGORY_USER_INPUT, 1037, MimeMailExceptionMessage.TRYCREATE_MSG_DISPLAY),
+    /**
+     * A temporary failure occurred on mail server %1$s during login for %2$s. Please try again later.
+     * <p>
+     * For example, an IMAP server that uses an LDAP server for authentication might use this response code when the LDAP/Radius server is down.
+     */
+    TEMPORARY_AUTH_FAILURE("A temporary failure occurred on mail server %1$s during login for %2$s. Please try again later.", CATEGORY_TRY_AGAIN, 1038, MimeMailExceptionMessage.TEMPORARY_AUTH_FAILURE_MSG_DISPLAY),
+    /**
+     * Access to mail server %1$s is no longer permitted for login %2$s using his password.
+     */
+    PASSWORD_EXPIRED("Access to mail server %1$s is no longer permitted for login %2$s using his password.", CATEGORY_PERMISSION_DENIED, 1039, MimeMailExceptionMessage.PASSWORD_EXPIRED_MSG_DISPLAY),
+    /**
+     * Access to mail server %1$s is not permitted for login %2$s due to a lack of privacy.
+     * <p>
+     * The client is supposed to switch to a connection with Transport Layer Security (TLS).
+     */
+    PRIVACY_REQUIRED("Access to mail server %1$s is not permitted for login %2$s due to a lack of privacy.", CATEGORY_PERMISSION_DENIED, 1040, MimeMailExceptionMessage.PRIVACY_REQUIRED_MSG_DISPLAY),
 
     ;
 

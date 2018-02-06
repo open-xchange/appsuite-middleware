@@ -52,6 +52,7 @@ package com.openexchange.chronos.provider.caching.basic;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -144,6 +145,17 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     public CalendarParameters getParameters() {
         return parameters;
+    }
+
+    /**
+     * Tracks one or more warnings in the calendar access.
+     *
+     * @param warnings The warnings to add, or <code>null</code> to ignore
+     */
+    public void addWarnings(Collection<OXException> warnings) {
+        if (null != warnings && 0 < warnings.size()) {
+            warnings.addAll(warnings);
+        }
     }
 
     /**

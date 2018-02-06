@@ -51,7 +51,6 @@ package com.openexchange.chronos.provider.caching.internal.handler.impl;
 
 import static com.openexchange.chronos.common.CalendarUtils.getEventsByUID;
 import static com.openexchange.chronos.common.CalendarUtils.sortSeriesMasterFirst;
-import java.sql.Connection;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -71,14 +70,12 @@ import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAcces
 import com.openexchange.chronos.provider.caching.internal.CachingCalendarAccessConstants;
 import com.openexchange.chronos.provider.caching.internal.Services;
 import com.openexchange.chronos.provider.caching.internal.handler.CachingHandler;
-import com.openexchange.chronos.provider.caching.internal.handler.utils.TruncationAwareCalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
+import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
 import com.openexchange.context.ContextService;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
-import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
@@ -134,29 +131,23 @@ public abstract class AbstractHandler implements CachingHandler {
     }
 
     protected List<Event> getExistingEventsForAccount() throws OXException {
-        DatabaseService dbService = Services.getService(DatabaseService.class);
-        Connection readConnection = null;
+        return new OSGiCalendarStorageOperation<List<Event>>(Services.getServiceLookup(), cachedCalendarAccess.getSession().getContextId(), cachedCalendarAccess.getAccount().getAccountId(), cachedCalendarAccess.getParameters()) {
 
-        int contextId = this.cachedCalendarAccess.getSession().getContextId();
-        try {
-            readConnection = dbService.getReadOnly(contextId);
-            CalendarStorage calendarStorage = initStorage(new SimpleDBProvider(readConnection, null));
-            EventField[] fields = getFields();
-            List<Event> events = calendarStorage.getEventStorage().searchEvents(null, null, fields);
-
-            return calendarStorage.getUtilities().loadAdditionalEventData(this.cachedCalendarAccess.getAccount().getUserId(), events, fields);
-        } finally {
-            if (null != readConnection) {
-                dbService.backReadOnly(contextId, readConnection);
+            @Override
+            protected List<Event> call(CalendarStorage storage) throws OXException {
+                EventField[] fields = getFields();
+                List<Event> events = storage.getEventStorage().searchEvents(null, null, fields);
+                return storage.getUtilities().loadAdditionalEventData(cachedCalendarAccess.getAccount().getUserId(), events, fields);
             }
-        }
+
+        }.executeQuery();
     }
 
     protected ExternalCalendarResult getAndPrepareExtEvents() throws OXException {
         return this.cachedCalendarAccess.getAllEvents();
     }
 
-    protected void create(TruncationAwareCalendarStorage calendarStorage, List<Event> externalEvents) throws OXException {
+    protected void create(CalendarStorage calendarStorage, List<Event> externalEvents) throws OXException {
         if (!externalEvents.isEmpty()) {
             Map<String, List<Event>> extEventsByUID = getEventsByUID(externalEvents, true);
             for (Entry<String, List<Event>> event : extEventsByUID.entrySet()) {
@@ -165,14 +156,14 @@ public abstract class AbstractHandler implements CachingHandler {
         }
     }
 
-    protected void create(TruncationAwareCalendarStorage calendarStorage, Entry<String, List<Event>> entry) throws OXException {
+    protected void create(CalendarStorage calendarStorage, Entry<String, List<Event>> entry) throws OXException {
         Date now = new Date();
         List<Event> events = sortSeriesMasterFirst(entry.getValue());
 
         insertEvents(calendarStorage, now, events.toArray(new Event[events.size()]));
     }
 
-    protected void insertEvents(TruncationAwareCalendarStorage calendarStorage, Date now, Event... lEvents) throws OXException {
+    protected void insertEvents(CalendarStorage calendarStorage, Date now, Event... lEvents) throws OXException {
         if (null == lEvents || 0 == lEvents.length) {
             return;
         }
@@ -185,11 +176,11 @@ public abstract class AbstractHandler implements CachingHandler {
         if (Strings.isNotEmpty(importedEvent.getRecurrenceRule())) {
             importedEvent.setSeriesId(id);
         }
-        calendarStorage.insertEvent(importedEvent);
+        calendarStorage.getEventStorage().insertEvent(importedEvent);
         List<Attendee> attendees = importedEvent.getAttendees();
 
         if (null != attendees && !attendees.isEmpty()) {
-            calendarStorage.insertAttendees(id, attendees);
+            calendarStorage.getAttendeeStorage().insertAttendees(id, attendees);
         }
 
         if (null != importedEvent.getAlarms() && !importedEvent.getAlarms().isEmpty()) {
@@ -204,10 +195,10 @@ public abstract class AbstractHandler implements CachingHandler {
                 Event importedChangeException = applyDefaults(events.get(i), now);
                 importedChangeException.setSeriesId(id);
                 importedChangeException.setId(calendarStorage.getEventStorage().nextId());
-                calendarStorage.insertEvent(importedChangeException);
+                calendarStorage.getEventStorage().insertEvent(importedChangeException);
                 List<Attendee> changeExceptionAttendees = importedChangeException.getAttendees();
                 if (null != changeExceptionAttendees && !changeExceptionAttendees.isEmpty()) {
-                    calendarStorage.insertAttendees(importedChangeException.getId(), changeExceptionAttendees);
+                    calendarStorage.getAttendeeStorage().insertAttendees(importedChangeException.getId(), changeExceptionAttendees);
                 }
                 if (null != importedChangeException.getAlarms() && !importedChangeException.getAlarms().isEmpty()) {
                     for (Alarm alarm : importedChangeException.getAlarms()) {
