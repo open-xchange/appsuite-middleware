@@ -531,7 +531,7 @@ public final class DownloadUtility {
     }
 
     private static boolean fileNameImpliesHtml(final String fileName) {
-        return null != fileName && MimeType2ExtMap.getContentType(fileName).startsWith("text/htm");
+        return null != fileName && checkFileNameFor(fileName, testStartsWith("text/htm"), "html", "htm");
     }
 
     private static boolean fileNameImpliesImage(final String fileName) {
@@ -543,11 +543,11 @@ public final class DownloadUtility {
     }
 
     private static boolean fileNameImpliesSvg(final String fileName) {
-        return null != fileName && MimeType2ExtMap.getContentType(fileName).indexOf("svg") >= 0;
+        return null != fileName && checkFileNameFor(fileName, testContains("svg"), "svg");
     }
 
     private static boolean fileNameImpliesExcel(final String fileName) {
-        return null != fileName && MimeType2ExtMap.getContentType(fileName).indexOf("excel") >= 0;
+        return null != fileName && checkFileNameFor(fileName, testContains("excel"), "xls", "xlt", "xlm", "xlsx", "xlsm", "xltx", "xltm", "xlsb", "xla", "xlam", "xll", "xlw");
     }
 
     private static boolean fileNameImpliesJavascript(final String fileName) {
@@ -556,6 +556,22 @@ public final class DownloadUtility {
 
     private static boolean fileNameImpliesXml(final String fileName) {
         return null != fileName && MimeType2ExtMap.getContentType(fileName).indexOf("xml") >= 0;
+    }
+
+    private static boolean checkFileNameFor(String fileName, ContentTypeTest contentTypeTest, String... fileNameTests) {
+        if (contentTypeTest.matches(fileName)) {
+            return true;
+        }
+
+        int pos = fileName.indexOf('.');
+        String toCheck = Strings.asciiLowerCase(pos < 0 ? fileName : fileName.substring(pos));
+        for (String test : fileNameTests) {
+            if (toCheck.endsWith(test)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -905,6 +921,55 @@ public final class DownloadUtility {
         }
 
         return true;
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------
+
+    private static interface ContentTypeTest {
+
+        boolean matches(String fileName);
+    }
+
+    private static ContainsContentTypeTest testContains(String test) {
+        return new ContainsContentTypeTest(test);
+    }
+
+    private static class ContainsContentTypeTest implements ContentTypeTest {
+
+        private final String test;
+
+        ContainsContentTypeTest(String test) {
+            super();
+            this.test = test;
+        }
+
+        @Override
+        public boolean matches(String fileName) {
+            String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
+            return contentTypeByFileName.indexOf(test) >= 0;
+        }
+
+    }
+
+    private static StartsWithContentTypeTest testStartsWith(String test) {
+        return new StartsWithContentTypeTest(test);
+    }
+
+    private static class StartsWithContentTypeTest implements ContentTypeTest {
+
+        private final String test;
+
+        StartsWithContentTypeTest(String test) {
+            super();
+            this.test = test;
+        }
+
+        @Override
+        public boolean matches(String fileName) {
+            String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
+            return contentTypeByFileName.startsWith(test);
+        }
+
     }
 
 }
