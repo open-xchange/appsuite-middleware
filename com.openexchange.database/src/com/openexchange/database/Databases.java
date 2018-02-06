@@ -538,7 +538,7 @@ public final class Databases {
     public static String getCharacterSet(Connection connection) throws SQLException {
         String schemaName = connection.getCatalog();
         if (null == schemaName) {
-            LOG.warn("Unable to derive schema name for connection {}, evaluating character dynamically.", connection);
+            LOG.warn("Unable to derive schema name for connection {}, evaluating character set dynamically.", connection);
             return readCharacterSet(connection);
         }
         try {
