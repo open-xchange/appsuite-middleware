@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.itip;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -66,7 +67,6 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.EventMapper;
-import com.openexchange.chronos.common.mapping.EventUpdateImpl;
 import com.openexchange.chronos.itip.generators.ITipMailGenerator;
 import com.openexchange.chronos.itip.generators.NotificationMail;
 import com.openexchange.chronos.itip.generators.NotificationMailGenerator;
@@ -91,14 +91,13 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
 
     // TODO: Keep shared folder owner, if possible
 
-    private static final int MINUTES = 60000;
+    int detailChangeInterval;
+    int stateChangeInterval;
+    int priorityInterval;
 
-    private int detailChangeInterval = 2 * MINUTES;
-    private int stateChangeInterval = 10 * MINUTES;
-    private int priorityInterval = 15 * MINUTES;
+    final NotificationMailGeneratorFactory generatorFactory;
 
-    private final NotificationMailGeneratorFactory generatorFactory;
-    private final MailSenderService notificationMailer;
+    final MailSenderService notificationMailer;
 
     private final ReentrantLock lock = new ReentrantLock();
 
@@ -124,7 +123,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
 
             Collection<QueueItem> allItems = allItems();
             for (QueueItem item : allItems) {
-                tick(item.getContextId(), item.getEventId(), false);
+                tick(I(item.getContextId()), item.getEventId(), false);
             }
         } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
@@ -135,83 +134,75 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
     }
 
     @Override
-    public void enqueue(Event original, Event newAppointment, Session session, int sharedFolderOwner, CalendarUser principal) throws OXException {
-        if (original == null) {
-            throw new NullPointerException("Please specify an original appointment, a new appointment and a session");
-        }
-
-        if (newAppointment == null) {
-            throw new NullPointerException("Please specify an original appointment, a new appointment and a session");
-        }
-
-        if (session == null) {
-            throw new NullPointerException("Please specify an original appointment, a new appointment and a session");
+    public void enqueue(Event original, Event update, Session session, int sharedFolderOwner, CalendarUser principal) throws OXException {
+        if (null == original || null == update || null == session) {
+            throw new NullPointerException("Please specify an original event, a new event and a session");
         }
 
         try {
             lock.lock();
-            item(session.getContextId(), original.getId()).remember(original, newAppointment, session, sharedFolderOwner, principal);
+            item(I(session.getContextId()), original.getId()).remember(original, update, session, sharedFolderOwner, principal);
         } finally {
             lock.unlock();
         }
     }
 
     @Override
-    public void fasttrack(Event appointment, Session session) throws OXException {
+    public void fasttrack(Event event, Session session) throws OXException {
         try {
             lock.lock();
-            tick(session.getContextId(), appointment.getId(), true);
+            tick(I(session.getContextId()), event.getId(), true);
         } finally {
             lock.unlock();
         }
     }
 
     @Override
-    public void aware(Event appointment, NotificationParticipant recipient, Session session) {
-        Map<NotificationParticipant, List<Event>> participants = sent.get(session.getContextId());
+    public void aware(Event event, NotificationParticipant recipient, Session session) {
+        Map<NotificationParticipant, List<Event>> participants = sent.get(I(session.getContextId()));
         if (participants == null) {
             participants = new HashMap<NotificationParticipant, List<Event>>();
-            sent.put(session.getContextId(), participants);
+            sent.put(I(session.getContextId()), participants);
         }
 
-        List<Event> appointments = participants.get(recipient);
-        if (appointments == null) {
-            appointments = new ArrayList<Event>();
-            participants.put(recipient, appointments);
+        List<Event> events = participants.get(recipient);
+        if (events == null) {
+            events = new ArrayList<Event>();
+            participants.put(recipient, events);
         }
 
-        appointments.remove(appointment); // Stops working, if equals() depends on more than the objectId
-        appointments.add(appointment);
+        events.remove(event); // Stops working, if equals() depends on more than the objectId
+        events.add(event);
     }
 
     /**
-     * Searches for an Appointment about a recipient was already informed. Removes this appointments from memory.
+     * Searches for an event about a recipient was already informed. Removes this events from memory.
      *
-     * @param participant
-     * @param appointment
-     * @param contextId
-     * @return The appointment, null if not found.
+     * @param participant The {@link NotificationParticipant}
+     * @param event The {@link Event}
+     * @param contextId The context identifier
+     * @return The event, null if not found.
      */
-    private Event removeFromSent(NotificationParticipant participant, Event appointment, int contextId) {
+    Event removeFromSent(NotificationParticipant participant, Event event, Integer contextId) {
         Map<NotificationParticipant, List<Event>> participants = sent.get(contextId);
         if (participants == null) {
             return null;
         }
 
-        List<Event> appointments = participants.get(participant);
-        if (appointments == null) {
+        List<Event> events = participants.get(participant);
+        if (events == null) {
             return null;
         }
 
         Event retval = null;
-        for (Event app : appointments) {
-            if (app.getId().equals(appointment.getId())) {
-                retval = app;
+        for (Event e : events) {
+            if (e.getId().equals(event.getId())) {
+                retval = e;
             }
         }
-        appointments.remove(retval);
+        events.remove(retval);
 
-        if (appointments.isEmpty()) {
+        if (events.isEmpty()) {
             participants.remove(participant);
         }
         if (participants.isEmpty()) {
@@ -221,11 +212,11 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
         return retval;
     }
 
-    private void clearSentItems(int contextId) {
+    private void clearSentItems(Integer contextId) {
         sent.remove(contextId);
     }
 
-    private void tick(int contextId, String objectID, boolean force) {
+    private void tick(Integer contextId, String objectID, boolean force) {
         try {
             HandlingSuggestion handlingSuggestion = item(contextId, objectID).tick(force);
             if (handlingSuggestion == HandlingSuggestion.DONE) {
@@ -239,8 +230,8 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
     }
 
     @Override
-    public void drop(Event appointment, Session session) throws OXException {
-        drop(session.getContextId(), appointment.getId());
+    public void drop(Event event, Session session) throws OXException {
+        drop(I(session.getContextId()), event.getId());
     }
 
     private Collection<QueueItem> allItems() {
@@ -251,7 +242,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
         return allItems;
     }
 
-    private QueueItem item(int contextId, String objectID) {
+    private QueueItem item(Integer contextId, String objectID) {
         Map<String, QueueItem> contextMap = items.get(contextId);
         if (contextMap == null) {
             contextMap = new HashMap<String, QueueItem>();
@@ -268,7 +259,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
         return queueItem;
     }
 
-    private void drop(int contextId, String objectID) {
+    private void drop(Integer contextId, String objectID) {
         Map<String, QueueItem> contextMap = items.get(contextId);
         if (contextMap == null) {
             clearSentItems(contextId);
@@ -283,16 +274,16 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
 
     private static final class Update {
 
-        private final Event oldAppointment;
-        private final Event newAppointment;
-        private final Session session;
-        private final long timestamp;
+        private final Event     oldEvent;
+        private final Event     newEvent;
+        private final Session   session;
+        private final long      timestamp;
         private ITipEventUpdate diff;
-        private int sharedFolderOwner = -1;
+        private int             sharedFolderOwner = -1;
 
-        public Update(Event oldAppointment, Event newAppointment, Session session, int sharedFolderOwner) {
-            this.oldAppointment = oldAppointment;
-            this.newAppointment = newAppointment;
+        public Update(Event oldEvent, Event newEvent, Session session, int sharedFolderOwner) {
+            this.oldEvent = oldEvent;
+            this.newEvent = newEvent;
             this.session = session;
             this.sharedFolderOwner = sharedFolderOwner;
             this.timestamp = System.currentTimeMillis();
@@ -307,11 +298,11 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
         }
 
         public Event getOldEvent() {
-            return oldAppointment;
+            return oldEvent;
         }
 
         public Event getNewEvent() {
-            return newAppointment;
+            return newEvent;
         }
 
         public int getSharedFolderOwner() {
@@ -320,7 +311,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
 
         public ITipEventUpdate getDiff() throws OXException {
             if (diff == null) {
-                diff = new ITipEventUpdate(oldAppointment, newAppointment, true, NotificationMailGenerator.DEFAULT_SKIP);
+                diff = new ITipEventUpdate(oldEvent, newEvent, true, NotificationMailGenerator.DEFAULT_SKIP);
             }
             return diff;
         }
@@ -336,29 +327,37 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
 
     private final class QueueItem {
 
-        private Event original;
-        private Event mostRecent;
-        private long newestTime;
-        private long lastKnownStartDateForNextOccurrence;
-        private Session session;
+        private Event        original;
+        private Event        mostRecent;
+        private long         newestTime;
+        private long         lastKnownStartDateForNextOccurrence;
+        private Session      session;
         private CalendarUser principal;
 
         private final LinkedList<Update> updates = new LinkedList<Update>();
 
-        public void remember(Event original, Event newAppointment, Session session, int sharedFolderOwner, CalendarUser principal) throws OXException {
+        /**
+         * Initializes a new {@link QueueItem}.
+         * 
+         */
+        public QueueItem() {
+            super();
+        }
+
+        public void remember(Event original, Event newEvent, Session session, int sharedFolderOwner, CalendarUser principal) throws OXException {
             this.principal = principal;
             if (this.original == null) {
                 this.original = original;
-                this.mostRecent = newAppointment;
+                this.mostRecent = newEvent;
                 this.session = session;
             }
             if (this.session.getUserId() != original.getOrganizer().getEntity() && session.getUserId() == original.getOrganizer().getEntity()) {
                 this.session = session;
             }
-            this.mostRecent = newAppointment;
+            this.mostRecent = newEvent;
             this.newestTime = System.currentTimeMillis();
-            this.lastKnownStartDateForNextOccurrence = newAppointment.getStartDate().getTimestamp();
-            Update update = new Update(original, newAppointment, session, sharedFolderOwner);
+            this.lastKnownStartDateForNextOccurrence = newEvent.getStartDate().getTimestamp();
+            Update update = new Update(original, newEvent, session, sharedFolderOwner);
             updates.add(update);
             if (update.getDiff().containsAnyChangeOf(new EventField[] { EventField.START_DATE, EventField.END_DATE, EventField.LOCATION, EventField.RECURRENCE_RULE, EventField.RECURRENCE_ID })) {
                 // Participant State has been reset
@@ -371,8 +370,8 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
                     }
                 }
                 this.original = updates.get(0).getOldEvent();
-                // Apply new reset states to original appointment
-                copyParticipantStates(newAppointment, this.original);
+                // Apply new reset states to original event
+                copyParticipantStates(newEvent, this.original);
             }
         }
 
@@ -416,8 +415,8 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
             }
             List<NotificationParticipant> recipients = generator.getRecipients();
             for (NotificationParticipant participant : recipients) {
-                if (isAlreadyInformed(participant, mostRecent, session.getContextId())) {
-                    continue; // Skip this participant. He was already informed about the exact same Appointment.
+                if (isAlreadyInformed(participant, mostRecent, I(session.getContextId()))) {
+                    continue; // Skip this participant. He was already informed about the exact same event.
                 }
 
                 NotificationMail mail = generator.generateUpdateMailFor(participant);
@@ -435,8 +434,8 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
             List<NotificationParticipant> recipients = generator.getRecipients();
             for (NotificationParticipant participant : recipients) {
                 if (!participant.isExternal()) {
-                    if (isAlreadyInformed(participant, mostRecent, session.getContextId())) {
-                        continue; // Skip this participant. He was already informed about the exact same Appointment.
+                    if (isAlreadyInformed(participant, mostRecent, I(session.getContextId()))) {
+                        continue; // Skip this participant. He was already informed about the exact same event.
                     }
 
                     NotificationMail mail = generator.generateUpdateMailFor(participant);
@@ -447,7 +446,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
             }
         }
 
-        private boolean isAlreadyInformed(NotificationParticipant participant, Event mostRecent, int contextId) throws OXException {
+        private boolean isAlreadyInformed(NotificationParticipant participant, Event mostRecent, Integer contextId) throws OXException {
             Event alreadySent = removeFromSent(participant, mostRecent, contextId);
             if (alreadySent != null) {
                 ITipEventUpdate diff = new ITipEventUpdate(alreadySent, mostRecent, true, (EventField[]) null);
@@ -496,9 +495,9 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
 
             for (Update[] userScopedUpdate : userScopedUpdates) {
                 Session session = userScopedUpdate[1].getSession();
-                Event oldAppointment = userScopedUpdate[0].getOldEvent();
-                Event newAppointment = userScopedUpdate[1].getNewEvent();
-                ITipMailGenerator generator = generatorFactory.create(oldAppointment, newAppointment, session, userScopedUpdate[0].getSharedFolderOwner(), principal);
+                Event oldEvent = userScopedUpdate[0].getOldEvent();
+                Event newEvent = userScopedUpdate[1].getNewEvent();
+                ITipMailGenerator generator = generatorFactory.create(oldEvent, newEvent, session, userScopedUpdate[0].getSharedFolderOwner(), principal);
                 List<NotificationParticipant> recipients = generator.getRecipients();
                 for (NotificationParticipant participant : recipients) {
                     if (participant.isExternal() && !participant.hasRole(ITipRole.ORGANIZER)) {
@@ -548,9 +547,9 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
         }
 
         private void notifyInternalParticipantsAboutStateChanges() throws OXException {
-            // We have to construct a pair of appointments in which only the participant status is changed
-            // For that we clone the new appointment
-            // And set the participant states to the values in the old appointment
+            // We have to construct a pair of events in which only the participant status is changed
+            // For that we clone the new event
+            // And set the participant states to the values in the old event
             // Then finally construct a mail to all internal participants
             Event facsimile = EventMapper.getInstance().copy(mostRecent, new Event(), false, (EventField[]) null);
 
