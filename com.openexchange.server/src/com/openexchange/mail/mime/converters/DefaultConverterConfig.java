@@ -52,9 +52,7 @@ package com.openexchange.mail.mime.converters;
 import com.openexchange.mail.api.MailConfig;
 
 /**
- * {@link ConverterConfig}
- *
- *TODO QS-MS: Vielleicht etwas mehr Informationen wofür das die Konfig ist
+ * {@link DefaultConverterConfig} Default implementation of {@link ConverterConfig}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0

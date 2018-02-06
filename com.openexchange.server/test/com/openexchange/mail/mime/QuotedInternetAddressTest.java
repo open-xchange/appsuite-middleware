@@ -56,7 +56,7 @@ import static org.junit.Assert.fail;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.junit.Test;
-import com.openexchange.mail.mime.converters.MimeMessageUtils;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 
 /**
  * {@link QuotedInternetAddressTest}
@@ -249,7 +249,7 @@ public class QuotedInternetAddressTest {
     @Test
     public void testBug36095() throws Exception {
         String s = "=?UTF-8?Q?F=C3=B6oooo=2C_Bar?= <s.foeoooobar@foobar.org>";
-        InternetAddress[] parsed = MimeMessageUtils.getAddressHeader(s);
+        InternetAddress[] parsed = MimeMessageUtility.getAddressHeader(s);
         assertEquals("Unexpected amount of addresses", 1, parsed.length);
 
         assertEquals("Display name does not equals \"F\u00f6oooo, Bar\"", "F\u00f6oooo, Bar", parsed[0].getPersonal());
