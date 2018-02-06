@@ -121,8 +121,8 @@ public class CancelITipAnalyzer extends AbstractITipAnalyzer {
         }
         change.setCurrentEvent(toDelete);
         if (event.containsRecurrenceId()) {
-            List<Event> exceptions = util.getExceptions(toDelete, session.getSession());
-            toDelete = findAndRemoveMatchingException(event, exceptions);
+            List<Event> exceptions = util.getExceptions(toDelete, session);
+            toDelete = findAndRemoveMatchingException(null, event, exceptions);
             if (toDelete == null) {
                 toDelete = event;
                 change.setType(Type.CREATE_DELETE_EXCEPTION);

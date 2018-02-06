@@ -140,16 +140,15 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
             analysis.addChange(change);
         }
 
-        final List<Event> exceptions = util.getExceptions(original, session.getSession());
+        final List<Event> exceptions = util.getExceptions(original, session);
         for (final Event exception : message.exceptions()) {
-            final Event matchingException = findAndRemoveMatchingException(exception, exceptions);
+            final Event matchingException = findAndRemoveMatchingException(original, exception, exceptions);
             ITipChange change = new ITipChange();
             change.setException(true);
             change.setMaster(original);
             if (matchingException != null) {
                 change = new ITipChange();
-                change.setException(true);
-                change.setNewEvent(ensureAttendees(original, exception));
+                change.setNewEvent(ensureAttendees(matchingException, exception));
                 change.setCurrentEvent(matchingException);
 
                 change.setType(Type.UPDATE);
@@ -162,11 +161,9 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
                 change.setType(Type.CREATE);
                 describeDiff(change, wrapper, session, message);
                 analysis.addChange(change);
-
-                //analysis.addAnnotation(new ITipAnnotation(Messages.CHANGE_PARTICIPANT_STATE_IN_UNKNOWN_APPOINTMENT, locale));
             }
         }
-        if (containsPartyCrasher(original, update)) {
+        if (containsPartyCrasher(analysis)) {
             analysis.recommendAction(ITipAction.ACCEPT_PARTY_CRASHER);
         } else {
             if (containsChangesForUpdate(analysis)) {
@@ -226,9 +223,15 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
         return false;
     }
 
-    private boolean containsPartyCrasher(Event original, Event update) throws OXException {
-        Attendee reply = getReply(update);
-        return original.getAttendees().stream().noneMatch(a -> reply.getUri().equals(a.getUri()));
+    private boolean containsPartyCrasher(ITipAnalysis analysis) throws OXException {
+        for (ITipChange change : analysis.getChanges()) {
+            // Replying attendee is first one in list through #ensureAttendees
+            Attendee reply = change.getNewEvent().getAttendees().get(0);
+            if (change.getCurrentEvent().getAttendees().stream().noneMatch(a -> reply.getUri().equals(a.getUri()))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private Attendee getReply(Event update) throws OXException {
@@ -236,8 +239,6 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
             // Not RFC conform
             throw ITipExceptions.NOT_CONFORM.create();
         }
-
-        Attendee reply = update.getAttendees().get(0);
-        return reply;
+        return update.getAttendees().get(0);
     }
 }

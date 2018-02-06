@@ -64,7 +64,6 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.mapping.EventUpdateImpl;
 import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.chronos.itip.ITipMethod;
 import com.openexchange.chronos.itip.ITipRole;
