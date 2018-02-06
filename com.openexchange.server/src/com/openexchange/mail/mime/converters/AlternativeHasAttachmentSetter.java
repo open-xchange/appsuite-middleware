@@ -56,6 +56,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
  * {@link AlternativeHasAttachmentSetter}
+ * TODO QS-MS: Ein paar Sätze zum Sinn des Interfaces sollten nicht fehlen.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0

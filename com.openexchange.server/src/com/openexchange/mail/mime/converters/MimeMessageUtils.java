@@ -90,6 +90,8 @@ import com.openexchange.mail.mime.utils.MimeMessageUtility;
 
 /**
  * {@link MimeMessageUtils}
+ * 
+ *TODO QS-MS: Warum eine neue Klasse, was unterscheidet sie von MimeMessageUtility?
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0

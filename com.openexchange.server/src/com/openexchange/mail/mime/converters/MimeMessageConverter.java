@@ -86,6 +86,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.SharedFileInputStream;
 import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Charsets;
@@ -1477,6 +1478,7 @@ public final class MimeMessageConverter {
             FILLER_MAP.put(MailField.MIME_TYPE, filler);
 
         }
+        
         MailMessageFieldFiller attachmentFiller = new MailMessageFieldFiller() {
 
             private final String multipart = "multipart";
@@ -1499,6 +1501,9 @@ public final class MimeMessageConverter {
                             } catch (final OXException e) {
                                 /*
                                  * Cannot occur
+                                 * TODO QS-MS: Wenn das nicht auftreten kann, warum dann die Umstände?
+                                 * Warum den Content-Type zunächst aus dem Header laden, wenn bei der Fehlermeldung aus
+                                 * der Message geladen wird und potentiell immer text/plain rauskommt?
                                  */
                                 LOG1.error(MessageFormat.format("Invalid content type: {0}", msg.getContentType()), e);
                                 try {
@@ -1522,6 +1527,7 @@ public final class MimeMessageConverter {
                                     localMail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                                 } catch (final MessagingException e) {
                                     // A messaging error occurred
+                                    // TODO QS-MS: Fehlerhandling wird mehrmals verwendet, besser zusammenfassen
                                     LOG1.debug(new StringBuilder(256).append("Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(e.getMessage()).append(".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
                                     localMail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
                                 }
@@ -2012,33 +2018,6 @@ public final class MimeMessageConverter {
             {
                 final Date receivedDate = msg.getReceivedDate();
                 if (receivedDate == null) {
-                    /*
-                     * Check for "Received" header
-                     */
-                    /*
-                     * TODO: Grab first or determine latest available date through iterating headers?
-                     */
-                    /*-
-                     * final String[] receivedHdrs = msg.getHeader(MessageHeaders.HDR_RECEIVED);
-                     * if (null != receivedHdrs) {
-                     *     long lastReceived = Long.MIN_VALUE;
-                     *     for (int i = 0; i &lt; receivedHdrs.length; i++) {
-                     *         final String hdr = unfold(receivedHdrs[i]);
-                     *         int pos;
-                     *         if (hdr != null &amp;&amp; (pos = hdr.lastIndexOf(';')) != -1) {
-                     *             try {
-                     *                 lastReceived = Math.max(lastReceived, com.openexchange.mail.utils.DateUtils.getDateRFC822(
-                     *                         hdr.substring(pos + 1).trim()).getTime());
-                     *             } catch (final IllegalArgumentException e) {
-                     *                 continue;
-                     *             }
-                     *         }
-                     *     }
-                     *     mail.setReceivedDate(new java.util.Date(lastReceived));
-                     * } else {
-                     *     mail.setReceivedDate(null);
-                     * }
-                     */
                     mail.setReceivedDate(null);
                 } else {
                     mail.setReceivedDate(receivedDate);
@@ -2085,10 +2064,11 @@ public final class MimeMessageConverter {
         }
     }
 
-    public static void setHasAttachment(MailConfig mailConfig, MailMessage mail, String[] userFlags, AlternativeHasAttachmentSetter alternative) throws OXException, MessagingException, IOException {
+    // TODO QS-MS: Wenn userFlags NULL sein kann, sollte das geprüft und annotiert werden, Unit-test?
+    public static void setHasAttachment(MailConfig mailConfig, MailMessage mail, @NonNull String[] userFlags, AlternativeHasAttachmentSetter alternative) throws OXException, MessagingException, IOException {
         if (mailConfig != null && mailConfig.getCapabilities().hasAttachmentSearch()) {
             for (String flag : userFlags) {
-                if (MailMessage.isHasAttachment(flag) || MailMessage.isHasNoAttachment(flag)) {
+                if (MailMessage.isHasAttachment(flag) || MailMessage.isHasNoAttachment(flag)) { //TODO QS-MS: Welche Relevanz hat hier "|| MailMessage.isHasNoAttachment(flag)". Es wird im Anschluss nur nach MailMessage.isHasAttachment(flag) gefragt
                     setHasAttachmentViaUserFlags(mail, userFlags);
                     return;
                 }
@@ -2096,7 +2076,32 @@ public final class MimeMessageConverter {
         }
         alternative.setAlternative(mail);
     }
+    
+    //TODO QS-MS: Alternativer Vorschlag
+    public static void setHasAttachment_QSMS(MailConfig mailConfig, MailMessage mail, String[] userFlags, AlternativeHasAttachmentSetter alternative) throws OXException, MessagingException, IOException {
+        if (mailConfig != null && mailConfig.getCapabilities().hasAttachmentSearch()) {
+            if (applyUserFlag_QSMS(mail, userFlags)) {
+                return;
+            }
+        }
+        alternative.setAlternative(mail);
+    }
+    
+    private static boolean applyUserFlag_QSMS(MailMessage mail, String[] userFlags) {
+        for (String flag : userFlags) {
+            if (MailMessage.isHasAttachment(flag)) {
+                mail.setHasAttachment(true);
+                return true;
+            }
+            else if (MailMessage.isHasNoAttachment(flag)) {
+                //???
+                return true;
+            }
+        }
+        return false;
+    }
 
+    // TODO QS-MS: userFlags kann nicht null sein, es wird immer initialisiert und ist im Schlimmsten Fall String[0]
     private static void setHasAttachmentViaUserFlags(MailMessage mail, String[] userFlags) {
         if (userFlags != null && userFlags.length > 0) {
             for (String flag : userFlags) {
