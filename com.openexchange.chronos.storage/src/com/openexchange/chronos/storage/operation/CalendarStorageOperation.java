@@ -52,6 +52,10 @@ package com.openexchange.chronos.storage.operation;
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.locks.LockSupport;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -234,6 +238,24 @@ public abstract class CalendarStorageOperation<T> {
                 }
             }
         }
+    }
+
+    /**
+     * Collects and flushes all warnings from the supplied calendar storage.
+     *
+     * @param storage The calendar storage to collect the warnings from
+     * @return The warnings, or an empty list if there were none
+     */
+    protected static List<OXException> collectWarnings(CalendarStorage storage) {
+        Map<String, List<OXException>> warningsPerEventId = storage.getAndFlushWarnings();
+        if (null == warningsPerEventId || warningsPerEventId.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<OXException> warnings = new ArrayList<OXException>();
+        for (List<OXException> value : warningsPerEventId.values()) {
+            warnings.addAll(value);
+        }
+        return warnings;
     }
 
     private static void rollback(Connection connection) {

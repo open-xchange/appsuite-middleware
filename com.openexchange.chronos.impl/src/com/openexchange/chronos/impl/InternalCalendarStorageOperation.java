@@ -53,8 +53,6 @@ import static com.openexchange.chronos.impl.AbstractStorageOperation.PARAM_CONNE
 import static com.openexchange.chronos.impl.Utils.optConnection;
 import static com.openexchange.java.Autoboxing.b;
 import java.sql.Connection;
-import java.util.List;
-import java.util.Map;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
@@ -100,7 +98,7 @@ public abstract class InternalCalendarStorageOperation<T> extends CalendarStorag
     @Override
     protected T call(CalendarStorage storage) throws OXException {
         T result = execute(session, storage);
-        collectWarnings(storage);
+        Utils.addWarnings(session, collectWarnings(storage));
         return result;
     }
 
@@ -120,15 +118,6 @@ public abstract class InternalCalendarStorageOperation<T> extends CalendarStorag
             storage = storageFactory.makeResilient(storage, handleTruncations, handleIncorrectStrings);
         }
         return storage;
-    }
-
-    private void collectWarnings(CalendarStorage storage) {
-        Map<String, List<OXException>> warningsPerEventId = storage.getAndFlushWarnings();
-        if (null != warningsPerEventId && 0 < warningsPerEventId.size()) {
-            for (List<OXException> warnings : warningsPerEventId.values()) {
-                Utils.addWarnings(session, warnings);
-            }
-        }
     }
 
 }
