@@ -479,6 +479,16 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             }
         }
 
+        // Check for possible SubjectAlternativeNames 
+        Collection<List<?>> subjectAlternativeNames = certificate.getSubjectAlternativeNames();
+        if (subjectAlternativeNames != null) {
+            for (List<?> list : subjectAlternativeNames) {
+                if (list.contains(commonName)) {
+                    return;
+                }
+            }
+        }
+
         logChain(chain);
 
         String fingerprint = cacheCertificate(userId, contextId, chain[0], hostname, FailureReason.INVALID_COMMON_NAME);
