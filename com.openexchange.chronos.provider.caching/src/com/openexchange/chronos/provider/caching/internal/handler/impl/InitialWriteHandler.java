@@ -49,22 +49,18 @@
 
 package com.openexchange.chronos.provider.caching.internal.handler.impl;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.caching.internal.Services;
-import com.openexchange.chronos.provider.caching.internal.handler.utils.TruncationAwareCalendarStorage;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventUpdates;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.database.Databases;
-import com.openexchange.database.provider.SimpleDBProvider;
+import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * The {@link InitialWriteHandler} will be used for the initial caching of {@link Event}s
@@ -90,33 +86,18 @@ public class InitialWriteHandler extends AbstractHandler {
 
     @Override
     public void persist(EventUpdates diff) throws OXException {
-        boolean committed = false;
-        DatabaseService dbService = Services.getService(DatabaseService.class);
-        Connection writeConnection = null;
-        int contextId = this.cachedCalendarAccess.getSession().getContextId();
-        try {
-            writeConnection = dbService.getWritable(contextId);
-            writeConnection.setAutoCommit(false);
-            create(new TruncationAwareCalendarStorage(initStorage(new SimpleDBProvider(writeConnection, writeConnection)), this.cachedCalendarAccess.getSession()), diff.getAddedItems());
+        CalendarParameters parameters = new DefaultCalendarParameters(cachedCalendarAccess.getParameters())
+            .set(CalendarParameters.PARAMETER_AUTO_HANDLE_DATA_TRUNCATIONS, Boolean.TRUE)
+            .set(CalendarParameters.PARAMETER_AUTO_HANDLE_INCORRECT_STRINGS, Boolean.TRUE)
+        ;
+        new OSGiCalendarStorageOperation<Void>(Services.getServiceLookup(), cachedCalendarAccess.getSession().getContextId(), cachedCalendarAccess.getAccount().getAccountId(), parameters) {
 
-            writeConnection.commit();
-            committed = true;
-        } catch (SQLException e) {
-            if (DBUtils.isTransactionRollbackException(e)) {
-                throw CalendarExceptionCodes.DB_ERROR_TRY_AGAIN.create(e.getMessage(), e);
+            @Override
+            protected Void call(CalendarStorage storage) throws OXException {
+                create(storage, diff.getAddedItems());
+                return null;
             }
-            throw CalendarExceptionCodes.DB_ERROR.create(e.getMessage(), e);
-        } finally {
-            if (writeConnection != null) {
-                if (!committed) {
-                    Databases.rollback(writeConnection);
-                    Databases.autocommit(writeConnection);
-                    dbService.backWritableAfterReading(contextId, writeConnection);
-                } else {
-                    Databases.autocommit(writeConnection);
-                    dbService.backWritable(contextId, writeConnection);
-                }
-            }
-        }
+
+        }.executeUpdate();
     }
 }
