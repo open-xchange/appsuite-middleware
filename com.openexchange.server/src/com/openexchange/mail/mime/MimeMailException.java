@@ -250,7 +250,13 @@ public class MimeMailException extends OXException {
                 // Authentication failed
                 return handleAuthenticationFailedException(e, mailConfig, session);
             } else if (e instanceof javax.mail.AuthorizationFailedException) {
-                return MimeMailExceptionCode.LOGIN_FAILED.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
+                return MimeMailExceptionCode.AUTHORIZATION_FAILED.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
+            } else if (e instanceof javax.mail.TemporaryAuthenticationFailureException) {
+                return MimeMailExceptionCode.TEMPORARY_AUTH_FAILURE.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
+            } else if (e instanceof javax.mail.PasswordExpiredException) {
+                return MimeMailExceptionCode.PASSWORD_EXPIRED.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
+            } else if (e instanceof javax.mail.PrivacyRequiredException) {
+                return MimeMailExceptionCode.PRIVACY_REQUIRED.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer(), mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
             } else if (e instanceof javax.mail.FolderClosedException) {
                 if (isTimeoutException(e)) {
                     // javax.mail.FolderClosedException through a read timeout
