@@ -55,6 +55,7 @@ import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Metric;
+import com.codahale.metrics.RatioGauge;
 import com.codahale.metrics.Timer;
 import com.openexchange.metrics.MetricMetadata;
 import com.openexchange.metrics.jmx.impl.CounterMBeanImpl;
@@ -148,6 +149,25 @@ public final class MetricMBeanFactory {
      */
     public static GaugeMBean gauge(Metric metric) {
         checkInstance(metric, Gauge.class);
+        try {
+            return new GaugeMBeanImpl((Gauge<?>) metric);
+        } catch (NotCompliantMBeanException e) {
+            throw new IllegalArgumentException("The GaugeMBean is not a compliant MBean");
+        }
+    }
+    
+    /**
+     * Creates a new {@link GaugeMBean} with the specified {@link Metric}
+     * 
+     * @param metric The {@link Metric} of type {@link RatioGauge} for the {@link GaugeMBean}
+     * @return The newly created {@link GaugeMBean}
+     * @throws IllegalArgumentException if an invalid type of {@link Metric} is supplied or if the
+     *             {@link GaugeMBean} does not follow JMX design patterns for Management Interfaces
+     */
+    public static GaugeMBean ratioGauge(Metric metric) {
+        if (!(metric instanceof RatioGauge)) {
+            throw new IllegalArgumentException("Invalid metric specified for 'RatioGauge' mbean: '" + metric.getClass() + "'");
+        }
         try {
             return new GaugeMBeanImpl((Gauge<?>) metric);
         } catch (NotCompliantMBeanException e) {

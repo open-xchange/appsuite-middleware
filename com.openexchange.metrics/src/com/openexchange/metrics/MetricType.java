@@ -54,6 +54,7 @@ import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricRegistry.MetricSupplier;
+import com.codahale.metrics.RatioGauge;
 import com.codahale.metrics.Timer;
 
 /**
@@ -111,5 +112,10 @@ public enum MetricType {
      * but not for high-throughput, low-latency services.
      * </p>
      */
-    HISTOGRAM;
+    HISTOGRAM,
+    /**
+     * <p>A {@link RatioGauge} is simply a gauge with a ration between two numbers</p>
+     */
+    RATIO_GAUGE;
+
 }

@@ -57,6 +57,7 @@ import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.RatioGauge;
 import com.codahale.metrics.Timer;
 
 /**
@@ -158,6 +159,14 @@ public abstract class AbstractMetricCollector implements MetricCollector {
     @SuppressWarnings("unchecked")
     public <T> Gauge<T> getGauge(String name, Class<T> clazz) {
         return (Gauge<T>) checkAndReturn(metricRegistry.getGauges().get(name), name);
+    }
+    
+    /* (non-Javadoc)
+     * @see com.openexchange.metrics.MetricCollector#getRatioGauge(java.lang.String, java.lang.Class)
+     */
+    @Override
+    public <T extends RatioGauge> T getRatioGauge(String name, Class<T> clazz) {
+        return (T) checkAndReturn(metricRegistry.getGauges().get(name), name);
     }
 
     /*

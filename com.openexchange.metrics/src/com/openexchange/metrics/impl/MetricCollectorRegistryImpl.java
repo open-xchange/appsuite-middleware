@@ -63,6 +63,7 @@ import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.MetricRegistry.MetricSupplier;
+import com.codahale.metrics.jmx.JmxReporter;
 import com.codahale.metrics.SharedMetricRegistries;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
@@ -105,6 +106,7 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
         r.put(MetricType.METER, (metricMetadata, metricRegistry) -> metricRegistry.meter(metricMetadata.getMetricName()));
         r.put(MetricType.HISTOGRAM, (metricMetadata, metricRegistry) -> metricRegistry.histogram(metricMetadata.getMetricName()));
         r.put(MetricType.GAUGE, (metricMetadata, metricRegistry) -> metricRegistry.gauge(metricMetadata.getMetricName(), (MetricSupplier<Gauge>) metricMetadata.getMetricSupplier()));
+        r.put(MetricType.RATIO_GAUGE, (metricMetadata, metricRegistry) -> metricRegistry.gauge(metricMetadata.getMetricName(), (MetricSupplier<Gauge>) metricMetadata.getMetricSupplier()));
         registerers = Collections.unmodifiableMap(r);
 
         Map<MetricType, BiFunction<Metric, MetricMetadata, MetricMBean>> c = new HashMap<>();
@@ -113,6 +115,7 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
         c.put(MetricType.METER, (metric, metricMetadata) -> MetricMBeanFactory.meter(metric, metricMetadata));
         c.put(MetricType.HISTOGRAM, (metric, metricMetadata) -> MetricMBeanFactory.histogram(metric));
         c.put(MetricType.GAUGE, (metric, metricMetadata) -> MetricMBeanFactory.gauge(metric));
+        c.put(MetricType.RATIO_GAUGE, (metric, metricMetadata) -> MetricMBeanFactory.ratioGauge(metric));
         mbeanCreators = Collections.unmodifiableMap(c);
     }
 
@@ -138,6 +141,8 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
         for (MetricMetadata metadata : metricCollector.getMetricMetadata()) {
             registerMetric(metricCollector, metadata, metricRegistry);
         }
+        JmxReporter r = JmxReporter.forRegistry(metricRegistry).inDomain("com.openexchange.metrics." + metricCollector.getComponentName()).build();
+        r.start();
     }
 
     /*
@@ -203,9 +208,14 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
      * @throws OXException if the MBean for the specified {@link Metric} cannot be registered
      */
     private void registerMBean(Metric metric, String componentName, MetricMetadata metricMetadata) throws OXException {
+        BiFunction<Metric, MetricMetadata, MetricMBean> registerer = mbeanCreators.get(metricMetadata.getMetricType());
+        if (registerer == null) {
+            LOG.warn("No metric type mbeab registerer for '{}' was found.", metric.getClass());
+            return;
+        }
         try {
             ManagementService managementService = services.getService(ManagementService.class);
-            managementService.registerMBean(getObjectName(componentName, metricMetadata.getMetricName()), mbeanCreators.get(metricMetadata.getMetricType()).apply(metric, metricMetadata));
+            managementService.registerMBean(getObjectName(componentName, metricMetadata.getMetricName()), registerer.apply(metric, metricMetadata));
         } catch (MalformedObjectNameException e) {
             throw new OXException(e);
         }

@@ -55,6 +55,7 @@ import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.codahale.metrics.Meter;
+import com.codahale.metrics.RatioGauge;
 import com.codahale.metrics.Timer;
 
 /**
@@ -126,6 +127,16 @@ public interface MetricCollector {
      *         under the specified name or <code>null</code> if no such {@link Gauge} exists
      */
     <T> Gauge<T> getGauge(String name, Class<T> clazz);
+
+    /**
+     * Retrieves the {@link RatioGauge} with the specified type {@link T} registered
+     * under the specified name or <code>null</code> if no such {@link RatioGauge} exists
+     * 
+     * @param name The name of the {@link RatioGauge}
+     * @return the {@link RatioGauge} with the specified type {@link T} registered
+     *         under the specified name or <code>null</code> if no such {@link RatioGauge} exists
+     */
+    <T extends RatioGauge> T getRatioGauge(String name, Class<T> clazz);
 
     /**
      * Retrieves the {@link Meter} registered under the specified name
