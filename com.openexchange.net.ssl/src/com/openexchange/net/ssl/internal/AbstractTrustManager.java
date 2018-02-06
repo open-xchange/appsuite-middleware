@@ -124,9 +124,9 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         if (Services.getService(SSLConfigurationService.class).isWhitelisted(socket.getInetAddress().getHostName())) {
             return;
         }
-        checkCommonName(getUseId(), getContextId(), chain, socket);
 
         try {
+            checkCommonName(getUseId(), getContextId(), chain, socket);
             this.trustManager.checkServerTrusted(chain, authType, socket);
         } catch (CertificateException e) {
             handleCertificateException(chain, socket, e);
@@ -336,6 +336,9 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      * @throws CertificateException
      */
     private void preliminaryChecks(int userId, int contextId, X509Certificate[] chain, Socket socket, CertificateException ce) throws CertificateException {
+        if (ce == null) {
+            return;
+        }
         if (!(ce.getCause() instanceof CertPathValidatorException)) {
             return;
         }
