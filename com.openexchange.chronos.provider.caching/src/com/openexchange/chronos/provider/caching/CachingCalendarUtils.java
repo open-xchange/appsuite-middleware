@@ -70,14 +70,15 @@ public class CachingCalendarUtils {
      * <b>Make sure that the new account configuration will be persisted.</b>
      * 
      * @param calendarAccount The calendar account to invalidate the cache should be invalidated
+     * @param newLastUpdateTimestamp The timestamp to set as 'last update'
      */
-    public static void invalidateCache(CalendarAccount calendarAccount) {
+    public static void invalidateCache(CalendarAccount calendarAccount, long newLastUpdateTimestamp) {
         JSONObject internalConfiguration = calendarAccount.getInternalConfiguration();
         if (internalConfiguration.hasAndNotNull(CachingCalendarAccessConstants.CACHING)) {
             try {
                 JSONObject caching = internalConfiguration.getJSONObject(CachingCalendarAccessConstants.CACHING);
                 if (caching != null) {
-                    caching.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, 0);
+                    caching.putSafe(CachingCalendarAccessConstants.LAST_UPDATE, newLastUpdateTimestamp); 
                 }
             } catch (JSONException e) {
                 LOG.error("Unable to retrieve caching information for calendar account {} with provider {}: {}", calendarAccount.getAccountId(), calendarAccount.getProviderId(), e.getMessage(), e);
