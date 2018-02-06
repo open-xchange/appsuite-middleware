@@ -58,6 +58,7 @@ import com.amazonaws.metrics.AwsSdkMetrics;
 import com.amazonaws.metrics.RequestMetricCollector;
 import com.amazonaws.util.AWSRequestMetrics;
 import com.amazonaws.util.AWSRequestMetrics.Field;
+import com.amazonaws.util.TimingInfo;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Timer;
 import com.openexchange.metrics.MetricCollector;
@@ -79,8 +80,8 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
     public S3FileStorageRequestMetricCollector(MetricCollector metricCollector) {
         super();
         internalCollector = metricCollector;
+        Set<MetricMetadata> metricMetadata = metricCollector.getMetricMetadata();
         for (HttpMethodName method : HttpMethodName.values()) {
-            Set<MetricMetadata> metricMetadata = metricCollector.getMetricMetadata();
             metricMetadata.add(new MetricMetadata(MetricType.TIMER, "timer." + method.name()));
             metricMetadata.add(new MetricMetadata(MetricType.COUNTER, "counter." + method.name()));
         }
@@ -108,7 +109,8 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
             }
 
             AWSRequestMetrics metrics = request.getAWSRequestMetrics();
-            long longValue = metrics.getTimingInfo().getTimeTakenMillisIfKnown().longValue();
+            TimingInfo timingInfo = metrics.getTimingInfo();
+            long longValue = timingInfo.getTimeTakenMillisIfKnown().longValue();
             Field predefined = (Field) type;
             switch (predefined) {
                 case ClientExecuteTime:
