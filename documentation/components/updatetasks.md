@@ -11,7 +11,7 @@ Updates for database are executed by so called update tasks. Each task applies o
 Each new version of the Open-Xchange Middleware may ship with one or more such update tasks. The not yet applied update tasks are either triggered
 
  - Manually by invoking the ``runupdate`` or the ``runallupdate`` command-line interface
- - By the first login of any user from any context that is hosted on the affecetd database schema
+ - By the first login of any user from any context that is hosted on the affected database schema
  - By executing provisioning calls
    - On context deletion
    - On moving a context to another database
@@ -53,7 +53,7 @@ The following list gives an overview about the known update tasks of the core Op
 - ``com.openexchange.groupware.update.tasks.FolderDefaultValuesForDelTablesTasks``  
   Adds default values to the 'del_oxfolder_tree', and 'virtualBackupTree' tables.
 - ``com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsMakeUuidPrimaryTask``  
-  Changes the column defintion for "uuid" to "uuid BINARY(16) NOT NULL" in the "driveEventSubscriptions" table, fills it with random values, then changes the primary key to "(cid,uuid)". Also, an additional index for "(cid,service,token)" is added.
+  Changes the column definition for "uuid" to "uuid BINARY(16) NOT NULL" in the "driveEventSubscriptions" table, fills it with random values, then changes the primary key to "(cid,uuid)". Also, an additional index for "(cid,service,token)" is added.
 - ``com.openexchange.download.limit.rdb.FileAccessCreateTableTask``  
   Creates the "fileAccess" table.
 - ``com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsAddUuidColumnTask``  
