@@ -50,6 +50,7 @@
 package com.openexchange.metrics.jmx;
 
 import com.codahale.metrics.Histogram;
+import com.openexchange.management.MBeanMethodAnnotation;
 
 /**
  * {@link HistogramMBean}
@@ -63,6 +64,7 @@ public interface HistogramMBean extends MetricMBean {
      *
      * @return the number of values recorded
      */
+    @MBeanMethodAnnotation(description = "Returns the number of values recorded", parameterDescriptions = { "" }, parameters = { "" })
     long getCount();
 
     /**
@@ -70,6 +72,7 @@ public interface HistogramMBean extends MetricMBean {
      *
      * @return the lowest value
      */
+    @MBeanMethodAnnotation(description = "Returns the lowest value in the snapshot.", parameterDescriptions = { "" }, parameters = { "" })
     long getMin();
 
     /**
@@ -77,6 +80,7 @@ public interface HistogramMBean extends MetricMBean {
      *
      * @return the highest value
      */
+    @MBeanMethodAnnotation(description = "Returns the highest value in the snapshot.", parameterDescriptions = { "" }, parameters = { "" })
     long getMax();
 
     /**
@@ -84,6 +88,7 @@ public interface HistogramMBean extends MetricMBean {
      *
      * @return the arithmetic mean
      */
+    @MBeanMethodAnnotation(description = "Returns the arithmetic mean of the values in the snapshot.", parameterDescriptions = { "" }, parameters = { "" })
     double getMean();
 
     /**
@@ -91,6 +96,7 @@ public interface HistogramMBean extends MetricMBean {
      *
      * @return the standard value
      */
+    @MBeanMethodAnnotation(description = "Returns the standard deviation of the values in the snapshot.", parameterDescriptions = { "" }, parameters = { "" })
     double getStdDev();
 
     /**
@@ -98,6 +104,7 @@ public interface HistogramMBean extends MetricMBean {
      *
      * @return the median value
      */
+    @MBeanMethodAnnotation(description = "Returns the median value in the distribution.", parameterDescriptions = { "" }, parameters = { "" })
     double get50thPercentile();
 
     /**
@@ -105,6 +112,7 @@ public interface HistogramMBean extends MetricMBean {
      *
      * @return the value at the 75th percentile
      */
+    @MBeanMethodAnnotation(description = "Returns the value at the 75th percentile in the distribution.", parameterDescriptions = { "" }, parameters = { "" })
     double get75thPercentile();
 
     /**
@@ -112,6 +120,7 @@ public interface HistogramMBean extends MetricMBean {
      *
      * @return the value at the 95th percentile
      */
+    @MBeanMethodAnnotation(description = "Returns the value at the 95th percentile in the distribution.", parameterDescriptions = { "" }, parameters = { "" })
     double get95thPercentile();
 
     /**
@@ -119,6 +128,7 @@ public interface HistogramMBean extends MetricMBean {
      *
      * @return the value at the 98th percentile
      */
+    @MBeanMethodAnnotation(description = "Returns the value at the 98th percentile in the distribution.", parameterDescriptions = { "" }, parameters = { "" })
     double get98thPercentile();
 
     /**
@@ -126,6 +136,7 @@ public interface HistogramMBean extends MetricMBean {
      *
      * @return the value at the 99th percentile
      */
+    @MBeanMethodAnnotation(description = "Returns the value at the 99th percentile in the distribution.", parameterDescriptions = { "" }, parameters = { "" })
     double get99thPercentile();
 
     /**
@@ -133,6 +144,7 @@ public interface HistogramMBean extends MetricMBean {
      *
      * @return the value at the 99.9th percentile
      */
+    @MBeanMethodAnnotation(description = "Returns the value at the 99.9th percentile in the distribution.", parameterDescriptions = { "" }, parameters = { "" })
     double get999thPercentile();
 
     /**
@@ -140,6 +152,7 @@ public interface HistogramMBean extends MetricMBean {
      *
      * @return the entire set of values
      */
+    @MBeanMethodAnnotation(description = "Returns the entire set of values in the snapshot of the histogram", parameterDescriptions = { "" }, parameters = { "" })
     long[] values();
 
     /**
@@ -147,5 +160,6 @@ public interface HistogramMBean extends MetricMBean {
      *
      * @return the number of values
      */
+    @MBeanMethodAnnotation(description = "Returns the number of values in the snapshot.", parameterDescriptions = { "" }, parameters = { "" })
     long getSnapshotSize();
 }

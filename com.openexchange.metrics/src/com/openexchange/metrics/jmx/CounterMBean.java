@@ -50,6 +50,7 @@
 package com.openexchange.metrics.jmx;
 
 import com.codahale.metrics.Counter;
+import com.openexchange.management.MBeanMethodAnnotation;
 
 /**
  * {@link CounterMBean}
@@ -63,5 +64,6 @@ public interface CounterMBean extends MetricMBean {
      * 
      * @return The current number of the {@link Counter}
      */
+    @MBeanMethodAnnotation(description = "Returns the current number of the counter", parameterDescriptions = { "" }, parameters = { "" })
     long getCount();
 }

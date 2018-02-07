@@ -106,7 +106,7 @@ public abstract class AbstractMetricCollector implements MetricCollector {
      * @see com.openexchange.metrics.MetricCollector#getComponentName()
      */
     @Override
-    public String getComponentName() {
+    public final String getComponentName() {
         return componentName;
     }
 
@@ -116,7 +116,7 @@ public abstract class AbstractMetricCollector implements MetricCollector {
      * @see com.openexchange.metrics.MetricCollector#getMetricMetadata()
      */
     @Override
-    public Set<MetricMetadata> getMetricMetadata() {
+    public final Set<MetricMetadata> getMetricMetadata() {
         return metricMetadata;
     }
 
@@ -126,7 +126,7 @@ public abstract class AbstractMetricCollector implements MetricCollector {
      * @see com.openexchange.metrics.Blah#getHistogram(java.lang.String)
      */
     @Override
-    public Histogram getHistogram(String name) {
+    public final Histogram getHistogram(String name) {
         return (Histogram) checkAndReturn(metricRegistry.getHistograms().get(name), name);
     }
 
@@ -136,7 +136,7 @@ public abstract class AbstractMetricCollector implements MetricCollector {
      * @see com.openexchange.metrics.Blah#getTimer(java.lang.String)
      */
     @Override
-    public Timer getTimer(String name) {
+    public final Timer getTimer(String name) {
         return (Timer) checkAndReturn(metricRegistry.getTimers().get(name), name);
     }
 
@@ -146,7 +146,7 @@ public abstract class AbstractMetricCollector implements MetricCollector {
      * @see com.openexchange.metrics.Blah#getCounter(java.lang.String)
      */
     @Override
-    public Counter getCounter(String name) {
+    public final Counter getCounter(String name) {
         return (Counter) checkAndReturn(metricRegistry.getCounters().get(name), name);
     }
 
@@ -157,7 +157,7 @@ public abstract class AbstractMetricCollector implements MetricCollector {
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T> Gauge<T> getGauge(String name, Class<T> clazz) {
+    public final <T> Gauge<T> getGauge(String name, Class<T> clazz) {
         return (Gauge<T>) checkAndReturn(metricRegistry.getGauges().get(name), name);
     }
     
@@ -165,7 +165,7 @@ public abstract class AbstractMetricCollector implements MetricCollector {
      * @see com.openexchange.metrics.MetricCollector#getRatioGauge(java.lang.String, java.lang.Class)
      */
     @Override
-    public <T extends RatioGauge> T getRatioGauge(String name, Class<T> clazz) {
+    public final <T extends RatioGauge> T getRatioGauge(String name, Class<T> clazz) {
         return (T) checkAndReturn(metricRegistry.getGauges().get(name), name);
     }
 
@@ -175,7 +175,7 @@ public abstract class AbstractMetricCollector implements MetricCollector {
      * @see com.openexchange.metrics.Blah#getMeter(java.lang.String)
      */
     @Override
-    public Meter getMeter(String name) {
+    public final Meter getMeter(String name) {
         return (Meter) checkAndReturn(metricRegistry.getMeters().get(name), name);
     }
 

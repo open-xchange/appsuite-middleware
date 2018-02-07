@@ -50,6 +50,7 @@
 package com.openexchange.metrics.jmx;
 
 import com.codahale.metrics.Meter;
+import com.openexchange.management.MBeanMethodAnnotation;
 
 /**
  * {@link MeterMBean}
@@ -63,6 +64,7 @@ public interface MeterMBean extends MetricMBean {
      *
      * @return the number of events which have been marked
      */
+    @MBeanMethodAnnotation(description = "Returns the number of events which have been marked.", parameterDescriptions = { "" }, parameters = { "" })
     long getCount();
 
     /**
@@ -70,30 +72,33 @@ public interface MeterMBean extends MetricMBean {
      *
      * @return the mean rate at which events have occurred since the meter was created
      */
+    @MBeanMethodAnnotation(description = "Returns the mean rate at which events have occurred since the meter was created.", parameterDescriptions = { "" }, parameters = { "" })
     double getMeanRate();
 
     /**
      * Returns the one-minute exponentially-weighted moving average rate at which events have
      * occurred since the meter was created.
      * <p/>
-     * This rate has the same exponential decay factor as the one-minute load average in the {@code
-     * top} Unix command.
+     * This rate has the same exponential decay factor as the one-minute load average in the
+     * <code>top</code> Unix command.
      *
      * @return the one-minute exponentially-weighted moving average rate at which events have
      *         occurred since the meter was created
      */
+    @MBeanMethodAnnotation(description = "Returns the one-minute exponentially-weighted moving average rate at which events have occurred since the meter was created. This rate has the same exponential decay factor as the one-minute load average in the top Unix command.", parameterDescriptions = { "" }, parameters = { "" })
     double getOneMinuteRate();
 
     /**
      * Returns the five-minute exponentially-weighted moving average rate at which events have
      * occurred since the meter was created.
      * <p/>
-     * This rate has the same exponential decay factor as the five-minute load average in the {@code
-     * top} Unix command.
+     * This rate has the same exponential decay factor as the five-minute load average in the
+     * <code>top</code> Unix command.
      *
      * @return the five-minute exponentially-weighted moving average rate at which events have
      *         occurred since the meter was created
      */
+    @MBeanMethodAnnotation(description = "Returns the five-minute exponentially-weighted moving average rate at which events have occurred since the meter was created. This rate has the same exponential decay factor as the five-minute load average in the top Unix command.", parameterDescriptions = { "" }, parameters = { "" })
     double getFiveMinuteRate();
 
     /**
@@ -106,6 +111,7 @@ public interface MeterMBean extends MetricMBean {
      * @return the fifteen-minute exponentially-weighted moving average rate at which events have
      *         occurred since the meter was created
      */
+    @MBeanMethodAnnotation(description = "Returns the fifteen-minute exponentially-weighted moving average rate at which events have occurred since the meter was created. This rate has the same exponential decay factor as the fifteen-minute load average in the top Unix command.", parameterDescriptions = { "" }, parameters = { "" })
     double getFifteenMinuteRate();
 
     /**
@@ -113,5 +119,6 @@ public interface MeterMBean extends MetricMBean {
      * 
      * @return the rate unit of the {@link Meter}
      */
+    @MBeanMethodAnnotation(description = "Returns the rate unit of the meter", parameterDescriptions = { "" }, parameters = { "" })
     String getRateUnit();
 }

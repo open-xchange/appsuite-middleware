@@ -49,6 +49,8 @@
 
 package com.openexchange.metrics.jmx;
 
+import com.openexchange.management.MBeanMethodAnnotation;
+
 /**
  * {@link TimerMBean}
  *
@@ -61,6 +63,7 @@ public interface TimerMBean extends MetricMBean {
      *
      * @return the lowest value
      */
+    @MBeanMethodAnnotation(description = "Returns the lowest value in the snapshot.", parameterDescriptions = { "" }, parameters = { "" })
     double getMin();
 
     /**
@@ -68,6 +71,7 @@ public interface TimerMBean extends MetricMBean {
      *
      * @return the highest value
      */
+    @MBeanMethodAnnotation(description = "Returns the highest value in the snapshot.", parameterDescriptions = { "" }, parameters = { "" })
     double getMax();
 
     /**
@@ -75,6 +79,7 @@ public interface TimerMBean extends MetricMBean {
      *
      * @return the arithmetic mean
      */
+    @MBeanMethodAnnotation(description = "Returns the arithmetic mean of the values in the snapshot.", parameterDescriptions = { "" }, parameters = { "" })
     double getMean();
 
     /**
@@ -82,6 +87,7 @@ public interface TimerMBean extends MetricMBean {
      *
      * @return the standard value
      */
+    @MBeanMethodAnnotation(description = "Returns the standard deviation of the values in the snapshot.", parameterDescriptions = { "" }, parameters = { "" })
     double getStdDev();
 
     /**
@@ -89,6 +95,7 @@ public interface TimerMBean extends MetricMBean {
      *
      * @return the median value
      */
+    @MBeanMethodAnnotation(description = "Returns the median value in the distribution.", parameterDescriptions = { "" }, parameters = { "" })
     double get50thPercentile();
 
     /**
@@ -96,6 +103,7 @@ public interface TimerMBean extends MetricMBean {
      *
      * @return the value at the 75th percentile
      */
+    @MBeanMethodAnnotation(description = "Returns the value at the 75th percentile in the distribution.", parameterDescriptions = { "" }, parameters = { "" })
     double get75thPercentile();
 
     /**
@@ -103,6 +111,7 @@ public interface TimerMBean extends MetricMBean {
      *
      * @return the value at the 95th percentile
      */
+    @MBeanMethodAnnotation(description = "Returns the value at the 95th percentile in the distribution.", parameterDescriptions = { "" }, parameters = { "" })
     double get95thPercentile();
 
     /**
@@ -110,6 +119,7 @@ public interface TimerMBean extends MetricMBean {
      *
      * @return the value at the 98th percentile
      */
+    @MBeanMethodAnnotation(description = "Returns the value at the 98th percentile in the distribution.", parameterDescriptions = { "" }, parameters = { "" })
     double get98thPercentile();
 
     /**
@@ -117,6 +127,7 @@ public interface TimerMBean extends MetricMBean {
      *
      * @return the value at the 99th percentile
      */
+    @MBeanMethodAnnotation(description = "Returns the value at the 99th percentile in the distribution.", parameterDescriptions = { "" }, parameters = { "" })
     double get99thPercentile();
 
     /**
@@ -124,6 +135,7 @@ public interface TimerMBean extends MetricMBean {
      *
      * @return the value at the 99.9th percentile
      */
+    @MBeanMethodAnnotation(description = "Returns the value at the 99.9th percentile in the distribution.", parameterDescriptions = { "" }, parameters = { "" })
     double get999thPercentile();
 
     /**
@@ -131,6 +143,7 @@ public interface TimerMBean extends MetricMBean {
      *
      * @return the entire set of values
      */
+    @MBeanMethodAnnotation(description = "Returns the entire set of values in the snapshot.", parameterDescriptions = { "" }, parameters = { "" })
     long[] values();
 
     /**
@@ -138,5 +151,6 @@ public interface TimerMBean extends MetricMBean {
      * 
      * @return the sampling unit
      */
+    @MBeanMethodAnnotation(description = "Returns the sampling unit.", parameterDescriptions = { "" }, parameters = { "" })
     String getDurationUnit();
 }
