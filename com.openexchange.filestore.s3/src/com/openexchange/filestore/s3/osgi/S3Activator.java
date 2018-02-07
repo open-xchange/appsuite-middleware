@@ -88,9 +88,9 @@ public class S3Activator extends HousekeepingActivator {
         boolean metricCollection = getService(LeanConfigurationService.class).getBooleanProperty(S3FileStoreProperty.metricCollection);
         if (metricCollection) {
             S3FileStorageDelegateMetricCollector delegateCollector = new S3FileStorageDelegateMetricCollector(this);
-            registerService(MetricCollector.class, delegateCollector);
             // Enable metric collection by overriding the default metrics
             AwsSdkMetrics.setMetricCollector(new S3FileStorageMetricCollector(this, delegateCollector));
+            registerService(MetricCollector.class, delegateCollector);
         }
 
         S3FileStorageFactory factory = new S3FileStorageFactory(this);
