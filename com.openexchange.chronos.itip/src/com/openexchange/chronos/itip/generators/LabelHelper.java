@@ -128,7 +128,7 @@ public class LabelHelper {
     public String getShowAs() {
         final Event event = mail.getEvent();
 
-        if (event.getTransp().getValue().equals(Transp.TRANSPARENT)) {
+        if (event.getTransp() != null && Transp.TRANSPARENT.equals(event.getTransp().getValue())) {
             return new Sentence(Messages.FREE).getMessage(locale);
         } else {
             return new Sentence(Messages.RESERVERD).getMessage(locale);
