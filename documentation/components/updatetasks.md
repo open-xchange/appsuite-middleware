@@ -37,7 +37,7 @@ The following list gives an overview about the known update tasks of the core Op
 - ``com.openexchange.tools.oxfolder.RemoveInconsistentLocksUpdateTasks``  
   Removes all file locks which may be hold by any user which doesn't have any permissions to do so anymore.
 - ``com.openexchange.oauth.impl.internal.groupware.RenameMigrateLinkedInServiceIdUpdateTask``  
-  Updates the service identifier and scope for LinkedIN accounts stored in the table "oauthAccounts".
+  Updates the service identifier and scope for LinkedIN accounts stored in the table "oauthAccounts" [The LinkedIN feature was REMOVED in 7.10.0].
 - ``com.openexchange.groupware.update.tasks.AddOAuthColumnToMailAccountTableTask``  
   Adds "oauth" column to the "user_mail_account" and "user_transport_account" tables.
 - ``com.openexchange.oauth.impl.internal.groupware.OAuthAddScopeColumnTask``  
