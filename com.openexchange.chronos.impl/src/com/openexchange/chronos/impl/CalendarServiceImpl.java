@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.impl.Utils.getFolder;
+import static com.openexchange.chronos.impl.Utils.getFolders;
 import static com.openexchange.java.Autoboxing.L;
 import static org.slf4j.LoggerFactory.getLogger;
 import java.util.ArrayList;
@@ -216,6 +217,17 @@ public class CalendarServiceImpl implements CalendarService {
             @Override
             protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new AllPerformer(session, storage).perform(getFolder(session, folderID));
+            }
+        }.executeQuery();
+    }
+
+    @Override
+    public List<Event> getEventsInFolders(CalendarSession session, List<String> folderIds) throws OXException {
+        return new InternalCalendarStorageOperation<List<Event>>(session) {
+
+            @Override
+            protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return new AllPerformer(session, storage).perform(getFolders(session, folderIds));
             }
         }.executeQuery();
     }
@@ -481,21 +493,6 @@ public class CalendarServiceImpl implements CalendarService {
         return importResults;
     }
 
-    private InternalCalendarResult notifyHandlers(InternalCalendarResult result, CalendarSession session) {
-        notifyHandlers(result.getCalendarEvent(session));
-        return result;
-    }
-
-    private void notifyHandlers(CalendarEvent event) {
-        for (CalendarHandler handler : calendarHandlers) {
-            try {
-                handler.handle(event);
-            } catch (Exception e) {
-                getLogger(getClass()).warn("Unexpected error while handling {}: {}", handler, event, e.getMessage(), e);
-            }
-        }
-    }
-
     @Override
     public List<AlarmTrigger> getAlarmTriggers(CalendarSession session, Set<String> actions) throws OXException {
         List<AlarmTrigger> triggers = new InternalCalendarStorageOperation<List<AlarmTrigger>>(session) {
@@ -517,6 +514,21 @@ public class CalendarServiceImpl implements CalendarService {
                 return new GetAttachmentPerformer(session, storage).performGetAttachment(eventID.getObjectID(), getFolder(session, eventID.getFolderID()), managedId);
             }
         }.executeQuery();
+    }
+
+    private InternalCalendarResult notifyHandlers(InternalCalendarResult result, CalendarSession session) {
+        notifyHandlers(result.getCalendarEvent(session));
+        return result;
+    }
+
+    private void notifyHandlers(CalendarEvent event) {
+        for (CalendarHandler handler : calendarHandlers) {
+            try {
+                handler.handle(event);
+            } catch (Exception e) {
+                getLogger(getClass()).warn("Unexpected error while handling {}: {}", handler, event, e.getMessage(), e);
+            }
+        }
     }
 
 }

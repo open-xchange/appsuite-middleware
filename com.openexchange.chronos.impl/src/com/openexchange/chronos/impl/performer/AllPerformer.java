@@ -61,9 +61,12 @@ import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.arrays.Arrays.contains;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.AttendeeField;
@@ -176,6 +179,41 @@ public class AllPerformer extends AbstractQueryPerformer {
     /**
      * Performs the operation.
      *
+     * @param folders The parent folders to get all events from
+     * @return The loaded events
+     */
+    public List<Event> perform(List<UserizedFolder> folders) throws OXException {
+        /*
+         * load event data per folder & additional event data per calendar user
+         */
+        EventField[] fields = getFields(session);
+        SearchOptions searchOptions = new SearchOptions(session);
+        Map<UserizedFolder, List<Event>> eventsPerFolder = new HashMap<UserizedFolder, List<Event>>();
+        for (Map.Entry<Integer, List<UserizedFolder>> entry : getFoldersPerCalendarUserId(folders).entrySet()) {
+            List<Event> eventsForCalendarUser = new ArrayList<Event>();
+            for (UserizedFolder folder : entry.getValue()) {
+                requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
+                List<Event> eventsInFolder = storage.getEventStorage().searchEvents(getFolderIdTerm(session, folder), searchOptions, fields);
+                eventsForCalendarUser.addAll(eventsInFolder);
+                eventsPerFolder.put(folder, eventsInFolder);
+            }
+            eventsForCalendarUser = storage.getUtilities().loadAdditionalEventData(i(entry.getKey()), eventsForCalendarUser, fields);
+        }
+        /*
+         * post process events, based on each requested folder's perspective
+         */
+        List<Event> allEvents = new ArrayList<Event>();
+        boolean includeClassifiedEvents = isIncludeClassifiedEvents(session);
+        for (Map.Entry<UserizedFolder, List<Event>> entry : eventsPerFolder.entrySet()) {
+            allEvents.addAll(postProcess(entry.getValue(), entry.getKey(), includeClassifiedEvents, fields));
+            getSelfProtection().checkEventCollection(allEvents);
+        }
+        return allEvents;
+    }
+
+    /**
+     * Performs the operation.
+     *
      * @param folder The parent folder to get all events from
      * @return The loaded events
      */
@@ -204,6 +242,14 @@ public class AllPerformer extends AbstractQueryPerformer {
         events = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), events, fields);
         DynamicEventFlagsGenerator flagsGenerator = new DynamicEventFlagsGenerator(session, storage, getCalendarUserId(folder), getObjectIDs(events), fields);
         return postProcess(events, folder, isIncludeClassifiedEvents(session), fields, flagsGenerator);
+    }
+
+    private static Map<Integer, List<UserizedFolder>> getFoldersPerCalendarUserId(List<UserizedFolder> folders) {
+        Map<Integer, List<UserizedFolder>> foldersPerCalendarUserId = new HashMap<Integer, List<UserizedFolder>>();
+        for (UserizedFolder folder : folders) {
+            com.openexchange.tools.arrays.Collections.put(foldersPerCalendarUserId, I(getCalendarUserId(folder)), folder);
+        }
+        return foldersPerCalendarUserId;
     }
 
     private static final class DynamicEventFlagsGenerator implements EventFlagsGenerator {

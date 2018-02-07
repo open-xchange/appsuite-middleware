@@ -221,6 +221,26 @@ public interface CalendarService {
     List<Event> getEventsInFolder(CalendarSession session, String folderID) throws OXException;
 
     /**
+     * Gets all events from one or more specific calendar folders.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
+     * <li>{@link CalendarParameters#PARAMETER_INCLUDE_PRIVATE}</li>
+     * </ul>
+     *
+     * @param session The calendar session
+     * @param folderIds The identifier of the folders to get the events from
+     * @return The events
+     */
+    List<Event> getEventsInFolders(CalendarSession session, List<String> folderIds) throws OXException;
+
+    /**
      * Gets all events of the session's user.
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>

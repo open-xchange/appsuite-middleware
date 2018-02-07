@@ -494,6 +494,38 @@ public class Utils {
     }
 
     /**
+     * Gets multiple <i>userized</i> folders by their identifier.
+     *
+     * @param session The calendar session
+     * @param folderIds The identifiers of the folders to get
+     * @return The folders
+     */
+    public static List<UserizedFolder> getFolders(CalendarSession session, List<String> folderIds) throws OXException {
+        if (null == folderIds || 0 == folderIds.size()) {
+            return Collections.emptyList();
+        }
+        List<UserizedFolder> folders = new ArrayList<UserizedFolder>(folderIds.size());
+        FolderServiceDecorator decorator = initDecorator(session);
+        FolderService folderService = Services.getService(FolderService.class);
+        for (String folderId : folderIds) {
+            try {
+                folders.add(folderService.getFolder(FolderStorage.REAL_TREE_ID, folderId, session.getSession(), decorator));
+            } catch (OXException e) {
+                if ("FLD-0003".equals(e.getErrorCode())) {
+                    // com.openexchange.tools.oxfolder.OXFolderExceptionCode.NOT_VISIBLE
+                    throw CalendarExceptionCodes.NO_READ_PERMISSION.create(e, folderId);
+                }
+                if ("FLD-1004".equals(e.getErrorCode())) {
+                    // com.openexchange.folderstorage.FolderExceptionErrorMessage.NO_STORAGE_FOR_ID
+                    throw CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(e, folderId, "");
+                }
+                throw e;
+            }
+        }
+        return folders;
+    }
+
+    /**
      * Maps the corresponding event occurrences from two collections based on their common object- and recurrence identifiers.
      *
      * @param originalOccurrences The original event occurrences
