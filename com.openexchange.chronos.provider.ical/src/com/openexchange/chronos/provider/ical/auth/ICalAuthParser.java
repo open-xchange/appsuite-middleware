@@ -169,11 +169,11 @@ public class ICalAuthParser {
             authInfo = builder.setAuthType(AuthType.TOKEN).setToken((String) configuration.get(CalendarAccountAttribute.TOKEN_LITERAL.getName())).build();
         } else if (authAttributes.contains(CalendarAccountAttribute.LOGIN_LITERAL) || authAttributes.contains(CalendarAccountAttribute.PASSWORD_LITERAL)) {
             builder.setAuthType(AuthType.BASIC);
-            String login = (String) configuration.get(CalendarAccountAttribute.LOGIN_LITERAL.getName());
+            String login = configuration.optString(CalendarAccountAttribute.LOGIN_LITERAL.getName());
             if (Strings.isNotEmpty(login)) {
                 builder.setLogin(login);
             }
-            String feedPassword = (String) configuration.get(CalendarAccountAttribute.PASSWORD_LITERAL.getName());
+            String feedPassword = configuration.optString(CalendarAccountAttribute.PASSWORD_LITERAL.getName());
             if (Strings.isNotEmpty(feedPassword)) {
                 if (!encrypt) {
                     builder.setPassword(ICalAuthParser.decrypt(feedPassword, session.getPassword()));
