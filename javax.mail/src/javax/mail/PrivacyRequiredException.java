@@ -47,7 +47,7 @@ package javax.mail;
  *
  * @author Thorben Betten
  */
-public class PrivacyRequiredException extends MessagingException {
+public class PrivacyRequiredException extends LoginFailedException {
 
     private static final long serialVersionUID = -4487835285945045056L;
 

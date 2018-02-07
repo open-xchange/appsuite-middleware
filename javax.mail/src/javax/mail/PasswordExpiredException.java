@@ -48,8 +48,7 @@ package javax.mail;
  *
  * @author Thorben Betten
  */
-
-public class PasswordExpiredException extends MessagingException {
+public class PasswordExpiredException extends LoginFailedException {
 
     private static final long serialVersionUID = -1290959129983174076L;
 

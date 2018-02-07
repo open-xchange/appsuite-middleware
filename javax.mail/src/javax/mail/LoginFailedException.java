@@ -41,37 +41,34 @@
 package javax.mail;
 
 /**
- * A temporary failure during authentication attempt because a subsystem is down.
- * <p>
- * For example, an IMAP server that uses a Lightweight Directory Access Protocol
- * (LDAP) or Radius server for authentication might use this response code when
- * the LDAP/Radius server is down.
+ * This exception is thrown when the connect method on a Store or
+ * Transport object fails due to a login failure.
  *
  * @author Thorben Betten
  */
-public class TemporaryAuthenticationFailureException extends LoginFailedException {
+public class LoginFailedException extends MessagingException {
 
-    private static final long serialVersionUID = 472080755954436511L;
+    private static final long serialVersionUID = -7908646097837871784L;
 
     /**
-     * Constructs an TemporaryAuthenticationFailureException.
+     * Constructs an LoginFailedException.
      */
-    public TemporaryAuthenticationFailureException() {
+    public LoginFailedException() {
 	super();
     }
 
     /**
-     * Constructs an TemporaryAuthenticationFailureException with the specified
+     * Constructs an LoginFailedException with the specified
      * detail message.
      *
      * @param message	The detailed error message
      */
-    public TemporaryAuthenticationFailureException(String message) {
+    public LoginFailedException(String message) {
 	super(message);
     }
 
     /**
-     * Constructs an TemporaryAuthenticationFailureException with the specified
+     * Constructs an LoginFailedException with the specified
      * detail message and embedded exception.  The exception is chained
      * to this exception.
      *
@@ -79,7 +76,7 @@ public class TemporaryAuthenticationFailureException extends LoginFailedExceptio
      * @param e		The embedded exception
      * @since		JavaMail 1.5
      */
-    public TemporaryAuthenticationFailureException(String message, Exception e) {
+    public LoginFailedException(String message, Exception e) {
 	super(message, e);
     }
 }
