@@ -1423,7 +1423,7 @@ public class AJAXRequestData {
                     }
                 }
             }
-        } else if (httpServletRequest.getMethod().equalsIgnoreCase("PUT")) {
+        } else if (httpServletRequest.getMethod().equalsIgnoreCase("PUT") && Boolean.parseBoolean(httpServletRequest.getParameter("binary"))) {
             // Process simple binary upload upload
             final List<UploadFile> thisFiles = this.files;
             synchronized (thisFiles) {
