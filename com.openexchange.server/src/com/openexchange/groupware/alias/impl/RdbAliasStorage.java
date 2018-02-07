@@ -232,9 +232,11 @@ public class RdbAliasStorage implements UserAliasStorage {
         try {
             int index = 0;
             /*
-             * Use utf8_bin to match umlauts. But that also makes it case sensitive, so use LOWER to be case insesitive.
+             * Use utf8*_bin to match umlauts. But that also makes it case sensitive, so use LOWER to be case insensitive.
              */
-            stmt = con.prepareStatement("SELECT user FROM user_alias WHERE cid=? AND LOWER(alias) LIKE LOWER(?) COLLATE utf8_bin");
+            StringBuilder stringBuilder = new StringBuilder("SELECT user FROM user_alias WHERE cid=? AND LOWER(alias) LIKE LOWER(?) COLLATE ")
+                .append(Databases.getCharacterSet(con).contains("utf8mb4") ? "utf8mb4_bin" : "utf8_bin");
+            stmt = con.prepareStatement(stringBuilder.toString());
             stmt.setInt(++index, contextId);
             stmt.setString(++index, alias);
             rs = stmt.executeQuery();

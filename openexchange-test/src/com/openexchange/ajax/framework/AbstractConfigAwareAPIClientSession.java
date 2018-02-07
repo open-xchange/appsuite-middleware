@@ -53,6 +53,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.framework.config.util.ChangePropertiesRequest;
 import com.openexchange.ajax.framework.config.util.ChangePropertiesResponse;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -65,6 +67,8 @@ import com.openexchange.ajax.writer.ResponseWriter;
  */
 public abstract class AbstractConfigAwareAPIClientSession extends AbstractAPIClientSession {
 
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractConfigAwareAPIClientSession.class);
+
     /**
      * Initializes a new {@link AbstractConfigAwareAPIClientSession}.
      *
@@ -74,7 +78,6 @@ public abstract class AbstractConfigAwareAPIClientSession extends AbstractAPICli
 
     JSONObject oldData;
     private AJAXClient ajaxClient;
-
 
     @Override
     public void setUp() throws Exception {
@@ -89,12 +92,14 @@ public abstract class AbstractConfigAwareAPIClientSession extends AbstractAPICli
      */
     protected void setUpConfiguration() throws Exception {
         Map<String, String> map = getNeededConfigurations();
-        if (!map.isEmpty()) {
-            // change configuration to new values
-            ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<>(map, getScope(), getReloadables());
-            ChangePropertiesResponse response = getAjaxClient().execute(req);
-            oldData = ResponseWriter.getJSON(response.getResponse()).getJSONObject("data");
+        if (map.isEmpty()) {
+            return;
         }
+
+        // Change configuration to new values
+        ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<>(map, getScope(), getReloadables());
+        ChangePropertiesResponse response = getAjaxClient().execute(req);
+        oldData = ResponseWriter.getJSON(response.getResponse()).getJSONObject("data");
     }
 
     /**
@@ -107,24 +112,35 @@ public abstract class AbstractConfigAwareAPIClientSession extends AbstractAPICli
     @Override
     public void tearDown() throws Exception {
         try {
-            if (oldData != null) {
-                // change back to old value if present
-                Map<String, Object> map = oldData.asMap();
-                Map<String, String> newMap = new HashMap<>();
-                for (Map.Entry<String, Object> entry : map.entrySet()) {
-                    try {
-                        newMap.put(entry.getKey(), (String) entry.getValue());
-                    } catch (ClassCastException cce) {
-                        //should never be the case
-                        return;
+            if (oldData == null) {
+                return;
+            }
+            // change back to old value if present
+            Map<String, Object> map = oldData.asMap();
+            Map<String, String> newMap = new HashMap<>();
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                try {
+                    Object value = entry.getValue();
+                    if (value == JSONObject.NULL) {
+                        //TODO: Delete the value
+                        value = null;
                     }
-                }
-                if (!map.isEmpty()) {
-                    ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<>(newMap, getScope(), getReloadables());
-                    ChangePropertiesResponse response = getAjaxClient().execute(req);
-                    oldData = ResponseWriter.getJSON(response.getResponse());
+                    if (value == null) {
+                        value = " ";
+                    }
+                    newMap.put(entry.getKey(), (String) value);
+                } catch (ClassCastException cce) {
+                    //should never be the case
+                    LOG.error("Cannot revert the old values", cce);
+                    return;
                 }
             }
+            if (map.isEmpty()) {
+                return;
+            }
+            ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<>(newMap, getScope(), getReloadables());
+            ChangePropertiesResponse response = getAjaxClient().execute(req);
+            oldData = ResponseWriter.getJSON(response.getResponse());
         } finally {
             super.tearDown();
         }

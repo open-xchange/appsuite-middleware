@@ -64,6 +64,7 @@ import java.util.concurrent.ConcurrentMap;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
 import com.openexchange.ajax.customizer.folder.BulkFolderField;
@@ -83,6 +84,7 @@ import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.Tools;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
@@ -414,7 +416,20 @@ public final class FolderWriter {
             @Override
             public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
                 final ContentType obj = folder.getContentType();
-                jsonPutter.put(jsonPutter.withKey() ? FolderField.MODULE.getName() : null, null == obj ? JSONObject.NULL : obj.toString());
+                Object value;
+                if (null == obj) {
+                    value = JSONObject.NULL;
+                } else {
+                    int optFolderId;
+                    try {
+                        optFolderId = Integer.parseInt(folder.getID());
+                    } catch (NumberFormatException | NullPointerException e) {
+                        optFolderId = 0;
+                    }
+                    String module = AJAXServlet.getModuleString(obj.getModule(), optFolderId);
+                    value = Strings.isEmpty(module) ? obj.toString() : module;
+                }
+                jsonPutter.put(jsonPutter.withKey() ? FolderField.MODULE.getName() : null, value);
             }
         });
         m.put(FolderField.TYPE.getColumn(), new FolderFieldWriter() {
@@ -767,6 +782,7 @@ public final class FolderWriter {
         final TIntList list = new TIntArrayList();
         list.add(ALL_FIELDS);
         list.add(additionalFolderFieldList.getKnownFields());
+        list.addAll(FolderFieldRegistry.getInstance().getFields().keys());
         return list.toArray();
     }
 
@@ -790,7 +806,7 @@ public final class FolderWriter {
         @Override
         public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
             final FolderProperty property = folder.getProperties().get(field);
-            jsonPutter.put(jsonPutter.withKey() ? name : null, null == property ? field.getDefaultValue() : property.getValue());
+            jsonPutter.put(jsonPutter.withKey() ? name : null, field.write(property));
         }
 
     }

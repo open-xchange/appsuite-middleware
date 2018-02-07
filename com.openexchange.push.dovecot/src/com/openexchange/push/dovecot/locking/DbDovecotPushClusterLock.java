@@ -108,7 +108,7 @@ public class DbDovecotPushClusterLock extends AbstractDovecotPushClusterLock {
         ResultSet rs = null;
         try {
             stmt = con.prepareStatement("INSERT INTO user_attribute (cid, id, name, value, uuid) SELECT ?, ?, ?, ?, ? FROM dual WHERE NOT EXISTS (SELECT 1 FROM user_attribute WHERE cid=? AND id=? AND name=?)");
-            long now = System.nanoTime();
+            long now = System.currentTimeMillis();
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -178,7 +178,7 @@ public class DbDovecotPushClusterLock extends AbstractDovecotPushClusterLock {
         try {
             stmt = con.prepareStatement("UPDATE user_attribute SET value=? WHERE cid=? AND id=? AND name=?");
             int pos = 1;
-            stmt.setString(pos++, generateValue(System.nanoTime(), sessionInfo));
+            stmt.setString(pos++, generateValue(System.currentTimeMillis(), sessionInfo));
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
             stmt.setString(pos++, ATTR_DOVECOT_LOCK);

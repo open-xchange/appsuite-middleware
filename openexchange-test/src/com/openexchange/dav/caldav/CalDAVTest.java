@@ -57,6 +57,7 @@ import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -64,11 +65,18 @@ import java.util.Map;
 import java.util.TimeZone;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.jackrabbit.webdav.DavConstants;
+import org.apache.jackrabbit.webdav.MultiStatus;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.MoveMethod;
+import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
+import org.apache.jackrabbit.webdav.client.methods.PropPatchMethod;
 import org.apache.jackrabbit.webdav.client.methods.PutMethod;
+import org.apache.jackrabbit.webdav.property.DavProperty;
+import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
+import org.apache.jackrabbit.webdav.property.DefaultDavProperty;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.json.JSONException;
 import org.junit.Assert;
@@ -92,6 +100,8 @@ import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.Charsets;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.PermissionTools;
+import net.fortuna.ical4j.model.component.Available;
+import net.fortuna.ical4j.model.component.VAvailability;
 
 /**
  * {@link CalDAVTest} - Common base class for CalDAV tests
@@ -102,19 +112,20 @@ import com.openexchange.test.PermissionTools;
 public abstract class CalDAVTest extends WebDAVTest {
 
     protected static final int TIMEOUT = 10000;
-    
+
     private int folderId;
-    
+
     @Parameters(name = "AuthMethod={0}")
     public static Iterable<Object[]> params() {
         return availableAuthMethods();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         folderId = this.getAJAXClient().getValues().getPrivateAppointmentFolder();
-        catm.setFailOnError(true);        
+        catm.setFailOnError(true);
     }
 
     /**
@@ -214,6 +225,92 @@ public abstract class CalDAVTest extends WebDAVTest {
             return getWebDAVClient().executeMethod(put);
         } finally {
             release(put);
+        }
+    }
+
+    /**
+     * Puts the specified iCal (containing one or multiple VAvailability components) via the
+     * PROPATCH method to the server
+     * 
+     * @param iCal The ical as string
+     * @return The response code of the operation
+     */
+    protected int propPatchICal(String iCal) throws Exception {
+        String resource = "schedule-inbox";
+        // Set props
+        DavProperty<String> set = new DefaultDavProperty<>(DavPropertyName.create("calendar-availability", PropertyNames.NS_CALENDARSERVER), iCal);
+        DavPropertySet setProps = new DavPropertySet();
+        setProps.add(set);
+
+        // Unset props
+        DavPropertyNameSet unsetProps = new DavPropertyNameSet();
+
+        // Execute
+        return propPatchICal(resource, setProps, unsetProps, Collections.<String, String> emptyMap());
+    }
+
+    /**
+     * Sets and unsets the specified DAV properties from the specified resource using the PROPATCH method
+     * 
+     * @param resource The resource name
+     * @param setProps The properties to set
+     * @param unsetProps The properties to unset
+     * @param headers The headers
+     * @return The response code of the operation
+     */
+    protected int propPatchICal(String resource, DavPropertySet setProps, DavPropertyNameSet unsetProps, Map<String, String> headers) throws Exception {
+        PropPatchMethod propPatch = null;
+        try {
+            String href = "/caldav/" + resource + "/";
+            propPatch = new PropPatchMethod(getBaseUri() + href, setProps, unsetProps);
+            for (String key : headers.keySet()) {
+                propPatch.addRequestHeader(key, headers.get(key));
+            }
+            return getWebDAVClient().executeMethod(propPatch);
+        } finally {
+            release(propPatch);
+        }
+    }
+
+    /**
+     * 
+     * @param property
+     * @return
+     * @throws Exception
+     */
+    protected List<ICalResource> propFind(String property) throws Exception {
+        String resource = "schedule-inbox";
+
+        DavPropertyNameSet queryProps = new DavPropertyNameSet();
+        queryProps.add(DavPropertyName.create(property, PropertyNames.NS_CALENDARSERVER));
+
+        return propFind(resource, queryProps);
+    }
+
+    /**
+     * 
+     * @return
+     * @throws Exception
+     */
+    protected List<ICalResource> propFind(String resource, DavPropertyNameSet queryProps) throws Exception {
+        PropFindMethod propFind = null;
+        try {
+            String href = "/caldav/" + resource + "/";
+            propFind = new PropFindMethod(getBaseUri() + href, queryProps, DavConstants.DEPTH_0);
+
+            Assert.assertEquals("response code wrong", 207, getWebDAVClient().executeMethod(propFind));
+            MultiStatus multiStatus = propFind.getResponseBodyAsMultiStatus();
+            assertNotNull("got no response body", multiStatus);
+
+            List<ICalResource> resources = new ArrayList<ICalResource>();
+            MultiStatusResponse[] responses = multiStatus.getResponses();
+            for (MultiStatusResponse response : responses) {
+                String data = extractTextContent(PropertyNames.CALENDAR_AVAILABILITY, response);
+                resources.add(new ICalResource(data));
+            }
+            return resources;
+        } finally {
+            release(propFind);
         }
     }
 
@@ -435,6 +532,44 @@ public abstract class CalDAVTest extends WebDAVTest {
         return stringBuilder.toString();
     }
 
+    /**
+     * Generates a {@link VAvailability} with one {@link Available} block
+     * 
+     * @param start The start of the available block
+     * @param end The end of the available block
+     * @param uid The uid
+     * @param summary The summary
+     * @param location The location
+     * @return The {@link VAvailability} as {@link String} iCal
+     */
+    protected static String generateVAvailability(Date start, Date end, String uid, String summary, String location) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("BEGIN:VCALENDAR").append("\r\n").append("VERSION:2.0").append("\r\n");
+        sb.append("PRODID:-//Apple Inc.//Mac OS X 10.12.6//EN").append("\r\n").append("CALSCALE:GREGORIAN").append("\r\n");
+        sb.append("BEGIN:VTIMEZONE").append("\r\n").append("TZID:Europe/Berlin").append("\r\n");
+        sb.append("BEGIN:DAYLIGHT").append("\r\n").append("TZOFFSETFROM:+0100").append("\r\n");
+        sb.append("RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU").append("\r\n");
+        sb.append("DTSTART:19810329T020000").append("\r\n").append("TZNAME:GMT+2").append("\r\n").append("TZOFFSETTO:+0200").append("\r\n");
+        sb.append("END:DAYLIGHT").append("\r\n").append("BEGIN:STANDARD").append("\r\n").append("TZOFFSETFROM:+0200").append("\r\n");
+        sb.append("RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU").append("\r\n").append("DTSTART:19961027T030000").append("\r\n");
+        sb.append("TZNAME:CET").append("\r\n").append("TZOFFSETTO:+0100").append("\r\n").append("END:STANDARD").append("\r\n");
+        sb.append("END:VTIMEZONE").append("\r\n");
+        sb.append("BEGIN:VAVAILABILITY").append("\r\n");
+        sb.append("UID:").append(uid).append("\r\n");
+        sb.append("DTSTAMP:").append(formatAsUTC(new Date())).append("\r\n").append("\r\n");
+        sb.append("SUMMARY:").append(summary).append("\r\n");
+        sb.append("LOCATION:").append(location).append("\r\n");
+        sb.append("BEGIN:AVAILABLE").append("\r\n");
+        sb.append("DTSTART;TZID=Europe/Berlin:").append(format(start, "Europe/Berlin")).append("\r\n");
+        sb.append("RRULE:FREQ=WEEKLY;BYDAY=WE").append("\r\n");
+        sb.append("DTEND;TZID=Europe/Berlin:").append(format(end, "Europe/Berlin")).append("\r\n");
+        sb.append("END:AVAILABLE").append("\r\n");
+        sb.append("END:VAVAILABILITY").append("\r\n");
+        sb.append("END:VCALENDAR").append("\r\n");
+
+        return sb.toString();
+    }
+
     public static void assertAppointmentEquals(Appointment appointment, Date expectedStart, Date expectedEnd, String expectedUid, String expectedTitle, String expectedLocation) {
         assertNotNull("appointment is null", appointment);
         Assert.assertEquals("start date wrong", expectedStart, appointment.getStartDate());
@@ -494,6 +629,19 @@ public abstract class CalDAVTest extends WebDAVTest {
         Assert.assertEquals("Expected dummy trigger.", "19760401T005545Z", vAlarm.getProperty("TRIGGER").getValue());
         Assert.assertEquals("Expected dummy property.", "TRUE", vAlarm.getProperty("X-APPLE-LOCAL-DEFAULT-ALARM").getValue());
         Assert.assertEquals("Expected dummy property.", "TRUE", vAlarm.getProperty("X-APPLE-DEFAULT-ALARM").getValue());
+    }
+
+    protected static void assertAcknowledgedOrDummyAlarm(Component component, String expectedAcknowledged) {
+        List<Component> vAlarms = component.getVAlarms();
+        Assert.assertEquals("Expected exactly one VAlarm.", 1, vAlarms.size());
+        Component vAlarm = vAlarms.get(0);
+        if ("19760401T005545Z".equals(vAlarm.getPropertyValue("TRIGGER"))) {
+            Assert.assertEquals("Expected dummy trigger", "19760401T005545Z", vAlarm.getProperty("TRIGGER").getValue());
+            Assert.assertEquals("Expected dummy property", "TRUE", vAlarm.getProperty("X-APPLE-LOCAL-DEFAULT-ALARM").getValue());
+            Assert.assertEquals("Expected dummy property", "TRUE", vAlarm.getProperty("X-APPLE-DEFAULT-ALARM").getValue());
+        } else {
+            Assert.assertEquals("ACKNOWLEDGED wrong", expectedAcknowledged, vAlarm.getPropertyValue("ACKNOWLEDGED"));
+        }
     }
 
 }

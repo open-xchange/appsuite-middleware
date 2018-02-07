@@ -85,7 +85,7 @@ public class LocalImapIdleClusterLock extends AbstractImapIdleClusterLock {
     public boolean acquireLock(SessionInfo sessionInfo) throws OXException {
         Key key = generateKey(sessionInfo);
 
-        long now = System.nanoTime();
+        long now = System.currentTimeMillis();
         String previous = locks.putIfAbsent(key, generateValue(now, sessionInfo));
 
         if (null == previous) {
@@ -105,7 +105,7 @@ public class LocalImapIdleClusterLock extends AbstractImapIdleClusterLock {
 
     @Override
     public void refreshLock(SessionInfo sessionInfo) throws OXException {
-        locks.put(generateKey(sessionInfo), generateValue(System.nanoTime(), sessionInfo));
+        locks.put(generateKey(sessionInfo), generateValue(System.currentTimeMillis(), sessionInfo));
     }
 
     @Override

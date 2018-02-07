@@ -1,6 +1,15 @@
 type: object
 properties:
   $ref: ./RawMailData.yaml
+  nested_msgs:
+    type: array
+    description: An array containing additional mails that are attached to this mail.
+    items: 
+      type: object
+      description: A mail that is attached to another mail.
+      title: NestedMailData
+      properties:
+        $ref: ./RawMailData.yaml
   security_info:
     type: array
     description: Information if mail is encrypted or signed.  Requires Guard

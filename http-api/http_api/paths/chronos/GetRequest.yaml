@@ -1,0 +1,20 @@
+/chronos?action=get:
+  get:
+    operationId: getEvent
+    tags:
+      - Chronos
+    summary: Gets an event.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/QueryParamChronosID"
+      - $ref: "#/parameters/QueryParamChronosFolder"
+      - $ref: "#/parameters/QueryParamChronosRecurrenceID"
+      - $ref: "#/parameters/QueryParamChronosFields"
+      - $ref: "#/parameters/QueryParamChronosExtendedEntities"
+    responses:
+      200:
+        description: |
+          An object containing all data of the requested event. In case of errors the
+          responsible fields in the response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/EventResponse"

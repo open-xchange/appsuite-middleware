@@ -153,7 +153,18 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
         if (!KNOWN_TREES.contains(treeId)) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Create not supported by tree " + treeId);
         }
-        final FolderStorage parentStorage = folderStorageDiscoverer.getFolderStorage(treeId, parentId);
+        FolderStorage parentStorage = null;
+        FolderStorage[] folderStorages = folderStorageDiscoverer.getFolderStoragesForParent(treeId, parentId);
+        if (1 == folderStorages.length) {
+            parentStorage = folderStorages[0];
+        } else {
+            for (FolderStorage folderStorage : folderStorages) {
+                if (com.openexchange.tools.arrays.Arrays.contains(folderStorage.getSupportedContentTypes(), toCreate.getContentType())) {
+                    parentStorage = folderStorage;
+                    break;
+                }
+            }
+        }
         if (null == parentStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, parentId);
         }

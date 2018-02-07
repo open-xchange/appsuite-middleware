@@ -141,6 +141,83 @@ AppointmentFreeBusyResponse:
   $ref: ./calendar/AppointmentFreeBusyResponse.yaml
 AppointmentSearchBody:
   $ref: ./calendar/AppointmentSearchBody.yaml
+# Module: chronos
+EventResponse:
+  $ref: ./chronos/EventResponse.yaml
+EventsResponse:
+  $ref: ./chronos/EventsResponse.yaml
+EventData:
+  $ref: ./chronos/EventData.yaml
+EventId:
+  $ref: ./chronos/EventId.yaml
+CalendarUser:
+  $ref: ./chronos/CalendarUser.yaml
+Attendee:
+  $ref: ./chronos/Attendee.yaml
+Alarm:
+  $ref: ./chronos/Alarm.yaml
+ChronosCalendarResultResponse:
+  $ref: ./chronos/CalendarResultResponse.yaml
+ChronosUpdatesResponse:
+  $ref: ./chronos/UpdatesResponse.yaml
+ChronosAttachment:
+  $ref: ./chronos/Attachment.yaml
+DateTimeData:
+  $ref: ./chronos/DateTimeData.yaml
+ChronosFreeBusyResponse:
+  $ref: ./chronos/FreeBusyResponse.yaml
+ChronosFreeBusyResponseData:
+  $ref: ./chronos/FreeBusyResponseData.yaml
+ChronosConflictDataRaw:
+  $ref: ./chronos/ConflictDataRaw.yaml
+ChronosFolderBody:
+  $ref: ./chronos/ChronosFolderBody.yaml
+# Module: chronos/alarm
+AlarmTriggerResponse:
+  $ref: ./chronos/AlarmTriggerResponse.yaml
+AlarmTriggerData:
+  $ref: ./chronos/AlarmTriggerData.yaml
+# Module: chronos-accounts
+CalendarAccountData:
+  $ref: ./chronos-accounts/CalendarAccountData.yaml
+CalendarAccountProbeData:
+  $ref: ./chronos-accounts/CalendarAccountProbeData.yaml
+CalendarAccountProbeResponse:
+  $ref: ./chronos-accounts/CalendarAccountProbeResponse.yaml
+# Module: chronos-availability
+AvailabilityData:
+  $ref: ./chronos-availability/AvailabilityData.yaml
+Available:
+  $ref: ./chronos-availability/Available.yaml
+GetAvailabilityResponse:
+  $ref: ./chronos-availability/GetAvailabilityResponse.yaml
+# Module: chronos-schedjoules
+CountryData:
+  $ref: ./chronos-schedjoules/CountryData.yaml
+CountriesResponse:
+  $ref: ./chronos-schedjoules/CountriesResponse.yaml
+LanguageData:
+  $ref: ./chronos-schedjoules/LanguageData.yaml
+LanguagesResponse:
+  $ref: ./chronos-schedjoules/LanguagesResponse.yaml
+ItemData:
+  $ref: ./chronos-schedjoules/ItemData.yaml
+ItemsData:
+  $ref: ./chronos-schedjoules/ItemsData.yaml
+BrowseResponse:
+  $ref: ./chronos-schedjoules/BrowseResponse.yaml
+PageData:
+  $ref: ./chronos-schedjoules/PageData.yaml
+PageSectionsData:
+  $ref: ./chronos-schedjoules/PageSectionsData.yaml
+SearchData:
+  $ref: ./chronos-schedjoules/SearchData.yaml
+SearchResponse:
+  $ref: ./chronos-schedjoules/SearchResponse.yaml
+FolderConfigurationData:
+  $ref: ./chronos-schedjoules/FolderConfigurationData.yaml
+FoldersConfigurationData:
+  $ref: ./chronos-schedjoules/FoldersConfigurationData.yaml
 # Module: mail
 MailCountResponse:
   $ref: ./mail/MailCountResponse.yaml
@@ -432,13 +509,6 @@ JSlobData:
   $ref: ./jslob/JSlobData.yaml
 JSlobsResponse:
   $ref: ./jslob/JSlobsResponse.yaml
-# Module: freebusy
-FreeBusyData:
-  $ref: ./freebusy/FreeBusyData.yaml
-FreeBusyResponse:
-  $ref: ./freebusy/FreeBusyResponse.yaml
-FreeBusysResponse:
-  $ref: ./freebusy/FreeBusysResponse.yaml
 # Module: messaging
 MessagingFormDescription:
   $ref: ./messaging/service/MessagingFormDescription.yaml

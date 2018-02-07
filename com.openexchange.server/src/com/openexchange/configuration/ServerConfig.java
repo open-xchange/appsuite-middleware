@@ -508,6 +508,7 @@ public final class ServerConfig implements Reloadable {
         return value;
     }
 
+    //TODO: Make the transition to the ServerProperty
     public static enum Property {
         /**
          * Upload directory.

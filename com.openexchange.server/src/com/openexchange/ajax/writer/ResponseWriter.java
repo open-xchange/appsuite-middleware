@@ -573,6 +573,7 @@ public final class ResponseWriter {
         json.put(ERROR_CODE, exception.getErrorCode());
         json.put(ERROR_ID, exception.getExceptionId());
         json.put(ERROR_DESC, exception.getSoleMessage());
+
         /*
          * Problematics
          */

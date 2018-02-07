@@ -81,6 +81,8 @@ import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.osgi.FolderFieldCollector;
 import com.openexchange.ajax.ipcheck.IPCheckService;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.ResultConverterRegistry;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
@@ -92,9 +94,12 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.charset.CustomCharsetProvider;
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.client.ConfigJump;
 import com.openexchange.configuration.ServerConfig;
@@ -147,7 +152,6 @@ import com.openexchange.groupware.alias.impl.CachingAliasStorage;
 import com.openexchange.groupware.alias.impl.RdbAliasStorage;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.contact.datasource.ContactDataSource;
 import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
@@ -320,12 +324,12 @@ public final class ServerActivator extends HousekeepingActivator {
 
     private static final Class<?>[] NEEDED_SERVICES_SERVER = {
         ConfigurationService.class, DatabaseService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class,
-        JDOMParser.class, TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class,
+        JDOMParser.class, TimerService.class, ThreadPoolService.class,
         AppointmentSqlFactoryService.class, CalendarCollectionService.class, MessagingServiceRegistry.class, HtmlService.class,
         IDBasedFolderAccessFactory.class, IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
         CryptoService.class, HttpService.class, SystemNameService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
         TextXtractService.class, SecretEncryptionFactoryService.class, SearchService.class, DispatcherPrefixService.class,
-        UserAgentParser.class, PasswordMechFactory.class };
+        UserAgentParser.class, PasswordMechFactory.class, LeanConfigurationService.class };
 
     private static volatile BundleContext CONTEXT;
 
@@ -675,6 +679,11 @@ public final class ServerActivator extends HousekeepingActivator {
         ServerServiceRegistry.getInstance().addService(UserService.class, userService);
 
         track(ObjectUseCountService.class, new ObjectUseCountServiceTracker(context));
+        track(CalendarService.class, new RegistryCustomizer<CalendarService>(context, CalendarService.class));
+        track(ICalService.class, new RegistryCustomizer<ICalService>(context, ICalService.class));
+        
+        CommonResultConverterRegistry resultConverterRegistry = new CommonResultConverterRegistry(context);
+        track(ResultConverter.class, resultConverterRegistry);
 
         // Start up server the usual way
         starter.start();
@@ -796,25 +805,10 @@ public final class ServerActivator extends HousekeepingActivator {
         // registerService(DataSource.class, dataSource, props);
         // ImageServlet.addMapping(dataSource.getRegistrationName(), dataSource.getAlias());
         // }
-        /*
-         * Register data handlers
-         */
-        {
-            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-            props.put(STR_IDENTIFIER, "com.openexchange.ical");
-            registerService(DataHandler.class, new ICalInsertDataHandler(), props);
-        }
-        {
-            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-            props.put(STR_IDENTIFIER, "com.openexchange.ical.json");
-            registerService(DataHandler.class, new ICalJSONDataHandler(), props);
-        }
-        {
-            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-            props.put(STR_IDENTIFIER, "com.openexchange.mail.vcard");
-            registerService(DataHandler.class, new VCardAttachMailDataHandler(), props);
-        }
-
+        
+        registerService(ResultConverterRegistry.class, resultConverterRegistry);
+        ServerServiceRegistry.getInstance().addService(ResultConverterRegistry.class, resultConverterRegistry);
+        
         // Register DBProvider
         registerService(DBProvider.class, new DBPoolProvider());
 

@@ -1025,6 +1025,7 @@ public final class QuotedInternetAddress extends InternetAddress {
     }
 
     private static final Pattern WHITESPACE_OR_CONTROL = Pattern.compile("[\\p{Space}&&[^ ]]|\\p{Cntrl}|[^\\p{Print}\\p{L}]");
+    private static final Pattern WHITESPACE_OR_CONTROL_WITHOUT_LETTERS = Pattern.compile("[\\p{Space}&&[^ ]]|\\p{Cntrl}");
 
     /**
      * Initializes specified address by dropping possibly contained white-space and control characters.
@@ -1033,7 +1034,18 @@ public final class QuotedInternetAddress extends InternetAddress {
      * @return The possibly initialized address string
      */
     public static String init(String address) {
-        return null == address ? null : WHITESPACE_OR_CONTROL.matcher(address).replaceAll("");
+        return init(address, false);
+    }
+
+    /**
+     * Initializes specified address by dropping possibly contained white-space and control characters.
+     *
+     * @param address The address to initialize
+     * @param withoutLetters <code>true</code> to only drop space (<code>[\t\n\x0B\f\r]</code>) and control (<code>[\x00-\x1F\x7F]</code>) characters; otherwise <code>false</code>
+     * @return The possibly initialized address string
+     */
+    public static String init(String address, boolean withoutLetters) {
+        return null == address ? null : (withoutLetters ? WHITESPACE_OR_CONTROL_WITHOUT_LETTERS : WHITESPACE_OR_CONTROL).matcher(address).replaceAll("");
     }
 
     /**
@@ -1137,7 +1149,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
     @Override
     public void setPersonal(String name, String charset) throws UnsupportedEncodingException {
-        String n = init(name);
+        String n = init(name, true);
         personal = n;
         if (n != null) {
             if (charset == null) {
@@ -1196,7 +1208,7 @@ public final class QuotedInternetAddress extends InternetAddress {
 
         if (encodedPersonal != null) {
             try {
-                personal = init(MimeMessageUtility.decodeMultiEncodedHeader(encodedPersonal));
+                personal = init(MimeMessageUtility.decodeMultiEncodedHeader(encodedPersonal), true);
                 return personal;
             } catch (final Exception ex) {
                 // 1. ParseException: either its an unencoded string or
@@ -1229,7 +1241,7 @@ public final class QuotedInternetAddress extends InternetAddress {
             if (encodedPersonal.length() > 0) {
                 if (null == personal) {
                     try {
-                        personal = init(MimeMessageUtility.decodeMultiEncodedHeader(encodedPersonal));
+                        personal = init(MimeMessageUtility.decodeMultiEncodedHeader(encodedPersonal), true);
                     } catch (final Exception ex) {
                         // 1. ParseException: either its an unencoded string or
                         // it can't be parsed

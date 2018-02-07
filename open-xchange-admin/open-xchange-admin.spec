@@ -2,7 +2,6 @@
 
 Name:          open-xchange-admin
 BuildArch:     noarch
-#!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
 %else
@@ -15,7 +14,7 @@ BuildRequires: java-1_8_0-openjdk-devel
 BuildRequires: java-1.8.0-openjdk-devel
 %endif
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -149,16 +148,10 @@ if [ ${1:-0} -eq 2 ]; then
     # SoftwareChange_Request-4170
     ox_add_property LOCK_ON_WRITE_CONTEXT_INTO_PAYLOAD_DB false /opt/open-xchange/etc/plugin/hosting.properties
 
-    # SoftwareChange_Request-16
+    # SoftwareChange_Request-4351
     PFILE=/opt/open-xchange/etc/ModuleAccessDefinitions.properties
-    sed -i '/^# webdavxml (interface for OXtender for Microsoft Outlook, used by KDE for synchronization).*$/d' $PFILE
-    KEYS=( premium groupware groupware_premium all )
-    for I in $(seq 1 ${#KEYS[@]}); do
-        VALUE=$(ox_read_property ${KEYS[$I-1]} $PFILE)
-        if [ -z "${VALUE##*webdavxml*}" ]; then
-            ox_set_property ${KEYS[$I-1]} $(echo "${VALUE}" | tr ',' "\n" | grep -v webdavxml | paste -sd ',' -) $PFILE
-        fi
-    done
+    expression='# webdavxml (interface for OXtender for Microsoft Outlook, used by KDE for synchronization)'
+    $(contains "^${expression}$" $PFILE) && sed -i "s/^${expression}$/${expression} [DEPRECATED]/" $PFILE
 
     ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 fi
@@ -185,6 +178,10 @@ fi
 %doc com.openexchange.admin.rmi/javadoc
 
 %changelog
+* Fri Feb 02 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Second preview for 7.10.0 release
+* Fri Dec 01 2017 Marcus Klein <marcus.klein@open-xchange.com>
+First preview for 7.10.0 release
 * Thu Oct 12 2017 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.10.0 release
 * Fri May 19 2017 Marcus Klein <marcus.klein@open-xchange.com>

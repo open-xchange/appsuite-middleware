@@ -68,6 +68,7 @@ import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.Databases;
 import com.openexchange.database.internal.reloadable.GenericReloadable;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.pooling.PoolableLifecycle;
 import com.openexchange.pooling.PooledData;
 
@@ -157,7 +158,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         final Iterator<Object> iter = withoutTimeout.keySet().iterator();
         while (iter.hasNext()) {
             final Object test = iter.next();
-            if (String.class.isAssignableFrom(test.getClass()) && ((String) test).toLowerCase().endsWith("timeout")) {
+            if (String.class.isAssignableFrom(test.getClass()) && Strings.asciiLowerCase(((String) test)).endsWith("timeout")) {
                 iter.remove();
             }
         }

@@ -49,25 +49,22 @@
 
 package com.openexchange.tools.oxfolder.downgrade;
 
-import gnu.trove.TIntCollection;
-import gnu.trove.iterator.TIntIterator;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.cache.impl.FolderQueryCacheManager;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.contact.ContactService;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.StaticDBPoolProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderEventConstants;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCache;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -84,13 +81,17 @@ import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.downgrade.sql.OXFolderDowngradeSQL;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import gnu.trove.TIntCollection;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link OXFolderDowngradeListener} - Performs deletion of unused folder data remaining from a former downgrade.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class OXFolderDowngradeListener extends DowngradeListener {
+public final class OXFolderDowngradeListener implements DowngradeListener {
 
     private static final String TABLE_FOLDER_WORKING = "oxfolder_tree";
 
@@ -364,19 +365,9 @@ public final class OXFolderDowngradeListener extends DowngradeListener {
     }
 
     private static void deleteContainedAppointments(final int folderID, final DowngradeEvent event) throws OXException {
-        final AppointmentSqlFactoryService service = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class);
-        if (null != service) {
-            final AppointmentSQLInterface cSql = service.createAppointmentSql(event.getSession());
-            try {
-                if (null == event.getWriteCon()) {
-                    cSql.deleteAppointmentsInFolder(folderID);
-                } else {
-                    cSql.deleteAppointmentsInFolder(folderID, event.getWriteCon());
-                }
-            } catch (final SQLException e) {
-                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-            }
-        }
+        CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class, true).init(event.getSession());
+        calendarSession.set(Connection.class.getName(), event.getWriteCon());
+        calendarSession.getCalendarService().clearEvents(calendarSession, String.valueOf(folderID), CalendarUtils.DISTANT_FUTURE);
     }
 
     private static void deleteContainedTasks(final int folderID, final DowngradeEvent event) throws OXException {

@@ -1,0 +1,65 @@
+type: object
+properties:
+  attendee:
+    $ref: "#/definitions/Attendee"
+  freeBusyTime:
+    type: array
+    description: The free-busy times of the attendee.
+    items:
+      type: object
+      title: FreeBusyTime
+      description: A free-busy time slot.
+      properties:
+        startTime: 
+          type: integer
+          format: int64
+          description: The start time of the free-busy timeslot.
+        endTime: 
+          type: integer
+          format: int64
+          description: The end time of the free-busy timeslot.
+        fbType:
+          type: string
+          description: The type of the free-busy timeslot.
+        event:
+          type: object
+          title: Event
+          description: The event this timeslot belongs to if known.
+          properties:
+            $ref: EventDataRaw.yaml
+  warnings:
+    type: array
+    items:
+      type: object
+      title: Warning
+      description: A warning concerning the attendee. E.g. when the attendee couldn't be found.
+      properties:
+        error:
+          type: string
+          description: The translated error message. Present in case of errors.
+        error_params:
+          type: array
+          description: "Empty JSON array."
+          items:
+            type: string
+        error_id:
+          type: string
+          description: Unique error identifier to help finding this error instance in the server logs.
+        error_desc:
+          type: string
+          description: The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.
+        error_stack:
+          type: array
+          description: 'If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides the stack trace of associated Java exception represented as a JSON array.'
+          items:
+            type: string
+        code:
+          type: string
+          description: Error code consisting of an upper-case module identifier and a four-digit message number, separated by a dash; e.g. "MSG-0012"
+        categories:
+          type: string
+          description: Either a single (String) or list (Array) of upper-case category identifiers to which the error belongs.
+        category:
+          type: integer
+          description: "Maintained for legacy reasons: The numeric representation of the first category."
+

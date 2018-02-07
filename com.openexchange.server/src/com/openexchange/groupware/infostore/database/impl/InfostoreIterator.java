@@ -355,7 +355,8 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
                         try {
                             set.setValue(new JSONObject(new AsciiReader(jsonBlobStream)).asMap());
                         } catch (final JSONException e) {
-                            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+                            LOG.warn("Failed to read metadata from document {} in folder {}", dm.getId(), dm.getFolderId(), e);
+                            set.setValue(null);
                         } finally {
                             Streams.close(jsonBlobStream);
                         }

@@ -86,7 +86,7 @@ public class UserTypeSessiondConfigRegistry {
     /**
      * Initializes a new {@link UserTypeSessiondConfigRegistry}.
      *
-     * @param conf The config service to use
+     * @param conf The configuration service to use
      */
     public UserTypeSessiondConfigRegistry(ConfigurationService conf) {
         super();
@@ -105,7 +105,6 @@ public class UserTypeSessiondConfigRegistry {
      * Clears this registry
      */
     public void clear() {
-        this.map.clear();
         cache.invalidateAll();
     }
 

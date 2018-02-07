@@ -118,7 +118,7 @@ public class UUEncodedMultiPart {
     // -----------------------------------------------------------------------------------------------------------------------------------
 
     private final List<UUEncodedPart> uuencodeParts;
-    private StringBuilder text;
+    private String text;
     private int count = -1;
 
     /**
@@ -151,7 +151,7 @@ public class UUEncodedMultiPart {
         if (count >= 1) {
             final UUEncodedPart uuencodedPart = uuencodeParts.get(0);
             if (uuencodedPart.getIndexStart() != -1) {
-                text = new StringBuilder(content.substring(0, uuencodedPart.getIndexStart()));
+                text = content.substring(0, uuencodedPart.getIndexStart());
             }
         }
     }
@@ -190,15 +190,36 @@ public class UUEncodedMultiPart {
 
     private static final int examineBeginToken(final String beginToken) {
         int count = 0;
-        char c = beginToken.charAt(count);
-        while (Strings.isWhitespace(c)) {
+        for (char c = beginToken.charAt(count); Strings.isWhitespace(c);) {
             c = beginToken.charAt(++count);
         }
         return count;
     }
 
     private static final String cleanAtom(final String atom) {
-        return atom.replaceAll("\r?\n", "");
+        int length = atom.length();
+        if (length <= 0) {
+            return atom;
+        }
+        
+        StringBuilder sb = null;
+        for (int i = 0; i < length; i++) {
+            char c = atom.charAt(i);
+            if (c == '\r' || c == '\n') {
+                if (null == sb) {
+                    sb = new StringBuilder(length);
+                    if (i > 0) {
+                        sb.append(atom, 0, i);
+                    }
+                }
+            } else {
+                if (null != sb) {
+                    sb.append(c);
+                }
+            }
+        }
+        
+        return null == sb ? atom : sb.toString();
     }
 
     /**
@@ -207,7 +228,7 @@ public class UUEncodedMultiPart {
      * @return The "cleaned" text
      */
     public String getCleanText() {
-        return text.toString();
+        return text;
     }
 
     /**

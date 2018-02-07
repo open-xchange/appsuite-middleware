@@ -96,4 +96,15 @@ public interface MailFetchListener {
      * @throws OXException If an aborting error occurs; acts in the same way as returning {@link MailFetchListenerResult#deny(OXException)}
      */
     MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, Session session, Map<String, Object> state) throws OXException;
+
+    /**
+     * Invoked when a single mail has been fully fetched from storage.
+     *
+     * @param mail The fetched mail
+     * @param session The user's session
+     * @return The resulting mail
+     * @throws OXException If an aborting error occurs
+     */
+    MailMessage onMailFetch(MailMessage mail, Session session) throws OXException;
+
 }

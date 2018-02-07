@@ -12,6 +12,5 @@ properties:
   signatures:
     type: array
     description: Array of signatures, if any, and the verification status
-    items: {
+    items: 
       $ref: "#/definitions/GuardSignatureResult"
-    }

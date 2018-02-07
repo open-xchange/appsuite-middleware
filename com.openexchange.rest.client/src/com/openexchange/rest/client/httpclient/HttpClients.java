@@ -261,7 +261,7 @@ public final class HttpClients {
         }
 
         if (config.denyLocalRedirect) {
-            clientBuilder.setRedirectStrategy(DenyLocalRedirectStrategy.INSTANCE);
+            clientBuilder.setRedirectStrategy(DenyLocalRedirectStrategy.DENY_LOCAL_INSTANCE);
         }
         if (null != config.userAgent) {
             clientBuilder.setUserAgent(config.userAgent);
@@ -905,7 +905,7 @@ public final class HttpClients {
 
     private static class DenyLocalRedirectStrategy extends DefaultRedirectStrategy {
 
-        static final DenyLocalRedirectStrategy INSTANCE = new DenyLocalRedirectStrategy();
+        static final DenyLocalRedirectStrategy DENY_LOCAL_INSTANCE = new DenyLocalRedirectStrategy();
 
         private DenyLocalRedirectStrategy() {
             super();

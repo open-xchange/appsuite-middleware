@@ -60,12 +60,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.contact.ContactService;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -1386,8 +1386,9 @@ public class OXFolderTools {
                         final Tasks tasks = Tasks.getInstance();
                         return !tasks.containsNotSelfCreatedTasks(session, fo.getObjectID());
                     case FolderObject.CALENDAR:
-                        final AppointmentSQLInterface calSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
-                        return !calSql.checkIfFolderContainsForeignObjects(userId, fo.getObjectID());
+                        CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class, true).init(session);
+                        calendarSession.set(Connection.class.getName(), readCon);
+                        return false == calendarSession.getCalendarService().getUtilities().containsForeignEvents(calendarSession, String.valueOf(fo.getObjectID()));
                     case FolderObject.CONTACT:
                         ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
                         return false == contactService.containsForeignObjectInFolder(session, String.valueOf(fo.getObjectID()));
@@ -1406,8 +1407,9 @@ public class OXFolderTools {
                         final Tasks tasks = Tasks.getInstance();
                         return tasks.isFolderEmpty(ctx, fo.getObjectID());
                     case FolderObject.CALENDAR:
-                        final AppointmentSQLInterface calSql = ServerServiceRegistry.getInstance().getService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
-                        return calSql.isFolderEmpty(userId, fo.getObjectID());
+                        CalendarSession calendarSession = ServerServiceRegistry.getInstance().getService(CalendarService.class, true).init(session);
+                        calendarSession.set(Connection.class.getName(), readCon);
+                        return 0 == calendarSession.getCalendarService().getUtilities().countEvents(calendarSession, String.valueOf(fo.getObjectID()));
                     case FolderObject.CONTACT:
                         ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
                         return contactService.isFolderEmpty(session, String.valueOf(fo.getObjectID()));

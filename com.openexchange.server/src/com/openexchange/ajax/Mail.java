@@ -135,6 +135,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.json.OXJSONWriter;
+import com.openexchange.mail.FlaggingMode;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -174,6 +175,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.converters.DefaultConverterConfig;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.structure.parser.MIMEStructureParser;
@@ -3412,7 +3414,7 @@ public class Mail extends PermissionServlet {
                 final String[] ids;
                 final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
                 try {
-                    ids = mailInterface.appendMessages(folder, new MailMessage[] { MimeMessageConverter.convertMessage(data.getMail()) }, force);
+                    ids = mailInterface.appendMessages(folder, new MailMessage[] { MimeMessageConverter.convertMessage(data.getMail(), new DefaultConverterConfig(mailInterface.getMailConfig())) }, force);
                     if (flags > 0) {
                         mailInterface.updateMessageFlags(folder, ids, flags, true);
                     }
@@ -3620,7 +3622,7 @@ public class Mail extends PermissionServlet {
                     final boolean quit = messages.remove(POISON);
                     for (final MimeMessage message : messages) {
                         message.getHeader("Date", null);
-                        final MailMessage mm = MimeMessageConverter.convertMessage(message);
+                        final MailMessage mm = MimeMessageConverter.convertMessage(message, new DefaultConverterConfig(mailInterface.getMailConfig()));
                         mails.add(mm);
                     }
                     messages.clear();
@@ -3773,11 +3775,10 @@ public class Mail extends PermissionServlet {
                     final List<MailMessage> mails = new ArrayList<MailMessage>(messages.size());
                     for (final MimeMessage message : messages) {
                         message.getHeader("Date", null);
-                        final MailMessage mm = MimeMessageConverter.convertMessage(message);
+                        final MailMessage mm = MimeMessageConverter.convertMessage(message, new DefaultConverterConfig(mailInterface.getMailConfig()));
                         mails.add(mm);
                     }
                     messages.clear();
-                    mailInterface = MailServletInterface.getInstance(session);
                     try {
                         final String[] ids = mailInterface.importMessages(folder, mails.toArray(new MailMessage[mails.size()]), force);
                         mails.clear();
@@ -4169,6 +4170,27 @@ public class Mail extends PermissionServlet {
                 MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailInterface.getMailAccess();
                 FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folder);
                 MailMessage[] messages = mailAccess.getMessageStorage().getMessages(fa.getFullName(), mailIDs, new MailField[] { MailField.FULL });
+
+                for (MailMessage mail : messages) {
+                    /*
+                     * Check color label vs. \Flagged flag
+                     */
+                    if (mail.getColorLabel() == 0) {
+                        // No color label set; check if \Flagged
+                        if (mail.isFlagged()) {
+                            FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
+                            if (mode.equals(FlaggingMode.FLAGGED_IMPLICIT)) {
+                                mail.setColorLabel(FlaggingMode.getFlaggingColor(session));
+                            }
+                        }
+                    } else {
+                        // Color label set. Check whether to swallow that information in case only \Flagged should be advertised
+                        FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
+                        if (mode.equals(FlaggingMode.FLAGGED_ONLY)) {
+                            mail.setColorLabel(0);
+                        }
+                    }
+                }
 
                 // Check if mail authenticity handler is available
                 MailAuthenticityHandler handler = null;

@@ -50,7 +50,12 @@
 package com.openexchange.groupware.ldap;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.sql.DBUtils.*;
+import static com.openexchange.tools.sql.DBUtils.IN_LIMIT;
+import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.getIN;
+import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -1333,23 +1338,6 @@ public class RdbUserStorage extends UserStorage {
 
     @Override
     public User searchUser(final String email, final Context context, boolean considerAliases, boolean includeGuests, boolean excludeUsers) throws OXException {
-        /*
-         *  Use utf8_bin to match umlauts. But that also makes it case sensitive, so use LOWER to be case insesitive.
-         */
-        StringBuilder stringBuilder = new StringBuilder("SELECT id FROM user WHERE cid=? AND LOWER(mail) LIKE LOWER(?) COLLATE utf8_bin");
-        if (excludeUsers) {
-            /*
-             * exclude all regular users
-             */
-            stringBuilder.append(" AND guestCreatedBy>0");
-        }
-        if (false == includeGuests) {
-            /*
-             * exclude all guest users
-             */
-            stringBuilder.append(" AND guestCreatedBy=0");
-        }
-        String sql = stringBuilder.toString();
         final Connection con = DBPool.pickup(context);
         try {
             final String pattern = StringCollection.prepareForSearch(email, false, true);
@@ -1357,7 +1345,24 @@ public class RdbUserStorage extends UserStorage {
             ResultSet result = null;
             int userId = -1;
             try {
-                stmt = con.prepareStatement(sql);
+                /*
+                 * Use utf8*_bin to match umlauts. But that also makes it case sensitive, so use LOWER to be case insensitive.
+                 */
+                StringBuilder stringBuilder = new StringBuilder("SELECT id FROM user WHERE cid=? AND LOWER(mail) LIKE LOWER(?) COLLATE ")
+                    .append(Databases.getCharacterSet(con).contains("utf8mb4") ? "utf8mb4_bin" : "utf8_bin");
+                if (excludeUsers) {
+                    /*
+                     * exclude all regular users
+                     */
+                    stringBuilder.append(" AND guestCreatedBy>0");
+                }
+                if (false == includeGuests) {
+                    /*
+                     * exclude all guest users
+                     */
+                    stringBuilder.append(" AND guestCreatedBy=0");
+                }
+                stmt = con.prepareStatement(stringBuilder.toString());
                 stmt.setInt(1, context.getContextId());
                 stmt.setString(2, pattern);
                 result = stmt.executeQuery();

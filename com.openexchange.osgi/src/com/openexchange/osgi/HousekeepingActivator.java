@@ -51,9 +51,11 @@ package com.openexchange.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.LinkedList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.CopyOnWriteArrayList;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -64,6 +66,8 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimaps;
+import com.google.common.collect.SetMultimap;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -176,15 +180,15 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     // ------------------------------------------------------------------------------------------------------------------------------- //
 
     private final List<ServiceTracker<?, ?>> serviceTrackers;
-    private final HashMultimap<Object,ServiceRegistration<?>> serviceRegistrations;
+    private final SetMultimap<Object,ServiceRegistration<?>> serviceRegistrations;
 
     /**
      * Initializes a new {@link HousekeepingActivator}.
      */
     protected HousekeepingActivator() {
         super();
-        serviceTrackers = new LinkedList<ServiceTracker<?, ?>>();
-        serviceRegistrations = HashMultimap.create(6,2);
+        serviceTrackers = new CopyOnWriteArrayList<ServiceTracker<?, ?>>();
+        serviceRegistrations = Multimaps.synchronizedSetMultimap(HashMultimap.create(6,2));
     }
 
     @Override
@@ -480,7 +484,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
             }
         }
 
-        for (final ServiceTracker<?, ?> tracker : new LinkedList<ServiceTracker<?, ?>>(serviceTrackers)) {
+        for (final ServiceTracker<?, ?> tracker : serviceTrackers) {
             tracker.open();
         }
     }
@@ -489,7 +493,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
      * Closes all trackers.
      */
     protected void closeTrackers() {
-        for (final ServiceTracker<?, ?> tracker : new LinkedList<ServiceTracker<?, ?>>(serviceTrackers)) {
+        for (final ServiceTracker<?, ?> tracker : serviceTrackers) {
             tracker.close();
         }
     }
@@ -513,7 +517,7 @@ public abstract class HousekeepingActivator extends DeferredActivator {
     }
 
     /**
-     * Unregisters specified service.
+     * Unregisters all registrations associated with specified service.
      *
      * @param service The service to unregister
      */
@@ -521,6 +525,21 @@ public abstract class HousekeepingActivator extends DeferredActivator {
         for(ServiceRegistration<?> registration : serviceRegistrations.removeAll(service)) {
             LOG.debug("Unregistering {}", registration);
             registration.unregister();
+        }
+    }
+
+    /**
+     * Unregisters all registrations associated with specified service class.
+     *
+     * @param service The class of the service to unregister
+     */
+    protected <S> void unregisterService(final Class<S> clazz) {
+        for (Iterator<Entry<Object, ServiceRegistration<?>>> it = serviceRegistrations.entries().iterator(); it.hasNext();) {
+            Map.Entry<Object, ServiceRegistration<?>> entry = it.next();
+            if (clazz.isInstance(entry.getKey())) {
+                entry.getValue().unregister();
+                it.remove();
+            }
         }
     }
 
@@ -536,6 +555,20 @@ public abstract class HousekeepingActivator extends DeferredActivator {
         closeTrackers();
         clearTrackers();
         unregisterServices();
+    }
+
+    /**
+     * Initializes a new dictionary and inserts a specific key/value pair, ready to use when registering a service with a custom property
+     * via {@link #registerService(Class, Object, Dictionary)}.
+     *
+     * @param key The key to insert into the returned dictionary
+     * @param value The value to associate with the key in the returned dictionary
+     * @return A new dictionary holding a single mapping from <code>key</code> to <code>value</code>
+     */
+    protected static Dictionary<String, Object> singletonDictionary(String key, Object value) {
+        Dictionary<String, Object> dictionary = new Hashtable<String, Object>(1);
+        dictionary.put(key, value);
+        return dictionary;
     }
 
 }

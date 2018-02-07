@@ -61,8 +61,13 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 /**
  * Utilities for database resource handling.
@@ -73,6 +78,7 @@ import java.util.regex.Pattern;
 public final class Databases {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Databases.class);
+    private static final Cache<String, String> CHARSETS_BY_SCHEMA = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build();
 
     /** The default limit for SQL-IN expressions: <code>1000</code */
     public static final int IN_LIMIT = 1000;
@@ -520,6 +526,52 @@ public final class Databases {
             closeSQLStuff(rs);
         }
         return retval;
+    }
+
+    /**
+     * Gets the underlying character set of the supplied database connection, based on the <code>character_set_connection</code> variable.
+     *
+     * @param connection The connection to determine the character set for
+     * @return The connection's character set
+     * @throws SQLException In case the character set cannot be determined
+     */
+    public static String getCharacterSet(Connection connection) throws SQLException {
+        String schemaName = connection.getCatalog();
+        if (null == schemaName) {
+            LOG.warn("Unable to derive schema name for connection {}, evaluating character set dynamically.", connection);
+            return readCharacterSet(connection);
+        }
+        try {
+            return CHARSETS_BY_SCHEMA.get(schemaName, new Callable<String>() {
+
+                @Override
+                public String call() throws Exception {
+                    return readCharacterSet(connection);
+                }
+            });
+        } catch (ExecutionException e) {
+            throw SQLException.class.isInstance(e.getCause()) ? (SQLException) e.getCause() : new SQLException(e.getCause());
+        }
+    }
+
+    /**
+     * Reads out the underlying character set of the supplied database connection, based on the <code>character_set_connection</code>
+     * variable.
+     *
+     * @param connection The connection to determine the character set for
+     * @return The connection's character set
+     * @throws SQLException In case the character set cannot be determined
+     */
+    private static String readCharacterSet(Connection connection) throws SQLException {
+        try (PreparedStatement stmt = connection.prepareStatement("SHOW VARIABLES LIKE 'character_set_connection';");
+            ResultSet resultSet = stmt.executeQuery()) {
+            if (false == resultSet.next()) {
+                throw new SQLException("Unable to determine 'character_set_connection'");
+            }
+            String value = resultSet.getString("Value");
+            LOG.debug("'character_set_connection' evaluated to \"{}\" on database schema \"{}\".", value, connection.getCatalog());
+            return value;
+        }
     }
 
 }

@@ -52,7 +52,6 @@ package com.openexchange.setuptools;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.calendar.CalendarSql;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -154,7 +153,7 @@ public class TestFolderToolkit {
     public void removeAll(final Session session, final List<FolderObject> cleanFolders) {
         final OXFolderManager oxma;
         try {
-            oxma = OXFolderManager.getInstance(session, new CalendarSql(session));
+            oxma = OXFolderManager.getInstance(session);
             for (final FolderObject folder : cleanFolders) {
                 oxma.deleteFolder(folder, true, System.currentTimeMillis());
             }
@@ -178,7 +177,7 @@ public class TestFolderToolkit {
 
     /**
      * Shares a given calendar folder to a given userId with Admin permisson.
-     * 
+     *
      * @param sssion
      * @param ctx
      * @param otherUserId

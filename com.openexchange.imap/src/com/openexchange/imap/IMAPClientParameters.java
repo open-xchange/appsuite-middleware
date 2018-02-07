@@ -149,7 +149,7 @@ public enum IMAPClientParameters {
             // Ignore
         }
 
-        return new StringBuilder(16).append(session.hashCode()).append(session.getUserId()).append(session.getContextId()).append(System.nanoTime()).toString();
+        return new StringBuilder(16).append(session.hashCode()).append(session.getUserId()).append(session.getContextId()).append(System.currentTimeMillis()).toString();
     }
 
     private static final char[] HEX_CHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };

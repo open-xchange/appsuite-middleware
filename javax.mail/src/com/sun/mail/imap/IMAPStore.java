@@ -52,7 +52,9 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.Folder;
@@ -291,6 +293,7 @@ public class IMAPStore extends Store
     private volatile String generatedExternalId = null;
     private Map<String, String> clientParameters = null;
     private ExternalIdGenerator externalIdGenerator = null;
+    private IMAPTextPreviewProvider textPreviewProvider = null;
     private boolean failOnNOFetch = false;
     private final String guid;			// for Yahoo! Mail IMAP
     private boolean throwSearchException = false;
@@ -786,6 +789,24 @@ public class IMAPStore extends Store
     }
 
     /**
+     * Gets the text-preview provider
+     *
+     * @return The text-preview provider or <code>null</code>
+     */
+    public IMAPTextPreviewProvider getTextPreviewProvider() {
+        return textPreviewProvider;
+    }
+
+    /**
+     * Sets the text-preview provider
+     *
+     * @param textPreviewProvider The text-preview provider to set
+     */
+    public void setTextPreviewProvider(IMAPTextPreviewProvider textPreviewProvider) {
+        this.textPreviewProvider = textPreviewProvider;
+    }
+
+    /**
      * Sets the client parameters
      *
      * @param clientParameters The client parameters to set
@@ -859,6 +880,8 @@ public class IMAPStore extends Store
 	    port = defaultPort;
 	}
 
+	int retry = 0;
+	LoginAttempt: while (true) {
 	try {
             boolean poolEmpty;
             synchronized (pool) {
@@ -910,11 +933,24 @@ public class IMAPStore extends Store
 	    if (null != responseCode) {
 	        // Verify login really failed due to an authentication/authorization issue
             switch (responseCode) {
-                case AUTHENTICATIONFAILED: /* fall-through */
-                case AUTHORIZATIONFAILED:
+                case AUTHENTICATIONFAILED:
                     throw new AuthenticationFailedException(cex.getResponse().getRest(), cex);
+                case AUTHORIZATIONFAILED:
+                    throw new javax.mail.AuthorizationFailedException(cex.getResponse().getRest(), cex);
+                case UNAVAILABLE:
+                    if (++retry > 5) {
+                        throw new javax.mail.TemporaryAuthenticationFailureException(cex.getResponse().getRest(), cex);
+                    }
+
+                    long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
+                    LockSupport.parkNanos(nanosToWait);
+                    continue LoginAttempt;
+                case EXPIRED:
+                    throw new javax.mail.PasswordExpiredException(cex.getResponse().getRest(), cex);
+                case PRIVACYREQUIRED:
+                    throw new javax.mail.PrivacyRequiredException(cex.getResponse().getRest(), cex);
                 default:
-                    throw new MessagingException(cex.getMessage(), cex);
+                    throw new javax.mail.LoginFailedException(cex.getMessage(), cex);
             }
         }
 
@@ -933,8 +969,10 @@ public class IMAPStore extends Store
 	} catch (IOException ioex) {
 	    throw new MessagingException(ioex.getMessage(), ioex);
 	}
+	
 
         return true;
+	}
     }
 
     /**

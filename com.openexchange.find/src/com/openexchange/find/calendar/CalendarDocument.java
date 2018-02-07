@@ -51,25 +51,47 @@ package com.openexchange.find.calendar;
 
 import com.openexchange.find.Document;
 import com.openexchange.find.DocumentVisitor;
-import com.openexchange.groupware.container.Appointment;
 
 /**
  * {@link CalendarDocument}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class CalendarDocument implements Document {
 
     private static final long serialVersionUID = 644937237827581918L;
 
-    private Appointment appointment;
+    private Object object;
+    private String format;
 
-    public CalendarDocument(Appointment appointment) {
-        this.appointment = appointment;
+    /**
+     * Initializes a new {@link CalendarDocument}.
+     *
+     * @param object The underling calendar object
+     * @param format The object's format name
+     */
+    public CalendarDocument(Object object, String format) {
+        super();
+        this.object = object;
+        this.format = format;
     }
 
-    public Appointment getAppointment() {
-        return appointment;
+    /**
+     * Gets the underlying calendar object.
+     *
+     * @return The underlying calendar object
+     */
+    public Object getObject() {
+        return object;
+    }
+
+    /**
+     * Gets the object's format name.
+     *
+     * @return The format name
+     */
+    public String getFormat() {
+        return format;
     }
 
     @Override

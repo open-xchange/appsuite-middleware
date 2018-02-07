@@ -84,7 +84,7 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
      * <li>The certificate is self-signed.</li>
      * <li>The certificate with fingerprint '%1$s' is self-signed.</li>
      */
-    SELF_SIGNED_CERTIFICATE("The certificate with fingerprint '%1$s' for domain '%2$s'  is self-signed", CATEGORY_ERROR, 4, SSLExceptionMessages.SELF_SIGNED_CERTIFICATE),
+    SELF_SIGNED_CERTIFICATE("The certificate with fingerprint '%1$s' for domain '%2$s' is self-signed", CATEGORY_ERROR, 4, SSLExceptionMessages.SELF_SIGNED_CERTIFICATE),
     /**
      * <li>The certificate is expired.</li>
      * <li>The certificate with fingerprint '%1$s' is expired.</li>
@@ -97,18 +97,19 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
     INVALID_HOSTNAME("The common name of the certificate with fingerprint '%1$s' does not match the requested endpoint's hostname '%2$s'", CATEGORY_ERROR, 6, SSLExceptionMessages.INVALID_COMMON_NAME),
     /**
      * <li>The root authority for the certificate is untrusted</li>
-     * <li>The root authority of the certificate with fingerprint '%1$s' is untrusted</li>
+     * <li>The root authority of the certificate with fingerprint '%1$s' for domain '%2$s' is untrusted.</li>
      */
-    UNTRUSTED_ROOT_AUTHORITY("The root authority of the certificate with fingerprint '%1$s' is untrusted'", CATEGORY_ERROR, 7, SSLExceptionMessages.UNTRUSTED_ROOT_AUTHORITY),
+    UNTRUSTED_ROOT_AUTHORITY("The root authority of the certificate with fingerprint '%1$s' for domain '%2$s' is untrusted.", CATEGORY_ERROR, 7, SSLExceptionMessages.UNTRUSTED_ROOT_AUTHORITY),
     /**
      * <li>The certificate is using a weak algorithm</li>
-     * <li>The certificate with fingerprint '%1$s' is using a weak algorithm.</li>
+     * <li>The certificate with fingerprint '%1$s' for domain '%2$s' is using a weak algorithm.</li>
      */
-    WEAK_ALGORITHM("The certificate with fingerprint '%1$s' is using a weak algorithm.", CATEGORY_ERROR, 8, SSLExceptionMessages.WEAK_ALGORITHM),
+    WEAK_ALGORITHM("The certificate with fingerprint '%1$s' for domain '%2$s' is using a weak algorithm.", CATEGORY_ERROR, 8, SSLExceptionMessages.WEAK_ALGORITHM),
     /**
-     * <li>The certificate with fingerprint '%1$s' was revoked.</li>
+     * <li>The certificate was revoked.</li>
+     * <li>The certificate with fingerprint '%1$s' for domain '%2$s' was revoked.</li>
      */
-    CERTIFICATE_REVOKED("The certificate with fingerprint '%1$s' was revoked.", CATEGORY_ERROR, 9, SSLExceptionMessages.CERTIFICATE_REVOKED),
+    CERTIFICATE_REVOKED("The certificate with fingerprint '%1$s' for domain '%2$s' was revoked.", CATEGORY_ERROR, 9, SSLExceptionMessages.CERTIFICATE_REVOKED),
     ;
 
     public static final String PREFIX = "SSL";

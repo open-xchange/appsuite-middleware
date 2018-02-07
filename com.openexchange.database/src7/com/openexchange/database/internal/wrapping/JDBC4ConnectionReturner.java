@@ -92,6 +92,9 @@ import com.openexchange.timer.TimerService;
  */
 public abstract class JDBC4ConnectionReturner implements Connection, StateAware, Heartbeat {
 
+    /** The logger constant */
+    static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(JDBC4ConnectionReturner.class);
+
     private static final class HeartBeatHelper {
 
         private final long timeoutMillis;
@@ -129,13 +132,14 @@ public abstract class JDBC4ConnectionReturner implements Connection, StateAware,
          * @param timer The timer service to use
          */
         public void startHeartbeat(TimerService timer) {
-            final long timeoutMillis = this.timeoutMillis > 0 ? this.timeoutMillis : 15000;
+            long timeoutMillis = this.timeoutMillis > 0 ? this.timeoutMillis : 15000;
+            final long maxIdleTime = timeoutMillis - 3000L;
             Runnable keepAliveTask = new Runnable() {
 
                 @Override
                 public void run() {
                     long idleTime = System.currentTimeMillis() - lastAccessed.get();
-                    if (idleTime > timeoutMillis) {
+                    if (idleTime > maxIdleTime) {
                         writeLock.lock();
                         try {
                             Statement statement = null;
@@ -143,10 +147,11 @@ public abstract class JDBC4ConnectionReturner implements Connection, StateAware,
                             try {
                                 statement = con.createStatement();
                                 rs = statement.executeQuery("SELECT 1 AS keep_alive_test");
-                                System.out.println("Performed \"SELECT 1 AS keep_alive_test\" to keep connection alive");
+                                LOGGER.debug("Performed \"SELECT 1 AS keep_alive_test\" to keep connection alive");
                                 while (rs.next()) {
                                     // Discard
                                 }
+                                lastAccessed.set(System.currentTimeMillis()); // Obviously...
                             } finally {
                                 Databases.closeSQLStuff(rs, statement);
                             }
@@ -158,7 +163,7 @@ public abstract class JDBC4ConnectionReturner implements Connection, StateAware,
                     }
                 }
             };
-            timerTask = timer.scheduleWithFixedDelay(keepAliveTask, timeoutMillis, timeoutMillis, TimeUnit.MILLISECONDS);
+            timerTask = timer.scheduleWithFixedDelay(keepAliveTask, timeoutMillis - 1000L, 2500L, TimeUnit.MILLISECONDS);
         }
 
         /**

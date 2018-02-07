@@ -49,22 +49,18 @@
 
 package com.openexchange.calendar.printing;
 
-import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.printing.blocks.WeekAndDayCalculator;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.calendar.RecurringResultInterface;
-import com.openexchange.groupware.calendar.RecurringResultsInterface;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -73,12 +69,13 @@ public class CPTool extends WeekAndDayCalculator {
 
     /**
      * Based on the selected template, this method determines new start and end dates to present exactly the block that the template needs.
+     * 
+     * @param params The {@link CPParameters}
      */
     public void calculateNewStartAndEnd(final CPParameters params) {
-        if (!isBlockTemplate(params))
-         {
+        if (!isBlockTemplate(params)) {
             return;
-        // TODO this calls for a strategy pattern later on when there is more than one
+            // TODO this calls for a strategy pattern later on when there is more than one
         }
 
         final Calendar cal = getCalendar();
@@ -100,6 +97,9 @@ public class CPTool extends WeekAndDayCalculator {
     /**
      * Checks whether the template given is one that prints a specific timeframe as a block, which might be different from the given start
      * and end date.
+     * 
+     * @param params The {@link CPParameters}
+     * @return <code>true</code> if the template given is one that prints a specific timeframe as a block, <code>false</code> otherwise
      */
     public boolean isBlockTemplate(final CPParameters params) {
         final String basic = "/[^/]+$";
@@ -110,106 +110,44 @@ public class CPTool extends WeekAndDayCalculator {
     }
 
     /**
-     * Sort a list of appointments by start date.
+     * Sort a list of events by start date.
+     * 
+     * @param events To sort
      */
-    public void sort(final List<CPAppointment> appointments) {
-        Collections.sort(appointments, new StartDateComparator());
+    public void sort(final List<CPEvent> events) {
+        Collections.sort(events, new StartDateComparator());
     }
 
     /**
-     * Expands all appointments in a list using their recurrence information for a certain given timeframe
+     * Check if the specific user declined the event
+     * 
+     * @param event The {@link Event}
+     * @param userId The user to check
+     * @return <code>true</code> if the user declined the event, <code>false</code> otherwise
      */
-    public List<CPAppointment> expandAppointements(final List<Appointment> compressedAppointments, final Date start, final Date end, final AppointmentSQLInterface appointmentSql, final CalendarCollectionService calendarTools, int userId) throws OXException, SQLException {
-        final List<CPAppointment> expandedAppointments = new LinkedList<CPAppointment>();
-        for (final Appointment appointment : compressedAppointments) {
-            final Appointment temp = appointmentSql.getObjectById(appointment.getObjectID(), appointment.getParentFolderID());
-            final List<Appointment> split = splitIntoSingleDays(temp);
-            for (final Appointment temp2 : split) {
-                expandedAppointments.addAll(expandRecurrence(temp2, start, end, calendarTools, userId));
-            }
-        }
-        return expandedAppointments;
-    }
-
-    public List<Appointment> splitIntoSingleDays(final Appointment appointment) {
-        final List<Appointment> appointments = new LinkedList<Appointment>();
-
-        if (!isOnDifferentDays(appointment.getStartDate(), appointment.getEndDate())) {
-            appointments.add(appointment);
-            return appointments;
-        }
-
-        final int duration = getMissingDaysInbetween(appointment.getStartDate(), appointment.getEndDate()).size() + 1;
-
-        final Calendar newStartCal = Calendar.getInstance();
-        newStartCal.setTime(appointment.getStartDate());
-        newStartCal.set(Calendar.HOUR_OF_DAY, 0);
-        newStartCal.set(Calendar.MINUTE, 0);
-        newStartCal.set(Calendar.SECOND, 0);
-        newStartCal.set(Calendar.MILLISECOND, 0);
-
-        final Calendar newEndCal = Calendar.getInstance();
-        newEndCal.setTime(appointment.getStartDate());
-        newEndCal.set(Calendar.HOUR_OF_DAY, 23);
-        newEndCal.set(Calendar.MINUTE, 59);
-        newEndCal.set(Calendar.SECOND, 59);
-        newEndCal.set(Calendar.MILLISECOND, 999);
-
-        final Appointment first = appointment.clone();
-        first.setEndDate(newEndCal.getTime());
-        appointments.add(first);
-
-        for (int i = 1; i < duration; i++) {
-            final Appointment middle = appointment.clone();
-            newStartCal.add(Calendar.DAY_OF_YEAR, 1);
-            newEndCal.add(Calendar.DAY_OF_YEAR, 1);
-            middle.setStartDate(newStartCal.getTime());
-            middle.setEndDate(newEndCal.getTime());
-            appointments.add(middle);
-        }
-
-        final Appointment last = appointment.clone();
-        newStartCal.add(Calendar.DAY_OF_YEAR, 1);
-        last.setStartDate(newStartCal.getTime());
-        appointments.add(last);
-
-        return appointments;
-    }
-
-    /**
-     * Takes an appointment and interprets its recurrence information to find all occurrences between start and end date.
-     */
-    public List<CPAppointment> expandRecurrence(final Appointment appointment, final Date start, final Date end, final CalendarCollectionService calendarTools, int userId) throws OXException {
-        if (hasDeclined(appointment, userId)) {
-            return Collections.<CPAppointment>emptyList();
-        }
-        final RecurringResultsInterface recurrences = calendarTools.calculateRecurring(appointment, start.getTime(), end.getTime(), 0);
-        final List<CPAppointment> all = new LinkedList<CPAppointment>();
-        if (recurrences == null) {
-            all.add(new CPAppointment(appointment));
-            return all;
-        }
-
-        for (int i = 0, length = recurrences.size(); i < length; i++) {
-            final CPAppointment temp = new CPAppointment();
-            temp.setTitle(appointment.getTitle());
-            final RecurringResultInterface recurringResult = recurrences.getRecurringResult(i);
-            temp.setStartDate(new Date(recurringResult.getStart()));
-            temp.setEndDate(new Date(recurringResult.getEnd()));
-            temp.setOriginal(appointment);
-            
-            all.add(temp);
-        }
-        return all;
-    }
-
-    public static boolean hasDeclined(Appointment appointment, int userId) {
-        UserParticipant[] users = appointment.getUsers();
-        for (UserParticipant userParticipant : users) {
-            if (userParticipant.getIdentifier() == userId && userParticipant.getConfirm() == Appointment.DECLINE) {
+    public static boolean hasDeclined(Event event, int userId) {
+        for (Attendee attendee : event.getAttendees()) {
+            if (attendee.getEntity() == userId && ParticipationStatus.DECLINED.getValue().equals(attendee.getPartStat().getValue())) {
                 return true;
             }
         }
         return false;
+    }
+
+    /**
+     * Converts {@link Event}s into {@link CPEvent}s
+     * 
+     * @param services The {@link ServiceLookup}
+     * @param events To convert
+     * @param cal The {@link CPCalendar}
+     * @param context The {@link Context}
+     * @return The {@link Event}s as {@link CPEvent}s
+     */
+    public List<CPEvent> toCPEvent(ServiceLookup services, List<Event> events, CPCalendar cal, Context context) {
+        List<CPEvent> retval = new LinkedList<>();
+        for (Event event : events) {
+            retval.add(new CPEvent(services, event, cal, context));
+        }
+        return retval;
     }
 }

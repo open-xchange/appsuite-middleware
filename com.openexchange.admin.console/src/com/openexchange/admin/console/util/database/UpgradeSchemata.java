@@ -73,7 +73,7 @@ import javax.management.remote.JMXServiceURL;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CLIOption;
-import com.openexchange.admin.console.util.UtilAbstraction;
+import com.openexchange.admin.console.ObjectNamingAbstraction;
 import com.openexchange.admin.exceptions.TargetDatabaseException;
 import com.openexchange.admin.rmi.OXUtilInterface;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -93,8 +93,9 @@ import com.openexchange.java.Strings;
  * {@link UpgradeSchemata}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since 7.10.0
  */
-public class UpgradeSchemata extends UtilAbstraction {
+public class UpgradeSchemata extends ObjectNamingAbstraction {
 
     private static final String PROMPT = "Type 'abort' to abort the upgrade process, or 'continue' to proceed ['abort'/'continue']:";
     private static final String ABORT = "abort";
@@ -235,8 +236,8 @@ public class UpgradeSchemata extends UtilAbstraction {
 
         // Sort arithmetically, that is by integer suffix of each database schema
         Comparator<Database> comparator = (o1, o2) -> {
-            Integer i1 = Integer.parseInt(o1.getScheme().substring(o1.getScheme().indexOf('_') + 1));
-            Integer i2 = Integer.parseInt(o2.getScheme().substring(o2.getScheme().indexOf('_') + 1));
+            Integer i1 = Integer.parseInt(o1.getScheme().substring(o1.getScheme().lastIndexOf('_') + 1));
+            Integer i2 = Integer.parseInt(o2.getScheme().substring(o2.getScheme().lastIndexOf('_') + 1));
             return i1.compareTo(i2);
         };
         Arrays.sort(databases, comparator);
@@ -277,7 +278,9 @@ public class UpgradeSchemata extends UtilAbstraction {
             }
         }
 
-        sb.setLength(sb.length() - 2);
+        if (!skippedSchemata.isEmpty()) {
+            sb.setLength(sb.length() - 2);
+        }
         System.out.println(sb.toString());
 
         return filtered;
@@ -350,17 +353,20 @@ public class UpgradeSchemata extends UtilAbstraction {
      * @param schemaName
      * @throws TargetDatabaseException
      * @throws StorageException
-     * @throws NoSuchObjectException
      * @throws MissingServiceException
      * @throws RemoteException
      * @throws InvalidCredentialsException
      * @throws InvalidDataException
      */
-    private void disableSchema(String schemaName) throws StorageException, NoSuchObjectException, MissingServiceException, RemoteException, InvalidCredentialsException, InvalidDataException, TargetDatabaseException {
-        System.out.print("Disabling schema '" + schemaName + "'...");
-        schemaMoveUtil.disableSchema(credentials, schemaName);
-        schemaMoveUtil.invalidateContexts(credentials, schemaName, true);
-        ok();
+    private void disableSchema(String schemaName) throws StorageException, MissingServiceException, RemoteException, InvalidCredentialsException, InvalidDataException, TargetDatabaseException {
+        try {
+            System.out.print("Disabling schema '" + schemaName + "'...");
+            schemaMoveUtil.disableSchema(credentials, schemaName);
+            schemaMoveUtil.invalidateContexts(credentials, schemaName, true);
+            ok();
+        } catch (NoSuchObjectException e) {
+            System.out.println("Schema " + schemaName + " not found. Skipping");
+        }
     }
 
     /**
@@ -377,7 +383,7 @@ public class UpgradeSchemata extends UtilAbstraction {
             // If the 'schema-name' is present it means that there is a continuation which implies
             // that a server was previously registered, thus simply use the already existing server.
             Server s = listServer[0];
-            if (!Strings.isEmpty(startFromSchema)) {
+            if (Strings.isNotEmpty(startFromSchema)) {
                 System.out.println("The server '" + s.getName() + "' with id '" + s.getId() + "' will be used to point the updated schemata after the update tasks complete.");
                 System.out.println(PROMPT);
                 prompt();
@@ -472,47 +478,73 @@ public class UpgradeSchemata extends UtilAbstraction {
         server.setName(serverName);
 
         startFromSchema = (String) parser.getOptionValue(schemaNameOption);
+        if (Strings.isNotEmpty(startFromSchema) && startFromSchema.lastIndexOf('_') < 0) {
+            System.err.println("Invalid/Malformed schema name: '" + startFromSchema + "'");
+            parser.printUsage();
+            System.exit(1);
+        }
 
         force = parser.hasOption(forceOption);
 
         String skippedSchemata = (String) parser.getOptionValue(skipOption);
         if (skippedSchemata != null) {
-            String[] split = skippedSchemata.split(",");
+            String[] split = Strings.splitByComma(",");
             for (String s : split) {
                 this.skippedSchemata.add(s);
             }
         }
 
+        // Parse the optional JMX host
+        jmxHost = parseHost(parser, jmxHostNameOption, "localhost");
         // Parse the optional JMX port
-        jmxPort = 9999;
-        if (parser.hasOption(jmxPortNameOption)) {
-            String val = (String) parser.getOptionValue(jmxPortNameOption);
-            if (null != val) {
-                try {
-                    jmxPort = Integer.parseInt(val.trim());
-                } catch (NumberFormatException e) {
-                    System.err.println("Port parameter is not a number: " + val);
-                    parser.printUsage();
-                    System.exit(1);
-                }
-                if (jmxPort < 1 || jmxPort > 65535) {
-                    System.err.println("Port parameter is out of range: " + val + ". Valid range is from 1 to 65535.");
-                    parser.printUsage();
-                    System.exit(1);
-                }
-            }
-        }
-
-        // Parser the optional JMX host
-        jmxHost = "localhost";
-        if (parser.hasOption(jmxHostNameOption)) {
-            String tmp = (String) parser.getOptionValue(jmxHostNameOption);
-            if (null != tmp) {
-                jmxHost = tmp.trim();
-            }
-        }
+        jmxPort = parsePort(parser, jmxPortNameOption, 9999);
 
         credentials = credentialsparsing(parser);
+    }
+
+    /**
+     * Parses the host from the specified {@link CLIOption}
+     * 
+     * @param parser The {@link AdminParser}
+     * @param option The {@link CLIOption}
+     * @param defaultValue The default value
+     * @return The hostname or the default value
+     */
+    private String parseHost(AdminParser parser, CLIOption option, String defaultValue) {
+        if (parser.hasOption(option)) {
+            String tmp = (String) parser.getOptionValue(option);
+            return Strings.isNotEmpty(tmp) ? tmp.trim() : defaultValue;
+        }
+        return defaultValue;
+    }
+
+    /**
+     * Parses the port from the specified {@link CLIOption}
+     * 
+     * @param parser The {@link AdminParser}
+     * @param option The {@link CLIOption}
+     * @param defaultValue The default value
+     * @return the port or the default value
+     */
+    private int parsePort(AdminParser parser, CLIOption option, int defaultValue) {
+        int port = defaultValue;
+        String value = (String) parser.getOptionValue(option);
+        if (Strings.isEmpty(value)) {
+            return port;
+        }
+        try {
+            port = Integer.parseInt(value.trim());
+        } catch (NumberFormatException e) {
+            System.err.println("Port parameter is not a number: " + value);
+            parser.printUsage();
+            System.exit(1);
+        }
+        if (port < 1 || port > 65535) {
+            System.err.println("Port parameter is out of range: " + value + ". Valid range is from 1 to 65535.");
+            parser.printUsage();
+            System.exit(1);
+        }
+        return port;
     }
 
     /**

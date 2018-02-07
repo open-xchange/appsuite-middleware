@@ -253,19 +253,25 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public void setFullNamesForMailAccount(int id, int[] indexes, String[] fullNames, int userId, int contextId) throws OXException {
-        delegate.setFullNamesForMailAccount(id, indexes, fullNames, userId, contextId);
-        invalidateMailAccount(id, userId, contextId);
+    public boolean setFullNamesForMailAccount(int id, int[] indexes, String[] fullNames, int userId, int contextId) throws OXException {
+        boolean modified = delegate.setFullNamesForMailAccount(id, indexes, fullNames, userId, contextId);
+        if (modified) {
+            invalidateMailAccount(id, userId, contextId);
+            postChangedDefaultFolders(id, indexes, fullNames, true, true, userId, contextId);
+        }
 
-        postChangedDefaultFolders(id, indexes, fullNames, true, true, userId, contextId);
+        return modified;
     }
 
     @Override
-    public void setNamesForMailAccount(int id, int[] indexes, String[] names, int userId, int contextId) throws OXException {
-        delegate.setNamesForMailAccount(id, indexes, names, userId, contextId);
-        invalidateMailAccount(id, userId, contextId);
+    public boolean setNamesForMailAccount(int id, int[] indexes, String[] names, int userId, int contextId) throws OXException {
+        boolean modified = delegate.setNamesForMailAccount(id, indexes, names, userId, contextId);
+        if (modified) {
+            invalidateMailAccount(id, userId, contextId);
+            postChangedDefaultFolders(id, indexes, names, false, true, userId, contextId);
+        }
 
-        postChangedDefaultFolders(id, indexes, names, false, true, userId, contextId);
+        return modified;
     }
 
     @Override
@@ -330,8 +336,8 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public boolean incrementFailedMailAuthCount(int accountId, int userId, int contextId) throws OXException {
-        boolean disabled = delegate.incrementFailedMailAuthCount(accountId, userId, contextId);
+    public boolean incrementFailedMailAuthCount(int accountId, int userId, int contextId, Exception optReason) throws OXException {
+        boolean disabled = delegate.incrementFailedMailAuthCount(accountId, userId, contextId, optReason);
         if (disabled) {
             invalidateMailAccount(accountId, userId, contextId);
         }
@@ -339,8 +345,8 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public boolean incrementFailedTransportAuthCount(int accountId, int userId, int contextId) throws OXException {
-        boolean disabled = delegate.incrementFailedTransportAuthCount(accountId, userId, contextId);
+    public boolean incrementFailedTransportAuthCount(int accountId, int userId, int contextId, Exception optReason) throws OXException {
+        boolean disabled = delegate.incrementFailedTransportAuthCount(accountId, userId, contextId, optReason);
         if (disabled) {
             invalidateMailAccount(accountId, userId, contextId);
         }

@@ -88,6 +88,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.ContentProvider;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
@@ -391,7 +392,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                      */
                     int priority = MailMessage.PRIORITY_NORMAL;
                     if (null != entry.getValue()) {
-                        priority = MimeMessageConverter.parseImportance(entry.getValue());
+                        priority = MimeMessageUtility.parseImportance(entry.getValue());
                         jsonObject.put(MailJSONField.PRIORITY.getKey(), priority);
                     }
                 } else if (MessageHeaders.HDR_X_PRIORITY.equalsIgnoreCase(headerName)) {
@@ -401,7 +402,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                          */
                         int priority = MailMessage.PRIORITY_NORMAL;
                         if (null != entry.getValue()) {
-                            priority = MimeMessageConverter.parsePriority(entry.getValue());
+                            priority = MimeMessageUtility.parsePriority(entry.getValue());
                         }
                         jsonObject.put(MailJSONField.PRIORITY.getKey(), priority);
                     }

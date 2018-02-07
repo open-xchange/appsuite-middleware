@@ -53,7 +53,6 @@ import static com.openexchange.imap.command.MailMessageFetchIMAPCommand.getFetch
 import static com.openexchange.imap.command.MailMessageFetchIMAPCommand.handleFetchRespone;
 import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
-import gnu.trove.set.TIntSet;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,6 +65,7 @@ import java.util.regex.Pattern;
 import javax.mail.FetchProfile;
 import javax.mail.Header;
 import javax.mail.MessagingException;
+import javax.mail.UIDFolder;
 import javax.mail.internet.InternetHeaders;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.ConfigurationService;
@@ -82,6 +82,7 @@ import com.openexchange.imap.threader.nntp.ThreadableImpl;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.log.LogProperties;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -91,6 +92,8 @@ import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPTextPreviewProvider;
+import com.sun.mail.imap.IMAPTextPreviewProvider.Mode;
 import com.sun.mail.imap.protocol.BODY;
 import com.sun.mail.imap.protocol.ENVELOPE;
 import com.sun.mail.imap.protocol.FetchResponse;
@@ -99,6 +102,7 @@ import com.sun.mail.imap.protocol.IMAPResponse;
 import com.sun.mail.imap.protocol.Item;
 import com.sun.mail.imap.protocol.RFC822DATA;
 import com.sun.mail.imap.protocol.UID;
+import gnu.trove.set.TIntSet;
 
 /**
  * {@link Threadables} - Utility class for {@code Threadable}.
@@ -162,7 +166,7 @@ public final class Threadables {
     public static Threadable applyThreaderTo(final Threadable threadable) {
         if (useCommonsNetThreader()) {
             ThreadableImpl threadableImpl = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable)));
-            if(threadableImpl!=null){
+            if (threadableImpl != null) {
                 return threadableImpl.getDelegatee();
             } else {
                 LOG.warn("Unable to use apache commom net threader. Falling back to default threader.");
@@ -204,8 +208,8 @@ public final class Threadables {
         Threadable threadable = getAllThreadablesFrom(imapFolder, lookAhead);
         if (sorted) {
             if (useCommonsNetThreader()) {
-                ThreadableImpl threadableImpl =  ((ThreadableImpl)new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable)));
-                if(threadableImpl!=null){
+                ThreadableImpl threadableImpl = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable)));
+                if (threadableImpl != null) {
                     threadable = threadableImpl.getDelegatee();
                 }
             } else {
@@ -264,11 +268,12 @@ public final class Threadables {
      * @param limit The max. number of messages or <code>-1</code>
      * @param fetchProfile The FETCH profile
      * @param serverInfo The IMAP server information
+     * @param mailConfig The mail configuration
      * @return The fetched <tt>MailMessage</tt>s
      * @throws MessagingException If an error occurs
      */
     @SuppressWarnings("unchecked")
-    public static List<MailMessage> getAllMailsFrom(final IMAPFolder imapFolder, final int limit, final FetchProfile fetchProfile, final IMAPServerInfo serverInfo) throws MessagingException {
+    public static List<MailMessage> getAllMailsFrom(final IMAPFolder imapFolder, final int limit, final FetchProfile fetchProfile, final IMAPServerInfo serverInfo, MailConfig mailConfig) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
@@ -283,7 +288,19 @@ public final class Threadables {
             public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
                 final String command;
                 final Response[] r;
+                final IMAPTextPreviewProvider textPreviewProvider = Services.optService(IMAPTextPreviewProvider.class);
+                final Mode textPreviewMode;
                 {
+                    if (fetchProfile.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
+                        textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.ONLY_IF_AVAILABLE;
+                    } else if (fetchProfile.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS)) {
+                        textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.REQUIRE;
+                    } else {
+                        textPreviewMode = null;
+                    }
+                    if (null != textPreviewMode) {
+                        fetchProfile.add(UIDFolder.FetchProfileItem.UID);
+                    }
                     StringBuilder sb = new StringBuilder(128).append("FETCH ");
                     if (1 == messageCount) {
                         sb.append("1");
@@ -314,13 +331,16 @@ public final class Threadables {
                         final String sReferences = "References";
                         for (int j = 0; j < len; j++) {
                             if (sFetch.equals(((IMAPResponse) r[j]).getKey())) {
-                                final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName, serverInfo.getAccountId());
+                                final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName, serverInfo.getAccountId(), mailConfig);
                                 final String references = message.getFirstHeader(sReferences);
                                 if (null == references) {
                                     final String inReplyTo = message.getFirstHeader(sInReplyTo);
                                     if (null != inReplyTo) {
                                         message.setHeader(sReferences, inReplyTo);
                                     }
+                                }
+                                if (null != textPreviewMode) {
+                                    message.setTextPreview(textPreviewProvider.getTextPreview(Long.parseLong(message.getMailId()), textPreviewMode));
                                 }
                                 mails.add(message);
                                 r[j] = null;
@@ -339,16 +359,10 @@ public final class Threadables {
                         return null;
                     }
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new BadCommandException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    throw new BadCommandException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                 } else if (response.isNO()) {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new CommandFailedException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    throw new CommandFailedException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                 } else {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     protocol.handleResult(response);
@@ -463,13 +477,7 @@ public final class Threadables {
                             final HeaderHandler refsHeaderHandler = handlers.get(sReferences);
                             for (int j = 0; j < len; j++) {
                                 if (sFetch.equals(((IMAPResponse) r[j]).getKey())) {
-                                    handleByEnvelope(
-                                        threadables,
-                                        fullName,
-                                        includeReferences,
-                                        sReferences,
-                                        refsHeaderHandler,
-                                        (FetchResponse) r[j]);
+                                    handleByEnvelope(threadables, fullName, includeReferences, sReferences, refsHeaderHandler, (FetchResponse) r[j]);
                                     r[j] = null;
                                 }
                             }
@@ -493,16 +501,10 @@ public final class Threadables {
                         return null;
                     }
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new BadCommandException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    throw new BadCommandException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                 } else if (response.isNO()) {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new CommandFailedException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    throw new CommandFailedException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                 } else {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     protocol.handleResult(response);

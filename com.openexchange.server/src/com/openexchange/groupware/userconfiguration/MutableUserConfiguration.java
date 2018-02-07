@@ -116,6 +116,7 @@ public class MutableUserConfiguration extends UserConfiguration {
      * @param enableWebDAVXML
      * @deprecated
      */
+    @Deprecated
     public void setWebDAVXML(final boolean enableWebDAVXML) {
         setPermission(enableWebDAVXML, WEBDAV_XML);
     }
@@ -247,6 +248,7 @@ public class MutableUserConfiguration extends UserConfiguration {
     /**
      * Sets if this user is able to user OLOX2.0.
      */
+    @Deprecated
     public void setOLOX20(final boolean olox20) {
         setPermission(olox20, OLOX20);
     }

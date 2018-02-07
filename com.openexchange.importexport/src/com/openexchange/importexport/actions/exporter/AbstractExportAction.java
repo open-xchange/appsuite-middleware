@@ -127,7 +127,7 @@ public abstract class AbstractExportAction implements AJAXActionService {
         return optionalParams;
     }
 
-    private String getExportFileName(ExportRequest req, String extension) throws OXException{
+    private String getExportFileName(ExportRequest req, String extension) {
         Map<String, List<String>> batchIds = req.getBatchIds();
         if (null == batchIds || batchIds.isEmpty()) {
             return getExporter().getFolderExportFileName(req.getSession(), req.getFolder(), extension);

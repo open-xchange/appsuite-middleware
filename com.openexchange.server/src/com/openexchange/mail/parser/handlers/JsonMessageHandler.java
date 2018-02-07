@@ -115,7 +115,6 @@ import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.ContentProvider;
 import com.openexchange.mail.parser.MailMessageHandler;
@@ -874,7 +873,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                      */
                     int priority = MailMessage.PRIORITY_NORMAL;
                     if (null != entry.getValue()) {
-                        priority = MimeMessageConverter.parseImportance(entry.getValue());
+                        priority = MimeMessageUtility.parseImportance(entry.getValue());
                         jsonObject.put(PRIORITY, priority);
                     }
                 } else if (MessageHeaders.HDR_X_PRIORITY.equalsIgnoreCase(headerName)) {
@@ -884,7 +883,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                          */
                         int priority = MailMessage.PRIORITY_NORMAL;
                         if (null != entry.getValue()) {
-                            priority = MimeMessageConverter.parsePriority(entry.getValue());
+                            priority = MimeMessageUtility.parsePriority(entry.getValue());
                         }
                         jsonObject.put(PRIORITY, priority);
                     }
@@ -1021,6 +1020,13 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
             throw x;
         }
+        String identifier = id;
+        /*
+         * Adjust DI if virtually inserted; e.g. MimeForward
+         */
+        if (isVirtual(contentType)) {
+            identifier = "0";
+        }
         if (textAppended) {
             /*
              * A text part has already been detected as message's body
@@ -1033,7 +1039,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                      */
                     if (textWasEmpty) {
                         if (usm.isDisplayHtmlInlineContent()) {
-                            JSONObject jsonObject = asDisplayHtml(id, contentType.getBaseType(), htmlContent, contentType.getCharsetParameter());
+                            JSONObject jsonObject = asDisplayHtml(identifier, contentType.getBaseType(), htmlContent, contentType.getCharsetParameter());
                             if (includePlainText) {
                                 try {
                                     String plainText = html2text(htmlContent);
@@ -1044,7 +1050,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                             }
                         } else {
                             try {
-                                asDisplayText(id, contentType.getBaseType(), htmlContent, fileName, false);
+                                asDisplayText(identifier, contentType.getBaseType(), htmlContent, fileName, false);
                                 getAttachmentListing().removeFirst();
                             } catch (RuntimeException e) {
                                 throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -1080,7 +1086,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                      */
                     if (attachHTMLAlternativePart) {
                         try {
-                            JSONObject attachment = asAttachment(id, contentType.getBaseType(), htmlContent.length(), fileName, null);
+                            JSONObject attachment = asAttachment(identifier, contentType.getBaseType(), htmlContent.length(), fileName, null);
                             attachment.put(VIRTUAL, true);
                         } catch (final JSONException e) {
                             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -1090,7 +1096,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     /*
                      * Return HTML content as-is
                      */
-                    asRawContent(id, contentType.getBaseType(), new HtmlSanitizeResult(htmlContent));
+                    asRawContent(identifier, contentType.getBaseType(), new HtmlSanitizeResult(htmlContent));
                 } else {
                     /*
                      * Discard
@@ -1123,7 +1129,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                  * Add HTML part as attachment
                  */
                 try {
-                    JSONObject attachment = asAttachment(id, contentType.getBaseType(), htmlContent.length(), fileName, null);
+                    JSONObject attachment = asAttachment(identifier, contentType.getBaseType(), htmlContent.length(), fileName, null);
                     attachment.put(VIRTUAL, true);
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -1144,7 +1150,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                          */
                         asRawContent(plainText.id, plainText.contentType, new HtmlSanitizeResult(plainText.content));
                     } else {
-                        JSONObject jsonObject = asDisplayHtml(id, contentType.getBaseType(), htmlContent, contentType.getCharsetParameter());
+                        JSONObject jsonObject = asDisplayHtml(identifier, contentType.getBaseType(), htmlContent, contentType.getCharsetParameter());
                         if (includePlainText) {
                             try {
                                 /*
@@ -1158,17 +1164,17 @@ public final class JsonMessageHandler implements MailMessageHandler {
                         }
                     }
                 } else {
-                    asDisplayText(id, contentType.getBaseType(), htmlContent, fileName, DisplayMode.DISPLAY.isIncluded(displayMode));
+                    asDisplayText(identifier, contentType.getBaseType(), htmlContent, fileName, DisplayMode.DISPLAY.isIncluded(displayMode));
                 }
             } else if (DisplayMode.RAW.equals(displayMode)) {
                 /*
                  * Return HTML content as-is
                  */
-                asRawContent(id, contentType.getBaseType(), new HtmlSanitizeResult(htmlContent));
+                asRawContent(identifier, contentType.getBaseType(), new HtmlSanitizeResult(htmlContent));
             } else {
                 try {
                     JSONObject jsonObject = new JSONObject(6);
-                    jsonObject.put(ID, id);
+                    jsonObject.put(ID, identifier);
                     jsonObject.put(CONTENT_TYPE, contentType.getBaseType());
                     jsonObject.put(SIZE, htmlContent.length());
                     jsonObject.put(DISPOSITION, Part.INLINE);

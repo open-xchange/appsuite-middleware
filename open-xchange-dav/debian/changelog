@@ -1,3 +1,15 @@
+open-xchange-dav (7.10.0-2) stable; urgency=medium
+
+  * Second preview for 7.10.0 release
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Fri, 02 Feb 2018 15:12:01 +0100
+
+open-xchange-dav (7.10.0-1) stable; urgency=medium
+
+  * First preview for 7.10.0 release
+
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Fri, 01 Dec 2017 18:01:24 +0100
+
 open-xchange-dav (7.10.0-0) unstable; urgency=medium
 
   * prepare for 7.10.0 release

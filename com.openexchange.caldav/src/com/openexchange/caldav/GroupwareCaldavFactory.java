@@ -50,7 +50,6 @@
 package com.openexchange.caldav;
 
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.caldav.resources.CalDAVRootCollection;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -62,8 +61,6 @@ import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.server.ServiceLookup;
@@ -83,12 +80,10 @@ import com.openexchange.webdav.protocol.WebdavResource;
  */
 public class GroupwareCaldavFactory extends DAVFactory {
 
-    private final AppointmentSqlFactoryService appointments;
     private final FolderService folders;
     private final ICalEmitter icalEmitter;
     private final ICalParser icalParser;
     private final UserService users;
-    private final CalendarCollectionService calendarUtils;
 
     /**
      * Initializes a new {@link GroupwareCaldavFactory}.
@@ -99,12 +94,10 @@ public class GroupwareCaldavFactory extends DAVFactory {
      */
     public GroupwareCaldavFactory(Protocol protocol, ServiceLookup services, SessionHolder sessionHolder) {
         super(protocol, services, sessionHolder);
-        this.appointments = services.getService(AppointmentSqlFactoryService.class);
         this.folders = services.getService(FolderService.class);
         this.icalEmitter = services.getService(ICalEmitter.class);
         this.icalParser = services.getService(ICalParser.class);
         this.users = services.getService(UserService.class);
-        this.calendarUtils = services.getService(CalendarCollectionService.class);
     }
 
     @Override
@@ -155,13 +148,6 @@ public class GroupwareCaldavFactory extends DAVFactory {
         return property.get();
     }
 
-
-    public AppointmentSQLInterface getAppointmentInterface() {
-        AppointmentSQLInterface appointmentSql = appointments.createAppointmentSql(getSessionObject());
-        appointmentSql.setIncludePrivateAppointments(true);
-        return appointmentSql;
-    }
-
     public TasksSQLInterface getTaskInterface() {
         return new TasksSQLImpl(getSession());
     }
@@ -176,10 +162,6 @@ public class GroupwareCaldavFactory extends DAVFactory {
 
     public ICalParser getIcalParser() {
         return icalParser;
-    }
-
-    public CalendarCollectionService getCalendarUtilities() {
-        return calendarUtils;
     }
 
     public User resolveUser(int userID) throws OXException {

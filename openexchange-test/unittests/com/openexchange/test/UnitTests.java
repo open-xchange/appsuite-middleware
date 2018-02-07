@@ -160,8 +160,6 @@ import org.junit.runners.Suite;
     // Slow Tests
     com.openexchange.webdav.protocol.ProtocolTestSuite.class,
     com.openexchange.webdav.action.ActionTestSuite.class,
-    com.openexchange.groupware.calendar.SlowCalendarTests.class,
-    com.openexchange.tools.file.FileStorageTest.class,
     // Pretty outdated since v6.18.0
     // com.openexchange.tools.file.FileStorageThreadTest.class,
     com.openexchange.tools.file.QuotaFileStorageTest.class,

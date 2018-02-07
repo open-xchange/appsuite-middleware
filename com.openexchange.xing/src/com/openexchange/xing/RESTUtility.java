@@ -438,8 +438,6 @@ public class RESTUtility {
                 throw new XingServerException(response, result);
             }
             throw new XingParseException("failed to parse: " + body);
-        } catch (final OutOfMemoryError e) {
-            throw new XingException(e);
         } finally {
             Streams.close(bin);
         }
@@ -591,8 +589,6 @@ public class RESTUtility {
             // Quite common for network going up & down or the request being
             // cancelled, so don't worry about logging this
             throw new XingIOException(e);
-        } catch (final OutOfMemoryError e) {
-            throw new XingException(e);
         }
     }
 

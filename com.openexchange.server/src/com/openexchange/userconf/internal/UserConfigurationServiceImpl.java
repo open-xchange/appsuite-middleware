@@ -54,6 +54,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.session.Session;
 import com.openexchange.userconf.UserConfigurationService;
 
 /**
@@ -73,6 +74,11 @@ public final class UserConfigurationServiceImpl implements UserConfigurationServ
     @Override
     public void clearStorage() throws OXException {
         UserConfigurationStorage.getInstance().clearStorage();
+    }
+
+    @Override
+    public UserConfiguration getUserConfiguration(Session session) throws OXException {
+        return UserConfigurationStorage.getInstance().getUserConfiguration(session);
     }
 
     @Override
