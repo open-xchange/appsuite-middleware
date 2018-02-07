@@ -83,7 +83,6 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.ReminderSQLInterface;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.calendar.api.CalendarCollection;
-import com.openexchange.calendar.api.TransactionallyCachingCalendar;
 import com.openexchange.calendar.cache.Attribute;
 import com.openexchange.calendar.cache.CalendarVolatileCache;
 import com.openexchange.calendar.cache.CalendarVolatileCache.CacheType;
@@ -93,7 +92,6 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
-import com.openexchange.exception.OXExceptions;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCallbacks;
@@ -129,6 +127,8 @@ import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.groupware.update.UpdateStatus;
+import com.openexchange.groupware.update.Updater;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Streams;
@@ -223,9 +223,9 @@ public class CalendarMySQL implements CalendarSqlImp {
         void fillStatement(PreparedStatement stmt, int pos, CalendarDataObject cdao) throws OXException, SQLException;
     }
 
-    private static final AtomicReference<AppointmentSqlFactoryService> FACTORY_REF = new AtomicReference<AppointmentSqlFactoryService>();
+    private static final AtomicReference<AppointmentSqlFactoryService> FACTORY_REF = new AtomicReference<>();
 
-    private static final AtomicReference<ServiceLookup> SERVICES_REF = new AtomicReference<ServiceLookup>();
+    private static final AtomicReference<ServiceLookup> SERVICES_REF = new AtomicReference<>();
 
     public static void setApppointmentSqlFactory(final AppointmentSqlFactoryService factory) {
         CalendarMySQL.FACTORY_REF.set(factory);
@@ -234,7 +234,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     private static final Map<Integer, StatementFiller> STATEMENT_FILLERS;
 
     static {
-        STATEMENT_FILLERS = new HashMap<Integer, StatementFiller>();
+        STATEMENT_FILLERS = new HashMap<>();
         STATEMENT_FILLERS.put(Integer.valueOf(CalendarObject.TITLE), new StatementFiller() {
 
             @Override
@@ -616,10 +616,10 @@ public class CalendarMySQL implements CalendarSqlImp {
                     lock.unlock();
                 }
             }
-            return new SearchIteratorAdapter<List<Integer>>(list.iterator(), list.size());
+            return new SearchIteratorAdapter<>(list.iterator(), list.size());
         } catch (final Exception e) {
             final List<List<Integer>> list = getAllPrivateAppointmentAndFolderIdsForUser0(c, id, readcon);
-            return new SearchIteratorAdapter<List<Integer>>(list.iterator(), list.size());
+            return new SearchIteratorAdapter<>(list.iterator(), list.size());
         }
     }
 
@@ -634,7 +634,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             if (!rs.next()) {
                 return Collections.emptyList();
             }
-            final List<List<Integer>> list = new LinkedList<List<Integer>>();
+            final List<List<Integer>> list = new LinkedList<>();
             int object_id = 0;
             int pfid = 0;
             int uid = 0;
@@ -643,7 +643,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 pfid = rs.getInt(2);
                 uid = rs.getInt(3);
                 if (!rs.wasNull()) {
-                    final List<Integer> ints = new ArrayList<Integer>(3);
+                    final List<Integer> ints = new ArrayList<>(3);
                     ints.add(Integer.valueOf(object_id));
                     ints.add(Integer.valueOf(pfid));
                     ints.add(Integer.valueOf(uid));
@@ -717,7 +717,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             if (!rs.next()) {
                 return SearchIteratorAdapter.emptyIterator();
             }
-            final List<List<Integer>> list = new LinkedList<List<Integer>>();
+            final List<List<Integer>> list = new LinkedList<>();
             int object_id = 0;
             int pfid = 0;
             int uid = 0;
@@ -726,14 +726,14 @@ public class CalendarMySQL implements CalendarSqlImp {
                 pfid = rs.getInt(2);
                 uid = rs.getInt(3);
                 if (!rs.wasNull()) {
-                    final List<Integer> ints = new ArrayList<Integer>(3);
+                    final List<Integer> ints = new ArrayList<>(3);
                     ints.add(Integer.valueOf(object_id));
                     ints.add(Integer.valueOf(pfid));
                     ints.add(Integer.valueOf(uid));
                     list.add(ints);
                 }
             } while (rs.next());
-            return new SearchIteratorAdapter<List<Integer>>(list.iterator(), list.size());
+            return new SearchIteratorAdapter<>(list.iterator(), list.size());
         } finally {
             DBUtils.closeSQLStuff(rs, pst);
         }
@@ -1406,7 +1406,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public PreparedStatement getSearchStatement(final int uid, final AppointmentSearchObject searchObj, final CalendarFolderObject cfo, final OXFolderAccess folderAccess, final String columns, final int orderBy, final Order orderDir, int limit, final Context ctx, final Connection readcon) throws SQLException, OXException {
-        List<Object> searchParameters = new ArrayList<Object>();
+        List<Object> searchParameters = new ArrayList<>();
         Integer contextID = Integer.valueOf(ctx.getContextId());
         final StringBuilder sb = new StringBuilder(512);
         sb.append("SELECT DISTINCT ");
@@ -1749,6 +1749,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final CalendarDataObject[] insertAppointment(final CalendarDataObject cdao, final Connection writecon, final Session so) throws DataTruncation, SQLException, OXException, OXException {
+        checkNotReadOnly(so);
         return insertAppointment0(cdao, writecon, so, true);
     }
 
@@ -1776,6 +1777,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
 
     private final CalendarDataObject[] insertAppointment0(final CalendarDataObject cdao, final Connection writecon, final Session so, final boolean notify) throws DataTruncation, SQLException, OXException, OXException {
+        checkNotReadOnly(so);
         checkQuota(so, writecon);
 
         int i = 1;
@@ -2234,19 +2236,19 @@ public class CalendarMySQL implements CalendarSqlImp {
         final TIntObjectMap<List<CalendarDataObject>> map;
         {
             final int size = list.size();
-            map = new TIntObjectHashMap<List<CalendarDataObject>>(size);
+            map = new TIntObjectHashMap<>(size);
             for (int i = 0; i < size; i++) {
                 final CalendarDataObject cdo = list.get(i);
                 List<CalendarDataObject> l = map.get(cdo.getObjectID());
                 if (null == l) {
-                    l = new LinkedList<CalendarDataObject>();
+                    l = new LinkedList<>();
                     map.put(cdo.getObjectID(), l);
                 }
                 l.add(cdo);
             }
         }
 
-        final List<PrgDateRight> rights = new LinkedList<PrgDateRight>();
+        final List<PrgDateRight> rights = new LinkedList<>();
         {
             final String[] ids = Strings.splitByComma(Strings.unparenthize(sqlin));
             final int length = ids.length;
@@ -2427,19 +2429,19 @@ public class CalendarMySQL implements CalendarSqlImp {
         final TIntObjectMap<List<CalendarDataObject>> map; // See http://b010.blogspot.de/2009/05/speed-comparison-of-1-javas-built-in.html
         {
             final int size = list.size();
-            map = new TIntObjectHashMap<List<CalendarDataObject>>(size);
+            map = new TIntObjectHashMap<>(size);
             for (int i = 0; i < size; i++) {
                 final CalendarDataObject cdo = list.get(i);
                 List<CalendarDataObject> l = map.get(cdo.getObjectID());
                 if (null == l) {
-                    l = new ArrayList<CalendarDataObject>();
+                    l = new ArrayList<>();
                     map.put(cdo.getObjectID(), l);
                 }
                 l.add(cdo);
             }
         }
 
-        final List<PrgDatesMember> members = new LinkedList<PrgDatesMember>();
+        final List<PrgDatesMember> members = new LinkedList<>();
         {
             final String[] ids = Strings.splitByComma(Strings.unparenthize(sqlin));
             final int length = ids.length;
@@ -2714,6 +2716,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final CalendarDataObject[] updateAppointment(final CalendarDataObject cdao, final CalendarDataObject edao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, OXException {
+        checkNotReadOnly(so);
         return updateAppointment(cdao, edao, writecon, so, ctx, inFolder, clientLastModified, true, false);
     }
 
@@ -2836,7 +2839,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             COLLECTION.purgeExceptionFieldsFromObject(cdao);
         } else if (rec_action == CalendarCollectionService.RECURRING_EXCEPTION_DELETE_EXISTING) {
             final Date[] deleteExceptions = cdao.getDeleteException();
-            final List<Integer> deleteExceptionPositions = new ArrayList<Integer>();
+            final List<Integer> deleteExceptionPositions = new ArrayList<>();
             {
                 /*
                  * Get corresponding positions in recurring appointment whose change exception shall be turned to a delete exception
@@ -2851,7 +2854,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 final List<Long> dates;
                 {
                     final Object positions[] = deleteExceptionPositions.toArray();
-                    dates = new ArrayList<Long>(positions.length);
+                    dates = new ArrayList<>(positions.length);
                     final List<Integer> objectIDs = getDeletedExceptionList(
                         null,
                         ctx,
@@ -2897,7 +2900,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     } else {
                         users = COLLECTION.checkAndModifyAlarm(cdao, toSet(edao.getUsers()), so.getUserId(), toSet(edao.getUsers()));
                     }
-                    clone.setUsers(new ArrayList<UserParticipant>(users));
+                    clone.setUsers(new ArrayList<>(users));
                     clone.setAlarm(cdao.getAlarm());
                     cdao.removeAlarm();
                 }
@@ -3115,7 +3118,7 @@ public class CalendarMySQL implements CalendarSqlImp {
              */
             ReminderSQLInterface reminderInterface = ReminderHandler.getInstance();
 
-            List<ReminderObject> toUpdate = new LinkedList<ReminderObject>();
+            List<ReminderObject> toUpdate = new LinkedList<>();
             {
                 SearchIterator<?> it = reminderInterface.listReminder(Types.APPOINTMENT, cdao.getObjectID(), ctx);
                 try {
@@ -3281,22 +3284,22 @@ public class CalendarMySQL implements CalendarSqlImp {
                 time_change,
                 cdao);
             if (p[0] != null) {
-                new_userparticipants = new HashSet<UserParticipant>(Arrays.asList(p[0].getUsers()));
+                new_userparticipants = new HashSet<>(Arrays.asList(p[0].getUsers()));
                 if (new_userparticipants != null) {
                     check_up += new_userparticipants.size();
                 }
             }
             if (p[1] != null) {
-                modified_userparticipants = new HashSet<UserParticipant>(Arrays.asList(p[1].getUsers()));
+                modified_userparticipants = new HashSet<>(Arrays.asList(p[1].getUsers()));
             }
             UserParticipant[] tmp = CalendarOperation.getDeletedUserParticipants(old_users, users, uid);
-            deleted_userparticipants = new HashSet<UserParticipant>(Arrays.asList(tmp));
+            deleted_userparticipants = new HashSet<>(Arrays.asList(tmp));
             if (deleted_userparticipants != null) {
                 check_up -= deleted_userparticipants.size();
             }
         }
         final boolean onlyAlarmChange = modified_userparticipants == null;
-        modified_userparticipants = COLLECTION.checkAndModifyAlarm(cdao, modified_userparticipants, uid, new HashSet<UserParticipant>(Arrays.asList(edao.getUsers())));
+        modified_userparticipants = COLLECTION.checkAndModifyAlarm(cdao, modified_userparticipants, uid, new HashSet<>(Arrays.asList(edao.getUsers())));
 
         if (check_up < 1) {
             throw OXCalendarExceptionCodes.UPDATE_WITHOUT_PARTICIPANTS.create();
@@ -4030,7 +4033,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         if (array.length == 0) {
             return Collections.<T>emptySet();
         }
-        return new HashSet<T>(Arrays.asList(array));
+        return new HashSet<>(Arrays.asList(array));
     }
 
     private void prepareConfirmation(final CalendarDataObject edao, final UserParticipant modifiedUserParticipant, final PreparedStatement pu) throws SQLException {
@@ -4080,7 +4083,7 @@ public class CalendarMySQL implements CalendarSqlImp {
      * @return All identifiers of external participants as a {@link Set}.
      */
     private static Set<Integer> createExternalIdentifierSet(final Participant[] participants) {
-        final Set<Integer> retval = new HashSet<Integer>(participants.length >> 1);
+        final Set<Integer> retval = new HashSet<>(participants.length >> 1);
         for (Participant participant : participants) {
             if (participant.getType() == Participant.EXTERNAL_USER && participant.getIdentifier() != 0) {
                 retval.add(Integer.valueOf(participant.getIdentifier()));
@@ -4095,6 +4098,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final Date setUserConfirmation(final int oid, final int folderId, final int uid, final int confirm, final String message, final Session so, final Context ctx) throws OXException {
+        checkNotReadOnly(so);
         checkConfirmPermission(folderId, uid, so, ctx, false);
         Connection writecon = null;
         PreparedStatement pu = null;
@@ -4191,6 +4195,7 @@ public class CalendarMySQL implements CalendarSqlImp {
      */
     @Override
     public Date setExternalConfirmation(final int oid, final int folderId, final String mail, final int confirm, final String message, final Session so, final Context ctx) throws OXException {
+        checkNotReadOnly(so);
         checkConfirmPermission(folderId, -1, so, ctx, true);
 
         final String insert = "INSERT INTO dateExternal (confirm, reason, objectId, cid, mailAddress) VALUES (?, ?, ?, ?, ?)"; // this is a
@@ -4291,6 +4296,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final long attachmentAction(final int folderId, final int oid, final int uid, final Session session, final Context c, final int numberOfAttachments) throws OXException {
+        checkNotReadOnly(session);
         int changes;
         PreparedStatement pst = null;
         int amount = 0;
@@ -4656,7 +4662,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 stmt.setInt(1, cid);
                 stmt.setInt(2, recurrenceId);
                 rs = stmt.executeQuery();
-                objectIDs = new HashSet<Integer>(8);
+                objectIDs = new HashSet<>(8);
                 while (rs.next()) {
                     objectIDs.add(Integer.valueOf(rs.getInt(1)));
                 }
@@ -4792,11 +4798,13 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final void deleteAppointment(final int uid, final CalendarDataObject cdao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified) throws SQLException, OXException {
+        checkNotReadOnly(so);
         deleteAppointment(uid, cdao, writecon, so, ctx, inFolder, clientLastModified, true);
     }
 
     @Override
     public final void deleteAppointment(final int uid, final CalendarDataObject cdao, final Connection writecon, final Session so, final Context ctx, final int inFolder, final java.util.Date clientLastModified, final boolean checkPermissions) throws SQLException, OXException {
+        checkNotReadOnly(so);
         final Connection readcon = DBPool.pickup(ctx);
         final CalendarDataObject edao;
         PreparedStatement prep = null;
@@ -4925,6 +4933,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public boolean deleteAppointmentsInFolder(final Session so, final Context ctx, final ResultSet rs, final Connection readcon, final Connection writecon, final int foldertype, final int fid) throws SQLException, OXException {
+        checkNotReadOnly(so);
         boolean modified = false;
 
         while (rs.next()) {
@@ -5622,7 +5631,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 rcon = DBPool.pickup(c);
                 close_read = true;
             }
-            al = new ArrayList<Integer>(8);
+            al = new ArrayList<>(8);
             prep = getPreparedStatement(rcon, SQL_GET_EXC_LIST);
             int pos = 1;
             prep.setInt(pos++, rec_id);
@@ -5665,7 +5674,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                 rcon = DBPool.pickup(c);
                 close_read = true;
             }
-            al = new ArrayList<Integer>(8);
+            al = new ArrayList<>(8);
             final StringBuilder query = new StringBuilder(128);
             query.append("select intfield01, field08 FROM prg_dates pd WHERE intfield02 = ");
             query.append(rec_id);
@@ -5675,7 +5684,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             query.append(sqlin);
             prep = getPreparedStatement(rcon, query.toString());
             rs = getResultSet(prep);
-            final List<Long> longs = new ArrayList<Long>();
+            final List<Long> longs = new ArrayList<>();
             while (rs.next()) {
                 al.add(Integer.valueOf(rs.getInt(1)));
                 longs.add(Long.valueOf(rs.getString(2)));
@@ -5748,7 +5757,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             new EQUALS(columnName, PLACEHOLDER).AND(new EQUALS("cid", PLACEHOLDER)).AND(
                 new OR(new ISNULL("intfield02"), new EQUALS(new Column("intfield01"), new Column("intfield02")))));
 
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         params.add(value);
         params.add(ctx.getContextId());
 
@@ -5786,7 +5795,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         final SELECT s = new SELECT("pfid").FROM("prg_dates_members").WHERE(
             new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("object_id", PLACEHOLDER).AND(new EQUALS("member_uid", PLACEHOLDER))));
 
-        final List<Object> params = new ArrayList<Object>();
+        final List<Object> params = new ArrayList<>();
         params.add(ctx.getContextId());
         params.add(objectId);
         params.add(session.getUserId());
@@ -5825,7 +5834,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     int countAppointments(Connection connection, Session session) throws OXException {
         SELECT select = new SELECT(new COUNT(ASTERISK)).FROM("prg_dates").WHERE(new EQUALS("cid", PLACEHOLDER));
-        List<Object> params = new ArrayList<Object>();
+        List<Object> params = new ArrayList<>();
         params.add(session.getContextId());
 
         PreparedStatement stmt = null;
@@ -5850,7 +5859,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         Context ctx = Tools.getContext(session);
 
         SELECT select = new SELECT(new COUNT(ASTERISK));
-        List<Object> values = new ArrayList<Object>();
+        List<Object> values = new ArrayList<>();
         values.add(ctx.getContextId());
         values.add(folderId);
         if (folderType == FolderObject.PUBLIC) {
@@ -5899,6 +5908,21 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     public static void setServiceLookup(ServiceLookup serviceLookup) {
         CalendarMySQL.SERVICES_REF.set(serviceLookup);
+    }
+
+    /**
+     * Checks that the calendar data in the context is not configured to be in an <i>read-only</i> mode or not.
+     * <p/>
+     * If so, an appropriate exception is thrown.
+     *
+     * @param session The session of the user trying to write calendar data
+     * @throws {@link OXCalendarExceptionCodes#CALENDAR_MAINTENANCE}
+     */
+    private void checkNotReadOnly(Session session) throws OXException {
+        UpdateStatus updateStatus = Updater.getInstance().getStatus(session.getContextId());
+        if (updateStatus.isExecutedSuccessfully("com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask")) {
+            throw OXCalendarExceptionCodes.CALENDAR_MAINTENANCE.create();
+        }
     }
 
     private static final class PrgDatesMember implements Comparable<PrgDatesMember> {

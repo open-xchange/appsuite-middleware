@@ -53,19 +53,21 @@ import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.math.LongRange;
 import org.apache.commons.lang.math.NumberRange;
 import org.apache.commons.lang.math.Range;
 import org.apache.commons.validator.routines.InetAddressValidator;
 import com.googlecode.ipv6.IPv6Address;
 import com.googlecode.ipv6.IPv6AddressRange;
-import com.openexchange.java.Autoboxing;
 import com.openexchange.java.IPAddressUtil;
 import edazdarevic.commons.net.CIDRUtils;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.openexchange.java.Strings;
 
 /**
  * {@link IPRange} - An IP range of either IPv4 or IPv6 addresses.
@@ -75,129 +77,6 @@ import edazdarevic.commons.net.CIDRUtils;
  */
 public class IPRange {
 
-    private final Map<String, Boolean> cache;
-    private final Range ipv4Range;
-    private final IPv6AddressRange ipv6Range;
-
-    /**
-     * Initializes a new {@link IPRange}.
-     * 
-     * @param ipv4Range The IPv4 address range
-     * @param ipv6Range The IPv6 address range
-     */
-    public IPRange(final Range ipv4Range, final Range ipv6Range) {
-        super();
-        this.ipv4Range = ipv4Range;
-        if (ipv6Range != null) {
-            IPv6AddressRange v6Range = IPv6AddressRange.fromFirstAndLast(IPv6Address.fromBigInteger((BigInteger) ipv6Range.getMinimumNumber()), IPv6Address.fromBigInteger((BigInteger) ipv6Range.getMaximumNumber()));
-            this.ipv6Range = v6Range;
-        } else {
-            this.ipv6Range = null;
-        }
-        cache = new ConcurrentHashMap<String, Boolean>(512, 0.9f, 1);
-    }
-
-    /**
-     * Checks if specified IP address is covered by configured IP range.
-     *
-     * @param ipAddress The IP address to check
-     * @return <code>true</code> if contained; otherwise <code>false</code>
-     */
-    public boolean contains(String ipAddress) {
-        // Check for cached entry
-        {
-            Boolean cached = cache.get(ipAddress);
-            if (null != cached) {
-                return cached.booleanValue();
-            }
-        }
-
-        // Calculate...
-        byte[] octets = IPAddressUtil.textToNumericFormatV4(ipAddress);
-        if (null != octets) {
-            /*
-             * IPv4
-             */
-            boolean ret = null != ipv4Range && ipv4Range.containsLong(ipToLong(octets));
-            cache.put(ipAddress, Boolean.valueOf(ret));
-            return ret;
-        }
-        return containsIPv6(ipAddress);
-    }
-
-    /**
-     * Checks if specified IPv4 octets are covered by configured IP range.
-     *
-     * @param octets The IPv4 octets to check
-     * @param ipAddress The octets' IPv4 string representation; might be <code>null</code>
-     * @return <code>true</code> if contained; otherwise <code>false</code>
-     */
-    public boolean containsIPv4(byte[] octets, String ipAddress) {
-        // Check for cached entry
-        if (null != ipAddress) {
-            Boolean cached = cache.get(ipAddress);
-            if (null != cached) {
-                return cached.booleanValue();
-            }
-        }
-
-        if (null != octets) {
-            boolean ret = null != ipv4Range && ipv4Range.containsLong(ipToLong(octets));
-            if (null != ipAddress) {
-                cache.put(ipAddress, Boolean.valueOf(ret));
-            }
-            return ret;
-        }
-        return false;
-    }
-
-    /**
-     * Checks if specified IPv6 octets are covered by configured IP range.
-     *
-     * @param octets The IPv6 octets to check
-     * @param ipAddress The octets' IPv6 string representation; might be <code>null</code>
-     * @return <code>true</code> if contained; otherwise <code>false</code>
-     */
-    public boolean containsIPv6(byte[] octets, String ipAddress) {
-        return contains(ipAddress);
-    }
-
-    public boolean containsIPv6(String ipAddress) {
-        if (null != ipAddress) {
-            Boolean cached = cache.get(ipAddress);
-            if (null != cached) {
-                return cached.booleanValue();
-            }
-        }
-        IPv6Address fromString = IPv6Address.fromString(ipAddress);
-        boolean ret = null != ipv6Range && ipv6Range.contains(fromString);
-        if (null != ipAddress) {
-            cache.put(ipAddress, Boolean.valueOf(ret));
-        }
-        return ret;
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder();
-        if (null != ipv4Range) {
-            for (final byte b : longToIP(ipv4Range.getMinimumLong())) {
-                sb.append(b < 0 ? 256 + b : b);
-                sb.append('.');
-            }
-            sb.setCharAt(sb.length() - 1, '-');
-            for (final byte b : longToIP(ipv4Range.getMaximumLong())) {
-                sb.append(b < 0 ? 256 + b : b);
-                sb.append('.');
-            }
-            sb.setLength(sb.length() - 1);
-        }
-        if (null != ipv6Range) {
-            sb.append(ipv6Range.toString());
-        }
-        return sb.toString();
-    }
-
     /**
      * Parses specified string to an IP range.
      *
@@ -206,7 +85,7 @@ public class IPRange {
      * @throws IllegalArgumentException If parsing fails
      */
     public static IPRange parseRange(final String string) {
-        if (com.openexchange.java.Strings.isEmpty(string)) {
+        if (Strings.isEmpty(string)) {
             return null;
         }
         if (string.indexOf('-') > 0) {  // Range with '-'
@@ -283,6 +162,183 @@ public class IPRange {
             value >>= 8;
         }
         Collections.reverse(retval);
-        return Autoboxing.B2b(retval);
+        return B2b(retval);
     }
+
+    private static byte[] B2b(final Collection<Byte> byteCollection) {
+        byte[] byteArray = new byte[byteCollection.size()];
+        int pos = 0;
+        for (final Byte b : byteCollection) {
+            if (null != b) {
+                byteArray[pos++] = b.byteValue();
+            }
+        }
+        if (pos != byteArray.length) {
+            final byte[] tmpArray = new byte[pos];
+            System.arraycopy(byteArray, 0, tmpArray, 0, pos);
+            byteArray = tmpArray;
+        }
+        return byteArray;
+    }
+
+    /** The {@link #ipToLong(byte[]) ipToLong()} result for localhost IP address <code>"127.0.0.1"</code> */
+    private static final long LONG_IPv4_LOCALHOST = 2130706433L;
+
+    // ---------------------------------------------------------------------------------------------------------------------------
+
+    private final Cache<String, Boolean> cache;
+    private final Range ipv4Range;
+    private final IPv6AddressRange ipv6Range;
+
+    /**
+     * Initializes a new {@link IPRange}. Use {@link IPRange#parseRange(String)} to get an instance
+     *
+     * @param ipv4Range The IPv4 address range
+     * @param ipv6Range The IPv6 address range
+     */
+    private IPRange(final Range ipv4Range, final Range ipv6Range) {
+        super();
+        this.ipv4Range = ipv4Range;
+        this.ipv6Range = ipv6Range == null ? null : IPv6AddressRange.fromFirstAndLast(IPv6Address.fromBigInteger((BigInteger) ipv6Range.getMinimumNumber()), IPv6Address.fromBigInteger((BigInteger) ipv6Range.getMaximumNumber()));
+        this.cache = CacheBuilder.newBuilder().initialCapacity(512).maximumSize(65536).expireAfterAccess(4, TimeUnit.HOURS).build();
+    }
+
+    /**
+     * Checks if specified IP address is covered by configured IP range.
+     *
+     * @param ipAddress The IP address to check
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    public boolean contains(String ipAddress) {
+        // Check for cached entry
+        {
+            Boolean cached = cache.getIfPresent(ipAddress);
+            if (null != cached) {
+                return cached.booleanValue();
+            }
+        }
+
+        // Calculate...
+        byte[] octets = IPAddressUtil.textToNumericFormatV4(ipAddress);
+        if (null != octets) {
+            /*
+             * IPv4
+             */
+            boolean ret = null != this.ipv4Range && this.ipv4Range.containsLong(ipToLong(octets));
+            this.cache.put(ipAddress, Boolean.valueOf(ret));
+            return ret;
+        }
+        return containsIPv6(ipAddress);
+    }
+
+    /**
+     * Checks if specified IPv4 octets are covered by configured IP range.
+     *
+     * @param octets The IPv4 octets to check
+     * @param ipAddress The octets' IPv4 string representation; might be <code>null</code>
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    public boolean containsIPv4(byte[] octets, String ipAddress) {
+        // Check for cached entry
+        if (null != ipAddress) {
+            Boolean cached = this.cache.getIfPresent(ipAddress);
+            if (null != cached) {
+                return cached.booleanValue();
+            }
+        }
+
+        if (null != octets) {
+            long longValue = ipToLong(octets);
+            if (longValue == 0) {
+                // All IPv4; consider as contained
+                this.cache.put(ipAddress, Boolean.TRUE);
+                return true;
+            }
+            boolean ret = null != this.ipv4Range && this.ipv4Range.containsLong(longValue);
+            if (null != ipAddress) {
+                this.cache.put(ipAddress, Boolean.valueOf(ret));
+            }
+            return ret;
+        }
+        return false;
+    }
+
+    /**
+     * Checks if specified IPv6 octets are covered by configured IP range.
+     *
+     * @param octets The IPv6 octets to check
+     * @param ipAddress The octets' IPv6 string representation; might be <code>null</code>
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    public boolean containsIPv6(byte[] octets, String ipAddress) {
+        if (null != ipAddress) {
+            Boolean cached = this.cache.getIfPresent(ipAddress);
+            if (null != cached) {
+                return cached.booleanValue();
+            }
+        }
+        IPv6Address v6Address = null == octets ? IPv6Address.fromString(ipAddress) : IPv6Address.fromByteArray(octets);
+        if (v6Address.getHighBits() == 0) {
+            if (v6Address.getLowBits() == 0) {
+                // All IPv6; consider as contained
+                this.cache.put(ipAddress, Boolean.TRUE);
+                return true;
+            }
+            if (v6Address.getLowBits() == 1) {
+                // Localhost IPv6; consider as contained
+                if (null != this.ipv4Range && this.ipv4Range.containsLong(LONG_IPv4_LOCALHOST)) {
+                    this.cache.put(ipAddress, Boolean.TRUE);
+                    return true;
+                }
+                return checkAgainstIPv6Range(v6Address, ipAddress);
+            }
+        }
+        return checkAgainstIPv6Range(v6Address, ipAddress);
+    }
+
+    private boolean checkAgainstIPv6Range(IPv6Address v6Address, String ipAddress) {
+        boolean ret = null != this.ipv6Range && this.ipv6Range.contains(v6Address);
+        if (null != ipAddress) {
+            this.cache.put(ipAddress, Boolean.valueOf(ret));
+        }
+        return ret;
+    }
+
+    public boolean containsIPv6(String ipAddress) {
+        if (null != ipAddress) {
+            Boolean cached = this.cache.getIfPresent(ipAddress);
+            if (null != cached) {
+                return cached.booleanValue();
+            }
+        }
+        IPv6Address v6Address = IPv6Address.fromString(ipAddress);
+        boolean ret = null != this.ipv6Range && this.ipv6Range.contains(v6Address);
+        if (null != ipAddress) {
+            this.cache.put(ipAddress, Boolean.valueOf(ret));
+        }
+        return ret;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        if (null != this.ipv4Range) {
+            for (final byte b : longToIP(this.ipv4Range.getMinimumLong())) {
+                sb.append(b < 0 ? 256 + b : b);
+                sb.append('.');
+            }
+            sb.setCharAt(sb.length() - 1, '-');
+            for (final byte b : longToIP(this.ipv4Range.getMaximumLong())) {
+                sb.append(b < 0 ? 256 + b : b);
+                sb.append('.');
+            }
+            sb.setLength(sb.length() - 1);
+        }
+
+        if (null != this.ipv6Range) {
+            sb.append(this.ipv6Range.toString());
+        }
+        return sb.toString();
+    }
+
 }
