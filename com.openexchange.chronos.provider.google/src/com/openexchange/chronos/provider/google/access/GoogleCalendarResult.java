@@ -409,7 +409,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
      * @return true if the event is a delete exception, false otherwise.
      */
     private boolean isDeleteException(Event updated) {
-        return updated.getRecurrenceId() != null && updated.getStatus().equals(EventStatus.CANCELLED);
+        return updated.getRecurrenceId() != null && updated.containsStatus() && EventStatus.CANCELLED.equals(updated.getStatus());
     }
 
     @Override
