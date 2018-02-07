@@ -85,6 +85,10 @@ public class AttachmentMemory {
     }
 
     public boolean hasAttachmentChanged(String objectId, int ctxId) {
+        if (memory.isEmpty()) {
+            // Changed because its new ..
+            return true;
+        }
         return memory.containsKey(new TimestampedAttachmentChange(objectId, ctxId));
     }
 
