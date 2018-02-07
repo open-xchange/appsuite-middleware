@@ -142,7 +142,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             change.setType(ITipChange.Type.UPDATE);
             change.setCurrentEvent(original);
             differ = doAppointmentsDiffer(update, original);
-            exceptions = new ArrayList<Event>(util.getExceptions(original, session.getSession()));
+            exceptions = new ArrayList<Event>(util.getExceptions(original, session));
         } else {
             if (message.getMethod() == ITipMethod.COUNTER) {
                 analysis.addAnnotation(new ITipAnnotation(Messages.COUNTER_UNKNOWN_APPOINTMENT, locale));
@@ -154,8 +154,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         int owner = session.getUserId();
         if (message.getOwner() > 0 && message.getOwner() != session.getUserId()) {
             owner = message.getOwner();
-        }
-        if (owner != session.getUserId()) {
+
             OXFolderAccess oxfs = new OXFolderAccess(ctx);
             FolderObject defaultFolder = oxfs.getDefaultFolder(owner, FolderObject.CALENDAR);
             EffectivePermission permission = oxfs.getFolderPermission(defaultFolder.getObjectID(), session.getUserId(), UserConfigurationStorage.getInstance().getUserConfigurationSafe(session.getUserId(), ctx));
@@ -169,7 +168,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
 
         if (differ && message.getEvent() != null) {
             Event event = session.getUtilities().copyEvent(message.getEvent(), (EventField[]) null);
-            ensureParticipant(event, session, owner);
+            ensureParticipant(original, event, session, owner);
             if (original != null) {
                 event.setFolderId(original.getFolderId());
             }
@@ -187,9 +186,8 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
 
         for (Event exception : message.exceptions()) {
             exception = session.getUtilities().copyEvent(exception, (EventField[]) null);
-            ensureParticipant(exception, session, owner);
 
-            final Event matchingException = findAndRemoveMatchingException(exception, exceptions);
+            final Event matchingException = findAndRemoveMatchingException(master, exception, exceptions);
             change = new ITipChange();
             change.setException(true);
             change.setMaster(master);
@@ -200,10 +198,12 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             if (matchingException != null) {
                 change.setType(ITipChange.Type.UPDATE);
                 change.setCurrentEvent(matchingException);
+                ensureParticipant(matchingException, exception, session, owner);
                 differ = doAppointmentsDiffer(exception, matchingException);
             } else {
                 // Exception is not yet created
                 exception.removeUid();
+                ensureParticipant(original, exception, session, owner);
                 change.setType(ITipChange.Type.CREATE);
             }
             if (master == null) {

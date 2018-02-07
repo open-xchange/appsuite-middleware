@@ -124,9 +124,9 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         if (Services.getService(SSLConfigurationService.class).isWhitelisted(socket.getInetAddress().getHostName())) {
             return;
         }
-        checkCommonName(getUseId(), getContextId(), chain, socket);
 
         try {
+            checkCommonName(getUseId(), getContextId(), chain, socket);
             this.trustManager.checkServerTrusted(chain, authType, socket);
         } catch (CertificateException e) {
             handleCertificateException(chain, socket, e);
@@ -336,6 +336,9 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      * @throws CertificateException
      */
     private void preliminaryChecks(int userId, int contextId, X509Certificate[] chain, Socket socket, CertificateException ce) throws CertificateException {
+        if (ce == null) {
+            return;
+        }
         if (!(ce.getCause() instanceof CertPathValidatorException)) {
             return;
         }
@@ -379,7 +382,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
                 // b) Check if the certificate is self-signed
                 checkSelfSigned(userId, contextId, chain, socketHostname);
                 // c) Check if the root certificate authority is trusted
-                checkRootCATrusted(userId, contextId, chain);
+                checkRootCATrusted(userId, contextId, chain, socketHostname);
                 // d) Check common name
                 checkCommonName(userId, contextId, chain, socket);
                 // e) Check if expired
@@ -416,13 +419,13 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      * @param chain The {@link X509Certificate} chain
      * @throws CertificateException if the root CA is not trusted by the user
      */
-    private void checkRootCATrusted(int userId, int contextId, X509Certificate[] chain) throws CertificateException {
+    private void checkRootCATrusted(int userId, int contextId, X509Certificate[] chain, String socketHostname) throws CertificateException {
         if (isRootCATrusted(chain)) {
             return;
         }
 
         String fingerprint = cacheCertificate(userId, contextId, chain[0], null, FailureReason.UNTRUSTED_ISSUER);
-        throw new CertificateException(SSLExceptionCode.UNTRUSTED_ROOT_AUTHORITY.create(Collections.singletonMap(FINGERPRINT_NAME, fingerprint), fingerprint));
+        throw new CertificateException(SSLExceptionCode.UNTRUSTED_ROOT_AUTHORITY.create(Collections.singletonMap(FINGERPRINT_NAME, fingerprint), fingerprint, socketHostname));
     }
 
     /**
@@ -476,6 +479,16 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             int hnDotCount = hostname.split("\\.").length;
             if (hnDotCount == cnDotCount) {
                 return;
+            }
+        }
+
+        // Check for possible SubjectAlternativeNames 
+        Collection<List<?>> subjectAlternativeNames = certificate.getSubjectAlternativeNames();
+        if (subjectAlternativeNames != null) {
+            for (List<?> list : subjectAlternativeNames) {
+                if (list.contains(commonName)) {
+                    return;
+                }
             }
         }
 

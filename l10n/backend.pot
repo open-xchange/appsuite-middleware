@@ -6,6 +6,17 @@
 #, fuzzy
 msgid ""
 msgstr ""
+"#-#-#-#-#  backend1.pot (PACKAGE VERSION)  #-#-#-#-#\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"#-#-#-#-#  backend2.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -1254,7 +1265,7 @@ msgid "Private"
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:62
-msgid "The requested event was not found."
+msgid "The requested appointment was not found."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:64
@@ -1262,7 +1273,7 @@ msgid "The requested folder was not found."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:66
-msgid "The requested attendee was not found."
+msgid "The requested participant was not found."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:68
@@ -1296,7 +1307,8 @@ msgid "The operation could not be completed due to insufficient permissions."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:80
-msgid "This modification can only be performed by the organizer of the event."
+msgid ""
+"This modification can only be performed by the organizer of the appointment."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:82
@@ -1317,12 +1329,12 @@ msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:88
 msgid ""
-"The event could not be created due to another conflicting event with the "
-"same unique identifier."
+"The appointment could not be created due to another conflicting appointment "
+"with the same unique identifier."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:90
-msgid "The event conflicts with one or more other events."
+msgid "The appointment conflicts with one or more other appointments."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:92
@@ -1332,24 +1344,24 @@ msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:94
 msgid ""
-"The end date lies before the start date. Please correct the event times and "
-"try again."
+"The end date lies before the start date. Please correct the appointment "
+"times and try again."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:96
 msgid ""
-"Events in non-personal folders must not be classified as \"private\" or "
-"\"confidential\"."
+"Appointments in non-personal folders must not be classified as \"private\" "
+"or \"confidential\"."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:98
 msgid ""
-"Events classified as \"private\" or \"confidential\" cannot be moved to this "
-"type of folder."
+"Appointments classified as \"private\" or \"confidential\" cannot be moved "
+"to this type of folder."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:100
-msgid "Occurrences of event series must not be classified differently."
+msgid "Occurrences of appointment series must not be classified differently."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:102
@@ -1359,7 +1371,8 @@ msgid ""
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:104
-msgid "The supplied alarm is invalid. Please correct the alarm and try again."
+msgid ""
+"The supplied reminder is invalid. Please correct the reminder and try again."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:106
@@ -1377,7 +1390,7 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:110
 msgid ""
 "The supplied types of start and end date are incompatible. Please correct "
-"the event times and try again."
+"the appointment times and try again."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:112
@@ -1388,23 +1401,24 @@ msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:114
 msgid ""
-"The targeted occurrence is not part of the event series. Please select a "
-"valid recurrence identifier and try again."
+"The targeted occurrence is not part of the appointment series. Please select "
+"a valid recurrence identifier and try again."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:116
 msgid ""
-"The split of the event series cannot be performed. Please select a valid "
-"split point and try again."
+"The split of the appointment series cannot be performed. Please select a "
+"valid split point and try again."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:118
-msgid "Moving an event series into another folder is not supported."
+msgid "Moving an appointment series into another folder is not supported."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:120
 msgid ""
-"Moving an occurrence of an event series into another folder is not supported."
+"Moving an occurrence of an appointment series into another folder is not "
+"supported."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:122
@@ -1473,15 +1487,15 @@ msgid "The requested attachment was not found."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:146
-msgid "Too many events are queried. Please choose a shorter timeframe."
+msgid "Too many appointments are queried. Please choose a shorter timeframe."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:148
-msgid "The event contains too many attendees."
+msgid "The appointment contains too many participants."
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:150
-msgid "The event contains too many alarms."
+msgid "The appointment contains too many reminders."
 msgstr ""
 
 #. Your selection is not supported.

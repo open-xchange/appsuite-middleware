@@ -260,6 +260,11 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
     }
 
     @Override
+    public List<Event> getEventsInFolders(List<String> folderIds) throws OXException {
+        return getCalendarService().getEventsInFolders(session, folderIds);
+    }
+
+    @Override
     public List<Event> getEventsOfUser() throws OXException {
         return getCalendarService().getEventsOfUser(session);
     }

@@ -108,22 +108,22 @@ import com.openexchange.exception.OXExceptionStrings;
 public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
-     * <li>The requested event was not found.</li>
+     * <li>The requested appointment was not found.</li>
      * <li>Event not found [id %1$s]</li>
      */
     EVENT_NOT_FOUND("Event not found [id %1$s]", EVENT_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4040),
     /**
-     * <li>The requested event was not found.</li>
+     * <li>The requested appointment was not found.</li>
      * <li>Event not found in folder [folder %1$s, id %2$s]</li>
      */
     EVENT_NOT_FOUND_IN_FOLDER("Event not found in folder [folder %1$s, id %2$s]", EVENT_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4041),
     /**
-     * <li>The requested event was not found.</li>
+     * <li>The requested appointment was not found.</li>
      * <li>Event recurrence not found [series id %1$s, recurrence id %2$s]</li>
      */
     EVENT_RECURRENCE_NOT_FOUND("Event recurrence not found [series id %1$s, recurrence id %2$s]", EVENT_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4042),
     /**
-     * <li>The requested attendee was not found.</li>
+     * <li>The requested participant was not found.</li>
      * <li>Attendee not found [attendee %1$d, event %2$s]</li>
      */
     ATTENDEE_NOT_FOUND("Attendee not found [attendee %1$d, event %2$s]", ATTENDEE_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4043),
@@ -183,7 +183,7 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     RESTRICTED_BY_CLASSIFICATION("Access to event restricted by classification [folder %1$s, id %2$s, classification %3$s]", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 4037),
     /**
-     * <li>This modification can only be performed by the organizer of the event.</li>
+     * <li>This modification can only be performed by the organizer of the appointment.</li>
      * <li>Modification restricted to organizer [folder %1$s, id %2$s, organizerUri %3$s, organizerCn %4$s]</li>
      */
     NOT_ORGANIZER("Modification restricted to organizer [folder %1$s, id %2$s, organizerUri %3$s, organizerCn %4$s]", NOT_ORGANIZER_MSG, Category.CATEGORY_PERMISSION_DENIED, 4038),
@@ -193,7 +193,7 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     UNSUPPORTED_FOLDER("Unsupported folder [folder %1$s, content type %2$s]", UNSUPPORTED_FOLDER_MSG, Category.CATEGORY_USER_INPUT, 4060),
     /**
-     * <li>The targeted occurrence is not part of the event series. Please select a valid recurrence identifier and try again.</li>
+     * <li>The targeted occurrence is not part of the appointment series. Please select a valid recurrence identifier and try again.</li>
      * <li>Invalid recurrence id [id %1$s, rule %2$s]</li>
      */
     INVALID_RECURRENCE_ID("Invalid recurrence id [id %1$s, rule %2$s]", INVALID_RECURRENCE_ID_MSG, Category.CATEGORY_USER_INPUT, 4061),
@@ -203,7 +203,7 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     QUERY_TOO_SHORT("Query too short [minimum %1$d, query %2$s]", QUERY_TOO_SHORT_MSG, Category.CATEGORY_USER_INPUT, 4062),
     /**
-     * <li>The split of the event series cannot be performed. Please select a valid split point and try again.</li>
+     * <li>The split of the appointment series cannot be performed. Please select a valid split point and try again.</li>
      * <li>Invalid split [id %1$s, split point %2$s]</li>
      */
     INVALID_SPLIT("Invalid split [id %1$s, split point %2$s]", INVALID_SPLIT_MSG, Category.CATEGORY_USER_INPUT, 4063),
@@ -213,17 +213,17 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     CONCURRENT_MODIFICATION("Concurrent modification [id %1$s, client timestamp %2$d, actual timestamp %3$d]", CONCURRENT_MODIFICATION_MSG, Category.CATEGORY_CONFLICT, 4120),
     /**
-     * <li>The event could not be created due to another conflicting event with the same unique identifier.</li>
+     * <li>The appointment could not be created due to another conflicting appointment with the same unique identifier.</li>
      * <li>UID conflict [uid %1$s, conflicting id %2$s]</li>
      */
     UID_CONFLICT("UID conflict [uid %1$s, conflicting id %2$s]", UID_CONFLICT_MSG, Category.CATEGORY_CONFLICT, 4090),
     /**
-     * <li>The event conflicts with one or more other events.</li>
+     * <li>The appointment conflicts with one or more other appointments.</li>
      * <li>Event conflicts detected [see problematics]</li>
      */
     EVENT_CONFLICTS("Event conflicts detected [see problematics]", EVENT_CONFLICTS_MSG, Category.CATEGORY_CONFLICT, 4091),
     /**
-     * <li>The event conflicts with one or more other events.</li>
+     * <li>The appointment conflicts with one or more other appointments.</li>
      * <li>(Hard) event conflicts detected [see problematics]</li>
      */
     HARD_EVENT_CONFLICTS("(Hard) event conflicts detected [see problematics]", EVENT_CONFLICTS_MSG, Category.CATEGORY_CONFLICT, 4092),
@@ -233,12 +233,12 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     MANDATORY_FIELD("Mandatory field missing [field %1$s]", MANDATORY_FIELD_MSG, Category.CATEGORY_USER_INPUT, 4220),
     /**
-     * <li>The end date lies before the start date. Please correct the event times and try again.</li>
+     * <li>The end date lies before the start date. Please correct the appointment times and try again.</li>
      * <li>End before start date [start %1$s, end %2$s]</li>
      */
     END_BEFORE_START("End before start date [start %1$s, end %2$s]", END_BEFORE_START_MSG, Category.CATEGORY_USER_INPUT, 4221),
     /**
-     * <li>Events in non-personal folders must not be classified as \"private\" or \"confidential\".</li>
+     * <li>Appointments in non-personal folders must not be classified as \"private\" or \"confidential\".</li>
      * <li>Unsupported classification [classification %1$s, folder %2$d, type %3$s]</li>
      */
     UNSUPPORTED_CLASSIFICATION("Unsupported classification [classification %1$s, folder %2$d, type %3$s]", UNSUPPORTED_CLASSIFICATION_MSG, Category.CATEGORY_USER_INPUT, 4222),
@@ -248,22 +248,22 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     UNSUPPORTED_RRULE("Unsupported recurrence rule [rule %1$s, part %2$s, error %3$s]", UNSUPPORTED_RRULE_MSG, Category.CATEGORY_USER_INPUT, 4223),
     /**
-     * <li>Moving an event series into another folder is not supported.</li>
+     * <li>Moving an appointment series into another folder is not supported.</li>
      * <li>Unsupported series move [id %1$s, folder %2$s, target folder %3$s]</li>
      */
     MOVE_SERIES_NOT_SUPPORTED("Unsupported series move [id %1$s, folder %2$s, target folder %3$s]", MOVE_SERIES_NOT_SUPPORTED_MSG, Category.CATEGORY_USER_INPUT, 4224),
     /**
-     * <li>Moving an occurrence of an event series into another folder is not supported.</li>
+     * <li>Moving an occurrence of an appointment series into another folder is not supported.</li>
      * <li>Unsupported occurrence move [id %1$s, folder %2$s, target folder %3$s]</li>
      */
     MOVE_OCCURRENCE_NOT_SUPPORTED("Unsupported occurrence move [id %1$s, folder %2$s, target folder %3$s]", MOVE_OCCURRENCE_NOT_SUPPORTED_MSG, Category.CATEGORY_USER_INPUT, 4225),
     /**
-     * <li>Events classified as \"private\" or \"confidential\" cannot be moved to this type of folder.</li>
+     * <li>Appointments classified as \"private\" or \"confidential\" cannot be moved to this type of folder.</li>
      * <li>Unsupported classification for move [classification %1$s, folder %2$s, type %3$s, target folder %4$s, target type %5$s]</li>
      */
     UNSUPPORTED_CLASSIFICATION_FOR_MOVE("Unsupported classification for move [classification %1$s, folder %2$s, type %3$s, target folder %4$s, target type %5$s]", UNSUPPORTED_CLASSIFICATION_FOR_MOVE_MSG, Category.CATEGORY_USER_INPUT, 4226),
     /**
-     * <li>Occurrences of event series must not be classified differently.</li>
+     * <li>Occurrences of appointment series must not be classified differently.</li>
      * <li>Unsupported classification for occurrence [classification %1$s, series id %2$s, recurrence id %3$s]</li>
      */
     UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE("Unsupported classification for occurrence [classification %1$s, series id %2$s, recurrence id %3$s]", UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE_MSG, Category.CATEGORY_USER_INPUT, 4227),
@@ -273,7 +273,7 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     UNSUPPORTED_OPERATION_FOR_PROVIDER("Unsupported operation for calendar provider [provider %1$s]", UNSUPPORTED_OPERATION_FOR_PROVIDER_MSG, Category.CATEGORY_USER_INPUT, 4228),
     /**
-     * <li>The supplied types of start and end date are incompatible. Please correct the event times and try again.</li>
+     * <li>The supplied types of start and end date are incompatible. Please correct the appointment times and try again.</li>
      * <li>Incompatible date types [start %1$s, end %2$s]</li>
      */
     INCOMPATIBLE_DATE_TYPES("Incompatible date types [start %1$s, end %2$s]", INCOMPATIBLE_DATE_TYPES_MSG, Category.CATEGORY_USER_INPUT, 4229),
@@ -298,7 +298,7 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     INVALID_CONFIGURATION("Invalid configuration [configuration %1$s]", INVALID_CONFIGURATION_MSG, Category.CATEGORY_USER_INPUT, 4004),
     /**
-     * <li>The supplied alarm is invalid. Please correct the alarm and try again.</li>
+     * <li>The supplied reminder is invalid. Please correct the reminder and try again.</li>
      * <li>Invalid alarm [alarm %1$s]</li>
      */
     INVALID_ALARM("Invalid alarm [alarm %1$s]", INVALID_ALARM_MSG, Category.CATEGORY_USER_INPUT, 4005),
@@ -342,15 +342,15 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     INCORRECT_STRING("Incorrect string [string %1$s, field %2$s, column %3$s]", INCORRECT_STRING_MSG, Category.CATEGORY_USER_INPUT, 5071),
     /**
-     * <li>Too many events are queried. Please choose a shorter timeframe.</li>
+     * <li>Too many appointments are queried. Please choose a shorter timeframe.</li>
      */
     TOO_MANY_EVENT_RESULTS("Too many events are queried. Please choose a shorter timeframe.", TOO_MANY_EVENTS_MSG, Category.CATEGORY_USER_INPUT, 5072),
     /**
-     * <li>The event contains too many attendees.</li>
+     * <li>The appointment contains too many attendees.</li>
      */
     TOO_MANY_ATTENDEES("The event contains too many attendees.", TOO_MANY_ATTENDEES_MSG, Category.CATEGORY_USER_INPUT, 5073),
     /**
-     * <li>The event contains too many alarms.</li>
+     * <li>The appointment contains too many alarms.</li>
      */
     TOO_MANY_ALARMS("The event contains too many alarms.", TOO_MANY_ALARMS_MSG, Category.CATEGORY_USER_INPUT, 5074),
     /**

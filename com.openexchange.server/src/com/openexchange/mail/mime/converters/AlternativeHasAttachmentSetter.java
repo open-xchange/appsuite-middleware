@@ -52,10 +52,11 @@ package com.openexchange.mail.mime.converters;
 import java.io.IOException;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
- * {@link AlternativeHasAttachmentSetter}
+ * {@link AlternativeHasAttachmentSetter} Defines an alternative way of setting hasAttachment flag if {@link MailCapabilities#hasAttachmentSearch()} is disabled
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0

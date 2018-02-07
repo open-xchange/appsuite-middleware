@@ -57,7 +57,6 @@ import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_UPDA
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import org.json.JSONArray;
@@ -113,7 +112,7 @@ public class AllAction extends ChronosAction {
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
         List<Event> events = calendarAccess.getEventsInFolders(parseFolderIds(requestData));
-        return new AJAXRequestResult(events, new Date(CalendarUtils.getMaximumTimestamp(events)), EventResultConverter.INPUT_FORMAT);
+        return new AJAXRequestResult(events, CalendarUtils.getMaximumTimestamp(events), EventResultConverter.INPUT_FORMAT);
     }
 
     private static List<String> parseFolderIds(AJAXRequestData requestData) throws OXException {

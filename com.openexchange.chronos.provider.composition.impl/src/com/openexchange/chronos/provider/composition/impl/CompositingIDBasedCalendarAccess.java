@@ -685,9 +685,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         try {
             CalendarAccess access = getAccess(account.getAccountId());
             if (FolderCalendarAccess.class.isInstance(access)) {
-                for (String folderId : folderIds) {
-                    events.addAll(((FolderCalendarAccess) access).getEventsInFolder(folderId));
-                }
+                events.addAll(((FolderCalendarAccess) access).getEventsInFolders(folderIds));
             } else if (BasicCalendarAccess.class.isInstance(access)) {
                 for (String folderId : folderIds) {
                     Check.folderMatches(folderId, BasicCalendarAccess.FOLDER_ID);

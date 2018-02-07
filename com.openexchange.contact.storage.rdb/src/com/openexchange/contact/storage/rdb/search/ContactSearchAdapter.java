@@ -76,19 +76,22 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 	private static ContactField startLetterField = null;
 
 	private final StringBuilder stringBuilder;
+    private final boolean utf8mb4;
 
 	/**
-	 * Initializes a new {@link ContactSearchAdapter}.
-	 *
-	 * @param contactSearch The used contact search object
-	 * @param contextID the context ID
-	 * @param fields the fields to select
-	 * @param charset The used charset
-	 * @throws OXException
-	 */
-    public ContactSearchAdapter(ContactSearchObject contactSearch, int contextID, ContactField[] fields, String charset, int forUser) throws OXException {
+     * Initializes a new {@link ContactSearchAdapter}.
+     *
+     * @param contactSearch The used contact search object
+     * @param contextID the context ID
+     * @param fields the fields to select
+     * @param charset The used charset
+     * @param utf8mb4 <code>true</code> to use collations based on utf8mb4, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    public ContactSearchAdapter(ContactSearchObject contactSearch, int contextID, ContactField[] fields, String charset, boolean utf8mb4, int forUser) throws OXException {
 		super(charset);
 		this.stringBuilder = new StringBuilder(256);
+        this.utf8mb4 = utf8mb4;
 		if (null != contactSearch.getPattern()) {
             appendSearch(contactSearch, contextID, fields, forUser);
 		} else {
@@ -190,11 +193,11 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 			String fallbackColumnLabel = Mappers.CONTACT.get(ContactField.DISPLAY_NAME).getColumnLabel();
 			stringBuilder.append('(').append(columnLabel).append(" LIKE ?");
 			if (exact) {
-			    stringBuilder.append(" COLLATE utf8_bin");
+                stringBuilder.append(" COLLATE ").append(utf8mb4 ? "utf8mb4_bin" : "utf8_bin");
             }
             stringBuilder.append(" OR (").append(columnLabel).append(" IS NULL AND ").append(fallbackColumnLabel).append(" LIKE ?");
             if (exact) {
-                stringBuilder.append(" COLLATE utf8_bin");
+                stringBuilder.append(" COLLATE ").append(utf8mb4 ? "utf8mb4_bin" : "utf8_bin");
             }
             stringBuilder.append("))");
             String preparedPattern = StringCollection.prepareForSearch(pattern, false, true, true);
@@ -291,13 +294,13 @@ public class ContactSearchAdapter extends DefaultSearchAdapter {
 				// use "LIKE" search
 				stringBuilder.append(" LIKE ?");
 				if (exact) {
-				    stringBuilder.append(" COLLATE utf8_bin");
+                    stringBuilder.append(" COLLATE ").append(utf8mb4 ? "utf8mb4_bin" : "utf8_bin");
                 }
 				parameters.add(preparedPattern);
 			} else {
 				stringBuilder.append("=?");
                 if (exact) {
-                    stringBuilder.append(" COLLATE utf8_bin");
+                    stringBuilder.append(" COLLATE ").append(utf8mb4 ? "utf8mb4_bin" : "utf8_bin");
                 }
 				parameters.add(value);
 			}

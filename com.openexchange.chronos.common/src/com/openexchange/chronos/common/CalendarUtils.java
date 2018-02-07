@@ -582,16 +582,16 @@ public class CalendarUtils {
      * Gets the maximum timestamp of a collection of events.
      *
      * @param events The events to get the maximum timestamp from
-     * @return The maximum timestamp, or <code>0</code> if the supplied collection was <code>null</code> or empty
+     * @return The maximum timestamp as {@link Date}, or <code>null</code> if the supplied collection was <code>null</code> or empty
      */
-    public static long getMaximumTimestamp(Collection<Event> events) {
-        long maximumTimestamp = 0L;
+    public static Date getMaximumTimestamp(Collection<Event> events) {
+        long maximumTimestamp = Integer.MIN_VALUE;
         for (Event event : events) {
             if (null != event) {
                 maximumTimestamp = Math.max(maximumTimestamp, event.getTimestamp());
             }
         }
-        return maximumTimestamp;
+        return Integer.MIN_VALUE == maximumTimestamp ? null : new Date(maximumTimestamp);
     }
 
     /**

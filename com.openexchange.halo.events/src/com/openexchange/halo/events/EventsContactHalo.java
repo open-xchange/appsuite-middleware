@@ -50,7 +50,6 @@
 package com.openexchange.halo.events;
 
 import static com.openexchange.chronos.common.CalendarUtils.getMaximumTimestamp;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_EXPAND_OCCURRENCES;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER_BY;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_RANGE_END;
@@ -121,27 +120,42 @@ public class EventsContactHalo extends AbstractContactHalo implements HaloContac
         /*
          * init calendar access, search matching events & return appropriate result
          */
-        List<Event> events = initCalendarAccess(request).searchEvents(null, filters, null);
-        return new AJAXRequestResult(events, new Date(getMaximumTimestamp(events)), "event");
+        List<Event> events = null;
+        IDBasedCalendarAccess calendarAccess = initCalendarAccess(request);
+        boolean committed = false;
+        try {
+            calendarAccess.startTransaction();
+            events = initCalendarAccess(request).searchEvents(null, filters, null);
+            calendarAccess.commit();
+            committed = true;
+        } finally {
+            if (false == committed) {
+                calendarAccess.rollback();
+            }
+            calendarAccess.finish();
+        }
+        AJAXRequestResult result = new AJAXRequestResult(events, getMaximumTimestamp(events), "event");
+        List<OXException> warnings = calendarAccess.getWarnings();
+        if (null != warnings && 0 < warnings.size()) {
+            result.addWarnings(warnings);
+        }
+        return result;
     }
 
     private IDBasedCalendarAccess initCalendarAccess(AJAXRequestData request) throws OXException {
         IDBasedCalendarAccess calendarAccess = calendarAccessFactory.createAccess(request.getSession());
-        String rangeStartParameter = request.checkParameter("rangeStart");
+        String rangeStartParameter = request.checkParameter(PARAMETER_RANGE_START);
         try {
-            DateTime rangeStart = DateTime.parse(TimeZones.UTC, rangeStartParameter);
-            calendarAccess.set(PARAMETER_RANGE_START, new Date(rangeStart.getTimestamp()));
+            calendarAccess.set(PARAMETER_RANGE_START, new Date(DateTime.parse(TimeZones.UTC, rangeStartParameter).getTimestamp()));
         } catch (IllegalArgumentException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "rangeStart", rangeStartParameter);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, PARAMETER_RANGE_START, rangeStartParameter);
         }
-        String rangeEndParameter = request.checkParameter("rangeEnd");
+        String rangeEndParameter = request.checkParameter(PARAMETER_RANGE_END);
         try {
-            DateTime rangeEnd = DateTime.parse(TimeZones.UTC, rangeEndParameter);
-            calendarAccess.set(PARAMETER_RANGE_END, new Date(rangeEnd.getTimestamp()));
+            calendarAccess.set(PARAMETER_RANGE_END, new Date(DateTime.parse(TimeZones.UTC, rangeEndParameter).getTimestamp()));
         } catch (IllegalArgumentException e) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "rangeEnd", rangeEndParameter);
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, PARAMETER_RANGE_END, rangeEndParameter);
         }
-        calendarAccess.set(PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
         calendarAccess.set(PARAMETER_ORDER_BY, EventField.START_DATE);
         calendarAccess.set(PARAMETER_ORDER, Order.ASC);
         return calendarAccess;

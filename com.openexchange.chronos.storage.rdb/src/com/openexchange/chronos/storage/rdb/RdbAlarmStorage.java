@@ -464,7 +464,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         ;
         if (1 == eventIds.length) {
             stringBuilder.append(" AND event=?");
-        } else {
+        } else if (eventIds.length > 1) {
             stringBuilder.append(" AND event IN (").append(getParameters(eventIds.length)).append(')');
         }
         stringBuilder.append(';');
@@ -495,7 +495,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         ;
         if (1 == eventIds.length) {
             stringBuilder.append(" AND event=?");
-        } else {
+        } else if (eventIds.length > 1) {
             stringBuilder.append(" AND event IN (").append(getParameters(eventIds.length)).append(')');
         }
         stringBuilder.append(';');

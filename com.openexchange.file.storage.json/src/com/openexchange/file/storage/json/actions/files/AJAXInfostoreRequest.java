@@ -99,7 +99,6 @@ import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
-import com.openexchange.tools.io.IOTools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -900,31 +899,48 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         if (contentData != null) {
             return;
         }
-        try {
-            String method = data.optHttpServletRequest().getMethod();
-            if (!"PUT".equals(method)) {
-                throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
-            }
-            InputStream uploadStream = data.getUploadStream();
-            if(uploadStream == null) {
-                throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
-            }
-            contentData = IOTools.getBytes(uploadStream);
-        } catch (IOException e1) {
-            throw FileStorageExceptionCodes.IO_ERROR.create(e1.getMessage(), e1);
+        String method = data.optHttpServletRequest().getMethod();
+        if (!"PUT".equals(method)) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
+        if (!data.hasUploadStreamProvider()) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        }
+
+        UploadFile uploadFile = null;
+        {
+            long maxSize = InfostoreConfigUtils.determineRelevantUploadSize();
+            if (data.hasUploads(-1, maxSize > 0 ? maxSize : -1L)) {
+                uploadFile = data.getFiles(-1, maxSize > 0 ? maxSize : -1L).get(0);
+            }
+        }
+
+
 
         file = ParameterBasedFileMetadataParser.getInstance().parse(data);
         fields = ParameterBasedFileMetadataParser.getInstance().getFields(data);
         if (file != null) {
+
+            if (uploadFile != null) {
+                if (!fields.contains(File.Field.FILENAME) || file.getFileName() == null || file.getFileName().trim().length() == 0) {
+                    file.setFileName(uploadFile.getPreparedFileName());
+                    fields.add(File.Field.FILENAME);
+                }
+
+                if (!fields.contains(File.Field.FILE_MIMETYPE)) {
+                    file.setFileMIMEType(uploadFile.getContentType());
+                    fields.add(File.Field.FILE_MIMETYPE);
+                }
+
+                file.setFileSize(uploadFile.getSize());
+                fields.add(File.Field.FILE_SIZE);
+            }
+
             if (!fields.contains(File.Field.FILENAME) && file.getFileName() != null && file.getFileName().trim().length() != 0) {
                 fields.add(File.Field.FILENAME);
             }
             if (!fields.contains(File.Field.FILE_MIMETYPE) && file.getFileMIMEType() != null && file.getFileMIMEType().trim().length() != 0) {
                 fields.add(File.Field.FILE_MIMETYPE);
-            }
-            if (file.getFileSize() <= 0 && contentData.length != 0) {
-                file.setFileSize(contentData.length);
             }
             if (!fields.contains(File.Field.FILE_SIZE)) {
                 fields.add(File.Field.FILE_SIZE);

@@ -62,11 +62,11 @@ import com.openexchange.session.Session;
  */
 public interface EventNotificationPoolService {
 
-    public void enqueue(Event original, Event newAppointment, Session session, int sharedFolderOwner, CalendarUser principal) throws OXException;
+    public void enqueue(Event original, Event update, Session session, int sharedFolderOwner, CalendarUser principal) throws OXException;
 
-    public void fasttrack(Event appointment, Session session) throws OXException;
+    public void fasttrack(Event event, Session session) throws OXException;
 
-    public void drop(Event appointment, Session session) throws OXException;
+    public void drop(Event event, Session session) throws OXException;
 
-    public void aware(Event appointment, NotificationParticipant recipient, Session session);
+    public void aware(Event event, NotificationParticipant recipient, Session session);
 }

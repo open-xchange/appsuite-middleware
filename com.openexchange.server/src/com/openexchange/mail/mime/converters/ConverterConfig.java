@@ -49,11 +49,12 @@
 
 package com.openexchange.mail.mime.converters;
 
+import javax.mail.internet.MimeMessage;
 import com.openexchange.mail.api.MailConfig;
 
 /**
- * {@link ConverterConfig}
- *
+ * {@link ConverterConfig} that contains setting considered while converting {@link MimeMessage}s
+ * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */

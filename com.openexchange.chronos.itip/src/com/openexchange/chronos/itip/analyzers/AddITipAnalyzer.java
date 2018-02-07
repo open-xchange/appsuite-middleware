@@ -102,21 +102,19 @@ public class AddITipAnalyzer extends AbstractITipAnalyzer {
                 owner = message.getOwner();
             }
 
-            ensureParticipant(exception, session, owner);
+            ensureParticipant(master, exception, session, owner);
             ITipChange change = new ITipChange();
             change.setType(Type.CREATE);
             change.setException(true);
+            analysis.setUid(exception.getUid());
+            master = util.resolveUid(exception.getUid(), session);
             if (master == null) {
-                analysis.setUid(exception.getUid());
-                master = util.resolveUid(exception.getUid(), session);
-                if (master == null) {
-                    analysis.addAnnotation(new ITipAnnotation(Messages.ADD_TO_UNKNOWN, locale));
-                    analysis.recommendAction(ITipAction.REFRESH);
-                    return analysis;
-                }
-                exceptions = util.getExceptions(master, session.getSession());
+                analysis.addAnnotation(new ITipAnnotation(Messages.ADD_TO_UNKNOWN, locale));
+                analysis.recommendAction(ITipAction.REFRESH);
+                return analysis;
             }
-            Event existingException = findAndRemoveMatchingException(exception, exceptions);
+            exceptions = util.getExceptions(master, session);
+            Event existingException = findAndRemoveMatchingException(master, exception, exceptions);
             if (existingException != null) {
                 change.setCurrentEvent(existingException);
                 analysis.recommendActions(ITipAction.IGNORE, ITipAction.ACCEPT_AND_REPLACE);

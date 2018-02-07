@@ -169,4 +169,23 @@ public interface FolderCalendarAccess extends CalendarAccess {
      */
     List<Event> getEventsInFolder(String folderId) throws OXException;
 
+    /**
+     * Gets all events from one or more specific calendar folders.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
+     * <li>{@link CalendarParameters#PARAMETER_INCLUDE_PRIVATE}</li>
+     * </ul>
+     *
+     * @param folderId The identifier of the folder to get the events from
+     * @return The events
+     */
+    List<Event> getEventsInFolders(List<String> folderIds) throws OXException;
+
 }

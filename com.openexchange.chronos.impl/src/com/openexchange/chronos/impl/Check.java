@@ -145,10 +145,6 @@ public class Check extends com.openexchange.chronos.common.Check {
         }
     }
 
-    public static void allowedOrganizerSchedulingObjectChange(Event originalEvent, Event udpatedEvent) throws OXException {
-
-    }
-
     /**
      * Checks that the supplied client timestamp is equal to or greater than the timestamp of the event.
      *
