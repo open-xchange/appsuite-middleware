@@ -1402,7 +1402,8 @@ public class AJAXRequestData {
     }
 
     private void processUpload(long maxFileSize, long maxOverallSize) throws OXException {
-        if (null == httpServletRequest) {
+        HttpServletRequest localHttpServletRequest = httpServletRequest;
+        if (null == localHttpServletRequest) {
             return;
         }
         if (multipart) {
@@ -1410,7 +1411,7 @@ public class AJAXRequestData {
             synchronized (thisFiles) {
                 UploadEvent uploadEvent = this.uploadEvent;
                 if (null == uploadEvent) {
-                    uploadEvent = AJAXServlet.processUploadStatic(httpServletRequest, maxFileSize, maxOverallSize, session);
+                    uploadEvent = AJAXServlet.processUploadStatic(localHttpServletRequest, maxFileSize, maxOverallSize, session);
                     this.uploadEvent = uploadEvent;
                     final Iterator<UploadFile> iterator = uploadEvent.getUploadFilesIterator();
                     while (iterator.hasNext()) {
@@ -1423,14 +1424,14 @@ public class AJAXRequestData {
                     }
                 }
             }
-        } else if (httpServletRequest.getMethod().equalsIgnoreCase("PUT") && Boolean.parseBoolean(httpServletRequest.getParameter("binary"))) {
+        } else if (localHttpServletRequest.getMethod().equalsIgnoreCase("PUT") && Boolean.parseBoolean(localHttpServletRequest.getParameter("binary"))) {
             // Process simple binary upload
             final List<UploadFile> files = this.files;
             synchronized (files) {
                 if (files.isEmpty()) {
                     UploadEvent uploadEvent = this.uploadEvent;
                     if (null == uploadEvent) {
-                        uploadEvent = UploadUtility.processPutUpload(httpServletRequest, maxFileSize, maxOverallSize, session);
+                        uploadEvent = UploadUtility.processPutUpload(localHttpServletRequest, maxFileSize, maxOverallSize, session);
                         this.uploadEvent = uploadEvent;
                         final Iterator<UploadFile> iterator = uploadEvent.getUploadFilesIterator();
                         while (iterator.hasNext()) {
