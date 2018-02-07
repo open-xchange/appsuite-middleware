@@ -141,7 +141,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
                 continue;
             }
             Event foundEvent = getEvent(existingEvents, update);
-            if (update.getStatus().equals(EventStatus.CANCELLED)) {
+            if (update.containsStatus() && EventStatus.CANCELLED.equals(update.getStatus())) {
                 if (foundEvent != null) {
                     // add to removed
                     removed.add(foundEvent);
