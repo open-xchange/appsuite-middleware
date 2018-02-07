@@ -419,7 +419,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public Integer get(Event event) {
-                return null != event.getCreatedBy() ? I(event.getCreatedBy().getEntity()) : null;
+                return null != event.getCreatedBy() && 0 < event.getCreatedBy().getEntity() ? I(event.getCreatedBy().getEntity()) : null;
             }
 
             @Override
@@ -470,7 +470,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public Integer get(Event event) {
-                return null != event.getModifiedBy() ? I(event.getModifiedBy().getEntity()) : null;
+                return null != event.getModifiedBy() && 0 < event.getModifiedBy().getEntity() ? I(event.getModifiedBy().getEntity()) : null;
             }
 
             @Override
@@ -498,7 +498,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public Integer get(Event event) {
-                return null != event.getCalendarUser() ? I(event.getCalendarUser().getEntity()) : null;
+                return null != event.getCalendarUser() && 0 < event.getCalendarUser().getEntity() ? I(event.getCalendarUser().getEntity()) : null;
             }
 
             @Override
