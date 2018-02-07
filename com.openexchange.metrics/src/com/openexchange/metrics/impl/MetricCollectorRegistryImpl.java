@@ -207,7 +207,7 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
     private void registerMBean(Metric metric, String componentName, MetricMetadata metricMetadata) throws OXException {
         BiFunction<Metric, MetricMetadata, MetricMBean> registerer = mbeanCreators.get(metricMetadata.getMetricType());
         if (registerer == null) {
-            LOG.warn("No metric type mbeab registerer for '{}' was found.", metric.getClass());
+            LOG.warn("No metric type mbean registerer for '{}' was found.", metric.getClass());
             return;
         }
         try {
