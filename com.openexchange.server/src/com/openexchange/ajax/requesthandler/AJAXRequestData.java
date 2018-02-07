@@ -1424,16 +1424,18 @@ public class AJAXRequestData {
                 }
             }
         } else if (httpServletRequest.getMethod().equalsIgnoreCase("PUT") && Boolean.parseBoolean(httpServletRequest.getParameter("binary"))) {
-            // Process simple binary upload upload
-            final List<UploadFile> thisFiles = this.files;
-            synchronized (thisFiles) {
-                UploadEvent uploadEvent = this.uploadEvent;
-                if (null == uploadEvent) {
-                    uploadEvent = UploadUtility.processPutUpload(httpServletRequest, maxFileSize, maxOverallSize, session);
-                    this.uploadEvent = uploadEvent;
-                    final Iterator<UploadFile> iterator = uploadEvent.getUploadFilesIterator();
-                    while (iterator.hasNext()) {
-                        thisFiles.add(iterator.next());
+            // Process simple binary upload
+            final List<UploadFile> files = this.files;
+            synchronized (files) {
+                if (files.isEmpty()) {
+                    UploadEvent uploadEvent = this.uploadEvent;
+                    if (null == uploadEvent) {
+                        uploadEvent = UploadUtility.processPutUpload(httpServletRequest, maxFileSize, maxOverallSize, session);
+                        this.uploadEvent = uploadEvent;
+                        final Iterator<UploadFile> iterator = uploadEvent.getUploadFilesIterator();
+                        while (iterator.hasNext()) {
+                            files.add(iterator.next());
+                        }
                     }
                 }
             }
