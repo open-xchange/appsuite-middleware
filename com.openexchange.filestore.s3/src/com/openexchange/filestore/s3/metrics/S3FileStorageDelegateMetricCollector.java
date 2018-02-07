@@ -49,81 +49,37 @@
 
 package com.openexchange.filestore.s3.metrics;
 
-import com.amazonaws.metrics.RequestMetricCollector;
-import com.amazonaws.metrics.ServiceMetricCollector;
-import com.openexchange.exception.OXException;
+import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.filestore.s3.internal.S3FileStoreProperty;
+import com.openexchange.metrics.AbstractMetricCollector;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link S3FileStorageMetricCollector}
+ * {@link S3FileStorageDelegateMetricCollector}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class S3FileStorageMetricCollector extends com.amazonaws.metrics.MetricCollector {
+public class S3FileStorageDelegateMetricCollector extends AbstractMetricCollector {
 
-    private final S3FileStorageRequestMetricCollector s3FileStorageRequestMetricCollector;
-    private S3FileStorageServiceMetricCollector s3FileStorageServiceMetricCollector;
-    private final S3FileStorageDelegateMetricCollector delegateCollector;
+    private static final String COMPONENT_NAME = "s3";
+
+    private final ServiceLookup services;
 
     /**
-     * Initialises a new {@link S3FileStorageMetricCollector}.
-     * 
-     * @throws OXException
+     * Initialises a new {@link S3FileStorageDelegateMetricCollector}.
      */
-    public S3FileStorageMetricCollector(ServiceLookup services, S3FileStorageDelegateMetricCollector delegateCollector) throws OXException {
-        super();
-        this.delegateCollector = delegateCollector;
-        s3FileStorageRequestMetricCollector = new S3FileStorageRequestMetricCollector(delegateCollector);
-        s3FileStorageServiceMetricCollector = new S3FileStorageServiceMetricCollector(delegateCollector);
+    public S3FileStorageDelegateMetricCollector(ServiceLookup services) {
+        super(COMPONENT_NAME);
+        this.services = services;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.amazonaws.metrics.MetricCollector#start()
-     */
-    @Override
-    public boolean start() {
-        return true;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.amazonaws.metrics.MetricCollector#stop()
-     */
-    @Override
-    public boolean stop() {
-        return false;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.amazonaws.metrics.MetricCollector#isEnabled()
+     * @see com.openexchange.metrics.MetricCollector#isEnabled()
      */
     @Override
     public boolean isEnabled() {
-        return delegateCollector.isEnabled();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.amazonaws.metrics.MetricCollector#getRequestMetricCollector()
-     */
-    @Override
-    public RequestMetricCollector getRequestMetricCollector() {
-        return s3FileStorageRequestMetricCollector;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.amazonaws.metrics.MetricCollector#getServiceMetricCollector()
-     */
-    @Override
-    public ServiceMetricCollector getServiceMetricCollector() {
-        return s3FileStorageServiceMetricCollector;
+        return services.getService(LeanConfigurationService.class).getBooleanProperty(S3FileStoreProperty.metricCollection);
     }
 }

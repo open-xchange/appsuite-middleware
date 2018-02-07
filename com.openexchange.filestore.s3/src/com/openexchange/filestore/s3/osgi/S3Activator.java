@@ -55,8 +55,9 @@ import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.filestore.s3.internal.S3FileStorageFactory;
 import com.openexchange.filestore.s3.internal.S3FileStoreProperty;
+import com.openexchange.filestore.s3.metrics.S3FileStorageDelegateMetricCollector;
 import com.openexchange.filestore.s3.metrics.S3FileStorageMetricCollector;
-import com.openexchange.metrics.MetricCollectorRegistry;
+import com.openexchange.metrics.MetricCollector;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -75,7 +76,7 @@ public class S3Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, LeanConfigurationService.class, MetricCollectorRegistry.class };
+        return new Class<?>[] { ConfigurationService.class, LeanConfigurationService.class };
     }
 
     @Override
@@ -86,8 +87,10 @@ public class S3Activator extends HousekeepingActivator {
         // Check for metric collection
         boolean metricCollection = getService(LeanConfigurationService.class).getBooleanProperty(S3FileStoreProperty.metricCollection);
         if (metricCollection) {
+            S3FileStorageDelegateMetricCollector delegateCollector = new S3FileStorageDelegateMetricCollector(this);
+            registerService(MetricCollector.class, delegateCollector);
             // Enable metric collection by overriding the default metrics
-            AwsSdkMetrics.setMetricCollector(new S3FileStorageMetricCollector(this));
+            AwsSdkMetrics.setMetricCollector(new S3FileStorageMetricCollector(this, delegateCollector));
         }
 
         S3FileStorageFactory factory = new S3FileStorageFactory(this);
@@ -98,7 +101,6 @@ public class S3Activator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(S3Activator.class);
 
-        getService(MetricCollectorRegistry.class).unregisterCollector(S3FileStorageMetricCollector.COMPONENT_NAME);
         AwsSdkMetrics.setMetricCollector(null);
 
         logger.info("Stopping bundle: com.openexchange.filestore.s3");
