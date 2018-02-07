@@ -427,10 +427,12 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
             attendee.setCuType(CalendarUserType.INDIVIDUAL);
 
             List<Attendee> attendees;
-            if (null != original && original.containsAttendees()) {
+            if (null != original && original.containsAttendees() && null != original.getAttendees()) {
                 attendees = new LinkedList<>(original.getAttendees());
-            } else {
+            } else if (event.containsAttendees() && null != event.getAttendees()) {
                 attendees = new LinkedList<>(event.getAttendees());
+            } else {
+                attendees = new LinkedList<>();
             }
             attendees.add(attendee);
             event.setAttendees(attendees);
