@@ -199,13 +199,4 @@ public class Configuration {
         this.needsAuthentication = needsAuthentication;
     }
 
-    /**
-     * Signals whether this configuration does not require authentication.
-     *
-     * @return <code>true</code> if no authentication is supposed to be performed; otherwise <code>false</code>
-     */
-    public boolean noAuthentication() {
-        return false == needsAuthentication;
-    }
-
 }
