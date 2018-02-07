@@ -17,5 +17,6 @@ Import-Package: com.codahale.metrics,
  com.openexchange.server,
  javax.management,
  org.osgi.framework,
+ org.osgi.util.tracker;version="1.5.1",
  org.slf4j
 Bundle-Activator: com.openexchange.metrics.osgi.MetricActivator

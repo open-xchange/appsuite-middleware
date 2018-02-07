@@ -63,7 +63,6 @@ import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Metric;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.MetricRegistry.MetricSupplier;
-import com.codahale.metrics.jmx.JmxReporter;
 import com.codahale.metrics.SharedMetricRegistries;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;

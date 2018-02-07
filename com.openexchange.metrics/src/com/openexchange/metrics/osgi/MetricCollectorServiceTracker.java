@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,57 +49,74 @@
 
 package com.openexchange.metrics.osgi;
 
-import com.openexchange.management.ManagementService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.metrics.MetricCollector;
 import com.openexchange.metrics.MetricCollectorRegistry;
-import com.openexchange.metrics.impl.MetricCollectorRegistryImpl;
-import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link MetricActivator}
+ * {@link MetricCollectorServiceTracker}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MetricActivator extends HousekeepingActivator {
+public class MetricCollectorServiceTracker implements ServiceTrackerCustomizer<MetricCollector, MetricCollector> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MetricCollectorServiceTracker.class);
+
+    private final BundleContext context;
+    private final MetricCollectorRegistry registry;
 
     /**
-     * Initialises a new {@link MetricActivator}.
+     * Initialises a new {@link MetricCollectorServiceTracker}.
      */
-    public MetricActivator() {
+    public MetricCollectorServiceTracker(BundleContext context, MetricCollectorRegistry registry) {
         super();
+        this.context = context;
+        this.registry = registry;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
      */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ManagementService.class };
+    public MetricCollector addingService(ServiceReference<MetricCollector> reference) {
+        MetricCollector metricCollector = context.getService(reference);
+        try {
+            registry.registerCollector(metricCollector);
+        } catch (IllegalArgumentException | OXException e) {
+            LOG.error("Unable to register metric collector for '{}': {}", metricCollector.getComponentName(), e.getMessage(), e);
+        }
+        return metricCollector;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
     @Override
-    protected void startBundle() throws Exception {
-        MetricCollectorRegistry registry = new MetricCollectorRegistryImpl(this);
-        registerService(MetricCollectorRegistry.class, registry);
-
-        track(MetricCollector.class, new MetricCollectorServiceTracker(context, registry));
-        openTrackers();
+    public void modifiedService(ServiceReference<MetricCollector> reference, MetricCollector service) {
+        // no op
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
     @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
+    public void removedService(ServiceReference<MetricCollector> reference, MetricCollector service) {
+        try {
+            registry.unregisterCollector(service.getComponentName());
+        } catch (OXException e) {
+            LOG.error("Unable to unregister metric collector for '{}': {}", service.getComponentName(), e.getMessage(), e);
+        }
     }
+
 }
