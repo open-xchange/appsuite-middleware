@@ -931,7 +931,7 @@ public class IMAPStore extends Store
                 case PRIVACYREQUIRED:
                     throw new javax.mail.PrivacyRequiredException(cex.getResponse().getRest(), cex);
                 default:
-                    throw new MessagingException(cex.getMessage(), cex);
+                    throw new javax.mail.LoginFailedException(cex.getMessage(), cex);
             }
         }
 
