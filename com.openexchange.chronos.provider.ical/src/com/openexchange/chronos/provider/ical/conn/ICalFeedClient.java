@@ -133,8 +133,9 @@ public class ICalFeedClient {
                 StringBuilder auth = new StringBuilder();
                 String login = authInfo.getLogin();
                 if (Strings.isNotEmpty(login)) {
-                    auth.append(login).append(":");
+                    auth.append(login);
                 }
+                auth.append(':');
                 String password = authInfo.getPassword();
                 if (Strings.isNotEmpty(password)) {
                     auth.append(password);
