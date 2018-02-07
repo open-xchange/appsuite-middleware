@@ -85,7 +85,7 @@ public abstract class AbstractMetricCollector implements MetricCollector {
      *
      * @param metricRegistry The metricRegistry to set
      */
-    public void setMetricRegistry(MetricRegistry metricRegistry) {
+    public final void setMetricRegistry(MetricRegistry metricRegistry) {
         this.metricRegistry = metricRegistry;
     }
 
@@ -96,7 +96,7 @@ public abstract class AbstractMetricCollector implements MetricCollector {
      * @return the {@link MetricRegistry} of this {@link MetricCollector} or
      *         <code>null</code> if no {@link MetricRegistry} is assigned.
      */
-    public MetricRegistry getMetricRegistry() {
+    public final MetricRegistry getMetricRegistry() {
         return metricRegistry;
     }
 
