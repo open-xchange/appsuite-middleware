@@ -76,6 +76,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -85,7 +86,6 @@ import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.oxfolder.OXFolderBatchLoader;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link ConditionTreeMap} - Stores context-related condition trees for individual entities (users/groups).
@@ -108,38 +108,9 @@ public final class ConditionTreeMap {
     public ConditionTreeMap(int contextId, int time2live) {
         super();
         // Evict user-associated entries after <time2live> milliseconds
-        entity2tree = new ConcurrentHashMap<Integer, Future<ConditionTree>>(countEntities(contextId), 0.9f, 1);
+        entity2tree = new ConcurrentHashMap<Integer, Future<ConditionTree>>(16, 0.9f, 1);
         this.contextId = contextId;
         this.time2live = time2live;
-    }
-
-    private static int countEntities(int contextId) {
-        DatabaseService service = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        Connection connection = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            connection = service.getReadOnly(contextId);
-
-            stmt = connection.prepareStatement("SELECT COUNT(id) FROM user WHERE cid=?");
-            stmt.setInt(1, contextId);
-            rs = stmt.executeQuery();
-            int count = rs.next() ? rs.getInt(1) : 0;
-            DBUtils.closeSQLStuff(rs, stmt);
-
-            stmt = connection.prepareStatement("SELECT COUNT(id) FROM groups WHERE cid=?");
-            stmt.setInt(1, contextId);
-            rs = stmt.executeQuery();
-            count += (rs.next() ? rs.getInt(1) : 0);
-            return count;
-        } catch (Exception e) {
-            return 1024;
-        } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
-            if (null != connection) {
-                service.backReadOnly(contextId, connection);
-            }
-        }
     }
 
     /**
@@ -162,6 +133,7 @@ public final class ConditionTreeMap {
                 }
             } catch (Exception e) {
                 // Drop on error
+                LOG.trace("", e);
                 it.remove();
             }
         }
@@ -181,9 +153,10 @@ public final class ConditionTreeMap {
     /**
      * Initializes the tree map for map's associated context.
      *
+     * @return This initialized tree map
      * @throws OXException If initialization fails
      */
-    public void init() throws OXException {
+    public ConditionTreeMap init() throws OXException {
         entity2tree.clear();
         DatabaseService service = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
 
@@ -205,10 +178,11 @@ public final class ConditionTreeMap {
                     insert(new Permission(rs.getInt(1), rs.getInt(2), admin, readFolder, rs.getInt(5), rs.getInt(6), rs.getInt(7), rs.getLong(8), rs.getInt(9)));
                 }
             }
+            return this;
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             if (null != connection) {
                 service.backReadOnly(contextId, connection);
             }
@@ -248,7 +222,7 @@ public final class ConditionTreeMap {
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             if (null != connection) {
                 service.backReadOnly(contextId, connection);
             }
