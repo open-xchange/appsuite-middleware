@@ -141,8 +141,6 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
         for (MetricMetadata metadata : metricCollector.getMetricMetadata()) {
             registerMetric(metricCollector, metadata, metricRegistry);
         }
-        JmxReporter r = JmxReporter.forRegistry(metricRegistry).inDomain("com.openexchange.metrics." + metricCollector.getComponentName()).build();
-        r.start();
     }
 
     /*
