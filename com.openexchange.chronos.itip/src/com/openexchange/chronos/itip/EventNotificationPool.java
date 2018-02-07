@@ -369,9 +369,10 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
                         iterator.remove();
                     }
                 }
-                this.original = updates.get(0).getOldEvent();
                 // Apply new reset states to original event
-                copyParticipantStates(newEvent, this.original);
+                Event orginalCopy = EventMapper.getInstance().copy(updates.get(0).getOldEvent(), new Event(), (EventField[]) null);
+                copyParticipantStates(newEvent, orginalCopy);
+                this.original = orginalCopy;
             }
         }
 
