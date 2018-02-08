@@ -59,9 +59,6 @@ import com.openexchange.ajax.anonymizer.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
-import com.openexchange.share.ShareService;
-import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.user.json.osgi.Services;
 
 /**
  * {@link UserAnonymizerService}
@@ -89,26 +86,7 @@ public class UserAnonymizerService implements AnonymizerService<User> {
             return null;
         }
 
-        // Do not anonymize yourself
-        if (session.getUserId() == entity.getId()) {
-            return entity;
-        }
-
-        // Check if associated guest was invited by given user entity
-        {
-            if (entity.getId() == ServerSessionAdapter.valueOf(session).getUser().getCreatedBy()) {
-                return entity;
-            }
-            ShareService shareService = Services.getService(ShareService.class);
-            if (null != shareService) {
-                Set<Integer> userIds = shareService.getSharingUsersFor(session.getContextId(), session.getUserId());
-                if (userIds.contains(Integer.valueOf(entity.getId()))) {
-                    return entity;
-                }
-            }
-        }
-
-        // Otherwise anonymize the user
+        // Anonymize the user
         return new AnonymizingUser(entity, session);
     }
 

@@ -50,8 +50,10 @@
 package com.openexchange.mail.autoconfig.sources;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import org.apache.http.Header;
 import org.apache.http.HttpHost;
@@ -66,6 +68,7 @@ import org.apache.http.message.BasicNameValuePair;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.InetAddresses;
 import com.openexchange.mail.autoconfig.DefaultAutoconfig;
 import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.autoconfig.xmlparser.AutoconfigParser;
@@ -107,19 +110,28 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
             }
         }
 
+        boolean isLocalAddress;
+        try {
+            InetAddress inetAddress = InetAddress.getByName(url.getHost());
+            isLocalAddress = InetAddresses.isInternalAddress(inetAddress);
+        } catch (UnknownHostException e) {
+            // IP address of that host could not be determined
+            LOG.warn("Unknown host: {}. Skipping config server source for mail auto-config", url.getHost(), e);
+            return null;
+        }
+
         // New HTTP client
         DefaultHttpClient httpclient = null;
         try {
 
             {
-                int timeout = 3000;
-                HttpClients.ClientConfig clientConfig = HttpClients.ClientConfig.newInstance().setConnectionTimeout(timeout).setSocketReadTimeout(timeout).setUserAgent("Open-Xchange Auto-Config Client");
-                httpclient = HttpClients.getHttpClient(clientConfig);
-            }
+                int readTimeout = 10000;
+                int connecTimeout = 3000;
+                HttpClients.ClientConfig clientConfig = HttpClients.ClientConfig.newInstance().setConnectionTimeout(connecTimeout).setSocketReadTimeout(readTimeout).setUserAgent("Open-Xchange Auto-Config Client").setDenyLocalRedirect(false == isLocalAddress);
 
-            {
                 ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
                 ConfigView view = configViewFactory.getView(userId, contextId);
+                httpclient = HttpClients.getHttpClient(clientConfig);
                 HttpHost proxy = getHttpProxyIfEnabled(httpclient, view);
                 if (null != proxy) {
                     httpclient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
@@ -189,9 +201,7 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
             // When HttpClient instance is no longer needed,
             // shut down the connection manager to ensure
             // immediate deallocation of all system resources
-            if (null != httpclient) {
-                httpclient.getConnectionManager().shutdown();
-            }
+            HttpClients.shutDown(httpclient);
         }
     }
 }

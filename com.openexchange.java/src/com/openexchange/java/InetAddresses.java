@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,34 +47,45 @@
  *
  */
 
-package com.openexchange.appsuite;
+package com.openexchange.java;
 
-import com.openexchange.login.DefaultAppSuiteLoginRampUp;
-import com.openexchange.server.ServiceLookup;
+import java.net.InetAddress;
 
 /**
- * {@link AppSuiteLoginRampUp}
+ * {@link InetAddresses} - Static utility methods for {@link InetAddress} instances.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public class AppSuiteLoginRampUp extends DefaultAppSuiteLoginRampUp {
+public class InetAddresses {
 
     /**
-     * Initializes a new {@link AppSuiteLoginRampUp}.
-     *
-     * @param services The service look-up
+     * Initializes a new {@link InetAddresses}.
      */
-    public AppSuiteLoginRampUp(ServiceLookup services) {
-        super(services);
+    private InetAddresses() {
+        super();
     }
 
-    @Override
-    protected String getConfigInfix() {
-        return "open-xchange-appsuite";
+    /**
+     * Checks if specified address denotes a network internal end-point.
+     * <p>
+     * The address is considered to be internal if all following checks are passed:
+     * <ul>
+     * <li>{@link InetAddress#isAnyLocalAddress() Any local address}</li>
+     * <li>{@link InetAddress#isSiteLocalAddress() Site local address}</li>
+     * <li>{@link InetAddress#isLoopbackAddress() Loop-back address}</li>
+     * <li>{@link InetAddress#isLinkLocalAddress() Link local address}</li>
+     * </ul>
+     *
+     * @param inetAddress The address to check
+     * @return <code>true</code> if specified address denotes a network internal end-point; otherwise <code>false</code>
+     */
+    public static boolean isInternalAddress(InetAddress inetAddress) {
+        if (null == inetAddress) {
+            return false;
+        }
+
+        return (inetAddress.isAnyLocalAddress() || inetAddress.isSiteLocalAddress() || inetAddress.isLoopbackAddress() || inetAddress.isLinkLocalAddress());
     }
 
-    @Override
-    public boolean contributesTo(String client) {
-        return "open-xchange-appsuite".equals(client);
-    }
 }

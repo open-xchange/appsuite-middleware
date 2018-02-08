@@ -413,7 +413,7 @@ public class SchemaStoreImpl extends SchemaStore {
                 state.setBackgroundUpdatesRunning(true);
                 state.setBackgroundUpdatesRunningSince(task.getLastModified());
             } else {
-                state.addExecutedTask(task.getTaskName());
+                state.addExecutedTask(task.getTaskName(), task.isSuccessful());
             }
         }
     }
@@ -422,7 +422,7 @@ public class SchemaStoreImpl extends SchemaStore {
         final String sql = "SELECT taskName,successful,lastModified FROM updateTask WHERE cid=0 FOR UPDATE";
         Statement stmt = null;
         ResultSet result = null;
-        final List<ExecutedTask> retval = new ArrayList<ExecutedTask>();
+        final List<ExecutedTask> retval = new ArrayList<>();
         try {
             stmt = con.createStatement();
             result = stmt.executeQuery(sql);
