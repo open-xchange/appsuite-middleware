@@ -185,6 +185,10 @@ final class MovePerformer extends AbstractPerformer {
     private List<Permission> adjustPermission(Folder newFolder, Folder originalFolder, FolderStorage newRealParentStorage) throws OXException {
         Permission[] permissions = originalFolder.getPermissions();
         List<Permission> addParentLinkPermission = addParentLinkPermission(newFolder, newRealParentStorage);
+        // permissions can be null
+        if (null == permissions) {
+            return addParentLinkPermission;
+        }
         List<Permission> cleanedPermissions = new ArrayList<>(permissions.length);
         for(Permission perm : permissions){
             if (perm.getType() != FolderPermissionType.INHERITED) {
