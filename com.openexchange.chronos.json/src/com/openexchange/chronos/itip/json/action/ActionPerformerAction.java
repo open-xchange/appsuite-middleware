@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.itip.json.action;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -57,8 +59,10 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipActionPerformer;
@@ -67,10 +71,17 @@ import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnalyzerService;
 import com.openexchange.chronos.itip.ITipAttributes;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.conversion.ConversionService;
+import com.openexchange.conversion.Data;
+import com.openexchange.conversion.DataArguments;
+import com.openexchange.conversion.DataSource;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -102,8 +113,12 @@ public class ActionPerformerAction extends AbstractITipAction {
             }
         }
         ITipActionPerformer performer = factory.getPerformer(action);
+        CalendarSession calendarSession = initCalendarSession(session);
 
-        List<Event> list = performer.perform(action, analysisToProcess, initCalendarSession(session), attributes);
+        // Parse for attachments
+        attach(request, analysisToProcess, session);
+
+        List<Event> list = performer.perform(action, analysisToProcess, calendarSession, attributes);
 
         if (list != null) {
             JSONArray array = new JSONArray(list.size());
@@ -117,6 +132,50 @@ public class ActionPerformerAction extends AbstractITipAction {
         JSONObject object = new JSONObject();
         object.put("msg", "Done");
         return new AJAXRequestResult(object, new Date(), "json");
+    }
+
+    /**
+     * Adds the actual data to the attachments
+     * 
+     * @param analysisToProcess The analysis already made
+     * @param session The {@link CalendarSession}
+     */
+    private void attach(AJAXRequestData request, ITipAnalysis analysisToProcess, Session session) throws OXException {
+        Event event = analysisToProcess.getMessage().getEvent();
+        // Check if there is an attachment besides the ical
+        if (event.containsAttachments() && 0 < event.getAttachments().size()) {
+            final ConversionService conversionEngine = services.getServiceSafe(ConversionService.class);
+            DataSource source = conversionEngine.getDataSource("com.openexchange.mail.attachment");
+            if (null != source) {
+                DataArguments dataSource = getDataSource(request);
+                for (Attachment attach : event.getAttachments()) {
+                    dataSource.put("com.openexchange.mail.conversion.cid", prepareUri(attach.getUri()));
+                    // Get attachment from mail
+                    Data<InputStream> data = source.getData(InputStream.class, dataSource, session);
+                    if (null != data) {
+                        // Get stream and properties for file holder
+                        InputStream stream = data.getData();
+                        ByteArrayFileHolder fileHolder = null;
+                        try {
+                            fileHolder = new ByteArrayFileHolder(Streams.stream2bytes(stream));
+                            // Set the attachment to the event
+                            attach.setData(fileHolder);
+                        } catch (IOException e) {
+                            LOG.error("Couldn't converte input stream.", e);
+                            Streams.close(stream);
+                            Streams.close(fileHolder);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private String prepareUri(String uri) {
+        if (uri.startsWith("CID:")) {
+            return uri.substring(4);
+        }
+        return uri;
     }
 
     public Collection<String> getActionNames() throws OXException {

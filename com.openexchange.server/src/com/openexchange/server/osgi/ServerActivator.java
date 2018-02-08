@@ -109,7 +109,6 @@ import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.context.ContextService;
 import com.openexchange.conversion.ConversionService;
-import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.counter.MailCounter;
 import com.openexchange.counter.MailIdleCounter;
@@ -154,8 +153,6 @@ import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.contact.datasource.ContactDataSource;
-import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
-import com.openexchange.groupware.datahandler.ICalJSONDataHandler;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.delete.contextgroup.DeleteContextGroupListener;
 import com.openexchange.groupware.impl.id.CreateIDSequenceTable;
@@ -196,8 +193,8 @@ import com.openexchange.mail.attachment.AttachmentTokenService;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
 import com.openexchange.mail.cache.MailAccessCacheEventListener;
 import com.openexchange.mail.cache.MailSessionEventHandler;
+import com.openexchange.mail.conversion.AttachmentMailPartDataSource;
 import com.openexchange.mail.conversion.ICalMailPartDataSource;
-import com.openexchange.mail.conversion.VCardAttachMailDataHandler;
 import com.openexchange.mail.conversion.VCardMailPartDataSource;
 import com.openexchange.mail.json.compose.ComposeHandlerRegistry;
 import com.openexchange.mail.json.compose.share.internal.AttachmentStorageRegistry;
@@ -778,6 +775,11 @@ public final class ServerActivator extends HousekeepingActivator {
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, "com.openexchange.mail.ical");
             registerService(DataSource.class, new ICalMailPartDataSource(), props);
+        }
+        {
+            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
+            props.put(STR_IDENTIFIER, "com.openexchange.mail.attachment");
+            registerService(DataSource.class, new AttachmentMailPartDataSource(), props);
         }
         {
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
