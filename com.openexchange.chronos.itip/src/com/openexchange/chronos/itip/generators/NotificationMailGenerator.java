@@ -533,7 +533,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         if (!attachmentMemory.hasAttachmentChanged(updated.getId(), ctx.getContextId())) {
             return;
         }
-        if (false == mail.getEvent().containsAttachments() || mail.getEvent().getAttachments().isEmpty()) {
+        if (false == mail.getEvent().containsAttachments() || null == mail.getEvent().getAttachments() || mail.getEvent().getAttachments().isEmpty()) {
             return;
         }
         mail.setAttachmentUpdate(true);
