@@ -107,7 +107,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.google.gdata"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.share"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.share.impl"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.subscribe.google"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.oauth.google"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.oauth"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.google.api.client"/>
