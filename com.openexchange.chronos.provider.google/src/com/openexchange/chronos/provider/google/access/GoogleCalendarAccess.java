@@ -66,7 +66,6 @@ import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.google.api.services.calendar.model.Events;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.TimeTransparency;
@@ -251,10 +250,6 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
     }
 
     private Event convertEvent(com.google.api.services.calendar.model.Event event) throws OXException {
-        if (parameters.contains(CalendarParameters.PARAMETER_FIELDS)) {
-            EventField[] eventFields = parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
-            return GoogleEventConverter.getInstance().convertToEvent(event, eventFields);
-        }
         return GoogleEventConverter.getInstance().convertToEvent(event);
     }
 
