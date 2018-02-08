@@ -208,7 +208,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
      */
     private boolean containsMaster(List<Event> events, String uid) {
         for (Event eve : events) {
-            if (eve.getUid().equals(uid) && !eve.containsRecurrenceId()) {
+            if (uid!=null && uid.equals(eve.getUid()) && !eve.containsRecurrenceId()) {
                 return true;
             }
         }
