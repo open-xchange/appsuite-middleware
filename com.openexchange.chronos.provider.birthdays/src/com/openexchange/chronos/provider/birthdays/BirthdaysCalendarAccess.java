@@ -339,12 +339,12 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
         /*
          * apply offset & limit for search
          */
-        SortOptions sortOptions;
-        SearchOptions searchOptions = new SearchOptions(parameters);
-        if (0 < searchOptions.getOffset() || 0 < searchOptions.getLimit()) {
-            sortOptions = new SortOptions(searchOptions.getOffset(), searchOptions.getLimit());
-        } else {
-            sortOptions = SortOptions.EMPTY;
+        SortOptions sortOptions = null;
+        if (null != parameters) {
+            SearchOptions searchOptions = new SearchOptions(parameters);
+            if (0 < searchOptions.getOffset() || 0 < searchOptions.getLimit()) {
+                sortOptions = new SortOptions(searchOptions.getOffset(), searchOptions.getLimit());
+            }
         }
         /*
          * perform search
