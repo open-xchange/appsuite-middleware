@@ -153,6 +153,9 @@ public class DateHelper {
     }
 
     public String formatTime(Date date) {
+        if (date == null || timeFormat == null) {
+            return "";
+        }
         return timeFormat.format(date);
     }
 
