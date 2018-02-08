@@ -153,22 +153,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
         if (!KNOWN_TREES.contains(treeId)) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Create not supported by tree " + treeId);
         }
-        FolderStorage parentStorage = null;
-        FolderStorage[] folderStorages = folderStorageDiscoverer.getFolderStoragesForParent(treeId, parentId);
-        if (1 == folderStorages.length) {
-            parentStorage = folderStorages[0];
-        } else {
-            for (FolderStorage folderStorage : folderStorages) {
-                if (com.openexchange.tools.arrays.Arrays.contains(folderStorage.getSupportedContentTypes(), toCreate.getContentType())) {
-                    parentStorage = folderStorage;
-                    break;
-                }
-            }
-        }
-        if (null == parentStorage) {
-            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, parentId);
-        }
-
+        FolderStorage parentStorage = selectFolderStorage(treeId, parentId, toCreate.getContentType());
         TransactionManager transactionManager = TransactionManager.initTransaction(storageParameters);
         boolean rollbackTransaction = true;
         /*
@@ -343,7 +328,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
 
     private String doCreateVirtual(final Folder toCreate, final String parentId, final String treeId, final FolderStorage virtualStorage, final List<FolderStorage> openedStorages, final TransactionManager transactionManager, ComparedFolderPermissions comparedPermissions) throws OXException {
         final ContentType folderContentType = toCreate.getContentType();
-        final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
+        final FolderStorage realStorage = selectFolderStorage(FolderStorage.REAL_TREE_ID, parentId, folderContentType);
         if (realStorage.equals(virtualStorage)) {
             doCreateReal(toCreate, parentId, FolderStorage.REAL_TREE_ID, realStorage, transactionManager, comparedPermissions);
         } else {
@@ -504,6 +489,30 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
         if (storage.startTransaction(storageParameters, true)) {
             openedStorages.add(storage);
         }
+    }
+
+    /**
+     * Selects a folder storage for a new folder, considering the targeted folder tree and parent folder, as well as the content type for
+     * the new folder.
+     *
+     * @param treeId The identifier of the targeted folder tree
+     * @param parentId The identifier of the parent folder
+     * @param contentType The content type for the new folder, or <code>null</code> if not set
+     * @return The parent folder storage appropriate for the new folder
+     */
+    private FolderStorage selectFolderStorage(String treeId, String parentId, ContentType contentType) throws OXException {
+        if (null != contentType) {
+            for (FolderStorage folderStorage : folderStorageDiscoverer.getFolderStoragesForParent(treeId, parentId)) {
+                if (supportsContentType(contentType, folderStorage)) {
+                    return folderStorage;
+                }
+            }
+        }
+        FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, parentId);
+        if (null == folderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, parentId);
+        }
+        return folderStorage;
     }
 
     private static boolean supportsContentType(final ContentType folderContentType, final FolderStorage folderStorage) {

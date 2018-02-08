@@ -305,10 +305,10 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                     if (msg2.isSeen()) {
                         return compareByReceivedDate(msg1, msg2, false);
                     }
-                    return 1;
+                    return -1;
                 }
                 if (msg2.isSeen()) {
-                    return -1;
+                    return 1;
                 }
                 return compareByReceivedDate(msg1, msg2, false);
             }

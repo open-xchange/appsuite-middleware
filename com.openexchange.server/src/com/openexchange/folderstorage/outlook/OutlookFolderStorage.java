@@ -874,7 +874,7 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                 return publicMailFolderPath;
             } else if (TaskContentType.getInstance().equals(contentType)) {
                 return FolderStorage.PUBLIC_ID;
-            } else if (CalendarContentType.getInstance().equals(contentType)) {
+            } else if (CalendarContentType.getInstance().equals(contentType) || com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance().equals(contentType)) {
                 return FolderStorage.PUBLIC_ID;
             } else if (ContactContentType.getInstance().equals(contentType)) {
                 return FolderStorage.PUBLIC_ID;
