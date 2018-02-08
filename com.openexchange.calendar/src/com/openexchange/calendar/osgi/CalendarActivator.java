@@ -59,7 +59,7 @@ public class CalendarActivator extends CompositeBundleActivator {
 	protected BundleActivator[] getActivators() {
 		return new BundleActivator[]{
 				new CoreCalendarActivator(),
-				new ITipActivator()
+				//new ITipActivator()
 		};
 	}
 

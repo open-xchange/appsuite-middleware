@@ -117,6 +117,7 @@ public class GetTest extends AppointmentTest {
         appointmentObj.setLabel(2);
         appointmentObj.setNote("note");
         appointmentObj.setCategories("testcat1,testcat2,testcat3");
+        appointmentObj.setIgnoreConflicts(true);
 
         final int userParticipantId = getClient2().getValues().getUserId();
         final int groupParticipantId = GroupTest.searchGroup(getClient(), testContext.getGroupParticipants().get(0))[0].getIdentifier();

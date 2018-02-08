@@ -77,7 +77,6 @@ public abstract class AbstractImportAction implements AJAXActionService {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-
         return perform(new ImportRequest(requestData, session));
     }
 

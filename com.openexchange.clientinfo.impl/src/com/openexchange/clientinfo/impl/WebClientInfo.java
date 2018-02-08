@@ -66,25 +66,27 @@ public class WebClientInfo implements ClientInfo {
 
     private final String client;
     private final String platform;
+    private final String platformFamily;
     private final String platformVersion;
     private final String browser;
     private final String browserVersion;
 
-    public WebClientInfo(String client, String platform, String platformVersion, String browser, String browserVersion) {
+    public WebClientInfo(String client, String platform, String platformFamily, String platformVersion, String browser, String browserVersion) {
         this.client = client;
         this.platform = platform;
+        this.platformFamily = platformFamily;
         this.platformVersion = platformVersion;
         this.browser = browser;
         this.browserVersion = browserVersion;
     }
 
     @Override
-    public String toString(Locale locale) {
+    public String getDisplayName(Locale locale) {
         StringHelper helper = StringHelper.valueOf(locale);
         String out;
-        if (Strings.isNotEmpty(platform) && Strings.isNotEmpty(platformVersion)) {
+        if (Strings.isNotEmpty(platform)) {
             out = helper.getString(ClientInfoStrings.DEFAULT_CLIENT_INFO_MESSAGE);
-            return String.format(out, client, browser, browserVersion, platform, platformVersion);
+            return String.format(out, client, browser, browserVersion, platform);
         } else if (Strings.isNotEmpty(browser) && Strings.isNotEmpty(browserVersion)) {
             out = helper.getString(ClientInfoStrings.CLIENT_BROWSER_INFO_MESSAGE);
             return String.format(out, client, browser, browserVersion);
@@ -97,6 +99,32 @@ public class WebClientInfo implements ClientInfo {
     @Override
     public ClientInfoType getType() {
         return ClientInfoType.BROWSER;
+    }
+
+    @Override
+    public String getOSFamily() {
+        if (Strings.isNotEmpty(platformFamily)) {
+            return platformFamily.toLowerCase();
+        }
+        return null;
+    }
+
+    @Override
+    public String getOSVersion() {
+        return platformVersion;
+    }
+
+    @Override
+    public String getClientName() {
+        if (Strings.isNotEmpty(browser)) {
+            return browser.toLowerCase();
+        }
+        return null;
+    }
+
+    @Override
+    public String getClientVersion() {
+        return browserVersion;
     }
 
 }

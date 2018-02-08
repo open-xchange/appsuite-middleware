@@ -49,7 +49,6 @@
 
 package com.openexchange.client.onboarding.mail;
 
-
 /**
  * {@link Configuration}
  *
@@ -57,6 +56,111 @@ package com.openexchange.client.onboarding.mail;
  * @since v7.8.1
  */
 public class Configuration {
+
+    /**
+     * Creates a new builder instance.
+     *
+     * @return The new builder
+     */
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    /** The builder for an instance of <code>Configuration</code> */
+    public static class Builder {
+
+        private String host;
+        private int port;
+        private boolean secure;
+        private String login;
+        private String password;
+        private boolean needsAuthentication;
+
+        /**
+         * Initializes a new {@link Configuration.Builder}.
+         */
+        Builder() {
+            super();
+            // Authentication needed by default
+            needsAuthentication = true;
+        }
+
+        /**
+         * Sets the host
+         *
+         * @param host The host to set
+         * @return This builder
+         */
+        public Builder withHost(String host) {
+            this.host = host;
+            return this;
+        }
+
+        /**
+         * Sets the port
+         *
+         * @param port The port to set
+         * @return This builder
+         */
+        public Builder withPort(int port) {
+            this.port = port;
+            return this;
+        }
+
+        /**
+         * Sets the secure flag.
+         *
+         * @param secure The secure flag to set
+         * @return This builder
+         */
+        public Builder withSecure(boolean secure) {
+            this.secure = secure;
+            return this;
+        }
+
+        /**
+         * Sets the login.
+         *
+         * @param login The login to set
+         * @return This builder
+         */
+        public Builder withLogin(String login) {
+            this.login = login;
+            return this;
+        }
+
+        /**
+         * Sets the password.
+         *
+         * @param password The password to set
+         * @return This builder
+         */
+        public Builder withPassword(String password) {
+            this.password = password;
+            return this;
+        }
+
+        /**
+         * Sets whether authentication is needed or not (default is <code>true</code>).
+         *
+         * @param needsAuthentication <code>true</code> to signal that authentication is needed; otherwise <code>false</code> if authentication-less access is permitted
+         */
+        public Builder withNeedsAuthentication(boolean needsAuthentication) {
+            this.needsAuthentication = needsAuthentication;
+            return this;
+        }
+
+        /**
+         * Builds the <code>Configuration</code> instance from this builder's arguments
+         *
+         * @return The <code>Configuration</code> instance
+         */
+        public Configuration build() {
+            return new Configuration(host, port, secure, login, password, needsAuthentication);
+        }
+    } // End of Builder class
+
+    // -----------------------------------------------------------------------------------------------------
 
     /** The host name */
     public final String host;
@@ -73,6 +177,9 @@ public class Configuration {
     /** The password */
     public final String password;
 
+    /** <code>true</code> to signal that authentication is needed; otherwise <code>false</code> if authentication-less access is permitted */
+    public final boolean needsAuthentication;
+
     /**
      * Initializes a new {@link Configuration}.
      *
@@ -82,22 +189,14 @@ public class Configuration {
      * @param login The login
      * @param password The password
      */
-    public Configuration(String host, int port, boolean secure, String login, String password) {
+    Configuration(String host, int port, boolean secure, String login, String password, boolean needsAuthentication) {
         super();
         this.host = host;
         this.port = port;
         this.secure = secure;
-        this.login = login;
-        this.password = password;
-    }
-
-    /**
-     * Signals whether this configuration requires no authentication.
-     *
-     * @return <code>true</code> if no authentication is supposed to be performed; otherwise <code>false</code>
-     */
-    public boolean noAuthentication() {
-        return null == login && null == password;
+        this.login = needsAuthentication ? login : null;
+        this.password = needsAuthentication ? password : null;
+        this.needsAuthentication = needsAuthentication;
     }
 
 }

@@ -1,3 +1,9 @@
+open-xchange-imap-textpreview-mock (7.10.0-1) stable; urgency=medium
+
+  * Second preview for 7.10.0 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 02 Feb 2018 15:12:34 +0100
+
 open-xchange-imap-textpreview-mock (7.10.0-0) unstable; urgency=medium
 
   * Initial release

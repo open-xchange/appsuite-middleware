@@ -56,6 +56,7 @@ import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
+import org.apache.http.ConnectionReuseStrategy;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
@@ -84,6 +85,7 @@ import org.apache.http.config.RegistryBuilder;
 import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.conn.ConnectionRequest;
+import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
@@ -243,13 +245,23 @@ public final class HttpClients {
         return ccm;
     }
 
-    private static CloseableHttpClient initializeHttpClientUsing(final ClientConfig config, ClientConnectionManager ccm) {
+    private static CloseableHttpClient initializeHttpClientUsing(final ClientConfig config, HttpClientConnectionManager ccm) {
         HttpClientBuilder clientBuilder = org.apache.http.impl.client.HttpClients.custom()
-            .setKeepAliveStrategy(new KeepAliveStrategy(config.keepAliveDuration))
             .setConnectionManager(ccm)
             .setDefaultRequestConfig(RequestConfig.custom().setConnectTimeout(config.connectionTimeout).setSocketTimeout(config.socketReadTimeout).setProxy(config.proxy).build());
+
+        if (config.keepAliveStrategy == null) {
+            clientBuilder.setKeepAliveStrategy(new KeepAliveStrategy(config.keepAliveDuration));
+        } else {
+            clientBuilder.setKeepAliveStrategy(config.keepAliveStrategy);
+        }
+
+        if(config.connectionReuseStrategy != null) {
+            clientBuilder.setConnectionReuseStrategy(config.connectionReuseStrategy);
+        }
+
         if (config.denyLocalRedirect) {
-            clientBuilder.setRedirectStrategy(DenyLocalRedirectStrategy.INSTANCE);
+            clientBuilder.setRedirectStrategy(DenyLocalRedirectStrategy.DENY_LOCAL_INSTANCE);
         }
         if (null != config.userAgent) {
             clientBuilder.setUserAgent(config.userAgent);
@@ -284,9 +296,8 @@ public final class HttpClients {
             builder.register("lenient", new LenientCookieSpecProvider());
             clientBuilder.setDefaultCookieSpecRegistry(builder.build());
         }
-        // Only apply manual content decompression if 'HttpClientBuilder.disableContentCompression()' was invoked
-        boolean contentCompressionDisabled = false;
-        if (contentCompressionDisabled) {
+
+        if (config.contentCompressionDisabled) {
             clientBuilder.addInterceptorLast(new HttpResponseInterceptor() {
 
                 @Override
@@ -306,7 +317,18 @@ public final class HttpClients {
                     }
                 }
             });
+
+            clientBuilder.addInterceptorLast(new HttpRequestInterceptor() {
+
+                @Override
+                public void process(final HttpRequest request, final HttpContext context) throws HttpException, IOException {
+                    if (!request.containsHeader("Accept-Encoding")) {
+                        request.addHeader("Accept-Encoding", "gzip");
+                    }
+                }
+            });
         }
+        clientBuilder.useSystemProperties();
         return clientBuilder.build();
     }
 
@@ -336,6 +358,10 @@ public final class HttpClients {
         Credentials credentials;
         CookieStore cookieStore;
         boolean denyLocalRedirect;
+
+        ConnectionKeepAliveStrategy keepAliveStrategy;
+        ConnectionReuseStrategy connectionReuseStrategy;
+        boolean contentCompressionDisabled = false;
 
         ClientConfig() {
             super();
@@ -470,6 +496,39 @@ public final class HttpClients {
          */
         public ClientConfig setKeepAliveDuration(int keepAliveDuration) {
             this.keepAliveDuration = keepAliveDuration;
+            return this;
+        }
+
+        /**
+         * Instead of a duration a own KeepAliveStrategy can be set.
+         * Default: null
+         *
+         * @param strategy The {@link KeepAliveStrategy}
+         */
+        public ClientConfig setKeepAliveStrategy(ConnectionKeepAliveStrategy strategy) {
+            this.keepAliveStrategy = strategy;
+            return this;
+        }
+
+        /**
+         * Sets the {@link ConnectionReuseStrategy}
+         * Default: null
+         *
+         * @param strategy The {@link ConnectionReuseStrategy}
+         */
+        public ClientConfig setConnectionReuseStrategy(ConnectionReuseStrategy strategy) {
+            this.connectionReuseStrategy = strategy;
+            return this;
+        }
+
+        /**
+         * Sets the contentCompressionDisabled flag
+         * Default: false
+         *
+         * @param contentCompressionDisabled
+         */
+        public ClientConfig setContentCompressionDisabled(boolean contentCompressionDisabled) {
+            this.contentCompressionDisabled = contentCompressionDisabled;
             return this;
         }
 
@@ -846,7 +905,7 @@ public final class HttpClients {
 
     private static class DenyLocalRedirectStrategy extends DefaultRedirectStrategy {
 
-        static final DenyLocalRedirectStrategy INSTANCE = new DenyLocalRedirectStrategy();
+        static final DenyLocalRedirectStrategy DENY_LOCAL_INSTANCE = new DenyLocalRedirectStrategy();
 
         private DenyLocalRedirectStrategy() {
             super();

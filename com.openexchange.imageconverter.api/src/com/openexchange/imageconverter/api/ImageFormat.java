@@ -437,7 +437,7 @@ public class ImageFormat implements Comparable<ImageFormat> {
         ImageFormat ret = null;
 
         if (isNotEmpty(imageFormatStr)) {
-            final String curFormatStr = imageFormatStr.trim();
+            final String curFormatStr = imageFormatStr.trim().toLowerCase();
 
             int extentsPos = curFormatStr.indexOf(':');
             int crossPos = curFormatStr.indexOf('x', extentsPos);
@@ -446,7 +446,7 @@ public class ImageFormat implements Comparable<ImageFormat> {
             final boolean hasFormat = (extentsPos > -1);
             final String imageFormatShortName = hasFormat ?
                 curFormatStr.substring(0, extentsPos) :
-                    ImageFormat.ImageType.AUTO.getShortName();
+                    ((curFormatStr.length() > 0) ? curFormatStr : ImageFormat.ImageType.AUTO.getShortName());
 
             if (scalePos < 0) {
                 scalePos = curFormatStr.length();

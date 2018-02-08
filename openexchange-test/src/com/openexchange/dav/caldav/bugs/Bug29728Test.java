@@ -77,14 +77,51 @@ public class Bug29728Test extends CalDAVTest {
          */
         String uid = randomUID();
         Date start = TimeTools.D("next friday at 8:00");
-        Date end = TimeTools.D("next thursday at 10:00");
+        Date end = TimeTools.D("next friday at 10:00");
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.setTime(start);
         calendar.add(Calendar.WEEK_OF_YEAR, 2);
         Date ex1 = calendar.getTime();
         calendar.add(Calendar.WEEK_OF_YEAR, 2);
         Date ex2 = calendar.getTime();
-        String iCal = "BEGIN:VCALENDAR\r\n" + "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\r\n" + "VERSION:2.0\r\n" + "BEGIN:VTIMEZONE\r\n" + "TZID:Europe/Berlin\r\n" + "X-LIC-LOCATION:Europe/Berlin\r\n" + "BEGIN:DAYLIGHT\r\n" + "TZOFFSETFROM:+0100\r\n" + "TZOFFSETTO:+0200\r\n" + "TZNAME:CEST\r\n" + "DTSTART:19700329T020000\r\n" + "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3\r\n" + "END:DAYLIGHT\r\n" + "BEGIN:STANDARD\r\n" + "TZOFFSETFROM:+0200\r\n" + "TZOFFSETTO:+0100\r\n" + "TZNAME:CET\r\n" + "DTSTART:19701025T030000\r\n" + "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10\r\n" + "END:STANDARD\r\n" + "END:VTIMEZONE\r\n" + "BEGIN:VEVENT\r\n" + "CREATED:" + formatAsUTC(new Date()) + "\r\n" + "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" + "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" + "UID:" + uid + "\r\n" + "SUMMARY:serie\r\n" + "RRULE:FREQ=DAILY\r\n" + "EXDATE:" + formatAsUTC(ex1) + "\r\n" + "EXDATE:" + formatAsUTC(ex2) + "\r\n" + "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" + "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" + "LOCATION:da\r\n" + "SEQUENCE:2\r\n" + "END:VEVENT\r\n" + "END:VCALENDAR\r\n";
+        String iCal =
+            "BEGIN:VCALENDAR\r\n" +
+            "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\r\n" +
+            "VERSION:2.0\r\n" +
+            "BEGIN:VTIMEZONE\r\n" +
+            "TZID:Europe/Berlin\r\n" +
+            "X-LIC-LOCATION:Europe/Berlin\r\n" +
+            "BEGIN:DAYLIGHT\r\n" +
+            "TZOFFSETFROM:+0100\r\n" +
+            "TZOFFSETTO:+0200\r\n" +
+            "TZNAME:CEST\r\n" +
+            "DTSTART:19700329T020000\r\n" +
+            "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3\r\n" +
+            "END:DAYLIGHT\r\n" +
+            "BEGIN:STANDARD\r\n" +
+            "TZOFFSETFROM:+0200\r\n" +
+            "TZOFFSETTO:+0100\r\n" +
+            "TZNAME:CET\r\n" +
+            "DTSTART:19701025T030000\r\n" +
+            "RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10\r\n" +
+            "END:STANDARD\r\n" +
+            "END:VTIMEZONE\r\n" +
+            "BEGIN:VEVENT\r\n" +
+            "CREATED:" + formatAsUTC(new Date()) + "\r\n" +
+            "LAST-MODIFIED:" + formatAsUTC(new Date()) + "\r\n" +
+            "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
+            "UID:" + uid + "\r\n" +
+            "SUMMARY:serie\r\n" +
+            "RRULE:FREQ=DAILY\r\n" +
+            "EXDATE:" + formatAsUTC(ex1) + "\r\n" +
+            "EXDATE:" + formatAsUTC(ex2) + "\r\n" +
+            "DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" +
+            "DTEND;TZID=Europe/Berlin:" + format(end, "Europe/Berlin") + "\r\n" +
+            "LOCATION:da\r\n" +
+            "SEQUENCE:2\r\n" +
+            "END:VEVENT\r\n" +
+            "END:VCALENDAR\r\n"
+        ;
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICal(uid, iCal));
         /*
          * verify appointment on server

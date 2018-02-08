@@ -52,8 +52,6 @@ package com.openexchange.groupware.attach.impl;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getStatement;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -112,6 +110,8 @@ import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
@@ -125,13 +125,13 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     private static final AtomicReference<AttachmentQuotaProvider> QUOTA_PROVIDER_REF = new AtomicReference<AttachmentQuotaProvider>();
 
-    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttachmentBaseImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttachmentBaseImpl.class);
 
     private static final AttachmentQueryCatalog QUERIES = new AttachmentQueryCatalog();
 
-    private final ThreadLocal<Context> contextHolder = new ThreadLocal<Context>();
+    private static final ThreadLocal<Context> contextHolder = new ThreadLocal<Context>();
 
-    private final ThreadLocal<List<String>> fileIdRemoveList = new ThreadLocal<List<String>>();
+    private static final ThreadLocal<List<String>> fileIdRemoveList = new ThreadLocal<List<String>>();
 
     private final TIntObjectMap<List<AttachmentListener>> moduleListeners = new TIntObjectHashMap<List<AttachmentListener>>();
 
@@ -143,6 +143,12 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
 
     public AttachmentBaseImpl(final DBProvider provider) {
         super(provider);
+    }
+
+    public AttachmentBaseImpl(AttachmentBaseImpl attachmentBase) {
+        super();
+        moduleListeners.putAll(attachmentBase.moduleListeners);
+        moduleAuthorizors.putAll(attachmentBase.moduleAuthorizors);
     }
 
     public static void setQuotaProvider(AttachmentQuotaProvider quotaProvider) {

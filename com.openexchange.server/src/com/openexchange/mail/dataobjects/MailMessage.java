@@ -73,7 +73,6 @@ import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.tools.TimeZoneUtils;
@@ -1543,11 +1542,11 @@ public abstract class MailMessage extends MailPart {
         if (!b_priority) {
             final String imp = getFirstHeader(MessageHeaders.HDR_IMPORTANCE);
             if (imp != null) {
-                setPriority(MimeMessageConverter.parseImportance(imp));
+                setPriority(MimeMessageUtility.parseImportance(imp));
             } else {
                 final String prioStr = getFirstHeader(MessageHeaders.HDR_X_PRIORITY);
                 if (prioStr != null) {
-                    setPriority(MimeMessageConverter.parsePriority(prioStr));
+                    setPriority(MimeMessageUtility.parsePriority(prioStr));
                 }
             }
         }

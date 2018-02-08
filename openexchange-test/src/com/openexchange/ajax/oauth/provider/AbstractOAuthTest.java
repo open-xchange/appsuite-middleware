@@ -67,6 +67,7 @@ import com.openexchange.oauth.provider.rmi.client.ClientDataDto;
 import com.openexchange.oauth.provider.rmi.client.ClientDto;
 import com.openexchange.oauth.provider.rmi.client.IconDto;
 import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
+import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
@@ -90,6 +91,7 @@ public abstract class AbstractOAuthTest extends AbstractSmtpAJAXSession {
         this.scope = scope;
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -101,6 +103,7 @@ public abstract class AbstractOAuthTest extends AbstractSmtpAJAXSession {
         oAuthClient = new OAuthClient(testUser, clientApp.getId(), clientApp.getSecret(), clientApp.getRedirectURIs().get(0), scope);
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {
@@ -135,7 +138,7 @@ public abstract class AbstractOAuthTest extends AbstractSmtpAJAXSession {
         clientData.setIcon(icon);
         clientData.setContactAddress("webmaster@example.com");
         clientData.setWebsite("http://www.example.com");
-        clientData.setDefaultScope(Scope.newInstance(ContactActionFactory.OAUTH_READ_SCOPE, ContactActionFactory.OAUTH_WRITE_SCOPE, AppointmentActionFactory.OAUTH_READ_SCOPE, AppointmentActionFactory.OAUTH_WRITE_SCOPE, TaskActionFactory.OAUTH_READ_SCOPE, TaskActionFactory.OAUTH_WRITE_SCOPE).toString());
+        clientData.setDefaultScope(Scope.newInstance(ContactActionFactory.OAUTH_READ_SCOPE, ContactActionFactory.OAUTH_WRITE_SCOPE, AppointmentActionFactory.OAUTH_READ_SCOPE, AppointmentActionFactory.OAUTH_WRITE_SCOPE, ChronosOAuthScope.OAUTH_WRITE_SCOPE, ChronosOAuthScope.OAUTH_READ_SCOPE, TaskActionFactory.OAUTH_READ_SCOPE, TaskActionFactory.OAUTH_WRITE_SCOPE).toString());
         clientData.setRedirectURIs(redirectURIs);
         return clientData;
     }

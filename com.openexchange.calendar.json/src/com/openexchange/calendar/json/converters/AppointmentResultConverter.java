@@ -57,19 +57,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
-import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
-import com.openexchange.calendar.json.actions.AppointmentAction;
+import com.openexchange.calendar.json.compat.Appointment;
+import com.openexchange.calendar.json.compat.AppointmentWriter;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
-import com.openexchange.groupware.calendar.RecurringResultInterface;
-import com.openexchange.groupware.calendar.RecurringResultsInterface;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.results.CollectionDelta;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.collections.PropertizedList;
@@ -109,7 +102,7 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
         final Date startUTC = req.optDate(AJAXServlet.PARAMETER_START);
         final Date endUTC = req.optDate(AJAXServlet.PARAMETER_END);
         final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
-        final boolean bRecurrenceMaster = Boolean.parseBoolean(req.getParameter(AppointmentAction.RECURRENCE_MASTER));
+        final boolean bRecurrenceMaster = Boolean.parseBoolean(req.getParameter(AJAXServlet.PARAMETER_RECURRENCE_MASTER));
 
         final TimeZone timeZone;
         {
@@ -219,8 +212,6 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
 
     private void convertCalendar(final Appointment appointmentobject, final AppointmentAJAXRequest request, final AJAXRequestResult result, final ServerSession session, final TimeZone userTimeZone) throws OXException {
         final JSONObject jsonResponseObj = new JSONObject();
-        final CalendarCollectionService recColl = services.getService(CalendarCollectionService.class);
-        final int recurrencePosition = request.optInt(CalendarFields.RECURRENCE_POSITION);
 
         final TimeZone timeZone;
         {
@@ -229,37 +220,10 @@ public class AppointmentResultConverter extends AbstractCalendarJSONResultConver
         }
         final AppointmentWriter appointmentwriter = new AppointmentWriter(timeZone).setSession(request.getSession());
         appointmentwriter.setSession(session);
-
-        if (appointmentobject.getRecurrenceType() != CalendarObject.NONE && recurrencePosition > 0) {
-            // Commented this because this is done in CalendarOperation.loadAppointment():207 that calls extractRecurringInformation()
-            // appointmentobject.calculateRecurrence();
-            final RecurringResultsInterface recuResults = recColl.calculateRecurring(
-                appointmentobject,
-                0,
-                0,
-                recurrencePosition,
-                CalendarCollectionService.MAX_OCCURRENCESE,
-                true);
-            if (recuResults.size() == 0) {
-                LOG.warn("No occurrence at position {}", recurrencePosition);
-                throw OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_POSITION.create(Integer.valueOf(recurrencePosition));
-            }
-            final RecurringResultInterface resultInterface = recuResults.getRecurringResult(0);
-            appointmentobject.setStartDate(new Date(resultInterface.getStart()));
-            appointmentobject.setEndDate(new Date(resultInterface.getEnd()));
-            appointmentobject.setRecurrencePosition(resultInterface.getPosition());
-
-            try {
-                appointmentwriter.writeAppointment(appointmentobject, jsonResponseObj);
-            } catch (final JSONException e) {
-                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            }
-        } else {
-            try {
-                appointmentwriter.writeAppointment(appointmentobject, jsonResponseObj);
-            } catch (final JSONException e) {
-                throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
-            }
+        try {
+            appointmentwriter.writeAppointment(appointmentobject, jsonResponseObj);
+        } catch (final JSONException e) {
+            throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
 
         result.setResultObject(jsonResponseObj, OUTPUT_FORMAT);

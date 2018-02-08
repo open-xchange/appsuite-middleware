@@ -557,4 +557,18 @@ public abstract class HousekeepingActivator extends DeferredActivator {
         unregisterServices();
     }
 
+    /**
+     * Initializes a new dictionary and inserts a specific key/value pair, ready to use when registering a service with a custom property
+     * via {@link #registerService(Class, Object, Dictionary)}.
+     *
+     * @param key The key to insert into the returned dictionary
+     * @param value The value to associate with the key in the returned dictionary
+     * @return A new dictionary holding a single mapping from <code>key</code> to <code>value</code>
+     */
+    protected static Dictionary<String, Object> singletonDictionary(String key, Object value) {
+        Dictionary<String, Object> dictionary = new Hashtable<String, Object>(1);
+        dictionary.put(key, value);
+        return dictionary;
+    }
+
 }

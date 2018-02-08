@@ -17,7 +17,7 @@
         schema:
           type: string
   put:
-    operationId: exportAsVICal
+    operationId: exportAsICal
     tags:
       - Export
     summary: Exports a batch of appointments and tasks data to a iCalendar file.

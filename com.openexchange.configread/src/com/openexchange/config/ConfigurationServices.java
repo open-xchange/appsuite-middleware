@@ -52,9 +52,9 @@ package com.openexchange.config;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -62,6 +62,7 @@ import java.util.Properties;
 import org.slf4j.Logger;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 
 /**
@@ -116,15 +117,15 @@ public class ConfigurationServices {
      * @throws IllegalArgumentException If file is no valid YAML
      */
     public static Object loadYamlFrom(File file) throws IOException {
-        FileReader reader = null;
+        InputStreamReader inputStreamReader = null;
         try {
-            reader = new FileReader(file);
+            inputStreamReader = new InputStreamReader(new FileInputStream(file), Charsets.UTF_8);
             Yaml yaml = new Yaml();
-            return yaml.load(reader);
+            return yaml.load(inputStreamReader);
         } catch (YAMLException e) {
             throw new IllegalArgumentException("Failed to load YAML file '" + file + ". Please fix any syntax errors in it.", e);
         } finally {
-            Streams.close(reader);
+            Streams.close(inputStreamReader);
         }
     }
 

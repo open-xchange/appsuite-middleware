@@ -92,7 +92,7 @@ public class MockIMAPTextPreviewActivator extends HousekeepingActivator {
             }
             float probability = (float) percentProbability / 100;
             String pseudoTextPropName = "com.openexchange.imap.textpreview.mock.text";
-            String pseudoText = configService.getProperty(pseudoTextPropName, "Awesome! Great! Fantastic! Yeeezzzz! Welcome to the Open-Xchange Cheering Team!");
+            String pseudoText = configService.getProperty(pseudoTextPropName, "Awesome! Great! Fantastic! Yeeezzzz! Massively excellent! Welcome to the Open-Xchange Cheering Team!");
             registerService(IMAPTextPreviewProvider.class, new MockIMAPTextPreviewProvider(pseudoText, probability));
             logger.info("Registered mock for IMAP text preview");
         } else {

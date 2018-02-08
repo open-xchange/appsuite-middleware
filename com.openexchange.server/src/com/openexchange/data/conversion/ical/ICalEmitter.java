@@ -157,18 +157,6 @@ public interface ICalEmitter {
     String writeTasks(List<Task> tasks, List<ConversionError> errors, List<ConversionWarning> warnings, Context ctx) throws ConversionError;
 
     /**
-     * Serializes a free/busy-reply directly, using the supplied free/busy information to reflect the free/busy-times and the corresponding attendee.
-     *
-     * @param freeBusyRequest the free/busy-information
-     * @param ctx the context
-     * @param errors the list of conversion errors
-     * @param warnings the list of conversion warnings
-     * @return the free/busy-reply
-     * @throws ConversionError
-     */
-    String writeFreeBusyReply(FreeBusyInformation freeBusyInfo, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
-
-    /**
      * Writes a single timezone definition to an iCal session.
      *
      * @param session The underlying iCal session

@@ -77,9 +77,9 @@ import com.openexchange.calendar.cache.CalendarVolatileCache;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.internal.AbstractCapabilityService;
-import com.openexchange.charset.internal.CollectionCharsetProvider;
 import com.openexchange.charset.CustomCharsetProvider;
 import com.openexchange.charset.CustomCharsetProviderInit;
+import com.openexchange.charset.internal.CollectionCharsetProvider;
 import com.openexchange.charset.internal.ModifyCharsetExtendedProvider;
 import com.openexchange.cluster.timer.ClusterTimerService;
 import com.openexchange.cluster.timer.impl.ClusterTimerServiceImpl;
@@ -114,7 +114,6 @@ import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedBy;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
-import com.openexchange.event.impl.AppointmentEventInterface;
 import com.openexchange.event.impl.EventDispatcher;
 import com.openexchange.event.impl.EventQueue;
 import com.openexchange.event.impl.TaskEventInterface;
@@ -133,7 +132,6 @@ import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.alias.impl.RdbAliasStorage;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.configuration.ParticipantConfig;
 import com.openexchange.groupware.container.Contact;
@@ -684,7 +682,6 @@ public final class Init {
             TestServiceRegistry.getInstance().addService(CalendarCollectionService.class, new CalendarCollection());
             TestServiceRegistry.getInstance().addService(AppointmentSqlFactoryService.class, new AppointmentSqlFactory());
             TargetRegistry.getInstance().addService(Types.APPOINTMENT, new CalendarReminderDelete());
-            TestServiceRegistry.getInstance().addService(CalendarAdministrationService.class, new CalendarAdministration());
 
             if (null == CalendarVolatileCache.getInstance()) {
                 try {
@@ -994,12 +991,7 @@ public final class Init {
     private static void startAndInjectEventBundle() throws Exception {
         if (null == TestServiceRegistry.getInstance().getService(EventAdmin.class)) {
             EventQueue.setNewEventDispatcher(new EventDispatcher() {
-
-                @Override
-                public void addListener(final AppointmentEventInterface listener) {
-                    // Do nothing.
-                }
-
+                
                 @Override
                 public void addListener(final TaskEventInterface listener) {
                     // Do nothing.

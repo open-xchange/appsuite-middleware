@@ -106,3 +106,81 @@ properties:
       file: calendar.properties
       packageName: open-xchange-core
       tags: ["Calendar"]
+    - key: com.openexchange.calendar.birthdays.enabled
+      description: |
+	    Configures if the <i>birthdays</i> calendar provider is available for a user or not. 
+      defaultValue: true
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Contact"]
+    - key: com.openexchange.calendar.schedjoules.enabled
+      description: |
+	    Configures if the <i>schedjoules</i> calendar provider is available for a user or not. 
+      defaultValue: true
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: subscribe.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar","Subscribe"]
+    - key: com.openexchange.calendar.schedjoules.maxAccounts
+      description: |
+        Defines the maximum number of allowed accounts or subscriptions for a user within the <i>schedjoules</i> calendar provider. A value of <code>0</code> disables the limit.
+      defaultValue: 20
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: subscribe.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar","Subscribe","Limit"]
+    - key: com.openexchange.calendar.ical.enabled
+      description: |
+	    Configures if the <i>ical</i> calendar provider is available for a user or not. 
+      defaultValue: true
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: subscribe.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar","Subscribe"]
+    - key: com.openexchange.calendar.ical.maxAccounts
+      description: |
+        Defines the maximum number of allowed accounts or subscriptions for a user within the <i>ical</i> calendar provider. A value of <code>0</code> disables the limit.
+      defaultValue: 20
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: subscribe.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar","Subscribe","Limit"]
+    - key: com.openexchange.calendar.google.enabled
+      description: |
+	    Configures if the <i>google</i> calendar provider is available for a user or not. 
+      defaultValue: true
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: subscribe.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar","Subscribe"]
+    - key: com.openexchange.calendar.google.maxAccounts
+      description: |
+        Defines the maximum number of allowed accounts or subscriptions for a user within the <i>google</i> calendar provider. A value of <code>0</code> disables the limit.
+      defaultValue: 20
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: subscribe.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar","Subscribe","Limit"]
+      

@@ -70,21 +70,18 @@ import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.net.URLCodec;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
-import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.conn.params.ConnRoutePNames;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
 import org.json.JSONException;
 import org.json.JSONInputStream;
 import org.json.JSONObject;
@@ -100,7 +97,6 @@ import com.openexchange.xing.exception.XingSSLException;
 import com.openexchange.xing.exception.XingServerException;
 import com.openexchange.xing.exception.XingUnlinkedException;
 import com.openexchange.xing.session.Session;
-import com.openexchange.xing.session.Session.ProxyInfo;
 
 /**
  * This class is mostly used internally by {@link XingAPI} for creating and executing REST requests to the XING API, and parsing responses.
@@ -442,8 +438,6 @@ public class RESTUtility {
                 throw new XingServerException(response, result);
             }
             throw new XingParseException("failed to parse: " + body);
-        } catch (final OutOfMemoryError e) {
-            throw new XingException(e);
         } finally {
             Streams.close(bin);
         }
@@ -527,7 +521,7 @@ public class RESTUtility {
      * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    private static HttpResponse execute(final Session session, final HttpUriRequest req, final List<Integer> expectedStatusCode) throws XingException {
+    private static HttpResponse execute(final Session session, final HttpRequestBase req, final List<Integer> expectedStatusCode) throws XingException {
         return execute(session, req, -1, expectedStatusCode);
     }
 
@@ -547,14 +541,13 @@ public class RESTUtility {
      * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
-    private static HttpResponse execute(final Session session, final HttpUriRequest req, final int socketTimeoutOverrideMs, final List<Integer> expectedStatusCode) throws XingException {
+    private static HttpResponse execute(final Session session, final HttpRequestBase req, final int socketTimeoutOverrideMs, final List<Integer> expectedStatusCode) throws XingException {
         final HttpClient client = updatedHttpClient(session);
 
         // Set request timeouts.
         session.setRequestTimeout(req);
         if (socketTimeoutOverrideMs >= 0) {
-            final HttpParams reqParams = req.getParams();
-            HttpConnectionParams.setSoTimeout(reqParams, socketTimeoutOverrideMs);
+            req.setConfig(RequestConfig.custom().setConnectTimeout(req.getConfig().getConnectTimeout()).setSocketTimeout(socketTimeoutOverrideMs).build());
         }
 
         final boolean repeatable = isRequestRepeatable(req);
@@ -571,14 +564,6 @@ public class RESTUtility {
                     response = client.execute(req);
                 } catch (final NullPointerException e) {
                     // Leave 'response' as null. This is handled below.
-                }
-
-                /*
-                 * We've potentially connected to a different network, but are still using the old proxy settings. Refresh proxy settings so
-                 * that we can retry this request.
-                 */
-                if (response == null) {
-                    updateClientProxy(client, session);
                 }
 
                 if (!repeatable) {
@@ -604,8 +589,6 @@ public class RESTUtility {
             // Quite common for network going up & down or the request being
             // cancelled, so don't worry about logging this
             throw new XingIOException(e);
-        } catch (final OutOfMemoryError e) {
-            throw new XingException(e);
         }
     }
 
@@ -679,30 +662,10 @@ public class RESTUtility {
     }
 
     /**
-     * Gets the session's client and updates its proxy.
+     * Gets the session's client
      */
     private static synchronized HttpClient updatedHttpClient(final Session session) {
-        final HttpClient client = session.getHttpClient();
-        updateClientProxy(client, session);
-        return client;
-    }
-
-    /**
-     * Updates the given client's proxy from the session.
-     */
-    private static void updateClientProxy(final HttpClient client, final Session session) {
-        final ProxyInfo proxyInfo = session.getProxyInfo();
-        if (proxyInfo != null && proxyInfo.host != null && !proxyInfo.host.equals("")) {
-            HttpHost proxy;
-            if (proxyInfo.port < 0) {
-                proxy = new HttpHost(proxyInfo.host);
-            } else {
-                proxy = new HttpHost(proxyInfo.host, proxyInfo.port);
-            }
-            client.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
-        } else {
-            client.getParams().removeParameter(ConnRoutePNames.DEFAULT_PROXY);
-        }
+        return session.getHttpClient();
     }
 
     /**

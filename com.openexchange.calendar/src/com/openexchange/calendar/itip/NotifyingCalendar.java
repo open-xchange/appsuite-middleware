@@ -150,9 +150,19 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
 
     @Override
     public long attachmentAction(final int folderId, final int objectId, final int userId, final Session session, final Context c, final int numberOfAttachments, AttachmentBatch batch) throws OXException {
+        return attachmentAction(folderId, objectId, userId, session, c, numberOfAttachments, batch, null);
+    }
+
+    @Override
+    public long attachmentAction(final int folderId, final int objectId, final int userId, final Session session, final Context c, final int numberOfAttachments, AttachmentBatch batch, Connection writeCon) throws OXException {
         attachmentMemory.rememberAttachmentChange(objectId, c.getContextId());
 
-        final long retval = delegate.attachmentAction(folderId, objectId, userId, session, c, numberOfAttachments, batch);
+        final long retval;
+        if (null == writeCon) {
+            retval = delegate.attachmentAction(folderId, objectId, userId, session, c, numberOfAttachments, batch);
+        } else {
+            retval = delegate.attachmentAction(folderId, objectId, userId, session, c, numberOfAttachments, batch, writeCon);
+        }
         // Trigger Update Mail unless attachment is in create new limbo
         if (batch == null || batch.getBatchId() == null || batch.isFinalElement()) {
             try {

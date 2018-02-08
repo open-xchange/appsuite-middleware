@@ -5,7 +5,7 @@
       - Infostore
     summary: Creates an infoitem.
     description: |
-      Creates a new contact. This request cannot add a file to the infoitem. Therefor it
+      Creates a new infoitem. This request cannot add a file to the infoitem. Therefor it
       is necessary to use the `POST` method.
     consumes:
       - application/json

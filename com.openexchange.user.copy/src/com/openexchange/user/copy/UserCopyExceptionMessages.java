@@ -64,6 +64,9 @@ public class UserCopyExceptionMessages implements LocalizableStrings {
     // The user's files are owned by user %1$s in source context %2$s. Please set individual or context-associated file storage first.
     public static final String FILE_STORAGE_CONFLICT_MSG = "The user's files are owned by user %1$s in source context %2$s. Please set individual or context-associated file storage first.";
 
+    // The user %1$s in source context %2$s does use Unified Quota and therefore cannot be copied.
+    public static final String UNIFIED_QUOTA_CONFLICT_MSG = "The user %1$s in source context %2$s does use Unified Quota and therefore cannot be copied.";
+
     private UserCopyExceptionMessages() {
         super();
     }

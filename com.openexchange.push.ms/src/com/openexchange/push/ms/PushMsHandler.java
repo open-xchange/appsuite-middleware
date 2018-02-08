@@ -124,13 +124,16 @@ public class PushMsHandler implements EventHandler {
         } else {
             parentFolder = null;
         }
-        if (parentFolder == null && module != Types.EMAIL) {
+        if (parentFolder == null && module != Types.EMAIL && module != Types.APPOINTMENT) {
             LOG.warn("folder object in event is null");
             return;
         }
         switch (module) {
-        case Types.APPOINTMENT:
-            // fall-through
+        case Types.APPOINTMENT: // new Event handle
+            for (final Entry<Integer, Set<Integer>> entry : transform(event.getAffectedUsersWithFolder()).entrySet()) {
+                publish(i(entry.getKey()), I2i(entry.getValue()), module, ctx, getTimestamp((com.openexchange.chronos.Event) event.getActionObj()), e, false);
+            }
+            break;
         case Types.TASK:
             // fall-through
         case Types.CONTACT:
@@ -170,6 +173,10 @@ public class PushMsHandler implements EventHandler {
 
     private static long getTimestamp(final DataObject object) {
         return null == object ? 0 : getTimestamp(object.getLastModified());
+    }
+
+    private static long getTimestamp(final com.openexchange.chronos.Event event) {
+        return null == event ? 0 : getTimestamp(event.getLastModified());
     }
 
     private static final Map<Integer, Set<Integer>> transform(final Map<Integer, Set<Integer>> map) {

@@ -60,11 +60,14 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.FolderPermissionType;
+import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.LockCleaningFolderStorage;
+import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.SortableId;
@@ -238,6 +241,25 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     } else {
                         changedMetaInfo = false == meta.equals(storageMeta);
                     }
+                }
+            }
+            final boolean changedProperties;
+            {
+                if (ParameterizedFolder.class.isInstance(folder)) {
+                    Map<FolderField, FolderProperty> properties = ((ParameterizedFolder) folder).getProperties();
+                    if (null == properties) {
+                        changedProperties = false;
+                    } else {
+                        Map<FolderField, FolderProperty> storageProperties = ParameterizedFolder.class.isInstance(storageFolder) ?
+                            ((ParameterizedFolder) storageFolder).getProperties() : null;
+                        if (properties.isEmpty() && (null == storageProperties || storageProperties.isEmpty())) {
+                            changedProperties = false;
+                        } else {
+                            changedProperties = false == properties.equals(storageProperties);
+                        }
+                    }
+                } else {
+                    changedProperties = false;
                 }
             }
 
@@ -446,28 +468,9 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     if (!isRecursion && comparedPermissions.hasRemovedGuests()) {
                         processRemovedGuestPermissions(comparedPermissions.getRemovedGuestPermissions());
                     }
-                } else if (changeSubscription) {
+                } else if (changeSubscription || changedMetaInfo || changedProperties) {
                     /*
-                     * Change subscription either in real or in virtual storage
-                     */
-                    if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
-                        storage.updateFolder(folder, storageParameters);
-                    } else {
-                        final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folder.getID());
-                        if (null == realStorage) {
-                            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
-                        }
-                        if (storage.equals(realStorage)) {
-                            storage.updateFolder(folder, storageParameters);
-                        } else {
-                            checkOpenedStorage(realStorage, openedStorages);
-                            realStorage.updateFolder(folder, storageParameters);
-                            storage.updateFolder(folder, storageParameters);
-                        }
-                    }
-                } else if (changedMetaInfo) {
-                    /*
-                     * Change meta either in real or in virtual storage
+                     * Change subscription, meta, properties either in real or in virtual storage
                      */
                     if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
                         storage.updateFolder(folder, storageParameters);

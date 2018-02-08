@@ -60,8 +60,6 @@
 #      driveapp           -> Requires "drive" capability
 #      caldav             -> Requires "caldav" capability
 #      carddav            -> Requires "carddav" capability
-#      oxupdater          -> Requires at least one product being available that is managed by OX Updater 
-#                             (OX Drive, OX Notifier, OXtender2, OX Uploader)
 #      eas                -> Requires "active_sync" capability
 #      mail               -> Requires "webmail" capability
 #
@@ -245,29 +243,6 @@ davmanual:
     displayName_t10e: "Calendar + Address Book"
     # The translatable description
     description_t10e: "To manually setup your Calendar and Address Book accounts, please use the following information."
-
-
-### OX Updater
-################################################################################
-
-# Requires the appropriate updater package being installed (e.g. "open-xchange-outlook-updater", "open-xchange-updater-drive", and so on)
-# and the associated permissions are granted to the users, which are supposed to download the file
-
-oxupdaterinstall:
-    # Disbled by default
-    enabled: false
-    type: link
-    providers: [oxupdater]
-    alternatives: []
-    # The comma-separated Font Awesome names
-    icon: fa-laptop
-    # The translatable display name
-    displayName_t10e: "Updater"
-    # The translatable description
-    description_t10e: "When executing the downloaded file, an installation wizard will be launched. Follow the instructions and install the updater. Installs latest versions of Windows® client software. The Updater automatically informs about new updates. You can download the updates from within the Updater."
-    # Alternative texts for Outlook Connector. If they should be used, remove the 'alt_' prefix and comment out the above ones.
-    alt_displayName_t10e: "Connector for Microsoft Outlook®"
-    alt_description_t10e: "Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, Shared and System Folders to Microsoft Outlook® clients."
 
 
 ### Exchange ActiveSync

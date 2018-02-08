@@ -293,6 +293,18 @@ public enum Privilege {
      * @return The granted privileges in a list
      */
     public static List<Privilege> getApplying(Permission permission) {
+        return getApplying(permission, false);
+    }
+
+    /**
+     * Gets the granted privileges applying to a specific folder permission.
+     *
+     * @param permission The permission to get the applying privileges for
+     * @param allowWriteProperties <code>true</code> to add the {@link #WRITE_PROPERTIES}-privilege regardless of the underlying
+     *            permission, <code>false</code>, otherwise
+     * @return The granted privileges in a list
+     */
+    public static List<Privilege> getApplying(Permission permission, boolean allowWriteProperties) {
         List<Privilege> applying = new ArrayList<Privilege>();
         applying.add(READ_ACL);
         applying.add(READ_CURRENT_USER_PRIVILEGE_SET);
@@ -306,6 +318,8 @@ public enum Privilege {
             applying.add(WRITE);
             applying.add(WRITE_PROPERTIES);
             applying.add(WRITE_ACL);
+        } else if (allowWriteProperties) {
+            applying.add(WRITE_PROPERTIES);
         }
         if (permission.getFolderPermission() >= Permission.CREATE_OBJECTS_IN_FOLDER) {
             applying.add(BIND);
@@ -316,7 +330,25 @@ public enum Privilege {
         return applying;
     }
 
+    /**
+     * Gets the granted permissions applying to a specific list of privileges.
+     *
+     * @param privileges The privileges to get the applying permission for
+     * @return The applying permission
+     */
     public static Permission getApplying(List<Privilege> privileges) throws WebdavProtocolException {
+        return getApplying(privileges, false);
+    }
+
+    /**
+     * Gets the granted permissions applying to a specific list of privileges.
+     *
+     * @param privileges The privileges to get the applying permission for
+     * @param allowWriteProperties <code>true</code> to add the {@link #WRITE_PROPERTIES}-privilege regardless of the underlying
+     *            permission, <code>false</code>, otherwise
+     * @return The applying permission
+     */
+    public static Permission getApplying(List<Privilege> privileges, boolean allowWriteProperties) throws WebdavProtocolException {
         BasicPermission permission = new BasicPermission();
         HashSet<Privilege> setPrivileges = new HashSet<Privilege>(privileges);
         if (setPrivileges.contains(ALL)) {
@@ -336,11 +368,20 @@ public enum Privilege {
             permission.setFolderPermission(Permission.READ_FOLDER);
             permission.setWritePermission(Permission.WRITE_ALL_OBJECTS);
         }
-        if (setPrivileges.contains(WRITE_ACL) || setPrivileges.contains(WRITE) || setPrivileges.contains(WRITE_PROPERTIES)) {
-            if (false == setPrivileges.containsAll(Arrays.asList(WRITE, WRITE_ACL, WRITE_PROPERTIES))) {
-                throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "no-ace-conflict", new WebdavPath(), HttpServletResponse.SC_FORBIDDEN);
+        if (allowWriteProperties) {
+            if (setPrivileges.contains(WRITE_ACL) || setPrivileges.contains(WRITE)) {
+                if (false == setPrivileges.containsAll(Arrays.asList(WRITE, WRITE_ACL))) {
+                    throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "no-ace-conflict", new WebdavPath(), HttpServletResponse.SC_FORBIDDEN);
+                }
+                permission.setAdmin(true);
             }
-            permission.setAdmin(true);
+        } else {
+            if (setPrivileges.contains(WRITE_ACL) || setPrivileges.contains(WRITE) || setPrivileges.contains(WRITE_PROPERTIES)) {
+                if (false == setPrivileges.containsAll(Arrays.asList(WRITE, WRITE_ACL, WRITE_PROPERTIES))) {
+                    throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "no-ace-conflict", new WebdavPath(), HttpServletResponse.SC_FORBIDDEN);
+                }
+                permission.setAdmin(true);
+            }
         }
         if (setPrivileges.contains(BIND)) {
             permission.setFolderPermission(Permission.CREATE_SUB_FOLDERS);

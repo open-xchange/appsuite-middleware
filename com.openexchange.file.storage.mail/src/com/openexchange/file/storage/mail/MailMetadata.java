@@ -50,7 +50,6 @@
 package com.openexchange.file.storage.mail;
 
 import static com.openexchange.mail.json.writer.MessageWriter.getAddressesAsArray;
-import static com.openexchange.mail.mime.converters.MimeMessageConverter.getAddressHeader;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONException;
@@ -84,8 +83,8 @@ public class MailMetadata extends DefaultFile {
         originalSubject = MimeMessageUtility.getHeader("X-Original-Subject", null, message);
         origUid = (Long) message.getItem("X-REAL-UID");
         origFolder = (String) message.getItem("X-MAILBOX");
-        fromHeaders = getAddressHeader("From", message);
-        toHeaders = getAddressHeader("To", message);
+        fromHeaders = MimeMessageUtility.getAddressHeader("From", message);
+        toHeaders = MimeMessageUtility.getAddressHeader("To", message);
     }
 
     /**

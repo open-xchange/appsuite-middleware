@@ -2360,7 +2360,7 @@ public final class IMAPCommandsCollection {
                     final MailFields set = new MailFields(fields);
                     final boolean body = set.contains(MailField.BODY) || set.contains(MailField.FULL);
                     final MailField sort = MailField.toField((sortField == null ? MailSortField.RECEIVED_DATE : sortField).getListField());
-                    final FetchProfile fp = null == sort ? getFetchProfile(fields, fastFetch, mailConfig.getCapabilities().hasAttachmentSearch()) : getFetchProfile(fields, sort, fastFetch, mailConfig.getCapabilities().hasAttachmentSearch());
+                    final FetchProfile fp = getFetchProfile(fields, sort, fastFetch, mailConfig.getCapabilities().hasAttachmentSearch());
                     newMsgs = new MessageFetchIMAPCommand(folder, p.isREV1(), newMsgSeqNums, fp, serverInfo, false, false, body).doCommand();
                 } catch (final MessagingException e) {
                     throw wrapException(e, null);

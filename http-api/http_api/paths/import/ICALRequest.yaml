@@ -30,6 +30,11 @@
         type: file
         description: The iCal file containing the appointment and task data.
         required: true
+      - in: query
+        name: plainJson
+        type: boolean
+        description: When set to `true`, signals that client expects plain JSON; no JavaScript callback.
+        required: false
     responses:
       200:
         description: |

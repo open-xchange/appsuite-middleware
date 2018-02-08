@@ -178,8 +178,6 @@ public class Questions {
 
     public static final String AVERAGE_DOCUMENT_SIZE = "averageDocumentSize";
 
-
-
     protected static void reportNumberOfUsers() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS);
@@ -193,7 +191,7 @@ public class Questions {
     protected static void reportNumberOfUsersWithEventsInPrivateCalendar() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WITH_EVENTS_IN_PRIVATE_CALENDAR);
-            String sql = "select count(distinct created_from, cid) from prg_dates";
+            String sql = "SELECT COUNT(DISTINCT cid, user) FROM calendar_event WHERE account=0 AND folder IS NULL;";
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WITH_EVENTS_IN_PRIVATE_CALENDAR, numberOfUsers.toString());
         } catch (Exception e) {
@@ -203,11 +201,9 @@ public class Questions {
     protected static void reportNumberOfUsersWithEventsInPrivateCalendarThatAreInTheFutureAndAreNotYearlySeries() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WITH_EVENTS_IN_PRIVATE_CALENDAR_THAT_ARE_IN_THE_FUTURE_AND_ARE_NOT_YEARLY_SERIES);
-            String sql = "SELECT count(distinct created_from, cid) FROM prg_dates WHERE timestampfield02 > now() AND ((field06 NOT LIKE \"t|4%\" AND field06 NOT LIKE \"t|6%\") OR field06 IS NULL);";
+            String sql = "SELECT COUNT(DISTINCT cid, user) FROM calendar_event WHERE account=0 AND start > NOW() AND folder IS NULL AND (rrule IS NULL OR rrule NOT LIKE '%FREQ=YEARLY%');";
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
-            Datamining.report(
-                NUMBER_OF_USERS_WITH_EVENTS_IN_PRIVATE_CALENDAR_THAT_ARE_IN_THE_FUTURE_AND_ARE_NOT_YEARLY_SERIES,
-                numberOfUsers.toString());
+            Datamining.report(NUMBER_OF_USERS_WITH_EVENTS_IN_PRIVATE_CALENDAR_THAT_ARE_IN_THE_FUTURE_AND_ARE_NOT_YEARLY_SERIES, numberOfUsers.toString());
         } catch (Exception e) {
         }
     }
@@ -215,7 +211,7 @@ public class Questions {
     protected static void reportNumberOfUsersWhoChangedTheirCalendarInTheLast30Days() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WHO_CHANGED_THEIR_CALENDAR_IN_THE_LAST30_DAYS);
-            String sql = "SELECT count(DISTINCT created_from, cid) FROM prg_dates WHERE DATE(FROM_UNIXTIME(SUBSTRING(CAST(changing_date AS CHAR) FROM 1 FOR 10))) BETWEEN (NOW() - INTERVAL 30 DAY) AND NOW()";
+            String sql = "SELECT count(DISTINCT cid, user) FROM calendar_event WHERE account=0 AND timestamp>=" + Tools.calculate30DaysBack() + ";";
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_CHANGED_THEIR_CALENDAR_IN_THE_LAST30_DAYS, numberOfUsers.toString());
         } catch (Exception e) {
@@ -235,7 +231,7 @@ public class Questions {
     protected static void reportNumberOfChangedInfostoreObjectsInTheLast30Days() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_CHANGED_INFOSTORE_OBJECTS_IN_THE_LAST30_DAYS);
-            String sql = "SELECT count(DISTINCT infostore_id, cid) FROM infostore_document WHERE DATE(FROM_UNIXTIME(SUBSTRING(CAST(creating_date AS CHAR) FROM 1 FOR 10))) BETWEEN (NOW() - INTERVAL 30 DAY) AND NOW();";
+            String sql = "SELECT count(DISTINCT infostore_id, cid) FROM infostore_document WHERE creating_date>= " + Tools.calculate30DaysBack() + ";";
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_CHANGED_INFOSTORE_OBJECTS_IN_THE_LAST30_DAYS, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
@@ -245,7 +241,7 @@ public class Questions {
     protected static void reportNumberOfUsersWithNewInfostoreObjectsInTheLast30Days() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WITH_NEW_INFOSTORE_OBJECTS_IN_THE_LAST30_DAYS);
-            String sql = "SELECT count(DISTINCT created_by, cid) FROM infostore_document WHERE DATE(FROM_UNIXTIME(SUBSTRING(CAST(creating_date AS CHAR) FROM 1 FOR 10))) BETWEEN (NOW() - INTERVAL 30 DAY) AND NOW()";
+            String sql = "SELECT count(DISTINCT created_by, cid) FROM infostore_document WHERE creating_date>=" + Tools.calculate30DaysBack() + ";";
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WITH_NEW_INFOSTORE_OBJECTS_IN_THE_LAST30_DAYS, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
@@ -275,7 +271,7 @@ public class Questions {
     protected static void reportNumberOfAppointments() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_APPOINTMENTS);
-            String sql = "SELECT count(*) FROM prg_dates;";
+            String sql = "SELECT count(*) FROM calendar_event WHERE account=0;";
             BigInteger numberOfAppointments = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_APPOINTMENTS, numberOfAppointments.toString());
         } catch (Exception e) {
@@ -335,7 +331,7 @@ public class Questions {
     protected static void reportMaximumNumberOfCreatedAppointmentsForOneUser() {
         try {
             Datamining.allTheQuestions.add(MAXIMUM_NUMBER_OF_CREATED_APPOINTMENTS_FOR_ONE_USER);
-            String sql = "SELECT MAX(count) FROM (SELECT cid, created_from, count(*) AS count FROM prg_dates) AS x;";
+            String sql = "SELECT MAX(count) FROM (SELECT COUNT(*) AS count FROM calendar_event WHERE account=0 GROUP BY cid, createdBy) AS x;";
             BigInteger numberOfInfostoreObjects = Datamining.maximumForAllSchemata(sql);
             Datamining.report(MAXIMUM_NUMBER_OF_CREATED_APPOINTMENTS_FOR_ONE_USER, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
@@ -375,7 +371,7 @@ public class Questions {
     protected static void reportNumberOfUsersWhoCreatedAppointments() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WHO_CREATED_APPOINTMENTS);
-            String sql = "SELECT count(DISTINCT created_from, cid) FROM prg_dates;";
+            String sql = "SELECT COUNT(DISTINCT cid, createdBy) FROM calendar_event WHERE account=0;";
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_CREATED_APPOINTMENTS, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
@@ -405,7 +401,7 @@ public class Questions {
     protected static void reportNumberOfUsersWhoChangedTheirContactsInTheLast30Days() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WHO_CHANGED_THEIR_CONTACTS_IN_THE_LAST30_DAYS);
-            String sql = "SELECT count(DISTINCT created_from, cid) FROM prg_contacts WHERE userid IS NULL AND field02 IS NOT NULL AND field03 IS NOT NULL AND (DATE(FROM_UNIXTIME(SUBSTRING(CAST(changing_date AS CHAR) FROM 1 FOR 10))) BETWEEN (NOW() - INTERVAL 30 DAY) AND NOW());";
+            String sql = "SELECT count(DISTINCT created_from, cid) FROM prg_contacts WHERE userid IS NULL AND field02 IS NOT NULL AND field03 IS NOT NULL AND changing_date>= " + Tools.calculate30DaysBack() + ";";
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_CHANGED_THEIR_CONTACTS_IN_THE_LAST30_DAYS, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
@@ -426,9 +422,7 @@ public class Questions {
                     Datamining.allTheQuestions.add("numberOfDocumentsBetween" + Tools.humanReadableBytes(size1[i]) + "And" + Tools.humanReadableBytes(size2[i]));
                     String sql = "SELECT COUNT(DISTINCT infostore.cid, infostore.id, infostore.version) FROM infostore LEFT OUTER JOIN infostore_document " + "ON infostore.cid = infostore_document.cid AND infostore.id = infostore_document.infostore_id " + "AND infostore.version = infostore_document.version_number WHERE infostore_document.file_size BETWEEN " + size1[i] + " AND " + size2[i];
                     BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
-                    Datamining.report(
-                        "numberOfDocumentsBetween" + Tools.humanReadableBytes(size1[i]) + "And" + Tools.humanReadableBytes(size2[i]),
-                        numberOfInfostoreObjects.toString());
+                    Datamining.report("numberOfDocumentsBetween" + Tools.humanReadableBytes(size1[i]) + "And" + Tools.humanReadableBytes(size2[i]), numberOfInfostoreObjects.toString());
                 }
             } else {
                 System.out.println("Error : Ranges in reportSliceAndDiceOnDocumentSize are not equal");
@@ -439,13 +433,11 @@ public class Questions {
 
     public static void reportSliceAndDiceOnDraftMailSize() {
         try {
-            LinkedHashMap<Integer, Integer> dms = Datamining.draftMailOverAllSchemata(new int[]{5000,10000,500000});
-            int ll=1;
-            for(final Integer key : dms.keySet() ) {
-                Datamining.report(
-                    "draftMailSizeBetween" + Tools.humanReadableBytes(""+ll) + "And" + Tools.humanReadableBytes(""+key),
-                    dms.get(key).toString());
-                ll=key;
+            LinkedHashMap<Integer, Integer> dms = Datamining.draftMailOverAllSchemata(new int[] { 5000, 10000, 500000 });
+            int ll = 1;
+            for (final Integer key : dms.keySet()) {
+                Datamining.report("draftMailSizeBetween" + Tools.humanReadableBytes("" + ll) + "And" + Tools.humanReadableBytes("" + key), dms.get(key).toString());
+                ll = key;
             }
         } catch (Exception e) {
         }
@@ -455,7 +447,7 @@ public class Questions {
         try {
             int MAXEXT = 5;
             HashMap<Integer, Integer> eaos = Datamining.externalAccountsOverAllSchemata(MAXEXT);
-            for(final Integer key : eaos.keySet() ) {
+            for (final Integer key : eaos.keySet()) {
                 Datamining.report("usersHaving" + (key < MAXEXT ? key : "MoreOrEqual" + key) + "ExternalAccounts", eaos.get(key).toString());
             }
         } catch (Exception e) {
@@ -463,7 +455,7 @@ public class Questions {
     }
 
     protected static void reportAverageDocumentSize() {
-    	try {
+        try {
             Datamining.allTheQuestions.add(AVERAGE_DOCUMENT_SIZE);
 
             String sql = "SELECT AVG(file_size) FROM infostore_document;";
@@ -485,9 +477,7 @@ public class Questions {
             float numberOfContacts = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_CONTACTS));
             float numberOfUsers = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_USERS_WHO_HAVE_CONTACTS));
 
-            Datamining.report(
-                AVERAGE_NUMBER_OF_CONTACTS_PER_USER_WHO_HAS_CONTACTS_AT_ALL,
-                Float.toString(numberOfContacts / numberOfUsers));
+            Datamining.report(AVERAGE_NUMBER_OF_CONTACTS_PER_USER_WHO_HAS_CONTACTS_AT_ALL, Float.toString(numberOfContacts / numberOfUsers));
         } catch (Exception e) {
         }
     }
@@ -502,9 +492,7 @@ public class Questions {
             float numberOfContacts = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_USER_CREATED_CONTACTS));
             float numberOfUsers = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_USERS_WHO_CREATED_CONTACTS));
 
-            Datamining.report(
-                AVERAGE_NUMBER_OF_CONTACTS_PER_USER_WHO_HAS_CREATED_CONTACTS,
-                Float.toString(numberOfContacts / numberOfUsers));
+            Datamining.report(AVERAGE_NUMBER_OF_CONTACTS_PER_USER_WHO_HAS_CREATED_CONTACTS, Float.toString(numberOfContacts / numberOfUsers));
         } catch (Exception e) {
         }
     }
@@ -516,9 +504,7 @@ public class Questions {
             float numberOfAppointments = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_APPOINTMENTS));
             float numberOfUsers = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_USERS_WHO_CREATED_APPOINTMENTS));
 
-            Datamining.report(
-                AVERAGE_NUMBER_OF_APPOINTMENTS_PER_USER_WHO_HAS_APPOINTMENTS_AT_ALL,
-                Float.toString(numberOfAppointments / numberOfUsers));
+            Datamining.report(AVERAGE_NUMBER_OF_APPOINTMENTS_PER_USER_WHO_HAS_APPOINTMENTS_AT_ALL, Float.toString(numberOfAppointments / numberOfUsers));
         } catch (Exception e) {
         }
     }
@@ -530,9 +516,7 @@ public class Questions {
             float numberOfTasks = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_TASKS));
             float numberOfUsers = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_USERS_WHO_CREATED_TASKS));
 
-            Datamining.report(
-                AVERAGE_NUMBER_OF_TASKS_PER_USER_WHO_HAS_TASKS_AT_ALL,
-                Float.toString(numberOfTasks / numberOfUsers));
+            Datamining.report(AVERAGE_NUMBER_OF_TASKS_PER_USER_WHO_HAS_TASKS_AT_ALL, Float.toString(numberOfTasks / numberOfUsers));
         } catch (Exception e) {
         }
     }
@@ -544,9 +528,7 @@ public class Questions {
             float numberOfDocuments = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_DOCUMENTS));
             float numberOfUsers = Float.valueOf(Datamining.getOneAnswer(NUMBER_OF_USERS_WHO_CREATED_DOCUMENTS));
 
-            Datamining.report(
-                AVERAGE_NUMBER_OF_DOCUMENTS_PER_USER_WHO_HAS_DOCUMENTS_AT_ALL,
-                Float.toString(numberOfDocuments / numberOfUsers));
+            Datamining.report(AVERAGE_NUMBER_OF_DOCUMENTS_PER_USER_WHO_HAS_DOCUMENTS_AT_ALL, Float.toString(numberOfDocuments / numberOfUsers));
         } catch (Exception e) {
         }
     }
@@ -662,7 +644,7 @@ public class Questions {
     }
 
     public static void reportNumberOfUsersConnectedToLinkedIn() {
-    	String networkName = "linkedin";
+        String networkName = "linkedin";
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_CONNECTED_TO_LINKEDIN);
             String sql = "SELECT COUNT(*) FROM (SELECT o.user, o.cid FROM oauthAccounts o where o.serviceId LIKE '%" + networkName + "%' UNION SELECT s.user_id, s.cid FROM subscriptions s where s.source_id LIKE '%" + networkName + "%') AS x;";
@@ -673,7 +655,7 @@ public class Questions {
     }
 
     public static void reportNumberOfUsersConnectedToTwitter() {
-    	String networkName = "twitter";
+        String networkName = "twitter";
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_CONNECTED_TO_TWITTER);
             String sql = "SELECT COUNT(*) FROM (SELECT o.user, o.cid FROM oauthAccounts o where o.serviceId LIKE '%" + networkName + "%' UNION SELECT s.user_id, s.cid FROM subscriptions s where s.source_id LIKE '%" + networkName + "%') AS x;";
@@ -684,7 +666,7 @@ public class Questions {
     }
 
     public static void reportNumberOfUsersConnectedToGoogle() {
-    	String networkName = "google";
+        String networkName = "google";
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_CONNECTED_TO_GOOGLE);
             String sql = "SELECT COUNT(*) FROM (SELECT o.user, o.cid FROM oauthAccounts o where o.serviceId LIKE '%" + networkName + "%' UNION SELECT s.user_id, s.cid FROM subscriptions s where s.source_id LIKE '%" + networkName + "%') AS x;";
@@ -695,7 +677,7 @@ public class Questions {
     }
 
     public static void reportNumberOfUsersConnectedToMSN() {
-    	String networkName = "msn";
+        String networkName = "msn";
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_CONNECTED_TO_MSN);
             String sql = "SELECT COUNT(*) FROM (SELECT o.user, o.cid FROM oauthAccounts o where o.serviceId LIKE '%" + networkName + "%' UNION SELECT s.user_id, s.cid FROM subscriptions s where s.source_id LIKE '%" + networkName + "%') AS x;";
@@ -706,7 +688,7 @@ public class Questions {
     }
 
     public static void reportNumberOfUsersConnectedToYahoo() {
-    	String networkName = "yahoo";
+        String networkName = "yahoo";
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_CONNECTED_TO_YAHOO);
             String sql = "SELECT COUNT(*) FROM (SELECT o.user, o.cid FROM oauthAccounts o where o.serviceId LIKE '%" + networkName + "%' UNION SELECT s.user_id, s.cid FROM subscriptions s where s.source_id LIKE '%" + networkName + "%') AS x;";
@@ -717,7 +699,7 @@ public class Questions {
     }
 
     public static void reportNumberOfUsersConnectedToXing() {
-    	String networkName = "xing";
+        String networkName = "xing";
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_CONNECTED_TO_XING);
             String sql = "SELECT COUNT(*) FROM (SELECT o.user, o.cid FROM oauthAccounts o where o.serviceId LIKE '%" + networkName + "%' UNION SELECT s.user_id, s.cid FROM subscriptions s where s.source_id LIKE '%" + networkName + "%') AS x;";
@@ -728,7 +710,7 @@ public class Questions {
     }
 
     public static void reportNumberOfUsersConnectedToTOnline() {
-    	String networkName = "t-online";
+        String networkName = "t-online";
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_CONNECTED_TO_TONLINE);
             String sql = "SELECT COUNT(*) FROM (SELECT o.user, o.cid FROM oauthAccounts o where o.serviceId LIKE '%" + networkName + "%' UNION SELECT s.user_id, s.cid FROM subscriptions s where s.source_id LIKE '%" + networkName + "%') AS x;";
@@ -739,7 +721,7 @@ public class Questions {
     }
 
     public static void reportNumberOfUsersConnectedToGMX() {
-    	String networkName = "gmx";
+        String networkName = "gmx";
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_CONNECTED_TO_GMX);
             String sql = "SELECT COUNT(*) FROM (SELECT o.user, o.cid FROM oauthAccounts o where o.serviceId LIKE '%" + networkName + "%' UNION SELECT s.user_id, s.cid FROM subscriptions s where s.source_id LIKE '%" + networkName + "%') AS x;";
@@ -750,7 +732,7 @@ public class Questions {
     }
 
     public static void reportNumberOfUsersConnectedToWebDe() {
-    	String networkName = "web";
+        String networkName = "web";
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_CONNECTED_TO_WEBDE);
             String sql = "SELECT COUNT(*) FROM (SELECT o.user, o.cid FROM oauthAccounts o where o.serviceId LIKE '%" + networkName + "%' UNION SELECT s.user_id, s.cid FROM subscriptions s where s.source_id LIKE '%" + networkName + "%') AS x;";
@@ -773,7 +755,7 @@ public class Questions {
     protected static void reportNumberOfUsersWhoChangedTheirTasksInTheLast30Days() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WHO_CHANGED_THEIR_TASKS_IN_THE_LAST30_DAYS);
-            String sql = "SELECT count(DISTINCT created_from, cid) FROM task WHERE DATE(FROM_UNIXTIME(SUBSTRING(CAST(last_modified AS CHAR) FROM 1 FOR 10))) BETWEEN (NOW() - INTERVAL 30 DAY) AND NOW()";
+            String sql = "SELECT count(DISTINCT created_from, cid) FROM task WHERE last_modified>=" + Tools.calculate30DaysBack() + ";";
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_CHANGED_THEIR_TASKS_IN_THE_LAST30_DAYS, numberOfUsers.toString());
         } catch (Exception e) {
@@ -783,7 +765,7 @@ public class Questions {
     protected static void reportNumberOfUsersWhoLoggedInWithClientOX6UIInTheLast30Days() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WHO_LOGGED_IN_WITH_CLIENT_OX6UI_IN_THE_LAST_30_DAYS);
-            String sql = "SELECT count(DISTINCT id, cid) FROM user_attribute WHERE name = 'client:com.openexchange.ox.gui.dhtml' AND DATE(FROM_UNIXTIME(SUBSTRING(CAST(value AS CHAR) FROM 1 FOR 10))) BETWEEN (NOW() - INTERVAL 30 DAY) AND NOW()";
+            String sql = "SELECT count(DISTINCT id, cid) FROM user_attribute WHERE name = 'client:com.openexchange.ox.gui.dhtml' AND value>=" + Tools.calculate30DaysBack() + ";";
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_LOGGED_IN_WITH_CLIENT_OX6UI_IN_THE_LAST_30_DAYS, numberOfUsers.toString());
         } catch (Exception e) {
@@ -793,7 +775,7 @@ public class Questions {
     protected static void reportNumberOfUsersWhoLoggedInWithClientAppSuiteUIInTheLast30Days() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WHO_LOGGED_IN_WITH_CLIENT_APPSUITEUI_IN_THE_LAST_30_DAYS);
-            String sql = "SELECT count(DISTINCT id, cid) FROM user_attribute WHERE name = 'client:open-xchange-appsuite' AND DATE(FROM_UNIXTIME(SUBSTRING(CAST(value AS CHAR) FROM 1 FOR 10))) BETWEEN (NOW() - INTERVAL 30 DAY) AND NOW()";
+            String sql = "SELECT count(DISTINCT id, cid) FROM user_attribute WHERE name = 'client:open-xchange-appsuite' AND value>=" + Tools.calculate30DaysBack() + ";";
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_LOGGED_IN_WITH_CLIENT_APPSUITEUI_IN_THE_LAST_30_DAYS, numberOfUsers.toString());
         } catch (Exception e) {
@@ -803,7 +785,7 @@ public class Questions {
     protected static void reportNumberOfUsersWhoLoggedInWithClientEASInTheLast30Days() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WHO_LOGGED_IN_WITH_CLIENT_EAS_IN_THE_LAST_30_DAYS);
-            String sql = "SELECT count(DISTINCT id, cid) FROM user_attribute WHERE name = 'client:USM-EAS' AND DATE(FROM_UNIXTIME(SUBSTRING(CAST(value AS CHAR) FROM 1 FOR 10))) BETWEEN (NOW() - INTERVAL 30 DAY) AND NOW()";
+            String sql = "SELECT count(DISTINCT id, cid) FROM user_attribute WHERE name = 'client:USM-EAS' AND value>=" + Tools.calculate30DaysBack() + ";";
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_LOGGED_IN_WITH_CLIENT_EAS_IN_THE_LAST_30_DAYS, numberOfUsers.toString());
         } catch (Exception e) {
@@ -813,7 +795,7 @@ public class Questions {
     protected static void reportNumberOfUsersWhoLoggedInWithClientMobileUIInTheLast30Days() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WHO_LOGGED_IN_WITH_CLIENT_MOBILEUI_IN_THE_LAST_30_DAYS);
-            String sql = "SELECT count(DISTINCT id, cid) FROM user_attribute WHERE name = 'client:com.openexchange.mobileapp' AND DATE(FROM_UNIXTIME(SUBSTRING(CAST(value AS CHAR) FROM 1 FOR 10))) BETWEEN (NOW() - INTERVAL 30 DAY) AND NOW()";
+            String sql = "SELECT count(DISTINCT id, cid) FROM user_attribute WHERE name = 'client:com.openexchange.mobileapp' AND value>=" + Tools.calculate30DaysBack() + ";";
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_LOGGED_IN_WITH_CLIENT_MOBILEUI_IN_THE_LAST_30_DAYS, numberOfUsers.toString());
         } catch (Exception e) {
@@ -823,7 +805,7 @@ public class Questions {
     protected static void reportNumberOfUsersWhoLoggedInWithClientCalDAVInTheLast30Days() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WHO_LOGGED_IN_WITH_CLIENT_CALDAV_IN_THE_LAST_30_DAYS);
-            String sql = "SELECT count(DISTINCT id, cid) FROM user_attribute WHERE name = 'client:CALDAV' AND DATE(FROM_UNIXTIME(SUBSTRING(CAST(value AS CHAR) FROM 1 FOR 10))) BETWEEN (NOW() - INTERVAL 30 DAY) AND NOW()";
+            String sql = "SELECT count(DISTINCT id, cid) FROM user_attribute WHERE name = 'client:CALDAV' AND value>=" + Tools.calculate30DaysBack() + ";";
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_LOGGED_IN_WITH_CLIENT_CALDAV_IN_THE_LAST_30_DAYS, numberOfUsers.toString());
         } catch (Exception e) {
@@ -833,7 +815,7 @@ public class Questions {
     protected static void reportNumberOfUsersWhoLoggedInWithClientCardDAVInTheLast30Days() {
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_WHO_LOGGED_IN_WITH_CLIENT_CARDDAV_IN_THE_LAST_30_DAYS);
-            String sql = "SELECT count(DISTINCT id, cid) FROM user_attribute WHERE name = 'client:CARDDAV' AND DATE(FROM_UNIXTIME(SUBSTRING(CAST(value AS CHAR) FROM 1 FOR 10))) BETWEEN (NOW() - INTERVAL 30 DAY) AND NOW()";
+            String sql = "SELECT count(DISTINCT id, cid) FROM user_attribute WHERE name = 'client:CARDDAV' AND value>=" + Tools.calculate30DaysBack() + ";";
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_LOGGED_IN_WITH_CLIENT_CARDDAV_IN_THE_LAST_30_DAYS, numberOfUsers.toString());
         } catch (Exception e) {

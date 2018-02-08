@@ -96,6 +96,12 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
         int compareFieldsDesc(final MailMessage msg1, final MailMessage msg2) throws MessagingException;
     }
 
+    private static interface FlaggingModeAwareIFieldComparer extends IFieldComparer {
+
+        void setFlaggingColor(Integer color);
+
+    }
+
     private static abstract class FieldComparer implements IFieldComparer {
 
         /**
@@ -173,6 +179,19 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
      * @param userFlagsEnabled <code>true</code> to signal support for user flags; otherwise <code>false</code>
      */
     public MailMessageComparator(MailSortField sortField, boolean descendingDirection, Locale locale, boolean userFlagsEnabled) {
+        this(sortField, descendingDirection, locale, userFlagsEnabled, null);
+    }
+
+    /**
+     * Initializes a new {@link MailMessageComparator}.
+     *
+     * @param sortField The sort field
+     * @param descendingDirection <code>true</code> for descending order; otherwise <code>false</code>
+     * @param locale The locale
+     * @param userFlagsEnabled <code>true</code> to signal support for user flags; otherwise <code>false</code>
+     * @param flaggingColor Optional flagging color in case flagging mode is set to implicit
+     */
+    public MailMessageComparator(MailSortField sortField, boolean descendingDirection, Locale locale, boolean userFlagsEnabled, Integer flaggingColor) {
         super();
         descendingDir = descendingDirection;
         if (MailSortField.COLOR_LABEL.equals(sortField) && !userFlagsEnabled) {
@@ -181,6 +200,9 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
             IFieldComparer tmp = COMPARERS.get(sortField);
             if (null == tmp) {
                 tmp = createFieldComparer(sortField, null == locale ? Locale.US : locale);
+            }
+            if(flaggingColor != null && sortField == MailSortField.COLOR_LABEL && tmp instanceof FlaggingModeAwareIFieldComparer) {
+                ((FlaggingModeAwareIFieldComparer) tmp).setFlaggingColor(flaggingColor);
             }
             fieldComparer = tmp;
         }
@@ -283,10 +305,10 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                     if (msg2.isSeen()) {
                         return compareByReceivedDate(msg1, msg2, false);
                     }
-                    return 1;
+                    return -1;
                 }
                 if (msg2.isSeen()) {
-                    return -1;
+                    return 1;
                 }
                 return compareByReceivedDate(msg1, msg2, false);
             }
@@ -364,7 +386,9 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                 return (size1 < size2 ? -1 : (size1 == size2 ? 0 : 1));
             }
         });
-        COMPARERS.put(MailSortField.COLOR_LABEL, new IFieldComparer() {
+        COMPARERS.put(MailSortField.COLOR_LABEL, new FlaggingModeAwareIFieldComparer() {
+
+            Integer flaggingColor = null;
 
             @Override
             public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
@@ -373,13 +397,13 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
             }
 
             private int compAsc(final MailMessage msg1, final MailMessage msg2) {
-                final int cl1 = msg1.getColorLabel();
-                final int cl2 = msg2.getColorLabel();
+                final int cl1 = getColorLabel(msg1);
+                final int cl2 = getColorLabel(msg2);
                 if (cl1 <= 0) {
-                    return cl2 <= 0 ? 0 : 1;
+                    return cl2 <= 0 ? 0 : -1;
                 }
                 if (cl2 <= 0) {
-                    return -1;
+                    return 1;
                 }
                 return (cl1 < cl2 ? -1 : (cl1 == cl2 ? 0 : 1));
             }
@@ -391,8 +415,8 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
             }
 
             private int compDesc(final MailMessage msg1, final MailMessage msg2) {
-                final int cl1 = msg1.getColorLabel();
-                final int cl2 = msg2.getColorLabel();
+                final int cl1 = getColorLabel(msg1);
+                final int cl2 = getColorLabel(msg2);
                 if (cl1 <= 0) {
                     return cl2 <= 0 ? 0 : 1;
                 }
@@ -400,6 +424,24 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                     return cl1 <= 0 ? 0 : -1;
                 }
                 return (cl1 < cl2 ? 1 : (cl1 == cl2 ? 0 : -1));
+            }
+
+            @Override
+            public void setFlaggingColor(Integer color) {
+                flaggingColor = color;
+            }
+
+            private int getColorLabel(MailMessage msg) {
+
+                if(msg.getColorLabel() > 0) {
+                    return msg.getColorLabel();
+                } else {
+                    if(flaggingColor != null) {
+                        return msg.isFlagged() ? flaggingColor : 0;
+                    } else {
+                        return 0;
+                    }
+                }
             }
         });
     }

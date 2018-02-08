@@ -96,6 +96,7 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.converters.DefaultConverterConfig;
 import com.openexchange.mail.mime.converters.FileBackedMimeMessage;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -395,7 +396,7 @@ public final class ImportAction extends AbstractMailAction {
                     boolean quit = messages.remove(POISON);
                     for (MimeMessage message : messages) {
                         message.getHeader("Date", null);
-                        MailMessage mm = MimeMessageConverter.convertMessage(message);
+                        MailMessage mm = MimeMessageConverter.convertMessage(message, new DefaultConverterConfig(mailInterface.getMailConfig(), true, false));
                         mails.add(mm);
                     }
                     String[] ids = mailInterface.importMessages(folder, mails.toArray(new MailMessage[mails.size()]), force);

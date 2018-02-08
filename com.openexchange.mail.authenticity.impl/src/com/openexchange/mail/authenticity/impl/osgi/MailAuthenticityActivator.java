@@ -109,8 +109,11 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
         final MailAuthenticityHandlerRegistryImpl registry = new MailAuthenticityHandlerRegistryImpl(getService(LeanConfigurationService.class), context);
         registerService(MailAuthenticityHandlerRegistry.class, registry);
 
-        registerService(MailAuthenticityMetricLogger.class, new MailAuthenticityMetricFileLogger());
-        trackService(MailAuthenticityMetricLogger.class);
+        LeanConfigurationService leanConfigService = getService(LeanConfigurationService.class);
+        if (leanConfigService.getBooleanProperty(MailAuthenticityProperty.LOG_METRICS)) {
+            registerService(MailAuthenticityMetricLogger.class, new MailAuthenticityMetricFileLogger());
+            trackService(MailAuthenticityMetricLogger.class);
+        }
 
         track(MailAuthenticityHandler.class, registry);
         openTrackers();

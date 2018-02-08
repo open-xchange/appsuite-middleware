@@ -670,7 +670,7 @@ public class OCLPermission implements Permission, Cloneable, Serializable, OXClo
         hash = 31 * hash + (groupPermission ? 1 : 0);
         hash = 31 * hash + system;
         hash = 31 * hash + type.getTypeNumber();
-        hash = 31 * hash + legator == null ? 0 : legator.hashCode();
+        hash = 31 * hash + (legator == null ? 0 : legator.hashCode());
         return hash;
     }
 

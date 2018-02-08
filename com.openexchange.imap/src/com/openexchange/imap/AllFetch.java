@@ -67,8 +67,6 @@ import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.session.Session;
@@ -78,7 +76,6 @@ import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
-import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 import com.sun.mail.imap.protocol.ENVELOPE;
 import com.sun.mail.imap.protocol.FLAGS;
 import com.sun.mail.imap.protocol.FetchResponse;
@@ -153,28 +150,6 @@ public final class AllFetch {
             @Override
             public void handleItem(final Item item, final MailMessage m, final org.slf4j.Logger logger) throws OXException {
                 MimeMessageConverter.parseFlags((FLAGS) item, m);
-            }
-        }),
-        /**
-         * BODYSTRUCTURE
-         */
-        BODYSTRUCTURE("BODYSTRUCTURE", BODYSTRUCTURE.class, new FetchItemHandler() {
-
-            @Override
-            public void handleItem(final Item item, final MailMessage m, final org.slf4j.Logger logger) throws OXException {
-                final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
-                final StringBuilder sb = new StringBuilder();
-                sb.append(bs.type).append('/').append(bs.subtype);
-                if (bs.cParams != null) {
-                    sb.append(bs.cParams);
-                }
-                try {
-                    m.setContentType(new ContentType(sb.toString()));
-                } catch (final OXException e) {
-                    logger.warn("", e);
-                    m.setContentType(new ContentType(MimeTypes.MIME_DEFAULT));
-                }
-                m.setHasAttachment(MimeMessageUtility.hasAttachments(bs));
             }
         }),
         /**

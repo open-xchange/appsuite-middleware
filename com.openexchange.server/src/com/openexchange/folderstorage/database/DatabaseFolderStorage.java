@@ -283,8 +283,8 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
     }
 
     private static final ConcurrentTIntObjectHashMap<Long> STAMPS = new ConcurrentTIntObjectHashMap<Long>(128);
-    private static final long DELAY = 60 * 60 * 1000;
-    private static final int MAX = 3;
+    private static final long                              DELAY  = 60 * 60 * 1000;
+    private static final int                               MAX    = 3;
 
     @Override
     public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws OXException {
@@ -1909,7 +1909,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
 
     private boolean isInPublicTree(FolderObject folder, Context context, Connection con, StorageParameters storageParameters) throws OXException {
         int parentId = folder.getParentFolderID();
-        while(true) {
+        while (true) {
             if (parentId == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID || parentId == FolderObject.SYSTEM_PRIVATE_FOLDER_ID || parentId == FolderObject.SYSTEM_ROOT_FOLDER_ID) {
                 return false;
             }
@@ -2314,7 +2314,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
     private static final class FolderObjectComparator implements Comparator<FolderObject> {
 
         private final Collator collator;
-        private final Context context;
+        private final Context  context;
 
         FolderObjectComparator(Locale locale, Context context) {
             super();
@@ -2368,7 +2368,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
     private static final class FolderNameComparator implements Comparator<FolderObject> {
 
         private final Collator collator;
-        private final Context context;
+        private final Context  context;
 
         FolderNameComparator(Locale locale, Context context) {
             super();

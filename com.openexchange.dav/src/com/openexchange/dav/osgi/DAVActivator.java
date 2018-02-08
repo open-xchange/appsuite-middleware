@@ -64,6 +64,7 @@ import com.openexchange.group.GroupService;
 import com.openexchange.login.Interface;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.resource.ResourceService;
+import com.openexchange.uadetector.UserAgentParser;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
@@ -80,7 +81,7 @@ public class DAVActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, HttpService.class, ContactService.class, GroupService.class, ResourceService.class };
+        return new Class<?>[] { UserService.class, HttpService.class, ContactService.class, GroupService.class, ResourceService.class, UserAgentParser.class };
     }
 
     @Override
@@ -113,7 +114,7 @@ public class DAVActivator extends HousekeepingActivator {
         /*
          * DAV client info
          */
-        registerService(ClientInfoProvider.class, new DAVClientInfoProvider(), 0);
+        registerService(ClientInfoProvider.class, new DAVClientInfoProvider(getService(UserAgentParser.class)), 0);
         openTrackers();
     }
 

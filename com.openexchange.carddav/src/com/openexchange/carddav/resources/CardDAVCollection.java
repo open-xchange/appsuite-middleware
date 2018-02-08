@@ -77,6 +77,7 @@ import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.SimilarityException;
+import com.openexchange.dav.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.dav.reports.SyncStatus;
 import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.exception.OXException;
@@ -127,7 +128,14 @@ public class CardDAVCollection extends CommonFolderCollection<Contact> {
     public CardDAVCollection(GroupwareCarddavFactory factory, WebdavPath url, UserizedFolder folder) throws OXException {
         super(factory, url, folder);
         this.factory = factory;
-        includeProperties(new SupportedReportSet(), new MaxResourceSize(factory), new MaxImageSize(factory), new SupportedAddressData(), new BulkRequests(factory));
+        includeProperties(
+            new CurrentUserPrivilegeSet(folder.getOwnPermission()), 
+            new SupportedReportSet(), 
+            new MaxResourceSize(factory), 
+            new MaxImageSize(factory), 
+            new SupportedAddressData(), 
+            new BulkRequests(factory)
+        );
     }
 
     @Override

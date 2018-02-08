@@ -1,0 +1,17 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: object
+    title: UpdatesResult
+    properties:
+      newAndModified:
+        type: array
+        description: The new and updated events.
+        items:
+          $ref: "#/definitions/EventData"
+      deleted:
+        type: array
+        description: The deleted events.
+        items:
+          $ref: "#/definitions/EventData"
