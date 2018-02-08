@@ -56,19 +56,20 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.math.LongRange;
 import org.apache.commons.lang.math.NumberRange;
 import org.apache.commons.lang.math.Range;
 import org.apache.commons.validator.routines.InetAddressValidator;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.googlecode.ipv6.IPv6Address;
 import com.googlecode.ipv6.IPv6AddressRange;
 import com.openexchange.net.utils.Strings;
 import edazdarevic.commons.net.CIDRUtils;
 
 /**
- * 
+ *
  * {@link IPRange}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -179,28 +180,27 @@ public class IPRange {
         }
         return byteArray;
     }
+
+    /** The {@link #ipToLong(byte[]) ipToLong()} result for localhost IP address <code>"127.0.0.1"</code> */
+    private static final long LONG_IPv4_LOCALHOST = 2130706433L;
+
     // ---------------------------------------------------------------------------------------------------------------------------
 
-    private final Map<String, Boolean> cache;
+    private final Cache<String, Boolean> cache;
     private final Range ipv4Range;
     private final IPv6AddressRange ipv6Range;
 
     /**
      * Initializes a new {@link IPRange}. Use {@link IPRange#parseRange(String)} to get an instance
-     * 
+     *
      * @param ipv4Range The IPv4 address range
      * @param ipv6Range The IPv6 address range
      */
     private IPRange(final Range ipv4Range, final Range ipv6Range) {
         super();
         this.ipv4Range = ipv4Range;
-        if (ipv6Range != null) {
-            IPv6AddressRange v6Range = IPv6AddressRange.fromFirstAndLast(IPv6Address.fromBigInteger((BigInteger) ipv6Range.getMinimumNumber()), IPv6Address.fromBigInteger((BigInteger) ipv6Range.getMaximumNumber()));
-            this.ipv6Range = v6Range;
-        } else {
-            this.ipv6Range = null;
-        }
-        this.cache = new ConcurrentHashMap<String, Boolean>(512, 0.9f, 1);
+        this.ipv6Range = ipv6Range == null ? null : IPv6AddressRange.fromFirstAndLast(IPv6Address.fromBigInteger((BigInteger) ipv6Range.getMinimumNumber()), IPv6Address.fromBigInteger((BigInteger) ipv6Range.getMaximumNumber()));
+        this.cache = CacheBuilder.newBuilder().initialCapacity(512).maximumSize(65536).expireAfterAccess(4, TimeUnit.HOURS).build();
     }
 
     /**
@@ -212,7 +212,7 @@ public class IPRange {
     public boolean contains(String ipAddress) {
         // Check for cached entry
         {
-            Boolean cached = cache.get(ipAddress);
+            Boolean cached = cache.getIfPresent(ipAddress);
             if (null != cached) {
                 return cached.booleanValue();
             }
@@ -241,14 +241,20 @@ public class IPRange {
     public boolean containsIPv4(byte[] octets, String ipAddress) {
         // Check for cached entry
         if (null != ipAddress) {
-            Boolean cached = this.cache.get(ipAddress);
+            Boolean cached = this.cache.getIfPresent(ipAddress);
             if (null != cached) {
                 return cached.booleanValue();
             }
         }
 
         if (null != octets) {
-            boolean ret = null != this.ipv4Range && this.ipv4Range.containsLong(ipToLong(octets));
+            long longValue = ipToLong(octets);
+            if (longValue == 0) {
+                // All IPv4; consider as contained
+                this.cache.put(ipAddress, Boolean.TRUE);
+                return true;
+            }
+            boolean ret = null != this.ipv4Range && this.ipv4Range.containsLong(longValue);
             if (null != ipAddress) {
                 this.cache.put(ipAddress, Boolean.valueOf(ret));
             }
@@ -265,18 +271,48 @@ public class IPRange {
      * @return <code>true</code> if contained; otherwise <code>false</code>
      */
     public boolean containsIPv6(byte[] octets, String ipAddress) {
-        return contains(ipAddress);
-    }
-
-    public boolean containsIPv6(String ipAddress) {
         if (null != ipAddress) {
-            Boolean cached = this.cache.get(ipAddress);
+            Boolean cached = this.cache.getIfPresent(ipAddress);
             if (null != cached) {
                 return cached.booleanValue();
             }
         }
-        IPv6Address fromString = IPv6Address.fromString(ipAddress);
-        boolean ret = null != this.ipv6Range && this.ipv6Range.contains(fromString);
+        IPv6Address v6Address = null == octets ? IPv6Address.fromString(ipAddress) : IPv6Address.fromByteArray(octets);
+        if (v6Address.getHighBits() == 0) {
+            if (v6Address.getLowBits() == 0) {
+                // All IPv6; consider as contained
+                this.cache.put(ipAddress, Boolean.TRUE);
+                return true;
+            }
+            if (v6Address.getLowBits() == 1) {
+                // Localhost IPv6; consider as contained
+                if (null != this.ipv4Range && this.ipv4Range.containsLong(LONG_IPv4_LOCALHOST)) {
+                    this.cache.put(ipAddress, Boolean.TRUE);
+                    return true;
+                }
+                return checkAgainstIPv6Range(v6Address, ipAddress);
+            }
+        }
+        return checkAgainstIPv6Range(v6Address, ipAddress);
+    }
+
+    private boolean checkAgainstIPv6Range(IPv6Address v6Address, String ipAddress) {
+        boolean ret = null != this.ipv6Range && this.ipv6Range.contains(v6Address);
+        if (null != ipAddress) {
+            this.cache.put(ipAddress, Boolean.valueOf(ret));
+        }
+        return ret;
+    }
+
+    public boolean containsIPv6(String ipAddress) {
+        if (null != ipAddress) {
+            Boolean cached = this.cache.getIfPresent(ipAddress);
+            if (null != cached) {
+                return cached.booleanValue();
+            }
+        }
+        IPv6Address v6Address = IPv6Address.fromString(ipAddress);
+        boolean ret = null != this.ipv6Range && this.ipv6Range.contains(v6Address);
         if (null != ipAddress) {
             this.cache.put(ipAddress, Boolean.valueOf(ret));
         }

@@ -126,6 +126,10 @@ public class UpdaterImpl extends Updater {
             public Date backgroundUpdatesRunningSince() {
                 return schema.backgroundUpdatesRunningSince();
             }
+            @Override
+            public boolean isExecutedSuccessfully(String taskName) {
+                return schema.isExecutedSuccessfully(taskName);
+            }
         };
     }
 

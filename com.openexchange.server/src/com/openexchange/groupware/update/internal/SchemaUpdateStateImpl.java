@@ -63,7 +63,8 @@ public class SchemaUpdateStateImpl extends SchemaImpl implements SchemaUpdateSta
 
     private static final long serialVersionUID = -2760325392823131336L;
 
-    private final Set<String> executedTasks = new HashSet<String>();
+    private final Set<String> successfullyExecutedTasks = new HashSet<String>();
+    private final Set<String> failedExecutedTasks = new HashSet<String>();
 
     private boolean backgroundUpdatesRunning;
     private Date backgroundUpdatesRunningSince;
@@ -76,23 +77,39 @@ public class SchemaUpdateStateImpl extends SchemaImpl implements SchemaUpdateSta
     public SchemaUpdateStateImpl(SchemaUpdateState schema) {
         super(schema);
         for (String task : schema.getExecutedList()) {
-            executedTasks.add(task);
+            if (schema.isExecutedSuccessfully(task)) {
+                successfullyExecutedTasks.add(task);
+            } else {
+                failedExecutedTasks.add(task);
+            }
         }
         backgroundUpdatesRunning = schema.backgroundUpdatesRunning();
     }
 
     @Override
-    public void addExecutedTask(String taskName) {
-        executedTasks.add(taskName);
+    public void addExecutedTask(String taskName, boolean success) {
+        if (success) {
+            successfullyExecutedTasks.add(taskName);
+        } else {
+            failedExecutedTasks.add(taskName);
+        }
     }
 
     @Override
     public boolean isExecuted(String taskName) {
-        return executedTasks.contains(taskName);
+        return successfullyExecutedTasks.contains(taskName) || failedExecutedTasks.contains(taskName);
+    }
+
+    @Override
+    public boolean isExecutedSuccessfully(String taskName) {
+        return successfullyExecutedTasks.contains(taskName);
     }
 
     @Override
     public String[] getExecutedList() {
+        Set<String> executedTasks = new HashSet<String>(successfullyExecutedTasks.size() + failedExecutedTasks.size());
+        executedTasks.addAll(successfullyExecutedTasks);
+        executedTasks.addAll(failedExecutedTasks);
         return executedTasks.toArray(new String[executedTasks.size()]);
     }
 
@@ -124,4 +141,5 @@ public class SchemaUpdateStateImpl extends SchemaImpl implements SchemaUpdateSta
     void setBackgroundUpdatesRunningSince(Date date) {
         this.backgroundUpdatesRunningSince = date;
     }
+
 }

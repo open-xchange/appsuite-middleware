@@ -225,4 +225,9 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
     //Sequence number is outdated.
     public static final String OUTDATED_SEQUENCE = "Sequence number is outdated.";
 
+    /**
+     * The calendar is currently under maintenance. Please try again later.
+     */
+    public static final String CALENDAR_MAINTENANCE_MSG = "The calendar is currently under maintenance. Please try again later.";
+
 }

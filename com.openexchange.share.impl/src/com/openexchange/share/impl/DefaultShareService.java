@@ -149,16 +149,32 @@ public class DefaultShareService implements ShareService {
         this.utils = new ShareUtils(services);
     }
 
+    private <S> S requireService(Class<? extends S> clazz) throws OXException {
+        S service = services.getOptionalService(clazz);
+        if (null == service) {
+            throw ServiceExceptionCode.absentService(clazz);
+        }
+        return service;
+    }
+
+    private <S> S requireService(Class<? extends S> clazz, S alreadyAcquired) throws OXException {
+        if (alreadyAcquired != null ) {
+            return alreadyAcquired;
+        }
+
+        return requireService(clazz);
+    }
+
     @Override
     public DefaultGuestInfo resolveGuest(String token) throws OXException {
         ShareToken shareToken = new ShareToken(token);
         int contextID = shareToken.getContextID();
         User guestUser;
         try {
-            guestUser = services.getService(UserService.class).getUser(shareToken.getUserID(), contextID);
+            guestUser = requireService(UserService.class).getUser(shareToken.getUserID(), contextID);
             shareToken.verifyGuest(contextID, guestUser);
 
-            GuestService guestService = services.getService(GuestService.class);
+            GuestService guestService = requireService(GuestService.class);
             if (guestService != null) {
                 guestUser = guestService.alignUserWithGuest(guestUser, contextID);
             }
@@ -177,7 +193,7 @@ public class DefaultShareService implements ShareService {
         User user = null;
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, false);
         try {
-            user = services.getService(UserService.class).getUser(connectionHelper.getConnection(), guestID, utils.getContext(session));
+            user = requireService(UserService.class).getUser(connectionHelper.getConnection(), guestID, utils.getContext(session));
             connectionHelper.commit();
         } catch (OXException e) {
             if (false == UserExceptionCode.USER_NOT_FOUND.equals(e)) {
@@ -198,20 +214,20 @@ public class DefaultShareService implements ShareService {
 
     @Override
     public Set<Integer> getSharingUsersFor(int contextID, int guestID) throws OXException {
-        Set<Integer> userIDs = new HashSet<Integer>();
-        User guestUser = services.getService(UserService.class).getUser(guestID, contextID);
+        User guestUser = requireService(UserService.class).getUser(guestID, contextID);
         if (false == guestUser.isGuest()) {
             throw ShareExceptionCodes.UNKNOWN_GUEST.create(I(guestID));
         }
         /*
          * always add the user who created this guest
          */
+        Set<Integer> userIDs = new HashSet<Integer>();
         userIDs.add(I(guestUser.getCreatedBy()));
         /*
          * for invited guests, also add the user permission entities found in accessible targets
          */
         if (false == ShareTool.isAnonymousGuest(guestUser)) {
-            List<TargetProxy> targets = services.getService(ModuleSupport.class).listTargets(contextID, guestID);
+            List<TargetProxy> targets = requireService(ModuleSupport.class).listTargets(contextID, guestID);
             for (TargetProxy target : targets) {
                 List<TargetPermission> permissions = target.getPermissions();
                 if (null != permissions && 0 < permissions.size()) {
@@ -224,6 +240,44 @@ public class DefaultShareService implements ShareService {
             }
         }
         return userIDs;
+    }
+
+    @Override
+    public boolean isGuestVisibleTo(int guestID, Session session) throws OXException {
+        Context context = requireService(ContextService.class).getContext(session.getContextId());
+        User guestUser = requireService(UserService.class).getUser(guestID, context);
+        if (false == guestUser.isGuest()) {
+            throw ShareExceptionCodes.UNKNOWN_GUEST.create(I(guestID));
+        }
+
+        int userId = session.getUserId();
+        if ((guestUser.getCreatedBy() == userId) || ShareTool.isAnonymousGuest(guestUser)) {
+            return true;
+        }
+
+        List<TargetProxy> targets = requireService(ModuleSupport.class).listTargets(session.getContextId(), guestID);
+        GroupService groupService = null;
+        for (TargetProxy target : targets) {
+            List<TargetPermission> permissions = target.getPermissions();
+            if (null != permissions && 0 < permissions.size()) {
+                for (TargetPermission permission : permissions) {
+                    if (userId == permission.getEntity()) {
+                        return true;
+                    }
+                    if (permission.isGroup()) {
+                        groupService = requireService(GroupService.class, groupService);
+                        Group group = groupService.getGroup(context, permission.getEntity());
+                        for (int memberId : group.getMember()) {
+                            if (userId == memberId) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     @Override
@@ -266,7 +320,7 @@ public class DefaultShareService implements ShareService {
     @Override
     public ShareLink optLink(Session session, ShareTarget target) throws OXException {
         Context context = utils.getContext(session);
-        ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
+        ModuleSupport moduleSupport = requireService(ModuleSupport.class);
         TargetProxy proxy = moduleSupport.load(target, session);
         DefaultShareInfo shareInfo = optLinkShare(session, context, proxy, null);
         return null != shareInfo ? new DefaultShareLink(shareInfo, proxy.getTimestamp(), false) : null;
@@ -306,8 +360,8 @@ public class DefaultShareService implements ShareService {
         /*
          * update password of anonymous user for this share link
          */
-        UserService userService = services.getService(UserService.class);
-        ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
+        UserService userService = requireService(UserService.class);
+        ModuleSupport moduleSupport = requireService(ModuleSupport.class);
         Context context = utils.getContext(session);
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
@@ -363,7 +417,7 @@ public class DefaultShareService implements ShareService {
          * delete anonymous guest user permission for this share link
          */
         int guestID;
-        ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
+        ModuleSupport moduleSupport = requireService(ModuleSupport.class);
         Context context = utils.getContext(session);
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
@@ -450,7 +504,7 @@ public class DefaultShareService implements ShareService {
             return null;
         }
         int contextID = guest.getContextID();
-        ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
+        ModuleSupport moduleSupport = requireService(ModuleSupport.class);
         List<ShareInfo> shareInfos;
         if (path == null) {
             List<TargetProxy> proxies = moduleSupport.listTargets(contextID, guest.getGuestID());
@@ -483,14 +537,16 @@ public class DefaultShareService implements ShareService {
      */
     List<ShareInfo> getAllShares(int contextID) throws OXException {
         List<ShareInfo> shareInfos = new ArrayList<ShareInfo>();
-        UserService userService = services.getService(UserService.class);
+        UserService userService = requireService(UserService.class);
         int[] guestIDs = userService.listAllUser(contextID, true, true);
+        ModuleSupport moduleSupport = null;
         if (null != guestIDs && 0 < guestIDs.length) {
             Set<Integer> guestsWithoutShares = new HashSet<>(guestIDs.length);
             for (int guestID : guestIDs) {
                 User guest = userService.getUser(guestID, contextID);
                 if (guest.isGuest()) { // double check
-                    List<TargetProxy> targets = services.getService(ModuleSupport.class).listTargets(contextID, guestID);
+                    moduleSupport = requireService(ModuleSupport.class, moduleSupport);
+                    List<TargetProxy> targets = moduleSupport.listTargets(contextID, guestID);
                     if (targets.isEmpty()) {
                         guestsWithoutShares.add(guestID);
                     } else {
@@ -519,12 +575,12 @@ public class DefaultShareService implements ShareService {
      */
     List<ShareInfo> getAllShares(int contextID, int guestID) throws OXException {
         List<ShareInfo> shareInfos = new ArrayList<ShareInfo>();
-        Context context = services.getService(ContextService.class).getContext(contextID);
-        User guest = services.getService(UserService.class).getUser(guestID, context);
+        Context context = requireService(ContextService.class).getContext(contextID);
+        User guest = requireService(UserService.class).getUser(guestID, context);
         if (false == guest.isGuest()) {
             throw ShareExceptionCodes.UNKNOWN_GUEST.create(I(guestID));
         }
-        List<TargetProxy> targets = services.getService(ModuleSupport.class).listTargets(contextID, guest.getId());
+        List<TargetProxy> targets = requireService(ModuleSupport.class).listTargets(contextID, guest.getId());
         for (TargetProxy proxy : targets) {
             ShareTargetPath targetPath = proxy.getTargetPath();
             ShareTarget srcTarget = new ShareTarget(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem());
@@ -660,7 +716,7 @@ public class DefaultShareService implements ShareService {
     private void checkRecipients(List<ShareRecipient> recipients, Session session) throws OXException {
         boolean shareLinks = false;
         boolean inviteGuests = false;
-        CapabilityService capabilityService = services.getService(CapabilityService.class);
+        CapabilityService capabilityService = requireService(CapabilityService.class);
         if (null == capabilityService) {
             throw ServiceExceptionCode.absentService(CapabilityService.class);
         }
@@ -778,7 +834,7 @@ public class DefaultShareService implements ShareService {
      * @throws OXException
      */
     private void removeTargetPermissions(Session session, ConnectionHelper connectionHelper, List<ShareInfo> shares) throws OXException {
-        ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
+        ModuleSupport moduleSupport = requireService(ModuleSupport.class);
         TargetUpdate targetUpdate;
         if (null == session) {
             targetUpdate = moduleSupport.prepareAdministrativeUpdate(connectionHelper.getContextID(), connectionHelper.getConnection());
@@ -811,7 +867,7 @@ public class DefaultShareService implements ShareService {
      * @throws OXException
      */
     private void removeTargetPermission(int guestID, ShareTarget target, ConnectionHelper connectionHelper) throws OXException {
-        ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
+        ModuleSupport moduleSupport = requireService(ModuleSupport.class);
         TargetUpdate targetUpdate = moduleSupport.prepareAdministrativeUpdate(connectionHelper.getContextID(), connectionHelper.getConnection());
         try {
             targetUpdate.fetch(Collections.singletonList(target));
@@ -841,7 +897,7 @@ public class DefaultShareService implements ShareService {
             /*
              * prepare pseudo share infos for group recipient
              */
-            Group group = services.getService(GroupService.class).getGroup(context, ((InternalRecipient) recipient).getEntity());
+            Group group = requireService(GroupService.class).getGroup(context, ((InternalRecipient) recipient).getEntity());
             int[] members = group.getMember();
             ShareTarget dstTarget;
             if (members.length == 0) {
@@ -895,11 +951,11 @@ public class DefaultShareService implements ShareService {
             /*
              * check quota restrictions & capability for anonymous links
              */
-            CapabilitySet capabilities = services.getService(CapabilityService.class).getCapabilities(session);
+            CapabilitySet capabilities = requireService(CapabilityService.class).getCapabilities(session);
             if (null == capabilities || false == capabilities.contains("share_links")) {
                 throw ShareExceptionCodes.NO_SHARE_LINK_PERMISSION.create();
             }
-            AccountQuota quota = services.getService(QuotaService.class).getProvider("share_links").getFor(session, "0");
+            AccountQuota quota = requireService(QuotaService.class).getProvider("share_links").getFor(session, "0");
             if (null != quota && quota.hasQuota(QuotaType.AMOUNT)) {
                 Quota amountQuota = quota.getQuota(QuotaType.AMOUNT);
                 if (amountQuota.isExceeded() || amountQuota.willExceed(anonymousShares.size())) {
@@ -911,11 +967,11 @@ public class DefaultShareService implements ShareService {
             /*
              * check quota restrictions & capability for inviting guests
              */
-            CapabilitySet capabilities = services.getService(CapabilityService.class).getCapabilities(session);
+            CapabilitySet capabilities = requireService(CapabilityService.class).getCapabilities(session);
             if (null == capabilities || false == capabilities.contains("invite_guests")) {
                 throw ShareExceptionCodes.NO_INVITE_GUEST_PERMISSION.create();
             }
-            AccountQuota quota = services.getService(QuotaService.class).getProvider("invite_guests").getFor(session, "0");
+            AccountQuota quota = requireService(QuotaService.class).getProvider("invite_guests").getFor(session, "0");
             if (null != quota && quota.hasQuota(QuotaType.AMOUNT)) {
                 Quota amountQuota = quota.getQuota(QuotaType.AMOUNT);
                 if (amountQuota.isExceeded() || amountQuota.willExceed(guestShares.size())) {
@@ -949,11 +1005,11 @@ public class DefaultShareService implements ShareService {
                 updatedGuest.setPasswordMech("");
                 updatedGuest.setUserPassword(null);
             } else {
-                String encodePassword = services.getService(PasswordMechFactory.class).get(ShareConstants.PASSWORD_MECH_ID).encode(password);
+                String encodePassword = requireService(PasswordMechFactory.class).get(ShareConstants.PASSWORD_MECH_ID).encode(password);
                 updatedGuest.setUserPassword(encodePassword);
                 updatedGuest.setPasswordMech(ShareConstants.PASSWORD_MECH_ID);
             }
-            services.getService(UserService.class).updatePassword(connectionHelper.getConnection(), updatedGuest, context);
+            requireService(UserService.class).updatePassword(connectionHelper.getConnection(), updatedGuest, context);
             return true;
         }
         return false;
@@ -972,7 +1028,7 @@ public class DefaultShareService implements ShareService {
      * @return The guest user
      */
     private User getGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, ShareRecipient recipient, ShareTarget target) throws OXException {
-        UserService userService = services.getService(UserService.class);
+        UserService userService = requireService(UserService.class);
         if (GuestRecipient.class.isInstance(recipient)) {
             /*
              * re-use existing, non-anonymous guest user from this context if possible
@@ -1016,7 +1072,7 @@ public class DefaultShareService implements ShareService {
         /*
          * create new guest user & contact in this context
          */
-        ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
+        ContactUserStorage contactUserStorage = requireService(ContactUserStorage.class);
         UserImpl guestUser = utils.prepareGuestUser(context.getContextId(), sharingUser, recipient, target);
         Contact contact = utils.prepareGuestContact(context.getContextId(), sharingUser, guestUser);
         int contactId = contactUserStorage.createGuestContact(context.getContextId(), contact, connection);
@@ -1030,16 +1086,16 @@ public class DefaultShareService implements ShareService {
         /*
          * store permission bits
          */
-        services.getService(UserPermissionService.class).saveUserPermissionBits(connection, new UserPermissionBits(permissionBits, guestID, context));
+        requireService(UserPermissionService.class).saveUserPermissionBits(connection, new UserPermissionBits(permissionBits, guestID, context));
         if (AnonymousRecipient.class.isInstance(recipient)) {
             LOG.info("Created anonymous guest user with permissions {} in context {}: {}", permissionBits, context.getContextId(), guestID);
         } else {
-            GuestService guestService = services.getService(GuestService.class);
+            GuestService guestService = requireService(GuestService.class);
             if (guestService == null) {
                 LOG.error("Required service GuestService absent");
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("GuestService");
             }
-            String groupId = services.getService(ConfigViewFactory.class).getView(sharingUser.getId(), context.getContextId()).opt("com.openexchange.context.group", String.class, "default");
+            String groupId = requireService(ConfigViewFactory.class).getView(sharingUser.getId(), context.getContextId()).opt("com.openexchange.context.group", String.class, "default");
 
             guestService.addGuest(guestUser.getMail(), groupId, context.getContextId(), guestID, guestUser.getUserPassword(), guestUser.getPasswordMech());
 
@@ -1078,7 +1134,7 @@ public class DefaultShareService implements ShareService {
 
     private DefaultShareLink getOrCreateLink(Session session, ShareTarget target) throws OXException {
         Context context = utils.getContext(session);
-        ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
+        ModuleSupport moduleSupport = requireService(ModuleSupport.class);
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
             connectionHelper.start();
