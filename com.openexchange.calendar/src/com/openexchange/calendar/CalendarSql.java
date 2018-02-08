@@ -49,8 +49,7 @@
 
 package com.openexchange.calendar;
 
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.*;
 import java.sql.BatchUpdateException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -918,9 +917,29 @@ public class CalendarSql implements AppointmentSQLInterface {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
         }
-        final Context ctx = Tools.getContext(session);
+        Context ctx = Tools.getContext(session);
+        CalendarDataObject cdao = new CalendarDataObject();
+        cdao.setObjectID(objectId);
+        cdao.setParentFolderID(folderId);
+        cdao.setContext(ctx);
         validateConfirmMessage(message);
-        return cimp.setExternalConfirmation(objectId, folderId, mail, confirm, message, session, ctx);
+        /*
+         * load existing appointment (implicitly checks permissions)
+         */
+        CalendarDataObject edao;
+        Connection connection = null;
+        try {
+            connection = DBPool.pickup(ctx);
+            edao = CalendarSql.cimp.loadObjectForUpdate(cdao, session, ctx, folderId, connection, true);
+        } catch (SQLException e) {
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
+        } finally {
+            DBPool.push(ctx, connection);
+        }
+        /*
+         * set external confirmation
+         */
+        return cimp.setExternalConfirmation(edao.getObjectID(), folderId, mail, confirm, message, session, ctx);
     }
 
     /**

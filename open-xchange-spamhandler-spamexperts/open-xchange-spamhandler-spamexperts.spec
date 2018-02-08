@@ -7,7 +7,7 @@ BuildRequires:  ant-nodeps
 BuildRequires:  open-xchange-core
 BuildRequires:  java-devel >= 1.6.0
 Version:	@OXVERSION@
-%define        ox_release 35
+%define        ox_release 36
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL_2.0
@@ -64,6 +64,8 @@ ox_add_property com.openexchange.custom.spamexperts.trainhamfolder "Not Spam" /o
 %doc com.openexchange.spamhandler.spamexperts/ChangeLog
 
 %changelog
+* Tue Jan 30 2018 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2018-02-05 (4552)
 * Fri Dec 08 2017 Marcus Klein <marcus.klein@open-xchange.com>
 Build for Patch 2017-12-11 (4470)
 * Thu Nov 16 2017 Marcus Klein <marcus.klein@open-xchange.com>

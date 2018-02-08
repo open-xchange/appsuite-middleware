@@ -326,6 +326,13 @@ class UpdateData {
      * @throws OXException if an error occurs
      */
     void prepare() throws OXException {
+        // Check if folder is correct.
+        Folder selectedFolder = foldStor.selectFolderById(ctx, getTaskId(), getFolderId(), StorageType.ACTIVE);
+        if (null == selectedFolder) {
+            // Either no such folder or specified task does not reside in given folder
+            throw TaskExceptionCode.NO_WRITE_PERMISSION.create(I(getFolderId()));
+        }
+
         if (getOrigTask().getLastModified().after(lastRead)) {
             throw TaskExceptionCode.MODIFIED.create();
         }

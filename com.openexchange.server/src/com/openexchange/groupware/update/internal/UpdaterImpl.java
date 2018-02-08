@@ -104,6 +104,10 @@ public class UpdaterImpl extends Updater {
             public boolean backgroundUpdatesRunning() {
                 return schema.backgroundUpdatesRunning();
             }
+            @Override
+            public boolean isExecutedSuccessfully(String taskName) {
+                return schema.isExecutedSuccessfully(taskName);
+            }
         };
     }
 

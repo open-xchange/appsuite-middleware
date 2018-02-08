@@ -482,7 +482,7 @@ public class SchemaStoreImpl extends SchemaStore {
             } else if (BACKGROUND.equals(task.getTaskName())) {
                 state.setBackgroundUpdatesRunning(true);
             } else {
-                state.addExecutedTask(task.getTaskName());
+                state.addExecutedTask(task.getTaskName(), task.isSuccessful());
             }
         }
     }

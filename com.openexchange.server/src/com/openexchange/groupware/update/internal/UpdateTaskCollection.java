@@ -54,7 +54,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.SeparatedTasks;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
@@ -95,12 +94,11 @@ class UpdateTaskCollection {
     private final List<UpdateTask> getFilteredUpdateTasks(SchemaUpdateState schema) {
         List<UpdateTask> tasks = getListWithoutExcludes();
         // Simulate executed list based on schema version if necessary.
-        final SchemaUpdateState state = addExecutedBasedOnVersion(schema, tasks);
         // Filter
         Filter filter = new ExecutedFilter();
         List<UpdateTask> filtered = new ArrayList<UpdateTask>();
         for (UpdateTask task : tasks) {
-            if (filter.mustBeExecuted(state, task)) {
+            if (filter.mustBeExecuted(schema, task)) {
                 filtered.add(task);
             }
         }
@@ -156,26 +154,10 @@ class UpdateTaskCollection {
             }
             retval.addAll(tasks.getBackground());
         }
-        final SchemaUpdateState simulatedState = addExecutedBasedOnVersion(schema, getListWithoutExcludes());
         // And sort them. Sorting this way prerequisites that every blocking task can be executed before any background task is scheduled.
         // Said in other words: Blocking tasks can not depend on background tasks.
-        retval = new UpdateTaskSorter().sort(simulatedState.getExecutedList(), retval);
-        return retval;
-    }
 
-    private SchemaUpdateState addExecutedBasedOnVersion(SchemaUpdateState schema, List<UpdateTask> tasks) {
-        final SchemaUpdateState retval;
-        if (Schema.FINAL_VERSION != schema.getDBVersion() && Schema.NO_VERSION != schema.getDBVersion()) {
-            retval = new SchemaUpdateStateImpl(schema);
-            Filter filter = new VersionFilter();
-            for (UpdateTask task : tasks) {
-                if (!filter.mustBeExecuted(schema, task)) {
-                    retval.addExecutedTask(task.getClass().getName());
-                }
-            }
-        } else {
-            retval = schema;
-        }
+        retval = new UpdateTaskSorter().sort(schema.getExecutedList(), retval);
         return retval;
     }
 

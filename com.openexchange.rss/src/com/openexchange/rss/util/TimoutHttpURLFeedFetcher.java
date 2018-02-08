@@ -49,17 +49,26 @@
 
 package com.openexchange.rss.util;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.java.InetAddresses;
+import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.rss.osgi.Services;
 import com.openexchange.tools.stream.CountingInputStream;
 import com.sun.syndication.feed.synd.SyndFeed;
@@ -81,6 +90,8 @@ import com.sun.syndication.io.XmlReader;
  * @since 7.4.1
  */
 public class TimoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Reloadable {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TimoutHttpURLFeedFetcher.class);
 
     private static final String MAX_FEED_SIZE_PROPERTY_NAME = "com.openexchange.messaging.rss.feed.size";
 
@@ -124,6 +135,51 @@ public class TimoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Rel
         reloadConfiguration(Services.getService(ConfigurationService.class));
     }
 
+    private static final Set<Integer> REDIRECT_RESPONSE_CODES = ImmutableSet.of(I(HttpURLConnection.HTTP_MOVED_PERM), I(HttpURLConnection.HTTP_MOVED_TEMP), I(HttpURLConnection.HTTP_SEE_OTHER), I(HttpURLConnection.HTTP_USE_PROXY));
+
+    private URL checkPossibleRedirect(int responseCode, HttpURLConnection httpConnection, boolean originalAddressIsRemote) throws FetcherException {
+        if (!REDIRECT_RESPONSE_CODES.contains(I(responseCode))) {
+            // No redirect response code
+            return null;
+        }
+
+        // Get redirect location & disconnect current URL connection instance
+        String redirectUrl = httpConnection.getHeaderField("Location");
+        httpConnection.disconnect();
+
+        // Validate redirect location
+        if (Strings.isEmpty(redirectUrl)) {
+            // Missing "Location" header
+            throw new FetcherException("Missing redirect URL");
+        }
+
+        // Examine redirect location
+        try {
+            URL feedUrl = new URL(redirectUrl);
+            if (RssProperties.isDenied(feedUrl.getProtocol(), feedUrl.getHost(), feedUrl.getPort())) {
+                // Deny redirecting to a local address
+                throw new FetcherException(feedUrl.toExternalForm() + " is not an allowed redirect URL");
+            }
+            if (originalAddressIsRemote) {
+                try {
+                    InetAddress inetAddress = InetAddress.getByName(feedUrl.getHost());
+                    if (InetAddresses.isInternalAddress(inetAddress)) {
+                        // Deny redirecting to a local address
+                        throw new FetcherException(feedUrl.toExternalForm() + " is not an allowed redirect URL");
+                    }
+                } catch (UnknownHostException e) {
+                    // IP address of that host could not be determined
+                    LOG.warn("Unknown host: {}. Skipping retrieving feed from redirect URL {}", feedUrl.getHost(), feedUrl, e);
+                    throw new IllegalArgumentException(feedUrl.toExternalForm() + " contains an unknown host", e);
+                }
+            }
+            return feedUrl;
+        } catch (MalformedURLException e) {
+            LOG.warn("Redirect URL is invalid: {}", redirectUrl, e);
+            throw new IllegalArgumentException("Redirect URL is invalid: " + redirectUrl, e);
+        }
+    }
+
     /**
      * Retrieve a feed over HTTP
      *
@@ -135,79 +191,108 @@ public class TimoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Rel
      * @throws FetcherException if a HTTP error occurred
      */
     @Override
-    public SyndFeed retrieveFeed(URL feedUrl) throws IllegalArgumentException, IOException, FeedException, FetcherException {
-        if (feedUrl == null) {
+    public SyndFeed retrieveFeed(URL feedUrlToRetrieve) throws IllegalArgumentException, IOException, FeedException, FetcherException {
+        if (feedUrlToRetrieve == null) {
             throw new IllegalArgumentException("null is not a valid URL");
         }
 
-        URLConnection connection = feedUrl.openConnection();
-        if (!(connection instanceof HttpURLConnection)) {
-            throw new IllegalArgumentException(feedUrl.toExternalForm() + " is not a valid HTTP Url");
+        boolean originalAddressIsRemote;
+        try {
+            InetAddress inetAddress = InetAddress.getByName(feedUrlToRetrieve.getHost());
+            originalAddressIsRemote = false == InetAddresses.isInternalAddress(inetAddress);
+        } catch (UnknownHostException e) {
+            // IP address of that host could not be determined
+            LOG.warn("Unknown host: {}. Skipping retrieving feed from URL {}", feedUrlToRetrieve.getHost(), feedUrlToRetrieve, e);
+            throw new IllegalArgumentException(feedUrlToRetrieve.toExternalForm() + " contains an unknown host", e);
         }
 
-        HttpURLConnection httpConnection = (HttpURLConnection) connection;
-        // httpConnection.setInstanceFollowRedirects(true); // this is true by default, but can be changed on a class wide basis
-        if (connectTimout > 0) {
-            httpConnection.setConnectTimeout(connectTimout);
-        }
-        if (readTimout > 0) {
-            httpConnection.setReadTimeout(readTimout);
-        }
+        URL feedUrl = feedUrlToRetrieve;
+        NextUrl: while (true) {
+            URLConnection connection = feedUrl.openConnection();
+            if (!(connection instanceof HttpURLConnection)) {
+                throw new IllegalArgumentException(feedUrl.toExternalForm() + " is not a valid HTTP Url");
+            }
 
-        FeedFetcherCache cache = getFeedInfoCache();
-        if (cache == null) {
-            fireEvent(FetcherEvent.EVENT_TYPE_FEED_POLLED, connection);
-            CountingInputStream countingInputStream = null;
-            setRequestHeaders(connection, null);
+            HttpURLConnection httpConnection = (HttpURLConnection) connection;
+            if (connectTimout > 0) {
+                httpConnection.setConnectTimeout(connectTimout);
+            }
+            if (readTimout > 0) {
+                httpConnection.setReadTimeout(readTimout);
+            }
+
+            // Deny to automatically follow redirects
+            httpConnection.setInstanceFollowRedirects(false);
+
+            FeedFetcherCache cache = getFeedInfoCache();
+            if (cache == null) {
+                fireEvent(FetcherEvent.EVENT_TYPE_FEED_POLLED, connection);
+                InputStream inputStream = null;
+                setRequestHeaders(connection, null);
+                httpConnection.connect();
+                try {
+                    // Check for redirect
+                    int responseCode = httpConnection.getResponseCode();
+                    URL redirectUrl = checkPossibleRedirect(responseCode, httpConnection, originalAddressIsRemote);
+                    if (null != redirectUrl) {
+                        feedUrl = redirectUrl;
+                        continue NextUrl;
+                    }
+
+                    inputStream = httpConnection.getInputStream();
+                    return getSyndFeedFromStream(inputStream, connection);
+                } catch (java.io.IOException e) {
+                    handleErrorCodes(((HttpURLConnection) connection).getResponseCode());
+                } finally {
+                    Streams.close(inputStream);
+                    httpConnection.disconnect();
+                }
+                // we will never actually get to this line
+                return null;
+            }
+
+            // With cache
+            SyndFeedInfo syndFeedInfo = cache.getFeedInfo(feedUrl);
+            setRequestHeaders(connection, syndFeedInfo);
             httpConnection.connect();
             try {
-                countingInputStream = new CountingInputStream(httpConnection.getInputStream(), maximumAllowedSize);
-                return getSyndFeedFromStream(countingInputStream, connection);
-            } catch (java.io.IOException e) {
-                handleErrorCodes(((HttpURLConnection) connection).getResponseCode());
-            } finally {
-                if (countingInputStream != null) {
-                    countingInputStream.close();
+                fireEvent(FetcherEvent.EVENT_TYPE_FEED_POLLED, connection);
+
+                // Check for redirect
+                int responseCode = httpConnection.getResponseCode();
+                URL redirectUrl = checkPossibleRedirect(responseCode, httpConnection, originalAddressIsRemote);
+                if (null != redirectUrl) {
+                    feedUrl = redirectUrl;
+                    continue NextUrl;
                 }
+
+                if (syndFeedInfo == null) {
+                    // this is a feed that hasn't been retrieved
+                    syndFeedInfo = new SyndFeedInfo();
+                    retrieveAndCacheFeed(feedUrl, syndFeedInfo, httpConnection, responseCode);
+                } else {
+                    // check the response code
+                    if (responseCode != HttpURLConnection.HTTP_NOT_MODIFIED) {
+                        // the response code is not 304 NOT MODIFIED
+                        // This is either because the feed server
+                        // does not support condition gets
+                        // or because the feed hasn't changed
+                        retrieveAndCacheFeed(feedUrl, syndFeedInfo, httpConnection, responseCode);
+                    } else {
+                        // the feed does not need retrieving
+                        fireEvent(FetcherEvent.EVENT_TYPE_FEED_UNCHANGED, connection);
+                    }
+                }
+                return syndFeedInfo.getSyndFeed();
+            } finally {
                 httpConnection.disconnect();
             }
-            // we will never actually get to this line
-            return null;
-        }
-        // With cache
-        SyndFeedInfo syndFeedInfo = cache.getFeedInfo(feedUrl);
-        setRequestHeaders(connection, syndFeedInfo);
-        httpConnection.connect();
-        try {
-            fireEvent(FetcherEvent.EVENT_TYPE_FEED_POLLED, connection);
-
-            if (syndFeedInfo == null) {
-                // this is a feed that hasn't been retrieved
-                syndFeedInfo = new SyndFeedInfo();
-                retrieveAndCacheFeed(feedUrl, syndFeedInfo, httpConnection);
-            } else {
-                // check the response code
-                int responseCode = httpConnection.getResponseCode();
-                if (responseCode != HttpURLConnection.HTTP_NOT_MODIFIED) {
-                    // the response code is not 304 NOT MODIFIED
-                    // This is either because the feed server
-                    // does not support condition gets
-                    // or because the feed hasn't changed
-                    retrieveAndCacheFeed(feedUrl, syndFeedInfo, httpConnection);
-                } else {
-                    // the feed does not need retrieving
-                    fireEvent(FetcherEvent.EVENT_TYPE_FEED_UNCHANGED, connection);
-                }
-            }
-            return syndFeedInfo.getSyndFeed();
-        } finally {
-            httpConnection.disconnect();
         }
     }
 
     /**
      * Retrieves and caches a {@link SyndFeed}
-     * 
+     *
      * @param feedUrl The feed {@link URL}
      * @param syndFeedInfo The {@link SyndFeedInfo} to retrieve and cache
      * @param connection The {@link HttpURLConnection}
@@ -216,8 +301,8 @@ public class TimoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Rel
      * @throws FetcherException
      * @throws IOException if an I/O error occurs
      */
-    protected void retrieveAndCacheFeed(URL feedUrl, SyndFeedInfo syndFeedInfo, HttpURLConnection connection) throws IllegalArgumentException, FeedException, FetcherException, IOException {
-        handleErrorCodes(connection.getResponseCode());
+    protected void retrieveAndCacheFeed(URL feedUrl, SyndFeedInfo syndFeedInfo, HttpURLConnection connection, int responseCode) throws IllegalArgumentException, FeedException, FetcherException, IOException {
+        handleErrorCodes(responseCode);
 
         resetFeedInfo(feedUrl, syndFeedInfo, connection);
         FeedFetcherCache cache = getFeedInfoCache();
@@ -231,7 +316,7 @@ public class TimoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Rel
 
     /**
      * Resets the specified {@link SyndFeedInfo}
-     * 
+     *
      * @param orignalUrl The original URL
      * @param syndFeedInfo The {@link SyndFeedInfo} to reset
      * @param connection The {@link HttpURLConnection}
@@ -317,7 +402,7 @@ public class TimoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Rel
 
     /**
      * Reads the SyndFeed from the specified input stream and fires an event {@link FetcherEvent#EVENT_TYPE_FEED_RETRIEVED}
-     * 
+     *
      * @param inputStream The {@link InputStream}
      * @param connection The {@link URLConnection}
      * @return The {@link SyndFeed}
@@ -333,7 +418,7 @@ public class TimoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Rel
 
     /**
      * Reads the SyndFeed from the specified input stream
-     * 
+     *
      * @param inputStream The {@link InputStream}
      * @param connection The {@link URLConnection}
      * @return The {@link SyndFeed}
@@ -342,7 +427,7 @@ public class TimoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Rel
      * @throws FeedException
      */
     private SyndFeed readSyndFeedFromStream(InputStream inputStream, URLConnection connection) throws IOException, IllegalArgumentException, FeedException {
-        CountingInputStream cis = new CountingInputStream(inputStream, maximumAllowedSize);
+        CountingInputStream cis = inputStream instanceof CountingInputStream ? (CountingInputStream) inputStream : new CountingInputStream(inputStream, maximumAllowedSize);
         InputStream is;
         if ("gzip".equalsIgnoreCase(connection.getContentEncoding())) {
             // handle gzip encoded content
@@ -366,7 +451,7 @@ public class TimoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Rel
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
      */
     @Override
@@ -376,7 +461,7 @@ public class TimoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Rel
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.Reloadable#getConfigFileNames()
      */
     @Override

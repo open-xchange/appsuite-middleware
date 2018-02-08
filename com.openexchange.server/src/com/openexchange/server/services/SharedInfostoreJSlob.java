@@ -116,8 +116,7 @@ public class SharedInfostoreJSlob implements SharedJSlobService {
             json.put("attachmentQuota", attachmentQuota);
             json.put("attachmentQuotaPerFile", attachmentQuotaPerFile);
 
-            DefaultJSlob jslob = new DefaultJSlob();
-            jslob.setJsonObject(json);
+            DefaultJSlob jslob = new DefaultJSlob(json);
             jslob.setId(new JSlobId(serviceId, id, session.getUserId(), session.getContextId()));
             return jslob;
         } catch (JSONException e) {
