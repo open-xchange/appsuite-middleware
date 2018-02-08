@@ -49,14 +49,9 @@
 
 package com.openexchange.groupware.calendar;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import java.util.Date;
 import java.util.List;
 import org.junit.Test;
-import com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTest;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
@@ -71,7 +66,7 @@ public class CalendarMoveTest extends AbstractCalendarTest {
     /**
      * Logger.
      */
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarSqlTest.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarMoveTest.class);
 
     /**
      * Calendar fields.

@@ -77,7 +77,6 @@ import org.junit.runners.Suite;
     com.openexchange.groupware.importexport.OutlookCSVContactImportTest.class,
     com.openexchange.groupware.importexport.SizedInputStreamTest.class,
     com.openexchange.folder.FolderTest.class,
-    com.openexchange.groupware.CalendarPerformanceTests.class,
     com.openexchange.groupware.calendar.CalendarMoveTest.class,
     com.openexchange.groupware.contexts.LoginTest.class,
     com.openexchange.groupware.reminder.ReminderTest.class,
