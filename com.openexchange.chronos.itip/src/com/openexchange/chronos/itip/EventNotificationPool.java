@@ -139,6 +139,10 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
             throw new NullPointerException("Please specify an original event, a new event and a session");
         }
 
+        // Copy events to avoid UnsupportedOperationException
+        original = copy(original);
+        update = copy(update);
+
         try {
             lock.lock();
             item(I(session.getContextId()), original.getId()).remember(original, update, session, sharedFolderOwner, principal);
@@ -149,6 +153,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
 
     @Override
     public void fasttrack(Event event, Session session) throws OXException {
+        event = copy(event);
         try {
             lock.lock();
             tick(I(session.getContextId()), event.getId(), true);
@@ -173,6 +178,10 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
 
         events.remove(event); // Stops working, if equals() depends on more than the objectId
         events.add(event);
+    }
+
+    protected Event copy(Event event) throws OXException {
+        return EventMapper.getInstance().copy(event, new Event(), (EventField[]) null);
     }
 
     /**
@@ -370,7 +379,7 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
                     }
                 }
                 // Apply new reset states to original event
-                Event orginalCopy = EventMapper.getInstance().copy(updates.get(0).getOldEvent(), new Event(), (EventField[]) null);
+                Event orginalCopy = copy(updates.get(0).getOldEvent());
                 copyParticipantStates(newEvent, orginalCopy);
                 this.original = orginalCopy;
             }
