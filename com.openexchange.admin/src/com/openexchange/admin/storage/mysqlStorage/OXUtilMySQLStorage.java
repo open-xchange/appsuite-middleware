@@ -2253,7 +2253,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
             int rows = statement.executeUpdate();
             if (rows <= 0) {
-                throw new StorageException("Unable to change to server '" + serverId + "' for the specified schema '" + schemaName + "'");
+                throw new StorageException("Unable to change to server '" + serverId + "' for the specified schema '" + schemaName + "'. The schema is empty.");
             }
 
             connection.commit();

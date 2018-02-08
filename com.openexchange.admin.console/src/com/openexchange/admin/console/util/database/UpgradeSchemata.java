@@ -193,7 +193,7 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
      * @throws NoSuchObjectException
      * @throws Exception if a fatal error is occurred
      */
-    private void execute(AdminParser parser) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchObjectException, MissingServiceException, InstanceNotFoundException, MBeanException, ReflectionException {
+    private void execute(AdminParser parser) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MissingServiceException, InstanceNotFoundException, MBeanException, ReflectionException {
         registerServer();
         for (Database database : listSchemata()) {
             boolean error = false;
@@ -211,6 +211,13 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
                 error = true;
                 System.err.println("An I/O error occurred while trying to upgrade schema '" + schemaName + "': " + e.getMessage());
                 printServerException(e, parser);
+            } catch (StorageException e) {
+                if (false == e.getMessage().contains("The schema is empty")) {
+                    throw e;
+                }
+                System.out.println("The schema '" + schemaName + "' is empty. Skipping.");
+            } catch (NoSuchObjectException e) {
+                System.out.println("Schema " + schemaName + " not found. Skipping");
             } finally {
                 if (!force && error) {
                     sysexit(1);
@@ -357,16 +364,13 @@ public class UpgradeSchemata extends ObjectNamingAbstraction {
      * @throws RemoteException
      * @throws InvalidCredentialsException
      * @throws InvalidDataException
+     * @throws NoSuchObjectException
      */
-    private void disableSchema(String schemaName) throws StorageException, MissingServiceException, RemoteException, InvalidCredentialsException, InvalidDataException, TargetDatabaseException {
-        try {
-            System.out.print("Disabling schema '" + schemaName + "'...");
-            schemaMoveUtil.disableSchema(credentials, schemaName);
-            schemaMoveUtil.invalidateContexts(credentials, schemaName, true);
-            ok();
-        } catch (NoSuchObjectException e) {
-            System.out.println("Schema " + schemaName + " not found. Skipping");
-        }
+    private void disableSchema(String schemaName) throws StorageException, MissingServiceException, RemoteException, InvalidCredentialsException, InvalidDataException, TargetDatabaseException, NoSuchObjectException {
+        System.out.print("Disabling schema '" + schemaName + "'...");
+        schemaMoveUtil.disableSchema(credentials, schemaName);
+        schemaMoveUtil.invalidateContexts(credentials, schemaName, true);
+        ok();
     }
 
     /**

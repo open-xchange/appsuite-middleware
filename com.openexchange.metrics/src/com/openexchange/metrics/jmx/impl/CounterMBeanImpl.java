@@ -47,63 +47,41 @@
  *
  */
 
-package com.openexchange.filestore.s3.osgi;
+package com.openexchange.metrics.jmx.impl;
 
-import com.amazonaws.metrics.AwsSdkMetrics;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.filestore.FileStorageProvider;
-import com.openexchange.filestore.s3.internal.S3FileStorageFactory;
-import com.openexchange.filestore.s3.internal.S3FileStoreProperty;
-import com.openexchange.filestore.s3.metrics.S3FileStorageDelegateMetricCollector;
-import com.openexchange.filestore.s3.metrics.S3FileStorageMetricCollector;
-import com.openexchange.metrics.MetricCollector;
-import com.openexchange.osgi.HousekeepingActivator;
+import javax.management.NotCompliantMBeanException;
+import com.codahale.metrics.Counter;
+import com.openexchange.metrics.jmx.CounterMBean;
 
 /**
- * {@link S3Activator}
+ * {@link CounterMBeanImpl}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class S3Activator extends HousekeepingActivator {
+public class CounterMBeanImpl extends AbstractMetricMBean implements CounterMBean {
+
+    private static final String DESCRIPTION = "Counter MBean";
+    private final Counter counter;
 
     /**
-     * Initializes a new {@link S3Activator}.
+     * Initialises a new {@link CounterMBeanImpl}.
+     * 
+     * @param description
+     * @param mbeanInterface
+     * @throws NotCompliantMBeanException
      */
-    public S3Activator() {
-        super();
+    public CounterMBeanImpl(Counter counter) throws NotCompliantMBeanException {
+        super(DESCRIPTION, CounterMBean.class);
+        this.counter = counter;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.jmx.CounterMBean#getCount()
+     */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, LeanConfigurationService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(S3Activator.class);
-        logger.info("Starting bundle: com.openexchange.filestore.s3");
-
-        // Check for metric collection
-        boolean metricCollection = getService(LeanConfigurationService.class).getBooleanProperty(S3FileStoreProperty.metricCollection);
-        if (metricCollection) {
-            S3FileStorageDelegateMetricCollector delegateCollector = new S3FileStorageDelegateMetricCollector(this);
-            // Enable metric collection by overriding the default metrics
-            AwsSdkMetrics.setMetricCollector(new S3FileStorageMetricCollector(this, delegateCollector));
-            registerService(MetricCollector.class, delegateCollector);
-        }
-
-        S3FileStorageFactory factory = new S3FileStorageFactory(this);
-        registerService(FileStorageProvider.class, factory);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(S3Activator.class);
-
-        AwsSdkMetrics.setMetricCollector(null);
-
-        logger.info("Stopping bundle: com.openexchange.filestore.s3");
-        super.stopBundle();
+    public long getCount() {
+        return counter.getCount();
     }
 }

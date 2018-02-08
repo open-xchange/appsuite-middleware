@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,63 +47,39 @@
  *
  */
 
-package com.openexchange.filestore.s3.osgi;
+package com.openexchange.filestore.s3.metrics;
 
-import com.amazonaws.metrics.AwsSdkMetrics;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.filestore.FileStorageProvider;
-import com.openexchange.filestore.s3.internal.S3FileStorageFactory;
 import com.openexchange.filestore.s3.internal.S3FileStoreProperty;
-import com.openexchange.filestore.s3.metrics.S3FileStorageDelegateMetricCollector;
-import com.openexchange.filestore.s3.metrics.S3FileStorageMetricCollector;
-import com.openexchange.metrics.MetricCollector;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.metrics.AbstractMetricCollector;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link S3Activator}
+ * {@link S3FileStorageDelegateMetricCollector}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class S3Activator extends HousekeepingActivator {
+public class S3FileStorageDelegateMetricCollector extends AbstractMetricCollector {
+
+    private static final String COMPONENT_NAME = "s3";
+
+    private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link S3Activator}.
+     * Initialises a new {@link S3FileStorageDelegateMetricCollector}.
      */
-    public S3Activator() {
-        super();
+    public S3FileStorageDelegateMetricCollector(ServiceLookup services) {
+        super(COMPONENT_NAME);
+        this.services = services;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.MetricCollector#isEnabled()
+     */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, LeanConfigurationService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(S3Activator.class);
-        logger.info("Starting bundle: com.openexchange.filestore.s3");
-
-        // Check for metric collection
-        boolean metricCollection = getService(LeanConfigurationService.class).getBooleanProperty(S3FileStoreProperty.metricCollection);
-        if (metricCollection) {
-            S3FileStorageDelegateMetricCollector delegateCollector = new S3FileStorageDelegateMetricCollector(this);
-            // Enable metric collection by overriding the default metrics
-            AwsSdkMetrics.setMetricCollector(new S3FileStorageMetricCollector(this, delegateCollector));
-            registerService(MetricCollector.class, delegateCollector);
-        }
-
-        S3FileStorageFactory factory = new S3FileStorageFactory(this);
-        registerService(FileStorageProvider.class, factory);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(S3Activator.class);
-
-        AwsSdkMetrics.setMetricCollector(null);
-
-        logger.info("Stopping bundle: com.openexchange.filestore.s3");
-        super.stopBundle();
+    public boolean isEnabled() {
+        return services.getService(LeanConfigurationService.class).getBooleanProperty(S3FileStoreProperty.metricCollection);
     }
 }

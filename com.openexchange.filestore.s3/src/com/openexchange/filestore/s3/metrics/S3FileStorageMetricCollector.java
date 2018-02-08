@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,63 +47,83 @@
  *
  */
 
-package com.openexchange.filestore.s3.osgi;
+package com.openexchange.filestore.s3.metrics;
 
-import com.amazonaws.metrics.AwsSdkMetrics;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.filestore.FileStorageProvider;
-import com.openexchange.filestore.s3.internal.S3FileStorageFactory;
-import com.openexchange.filestore.s3.internal.S3FileStoreProperty;
-import com.openexchange.filestore.s3.metrics.S3FileStorageDelegateMetricCollector;
-import com.openexchange.filestore.s3.metrics.S3FileStorageMetricCollector;
-import com.openexchange.metrics.MetricCollector;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.amazonaws.metrics.RequestMetricCollector;
+import com.amazonaws.metrics.ServiceMetricCollector;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link S3Activator}
+ * {@link S3FileStorageMetricCollector}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class S3Activator extends HousekeepingActivator {
+public class S3FileStorageMetricCollector extends com.amazonaws.metrics.MetricCollector {
+
+    private final S3FileStorageRequestMetricCollector s3FileStorageRequestMetricCollector;
+    private S3FileStorageServiceMetricCollector s3FileStorageServiceMetricCollector;
+    private final S3FileStorageDelegateMetricCollector delegateCollector;
 
     /**
-     * Initializes a new {@link S3Activator}.
+     * Initialises a new {@link S3FileStorageMetricCollector}.
+     * 
+     * @throws OXException
      */
-    public S3Activator() {
+    public S3FileStorageMetricCollector(ServiceLookup services, S3FileStorageDelegateMetricCollector delegateCollector) throws OXException {
         super();
+        this.delegateCollector = delegateCollector;
+        s3FileStorageRequestMetricCollector = new S3FileStorageRequestMetricCollector(delegateCollector);
+        s3FileStorageServiceMetricCollector = new S3FileStorageServiceMetricCollector(delegateCollector);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.amazonaws.metrics.MetricCollector#start()
+     */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, LeanConfigurationService.class };
+    public boolean start() {
+        return true;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.amazonaws.metrics.MetricCollector#stop()
+     */
     @Override
-    protected void startBundle() throws Exception {
-        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(S3Activator.class);
-        logger.info("Starting bundle: com.openexchange.filestore.s3");
-
-        // Check for metric collection
-        boolean metricCollection = getService(LeanConfigurationService.class).getBooleanProperty(S3FileStoreProperty.metricCollection);
-        if (metricCollection) {
-            S3FileStorageDelegateMetricCollector delegateCollector = new S3FileStorageDelegateMetricCollector(this);
-            // Enable metric collection by overriding the default metrics
-            AwsSdkMetrics.setMetricCollector(new S3FileStorageMetricCollector(this, delegateCollector));
-            registerService(MetricCollector.class, delegateCollector);
-        }
-
-        S3FileStorageFactory factory = new S3FileStorageFactory(this);
-        registerService(FileStorageProvider.class, factory);
+    public boolean stop() {
+        return false;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.amazonaws.metrics.MetricCollector#isEnabled()
+     */
     @Override
-    protected void stopBundle() throws Exception {
-        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(S3Activator.class);
+    public boolean isEnabled() {
+        return delegateCollector.isEnabled();
+    }
 
-        AwsSdkMetrics.setMetricCollector(null);
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.amazonaws.metrics.MetricCollector#getRequestMetricCollector()
+     */
+    @Override
+    public RequestMetricCollector getRequestMetricCollector() {
+        return s3FileStorageRequestMetricCollector;
+    }
 
-        logger.info("Stopping bundle: com.openexchange.filestore.s3");
-        super.stopBundle();
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.amazonaws.metrics.MetricCollector#getServiceMetricCollector()
+     */
+    @Override
+    public ServiceMetricCollector getServiceMetricCollector() {
+        return s3FileStorageServiceMetricCollector;
     }
 }

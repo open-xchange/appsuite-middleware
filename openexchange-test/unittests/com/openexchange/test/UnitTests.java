@@ -66,11 +66,6 @@ import org.junit.runners.Suite;
     com.openexchange.webdav.protocol.util.UtilsTest.class,
     com.openexchange.groupware.results.AbstractTimedResultTest.class,
 
-    com.openexchange.groupware.CalendarTest.class,
-    com.openexchange.groupware.CalendarRecurringTests.class,
-    com.openexchange.groupware.AppointmentBugTests.class,
-
-    com.openexchange.groupware.calendar.calendarsqltests.CalendarSqlTestSuite.class,
     com.openexchange.groupware.calendar.ConflictHandlerTest.class,
     com.openexchange.groupware.calendar.CalendarDowngradeUserTest.class,
     com.openexchange.groupware.calendar.RecurringCalculationTest.class,

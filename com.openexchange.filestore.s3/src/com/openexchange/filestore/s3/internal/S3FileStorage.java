@@ -197,8 +197,7 @@ public class S3FileStorage implements FileStorage {
         /*
          * results may be paginated - repeat listing objects as long as result is truncated
          */
-        ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
-            .withBucketName(bucketName).withDelimiter(DELIMITER).withPrefix(prefix + DELIMITER);
+        ListObjectsRequest listObjectsRequest = new ListObjectsRequest().withBucketName(bucketName).withDelimiter(DELIMITER).withPrefix(prefix + DELIMITER);
         ObjectListing objectListing;
         do {
             objectListing = amazonS3.listObjects(listObjectsRequest);
@@ -297,9 +296,9 @@ public class S3FileStorage implements FileStorage {
     public long appendToFile(InputStream file, String name, long offset) throws OXException {
         try {
             /*
-                 * TODO: This would be more efficient using the "CopyPartRequest", which is not yet supported by ceph
-                 * http://ceph.com/docs/next/radosgw/s3/#features-support
-                 */
+             * TODO: This would be more efficient using the "CopyPartRequest", which is not yet supported by ceph
+             * http://ceph.com/docs/next/radosgw/s3/#features-support
+             */
             /*
              * get existing object
              */
@@ -389,8 +388,7 @@ public class S3FileStorage implements FileStorage {
         try {
             return amazonS3.getObject(request).getObjectContent();
         } catch (AmazonClientException e) {
-            if (AmazonServiceException.class.isInstance(e) &&
-                HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE == ((AmazonServiceException) e).getStatusCode()) {
+            if (AmazonServiceException.class.isInstance(e) && HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE == ((AmazonServiceException) e).getStatusCode()) {
                 throw FileStorageCodes.INVALID_RANGE.create(e, offset, length, name, fileSize);
             }
             throw wrap(e, key);
@@ -521,10 +519,9 @@ public class S3FileStorage implements FileStorage {
      * @param lastPart <code>true</code> if this is the last part, <code>false</code>, otherwise
      * @return The put object result passed from the client
      */
-    private UploadPartResult uploadPart(String key, String uploadID, int partNumber, S3UploadChunk chunk, boolean lastPart) throws OXException  {
+    private UploadPartResult uploadPart(String key, String uploadID, int partNumber, S3UploadChunk chunk, boolean lastPart) throws OXException {
         try {
-            UploadPartRequest request = new UploadPartRequest().withBucketName(bucketName).withKey(key).withUploadId(uploadID)
-                .withInputStream(chunk.getData()).withPartSize(chunk.getSize()).withPartNumber(partNumber++).withLastPart(lastPart);
+            UploadPartRequest request = new UploadPartRequest().withBucketName(bucketName).withKey(key).withUploadId(uploadID).withInputStream(chunk.getData()).withPartSize(chunk.getSize()).withPartNumber(partNumber++).withLastPart(lastPart);
             String md5Digest = chunk.getMD5Digest();
             if (null != md5Digest) {
                 request.withMD5Digest(md5Digest);
@@ -534,5 +531,4 @@ public class S3FileStorage implements FileStorage {
             Streams.close(chunk);
         }
     }
-
 }
