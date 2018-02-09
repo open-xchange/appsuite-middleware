@@ -63,7 +63,6 @@ import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participan
 import com.openexchange.data.conversion.ical.itip.ITipEmitter;
 import com.openexchange.data.conversion.ical.itip.ITipParser;
 import com.openexchange.group.GroupService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.user.UserService;
@@ -95,7 +94,6 @@ public class Activator extends HousekeepingActivator {
         track(ResourceService.class, new ResourceServiceTrackerCustomizer(context, resourceResolver));
         Participants.resourceResolver = resourceResolver;
 
-        track(CalendarCollectionService.class, new CalendarServiceTracker(context));
         track(GroupService.class, new GroupServiceTracker(context));
         openTrackers();
 

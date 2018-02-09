@@ -21,7 +21,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
-import com.openexchange.groupware.calendar.tools.CommonAppointments;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
@@ -39,7 +38,6 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
-import com.openexchange.setuptools.TestConfig;
 import com.openexchange.test.AjaxInit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderManager;
@@ -1037,11 +1035,6 @@ public class FolderTest {
                 cdao.setParticipants(participants.getList());
 
                 fillDatesInDao(cdao);
-
-                CommonAppointments appointments = new CommonAppointments(ctx, new TestConfig().getUser());
-                appointments.save(cdao);
-                final int object_id = cdao.getObjectID();
-                appointments.load(object_id, fuid);
 
                 /*
                  * Clean folder

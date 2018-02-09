@@ -62,10 +62,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     com.openexchange.database.ConfigDBUniqueIDTest.class,
-    com.openexchange.groupware.importexport.Bug7470Test.class,
-    com.openexchange.groupware.importexport.Bug7732Test.class,
     com.openexchange.groupware.importexport.Bug8475.class,
-    com.openexchange.groupware.importexport.Bug8653.class,
     com.openexchange.groupware.importexport.Bug8654.class,
     com.openexchange.groupware.importexport.Bug8681forCSV.class,
     com.openexchange.groupware.importexport.Bug8681forICAL.class,
@@ -73,11 +70,9 @@ import org.junit.runners.Suite;
     com.openexchange.groupware.importexport.CSVContactExportTest.class,
     com.openexchange.groupware.importexport.CSVContactImportTest.class,
     com.openexchange.groupware.importexport.CSVParserTest.class,
-    com.openexchange.groupware.importexport.ICalImportTest.class,
     com.openexchange.groupware.importexport.OutlookCSVContactImportTest.class,
     com.openexchange.groupware.importexport.SizedInputStreamTest.class,
     com.openexchange.folder.FolderTest.class,
-    com.openexchange.groupware.calendar.CalendarMoveTest.class,
     com.openexchange.groupware.contexts.LoginTest.class,
     com.openexchange.groupware.reminder.ReminderTest.class,
     com.openexchange.mail.MailAccessTest.class,

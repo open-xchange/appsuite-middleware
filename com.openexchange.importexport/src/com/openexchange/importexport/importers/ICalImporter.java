@@ -53,7 +53,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.data.conversion.ical.TruncationInfo;
 import com.openexchange.exception.OXException;
@@ -76,8 +75,6 @@ import com.openexchange.tools.session.ServerSession;
  * Imports ICal files. ICal files can be translated to either tasks or
  * appointments within the OX, so the importer works with both SQL interfaces.
  *
- * @see AppointmentSQLInterface AppointmentSQLInterface - if you have a problem
- *      entering the parsed entry as Appointment
  * @see TasksSQLInterface TasksSQLInterface - if you have trouble entering the
  *      parsed entry as Task
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>

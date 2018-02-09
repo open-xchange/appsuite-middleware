@@ -150,8 +150,6 @@ import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.alias.impl.CachingAliasStorage;
 import com.openexchange.groupware.alias.impl.RdbAliasStorage;
 import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.contact.datasource.ContactDataSource;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.delete.contextgroup.DeleteContextGroupListener;
@@ -322,7 +320,7 @@ public final class ServerActivator extends HousekeepingActivator {
     private static final Class<?>[] NEEDED_SERVICES_SERVER = {
         ConfigurationService.class, DatabaseService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class,
         JDOMParser.class, TimerService.class, ThreadPoolService.class,
-        AppointmentSqlFactoryService.class, CalendarCollectionService.class, MessagingServiceRegistry.class, HtmlService.class,
+        MessagingServiceRegistry.class, HtmlService.class,
         IDBasedFolderAccessFactory.class, IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
         CryptoService.class, HttpService.class, SystemNameService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
         TextXtractService.class, SecretEncryptionFactoryService.class, SearchService.class, DispatcherPrefixService.class,

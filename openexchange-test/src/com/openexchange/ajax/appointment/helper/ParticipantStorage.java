@@ -47,49 +47,42 @@
  *
  */
 
-package com.openexchange.groupware.calendar.tools;
+package com.openexchange.ajax.appointment.helper;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.TimeTools;
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.groupware.container.ExternalUserParticipant;
+import com.openexchange.groupware.container.Participant;
+import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 
 /**
- * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ * Interface to the storage of external participants.
+ *
+ * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public class CommonAppointments {
+public class ParticipantStorage {
 
-    public static Date D(final String date) {
-        return TimeTools.D(date);
+    public static final ExternalUserParticipant[] extractExternal(Participant[] participants) {
+        return extractExternal(participants, null);
     }
-
-    public static Date recalculate(final Date date, final TimeZone from, final TimeZone to) {
-        final Calendar fromCal = new GregorianCalendar();
-        fromCal.setTimeZone(from);
-        fromCal.setTime(date);
-
-        final Calendar toCal = new GregorianCalendar();
-        toCal.setTimeZone(to);
-        toCal.set(fromCal.get(Calendar.YEAR), fromCal.get(Calendar.MONTH), fromCal.get(Calendar.DATE), fromCal.get(Calendar.HOUR_OF_DAY), fromCal.get(Calendar.MINUTE), fromCal.get(Calendar.SECOND));
-        toCal.set(Calendar.MILLISECOND, 0);
-
-        return toCal.getTime();
-    }
-
-    public static String dateString(final long time, final TimeZone tz) {
-        final SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-        format.setTimeZone(tz);
-        return format.format(new Date(time));
-    }
-
-    public CalendarDataObject createIdentifyingCopy(final CalendarDataObject appointment) {
-        final CalendarDataObject copy = new CalendarDataObject();
-        copy.setObjectID(appointment.getObjectID());
-        copy.setContext(appointment.getContext());
-        copy.setParentFolderID(appointment.getParentFolderID());
-        return copy;
+    public static final ExternalUserParticipant[] extractExternal(Participant[] participants, ConfirmableParticipant[] confirmations) {
+        List<ExternalUserParticipant> retval = new ArrayList<ExternalUserParticipant>();
+        if (null != participants) {
+            for (Participant participant : participants) {
+                if (participant instanceof ExternalUserParticipant) {
+                    ExternalUserParticipant external = (ExternalUserParticipant) participant;
+                    if (confirmations != null) {
+                        for (ConfirmableParticipant confirmation : confirmations) {
+                            if (external.getEmailAddress().equals(confirmation.getEmailAddress())) {
+                                external.setConfirm(confirmation.getConfirm());
+                                external.setMessage(confirmation.getMessage());
+                            }
+                        }
+                    }
+                    retval.add((ExternalUserParticipant) participant);
+                }
+            }
+        }
+        return retval.toArray(new ExternalUserParticipant[retval.size()]);
     }
 }

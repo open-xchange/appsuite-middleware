@@ -11,7 +11,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.caching"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.caching.events"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.caching.events.ms"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.calendar"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.calendar.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.capabilities"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.capabilities.impl"/>

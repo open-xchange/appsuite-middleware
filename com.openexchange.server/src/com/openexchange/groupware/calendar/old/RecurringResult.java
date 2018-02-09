@@ -47,49 +47,95 @@
  *
  */
 
-package com.openexchange.groupware.calendar.tools;
+package com.openexchange.groupware.calendar.old;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.TimeTools;
+import com.openexchange.groupware.calendar.CalendarCollectionUtils;
+import com.openexchange.groupware.calendar.Constants;
+import com.openexchange.groupware.calendar.RecurringResultInterface;
 
 /**
- * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ * {@link RecurringResult} - Represents an occurrence in a recurring event.
+ *
+ * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  */
-public class CommonAppointments {
+public final class RecurringResult implements RecurringResultInterface {
 
-    public static Date D(final String date) {
-        return TimeTools.D(date);
-    }
+	private final long normalized;
 
-    public static Date recalculate(final Date date, final TimeZone from, final TimeZone to) {
-        final Calendar fromCal = new GregorianCalendar();
-        fromCal.setTimeZone(from);
-        fromCal.setTime(date);
+	private final long start;
 
-        final Calendar toCal = new GregorianCalendar();
-        toCal.setTimeZone(to);
-        toCal.set(fromCal.get(Calendar.YEAR), fromCal.get(Calendar.MONTH), fromCal.get(Calendar.DATE), fromCal.get(Calendar.HOUR_OF_DAY), fromCal.get(Calendar.MINUTE), fromCal.get(Calendar.SECOND));
-        toCal.set(Calendar.MILLISECOND, 0);
+	private final long diff;
 
-        return toCal.getTime();
-    }
+	private final int lengthOffset;
 
-    public static String dateString(final long time, final TimeZone tz) {
-        final SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-        format.setTimeZone(tz);
-        return format.format(new Date(time));
-    }
+	private final int position;
 
-    public CalendarDataObject createIdentifyingCopy(final CalendarDataObject appointment) {
-        final CalendarDataObject copy = new CalendarDataObject();
-        copy.setObjectID(appointment.getObjectID());
-        copy.setContext(appointment.getContext());
-        copy.setParentFolderID(appointment.getParentFolderID());
-        return copy;
-    }
+	/**
+	 * Initializes a new {@link RecurringResult}
+	 *
+	 * @param start
+	 *            The start time in milliseconds
+	 * @param diff
+	 *            The single event's duration in milliseconds
+	 * @param lengthOffset
+	 *            The length offset (actually the duration in days)
+	 * @param position
+	 *            The one-based position
+	 */
+	public RecurringResult(final long start, final long diff, final int lengthOffset, final int position) {
+		this.start = start;
+		normalized = CalendarCollectionUtils.normalizeLong(start);
+		this.diff = diff;
+		this.lengthOffset = lengthOffset;
+		this.position = position;
+	}
+
+	/* (non-Javadoc)
+     * @see com.openexchange.calendar.RecurringResultInterface#getStart()
+     */
+	@Override
+    public long getStart() {
+		return start;
+	}
+
+	/* (non-Javadoc)
+     * @see com.openexchange.calendar.RecurringResultInterface#getNormalized()
+     */
+	@Override
+    public long getNormalized() {
+		return normalized;
+	}
+
+	/* (non-Javadoc)
+     * @see com.openexchange.calendar.RecurringResultInterface#getEnd()
+     */
+	@Override
+    public long getEnd() {
+		return start + diff + (lengthOffset * Constants.MILLI_DAY);
+	}
+
+	/* (non-Javadoc)
+     * @see com.openexchange.calendar.RecurringResultInterface#getDiff()
+     */
+	@Override
+    public long getDiff() {
+		return diff;
+	}
+
+	/* (non-Javadoc)
+     * @see com.openexchange.calendar.RecurringResultInterface#getOffset()
+     */
+	@Override
+    public int getOffset() {
+		return lengthOffset;
+	}
+
+	/* (non-Javadoc)
+     * @see com.openexchange.calendar.RecurringResultInterface#getPosition()
+     */
+	@Override
+    public int getPosition() {
+		return position;
+	}
+
 }

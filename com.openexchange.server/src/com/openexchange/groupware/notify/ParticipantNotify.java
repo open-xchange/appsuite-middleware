@@ -49,12 +49,9 @@
 
 package com.openexchange.groupware.notify;
 
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -93,7 +90,7 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.groupware.calendar.CalendarCollectionUtils;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
@@ -161,6 +158,8 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 public class ParticipantNotify implements TaskEventInterface2 {
 
@@ -315,7 +314,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
         return r;
     }
 
-    protected UserConfiguration getUserConfiguration(final int id, final int[] groups, final Context context) throws SQLException, OXException {
+    protected UserConfiguration getUserConfiguration(final int id, final int[] groups, final Context context) throws OXException {
         return CapabilityUserConfigurationStorage.loadUserConfiguration(id, groups, context);
     }
 
@@ -325,10 +324,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
 
     @Override
     public void taskCreated(final Task taskObj, final Session session) {
-        sendNotification(null, taskObj, session, new TaskState(
-            new TaskActionReplacement(TaskActionReplacement.ACTION_NEW),
-            Notifications.TASK_CREATE_MAIL,
-            State.Type.NEW), false, false, false);
+        sendNotification(null, taskObj, session, new TaskState(new TaskActionReplacement(TaskActionReplacement.ACTION_NEW), Notifications.TASK_CREATE_MAIL, State.Type.NEW), false, false, false);
     }
 
     @Override
@@ -338,10 +334,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
 
     @Override
     public void taskModified(final Task oldTask, final Task newTask, final Session session) {
-        sendNotification(oldTask, newTask, session, new TaskState(
-            new TaskActionReplacement(TaskActionReplacement.ACTION_CHANGED),
-            Notifications.TASK_UPDATE_MAIL,
-            State.Type.MODIFIED), false, false, true);
+        sendNotification(oldTask, newTask, session, new TaskState(new TaskActionReplacement(TaskActionReplacement.ACTION_CHANGED), Notifications.TASK_UPDATE_MAIL, State.Type.MODIFIED), false, false, true);
     }
 
     @Override
@@ -351,11 +344,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
 
     @Override
     public void taskAccepted(final Task oldTask, final Task taskObj, final Session session) {
-        sendNotification(oldTask, taskObj, session, new TaskState(
-            new TaskActionReplacement(TaskActionReplacement.ACTION_ACCEPTED),
-            new ConfirmationActionReplacement(ConfirmationActionReplacement.ACTION_ACCEPTED),
-            Notifications.TASK_CONFIRMATION_MAIL,
-            State.Type.ACCEPTED), false, false, false);
+        sendNotification(oldTask, taskObj, session, new TaskState(new TaskActionReplacement(TaskActionReplacement.ACTION_ACCEPTED), new ConfirmationActionReplacement(ConfirmationActionReplacement.ACTION_ACCEPTED), Notifications.TASK_CONFIRMATION_MAIL, State.Type.ACCEPTED), false, false, false);
     }
 
     @Override
@@ -365,11 +354,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
 
     @Override
     public void taskDeclined(final Task oldTask, final Task taskObj, final Session session) {
-        sendNotification(oldTask, taskObj, session, new TaskState(
-            new TaskActionReplacement(TaskActionReplacement.ACTION_DECLINED),
-            new ConfirmationActionReplacement(ConfirmationActionReplacement.ACTION_DECLINED),
-            Notifications.TASK_CONFIRMATION_MAIL,
-            State.Type.DECLINED), false, false, false);
+        sendNotification(oldTask, taskObj, session, new TaskState(new TaskActionReplacement(TaskActionReplacement.ACTION_DECLINED), new ConfirmationActionReplacement(ConfirmationActionReplacement.ACTION_DECLINED), Notifications.TASK_CONFIRMATION_MAIL, State.Type.DECLINED), false, false, false);
     }
 
     @Override
@@ -379,11 +364,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
 
     @Override
     public void taskTentativelyAccepted(final Task oldTask, final Task taskObj, final Session session) {
-        sendNotification(oldTask, taskObj, session, new TaskState(
-            new TaskActionReplacement(TaskActionReplacement.ACTION_TENTATIVE),
-            new ConfirmationActionReplacement(ConfirmationActionReplacement.ACTION_TENTATIVELY_ACCEPTED),
-            Notifications.TASK_CONFIRMATION_MAIL,
-            State.Type.TENTATIVELY_ACCEPTED), false, false, false);
+        sendNotification(oldTask, taskObj, session, new TaskState(new TaskActionReplacement(TaskActionReplacement.ACTION_TENTATIVE), new ConfirmationActionReplacement(ConfirmationActionReplacement.ACTION_TENTATIVELY_ACCEPTED), Notifications.TASK_CONFIRMATION_MAIL, State.Type.TENTATIVELY_ACCEPTED), false, false, false);
     }
 
     @Override
@@ -395,10 +376,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
         /*
          * Send delete notification
          */
-        sendNotification(null, taskObj, session, new TaskState(
-            new TaskActionReplacement(TaskActionReplacement.ACTION_DELETED),
-            Notifications.TASK_DELETE_MAIL,
-            State.Type.DELETED), NotificationConfig.getPropertyAsBoolean(NotificationProperty.NOTIFY_ON_DELETE, false), true, false);
+        sendNotification(null, taskObj, session, new TaskState(new TaskActionReplacement(TaskActionReplacement.ACTION_DELETED), Notifications.TASK_DELETE_MAIL, State.Type.DELETED), NotificationConfig.getPropertyAsBoolean(NotificationProperty.NOTIFY_ON_DELETE, false), true, false);
     }
 
     /**
@@ -499,17 +477,13 @@ public class ParticipantNotify implements TaskEventInterface2 {
             // Set correct recurrence information if CalendarObject is an Appointment
             if (newApp.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
                 try {
-                    ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class, true).fillDAO(
-                        (CalendarDataObject) newApp);
+                    CalendarCollectionUtils.fillDAO((CalendarDataObject) newApp);
                     if (oldObj != null) {
-                        ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class, true).fillDAO(
-                            (CalendarDataObject) oldApp);
+                        CalendarCollectionUtils.fillDAO((CalendarDataObject) oldApp);
                     }
                 } catch (final Exception e) {
                     if (e instanceof OXException) {
-                        final StringBuilder builder = new StringBuilder(256).append(
-                            "Could not set correct recurrence information in notification for appointment").append(title).append(" (").append(
-                                newObj.getObjectID()).append("). Cause:\n");
+                        final StringBuilder builder = new StringBuilder(256).append("Could not set correct recurrence information in notification for appointment").append(title).append(" (").append(newObj.getObjectID()).append("). Cause:\n");
                         LOG.error("{}", builder, e);
                     }
                 }
@@ -538,16 +512,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
         /*
          * Create message list
          */
-        final List<MailMessage> messages = createMessageList(
-            oldObj,
-            newObj,
-            state,
-            forceNotifyOthers,
-            isUpdate,
-            serverSession,
-            receivers,
-            title,
-            renderMap);
+        final List<MailMessage> messages = createMessageList(oldObj, newObj, state, forceNotifyOthers, isUpdate, serverSession, receivers, title, renderMap);
 
         /*
          * Send messages
@@ -595,11 +560,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
 
                 if (p.type != Participant.EXTERNAL_USER && allUserIds.contains(p.id)) {
                     try {
-                        sendMail = !p.ignoreNotification && state.sendMail(
-                            getUserSettingMail(p.id, session.getContext()),
-                            newObj.getCreatedBy(),
-                            p.id,
-                            session.getUserId()) && ((!newObj.containsNotification() || newObj.getNotification()) || (forceNotifyOthers && p.id != session.getUserId()));
+                        sendMail = !p.ignoreNotification && state.sendMail(getUserSettingMail(p.id, session.getContext()), newObj.getCreatedBy(), p.id, session.getUserId()) && ((!newObj.containsNotification() || newObj.getNotification()) || (forceNotifyOthers && p.id != session.getUserId()));
                         tz = p.timeZone;
                     } catch (final OXException e) {
                         log(e);
@@ -647,8 +608,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
                         /*
                          * Add to pool
                          */
-                        NotificationPool.getInstance().put(
-                            new PooledNotification(p, title, state, locale, (RenderMap) renderMap.clone(), session, newObj));
+                        NotificationPool.getInstance().put(new PooledNotification(p, title, state, locale, (RenderMap) renderMap.clone(), session, newObj));
                         LOG.debug("{} update (id = {}) notification added to pool for receiver {}", (Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task"), newObj.getObjectID(), p.email);
                     } else {
                         /*
@@ -656,18 +616,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
                          */
                         MailMessage message = null;
                         if (Participant.USER == p.type) {
-                            message = createUserMessage(
-                                session,
-                                newObj,
-                                p,
-                                (userCanReadObject(p, newObj, session)),
-                                title,
-                                actionRepl,
-                                state,
-                                locale,
-                                renderMap,
-                                isUpdate,
-                                b);
+                            message = createUserMessage(session, newObj, p, (userCanReadObject(p, newObj, session)), title, actionRepl, state, locale, renderMap, isUpdate, b);
                         } else {
                             message = createParticipantMessage(session, newObj, p, title, actionRepl, state, locale, renderMap, isUpdate, b);
                         }
@@ -796,17 +745,14 @@ public class ParticipantNotify implements TaskEventInterface2 {
                  */
                 final RenderMap clone = clonedRenderMap(renderMap);
                 if (Types.APPOINTMENT == state.getModule()) {
-                    msg.title = b.append(
-                        new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_DELETED, locale).getReplacement()).append(": ").append(
-                            title).toString();
+                    msg.title = b.append(new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_DELETED, locale).getReplacement()).append(": ").append(title).toString();
                     b.setLength(0);
                     /*
                      * Render proper message for removed participant
                      */
                     msg.message = new StringTemplate(Notifications.APPOINTMENT_DELETE_MAIL).render(p.getLocale(), clone);
                 } else {
-                    msg.title = b.append(new TaskActionReplacement(TaskActionReplacement.ACTION_DELETED, locale).getReplacement()).append(
-                        ": ").append(title).toString();
+                    msg.title = b.append(new TaskActionReplacement(TaskActionReplacement.ACTION_DELETED, locale).getReplacement()).append(": ").append(title).toString();
                     b.setLength(0);
                     /*
                      * Render proper message for removed participant
@@ -824,8 +770,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
                  */
                 final RenderMap clone = clonedRenderMap(renderMap);
                 if (Types.APPOINTMENT == state.getModule()) {
-                    msg.title = b.append(new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_NEW, locale).getReplacement()).append(
-                        ": ").append(title).toString();
+                    msg.title = b.append(new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_NEW, locale).getReplacement()).append(": ").append(title).toString();
                     b.setLength(0);
                     /*
                      * Render proper message for removed participant
@@ -838,8 +783,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
                         msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REQUEST, p, strings, b);
                     }
                 } else {
-                    msg.title = b.append(new TaskActionReplacement(TaskActionReplacement.ACTION_NEW, locale).getReplacement()).append(": ").append(
-                        title).toString();
+                    msg.title = b.append(new TaskActionReplacement(TaskActionReplacement.ACTION_NEW, locale).getReplacement()).append(": ").append(title).toString();
                     b.setLength(0);
                     /*
                      * Render proper message for removed participant
@@ -915,16 +859,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
                 if (p.type == Participant.USER && !NotificationConfig.getPropertyAsBoolean(NotificationProperty.INTERNAL_IMIP, false)) {
                     msg.message = textMessage;
                 } else {
-                    msg.message = generateMessageMultipart(
-                        session,
-                        cal,
-                        textMessage,
-                        state.getModule(),
-                        state.getType(),
-                        ITipMethod.REQUEST,
-                        p,
-                        strings,
-                        b);
+                    msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REQUEST, p, strings, b);
                 }
             } else if (ParticipantNotify.isStatusUpdate(state)) {
                 String textMessage = "";
@@ -937,16 +872,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
                 // Attach IMIP Magic only for external users on secondary events, to tell them the state of the appointment, but don't
                 // bother with internal users.
                 if (p.type == Participant.EXTERNAL_USER) {
-                    msg.message = generateMessageMultipart(
-                        session,
-                        cal,
-                        textMessage,
-                        state.getModule(),
-                        state.getType(),
-                        ITipMethod.REPLY,
-                        p,
-                        strings,
-                        b);
+                    msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REPLY, p, strings, b);
                 } else {
                     msg.message = textMessage;
                 }
@@ -954,16 +880,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
                 if (p.type == Participant.USER && !NotificationConfig.getPropertyAsBoolean(NotificationProperty.INTERNAL_IMIP, false)) {
                     msg.message = createTemplate.render(p.getLocale(), renderMap);
                 } else {
-                    msg.message = generateMessageMultipart(
-                        session,
-                        cal,
-                        createTemplate.render(p.getLocale(), renderMap),
-                        state.getModule(),
-                        state.getType(),
-                        ITipMethod.CANCEL,
-                        p,
-                        strings,
-                        b);
+                    msg.message = generateMessageMultipart(session, cal, createTemplate.render(p.getLocale(), renderMap), state.getModule(), state.getType(), ITipMethod.CANCEL, p, strings, b);
                 }
             } else {
                 msg.message = createTemplate.render(p.getLocale(), renderMap);
@@ -980,8 +897,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
                 /*
                  * Prepend prefix to text content
                  */
-                msg.message = b.append(String.format(strings.getString(Notifications.RESOURCE_PREFIX), p.displayName)).append(": ").append(
-                    content).toString();
+                msg.message = b.append(String.format(strings.getString(Notifications.RESOURCE_PREFIX), p.displayName)).append(": ").append(content).toString();
                 b.setLength(0);
             }
             /*
@@ -1059,9 +975,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
                             if (fileName != null) {
                                 final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
                                 cd.setFilenameParameter(fileName);
-                                bodyPart.setHeader(
-                                    MessageHeaders.HDR_CONTENT_DISPOSITION,
-                                    MimeMessageUtility.foldContentDisposition(cd.toString()));
+                                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentDisposition(cd.toString()));
                             }
                             bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
                             LOG.debug("Added file attachment to notification message: {}", fileName);
@@ -1137,13 +1051,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
             final int alarm = app.getAlarm();
             app.removeAlarm();
             final ITipContainer iTip = new ITipContainer(method, type, session.getUserId());
-            emitter.writeAppointment(
-                icalSession,
-                app,
-                session.getContext(),
-                iTip,
-                new LinkedList<ConversionError>(),
-                new LinkedList<ConversionWarning>());
+            emitter.writeAppointment(icalSession, app, session.getContext(), iTip, new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>());
             if (null != until) {
                 app.setEndDate(until);
             }
@@ -1169,15 +1077,15 @@ public class ParticipantNotify implements TaskEventInterface2 {
                  */
                 final String fileName;
                 switch (method) {
-                case REQUEST:
-                    fileName = "invite.ics";
-                    break;
-                case CANCEL:
-                    fileName = "cancel.ics";
-                    break;
-                default:
-                    fileName = "response.ics";
-                    break;
+                    case REQUEST:
+                        fileName = "invite.ics";
+                        break;
+                    case CANCEL:
+                        fileName = "cancel.ics";
+                        break;
+                    default:
+                        fileName = "response.ics";
+                        break;
                 }
                 /*
                  * Compose content type
@@ -1311,17 +1219,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
             }
 
             sortUserParticipants(oldUsers, newObj.getUsers(), participantSet, isUpdate, receivers, session, all);
-            sortExternalParticipantsAndResources(
-                oldParticipants,
-                newObj.getParticipants(),
-                participantSet,
-                resourceSet,
-                isUpdate,
-                receivers,
-                session,
-                all,
-                newObj.getOrganizer(),
-                state);
+            sortExternalParticipantsAndResources(oldParticipants, newObj.getParticipants(), participantSet, resourceSet, isUpdate, receivers, session, all, newObj.getOrganizer(), state);
         }
         // Add task owner to receivers list to make him receive mails about changed participants states.
         if (newObj instanceof Task) {
@@ -1331,9 +1229,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
          * Generate a render map
          */
         final RenderMap renderMap = new RenderMap();
-        renderMap.put(new FormatLocalizedStringReplacement(TemplateToken.TITLE, Notifications.FORMAT_DESCRIPTION, title).setChanged(isUpdate ? (oldObj == null ? false : !compareObjects(
-            title,
-            oldObj.getTitle())) : false));
+        renderMap.put(new FormatLocalizedStringReplacement(TemplateToken.TITLE, Notifications.FORMAT_DESCRIPTION, title).setChanged(isUpdate ? (oldObj == null ? false : !compareObjects(title, oldObj.getTitle())) : false));
         renderMap.put(new ParticipantsReplacement(participantSet).setChanged(isUpdate));
         renderMap.put(new ResourcesReplacement(resourceSet).setChanged(isUpdate));
         {
@@ -1368,9 +1264,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
         }
         {
             final String note = null == newObj.getNote() ? "" : newObj.getNote();
-            renderMap.put(new CommentsReplacement(note).setChanged(isUpdate ? (oldObj == null ? false : !compareStrings(
-                note,
-                oldObj.getNote())) : false));
+            renderMap.put(new CommentsReplacement(note).setChanged(isUpdate ? (oldObj == null ? false : !compareStrings(note, oldObj.getNote())) : false));
         }
         /*
          * Add task-specific replacements
@@ -1416,9 +1310,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
                 isFulltime = ((Appointment) newObj).getFullTime();
             }
             final Date start = newObj.getStartDate();
-            renderMap.put(new StartDateReplacement(start, isFulltime).setChanged(isUpdate ? (oldObj == null ? false : !compareObjects(
-                start,
-                oldObj.getStartDate())) : false));
+            renderMap.put(new StartDateReplacement(start, isFulltime).setChanged(isUpdate ? (oldObj == null ? false : !compareObjects(start, oldObj.getStartDate())) : false));
             Date end = newObj.getEndDate();
             /*
              * Determine changed status with original end time
@@ -1436,9 +1328,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
 
             renderMap.put(new EndDateReplacement(end, isFulltime, isTask).setChanged(endChanged));
         }
-        renderMap.put(new CreationDateReplacement(
-            newObj.containsCreationDate() ? newObj.getCreationDate() : (oldObj == null ? null : oldObj.getCreationDate()),
-                null));
+        renderMap.put(new CreationDateReplacement(newObj.containsCreationDate() ? newObj.getCreationDate() : (oldObj == null ? null : oldObj.getCreationDate()), null));
         {
             final SeriesReplacement seriesRepl;
             if (newObj.containsRecurrenceType() || newObj.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
@@ -1458,9 +1348,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
             final Date[] deleteExcs = newObj.getDeleteException();
             if (newObj.containsDeleteExceptions() || deleteExcs != null) {
                 deleteExceptionsReplacement = new DeleteExceptionsReplacement(deleteExcs);
-                deleteExceptionsReplacement.setChanged(isUpdate ? (oldObj == null ? false : !compareDates(
-                    deleteExcs,
-                    oldObj.getDeleteException())) : false);
+                deleteExceptionsReplacement.setChanged(isUpdate ? (oldObj == null ? false : !compareDates(deleteExcs, oldObj.getDeleteException())) : false);
             } else if (oldObj != null && oldObj.containsDeleteExceptions()) {
                 deleteExceptionsReplacement = new DeleteExceptionsReplacement(oldObj.getDeleteException());
                 deleteExceptionsReplacement.setChanged(false);
@@ -1480,17 +1368,13 @@ public class ParticipantNotify implements TaskEventInterface2 {
                     changeExceptionsReplacement.setChangeException(true);
                     changeExceptionsReplacement.setRecurrenceTitle(recurrenceTitle);
                 } else {
-                    changeExceptionsReplacement.setChanged(isUpdate ? (oldObj == null ? false : !compareDates(
-                        changeExcs,
-                        oldObj.getChangeException())) : false);
+                    changeExceptionsReplacement.setChanged(isUpdate ? (oldObj == null ? false : !compareDates(changeExcs, oldObj.getChangeException())) : false);
                 }
             } else if (oldObj != null && oldObj.containsChangeExceptions()) {
                 final Date[] oldChangeExcs = oldObj.getChangeException();
                 changeExceptionsReplacement = new ChangeExceptionsReplacement(oldChangeExcs);
                 final String recurrenceTitle;
-                if (oldChangeExcs != null && isChangeException(oldObj) && null != (recurrenceTitle = getRecurrenceTitle(
-                    oldObj,
-                    session.getContext()))) {
+                if (oldChangeExcs != null && isChangeException(oldObj) && null != (recurrenceTitle = getRecurrenceTitle(oldObj, session.getContext()))) {
                     changeExceptionsReplacement.setChangeException(true);
                     changeExceptionsReplacement.setRecurrenceTitle(recurrenceTitle);
                 } else {
@@ -1515,65 +1399,52 @@ public class ParticipantNotify implements TaskEventInterface2 {
         if (oldParticipants != null) {
             for (final Participant participant : oldParticipants) {
                 switch (participant.getType()) {
-                case Participant.USER:
-                    EmailableParticipant p = getUserParticipant(participant, ctx);
+                    case Participant.USER:
+                        EmailableParticipant p = getUserParticipant(participant, ctx);
                         if (p != null && p.type == Participant.USER && p.folderId > 0 && p.email.equalsIgnoreCase(email)) {
-                        folderRepl.setChanged(p.folderId != folderId);
-                        return;
-                    }
-                    break;
-                case Participant.EXTERNAL_USER:
-                    p = getExternalParticipant(participant, session);
+                            folderRepl.setChanged(p.folderId != folderId);
+                            return;
+                        }
+                        break;
+                    case Participant.EXTERNAL_USER:
+                        p = getExternalParticipant(participant, session);
                         if (p != null && p.type == Participant.USER && p.folderId > 0 && p.email.equalsIgnoreCase(email)) {
-                        folderRepl.setChanged(p.folderId != folderId);
-                        return;
-                    }
-                    break;
-                case Participant.RESOURCE:
-                    p = getResourceParticipant(participant, session);
+                            folderRepl.setChanged(p.folderId != folderId);
+                            return;
+                        }
+                        break;
+                    case Participant.RESOURCE:
+                        p = getResourceParticipant(participant, session);
                         if (p != null && p.type == Participant.USER && p.folderId > 0 && p.email.equalsIgnoreCase(email)) {
-                        folderRepl.setChanged(p.folderId != folderId);
-                        return;
-                    }
-                    break;
-                case Participant.GROUP:
-                    try {
-                        // FIXME 101 SELECT problem
-                        final Group group = resolveGroups(ctx, participant.getIdentifier())[0];
-                        final int[] members = group.getMember();
-                        final User[] memberObjects = resolveUsers(ctx, members);
-                        for (final User user : memberObjects) {
+                            folderRepl.setChanged(p.folderId != folderId);
+                            return;
+                        }
+                        break;
+                    case Participant.GROUP:
+                        try {
+                            // FIXME 101 SELECT problem
+                            final Group group = resolveGroups(ctx, participant.getIdentifier())[0];
+                            final int[] members = group.getMember();
+                            final User[] memberObjects = resolveUsers(ctx, members);
+                            for (final User user : memberObjects) {
 
-                            final int[] groups = user.getGroups();
-                            final TimeZone tz = TimeZoneUtils.getTimeZone(user.getTimeZone());
+                                final int[] groups = user.getGroups();
+                                final TimeZone tz = TimeZoneUtils.getTimeZone(user.getTimeZone());
 
-                            if (user.getMail() != null) {
-                                p = new EmailableParticipant(
-                                    ctx.getContextId(),
-                                    Participant.USER,
-                                    user.getId(),
-                                    groups,
-                                    user.getMail(),
-                                    user.getDisplayName(),
-                                    user.getLocale(),
-                                    tz,
-                                    10,
-                                    -1,
-                                    CalendarObject.NONE,
-                                    null,
-                                    participant.isIgnoreNotification());
-                                if (p.type == Participant.USER && p.folderId > 0 && p.email.equalsIgnoreCase(email)) {
-                                    folderRepl.setChanged(p.folderId != folderId);
-                                    return;
+                                if (user.getMail() != null) {
+                                    p = new EmailableParticipant(ctx.getContextId(), Participant.USER, user.getId(), groups, user.getMail(), user.getDisplayName(), user.getLocale(), tz, 10, -1, CalendarObject.NONE, null, participant.isIgnoreNotification());
+                                    if (p.type == Participant.USER && p.folderId > 0 && p.email.equalsIgnoreCase(email)) {
+                                        folderRepl.setChanged(p.folderId != folderId);
+                                        return;
+                                    }
                                 }
                             }
+                        } catch (final OXException e) {
+                            log(e);
                         }
-                    } catch (final OXException e) {
-                        log(e);
-                    }
-                    break;
-                default:
-                    throw new IllegalArgumentException("Unknown Participant Type: " + participant.getType());
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unknown Participant Type: " + participant.getType());
                 }
             }
         }
@@ -1581,17 +1452,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
 
     private void sortExternalParticipantsAndResources(final Participant[] oldParticipants, final Participant[] newParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final boolean isUpdate, final Map<Locale, List<EmailableParticipant>> receivers, final ServerSession session, final Map<String, EmailableParticipant> all, final String organizer, final State state) {
         sortNewExternalParticipantsAndResources(newParticipants, participantSet, resourceSet, receivers, session, all, oldParticipants);
-        sortOldExternalParticipantsAndResources(
-            oldParticipants,
-            participantSet,
-            resourceSet,
-            isUpdate,
-            receivers,
-            all,
-            session,
-            newParticipants,
-            organizer,
-            state);
+        sortOldExternalParticipantsAndResources(oldParticipants, participantSet, resourceSet, isUpdate, receivers, all, session, newParticipants, organizer, state);
     }
 
     private void sortOldExternalParticipantsAndResources(final Participant[] oldParticipants, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final boolean isUpdate, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final ServerSession session, final Participant[] newParticipants, final String organizer, final State state) {
@@ -1605,41 +1466,35 @@ public class ParticipantNotify implements TaskEventInterface2 {
 
         for (final Participant participant : oldParticipants) {
             switch (participant.getType()) {
-            case Participant.USER:
-                break;
-            case Participant.EXTERNAL_USER:
-                EmailableParticipant p = getExternalParticipant(participant, session);
-                if (p != null) {
-                    p.state = contains(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
-                    addSingleParticipant(p, participantSet, resourceSet, receivers, all, false);
-                }
-                break;
-            case Participant.RESOURCE:
-                p = getResourceParticipant(participant, session);
-                if (p == null) {
-                    // Might be user added as resource (!)
-                    p = getUserParticipant(participant, ctx);
-                }
-                if (p != null) {
-                    p.state = contains(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
-                    addSingleParticipant(p, participantSet, resourceSet, receivers, all, true);
-                }
-                break;
-            case Participant.GROUP:
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown Participant Type: " + participant.getType());
+                case Participant.USER:
+                    break;
+                case Participant.EXTERNAL_USER:
+                    EmailableParticipant p = getExternalParticipant(participant, session);
+                    if (p != null) {
+                        p.state = contains(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
+                        addSingleParticipant(p, participantSet, resourceSet, receivers, all, false);
+                    }
+                    break;
+                case Participant.RESOURCE:
+                    p = getResourceParticipant(participant, session);
+                    if (p == null) {
+                        // Might be user added as resource (!)
+                        p = getUserParticipant(participant, ctx);
+                    }
+                    if (p != null) {
+                        p.state = contains(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
+                        addSingleParticipant(p, participantSet, resourceSet, receivers, all, true);
+                    }
+                    break;
+                case Participant.GROUP:
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown Participant Type: " + participant.getType());
             }
         }
 
         if ((isUpdate || ParticipantNotify.isStatusUpdate(state)) && organizer != null) {
-            addSingleParticipant(
-                getExternalParticipant(new ExternalUserParticipant(organizer), session),
-                participantSet,
-                resourceSet,
-                receivers,
-                all,
-                false);
+            addSingleParticipant(getExternalParticipant(new ExternalUserParticipant(organizer), session), participantSet, resourceSet, receivers, all, false);
         }
     }
 
@@ -1650,31 +1505,31 @@ public class ParticipantNotify implements TaskEventInterface2 {
         final Context ctx = session.getContext();
         for (final Participant participant : newParticipants) {
             switch (participant.getType()) {
-            case Participant.USER:
-                break;
-            case Participant.EXTERNAL_USER:
-                EmailableParticipant p = getExternalParticipant(participant, session);
-                if (p != null) {
-                    p.state = contains(participant, oldParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_NEW;
-                    addSingleParticipant(p, participantSet, resourceSet, receivers, all, false);
-                }
+                case Participant.USER:
+                    break;
+                case Participant.EXTERNAL_USER:
+                    EmailableParticipant p = getExternalParticipant(participant, session);
+                    if (p != null) {
+                        p.state = contains(participant, oldParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_NEW;
+                        addSingleParticipant(p, participantSet, resourceSet, receivers, all, false);
+                    }
 
-                break;
-            case Participant.RESOURCE:
-                p = getResourceParticipant(participant, session);
-                if (p == null) {
-                    // Might be user added as resource (!)
-                    p = getUserParticipant(participant, ctx);
-                }
-                if (p != null) {
-                    p.state = contains(participant, oldParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_NEW;
-                    addSingleParticipant(p, participantSet, resourceSet, receivers, all, true);
-                }
-                break;
-            case Participant.GROUP:
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown Participant Type: " + participant.getType());
+                    break;
+                case Participant.RESOURCE:
+                    p = getResourceParticipant(participant, session);
+                    if (p == null) {
+                        // Might be user added as resource (!)
+                        p = getUserParticipant(participant, ctx);
+                    }
+                    if (p != null) {
+                        p.state = contains(participant, oldParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_NEW;
+                        addSingleParticipant(p, participantSet, resourceSet, receivers, all, true);
+                    }
+                    break;
+                case Participant.GROUP:
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown Participant Type: " + participant.getType());
             }
         }
     }
@@ -1691,64 +1546,51 @@ public class ParticipantNotify implements TaskEventInterface2 {
         final Context ctx = session.getContext();
         for (final Participant participant : oldParticipants) {
             switch (participant.getType()) {
-            case Participant.USER:
-                EmailableParticipant p = getUserParticipant(participant, ctx);
-                if (p != null) {
-                    p.state = contains(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
-                    addSingleParticipant(p, participantSet, resourceSet, receivers, all, false);
-                }
-                break;
-            case Participant.EXTERNAL_USER:
-                p = getExternalParticipant(participant, session);
-                if (p != null) {
-                    p.state = contains(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
-                    addSingleParticipant(p, participantSet, resourceSet, receivers, all, false);
-                }
-                break;
-            case Participant.RESOURCE:
-                p = getResourceParticipant(participant, session);
-                if (p != null) {
-                    p.state = contains(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
-                    addSingleParticipant(p, participantSet, resourceSet, receivers, all, true);
-                }
-                break;
-            case Participant.GROUP:
-                try {
-                    // FIXME 101 SELECT problem
-                    final int state = contains(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
-                    final Group group = resolveGroups(ctx, participant.getIdentifier())[0];
-                    final int[] members = group.getMember();
-                    final User[] memberObjects = resolveUsers(ctx, members);
-                    for (final User user : memberObjects) {
-                        // final String lang = user.getPreferredLanguage();
-                        final int[] groups = user.getGroups();
-                        final TimeZone tz = TimeZoneUtils.getTimeZone(user.getTimeZone());
-
-                        if (user.getMail() != null) {
-                            p = new EmailableParticipant(
-                                ctx.getContextId(),
-                                Participant.USER,
-                                user.getId(),
-                                groups,
-                                user.getMail(),
-                                user.getDisplayName(),
-                                user.getLocale(),
-                                tz,
-                                10,
-                                -1,
-                                CalendarObject.NONE,
-                                null,
-                                participant.isIgnoreNotification());
-                            p.state = state;
-                            addSingleParticipant(p, participantSet, resourceSet, receivers, all, false);
-                        }
+                case Participant.USER:
+                    EmailableParticipant p = getUserParticipant(participant, ctx);
+                    if (p != null) {
+                        p.state = contains(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
+                        addSingleParticipant(p, participantSet, resourceSet, receivers, all, false);
                     }
-                } catch (final OXException e) {
-                    log(e);
-                }
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown Participant Type: " + participant.getType());
+                    break;
+                case Participant.EXTERNAL_USER:
+                    p = getExternalParticipant(participant, session);
+                    if (p != null) {
+                        p.state = contains(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
+                        addSingleParticipant(p, participantSet, resourceSet, receivers, all, false);
+                    }
+                    break;
+                case Participant.RESOURCE:
+                    p = getResourceParticipant(participant, session);
+                    if (p != null) {
+                        p.state = contains(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
+                        addSingleParticipant(p, participantSet, resourceSet, receivers, all, true);
+                    }
+                    break;
+                case Participant.GROUP:
+                    try {
+                        // FIXME 101 SELECT problem
+                        final int state = contains(participant, newParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_REMOVED;
+                        final Group group = resolveGroups(ctx, participant.getIdentifier())[0];
+                        final int[] members = group.getMember();
+                        final User[] memberObjects = resolveUsers(ctx, members);
+                        for (final User user : memberObjects) {
+                            // final String lang = user.getPreferredLanguage();
+                            final int[] groups = user.getGroups();
+                            final TimeZone tz = TimeZoneUtils.getTimeZone(user.getTimeZone());
+
+                            if (user.getMail() != null) {
+                                p = new EmailableParticipant(ctx.getContextId(), Participant.USER, user.getId(), groups, user.getMail(), user.getDisplayName(), user.getLocale(), tz, 10, -1, CalendarObject.NONE, null, participant.isIgnoreNotification());
+                                p.state = state;
+                                addSingleParticipant(p, participantSet, resourceSet, receivers, all, false);
+                            }
+                        }
+                    } catch (final OXException e) {
+                        log(e);
+                    }
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown Participant Type: " + participant.getType());
             }
 
         }
@@ -1761,65 +1603,52 @@ public class ParticipantNotify implements TaskEventInterface2 {
         final Context ctx = session.getContext();
         for (final Participant participant : newParticipants) {
             switch (participant.getType()) {
-            case Participant.USER:
-                EmailableParticipant p = getUserParticipant(participant, ctx);
-                if (p != null) {
-                    p.state = contains(participant, oldParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_NEW;
-                    addSingleParticipant(p, participantSet, resourceSet, receivers, all, false);
-                }
-                break;
-            case Participant.EXTERNAL_USER:
-                p = getExternalParticipant(participant, session);
-                if (p != null) {
-                    p.state = contains(participant, oldParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_NEW;
-                    addSingleParticipant(p, participantSet, resourceSet, receivers, all, false);
-                }
-
-                break;
-            case Participant.RESOURCE:
-                p = getResourceParticipant(participant, session);
-                if (p != null) {
-                    p.state = contains(participant, oldParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_NEW;
-                    addSingleParticipant(p, participantSet, resourceSet, receivers, all, true);
-                }
-                break;
-            case Participant.GROUP:
-                try {
-                    // FIXME 101 SELECT problem
-                    final int state = contains(participant, oldParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_NEW;
-                    final Group group = resolveGroups(ctx, participant.getIdentifier())[0];
-                    final int[] members = group.getMember();
-                    final User[] memberObjects = resolveUsers(ctx, members);
-                    for (final User user : memberObjects) {
-                        // final String lang = user.getPreferredLanguage();
-                        final int[] groups = user.getGroups();
-                        final TimeZone tz = TimeZoneUtils.getTimeZone(user.getTimeZone());
-
-                        if (user.getMail() != null) {
-                            p = new EmailableParticipant(
-                                ctx.getContextId(),
-                                Participant.USER,
-                                user.getId(),
-                                groups,
-                                user.getMail(),
-                                user.getDisplayName(),
-                                user.getLocale(),
-                                tz,
-                                10,
-                                -1,
-                                CalendarObject.NONE,
-                                null,
-                                participant.isIgnoreNotification());
-                            p.state = state;
-                            addSingleParticipant(p, participantSet, resourceSet, receivers, all, false);
-                        }
+                case Participant.USER:
+                    EmailableParticipant p = getUserParticipant(participant, ctx);
+                    if (p != null) {
+                        p.state = contains(participant, oldParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_NEW;
+                        addSingleParticipant(p, participantSet, resourceSet, receivers, all, false);
                     }
-                } catch (final OXException e) {
-                    log(e);
-                }
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown Participant Type: " + participant.getType());
+                    break;
+                case Participant.EXTERNAL_USER:
+                    p = getExternalParticipant(participant, session);
+                    if (p != null) {
+                        p.state = contains(participant, oldParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_NEW;
+                        addSingleParticipant(p, participantSet, resourceSet, receivers, all, false);
+                    }
+
+                    break;
+                case Participant.RESOURCE:
+                    p = getResourceParticipant(participant, session);
+                    if (p != null) {
+                        p.state = contains(participant, oldParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_NEW;
+                        addSingleParticipant(p, participantSet, resourceSet, receivers, all, true);
+                    }
+                    break;
+                case Participant.GROUP:
+                    try {
+                        // FIXME 101 SELECT problem
+                        final int state = contains(participant, oldParticipants) ? EmailableParticipant.STATE_NONE : EmailableParticipant.STATE_NEW;
+                        final Group group = resolveGroups(ctx, participant.getIdentifier())[0];
+                        final int[] members = group.getMember();
+                        final User[] memberObjects = resolveUsers(ctx, members);
+                        for (final User user : memberObjects) {
+                            // final String lang = user.getPreferredLanguage();
+                            final int[] groups = user.getGroups();
+                            final TimeZone tz = TimeZoneUtils.getTimeZone(user.getTimeZone());
+
+                            if (user.getMail() != null) {
+                                p = new EmailableParticipant(ctx.getContextId(), Participant.USER, user.getId(), groups, user.getMail(), user.getDisplayName(), user.getLocale(), tz, 10, -1, CalendarObject.NONE, null, participant.isIgnoreNotification());
+                                p.state = state;
+                                addSingleParticipant(p, participantSet, resourceSet, receivers, all, false);
+                            }
+                        }
+                    } catch (final OXException e) {
+                        log(e);
+                    }
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown Participant Type: " + participant.getType());
             }
 
         }
@@ -1860,27 +1689,14 @@ public class ParticipantNotify implements TaskEventInterface2 {
         try {
             user = resolveUsers(session.getContext(), session.getUserId())[0];
             l = user.getLocale();
-            tz = getCalendarTools().getTimeZone(user.getTimeZone());
+            tz = TimeZone.getTimeZone(user.getTimeZone());
         } catch (final OXException e) {
             // Should not happen
             LOG.warn("Could not resolve user from session: UserId: {} in Context: {}", session.getUserId(), session.getContextId());
             l = Locale.getDefault();
             tz = TimeZone.getDefault();
         }
-        return new EmailableParticipant(
-            session.getContextId(),
-            participant.getType(),
-            -1,
-            new int[0],
-            participant.getEmailAddress(),
-            participant.getDisplayName(),
-            l,
-            tz,
-            0,
-            -1,
-            CalendarObject.NONE,
-            null,
-            participant.isIgnoreNotification());
+        return new EmailableParticipant(session.getContextId(), participant.getType(), -1, new int[0], participant.getEmailAddress(), participant.getDisplayName(), l, tz, 0, -1, CalendarObject.NONE, null, participant.isIgnoreNotification());
     }
 
     private EmailableParticipant getUserParticipant(final Participant participant, final Context ctx) {
@@ -1904,7 +1720,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
                 displayName = participant.getDisplayName();
             }
             groups = user.getGroups();
-            tz = getCalendarTools().getTimeZone(user.getTimeZone());
+            tz = TimeZone.getTimeZone(user.getTimeZone());
             if (participant instanceof UserParticipant) {
                 final UserParticipant userParticipant = (UserParticipant) participant;
                 folderId = userParticipant.getPersonalFolderId();
@@ -1918,35 +1734,9 @@ public class ParticipantNotify implements TaskEventInterface2 {
         if (mail != null) {
             if (participant instanceof UserParticipant) {
                 final UserParticipant up = (UserParticipant) participant;
-                return new EmailableParticipant(
-                    ctx.getContextId(),
-                    up.getType(),
-                    up.getIdentifier(),
-                    groups,
-                    mail,
-                    displayName,
-                    locale,
-                    tz,
-                    10,
-                    folderId,
-                    up.getConfirm(),
-                    up.getConfirmMessage(),
-                    participant.isIgnoreNotification());
+                return new EmailableParticipant(ctx.getContextId(), up.getType(), up.getIdentifier(), groups, mail, displayName, locale, tz, 10, folderId, up.getConfirm(), up.getConfirmMessage(), participant.isIgnoreNotification());
             }
-            return new EmailableParticipant(
-                ctx.getContextId(),
-                participant.getType(),
-                participant.getIdentifier(),
-                groups,
-                mail,
-                displayName,
-                locale,
-                tz,
-                10,
-                folderId,
-                CalendarObject.NONE,
-                null,
-                participant.isIgnoreNotification());
+            return new EmailableParticipant(ctx.getContextId(), participant.getType(), participant.getIdentifier(), groups, mail, displayName, locale, tz, 10, folderId, CalendarObject.NONE, null, participant.isIgnoreNotification());
         }
         return null;
     }
@@ -1982,20 +1772,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
 
         EmailableParticipant p;
         if (mail != null) {
-            p = new EmailableParticipant(
-                ctx.getContextId(),
-                participant.getType(),
-                participant.getIdentifier(),
-                groups,
-                mail,
-                displayName,
-                l,
-                TimeZone.getDefault(),
-                -1,
-                MailObject.DONT_SET,
-                CalendarObject.NONE,
-                null,
-                participant.isIgnoreNotification());
+            p = new EmailableParticipant(ctx.getContextId(), participant.getType(), participant.getIdentifier(), groups, mail, displayName, l, TimeZone.getDefault(), -1, MailObject.DONT_SET, CalendarObject.NONE, null, participant.isIgnoreNotification());
             return p;
         }
         return null;
@@ -2036,20 +1813,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
         final int folderId = null != oldTask ? oldTask.getParentFolderID() : -1;
         try {
             final User user = resolveUsers(ctx, creatorId)[0];
-            final EmailableParticipant emailable =  new EmailableParticipant(
-                ctx.getContextId(),
-                Participant.USER,
-                creatorId,
-                user.getGroups(),
-                user.getMail(),
-                user.getDisplayName(),
-                user.getLocale(),
-                getCalendarTools().getTimeZone(user.getTimeZone()),
-                10,
-                folderId,
-                CalendarObject.NONE,
-                null,
-                false);
+            final EmailableParticipant emailable = new EmailableParticipant(ctx.getContextId(), Participant.USER, creatorId, user.getGroups(), user.getMail(), user.getDisplayName(), user.getLocale(), TimeZone.getTimeZone(user.getTimeZone()), 10, folderId, CalendarObject.NONE, null, false);
             addReceiver(emailable, receivers, all);
         } catch (final OXException e) {
             log(e);
@@ -2083,7 +1847,9 @@ public class ParticipantNotify implements TaskEventInterface2 {
 
     }
 
-    private void addSingleParticipant(final EmailableParticipant participant, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final boolean /* HACK */resource) {
+    private void addSingleParticipant(final EmailableParticipant participant, final Set<EmailableParticipant> participantSet, final Set<EmailableParticipant> resourceSet, final Map<Locale, List<EmailableParticipant>> receivers, final Map<String, EmailableParticipant> all, final boolean /*
+                                                                                                                                                                                                                                                                                                * HACK
+                                                                                                                                                                                                                                                                                                */ resource) {
         addReceiver(participant, receivers, all);
         if (resource) {
             resourceSet.add(participant);
@@ -2257,7 +2023,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
                         return false;
                     }
                     if (Types.TASK == module && !compare2Date(endDate.getTime(), now)) {
-                            LOG.debug("Ignoring notification(s) for single task object {} since its end date is in the past", calendarObj.getObjectID());
+                        LOG.debug("Ignoring notification(s) for single task object {} since its end date is in the past", calendarObj.getObjectID());
                         return false;
                     }
                 }
@@ -2266,11 +2032,11 @@ public class ParticipantNotify implements TaskEventInterface2 {
             final Date untilDate = calendarObj.getUntil();
             if (null != untilDate) {
                 if (Types.APPOINTMENT == module && untilDate.getTime() < now) {
-                        LOG.debug("Ignoring notification(s) for recurring appointment object {} since its until date is in the past", calendarObj.getObjectID());
+                    LOG.debug("Ignoring notification(s) for recurring appointment object {} since its until date is in the past", calendarObj.getObjectID());
                     return false;
                 }
                 if (Types.TASK == module && !compare2Date(untilDate.getTime(), now)) {
-                        LOG.debug("Ignoring notification(s) for recurring task object {} since its until date is in the past", calendarObj.getObjectID());
+                    LOG.debug("Ignoring notification(s) for recurring task object {} since its until date is in the past", calendarObj.getObjectID());
                     return false;
                 }
             }
@@ -2297,7 +2063,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
      * @return The first occurence's end time.
      */
     private static Date computeFirstOccurrenceEnd(final long startMillis, final long endMillis) {
-        final Calendar cal = Calendar.getInstance(getCalendarTools().getTimeZone("UTC"), Locale.ENGLISH);
+        final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.ENGLISH);
         cal.setTimeInMillis(endMillis);
         final int hourOfDay = cal.get(Calendar.HOUR_OF_DAY);
         final int minutes = cal.get(Calendar.MINUTE);
@@ -2308,8 +2074,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
     }
 
     private static Date computeFirstOccurrenceEnd(final CalendarObject app) throws OXException {
-        final CalendarCollectionService service = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-        final RecurringResultsInterface recurrences = service.calculateFirstRecurring(app);
+        final RecurringResultsInterface recurrences = CalendarCollectionUtils.calculateRecurring(app, 0, 0, 1, CalendarCollectionUtils.MAX_OCCURRENCESE, true);
         final RecurringResultInterface recurringResult = recurrences.getRecurringResult(0);
         return new Date(recurringResult.getEnd());
     }
@@ -2327,15 +2092,12 @@ public class ParticipantNotify implements TaskEventInterface2 {
     /**
      * Gets a value indicating whether the supplied notification {@link State}
      * reflects an update of the accept/decline status or not.
+     * 
      * @param state The {@link State} to check
      * @return <code>true</code>, if it is a status update, <code>false</code>, otherwise
      */
     private static boolean isStatusUpdate(final State state) {
-        return null != state && (
-            State.Type.ACCEPTED.equals(state.getType()) ||
-            State.Type.DECLINED.equals(state.getType()) ||
-            State.Type.TENTATIVELY_ACCEPTED.equals(state.getType()) ||
-            State.Type.NONE_ACCEPTED.equals(state.getType()));
+        return null != state && (State.Type.ACCEPTED.equals(state.getType()) || State.Type.DECLINED.equals(state.getType()) || State.Type.TENTATIVELY_ACCEPTED.equals(state.getType()) || State.Type.NONE_ACCEPTED.equals(state.getType()));
     }
 
     /**
@@ -2351,13 +2113,9 @@ public class ParticipantNotify implements TaskEventInterface2 {
             return null;
         }
         try {
-            return getCalendarTools().getAppointmentTitle(recurrenceId, ctx);
+            return CalendarCollectionUtils.getAppointmentTitle(recurrenceId, ctx);
         } catch (final OXException e) {
             return null;
         }
-    }
-
-    private static CalendarCollectionService getCalendarTools() {
-        return ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
     }
 }
