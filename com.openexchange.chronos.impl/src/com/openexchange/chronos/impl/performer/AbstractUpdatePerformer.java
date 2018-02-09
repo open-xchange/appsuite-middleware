@@ -189,6 +189,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         Event exceptionEvent = EventMapper.getInstance().copy(originalMasterEvent, new Event(), true, (EventField[]) null);
         exceptionEvent.setId(storage.getEventStorage().nextId());
         exceptionEvent.setRecurrenceId(recurrenceID);
+        exceptionEvent.setRecurrenceRule(null);
         exceptionEvent.setDeleteExceptionDates(null);
         exceptionEvent.setChangeExceptionDates(new TreeSet<RecurrenceId>(Collections.singleton(recurrenceID)));
         exceptionEvent.setStartDate(CalendarUtils.calculateStart(originalMasterEvent, recurrenceID));
