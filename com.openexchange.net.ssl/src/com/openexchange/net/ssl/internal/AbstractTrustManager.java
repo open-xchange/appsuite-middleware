@@ -424,7 +424,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             return;
         }
 
-        String fingerprint = cacheCertificate(userId, contextId, chain[0], null, FailureReason.UNTRUSTED_ISSUER);
+        String fingerprint = cacheCertificate(userId, contextId, chain[0], socketHostname, FailureReason.UNTRUSTED_ISSUER);
         throw new CertificateException(SSLExceptionCode.UNTRUSTED_ROOT_AUTHORITY.create(Collections.singletonMap(FINGERPRINT_NAME, fingerprint), fingerprint, socketHostname));
     }
 
@@ -510,7 +510,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         X509Certificate certificate = chain[0];
         if (certificate.getNotAfter().getTime() < System.currentTimeMillis()) {
             String hostname = getHostFromPrincipal(chain[0]);
-            String fingerprint = cacheCertificate(userId, contextId, chain[0], null, FailureReason.EXPIRED);
+            String fingerprint = cacheCertificate(userId, contextId, chain[0], hostname, FailureReason.EXPIRED);
             throw new CertificateException(SSLExceptionCode.CERTIFICATE_IS_EXPIRED.create(fingerprint, hostname));
         }
     }
