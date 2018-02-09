@@ -72,14 +72,14 @@ public class DateHelper {
     private DateFormat dateFormat;
     private DateFormat weekdayFormat;
 
-    private final Event appointment;
+    private final Event event;
     private Locale locale;
     private TimeZone timezone;
     private final TimeZone utc = TimeZone.getTimeZone("UTC");
 
-    public DateHelper(Event appointment, Locale locale, TimeZone tz) {
+    public DateHelper(Event event, Locale locale, TimeZone tz) {
         super();
-        this.appointment = appointment;
+        this.event = event;
         if (locale != null && tz != null) {
             timeFormat = DateFormat.getTimeInstance(DateFormat.SHORT, locale);
             dateFormat = DateFormat.getDateInstance(DateFormat.FULL, locale);
@@ -94,39 +94,39 @@ public class DateHelper {
     }
 
     public String getRecurrenceDatePosition() {
-        return formatDate(new Date(appointment.getRecurrenceId().getValue().getTimestamp()));
+        return formatDate(new Date(event.getRecurrenceId().getValue().getTimestamp()));
     }
 
     public String getInterval() {
-        return formatInterval(appointment);
+        return formatInterval(event);
     }
 
     public String getDateSpec() {
         StringBuilder b = new StringBuilder();
-        b.append(formatDate(appointment));
-        if (appointment.getRecurrenceId() != null) {
-            b.append(" - ").append(formatRecurrenceRule(appointment));
+        b.append(formatDate(event));
+        if (event.getRecurrenceId() != null) {
+            b.append(" - ").append(formatRecurrenceRule(event));
         }
         return b.toString();
     }
 
-    public String formatRecurrenceRule(Event appointment) {
-        if (CalendarUtils.isSeriesMaster(appointment)) {
-            HumanReadableRecurrences recurInfo = new HumanReadableRecurrences(appointment, locale);
+    public String formatRecurrenceRule(Event event) {
+        if (CalendarUtils.isSeriesMaster(event)) {
+            HumanReadableRecurrences recurInfo = new HumanReadableRecurrences(event, locale);
             return recurInfo.getString() + ", " + recurInfo.getEnd();
         }
         return "";
     }
 
-    public String formatDate(Event appointment) {
-        Date startDate = new Date(appointment.getStartDate().getTimestamp());
-        Date endDate = new Date(appointment.getEndDate().getTimestamp());
-        if (appointment.getStartDate().isAllDay()) {
+    public String formatDate(Event event) {
+        Date startDate = new Date(event.getStartDate().getTimestamp());
+        Date endDate = new Date(event.getEndDate().getTimestamp());
+        if (event.getStartDate().isAllDay()) {
             endDate = new Date(endDate.getTime() - 1000);
         }
 
         if (differentDays(startDate, endDate)) {
-            if (appointment.getStartDate().isAllDay()) {
+            if (event.getStartDate().isAllDay()) {
                 return String.format("%s - %s", formatDate(startDate, utc), formatDate(endDate, utc));
             } else {
                 return String.format("%s - %s", formatDate(startDate), formatDate(endDate));
@@ -159,13 +159,13 @@ public class DateHelper {
         return timeFormat.format(date);
     }
 
-    public String formatInterval(Event appointment) {
-        if (appointment.getStartDate().isAllDay()) {
+    public String formatInterval(Event event) {
+        if (event.getStartDate().isAllDay()) {
             return new Sentence(Messages.FULL_TIME).getMessage(locale);
         }
         // TODO: Longer than a day
-        Date startDate = new Date(appointment.getStartDate().getTimestamp());
-        Date endDate = new Date(appointment.getEndDate().getTimestamp());
+        Date startDate = new Date(event.getStartDate().getTimestamp());
+        Date endDate = new Date(event.getEndDate().getTimestamp());
 
         if (differentDays(startDate, endDate)) {
             if (differentWeeks(startDate, endDate)) {
@@ -211,12 +211,12 @@ public class DateHelper {
     }
 
     public String getCreated() {
-        Date date = appointment.getCreated();
+        Date date = event.getCreated();
         return formatDate(date) + " " + formatTime(date);
     }
 
     public String getModified() {
-        Date date = appointment.getLastModified();
+        Date date = event.getLastModified();
         return formatDate(date) + " " + formatTime(date);
     }
 
