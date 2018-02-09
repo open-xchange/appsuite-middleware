@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getRecurrenceIds;
 import static com.openexchange.chronos.common.CalendarUtils.isClassifiedFor;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isInRange;
@@ -802,7 +803,7 @@ public class Utils {
             return seriesMaster;
         }
         /*
-         * check which change exceptions exist where the user is not attending
+         * check which change exceptions exist where the user is attending
          */
         SortedSet<RecurrenceId> changeExceptionDates = seriesMaster.getChangeExceptionDates();
         if (null == changeExceptionDates || 0 == changeExceptionDates.size()) {
@@ -811,24 +812,25 @@ public class Utils {
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
             .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.EQUALS, seriesMaster.getSeriesId()))
             .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
-            .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.NOT_EQUALS, I(forUser)))
+            .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(forUser)))
         ;
         EventField[] fields = new EventField[] { EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_ID };
-        List<Event> unattendedChangeExceptions = storage.getEventStorage().searchEvents(searchTerm, null, fields);
-        if (null == unattendedChangeExceptions || 0 == unattendedChangeExceptions.size()) {
+        List<Event> attendedChangeExceptions = storage.getEventStorage().searchEvents(searchTerm, null, fields);
+        if (attendedChangeExceptions.size() == changeExceptionDates.size()) {
             return seriesMaster;
         }
         /*
          * apply a 'userized' version of exception dates by moving exception date from change- to delete-exceptions
          */
-        SortedSet<RecurrenceId> userizedChangeExceptions = new TreeSet<RecurrenceId>(changeExceptionDates);
+        SortedSet<RecurrenceId> userizedChangeExceptions = getRecurrenceIds(attendedChangeExceptions);
         SortedSet<RecurrenceId> userizedDeleteExceptions = new TreeSet<RecurrenceId>();
         if (null != seriesMaster.getDeleteExceptionDates()) {
             userizedDeleteExceptions.addAll(seriesMaster.getDeleteExceptionDates());
         }
-        for (Event unattendedChangeException : unattendedChangeExceptions) {
-            userizedChangeExceptions.remove(unattendedChangeException.getRecurrenceId());
-            userizedDeleteExceptions.add(unattendedChangeException.getRecurrenceId());
+        for (RecurrenceId originalChangeExceptionDate : seriesMaster.getChangeExceptionDates()) {
+            if (false == userizedChangeExceptions.contains(originalChangeExceptionDate)) {
+                userizedDeleteExceptions.add(originalChangeExceptionDate);
+            }
         }
         return new DelegatingEvent(seriesMaster) {
 
