@@ -153,7 +153,6 @@ public class EventNotificationPool implements EventNotificationPoolService, Runn
 
     @Override
     public void fasttrack(Event event, Session session) throws OXException {
-        event = copy(event);
         try {
             lock.lock();
             tick(I(session.getContextId()), event.getId(), true);
