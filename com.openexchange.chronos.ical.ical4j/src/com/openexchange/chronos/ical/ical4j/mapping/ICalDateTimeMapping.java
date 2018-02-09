@@ -51,13 +51,16 @@ package com.openexchange.chronos.ical.ical4j.mapping;
 
 import java.util.List;
 import java.util.TimeZone;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.ParserTools;
 import com.openexchange.chronos.ical.impl.ICalParametersImpl;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.TimeZones;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.TimeZoneRegistry;
 import net.fortuna.ical4j.model.property.DateProperty;
 
@@ -132,7 +135,7 @@ public abstract class ICalDateTimeMapping<T extends Component, U> extends Abstra
         DateProperty property = getProperty(component);
         if (null != property && null != property.getDate()) {
             if (ParserTools.isDateTime(property)) {
-                TimeZone timeZone = TimeZoneUtils.selectTimeZone(property, (TimeZone) null);
+                TimeZone timeZone = selectTimeZone(property, (TimeZone) null);
                 setValue(object, org.dmfs.rfc5545.DateTime.parse(timeZone, property.getValue()));
             } else {
                 setValue(object, org.dmfs.rfc5545.DateTime.parse(property.getValue()).toAllDay());
@@ -140,6 +143,21 @@ public abstract class ICalDateTimeMapping<T extends Component, U> extends Abstra
         } else if (false == isIgnoreUnsetProperties(parameters)) {
             setValue(object, null);
         }
+    }
+
+    private static TimeZone selectTimeZone(DateProperty property, TimeZone defaultTimeZone) {
+        if (property.isUtc()) {
+            return TimeZones.UTC;
+        }
+        net.fortuna.ical4j.model.TimeZone parsedTimeZone = property.getTimeZone();
+        if (null != parsedTimeZone) {
+            return parsedTimeZone;
+        }
+        Parameter tzidParameter = property.getParameter(Parameter.TZID);
+        if (null != tzidParameter && Strings.isNotEmpty(tzidParameter.getValue())) {
+            return CalendarUtils.optTimeZone(tzidParameter.getValue(), defaultTimeZone);
+        }
+        return defaultTimeZone;
     }
 
 }

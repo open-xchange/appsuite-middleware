@@ -52,7 +52,6 @@ package com.openexchange.chronos.ical.ical4j.handler;
 import java.io.InputStream;
 import java.util.TimeZone;
 import com.openexchange.chronos.ical.ICalParameters;
-import com.openexchange.chronos.ical.ical4j.mapping.TimeZoneUtils;
 import com.openexchange.chronos.ical.impl.ICalUtils;
 import com.openexchange.exception.OXException;
 import net.fortuna.ical4j.model.Component;
@@ -80,10 +79,7 @@ public class ICal2TimeZoneDataHandler extends ICal2ObjectDataHandler<TimeZone> {
         if (null == components || components.isEmpty()) {
             return null;
         }
-        VTimeZone vTimeZone = (VTimeZone) components.getComponent(Component.VTIMEZONE);
-        net.fortuna.ical4j.model.TimeZone iCal4jTimeZone = new net.fortuna.ical4j.model.TimeZone(vTimeZone);
-        TimeZone defaultTimeZone = ICalUtils.getParametersOrDefault(parameters).get(ICalParameters.DEFAULT_TIMEZONE, TimeZone.class);
-        return TimeZoneUtils.selectTimeZone(iCal4jTimeZone, defaultTimeZone);
+        return new net.fortuna.ical4j.model.TimeZone((VTimeZone) components.getComponent(Component.VTIMEZONE));
     }
 
 }
