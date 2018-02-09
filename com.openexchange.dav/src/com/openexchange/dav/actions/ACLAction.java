@@ -59,10 +59,10 @@ import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.Privilege;
+import com.openexchange.dav.internal.FolderUpdate;
 import com.openexchange.dav.mixins.PrincipalURL;
 import com.openexchange.dav.resources.FolderCollection;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -117,15 +117,7 @@ public class ACLAction extends DAVAction {
         /*
          * perform the folder update
          */
-        AbstractFolder updatableFolder = new AbstractFolder() {
-
-            private static final long serialVersionUID = 9014282914929095490L;
-
-            @Override
-            public boolean isGlobalID() {
-                return false;
-            }
-        };
+        FolderUpdate updatableFolder = new FolderUpdate();
         updatableFolder.setID(folder.getID());
         updatableFolder.setTreeID(folder.getTreeID());
         updatableFolder.setType(folder.getType());
