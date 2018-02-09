@@ -139,7 +139,7 @@ public class MultipleCalendarResultConverter extends CalendarResultConverter {
                 for (UpdateResult updatedResult : calendarResult.getUpdates()) {
                     boolean isCreated = false;
                     for (Event created : creates) {
-                        if (created.getUid().equals(updatedResult.getUpdate())) {
+                        if (created.getUid().equals(updatedResult.getUpdate().getUid())) {
                             creates.remove(created);
                             creates.add(updatedResult.getUpdate());
                             isCreated = true;
