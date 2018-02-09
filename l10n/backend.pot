@@ -9385,6 +9385,11 @@ msgstr ""
 msgid "unknown location"
 msgstr ""
 
+#. Unknown device
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.session.management/src/com/openexchange/session/management/SessionManagementStrings.java:67
+msgid "Unknown device"
+msgstr ""
+
 #. No session found for identifier: %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.sessionstorage/src/com/openexchange/sessionstorage/SessionStorageExceptionMessages.java:62
 msgid "No session found for identifier: %1$s"
