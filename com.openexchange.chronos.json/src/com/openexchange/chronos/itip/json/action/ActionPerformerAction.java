@@ -54,6 +54,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
@@ -148,27 +149,44 @@ public class ActionPerformerAction extends AbstractITipAction {
             DataSource source = conversionEngine.getDataSource("com.openexchange.mail.attachment");
             if (null != source) {
                 DataArguments dataSource = getDataSource(request);
-                for (Attachment attach : event.getAttachments()) {
-                    dataSource.put("com.openexchange.mail.conversion.cid", prepareUri(attach.getUri()));
-                    // Get attachment from mail
-                    Data<InputStream> data = source.getData(InputStream.class, dataSource, session);
-                    if (null != data) {
+                Iterator<Attachment> it = event.getAttachments().iterator();
+                while (it.hasNext()) {
+                    Attachment attachment = it.next();
+                    dataSource.put("com.openexchange.mail.conversion.cid", prepareUri(attachment.getUri()));
+                    InputStream stream = null;
+                    ByteArrayFileHolder fileHolder = null;
+                    try {
+                        // Get attachment from mail
+                        Data<InputStream> data = source.getData(InputStream.class, dataSource, session);
                         // Get stream and properties for file holder
-                        InputStream stream = data.getData();
-                        ByteArrayFileHolder fileHolder = null;
-                        try {
-                            fileHolder = new ByteArrayFileHolder(Streams.stream2bytes(stream));
-                            // Set the attachment to the event
-                            attach.setData(fileHolder);
-                        } catch (IOException e) {
-                            LOG.error("Couldn't converte input stream.", e);
-                            Streams.close(stream);
-                            Streams.close(fileHolder);
+                        stream = data.getData();
+                        fileHolder = new ByteArrayFileHolder(Streams.stream2bytes(stream));
+                        // Set the attachment to the event
+                        attachment.setData(fileHolder);
+                    } catch (IOException e) {
+                        LOG.error("Couldn't convert input stream tp processaable data. Removing attachment from event.", e);
+                        removeAttachmentFromEvent(it, stream, fileHolder);
+                    } catch (OXException e) {
+                        // Check for MailExceptionCode.ATTACHMENT_NOT_FOUND
+                        if (e.getErrorCode().equals("MSG-0049")) {
+                            LOG.warn("Unable to find attachment with CID {}. Removing attachment from event.", attachment.getUri(), e);
+                            removeAttachmentFromEvent(it, stream, fileHolder);
+                        } else {
+                            throw e;
                         }
                     }
                 }
+            } else {
+                LOG.error("Unable to get conversion module for attachments. Removing attachments from event.");
+                event.removeAttachments();
             }
         }
+    }
+
+    private void removeAttachmentFromEvent(Iterator<Attachment> it, InputStream stream, ByteArrayFileHolder fileHolder) {
+        it.remove();
+        Streams.close(stream);
+        Streams.close(fileHolder);
     }
 
     private String prepareUri(String uri) {

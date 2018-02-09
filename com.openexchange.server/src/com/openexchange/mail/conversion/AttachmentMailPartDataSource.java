@@ -87,6 +87,7 @@ public final class AttachmentMailPartDataSource extends MailPartDataSource {
         super();
     }
 
+    @SuppressWarnings("unchecked") // checked within method
     @Override
     public <D> Data<D> getData(Class<? extends D> type, DataArguments dataArguments, Session session) throws OXException {
         if (!InputStream.class.equals(type)) {
@@ -100,21 +101,20 @@ public final class AttachmentMailPartDataSource extends MailPartDataSource {
         }
         String fullname = arg.getFullname();
         String mailId = dataArguments.get(ARGS[1]);
-        String name = dataArguments.get(PROPERTY_CID);
+        String cid = dataArguments.get(PROPERTY_CID);
         DataProperties properties = new DataProperties();
 
         // Get the mail with its attachments
         MailPart mail = getMail(arg.getAccountId(), fullname, mailId, session, properties);
         if (null != mail.getContentType() && mail.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
-            int enclosedCount = mail.getEnclosedCount();
-            for (int i = 0; i < enclosedCount; i++) {
+            for (int i = 0; i < mail.getEnclosedCount(); i++) {
                 MailPart part = mail.getEnclosedMailPart(i);
                 ContentType contentType = part.getContentType();
                 // Skip calendar files
                 if (null != contentType && false == contentType.isMimeType(MimeTypes.MIME_TEXT_ALL_CALENDAR)) {
-                    String contetnId = part.getContentId();
-                    if (Strings.isNotEmpty(contetnId) && name.equals(contetnId)) {
-                        // Found attachment
+                    String contentId = part.getContentId();
+                    if (Strings.isNotEmpty(contentId) && cid.equals(contentId)) {
+                        // Found attachment, set additional data for the stream
                         String cs = contentType.getCharsetParameter();
                         properties.put(DataProperties.PROPERTY_CONTENT_TYPE, contentType.getBaseType());
                         properties.put(DataProperties.PROPERTY_CHARSET, com.openexchange.java.Strings.isEmpty(cs) ? MailProperties.getInstance().getDefaultMimeCharset() : cs);
@@ -126,7 +126,7 @@ public final class AttachmentMailPartDataSource extends MailPartDataSource {
                 }
             }
         }
-        return null;
+        throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(cid, mailId, fullname);
     }
 
     private MailPart getMail(final int accountId, final String fullname, final String mailId, Session session, DataProperties properties) throws OXException {
