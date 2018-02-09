@@ -193,6 +193,9 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
             folder = folderUpdate;
         }
         if (originalFolder.isSubscribed() != folder.isSubscribed()) {
+            if (originalFolder.isDefaultFolder() && GroupwareFolderType.PRIVATE.equals(originalFolder.getType())) {
+                throw OXException.noPermissionForFolder();
+            }
             Map<String, String> properties = Collections.singletonMap(USER_PROPERTY_PREFIX + "subscribed", String.valueOf(folder.isSubscribed()));
             storeUserProperties(session.getContextId(), folderId, session.getUserId(), properties);
             DefaultGroupwareCalendarFolder folderUpdate = new DefaultGroupwareCalendarFolder(folder);
