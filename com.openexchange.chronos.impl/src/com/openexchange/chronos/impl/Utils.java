@@ -79,6 +79,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarStrings;
@@ -156,6 +157,143 @@ public class Utils {
     };
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Utils.class);
+
+    /** Windows to Olson timezone mappings */
+    private static final Map<String, String> WINDOWS2OLSON = ImmutableMap.<String, String> builder() // @formatter:off
+        .put("Saint Pierre Standard Time", "America/Miquelon")
+        .put("Greenwich Standard Time", "Atlantic/Reykjavik")
+        .put("Tasmania Standard Time", "Australia/Hobart")
+        .put("Magallanes Standard Time", "America/Punta_Arenas")
+        .put("Central European Standard Time", "Europe/Warsaw")
+        .put("Azores Standard Time", "Atlantic/Azores")
+        .put("Arabic Standard Time", "Asia/Baghdad")
+        .put("Samoa Standard Time", "Pacific/Apia")
+        .put("SA Western Standard Time", "America/La_Paz")
+        .put("Bahia Standard Time", "America/Bahia")
+        .put("Pakistan Standard Time", "Asia/Karachi")
+        .put("Libya Standard Time", "Africa/Tripoli")
+        .put("Yakutsk Standard Time", "Asia/Yakutsk")
+        .put("Sakhalin Standard Time", "Asia/Sakhalin")
+        .put("Norfolk Standard Time", "Pacific/Norfolk")
+        .put("Afghanistan Standard Time", "Asia/Kabul")
+        .put("Fiji Standard Time", "Pacific/Fiji")
+        .put("Central Brazilian Standard Time", "America/Cuiaba")
+        .put("Cuba Standard Time", "America/Havana")
+        .put("Aleutian Standard Time", "America/Adak")
+        .put("Pacific SA Standard Time", "America/Santiago")
+        .put("Egypt Standard Time", "Africa/Cairo")
+        .put("Arab Standard Time", "Asia/Riyadh")
+        .put("Taipei Standard Time", "Asia/Taipei")
+        .put("UTC-02", "Etc/GMT+2")
+        .put("West Bank Standard Time", "Asia/Hebron")
+        .put("Alaskan Standard Time", "America/Anchorage")
+        .put("Omsk Standard Time", "Asia/Omsk")
+        .put("Eastern Standard Time", "America/New_York")
+        .put("Myanmar Standard Time", "Asia/Rangoon")
+        .put("Syria Standard Time", "Asia/Damascus")
+        .put("Russian Standard Time", "Europe/Moscow")
+        .put("Mountain Standard Time (Mexico)", "America/Chihuahua")
+        .put("Magadan Standard Time", "Asia/Magadan")
+        .put("Iran Standard Time", "Asia/Tehran")
+        .put("Marquesas Standard Time", "Pacific/Marquesas")
+        .put("Azerbaijan Standard Time", "Asia/Baku")
+        .put("E. South America Standard Time", "America/Sao_Paulo")
+        .put("Turks And Caicos Standard Time", "America/Grand_Turk")
+        .put("UTC-09", "Etc/GMT+9")
+        .put("Russia Time Zone 3", "Europe/Samara")
+        .put("UTC-08", "Etc/GMT+8")
+        .put("E. Africa Standard Time", "Africa/Nairobi")
+        .put("Nepal Standard Time", "Asia/Katmandu")
+        .put("UTC+12", "Etc/GMT-12")
+        .put("Turkey Standard Time", "Europe/Istanbul")
+        .put("China Standard Time", "Asia/Shanghai")
+        .put("UTC+13", "Etc/GMT-13")
+        .put("Mountain Standard Time", "America/Denver")
+        .put("West Pacific Standard Time", "Pacific/Port_Moresby")
+        .put("AUS Central Standard Time", "Australia/Darwin")
+        .put("Newfoundland Standard Time", "America/St_Johns")
+        .put("N. Central Asia Standard Time", "Asia/Novosibirsk")
+        .put("SA Eastern Standard Time", "America/Cayenne")
+        .put("Singapore Standard Time", "Asia/Singapore")
+        .put("Vladivostok Standard Time", "Asia/Vladivostok")
+        .put("Haiti Standard Time", "America/Port-au-Prince")
+        .put("North Asia East Standard Time", "Asia/Irkutsk")
+        .put("Jordan Standard Time", "Asia/Amman")
+        .put("Bangladesh Standard Time", "Asia/Dhaka")
+        .put("Venezuela Standard Time", "America/Caracas")
+        .put("Cen. Australia Standard Time", "Australia/Adelaide")
+        .put("W. Australia Standard Time", "Australia/Perth")
+        .put("Mauritius Standard Time", "Indian/Mauritius")
+        .put("Central Standard Time", "America/Chicago")
+        .put("Tomsk Standard Time", "Asia/Tomsk")
+        .put("Arabian Standard Time", "Asia/Dubai")
+        .put("North Korea Standard Time", "Asia/Pyongyang")
+        .put("AUS Eastern Standard Time", "Australia/Sydney")
+        .put("Namibia Standard Time", "Africa/Windhoek")
+        .put("UTC", "Etc/GMT")
+        .put("North Asia Standard Time", "Asia/Krasnoyarsk")
+        .put("Central America Standard Time", "America/Guatemala")
+        .put("Kaliningrad Standard Time", "Europe/Kaliningrad")
+        .put("Aus Central W. Standard Time", "Australia/Eucla")
+        .put("New Zealand Standard Time", "Pacific/Auckland")
+        .put("SA Pacific Standard Time", "America/Bogota")
+        .put("Chatham Islands Standard Time", "Pacific/Chatham")
+        .put("Cape Verde Standard Time", "Atlantic/Cape_Verde")
+        .put("Pacific Standard Time", "America/Los_Angeles")
+        .put("US Eastern Standard Time", "America/Indianapolis")
+        .put("W. Mongolia Standard Time", "Asia/Hovd")
+        .put("Caucasus Standard Time", "Asia/Yerevan")
+        .put("Ulaanbaatar Standard Time", "Asia/Ulaanbaatar")
+        .put("India Standard Time", "Asia/Calcutta")
+        .put("Easter Island Standard Time", "Pacific/Easter")
+        .put("E. Europe Standard Time", "Europe/Chisinau")
+        .put("W. Central Africa Standard Time", "Africa/Lagos")
+        .put("W. Europe Standard Time", "Europe/Berlin")
+        .put("Sri Lanka Standard Time", "Asia/Colombo")
+        .put("Korea Standard Time", "Asia/Seoul")
+        .put("Saratov Standard Time", "Europe/Saratov")
+        .put("Tonga Standard Time", "Pacific/Tongatapu")
+        .put("Tokyo Standard Time", "Asia/Tokyo")
+        .put("Tocantins Standard Time", "America/Araguaina")
+        .put("Israel Standard Time", "Asia/Jerusalem")
+        .put("Central Standard Time (Mexico)", "America/Mexico_City")
+        .put("Bougainville Standard Time", "Pacific/Bougainville")
+        .put("Central Asia Standard Time", "Asia/Almaty")
+        .put("UTC-11", "Etc/GMT+11")
+        .put("US Mountain Standard Time", "America/Phoenix")
+        .put("Ekaterinburg Standard Time", "Asia/Yekaterinburg")
+        .put("Eastern Standard Time (Mexico)", "America/Cancun")
+        .put("Georgian Standard Time", "Asia/Tbilisi")
+        .put("Argentina Standard Time", "America/Buenos_Aires")
+        .put("Line Islands Standard Time", "Pacific/Kiritimati")
+        .put("Hawaiian Standard Time", "Pacific/Honolulu")
+        .put("Central Europe Standard Time", "Europe/Budapest")
+        .put("GMT Standard Time", "Europe/London")
+        .put("West Asia Standard Time", "Asia/Tashkent")
+        .put("FLE Standard Time", "Europe/Kiev")
+        .put("Canada Central Standard Time", "America/Regina")
+        .put("Montevideo Standard Time", "America/Montevideo")
+        .put("Central Pacific Standard Time", "Pacific/Guadalcanal")
+        .put("Lord Howe Standard Time", "Australia/Lord_Howe")
+        .put("South Africa Standard Time", "Africa/Johannesburg")
+        .put("Atlantic Standard Time", "America/Halifax")
+        .put("Astrakhan Standard Time", "Europe/Astrakhan")
+        .put("Paraguay Standard Time", "America/Asuncion")
+        .put("Romance Standard Time", "Europe/Paris")
+        .put("Greenland Standard Time", "America/Godthab")
+        .put("E. Australia Standard Time", "Australia/Brisbane")
+        .put("Russia Time Zone 11", "Asia/Kamchatka")
+        .put("GTB Standard Time", "Europe/Bucharest")
+        .put("Russia Time Zone 10", "Asia/Srednekolymsk")
+        .put("Belarus Standard Time", "Europe/Minsk")
+        .put("Altai Standard Time", "Asia/Barnaul")
+        .put("Morocco Standard Time", "Africa/Casablanca")
+        .put("SE Asia Standard Time", "Asia/Bangkok")
+        .put("Dateline Standard Time", "Etc/GMT+12")
+        .put("Transbaikal Standard Time", "Asia/Chita")
+        .put("Middle East Standard Time", "Asia/Beirut")
+        .put("Pacific Standard Time (Mexico)", "America/Tijuana")
+    .build(); // @formatter:on
 
     /**
      * Gets a value indicating whether the current calendar user should be added as default attendee to events implicitly or not,
@@ -305,7 +443,7 @@ public class Utils {
             return originalTimeZone;
         }
         /*
-         * use calendar user's, sesssion user's, or request timezone if same rules are effective
+         * use calendar user's / session user's timezone if same rules are effective
          */
         TimeZone calendarUserTimeZone = session.getEntityResolver().getTimeZone(calendarUserId);
         if (timeZone.hasSameRules(calendarUserTimeZone)) {
@@ -318,6 +456,14 @@ public class Utils {
                 LOG.debug("No matching timezone found for '{}', falling back to session user's timezone '{}'.", timeZone.getID(), sessionUserTimeZone);
                 return sessionUserTimeZone;
             }
+        }
+        /*
+         * select matching olson timezone for a known windows timezone
+         */
+        TimeZone mappedTimeZone = optTimeZone(WINDOWS2OLSON.get(timeZone.getID()));
+        if (null != mappedTimeZone) {
+            LOG.debug("No matching timezone found for '{}', falling back to mapped olson timezone '{}'.", timeZone.getID(), mappedTimeZone);
+            return mappedTimeZone;
         }
         /*
          * select the timezone with the same rules, and most similar identifier
