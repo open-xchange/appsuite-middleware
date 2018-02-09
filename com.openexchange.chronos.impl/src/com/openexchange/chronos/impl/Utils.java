@@ -56,6 +56,7 @@ import static com.openexchange.chronos.common.CalendarUtils.isInRange;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
 import static com.openexchange.chronos.impl.AbstractStorageOperation.PARAM_CONNECTION;
 import static com.openexchange.java.Autoboxing.I;
@@ -66,6 +67,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -77,7 +79,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
-import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarStrings;
@@ -153,6 +154,8 @@ public class Utils {
         EventField.ID, EventField.TIMESTAMP, EventField.MODIFIED_BY, EventField.FOLDER_ID, EventField.SERIES_ID,
         EventField.RECURRENCE_RULE, EventField.SEQUENCE, EventField.START_DATE, EventField.TRANSP
     };
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Utils.class);
 
     /**
      * Gets a value indicating whether the current calendar user should be added as default attendee to events implicitly or not,
@@ -273,44 +276,101 @@ public class Utils {
         return searchTerm;
     }
 
-    //    /**
-    //     * Gets a single search term using the field itself as column operand and a second operand.
-    //     *
-    //     * @param <V> The operand's type
-    //     * @param <E> The field type
-    //     * @param operation The operation to use
-    //     * @param operand The second operand
-    //     * @return A single search term
-    //     */
-    //    public static <V, E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation, Operand<V> operand) {
-    //        return getSearchTerm(field, operation).addOperand(operand);
-    //    }
-    //
-    //    /**
-    //     * Gets a single search term using the field itself as column operand and adds the supplied value as constant operand.
-    //     *
-    //     * @param <V> The operand's type
-    //     * @param <E> The field type
-    //     * @param operation The operation to use
-    //     * @param operand The value to use as constant operand
-    //     * @return A single search term
-    //     */
-    //    public static <V, E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation, V operand) {
-    //        return getSearchTerm(field, operation, new ConstantOperand<V>(operand));
-    //    }
-    //
-    //    /**
-    //     * Gets a single search term using the field itself as single column operand.
-    //     *
-    //     * @param <E> The field type
-    //     * @param operation The operation to use
-    //     * @param operand The value to use as constant operand
-    //     * @return A single search term
-    //     */
-    //    public static <E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation) {
-    //        return new SingleSearchTerm(operation).addOperand(new ColumnFieldOperand<E>(field));
-    //    }
-    //
+    /**
+     * Selects a well-known and valid timezone based on a client-supplied timezone, using different fallbacks if no exactly matching
+     * timezone is available.
+     *
+     * @param session The calendar session
+     * @param calendarUserId The identifier of the calendar user
+     * @param timeZone The timezone as supplied by the client
+     * @param originalTimeZone The original timezone in case of updates, or <code>null</code> if not available
+     * @return The selected timezone, or <code>null</code> if passed timezoen reference was <code>null</code>
+     */
+    public static TimeZone selectTimeZone(CalendarSession session, int calendarUserId, TimeZone timeZone, TimeZone originalTimeZone) throws OXException {
+        if (null == timeZone) {
+            return null;
+        }
+        /*
+         * try to match by timezone identifier first
+         */
+        TimeZone matchingTimeZone = optTimeZone(timeZone.getID(), null);
+        if (null != matchingTimeZone) {
+            return matchingTimeZone;
+        }
+        /*
+         * try and match a known timezone with the same rules (original timezone, calendar user timezone, session user timezone)
+         */
+        if (null != originalTimeZone && timeZone.hasSameRules(originalTimeZone)) {
+            LOG.debug("No matching timezone found for '{}', falling back to original timezone '{}'.", timeZone.getID(), originalTimeZone);
+            return originalTimeZone;
+        }
+        /*
+         * use calendar user's, sesssion user's, or request timezone if same rules are effective
+         */
+        TimeZone calendarUserTimeZone = session.getEntityResolver().getTimeZone(calendarUserId);
+        if (timeZone.hasSameRules(calendarUserTimeZone)) {
+            LOG.debug("No matching timezone found for '{}', falling back to calendar user's timezone '{}'.", timeZone.getID(), calendarUserTimeZone);
+            return calendarUserTimeZone;
+        }
+        if (session.getUserId() != calendarUserId) {
+            TimeZone sessionUserTimeZone = session.getEntityResolver().getTimeZone(session.getUserId());
+            if (timeZone.hasSameRules(sessionUserTimeZone)) {
+                LOG.debug("No matching timezone found for '{}', falling back to session user's timezone '{}'.", timeZone.getID(), sessionUserTimeZone);
+                return sessionUserTimeZone;
+            }
+        }
+        /*
+         * select the timezone with the same rules, and most similar identifier
+         */
+        List<TimeZone> timeZonesWithSameRules = getWithSameRules(timeZone);
+        if (timeZonesWithSameRules.isEmpty()) {
+            LOG.warn("No timezone with matching rules found for '{}', falling back to calendar user timezone '{}'.", timeZone.getID(), calendarUserTimeZone);
+            return calendarUserTimeZone;
+        }
+        timeZonesWithSameRules.sort(Comparator.comparingInt(tz -> levenshteinDistance(tz.getID(), timeZone.getID())));
+        TimeZone fallbackTimeZone = timeZonesWithSameRules.get(0);
+        LOG.warn("No matching timezone found for '{}', falling back to '{}'.", timeZone.getID(), fallbackTimeZone);
+        return fallbackTimeZone;
+    }
+
+    private static List<TimeZone> getWithSameRules(TimeZone timeZone) {
+        List<TimeZone> timeZones = new ArrayList<TimeZone>();
+        for (String timeZoneId : TimeZone.getAvailableIDs(timeZone.getRawOffset())) {
+            TimeZone candidateTimeZone = optTimeZone(timeZoneId);
+            if (timeZone.hasSameRules(candidateTimeZone)) {
+                timeZones.add(candidateTimeZone);
+            }
+        }
+        return timeZones;
+    }
+
+    /**
+     * Measures the distance between two strings, based on the <i>Levenshtein</i> algorithm.
+     *
+     * @param a The first string
+     * @param b The second string
+     * @return The result
+     * @see <a href="http://rosettacode.org/wiki/Levenshtein_distance#Java">Levenshtein Distance</a>
+     */
+    private static int levenshteinDistance(String a, String b) {
+        a = a.toLowerCase();
+        b = b.toLowerCase();
+        int[] costs = new int[b.length() + 1];
+        for (int j = 0; j < costs.length; j++) {
+            costs[j] = j;
+        }
+        for (int i = 1; i <= a.length(); i++) {
+            costs[0] = i;
+            int nw = i - 1;
+            for (int j = 1; j <= b.length(); j++) {
+                int cj = Math.min(1 + Math.min(costs[j], costs[j - 1]), a.charAt(i - 1) == b.charAt(j - 1) ? nw : nw + 1);
+                nw = costs[j];
+                costs[j] = cj;
+            }
+        }
+        return costs[b.length()];
+    }
+
     /**
      * <i>Anonymizes</i> an event in case it is not marked as {@link Classification#PUBLIC}, and the session's user is neither creator, nor
      * attendee of the event.
@@ -724,7 +784,7 @@ public class Utils {
             Connection connection = optConnection(session);
             folderAccess = null != connection ? new OXFolderAccess(connection, context) : new OXFolderAccess(context);
         } catch (OXException e) {
-            LoggerFactory.getLogger(Utils.class).warn("Error collecting affected folders", e);
+            LOG.warn("Error collecting affected folders", e);
             return affectedFoldersPerUser;
         }
         for (String folderId : folderIds) {
@@ -734,7 +794,7 @@ public class Utils {
                     com.openexchange.tools.arrays.Collections.put(affectedFoldersPerUser, userId, folderId);
                 }
             } catch (Exception e) {
-                LoggerFactory.getLogger(Utils.class).warn("Error collecting affected users for folder {}; skipping.", folderId, e);
+                LOG.warn("Error collecting affected users for folder {}; skipping.", folderId, e);
             }
         }
         return affectedFoldersPerUser;
@@ -779,8 +839,7 @@ public class Utils {
                         int[] groupMembers = entityResolver.getGroupMembers(permission.getEntity());
                         affectedUsers.addAll(Arrays.asList(i2I(groupMembers)));
                     } catch (OXException e) {
-                        LoggerFactory.getLogger(Utils.class).warn("Error resolving members of group {} for for folder {}; skipping.",
-                            I(permission.getEntity()), I(folder.getObjectID()), e);
+                        LOG.warn("Error resolving members of group {} for for folder {}; skipping.", I(permission.getEntity()), I(folder.getObjectID()), e);
                     }
                 } else {
                     affectedUsers.add(I(permission.getEntity()));
@@ -811,8 +870,7 @@ public class Utils {
                         int[] groupMembers = entityResolver.getGroupMembers(permission.getEntity());
                         affectedUsers.addAll(Arrays.asList(i2I(groupMembers)));
                     } catch (OXException e) {
-                        LoggerFactory.getLogger(Utils.class).warn("Error resolving members of group {} for for folder {}; skipping.",
-                            I(permission.getEntity()), folder.getID(), e);
+                        LOG.warn("Error resolving members of group {} for for folder {}; skipping.", I(permission.getEntity()), folder.getID(), e);
                     }
                 } else {
                     affectedUsers.add(I(permission.getEntity()));

@@ -271,6 +271,7 @@ public class EventUpdateProcessor implements EventUpdate {
 
     private void ensureConsistency(Event originalEvent, Event updatedEvent, Date timestamp) throws OXException {
         Consistency.adjustAllDayDates(updatedEvent);
+        Consistency.adjustTimeZones(session, calendarUser.getEntity(), updatedEvent, originalEvent);
         /*
          * adjust recurrence-related properties
          */

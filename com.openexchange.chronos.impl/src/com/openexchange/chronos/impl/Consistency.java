@@ -50,6 +50,8 @@
 package com.openexchange.chronos.impl;
 
 import java.util.Date;
+import java.util.TimeZone;
+import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.Duration;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
@@ -68,31 +70,33 @@ import com.openexchange.folderstorage.type.PublicType;
 public class Consistency {
 
     /**
-     * Sets the event's start- and end-timezones if not yet specified, falling back to the supplied user's default timezone.
-     *
-     * @param event The event to set the timezones in
-     * @param user The user to get the fallback timezone from
-     */
-    //    public static void setTimeZone(Event event, User user) throws OXException {
-    //        String startTimezone = event.getStartTimeZone();
-    //        event.setStartTimeZone(null == startTimezone ? user.getTimeZone() : Check.timeZoneExists(startTimezone));
-    //        String endTimezone = event.getEndTimeZone();
-    //        event.setEndTimeZone(null == endTimezone ? event.getStartTimeZone() : Check.timeZoneExists(endTimezone));
-    //    }
-
-    /**
-     * Sets the event's start- and end-timezones if not yet specified, falling back to the supplied user's default timezone.
+     * Checks and adjusts the timezones of the event's start- and end-time (in case they are <i>set</i>) to match well-known & valid
+     * timezones, using different fallbacks if no exactly matching timezone is available.
      *
      * @param session The calendar session
-     * @param event The event to set the timezones in
      * @param calendarUserId The identifier of the user to get the fallback timezone from
+     * @param event The event to set the timezones in
+     * @param originalEvent The original event, or <code>null</code> if not applicable
      */
-    //    public static void setTimeZone(CalendarSession session, Event event, int calendarUserId) throws OXException {
-    //        String startTimezone = event.getStartTimeZone();
-    //        event.setStartTimeZone(null == startTimezone ? session.getEntityResolver().getTimeZone(calendarUserId).getID() : Check.timeZoneExists(startTimezone));
-    //        String endTimezone = event.getEndTimeZone();
-    //        event.setEndTimeZone(null == endTimezone ? event.getStartTimeZone() : Check.timeZoneExists(endTimezone));
-    //    }
+    public static void adjustTimeZones(CalendarSession session, int calendarUserId, Event event, Event originalEvent) throws OXException {
+        if (event.containsStartDate()) {
+            event.setStartDate(selectTimeZone(session, event.getStartDate(), calendarUserId, null == originalEvent ? null : originalEvent.getStartDate()));
+        }
+        if (event.containsEndDate()) {
+            event.setEndDate(selectTimeZone(session, event.getEndDate(), calendarUserId, null == originalEvent ? null : originalEvent.getEndDate()));
+        }
+    }
+
+    private static DateTime selectTimeZone(CalendarSession session, DateTime dateTime, int calendarUserId, DateTime originalDateTime) throws OXException {
+        if (null == dateTime || dateTime.isFloating() || null == dateTime.getTimeZone()) {
+            return dateTime;
+        }
+        TimeZone selectedTimeZone = Utils.selectTimeZone(session, calendarUserId, dateTime.getTimeZone(), null == originalDateTime ? null : originalDateTime.getTimeZone());
+        if (false == dateTime.getTimeZone().equals(selectedTimeZone)) {
+            return dateTime.shiftTimeZone(selectedTimeZone);
+        }
+        return dateTime;
+    }
 
     /**
      * Adjusts the start- and end-date of the supplied event in case it is marked as "all-day". This includes the truncation of the
