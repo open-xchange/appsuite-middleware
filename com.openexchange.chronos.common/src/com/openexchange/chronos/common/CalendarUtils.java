@@ -418,7 +418,7 @@ public class CalendarUtils {
      * @return <code>true</code> if the attendee is internal, <code>false</code>, otherwise
      */
     public static boolean isExternalUser(Attendee attendee) {
-        return null != attendee && CalendarUserType.INDIVIDUAL.equals(attendee.getCuType()) && attendee.getEntity() == 0;
+        return null != attendee && CalendarUserType.INDIVIDUAL.equals(attendee.getCuType()) && attendee.getEntity() <= 0;
     }
 
     /**
@@ -1717,7 +1717,7 @@ public class CalendarUtils {
      *            comparison, or <code>null</code> to fall back to UTC
      * @return The sorted events
      */
-    public static List<Event> sortEvents(List<Event> events, final SortOrder[] sortOrders, final TimeZone timeZone) throws OXException {
+    public static List<Event> sortEvents(List<Event> events, final SortOrder[] sortOrders, final TimeZone timeZone) {
         if (null == events || 2 > events.size() || null == sortOrders || 0 == sortOrders.length) {
             return events;
         }
