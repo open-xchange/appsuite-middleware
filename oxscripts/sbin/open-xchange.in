@@ -85,11 +85,7 @@ JAVA_XTRAOPTS=${JAVA_XTRAOPTS:=${GATHERED_OPTS}}
 
 ox_set_JAVA_BIN
 
-ox_update_config_init \
-  @configini@ \
-  @configini@.template \
-  @bundle.d@ \
-  ${OSGI_JAR}
+ox_update_config_init @configini@ @configini@.template @bundle.d@
 
 test -z "$JAVA_XTRAOPTS" && JAVA_XTRAOPTS="-Xmx512M"
 
