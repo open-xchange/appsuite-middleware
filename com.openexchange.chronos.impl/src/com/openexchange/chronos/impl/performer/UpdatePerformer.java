@@ -62,6 +62,7 @@ import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -416,13 +417,14 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @return <code>true</code> if there were changes, <code>false</code>, otherwise
      */
     private boolean storeEventUpdate(Event originalEvent, Event deltaEvent, Set<EventField> updatedFields) throws OXException {
-        if (updatedFields.isEmpty()) {
+        HashSet<EventField> updatedEventFields = new HashSet<EventField>(updatedFields);
+        updatedEventFields.removeAll(java.util.Arrays.asList(EventField.ATTACHMENTS, EventField.ALARMS, EventField.ATTENDEES));
+        if (updatedEventFields.isEmpty()) {
             return false;
         }
         boolean realChange = false;
-        for (EventField updatedField : updatedFields) {
-            if (Arrays.contains(SKIPPED_FIELDS, updatedField) ||
-                EventField.ATTENDEES.equals(updatedField) || EventField.ALARMS.equals(updatedField) || EventField.ATTACHMENTS.equals(updatedField)) {
+        for (EventField updatedField : updatedEventFields) {
+            if (Arrays.contains(SKIPPED_FIELDS, updatedField)) {
                 continue;
             }
             realChange = true;
