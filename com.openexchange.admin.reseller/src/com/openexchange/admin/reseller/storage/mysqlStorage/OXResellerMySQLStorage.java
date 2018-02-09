@@ -1229,7 +1229,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface#checkRestrictions(com.openexchange.admin.rmi.dataobjects
      * .Credentials)
@@ -1316,7 +1316,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface#checkPerContextRestrictions(com.openexchange.admin.
      * rmi.dataobjects.Context, java.lang.String[])
@@ -1423,7 +1423,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface#applyRestrictionsToContext(java.util.HashSet,
      * com.openexchange.admin.rmi.dataobjects.Context)
      */
@@ -1479,7 +1479,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface#getRestrictionsFromContext(com.openexchange.admin.rmi
      * .dataobjects.Context)
@@ -1528,7 +1528,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface#initDatabaseRestrictions()
      */
     @Override
@@ -1587,7 +1587,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface#removeDatabaseRestrictions()
      */
     @Override
@@ -1622,7 +1622,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface#getCustomId(com.openexchange.admin.rmi.dataobjects.Context)
      */
     @Override
@@ -1653,7 +1653,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface#writeCustomId(com.openexchange.admin.rmi.dataobjects.Context)
      */
     @Override
@@ -1806,7 +1806,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.admin.reseller.storage.interfaces.OXResellerStorageInterface#updateModuleAccessRestrictions()
      */
     @Override
@@ -1821,6 +1821,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             cache.initAccessCombinations();
             final HashSet<String> usedCombinations = new HashSet<String>();
             // find out, which restrictions are already used/referenced
+            // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
             for (final String query : new String[] { "SELECT r.name FROM subadmin_restrictions AS sr LEFT JOIN restrictions AS r ON ( r.rid=sr.rid ) WHERE r.name LIKE ? OR r.name LIKE ? GROUP BY r.name", "SELECT r.name FROM context_restrictions  AS cr LEFT JOIN restrictions AS r ON ( r.rid=cr.rid ) WHERE r.name LIKE ? OR r.name LIKE ? GROUP BY r.name" }) {
                 prep = con.prepareStatement(query);
                 prep.setString(1, Restriction.MAX_OVERALL_USER_PER_SUBADMIN_BY_MODULEACCESS_PREFIX + "%");

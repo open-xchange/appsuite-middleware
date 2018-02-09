@@ -69,9 +69,7 @@ import java.util.Properties;
 import java.util.Set;
 import org.slf4j.Logger;
 import com.google.common.collect.Lists;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
-import com.openexchange.exception.OXException;
 import liquibase.change.custom.CustomTaskChange;
 import liquibase.change.custom.CustomTaskRollback;
 import liquibase.database.Database;
@@ -296,6 +294,7 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
             }
 
             // Check count entries for existing ones
+            // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
             stmt = configCon.prepareStatement("SELECT filestore.id, COUNT(context.cid) AS num FROM filestore LEFT JOIN context ON filestore.id=context.filestore_id GROUP BY filestore.id ORDER BY num ASC");
             rs = stmt.executeQuery();
             if (false == rs.next()) {
@@ -369,6 +368,7 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
             }
 
             // Check count entries for existing ones
+            // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
             stmt = configCon.prepareStatement("SELECT db_cluster.write_db_pool_id, COUNT(context_server2db_pool.cid) AS num FROM db_cluster LEFT JOIN context_server2db_pool ON db_cluster.write_db_pool_id = context_server2db_pool.write_db_pool_id GROUP BY db_cluster.write_db_pool_id ORDER BY num ASC");
             rs = stmt.executeQuery();
             if (false == rs.next()) {
@@ -648,6 +648,7 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
 
             Map<Integer, List<SchemaCount>> counts = new LinkedHashMap<Integer, List<SchemaCount>>(32, 0.9F);
             for (Integer poolId : poolIds) {
+                // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
                 stmt = configCon.prepareStatement("SELECT db_schema,COUNT(db_schema) AS count FROM context_server2db_pool WHERE write_db_pool_id=? GROUP BY db_schema ORDER BY count ASC");
                 stmt.setInt(1, poolId.intValue());
                 rs = stmt.executeQuery();
@@ -767,14 +768,6 @@ public class CountTablesCustomTaskChange implements CustomTaskChange, CustomTask
             return (rs.next() && rs.getString("TABLE_NAME").equalsIgnoreCase(table));
         } finally {
             Databases.closeSQLStuff(rs);
-        }
-    }
-
-    private Connection getConfigDbCon(DatabaseService databaseService) throws CustomChangeException {
-        try {
-            return databaseService.getForUpdateTask();
-        } catch (OXException e) {
-            throw new CustomChangeException("Pooling error", e);
         }
     }
 

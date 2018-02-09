@@ -50,7 +50,6 @@
 package com.openexchange.groupware.attach.impl;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getStatement;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -68,7 +67,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.activation.FileTypeMap;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
@@ -99,8 +97,6 @@ import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.file.SaveFileAction;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -953,28 +949,6 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         return System.currentTimeMillis();
     }
 
-    private long countAttachmentsInContext(final int contextId) throws OXException {
-        final DatabaseService databaseService = ServerServiceRegistry.getServize(DatabaseService.class);
-        if (null == databaseService) {
-            throw ServiceExceptionCode.absentService(DatabaseService.class);
-        }
-
-        final Connection con = databaseService.getReadOnly(contextId);
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SELECT count(id) FROM prg_attachment WHERE cid=?");
-            stmt.setInt(1, contextId);
-            rs = stmt.executeQuery();
-            return rs.next() ? rs.getLong(1) : 0;
-        } catch (final SQLException e) {
-            throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
-            databaseService.backReadOnly(contextId, con);
-        }
-    }
-
     private void checkCharacters(final AttachmentMetadata attachment) throws OXException {
         final StringBuilder errors = new StringBuilder();
         boolean invalid = false;
@@ -1257,7 +1231,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                 SearchIterators.close(delegate);
                 return;
             }
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             if (null != readCon) {
                 releaseReadConnection(ctx, readCon);
             }
@@ -1305,7 +1279,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                 if (mode.equals(FetchMode.CLOSE_LATER)) {
                     return;
                 } else if (mode.equals(FetchMode.CLOSE_IMMEDIATELY)) {
-                    closeSQLStuff(stmt);
+                    Databases.closeSQLStuff(stmt);
                     releaseReadConnection(ctx, readCon);
                     stmt = null;
                     readCon = null;
@@ -1314,7 +1288,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                     while (rs.next()) {
                         values.add(nextFromResult(rs));
                     }
-                    closeSQLStuff(rs, stmt);
+                    Databases.closeSQLStuff(rs, stmt);
                     releaseReadConnection(ctx, readCon);
                     stmt = null;
                     readCon = null;
@@ -1345,6 +1319,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
+            // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
             stmt = con.prepareStatement(DBUtils.getIN(QUERIES.getSelectNewestCreationDate(), attachedIds.length) + " GROUP BY attached");
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());

@@ -51,19 +51,18 @@ package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
 import static com.openexchange.groupware.update.WorkingLevel.SCHEMA;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link AttachmentCountUpdateTask}
@@ -77,7 +76,8 @@ public class AttachmentCountUpdateTask extends UpdateTaskAdapter {
     /**
      * Finds all appointments, where the field numberOfAttachments does not match the real amount of attachments.
      */
-    private static final String SELECT = "SELECT pd.cid, pd.intfield01 AS id, pd.intfield08 AS count, COUNT(pa.id) AS realCount " +
+    // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
+    private static final String SELECT = "SELECT pd.cid, pd.intfield01 AS id, ANY_VALUE(pd.intfield08) AS count, COUNT(pa.id) AS realCount " +
             "FROM prg_dates pd LEFT JOIN prg_attachment pa " +
             "ON pd.cid = pa.cid AND pd.intfield01 = pa.attached AND pa.module=1 " +
             "GROUP BY pd.cid,pd.intfield01 " +
@@ -124,12 +124,12 @@ public class AttachmentCountUpdateTask extends UpdateTaskAdapter {
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(repairStmt);
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(repairStmt);
+            Databases.closeSQLStuff(rs, stmt);
             if (rollback) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
-            autocommit(con);
+            Databases.autocommit(con);
         }
 
     }

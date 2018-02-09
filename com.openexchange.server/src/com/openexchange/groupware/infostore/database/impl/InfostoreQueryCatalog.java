@@ -391,6 +391,7 @@ public class InfostoreQueryCatalog {
     }
 
     public String getNumberOfVersionsQueryForOneDocument() {
+        // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
         final Table table = Table.INFOSTORE_DOCUMENT;
         final String idColumn = (String) Metadata.ID_LITERAL.doSwitch(table.getFieldSwitcher());
         final StringBuilder builder = new StringBuilder(200);
@@ -406,6 +407,7 @@ public class InfostoreQueryCatalog {
      * @return The statement
      */
     public String getNumberOfVersionsQueryForDocuments(int[] ids) {
+        // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
         if (null == ids || 0 == ids.length) {
             throw new IllegalArgumentException("ids");
         }

@@ -49,10 +49,6 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -91,7 +87,7 @@ public class MakeUUIDPrimaryForUserAttributeTable extends UpdateTaskAdapter {
         Connection con = params.getConnection();
         boolean rollback = false;
         try {
-            startTransaction(con);
+            Databases.startTransaction(con);
             rollback = true;
 
             progress.setTotal(getTotalRows(con));
@@ -125,9 +121,9 @@ public class MakeUUIDPrimaryForUserAttributeTable extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                rollback(con);
+                Databases.rollback(con);
             }
-            autocommit(con);
+            Databases.autocommit(con);
         }
     }
 
@@ -181,6 +177,7 @@ public class MakeUUIDPrimaryForUserAttributeTable extends UpdateTaskAdapter {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
+            // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
             stmt = con.prepareStatement("SELECT cid, HEX(uuid) FROM user_attribute GROUP BY cid, uuid HAVING count(*) > 1");
             rs = stmt.executeQuery();
 
@@ -267,7 +264,7 @@ public class MakeUUIDPrimaryForUserAttributeTable extends UpdateTaskAdapter {
                 rows += rs.getInt(1);
             }
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
         return rows;
     }

@@ -167,6 +167,7 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
 	    } else if (1 == patterns.size()) {
             appendAutocompletePattern(patterns.get(0), requireEmail, ignoreDistributionLists, ignoreNonWebmailUsers, folderIDs, contextID, fields, forUser);
 	    } else {
+	        // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
 	        stringBuilder.append("SELECT ");
 	        stringBuilder.append("o.").append(Mappers.CONTACT.get(fields[0]).getColumnLabel());
 	        for (int i = 1; i < fields.length; i++) {

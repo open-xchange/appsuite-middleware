@@ -319,6 +319,7 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
+                // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
                 stmt = connnection.prepareStatement("SELECT cid, object_id FROM "+table+" GROUP BY cid, object_id, member_uid HAVING count(*) > 1");
                 rs = stmt.executeQuery();
                 if (rs.next()) {
@@ -340,6 +341,7 @@ public class CalendarRevokeAddNewPrimaryKeyForConfirmPerOccurrence extends Updat
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
+                // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
                 stmt = connnection.prepareStatement("SELECT cid, objectId FROM "+table2+" GROUP BY cid, objectId, mailAddress HAVING count(*) > 1");
                 rs = stmt.executeQuery();
                 if (rs.next()) {

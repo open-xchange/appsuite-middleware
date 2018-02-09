@@ -324,6 +324,7 @@ public final class OXFolderSQL {
         }
     }
 
+    // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
     private static final String SQL_SELECT_ALL_SHARED_FLDS = "SELECT ot.fuid FROM oxfolder_tree AS ot WHERE ot.cid = ? AND ot.type = ? AND ot.created_from = ? AND " + "(SELECT COUNT(op.permission_id) FROM oxfolder_permissions AS op WHERE op.cid = ot.cid AND op.fuid = ot.fuid) > 1 GROUP BY ot.fuid";
 
     /**
@@ -2496,6 +2497,7 @@ public final class OXFolderSQL {
         }
     }
 
+    // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
     private static final String SQL_SEL_PERMS = "SELECT ot.fuid, ot.type, ot.module, ot.default_flag FROM " + TMPL_PERM_TABLE + " AS op JOIN " + TMPL_FOLDER_TABLE + " AS ot ON op.fuid = ot.fuid AND op.cid = ? AND ot.cid = ? WHERE op.permission_id IN " + TMPL_IDS + " GROUP BY ot.fuid";
 
     /**

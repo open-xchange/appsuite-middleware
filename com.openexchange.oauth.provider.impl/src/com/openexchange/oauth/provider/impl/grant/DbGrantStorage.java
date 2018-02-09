@@ -388,7 +388,8 @@ public class DbGrantStorage implements OAuthGrantStorage {
         ResultSet rs = null;
         try {
             stmt = con.createStatement();
-            rs = stmt.executeQuery("SELECT db_schema, write_db_pool_id FROM context_server2db_pool GROUP BY db_schema");
+            // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
+            rs = stmt.executeQuery("SELECT db_schema,  ANY_VALUE(write_db_pool_id) FROM context_server2db_pool GROUP BY db_schema");
             while (rs.next()) {
                 schemasAndWritePools.add(new SchemaAndWritePool(rs.getString(1), rs.getInt(2)));
             }

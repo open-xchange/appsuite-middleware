@@ -62,9 +62,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import com.davekoelle.AlphanumComparator;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link Duplicate}
@@ -103,7 +103,7 @@ public final class Duplicate {
                 return;
             }
             if (readWrite) {
-                DBUtils.autocommit(connection);
+                Databases.autocommit(connection);
                 databaseService.backWritable(contextId, connection);
             } else {
                 databaseService.backReadOnly(contextId, connection);
@@ -165,8 +165,8 @@ public final class Duplicate {
                 /*
                  * Detect possible duplicates
                  */
-                stmt =
-                    cm.connection.prepareStatement("SELECT name, COUNT(name), parentId FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? GROUP BY parentId, name");
+                // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
+                stmt = cm.connection.prepareStatement("SELECT name, COUNT(name), parentId FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? GROUP BY parentId, name");
                 pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, tree);
@@ -185,7 +185,7 @@ public final class Duplicate {
                     return java.util.Collections.emptyMap();
                 }
             } finally {
-                DBUtils.closeSQLStuff(rs, stmt);
+                Databases.closeSQLStuff(rs, stmt);
             }
             /*
              * Get folder identifiers
@@ -213,7 +213,7 @@ public final class Duplicate {
                         name2ids.put(name, folderIds);
                     }
                 } finally {
-                    DBUtils.closeSQLStuff(rs, stmt);
+                    Databases.closeSQLStuff(rs, stmt);
                 }
             }
             /*
@@ -240,9 +240,9 @@ public final class Duplicate {
                         rollback = false;
                     } finally {
                         if (rollback) {
-                            DBUtils.rollback(connection); // ROLLBACK
+                            Databases.rollback(connection); // ROLLBACK
                         }
-                        DBUtils.autocommit(connection);
+                        Databases.autocommit(connection);
                     }
                 }
             }
@@ -255,7 +255,7 @@ public final class Duplicate {
         } catch (final RuntimeException e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

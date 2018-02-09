@@ -63,6 +63,7 @@ import com.openexchange.advertisement.impl.services.AbstractAdvertisementConfigS
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.reseller.ResellerService;
 import com.openexchange.reseller.data.ResellerAdmin;
@@ -86,13 +87,14 @@ public class RemoteAdvertisementServiceImpl implements RemoteAdvertisementServic
     private static final String SQL_DELETE_CONFIG_WHERE_IN = "DELETE FROM advertisement_config WHERE reseller IN (";
     private static final String SQL_DELETE_CONFIG_WHERE_NOT_IN = "DELETE FROM advertisement_config WHERE configId NOT IN (";
 
+    // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
     private static final String SQL_SELECT_RESELLER_FROM_CONFIG = "SELECT reseller FROM advertisement_config GROUP BY reseller;";
     private static final String SQL_SELECT_CONFIGIDS_FROM_MAPPING = "SELECT configId FROM advertisement_mapping;";
     private static final String SQL_SELECT_CONFIGIDS_FROM_MAPPING_WHERE = "SELECT configId FROM advertisement_mapping WHERE reseller=?;";
 
     @Override
     public void removeConfigurations(String reseller, boolean clean, boolean includePreview) throws OXException {
-        
+
         List<String> activeResellerNames = null;
         if (clean) {
             // collect active reseller
@@ -122,7 +124,7 @@ public class RemoteAdvertisementServiceImpl implements RemoteAdvertisementServic
                     if (stmt.executeUpdate() > 0) {
                         isReadOnly = false;
                     }
-                    DBUtils.closeSQLStuff(stmt);
+                    Databases.closeSQLStuff(stmt);
                     stmt = con.prepareStatement(SQL_DELETE_MAPPING_ALL);
                     if (stmt.executeUpdate() > 0) {
                         isReadOnly = false;
@@ -142,7 +144,7 @@ public class RemoteAdvertisementServiceImpl implements RemoteAdvertisementServic
 
                     if (!resellerToRemove.isEmpty()) {
                         // remove reseller configs
-                        DBUtils.closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                         String sql = DBUtils.getIN(SQL_DELETE_CONFIG_WHERE_IN, resellerToRemove.size());
                         stmt = con.prepareStatement(sql + ";");
                         int x = 1;
@@ -154,7 +156,7 @@ public class RemoteAdvertisementServiceImpl implements RemoteAdvertisementServic
                         }
 
                         // remove reseller mappings
-                        DBUtils.closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                         sql = DBUtils.getIN(SQL_DELETE_MAPPING_WHERE_IN, resellerToRemove.size());
                         stmt = con.prepareStatement(sql + ";");
                         x = 1;
@@ -166,8 +168,8 @@ public class RemoteAdvertisementServiceImpl implements RemoteAdvertisementServic
                         }
                     }
                     if (includePreview) {
-                        // clean all previews 
-                        DBUtils.closeSQLStuff(resultSet, stmt);
+                        // clean all previews
+                        Databases.closeSQLStuff(resultSet, stmt);
                         stmt = con.prepareStatement(SQL_SELECT_CONFIGIDS_FROM_MAPPING);
                         resultSet = stmt.executeQuery();
                         List<Integer> ids = new ArrayList<>();
@@ -175,7 +177,7 @@ public class RemoteAdvertisementServiceImpl implements RemoteAdvertisementServic
                             ids.add(resultSet.getInt(1));
                         }
 
-                        DBUtils.closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                         if (ids.isEmpty()) {
                             // remove all configs, since noone has a mapping
                             stmt = con.prepareStatement(SQL_DELETE_CONFIG_ALL);
@@ -200,7 +202,7 @@ public class RemoteAdvertisementServiceImpl implements RemoteAdvertisementServic
                     if (stmt.executeUpdate() > 0) {
                         isReadOnly = false;
                     }
-                    DBUtils.closeSQLStuff(stmt);
+                    Databases.closeSQLStuff(stmt);
                     stmt = con.prepareStatement(SQL_DELETE_MAPPING);
                     stmt.setString(1, reseller);
                     if (stmt.executeUpdate() > 0) {
@@ -215,7 +217,7 @@ public class RemoteAdvertisementServiceImpl implements RemoteAdvertisementServic
                         if (stmt.executeUpdate() > 0) {
                             isReadOnly = false;
                         }
-                        DBUtils.closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                         stmt = con.prepareStatement(SQL_DELETE_MAPPING);
                         stmt.setString(1, reseller);
                         if (stmt.executeUpdate() > 0) {
@@ -225,7 +227,7 @@ public class RemoteAdvertisementServiceImpl implements RemoteAdvertisementServic
                     } else {
                         if (includePreview) {
                             // only remove previews for the given reseller
-                            DBUtils.closeSQLStuff(resultSet, stmt);
+                            Databases.closeSQLStuff(resultSet, stmt);
                             stmt = con.prepareStatement(SQL_SELECT_CONFIGIDS_FROM_MAPPING_WHERE);
                             stmt.setString(1, reseller);
                             resultSet = stmt.executeQuery();
@@ -234,7 +236,7 @@ public class RemoteAdvertisementServiceImpl implements RemoteAdvertisementServic
                                 ids.add(resultSet.getInt(1));
                             }
 
-                            DBUtils.closeSQLStuff(stmt);
+                            Databases.closeSQLStuff(stmt);
                             // remove all configs which does not have a mapping
                             String sql = DBUtils.getIN(SQL_DELETE_CONFIG_WHERE_NOT_IN, ids.size(), " AND reseller=?;");
                             stmt = con.prepareStatement(sql);
@@ -260,7 +262,7 @@ public class RemoteAdvertisementServiceImpl implements RemoteAdvertisementServic
         } catch (SQLException e) {
             throw AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(resultSet, stmt);
+            Databases.closeSQLStuff(resultSet, stmt);
             if (con != null) {
                 if (isReadOnly) {
                     dbService.backReadOnly(con);
@@ -269,8 +271,8 @@ public class RemoteAdvertisementServiceImpl implements RemoteAdvertisementServic
                 }
             }
         }
-            
-            
+
+
     }
 
 }
