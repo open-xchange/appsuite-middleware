@@ -443,7 +443,7 @@ public class EventManager extends AbstractManager {
      * @throws ChronosApiException if a Chronos API error is occurred
      */
     public EventData updateEvent(EventData eventData) throws ApiException, ChronosApiException {
-        return updateEvent(eventData);
+        return updateEvent(eventData, false);
     }
 
     /**
