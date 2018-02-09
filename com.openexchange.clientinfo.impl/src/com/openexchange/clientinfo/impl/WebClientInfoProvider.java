@@ -187,6 +187,7 @@ public class WebClientInfoProvider implements ClientInfoProvider {
 
                 return new WebClientInfo(client, osReadableName.toString(), os, osVersion, browser, browserVersion);
             }
+            return getClientInfo(session.getClient());
         }
 
         return null;
@@ -199,6 +200,8 @@ public class WebClientInfoProvider implements ClientInfoProvider {
             client = APPSUITE;
         } else if (Client.OX6_UI.getClientId().equals(clientId)) {
             client = OX6;
+        } else {
+            return null;
         }
         return new WebClientInfo(client, null, null, null, null, null);
     }

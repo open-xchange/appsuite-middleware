@@ -54,7 +54,6 @@ import com.openexchange.clientinfo.ClientInfoService;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.session.management.SessionManagementService;
 import com.openexchange.session.management.json.SessionManagementActionFactory;
-import com.openexchange.user.UserService;
 
 /**
  * {@link SessionManagementJSONActivator}
@@ -66,7 +65,7 @@ public class SessionManagementJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { SessionManagementService.class, LeanConfigurationService.class, ClientInfoService.class, UserService.class };
+        return new Class<?>[] { SessionManagementService.class, LeanConfigurationService.class, ClientInfoService.class };
     }
 
     @Override
