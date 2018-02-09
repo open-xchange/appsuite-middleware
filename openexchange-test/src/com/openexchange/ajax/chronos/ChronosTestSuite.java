@@ -51,6 +51,8 @@ package com.openexchange.ajax.chronos;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
+import com.openexchange.ajax.chronos.schedjoules.BasicSchedJoulesAPITest;
+import com.openexchange.ajax.chronos.schedjoules.BasicSchedJoulesProviderTest;
 import com.openexchange.test.concurrent.ParallelSuite;
 
 /**
@@ -64,12 +66,10 @@ import com.openexchange.test.concurrent.ParallelSuite;
     AcknowledgeAndSnoozeTest.class,
     BasicAlarmTest.class,
     BasicAlarmTriggerTest.class,
-    BasicAvailabilityTest.class,
+    //BasicAvailabilityTest.class,
     BasicFreeBusyTest.class,
-    // FIXME: The SchedJoules tests were deactivated due to the nature of their implementation
-    //        i.e. external/third party service provider. Will be re-activated for CI tests.
-    //BasicSchedJoulesAPITest.class,
-    //BasicSchedJoulesProviderTest.class,
+    BasicSchedJoulesAPITest.class,
+    BasicSchedJoulesProviderTest.class,
     BasicSelfProtectionTest.class,
     BasicSeriesEventTest.class,
     BasicSingleEventTest.class,
