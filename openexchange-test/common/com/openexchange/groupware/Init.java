@@ -251,10 +251,6 @@ public final class Init {
          */
         com.openexchange.configuration.SystemConfig.getInstance(),
         /**
-         * Reads the calendar.properties.
-         */
-        com.openexchange.groupware.calendar.CalendarConfig.getInstance(),
-        /**
          * Initialization for alias charset provider
          */
         new com.openexchange.charset.CustomCharsetProviderInit(),
