@@ -76,13 +76,16 @@ import com.openexchange.tools.sql.DBUtils;
  *
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @deprecated
  */
+@Deprecated
 public final class CalendarCollectionUtils {
 
     private static final char DELIMITER_PIPE = '|';
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarCollectionUtils.class);
 
+    @Deprecated
     public static final int MAX_OCCURRENCESE = 999;
 
     /**
@@ -103,6 +106,7 @@ public final class CalendarCollectionUtils {
      *         recurring appointment whose recurring information could be
      *         successfully filled; otherwise <code>false</code> to indicate a failure
      */
+    @Deprecated
     public static boolean fillDAO(final CalendarDataObject cdao) throws OXException {
         if (cdao.getRecurrence() == null || cdao.getRecurrence().indexOf(DELIMITER_PIPE) == -1) {
             if (cdao.getRecurrenceType() == 0) {
@@ -258,11 +262,7 @@ public final class CalendarCollectionUtils {
 
     private static int NO_END_YEARS = 4;
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.calendar.CalendarCommonCollectionInterface#getMaxUntilDate(com.openexchange.calendar.CalendarDataObject)
-     */
+    @Deprecated
     public static Date getMaxUntilDate(final CalendarDataObject cdao) {
         /*
          * Determine max. end date
@@ -295,15 +295,18 @@ public final class CalendarCollectionUtils {
         return new Date(maxEnd);
     }
 
+    @Deprecated
     public static long normalizeLong(final long millis) {
         return millis - (millis % Constants.MILLI_DAY);
     }
 
+    @Deprecated
     public static boolean isException(final long t, final Set<Long> ce, final Set<Long> de) {
         final Long check = Long.valueOf(normalizeLong(t));
         return (null == ce ? false : ce.contains(check)) || (null == de ? false : de.contains(check));
     }
 
+    @Deprecated
     public static RecurringResultsInterface calculateRecurring(final CalendarObject cdao, final long range_start, final long range_end, final int pos, final int PMAXTC, final boolean ignore_exceptions) throws OXException {
         String change_exceptions = null;
         String delete_exceptions = null;
@@ -357,7 +360,7 @@ public final class CalendarCollectionUtils {
         return rc.calculateRecurrence();
     }
 
-    public static String createDSString(final CalendarDataObject cdao) throws OXException {
+    private static String createDSString(final CalendarDataObject cdao) throws OXException {
         if (cdao.containsStartDate()) {
             checkRecurring(cdao);
             StringBuilder recStrBuilder = new StringBuilder(64);
@@ -521,7 +524,7 @@ public final class CalendarCollectionUtils {
      * @return The first occurrence's end date
      * @throws OXException If calculating the first occurrence fails
      */
-    public static Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
+    private static Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
         return getOccurenceDate(cdao, cdao.getOccurrence());
     }
 
@@ -533,7 +536,7 @@ public final class CalendarCollectionUtils {
      * @return The first occurrence's end date
      * @throws OXException If calculating the first occurrence fails
      */
-    public static Date getOccurenceDate(final CalendarDataObject cdao, final int occurrence) throws OXException {
+    private static Date getOccurenceDate(final CalendarDataObject cdao, final int occurrence) throws OXException {
         final RecurringResultsInterface rss = calculateRecurring(cdao, 0, 0, occurrence, 1, true);
         final RecurringResultInterface rs = rss.getRecurringResult(0);
         if (rs != null) {
@@ -543,11 +546,13 @@ public final class CalendarCollectionUtils {
         return new Date(cdao.getStartDate().getTime() + Constants.MILLI_YEAR);
     }
 
+    @Deprecated
     public static void fillMap(final RecurringResultsInterface rss, final long s, final long diff, final int d, final int counter) {
         final RecurringResult rs = new RecurringResult(s, diff, d, counter);
         rss.add(rs);
     }
 
+    @Deprecated
     public static boolean exceedsHourOfDay(final long millis, final String timeZoneID) {
         return exceedsHourOfDay(millis, TimeZone.getTimeZone(timeZoneID));
     }
@@ -563,7 +568,7 @@ public final class CalendarCollectionUtils {
      * @return <code>true</code> if specified date in increases day in month if
      *         adding given time zone's offset; otherwise <code>false</code>
      */
-    public static boolean exceedsHourOfDay(final long millis, final TimeZone zone) {
+    private static boolean exceedsHourOfDay(final long millis, final TimeZone zone) {
         final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         cal.setTimeInMillis(millis);
         final long hours = cal.get(Calendar.HOUR_OF_DAY) + (zone.getOffset(millis) / Constants.MILLI_HOUR);
@@ -594,6 +599,7 @@ public final class CalendarCollectionUtils {
         return retval.intValue();
     }
 
+    @Deprecated
     public static void checkRecurring(final CalendarObject cdao) throws OXException {
         if (cdao.getInterval() > MAX_OCCURRENCESE) {
             throw OXCalendarExceptionCodes.RECURRING_VALUE_CONSTRAINT.create(Integer.valueOf(cdao.getInterval()), Integer.valueOf(MAX_OCCURRENCESE));
@@ -654,6 +660,16 @@ public final class CalendarCollectionUtils {
         return calendar.getTimeInMillis();
     }
 
+    /**
+     * 
+     * @param date
+     * @param ignoreDate
+     * @param cdao
+     * @param changeExceptions
+     * @return
+     * @throws OXException
+     */
+    @Deprecated
     public static boolean isOccurrenceDate(final long date, final long ignoreDate, final CalendarDataObject cdao, final long[] changeExceptions) throws OXException {
         /*
          * Since we check dates here, normalize given time millis
@@ -706,6 +722,7 @@ public final class CalendarCollectionUtils {
      * @return The appointment's title or <code>null</code>
      * @throws OXException If determining appointment's title fails
      */
+    @Deprecated
     public static String getAppointmentTitle(final int objectId, final Context ctx) throws OXException {
         final Connection con = Database.get(ctx, false);
         PreparedStatement stmt = null;
@@ -726,5 +743,4 @@ public final class CalendarCollectionUtils {
             DBUtils.closeResources(rs, stmt, con, true, ctx);
         }
     }
-
 }
