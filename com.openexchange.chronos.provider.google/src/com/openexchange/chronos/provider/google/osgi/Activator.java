@@ -73,12 +73,13 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { OAuthService.class, OAuthServiceMetaDataRegistry.class, CalendarAccountService.class, AdministrativeCalendarAccountService.class, LeanConfigurationService.class, RecurrenceService.class };
-    }
-
-    @Override
-    protected Class<?>[] getOptionalServices() {
-        return new Class[] { GenericConfigurationStorageService.class, CalendarStorageFactory.class, ContextService.class, FolderUserPropertyStorage.class, GroupService.class, UserService.class, FolderService.class };
+        //@formatter:off
+        return new Class[] { 
+            OAuthService.class, OAuthServiceMetaDataRegistry.class, CalendarAccountService.class, AdministrativeCalendarAccountService.class, LeanConfigurationService.class, RecurrenceService.class,
+            // The services below are only required by migration
+            GenericConfigurationStorageService.class, CalendarStorageFactory.class, ContextService.class, FolderUserPropertyStorage.class, GroupService.class, UserService.class, FolderService.class
+        };
+        //@formatter:on
     }
 
     @Override
