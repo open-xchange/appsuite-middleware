@@ -244,6 +244,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
          */
         if (isSeriesMaster(originalEvent) && eventData.containsDeleteExceptionDates() && updateDeleteExceptions(originalEvent, eventData)) {
             originalEvent = loadEventData(originalEvent.getId());
+            ignoredFields = null != ignoredFields ? Arrays.add(ignoredFields, EventField.DELETE_EXCEPTION_DATES) : new EventField[] { EventField.DELETE_EXCEPTION_DATES };
         }
         /*
          * prepare event update & check conflicts as needed
@@ -398,8 +399,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                     }
                 }
                 updatedEvent.removeDeleteExceptionDates();
-                return true;
             }
+            return true;
         }
         return false;
     }
