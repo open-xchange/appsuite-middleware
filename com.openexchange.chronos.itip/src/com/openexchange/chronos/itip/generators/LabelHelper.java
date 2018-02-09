@@ -54,6 +54,8 @@ import java.net.UnknownHostException;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.Transp;
@@ -84,6 +86,8 @@ public class LabelHelper {
     private final ServiceLookup services;
     private final Pattern patternSlashFixer;
     private static final String fallbackHostname;
+    
+    private static final Logger LOG = LoggerFactory.getLogger(LabelHelper.class);
 
     protected final NotificationMail mail;
     protected final TypeWrapper wrapper;
@@ -261,6 +265,11 @@ public class LabelHelper {
 
         if (hostname == null) {
             hostname = fallbackHostname;
+        }
+
+        if (objectId == null || folder == null) {
+            LOG.error("Unable to generate Link. Either Object Id ({}) or Folder Id ({}) is null.", objectId, folder, new Throwable());
+            return "";
         }
 
         return template.replaceAll("\\[hostname\\]", hostname).replaceAll("\\[uiwebpath\\]", webpath).replaceAll("\\[module\\]", module).replaceAll("\\[object\\]", objectId).replaceAll("\\[folder\\]", folder);
