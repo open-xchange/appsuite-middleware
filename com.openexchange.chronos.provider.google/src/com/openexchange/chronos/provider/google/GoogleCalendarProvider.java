@@ -68,6 +68,7 @@ import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.provider.AvailabilityAwareCalendarProvider;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.CalendarFolderProperty;
@@ -76,10 +77,14 @@ import com.openexchange.chronos.provider.basic.BasicCalendarProvider;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.google.access.GoogleCalendarAccess;
 import com.openexchange.chronos.provider.google.access.GoogleOAuthAccess;
+import com.openexchange.chronos.provider.google.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -90,7 +95,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class GoogleCalendarProvider implements BasicCalendarProvider {
+public class GoogleCalendarProvider implements BasicCalendarProvider, AvailabilityAwareCalendarProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(GoogleCalendarProvider.class);
 
@@ -101,7 +106,7 @@ public class GoogleCalendarProvider implements BasicCalendarProvider {
 
     /**
      * Initialises a new {@link GoogleCalendarProvider}.
-     * 
+     *
      * @param services The {@link ServiceLookup} instance
      */
     public GoogleCalendarProvider(ServiceLookup services) {
@@ -299,6 +304,20 @@ public class GoogleCalendarProvider implements BasicCalendarProvider {
     @Override
     public BasicCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         return new GoogleCalendarAccess(services, session, account, parameters, true);
+    }
+
+    @Override
+    public boolean isAvailable(Session session) {
+        OAuthServiceMetaDataRegistry service = Services.getService(OAuthServiceMetaDataRegistry.class);
+        if (service == null) {
+            return false;
+        }
+        try {
+            OAuthServiceMetaData metaData = service.getService(KnownApi.GOOGLE.getFullName(), session.getUserId(), session.getContextId());
+            return metaData == null ? false : metaData.isEnabled(session.getUserId(), session.getContextId());
+        } catch (OXException e) {
+            return false;
+        }
     }
 
 }
