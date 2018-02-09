@@ -242,8 +242,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * handle new delete exceptions from the calendar user's point of view beforehand
          */
-        if (isSeriesMaster(originalEvent) && eventData.containsDeleteExceptionDates() && updateDeleteExceptions(originalEvent, eventData)) {
-            originalEvent = loadEventData(originalEvent.getId());
+        if (isSeriesMaster(originalEvent) && eventData.containsDeleteExceptionDates() && false == deleteRemovesEvent(originalEvent)) {
+            if (updateDeleteExceptions(originalEvent, eventData)) {
+                originalEvent = loadEventData(originalEvent.getId());
+            }
             ignoredFields = null != ignoredFields ? Arrays.add(ignoredFields, EventField.DELETE_EXCEPTION_DATES) : new EventField[] { EventField.DELETE_EXCEPTION_DATES };
         }
         /*
@@ -398,9 +400,8 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                         deleteFromRecurrence(originalEvent, recurrenceId, userAttendee);
                     }
                 }
-                updatedEvent.removeDeleteExceptionDates();
+                return true;
             }
-            return true;
         }
         return false;
     }
