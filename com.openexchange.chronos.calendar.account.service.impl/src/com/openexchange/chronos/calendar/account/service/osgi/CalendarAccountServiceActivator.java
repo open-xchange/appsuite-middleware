@@ -81,7 +81,7 @@ public class CalendarAccountServiceActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getOptionalServices() {
-        return new Class<?>[] { CalendarProviderRegistry.class, DatabaseService.class, ContextService.class, CalendarStorageFactory.class, CapabilityService.class, ConfigViewFactory.class };
+        return new Class<?>[] { CalendarProviderRegistry.class, DatabaseService.class, CalendarStorageFactory.class, CapabilityService.class, ConfigViewFactory.class };
     }
 
     @Override
