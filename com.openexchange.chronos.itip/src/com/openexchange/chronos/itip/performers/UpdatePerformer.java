@@ -142,13 +142,13 @@ public class UpdatePerformer extends AbstractActionPerformer {
                 ensureFolderId(event, session);
                 event.removeId();
                 event = createEvent(event, session);
-                event = util.loadEvent(event, session);
             }
 
             if (!change.isException()) {
                 processed.put(event.getUid(), event);
             }
 
+            event = util.loadEvent(event, session);
             writeMail(action, original, event, session, owner);
             result.add(event);
         }
