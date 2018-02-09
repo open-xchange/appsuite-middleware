@@ -52,6 +52,7 @@ package com.openexchange.chronos.itip;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -133,6 +134,10 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
         }
         if (event.getFolderId() == null) {
             event.setFolderId(getFolderIdForUser(session.getSession(), event.getId()));
+        }
+        List<Attachment> attachments = storage.getAttachmentStorage().loadAttachments(event.getId());
+        if (null != attachments && false == attachments.isEmpty()) {
+            event.setAttachments(attachments);
         }
     }
 

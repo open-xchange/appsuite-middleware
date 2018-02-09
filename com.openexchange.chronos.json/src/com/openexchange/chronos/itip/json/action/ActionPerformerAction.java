@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
@@ -65,12 +66,14 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipActionPerformer;
 import com.openexchange.chronos.itip.ITipActionPerformerFactoryService;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnalyzerService;
 import com.openexchange.chronos.itip.ITipAttributes;
+import com.openexchange.chronos.itip.ITipChange;
 import com.openexchange.chronos.json.converter.mapper.EventMapper;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.conversion.ConversionService;
@@ -135,6 +138,8 @@ public class ActionPerformerAction extends AbstractITipAction {
         return new AJAXRequestResult(object, new Date(), "json");
     }
 
+    private static final EventField[] ATTACH = new EventField[] { EventField.ATTACHMENTS };
+
     /**
      * Adds the actual data to the attachments
      * 
@@ -142,45 +147,78 @@ public class ActionPerformerAction extends AbstractITipAction {
      * @param session The {@link CalendarSession}
      */
     private void attach(AJAXRequestData request, ITipAnalysis analysisToProcess, Session session) throws OXException {
-        Event event = analysisToProcess.getMessage().getEvent();
-        // Check if there is an attachment besides the ical
-        if (event.containsAttachments() && 0 < event.getAttachments().size()) {
-            final ConversionService conversionEngine = services.getServiceSafe(ConversionService.class);
-            DataSource source = conversionEngine.getDataSource("com.openexchange.mail.attachment");
-            if (null != source) {
-                DataArguments dataSource = getDataSource(request);
-                Iterator<Attachment> it = event.getAttachments().iterator();
-                while (it.hasNext()) {
-                    Attachment attachment = it.next();
-                    dataSource.put("com.openexchange.mail.conversion.cid", prepareUri(attachment.getUri()));
-                    InputStream stream = null;
-                    ByteArrayFileHolder fileHolder = null;
-                    try {
-                        // Get attachment from mail
-                        Data<InputStream> data = source.getData(InputStream.class, dataSource, session);
-                        // Get stream and properties for file holder
-                        stream = data.getData();
-                        fileHolder = new ByteArrayFileHolder(Streams.stream2bytes(stream));
-                        // Set the attachment to the event
-                        attachment.setData(fileHolder);
-                    } catch (IOException e) {
-                        LOG.error("Couldn't convert input stream tp processaable data. Removing attachment from event.", e);
-                        removeAttachmentFromEvent(it, stream, fileHolder);
-                    } catch (OXException e) {
-                        // Check for MailExceptionCode.ATTACHMENT_NOT_FOUND
-                        if (e.getErrorCode().equals("MSG-0049")) {
-                            LOG.warn("Unable to find attachment with CID {}. Removing attachment from event.", attachment.getUri(), e);
-                            removeAttachmentFromEvent(it, stream, fileHolder);
-                        } else {
-                            throw e;
+        for (ITipChange change : analysisToProcess.getChanges()) {
+            // Changed attachments? No diff means no original event, so we have a new event
+            if (null == change.getDiff() || containsAttachmentChange(change)) {
+                Event event = change.getNewEvent();
+                if (null != event && event.containsAttachments() && 0 < event.getAttachments().size()) {
+                    final ConversionService conversionEngine = services.getServiceSafe(ConversionService.class);
+                    DataSource source = conversionEngine.getDataSource("com.openexchange.mail.attachment");
+                    if (null != source) {
+                        DataArguments dataSource = getDataSource(request);
+                        Iterator<Attachment> it = event.getAttachments().iterator();
+                        while (it.hasNext()) {
+                            Attachment attachment = it.next();
+                            dataSource.put("com.openexchange.mail.conversion.cid", prepareUri(attachment.getUri()));
+                            InputStream stream = null;
+                            ByteArrayFileHolder fileHolder = null;
+                            try {
+                                // Get attachment from mail
+                                Data<InputStream> data = source.getData(InputStream.class, dataSource, session);
+                                // Get stream and properties for file holder
+                                stream = data.getData();
+                                fileHolder = new ByteArrayFileHolder(Streams.stream2bytes(stream));
+                                // Set the attachment to the event
+                                attachment.setData(fileHolder);
+                            } catch (IOException e) {
+                                LOG.error("Couldn't convert input stream tp processaable data. Removing attachment from event.", e);
+                                removeAttachmentFromEvent(it, stream, fileHolder);
+                            } catch (OXException e) {
+                                // Check for MailExceptionCode.ATTACHMENT_NOT_FOUND
+                                if (e.getErrorCode().equals("MSG-0049")) {
+                                    LOG.warn("Unable to find attachment with CID {}. Removing attachment from event.", attachment.getUri(), e);
+                                    removeAttachmentFromEvent(it, stream, fileHolder);
+                                } else {
+                                    throw e;
+                                }
+                            }
                         }
+                    } else {
+                        LOG.error("Unable to get conversion module for attachments. Removing attachments from event.");
+                        event.removeAttachments();
                     }
                 }
-            } else {
-                LOG.error("Unable to get conversion module for attachments. Removing attachments from event.");
-                event.removeAttachments();
             }
         }
+    }
+
+    private boolean containsAttachmentChange(ITipChange change) throws OXException {
+        if (change.getDiff().containsAnyChangeOf(ATTACH)) {
+
+            Event original = change.getDiff().getOriginal();
+            Event update = change.getDiff().getUpdate();
+
+            List<Attachment> originals = new LinkedList<>(original.getAttachments());
+            List<Attachment> updated = update.getAttachments();
+
+            if (originals.size() != updated.size()) {
+                return true;
+            }
+
+            Iterator<Attachment> iterator = originals.iterator();
+            while (iterator.hasNext()) {
+                Attachment attach = iterator.next();
+                if (updated.stream().anyMatch(u -> null != attach.getUri() && prepareUri(attach.getUri()).equals(prepareUri(u.getUri())) || null != attach.getFilename() && attach.getFilename().equals(u.getFilename()))) {
+                    iterator.remove();
+                } else {
+                    return true;
+                }
+            }
+            // 'Remove' attachment diff
+            // XXX diff still has AttachmentUpdates
+            update.setAttachments(original.getAttachments());
+        }
+        return false;
     }
 
     private void removeAttachmentFromEvent(Iterator<Attachment> it, InputStream stream, ByteArrayFileHolder fileHolder) {
