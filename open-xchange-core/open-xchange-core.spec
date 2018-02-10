@@ -277,9 +277,9 @@ if [ ${1:-0} -eq 2 ]; then
     if ! grep "com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2" >/dev/null $PFILE; then
         cat >> $PFILE <<EOF
 
-    # Creates indexes on tables "prg_contacts" and "del_contacts" to improve auto-complete
-    !com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2
-    EOF
+# Creates indexes on tables "prg_contacts" and "del_contacts" to improve auto-complete
+!com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2
+EOF
     fi
 
     # SoftwareChange_Request-2815
@@ -310,9 +310,9 @@ if [ ${1:-0} -eq 2 ]; then
     if ! grep "com.openexchange.groupware.update.tasks.FolderCorrectOwnerTask" >/dev/null $PFILE; then
         cat >> $PFILE <<EOF
 
-    # Corrects values in the 'created_from' column for folders nested below/underneath personal 'Trash' folder
-    !com.openexchange.groupware.update.tasks.FolderCorrectOwnerTask
-    EOF
+# Corrects values in the 'created_from' column for folders nested below/underneath personal 'Trash' folder
+!com.openexchange.groupware.update.tasks.FolderCorrectOwnerTask
+EOF
     fi
 
     # SoftwareChange_Request-2990
@@ -321,10 +321,10 @@ if [ ${1:-0} -eq 2 ]; then
       TMPFILE=$(mktemp)
       rm -f $TMPFILE
       cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -r -
-    <configuration>
-        <logger name="com.hazelcast.internal.monitors" level="INFO"/>
-    </configuration>
-    EOF
+<configuration>
+    <logger name="com.hazelcast.internal.monitors" level="INFO"/>
+</configuration>
+EOF
       if [ -e $TMPFILE ]; then
         cat $TMPFILE > /opt/open-xchange/etc/logback.xml
         rm -f $TMPFILE
@@ -350,10 +350,10 @@ if [ ${1:-0} -eq 2 ]; then
     TMPFILE=$(mktemp)
     rm -f $TMPFILE
     cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -r -
-    <configuration>
-        <logger name="liquibase.ext.logging.slf4j.Slf4jLogger" level="WARN"/>
-    </configuration>
-    EOF
+<configuration>
+    <logger name="liquibase.ext.logging.slf4j.Slf4jLogger" level="WARN"/>
+</configuration>
+EOF
     if [ -e $TMPFILE ]; then
         cat $TMPFILE > /opt/open-xchange/etc/logback.xml
         rm -f $TMPFILE
@@ -572,10 +572,10 @@ if [ ${1:-0} -eq 2 ]; then
       TMPFILE=$(mktemp)
       rm -f $TMPFILE
       cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -z -r -
-    <configuration>
-        <logger name="com.hazelcast.internal.diagnostics" level="INFO"/>
-    </configuration>
-    EOF
+<configuration>
+    <logger name="com.hazelcast.internal.diagnostics" level="INFO"/>
+</configuration>
+EOF
       if [ -e $TMPFILE ]; then
         cat $TMPFILE > /opt/open-xchange/etc/logback.xml
         rm -f $TMPFILE
