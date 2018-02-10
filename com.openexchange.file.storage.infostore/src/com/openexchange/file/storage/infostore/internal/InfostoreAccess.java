@@ -83,7 +83,7 @@ public abstract class InfostoreAccess {
     protected InfostoreFacade getInfostore(final String folderId) throws OXException {
         if (Strings.isNotEmpty(folderId)) {
             try {
-                if (VIRTUAL_FOLDERS.contains(Long.valueOf(folderId))) {
+                if (VIRTUAL_FOLDERS.contains(Long.valueOf(Utils.getUnsignedLong(folderId)))) {
                     return VIRTUAL_INFOSTORE;
                 }
             } catch (NumberFormatException e) {
@@ -94,17 +94,17 @@ public abstract class InfostoreAccess {
     }
 
     protected static int ID(final String id) {
-        return Integer.parseInt(id);
+        return Utils.getUnsignedInt(id);
     }
 
     protected static long FOLDERID(final String folderId) {
-        return Long.parseLong(folderId);
+        return Utils.getUnsignedLong(folderId);
     }
 
     protected static int VERSION(final String version) {
         int iVersion = InfostoreFacade.CURRENT_VERSION;
         if (version != FileStorageFileAccess.CURRENT_VERSION) {
-            iVersion = Integer.parseInt(version);
+            iVersion = Utils.getUnsignedInt(version);
         }
 
         return iVersion;

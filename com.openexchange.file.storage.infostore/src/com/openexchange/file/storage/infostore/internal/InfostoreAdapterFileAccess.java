@@ -105,9 +105,12 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link InfostoreAdapterFileAccess}
@@ -188,7 +191,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
     @Override
     public boolean exists(final String folderId, final String id, final String version) throws OXException {
         try {
-            return getInfostore(folderId).exists(ID(id), null == version ? -1 : Integer.parseInt(version), session);
+            return getInfostore(folderId).exists(ID(id), null == version ? -1 : Utils.getUnsignedInt(version), session);
         } catch (final NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
         }
@@ -197,7 +200,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
     @Override
     public InputStream getDocument(final String folderId, final String id, final String version) throws OXException {
         try {
-            return getInfostore(folderId).getDocument(ID(id), null == version ? -1 : Integer.parseInt(version), session);
+            return getInfostore(folderId).getDocument(ID(id), null == version ? -1 : Utils.getUnsignedInt(version), session);
         } catch (final NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
         }
@@ -206,7 +209,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
     @Override
     public InputStream getDocument(String folderId, String id, String version, long offset, long length) throws OXException {
         try {
-            return getInfostore(folderId).getDocument(ID(id), null == version ? -1 : Integer.parseInt(version), offset, length, session);
+            return getInfostore(folderId).getDocument(ID(id), null == version ? -1 : Utils.getUnsignedInt(version), offset, length, session);
         } catch (final NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
         }
@@ -217,9 +220,9 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         try {
             DocumentMetadata metadata;
             if (null == folderId) {
-                metadata = getInfostore(folderId).getDocumentMetadata(ID(id), null == version ? -1 : Integer.parseInt(version), session);
+                metadata = getInfostore(folderId).getDocumentMetadata(ID(id), null == version ? -1 : Utils.getUnsignedInt(version), session);
             } else {
-                metadata = getInfostore(folderId).getDocumentMetadata(FOLDERID(folderId), ID(id), null == version ? -1 : Integer.parseInt(version), session);
+                metadata = getInfostore(folderId).getDocumentMetadata(FOLDERID(folderId), ID(id), null == version ? -1 : Utils.getUnsignedInt(version), session);
                 if (0 < metadata.getFolderId() && false == folderId.equals(Long.toString(metadata.getFolderId()))) {
                     throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
                 }
@@ -357,7 +360,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         final int[] ret = new int[sa.length];
         for (int i = 0; i < sa.length; i++) {
             final String version = sa[i];
-            ret[i] = null == version ? -1 : Integer.parseInt(version);
+            ret[i] = null == version ? -1 : Utils.getUnsignedInt(version);
         }
         return ret;
     }
@@ -578,7 +581,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         Map<String, Long> sequenceNumbers = new HashMap<>(folderIds.size());
         List<Long> foldersToQuery = new ArrayList<>(folderIds.size());
         for (String folderId : folderIds) {
-            Long id = Long.valueOf(folderId);
+            Long id = Long.valueOf(Utils.getUnsignedLong(folderId));
             if (VIRTUAL_FOLDERS.contains(id)) {
                 sequenceNumbers.put(folderId, Long.valueOf(0L));
             } else {
@@ -691,7 +694,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
             effectiveFields = Field.reduceBy(effectiveFields, Field.ORIGIN);
         }
 
-        int folder = (folderId == null) ? InfostoreSearchEngine.NO_FOLDER : Integer.parseInt(folderId);
+        int folder = (folderId == null) ? InfostoreSearchEngine.NO_FOLDER : Utils.getUnsignedInt(folderId);
         return new InfostoreSearchIterator(search.search(session, pattern, folder, includeSubfolders, getMatching(effectiveFields), getMatching(sort), getSortDirection(order), start, end));
     }
 
@@ -701,7 +704,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         if (null != folderIds) {
             for (final String folderId : folderIds) {
                 try {
-                    fids.add(Integer.parseInt(folderId));
+                    fids.add(Utils.getUnsignedInt(folderId));
                 } catch (final NumberFormatException e) {
                     throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create(e, folderId);
                 }
@@ -722,7 +725,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
 
         int fid;
         try {
-            fid = Integer.parseInt(folderId);
+            fid = Utils.getUnsignedInt(folderId);
         } catch (NumberFormatException e) {
             throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create(e, folderId);
         }
@@ -909,7 +912,8 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         }
 
         // The result map
-        Map<IDTuple, FileStorageFolder[]> result = new LinkedHashMap<>(tuples.size());
+        int size = tuples.size();
+        Map<IDTuple, FileStorageFolder[]> result = new LinkedHashMap<>(size);
 
         // Check trash folder existence
         String trashFolderID = getTrashFolderID();
@@ -921,29 +925,63 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
             return result;
         }
 
-        // Iterate tuples to restore
-        InfostoreFacade infostoreFacade = getInfostore(destFolderId);
-        Map<String, List<IDTuple>> toRestore = new LinkedHashMap<>(tuples.size());
-        boolean[] pathRecreated = new boolean[] { false };
-        FileStorageFolderAccess folderAccess = null;
-        String defaultFolderId = null;
+        // Checks tuples to restore
         for (IDTuple tuple : tuples) {
             if (false == isBelowTrashFolder(tuple.getFolder(), trashFolderID)) {
                 throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create("File does not reside in trash folder");
             }
+        }
 
-            InfostoreFolderPath originPath = infostoreFacade.getDocumentMetadata(Long.parseLong(tuple.getFolder()), Utils.getUnsignedInteger(tuple.getId()), InfostoreFacade.CURRENT_VERSION, session).getOriginFolderPath();
-            if (null == folderAccess) {
-                folderAccess = getAccountAccess().getFolderAccess();
+        // Load origin paths
+        InfostoreFacade infostoreFacade = getInfostore(destFolderId);
+        TIntObjectMap<InfostoreFolderPath> originPaths;
+        if (size > 1) {
+            SearchIterator<DocumentMetadata> iterator = null;
+            try {
+                TimedResult<DocumentMetadata> documents = infostoreFacade.getDocuments(tuples, new Metadata[] { Metadata.ID_LITERAL, Metadata.ORIGIN_LITERAL}, session);
+                iterator = documents.results();
+                originPaths = new TIntObjectHashMap<>(size);
+                while (iterator.hasNext()) {
+                    DocumentMetadata metadata = iterator.next();
+                    InfostoreFolderPath originPath = metadata.getOriginFolderPath();
+                    if (null != originPath) {
+                        originPaths.put(metadata.getId(), originPath);
+                    }
+                }
+            } catch (final IllegalAccessException e) {
+                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } finally {
+                SearchIterators.close(iterator);
             }
-            String folderId = null;
+        } else {
+            IDTuple tuple = tuples.get(0);
+            DocumentMetadata metadata = infostoreFacade.getDocumentMetadata(Utils.getUnsignedLong(tuple.getFolder()), Utils.getUnsignedInt(tuple.getId()), InfostoreFacade.CURRENT_VERSION, session);
+            InfostoreFolderPath originPath = metadata.getOriginFolderPath();
+            originPaths = new TIntObjectHashMap<>(1);
+            if (originPath != null) {
+                originPaths.put(metadata.getId(), originPath);
+            }
+        }
+
+        // Iterate tuples to restore
+        Map<String, List<IDTuple>> toRestore = new LinkedHashMap<>(size);
+        boolean[] pathRecreated = new boolean[] { false };
+        FileStorageFolderAccess folderAccess = getAccountAccess().getFolderAccess();
+        String personalFolderId = null;
+        for (IDTuple tuple : tuples) {
+            InfostoreFolderPath originPath = originPaths.get(Utils.getUnsignedInt(tuple.getId()));
+            if (null == originPath) {
+                originPath = InfostoreFolderPath.EMPTY_PATH;
+            }
+
+            String folderId;
             try {
                 switch (originPath.getType()) {
                     case PRIVATE:
-                        if (null == defaultFolderId) {
-                            defaultFolderId = folderAccess.getPersonalFolder().getId();
+                        if (null == personalFolderId) {
+                            personalFolderId = folderAccess.getPersonalFolder().getId();
                         }
-                        folderId = defaultFolderId;
+                        folderId = personalFolderId;
                         break;
                     case PUBLIC:
                         folderId = PUBLIC_INFOSTORE_FOLDER_ID;
@@ -953,10 +991,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
                         break;
                     case UNDEFINED: /*fall-through*/
                     default:
-                        if (null == defaultFolderId) {
-                            defaultFolderId = folderAccess.getPersonalFolder().getId();
-                        }
-                        folderId = defaultFolderId;
+                        folderId = destFolderId;
                         originPath = InfostoreFolderPath.EMPTY_PATH;
                         break;
                 }
@@ -967,11 +1002,11 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
                     }
                 }
             } catch (OXException e) {
-                if ("FLD".equals(e.getPrefix()) && 6 == e.getCode()) {
-                    folderId = defaultFolderId;
-                } else {
+                if (!"FLD".equals(e.getPrefix()) || 6 != e.getCode()) {
                     throw e;
                 }
+
+                folderId = destFolderId;
             }
 
             List<IDTuple> tuplesToRestore = toRestore.get(folderId);

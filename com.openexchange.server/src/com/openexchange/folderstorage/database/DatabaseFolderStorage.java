@@ -154,6 +154,7 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.java.Collators;
+import com.openexchange.java.util.Tools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -2551,7 +2552,8 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
 
             // ... and iterate them
             Map<String, String> result = new LinkedHashMap<>(folderIds.size());
-            int defaultDestId = Integer.parseInt(defaultDestFolderId);
+            int defaultDestId = Tools.getUnsignedInteger(defaultDestFolderId);
+            int personalFolderId = -1;
             boolean[] pathRecreated = new boolean[] { false };
             for (Map.Entry<Integer, FolderPath> entry : originPaths.entrySet()) {
                 FolderPath originPath = entry.getValue();
@@ -2560,7 +2562,10 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 int folderId;
                 switch (originPath.getType()) {
                     case PRIVATE:
-                        folderId = defaultDestId;
+                        if (personalFolderId < 0) {
+                            personalFolderId = OXFolderSQL.getUserDefaultFolder(storageParameters.getUserId(), FolderObject.INFOSTORE, FolderObject.PUBLIC, con, storageParameters.getContext());
+                        }
+                        folderId = personalFolderId;
                         break;
                     case SHARED:
                         folderId = FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID;

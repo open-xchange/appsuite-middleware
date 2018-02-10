@@ -10,6 +10,7 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FolderPath;
 import com.openexchange.file.storage.UserizedFile;
+import com.openexchange.file.storage.infostore.internal.Utils;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreFolderPath;
@@ -258,7 +259,7 @@ public class InfostoreFile extends AbstractFile implements UserizedFile {
         if (id == FileStorageFileAccess.NEW) {
             document.setId(InfostoreFacade.NEW);
         } else {
-            document.setId(Integer.parseInt(id));
+            document.setId(Utils.getUnsignedInt(id));
         }
     }
 
@@ -299,7 +300,7 @@ public class InfostoreFile extends AbstractFile implements UserizedFile {
 
     @Override
     public void setVersion(final String version) {
-        document.setVersion(Integer.parseInt(version));
+        document.setVersion(Utils.getUnsignedInt(version));
     }
 
     @Override
@@ -344,7 +345,7 @@ public class InfostoreFile extends AbstractFile implements UserizedFile {
 
     @Override
     public void setOriginalId(String id) {
-        document.setOriginalId(Integer.parseInt(id));
+        document.setOriginalId(Utils.getUnsignedInt(id));
     }
 
     @Override

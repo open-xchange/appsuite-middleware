@@ -63,11 +63,11 @@ public interface FileStorageRestoringFileAccess extends FileStorageFileAccess {
     /**
      * Restores a list of files from trash to origin location. Path will be recreated if it was deleted too.
      *
-     * @param ids The files to restore
-     * @param rootFolderId The user's root folder id
-     * @return Path to restored file mapped by id
+     * @param ids The identifiers or the files to restore
+     * @param defaultDestFolderId The identifier of the default destination folder
+     * @return A mapping of restored file to new parent's path
      * @throws OXException If restore fails
      */
-    Map<IDTuple, FileStorageFolder[]> restore(List<IDTuple> ids, String rootFolderId) throws OXException;
+    Map<IDTuple, FileStorageFolder[]> restore(List<IDTuple> ids, String defaultDestFolderId) throws OXException;
 
 }

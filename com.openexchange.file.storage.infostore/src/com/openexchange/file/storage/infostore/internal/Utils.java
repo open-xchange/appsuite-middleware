@@ -76,25 +76,21 @@ public class Utils {
      * @param s The string to parse
      * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
      */
-    public static final int getUnsignedInteger(final String s) {
+    public static int getUnsignedInt(final String s) {
         if (s == null) {
             return -1;
         }
 
-        final int max = s.length();
-
-        if (max <= 0) {
-            return -1;
-        }
-        if (s.charAt(0) == '-') {
+        int max = s.length();
+        if (max <= 0 || s.charAt(0) == '-') {
             return -1;
         }
 
         int result = 0;
         int i = 0;
 
-        final int limit = -Integer.MAX_VALUE;
-        final int multmin = limit / RADIX;
+        int limit = -Integer.MAX_VALUE;
+        int multmin = limit / RADIX;
         int digit;
 
         if (i < max) {
@@ -105,9 +101,55 @@ public class Utils {
             result = -digit;
         }
         while (i < max) {
-            /*
-             * Accumulating negatively avoids surprises near MAX_VALUE
-             */
+            // Accumulating negatively avoids surprises near MAX_VALUE
+            digit = digit(s.charAt(i++));
+            if (digit < 0) {
+                return -1;
+            }
+            if (result < multmin) {
+                return -1;
+            }
+            result *= RADIX;
+            if (result < limit + digit) {
+                return -1;
+            }
+            result -= digit;
+        }
+        return -result;
+    }
+
+    /**
+     * Parses a positive <code>long</code> value from passed {@link String} instance.
+     *
+     * @param s The string to parse
+     * @return The parsed positive <code>long</code> value or <code>-1</code> if parsing failed
+     */
+    public static long getUnsignedLong(final String s) {
+        if (s == null) {
+            return -1;
+        }
+
+        int max = s.length();
+        if (max <= 0 || s.charAt(0) == '-') {
+            return -1;
+        }
+
+        long result = 0;
+        int i = 0;
+
+        long limit = -Long.MAX_VALUE;
+        long multmin = limit / RADIX;
+        int digit;
+
+        if (i < max) {
+            digit = digit(s.charAt(i++));
+            if (digit < 0) {
+                return -1;
+            }
+            result = -digit;
+        }
+        while (i < max) {
+            // Accumulating negatively avoids surprises near MAX_VALUE
             digit = digit(s.charAt(i++));
             if (digit < 0) {
                 return -1;
