@@ -136,7 +136,7 @@ public final class FolderWriter {
                 }
                 if (FolderObject.SYSTEM_MODULE == module) {
                     try {
-                        int numericalID = Utils.getUnsignedInt(folder.getID());
+                        int numericalID = Utils.parseUnsignedInt(folder.getID());
                         if (FolderObject.SYSTEM_INFOSTORE_FOLDER_ID == numericalID || FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID == numericalID ||
                             FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == numericalID) {
                             return false;

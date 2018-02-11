@@ -228,7 +228,7 @@ public final class ToInfostoreTermVisitor implements SearchTermVisitor {
     @Override
     public void visit(final VersionTerm term) throws OXException {
         String sVersion = term.getPattern();
-        infstoreTerm = new com.openexchange.groupware.infostore.search.VersionTerm(FileStorageFileAccess.CURRENT_VERSION == sVersion ? InfostoreFacade.CURRENT_VERSION : Utils.getUnsignedInt(sVersion.trim()));
+        infstoreTerm = new com.openexchange.groupware.infostore.search.VersionTerm(FileStorageFileAccess.CURRENT_VERSION == sVersion ? InfostoreFacade.CURRENT_VERSION : Utils.parseUnsignedInt(sVersion.trim()));
     }
 
     @Override

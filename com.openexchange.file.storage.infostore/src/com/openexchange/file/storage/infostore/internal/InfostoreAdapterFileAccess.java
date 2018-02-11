@@ -191,7 +191,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
     @Override
     public boolean exists(final String folderId, final String id, final String version) throws OXException {
         try {
-            return getInfostore(folderId).exists(ID(id), null == version ? -1 : Utils.getUnsignedInt(version), session);
+            return getInfostore(folderId).exists(ID(id), null == version ? -1 : Utils.parseUnsignedInt(version), session);
         } catch (final NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
         }
@@ -200,7 +200,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
     @Override
     public InputStream getDocument(final String folderId, final String id, final String version) throws OXException {
         try {
-            return getInfostore(folderId).getDocument(ID(id), null == version ? -1 : Utils.getUnsignedInt(version), session);
+            return getInfostore(folderId).getDocument(ID(id), null == version ? -1 : Utils.parseUnsignedInt(version), session);
         } catch (final NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
         }
@@ -209,7 +209,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
     @Override
     public InputStream getDocument(String folderId, String id, String version, long offset, long length) throws OXException {
         try {
-            return getInfostore(folderId).getDocument(ID(id), null == version ? -1 : Utils.getUnsignedInt(version), offset, length, session);
+            return getInfostore(folderId).getDocument(ID(id), null == version ? -1 : Utils.parseUnsignedInt(version), offset, length, session);
         } catch (final NumberFormatException e) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(e, id, folderId);
         }
@@ -220,9 +220,9 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         try {
             DocumentMetadata metadata;
             if (null == folderId) {
-                metadata = getInfostore(folderId).getDocumentMetadata(ID(id), null == version ? -1 : Utils.getUnsignedInt(version), session);
+                metadata = getInfostore(folderId).getDocumentMetadata(ID(id), null == version ? -1 : Utils.parseUnsignedInt(version), session);
             } else {
-                metadata = getInfostore(folderId).getDocumentMetadata(FOLDERID(folderId), ID(id), null == version ? -1 : Utils.getUnsignedInt(version), session);
+                metadata = getInfostore(folderId).getDocumentMetadata(FOLDERID(folderId), ID(id), null == version ? -1 : Utils.parseUnsignedInt(version), session);
                 if (0 < metadata.getFolderId() && false == folderId.equals(Long.toString(metadata.getFolderId()))) {
                     throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
                 }
@@ -360,7 +360,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         final int[] ret = new int[sa.length];
         for (int i = 0; i < sa.length; i++) {
             final String version = sa[i];
-            ret[i] = null == version ? -1 : Utils.getUnsignedInt(version);
+            ret[i] = null == version ? -1 : Utils.parseUnsignedInt(version);
         }
         return ret;
     }
@@ -581,7 +581,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         Map<String, Long> sequenceNumbers = new HashMap<>(folderIds.size());
         List<Long> foldersToQuery = new ArrayList<>(folderIds.size());
         for (String folderId : folderIds) {
-            Long id = Long.valueOf(Utils.getUnsignedLong(folderId));
+            Long id = Long.valueOf(Utils.parseUnsignedLong(folderId));
             if (VIRTUAL_FOLDERS.contains(id)) {
                 sequenceNumbers.put(folderId, Long.valueOf(0L));
             } else {
@@ -694,7 +694,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
             effectiveFields = Field.reduceBy(effectiveFields, Field.ORIGIN);
         }
 
-        int folder = (folderId == null) ? InfostoreSearchEngine.NO_FOLDER : Utils.getUnsignedInt(folderId);
+        int folder = (folderId == null) ? InfostoreSearchEngine.NO_FOLDER : Utils.parseUnsignedInt(folderId);
         return new InfostoreSearchIterator(search.search(session, pattern, folder, includeSubfolders, getMatching(effectiveFields), getMatching(sort), getSortDirection(order), start, end));
     }
 
@@ -704,7 +704,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         if (null != folderIds) {
             for (final String folderId : folderIds) {
                 try {
-                    fids.add(Utils.getUnsignedInt(folderId));
+                    fids.add(Utils.parseUnsignedInt(folderId));
                 } catch (final NumberFormatException e) {
                     throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create(e, folderId);
                 }
@@ -725,7 +725,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
 
         int fid;
         try {
-            fid = Utils.getUnsignedInt(folderId);
+            fid = Utils.parseUnsignedInt(folderId);
         } catch (NumberFormatException e) {
             throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create(e, folderId);
         }
@@ -955,7 +955,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
             }
         } else {
             IDTuple tuple = tuples.get(0);
-            DocumentMetadata metadata = infostoreFacade.getDocumentMetadata(Utils.getUnsignedLong(tuple.getFolder()), Utils.getUnsignedInt(tuple.getId()), InfostoreFacade.CURRENT_VERSION, session);
+            DocumentMetadata metadata = infostoreFacade.getDocumentMetadata(Utils.parseUnsignedLong(tuple.getFolder()), Utils.parseUnsignedInt(tuple.getId()), InfostoreFacade.CURRENT_VERSION, session);
             InfostoreFolderPath originPath = metadata.getOriginFolderPath();
             originPaths = new TIntObjectHashMap<>(1);
             if (originPath != null) {
@@ -969,7 +969,7 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         FileStorageFolderAccess folderAccess = getAccountAccess().getFolderAccess();
         String personalFolderId = null;
         for (IDTuple tuple : tuples) {
-            InfostoreFolderPath originPath = originPaths.get(Utils.getUnsignedInt(tuple.getId()));
+            InfostoreFolderPath originPath = originPaths.get(Utils.parseUnsignedInt(tuple.getId()));
             if (null == originPath) {
                 originPath = InfostoreFolderPath.EMPTY_PATH;
             }

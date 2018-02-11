@@ -259,7 +259,7 @@ public class InfostoreFile extends AbstractFile implements UserizedFile {
         if (id == FileStorageFileAccess.NEW) {
             document.setId(InfostoreFacade.NEW);
         } else {
-            document.setId(Utils.getUnsignedInt(id));
+            document.setId(Utils.parseUnsignedInt(id));
         }
     }
 
@@ -300,7 +300,7 @@ public class InfostoreFile extends AbstractFile implements UserizedFile {
 
     @Override
     public void setVersion(final String version) {
-        document.setVersion(Utils.getUnsignedInt(version));
+        document.setVersion(Utils.parseUnsignedInt(version));
     }
 
     @Override
@@ -345,7 +345,7 @@ public class InfostoreFile extends AbstractFile implements UserizedFile {
 
     @Override
     public void setOriginalId(String id) {
-        document.setOriginalId(Utils.getUnsignedInt(id));
+        document.setOriginalId(Utils.parseUnsignedInt(id));
     }
 
     @Override

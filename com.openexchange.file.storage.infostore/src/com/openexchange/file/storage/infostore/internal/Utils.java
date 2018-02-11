@@ -76,7 +76,7 @@ public class Utils {
      * @param s The string to parse
      * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
      */
-    public static int getUnsignedInt(final String s) {
+    public static int parseUnsignedInt(final String s) {
         if (s == null) {
             return -1;
         }
@@ -124,7 +124,7 @@ public class Utils {
      * @param s The string to parse
      * @return The parsed positive <code>long</code> value or <code>-1</code> if parsing failed
      */
-    public static long getUnsignedLong(final String s) {
+    public static long parseUnsignedLong(final String s) {
         if (s == null) {
             return -1;
         }

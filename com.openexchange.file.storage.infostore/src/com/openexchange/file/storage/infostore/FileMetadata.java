@@ -144,7 +144,7 @@ public class FileMetadata implements DocumentMetadata {
     @Override
     public int getId() {
         String fileId = file.getId();
-        return (fileId == FileStorageFileAccess.NEW) ? InfostoreFacade.NEW : Utils.getUnsignedInt(fileId);
+        return (fileId == FileStorageFileAccess.NEW) ? InfostoreFacade.NEW : Utils.parseUnsignedInt(fileId);
     }
 
     @Override
@@ -195,7 +195,7 @@ public class FileMetadata implements DocumentMetadata {
     @Override
     public int getVersion() {
         final String version = file.getVersion();
-        return com.openexchange.java.Strings.isEmpty(version) ? -1 : Utils.getUnsignedInt(version);
+        return com.openexchange.java.Strings.isEmpty(version) ? -1 : Utils.parseUnsignedInt(version);
     }
 
     @Override
@@ -360,12 +360,12 @@ public class FileMetadata implements DocumentMetadata {
              * check for numerical identifiers if set
              */
             String id = file.getId();
-            if (FileStorageFileAccess.NEW != id && Utils.getUnsignedInt(id) < 0) {
+            if (FileStorageFileAccess.NEW != id && Utils.parseUnsignedInt(id) < 0) {
                 throw FileStorageExceptionCodes.INVALID_FILE_IDENTIFIER.create(id);
             }
 
             String folderID = file.getFolderId();
-            if (null != folderID && Utils.getUnsignedLong(folderID) < 0) {
+            if (null != folderID && Utils.parseUnsignedLong(folderID) < 0) {
                 throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create(folderID);
             }
         }
@@ -509,7 +509,7 @@ public class FileMetadata implements DocumentMetadata {
 
             @Override
             public int getVersion() {
-                return Utils.getUnsignedInt(file.getVersion());
+                return Utils.parseUnsignedInt(file.getVersion());
             }
 
             @Override
@@ -563,7 +563,7 @@ public class FileMetadata implements DocumentMetadata {
                 if (FileStorageFileAccess.NEW == id) {
                     return InfostoreFacade.NEW;
                 }
-                return Utils.getUnsignedInt(new FileID(id).getFileId());
+                return Utils.parseUnsignedInt(new FileID(id).getFileId());
             }
 
             @Override
@@ -664,7 +664,7 @@ public class FileMetadata implements DocumentMetadata {
             @Override
             public int getOriginalId() {
                 if (file instanceof UserizedFile) {
-                    return Utils.getUnsignedInt(((UserizedFile) file).getOriginalId());
+                    return Utils.parseUnsignedInt(((UserizedFile) file).getOriginalId());
                 }
 
                 return getId();
@@ -673,7 +673,7 @@ public class FileMetadata implements DocumentMetadata {
             @Override
             public long getOriginalFolderId() {
                 if (file instanceof UserizedFile) {
-                    return Utils.getUnsignedLong(((UserizedFile) file).getOriginalFolderId());
+                    return Utils.parseUnsignedLong(((UserizedFile) file).getOriginalFolderId());
                 }
 
                 return getFolderId();
@@ -696,7 +696,7 @@ public class FileMetadata implements DocumentMetadata {
     @Override
     public int getOriginalId() {
         if (file instanceof UserizedFile) {
-            return Utils.getUnsignedInt(((UserizedFile) file).getOriginalId());
+            return Utils.parseUnsignedInt(((UserizedFile) file).getOriginalId());
         }
 
         return getId();
