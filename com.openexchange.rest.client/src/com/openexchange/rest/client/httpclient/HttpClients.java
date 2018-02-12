@@ -90,6 +90,7 @@ import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.conn.util.PublicSuffixMatcher;
 import org.apache.http.conn.util.PublicSuffixMatcherLoader;
@@ -221,9 +222,10 @@ public final class HttpClients {
     }
 
     private static ClientConnectionManager initializeClientConnectionManagerUsing(ClientConfig config, SSLSocketFactoryProvider factoryProvider, SSLConfigurationService sslConfig) {
+        javax.net.ssl.HostnameVerifier hostnameVerifier = sslConfig.isVerifyHostname() ? new DefaultHostnameVerifier() : NoopHostnameVerifier.INSTANCE;
         Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory> create()
             .register("http", PlainConnectionSocketFactory.getSocketFactory())
-            .register("https", new SSLConnectionSocketFactory(factoryProvider.getDefault(), sslConfig.getSupportedProtocols(), sslConfig.getSupportedCipherSuites(), new DefaultHostnameVerifier()))
+            .register("https", new SSLConnectionSocketFactory(factoryProvider.getDefault(), sslConfig.getSupportedProtocols(), sslConfig.getSupportedCipherSuites(), hostnameVerifier))
             .build();
         return initializeClientConnectionManagerUsing(config, socketFactoryRegistry);
     }
