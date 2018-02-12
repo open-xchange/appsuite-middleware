@@ -376,11 +376,9 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                     }
                 }
 
-                if(ignoreDeleted != null) {
-                    SearchTerm<?> deleteTerm = new FlagTerm(MailMessage.FLAG_DELETED, !ignoreDeleted);
-                    if(deleteTerm != null) {
-                        searchTerm = searchTerm == null ? deleteTerm : new ANDTerm(deleteTerm, searchTerm);
-                    }
+                if (ignoreDeleted != null) {
+                    SearchTerm<?> deleteTerm = new FlagTerm(MailMessage.FLAG_DELETED, false == ignoreDeleted.booleanValue());
+                    searchTerm = searchTerm == null ? deleteTerm : new ANDTerm(deleteTerm, searchTerm);
                 }
             }
 
