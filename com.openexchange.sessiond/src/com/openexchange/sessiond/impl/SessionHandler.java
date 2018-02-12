@@ -748,7 +748,7 @@ public final class SessionHandler {
      * @param sessionId The session identifier
      * @return <code>true</code> if stored; otherwise <code>false</code>
      */
-    protected static boolean storeSession(String sessionId) {
+    protected static boolean storeSession(String sessionId, boolean addIfAbsent) {
         if (null == sessionId) {
             return false;
         }
@@ -763,7 +763,7 @@ public final class SessionHandler {
             return false;
         }
 
-        return putIntoSessionStorage(sessionControl.getSession(), true, asyncPutToSessionStorage);
+        return putIntoSessionStorage(sessionControl.getSession(), addIfAbsent, asyncPutToSessionStorage);
     }
 
     /**
