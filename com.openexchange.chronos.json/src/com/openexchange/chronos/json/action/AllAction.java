@@ -111,14 +111,18 @@ public class AllAction extends ChronosAction {
 
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
-        List<Event> events = calendarAccess.getEventsInFolders(parseFolderIds(requestData));
+        List<String> folderIds = parseFolderIds(requestData);
+        List<Event> events = null != folderIds ? calendarAccess.getEventsInFolders(folderIds) : calendarAccess.getEventsOfUser();
         return new AJAXRequestResult(events, CalendarUtils.getMaximumTimestamp(events), EventResultConverter.INPUT_FORMAT);
     }
 
     private static List<String> parseFolderIds(AJAXRequestData requestData) throws OXException {
         JSONObject jsonObject = requestData.getData(JSONObject.class);
         if (null == jsonObject) {
-            return Collections.singletonList(requestData.requireParameter(AJAXServlet.PARAMETER_FOLDERID));
+            if (requestData.containsParameter(AJAXServlet.PARAMETER_FOLDERID)) {
+                return Collections.singletonList(requestData.getParameter(AJAXServlet.PARAMETER_FOLDERID));
+            }
+            return null;
         }
         try {
             JSONArray jsonArray = jsonObject.getJSONArray(PARAMETER_FOLDERS);
