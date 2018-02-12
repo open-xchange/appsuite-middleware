@@ -185,6 +185,7 @@ public class Questions {
             BigInteger count = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS, count.toString());
         } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
     }
 
@@ -195,7 +196,13 @@ public class Questions {
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WITH_EVENTS_IN_PRIVATE_CALENDAR, numberOfUsers.toString());
         } catch (Exception e) {
+            handleError(e);
         }
+    }
+
+    private static void handleError(Exception e) {
+        //TODO properly handle errors
+        System.out.println("Error : " + e.getMessage());
     }
 
     protected static void reportNumberOfUsersWithEventsInPrivateCalendarThatAreInTheFutureAndAreNotYearlySeries() {
@@ -205,6 +212,7 @@ public class Questions {
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WITH_EVENTS_IN_PRIVATE_CALENDAR_THAT_ARE_IN_THE_FUTURE_AND_ARE_NOT_YEARLY_SERIES, numberOfUsers.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -215,6 +223,7 @@ public class Questions {
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_CHANGED_THEIR_CALENDAR_IN_THE_LAST30_DAYS, numberOfUsers.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -225,6 +234,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_NEW_INFOSTORE_OBJECTS_IN_THE_LAST30_DAYS, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -235,6 +245,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_CHANGED_INFOSTORE_OBJECTS_IN_THE_LAST30_DAYS, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -245,6 +256,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WITH_NEW_INFOSTORE_OBJECTS_IN_THE_LAST30_DAYS, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -255,6 +267,7 @@ public class Questions {
             BigInteger numberOfContacts = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_CONTACTS, numberOfContacts.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -265,6 +278,7 @@ public class Questions {
             BigInteger numberOfContacts = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USER_CREATED_CONTACTS, numberOfContacts.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -275,6 +289,7 @@ public class Questions {
             BigInteger numberOfAppointments = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_APPOINTMENTS, numberOfAppointments.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -285,6 +300,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_TASKS, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -295,6 +311,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_DOCUMENTS, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -305,6 +322,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_HAVE_CONTACTS, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -315,26 +333,31 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_CREATED_CONTACTS, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
     protected static void reportMaximumNumberOfContactsForOneUser() {
         try {
             Datamining.allTheQuestions.add(MAXIMUM_NUMBER_OF_CREATED_CONTACTS_FOR_ONE_USER);
+            // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
             String sql = "SELECT MAX(count) FROM (SELECT cid, created_from, count(*) AS count FROM prg_contacts WHERE userid IS NULL GROUP BY cid, created_from) AS x;";
             BigInteger numberOfInfostoreObjects = Datamining.maximumForAllSchemata(sql);
             Datamining.report(MAXIMUM_NUMBER_OF_CREATED_CONTACTS_FOR_ONE_USER, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
     protected static void reportMaximumNumberOfCreatedAppointmentsForOneUser() {
         try {
             Datamining.allTheQuestions.add(MAXIMUM_NUMBER_OF_CREATED_APPOINTMENTS_FOR_ONE_USER);
+            // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
             String sql = "SELECT MAX(count) FROM (SELECT COUNT(*) AS count FROM calendar_event WHERE account=0 GROUP BY cid, createdBy) AS x;";
             BigInteger numberOfInfostoreObjects = Datamining.maximumForAllSchemata(sql);
             Datamining.report(MAXIMUM_NUMBER_OF_CREATED_APPOINTMENTS_FOR_ONE_USER, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -345,6 +368,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.maximumForAllSchemata(sql);
             Datamining.report(MAXIMUM_NUMBER_OF_CREATED_DOCUMENTS_FOR_ONE_USER, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -355,16 +379,19 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.maximumForAllSchemata(sql);
             Datamining.report(MAXIMUM_NUMBER_OF_CREATED_TASKS_FOR_ONE_USER, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
     protected static void reportMaximumNumberOfCreatedContactsForOneUser() {
         try {
             Datamining.allTheQuestions.add(MAXIMUM_NUMBER_OF_CREATED_CONTACTS_FOR_ONE_USER);
+            // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
             String sql = "SELECT MAX(count) FROM (SELECT cid, created_from, count(*) AS count FROM prg_contacts WHERE userid IS NULL AND field02 IS NOT NULL AND field03 IS NOT NULL GROUP BY cid, created_from) AS x;";
             BigInteger numberOfInfostoreObjects = Datamining.maximumForAllSchemata(sql);
             Datamining.report(MAXIMUM_NUMBER_OF_CREATED_CONTACTS_FOR_ONE_USER, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -375,6 +402,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_CREATED_APPOINTMENTS, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -385,6 +413,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_CREATED_TASKS, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -395,6 +424,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_CREATED_DOCUMENTS, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -405,6 +435,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_CHANGED_THEIR_CONTACTS_IN_THE_LAST30_DAYS, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -428,6 +459,7 @@ public class Questions {
                 System.out.println("Error : Ranges in reportSliceAndDiceOnDocumentSize are not equal");
             }
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -440,6 +472,7 @@ public class Questions {
                 ll = key;
             }
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -451,6 +484,7 @@ public class Questions {
                 Datamining.report("usersHaving" + (key < MAXEXT ? key : "MoreOrEqual" + key) + "ExternalAccounts", eaos.get(key).toString());
             }
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -464,6 +498,7 @@ public class Questions {
 
             Datamining.report(AVERAGE_DOCUMENT_SIZE, Tools.humanReadableBytes(Integer.toString(resultInt)));
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -479,6 +514,7 @@ public class Questions {
 
             Datamining.report(AVERAGE_NUMBER_OF_CONTACTS_PER_USER_WHO_HAS_CONTACTS_AT_ALL, Float.toString(numberOfContacts / numberOfUsers));
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -494,6 +530,7 @@ public class Questions {
 
             Datamining.report(AVERAGE_NUMBER_OF_CONTACTS_PER_USER_WHO_HAS_CREATED_CONTACTS, Float.toString(numberOfContacts / numberOfUsers));
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -506,6 +543,7 @@ public class Questions {
 
             Datamining.report(AVERAGE_NUMBER_OF_APPOINTMENTS_PER_USER_WHO_HAS_APPOINTMENTS_AT_ALL, Float.toString(numberOfAppointments / numberOfUsers));
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -518,6 +556,7 @@ public class Questions {
 
             Datamining.report(AVERAGE_NUMBER_OF_TASKS_PER_USER_WHO_HAS_TASKS_AT_ALL, Float.toString(numberOfTasks / numberOfUsers));
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -530,6 +569,7 @@ public class Questions {
 
             Datamining.report(AVERAGE_NUMBER_OF_DOCUMENTS_PER_USER_WHO_HAS_DOCUMENTS_AT_ALL, Float.toString(numberOfDocuments / numberOfUsers));
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -540,6 +580,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WITH_LINKED_SOCIAL_NETWORKING_ACCOUNTS, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -550,6 +591,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_SELECTED_TEAM_VIEW_AS_CALENDAR_DEFAULT, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -560,6 +602,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_SELECTED_CALENDAR_VIEW_AS_CALENDAR_DEFAULT, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -570,6 +613,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_SELECTED_LIST_VIEW_AS_CALENDAR_DEFAULT, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -580,6 +624,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_SELECTED_CARDS_VIEW_AS_CONTACTS_DEFAULT, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -590,6 +635,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_SELECTED_LIST_VIEW_AS_CONTACTS_DEFAULT2, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -600,6 +646,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_SELECTED_LIST_VIEW_AS_TASKS_DEFAULT, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -610,6 +657,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_SELECTED_H_SPLIT_VIEW_AS_CONTACTS_DEFAULT, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -620,6 +668,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_SELECTED_LIST_VIEW_AS_INFOSTORE_DEFAULT, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -630,6 +679,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_SELECTED_LIST_VIEW_AS_CONTACTS_DEFAULT2, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -640,6 +690,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_ACTIVATED_MINI_CALENDAR, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -651,6 +702,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_CONNECTED_TO_LINKEDIN, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -662,6 +714,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_CONNECTED_TO_TWITTER, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -673,6 +726,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_CONNECTED_TO_GOOGLE, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -684,6 +738,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_CONNECTED_TO_MSN, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -695,6 +750,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_CONNECTED_TO_YAHOO, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -706,6 +762,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_CONNECTED_TO_XING, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -717,6 +774,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_CONNECTED_TO_TONLINE, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -728,6 +786,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_CONNECTED_TO_GMX, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -739,6 +798,7 @@ public class Questions {
             BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_CONNECTED_TO_WEBDE, numberOfInfostoreObjects.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -749,6 +809,7 @@ public class Questions {
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WITH_TASKS, numberOfUsers.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -759,6 +820,7 @@ public class Questions {
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_CHANGED_THEIR_TASKS_IN_THE_LAST30_DAYS, numberOfUsers.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -769,6 +831,7 @@ public class Questions {
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_LOGGED_IN_WITH_CLIENT_OX6UI_IN_THE_LAST_30_DAYS, numberOfUsers.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -779,6 +842,7 @@ public class Questions {
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_LOGGED_IN_WITH_CLIENT_APPSUITEUI_IN_THE_LAST_30_DAYS, numberOfUsers.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -789,6 +853,7 @@ public class Questions {
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_LOGGED_IN_WITH_CLIENT_EAS_IN_THE_LAST_30_DAYS, numberOfUsers.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -799,6 +864,7 @@ public class Questions {
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_LOGGED_IN_WITH_CLIENT_MOBILEUI_IN_THE_LAST_30_DAYS, numberOfUsers.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -809,6 +875,7 @@ public class Questions {
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_LOGGED_IN_WITH_CLIENT_CALDAV_IN_THE_LAST_30_DAYS, numberOfUsers.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 
@@ -819,6 +886,7 @@ public class Questions {
             BigInteger numberOfUsers = Datamining.countOverAllSchemata(sql);
             Datamining.report(NUMBER_OF_USERS_WHO_LOGGED_IN_WITH_CLIENT_CARDDAV_IN_THE_LAST_30_DAYS, numberOfUsers.toString());
         } catch (Exception e) {
+            handleError(e);
         }
     }
 }
