@@ -141,7 +141,7 @@ public class LabelHelper {
 
     public String getShowAsClass() {
         final Event event = mail.getEvent();
-        if (event.getTransp().getValue().equals(Transp.TRANSPARENT)) {
+        if (event.getTransp() != null && event.getTransp().getValue() != null && Transp.TRANSPARENT.equals(event.getTransp().getValue())) {
             return "free";
         } else {
             return "reserved";
