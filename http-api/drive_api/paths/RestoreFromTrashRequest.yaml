@@ -1,5 +1,5 @@
 /drive?action=restoreFromTrash:
-  get:
+  put:
     operationId: restoreFromTrash
     tags:
       - Drive
