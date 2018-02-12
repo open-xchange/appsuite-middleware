@@ -240,6 +240,26 @@ public class AlarmUtils extends CalendarUtils {
     }
 
     /**
+     * Filters those alarms that have a <i>relative</i> trigger from the supplied list of alarms.
+     *
+     * @param alarms The alarms to filter
+     * @return The filtered alarms
+     * @see #hasRelativeTrigger
+     */
+    public static List<Alarm> filterRelativeTriggers(List<Alarm> alarms) {
+        if (null == alarms) {
+            return null;
+        }
+        List<Alarm> filteredAlarms = new ArrayList<Alarm>(alarms.size());
+        for (Alarm alarm : alarms) {
+            if (hasRelativeTrigger(alarm)) {
+                filteredAlarms.add(alarm);
+            }
+        }
+        return filteredAlarms;
+    }
+
+    /**
      * Filters a list of alarms based on their alarm action.
      *
      * @param alarms The alarms to filter

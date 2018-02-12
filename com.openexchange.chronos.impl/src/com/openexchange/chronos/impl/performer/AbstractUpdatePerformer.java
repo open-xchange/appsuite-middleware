@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.AlarmUtils.filterRelativeTriggers;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
 import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
@@ -390,9 +391,9 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          * take over all other original alarms
          */
         for (Entry<Integer, List<Alarm>> entry : storage.getAlarmStorage().loadAlarms(originalMasterEvent).entrySet()) {
-            int userId = entry.getKey().intValue();
+            int userId = i(entry.getKey());
             if (userId != originalAttendee.getEntity()) {
-                insertAlarms(exceptionEvent, userId, entry.getValue(), true);
+                insertAlarms(exceptionEvent, userId, filterRelativeTriggers(entry.getValue()), true);
             }
         }
         /*
