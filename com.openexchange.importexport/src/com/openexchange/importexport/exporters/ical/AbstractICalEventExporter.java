@@ -95,24 +95,19 @@ public abstract class AbstractICalEventExporter extends AbstractICalExporter {
      *
      * @param eventList The event list to export
      * @param optOut The output stream
-     * @return ThresholdFileHolder The file holder or null in case the eventList size is one and the value is null
+     * @return ThresholdFileHolder The file holder
      * @throws OXException if the export fails
      */
     protected ThresholdFileHolder exportChronosEvents(List<Event> eventList, OutputStream optOut) throws OXException {
         ICalService iCalService = ImportExportServices.getICalService();
         ICalParameters iCalParameters = iCalService.initParameters();
         CalendarExport calendarExport = iCalService.exportICal(iCalParameters);
-        boolean skipped = false;
         for (Event event : eventList) {
             if(event == null) {
-                // Skip not existing event
-                skipped = true;
+                // Skip not existing events
                 continue;
             }
             calendarExport.add(event);
-        }
-        if(skipped && eventList.size() == 1) {
-            return null;
         }
         if (null != optOut) {
             calendarExport.writeVCalendar(optOut);
