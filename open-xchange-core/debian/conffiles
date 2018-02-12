@@ -63,6 +63,7 @@ opt/open-xchange/etc/secret.properties
 opt/open-xchange/etc/secrets
 opt/open-xchange/etc/server.properties
 opt/open-xchange/etc/sessiond.properties
+opt/open-xchange/etc/settings/participant-blacklist.properties
 opt/open-xchange/etc/settings/themes.properties
 opt/open-xchange/etc/settings/ui.properties
 opt/open-xchange/etc/share.properties
