@@ -3,7 +3,6 @@
 
 Name:          open-xchange-core
 BuildArch:     noarch
-#!BuildIgnore:  post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
 %else
@@ -193,7 +192,7 @@ find %{buildroot}/opt/open-xchange/etc \
         -printf "%%%config(noreplace) %p\n" > %{configfiles}
 perl -pi -e 's;%{buildroot};;' %{configfiles}
 perl -pi -e 's;^(.*?)\s+(.*/paths.perfMap)$;$2;' %{configfiles}
-perl -pi -e 's;(^.*?)\s+(.*/(mail|configdb|server|filestorage|management|secret|sessiond)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
+perl -pi -e 's;(^.*?)\s+(.*/(autoconfig|mail|configdb|server|filestorage|management|secret|sessiond)\.properties)$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
 perl -pi -e 's;(^.*?)\s+(.*/(secrets|tokenlogin-secrets))$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
 
 %post
@@ -212,11 +211,6 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-2470
     ox_add_property com.openexchange.publish.createModifyEnabled false /opt/open-xchange/etc/publications.properties
-
-    # SoftwareChange_Request-2530
-    ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy "" /opt/open-xchange/etc/autoconfig.properties
-    ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy.login "" /opt/open-xchange/etc/autoconfig.properties
-    ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy.password "" /opt/open-xchange/etc/autoconfig.properties
 
     # SoftwareChange_Request-2541
     VALUE=$(ox_read_property com.openexchange.hazelcast.maxOperationTimeout /opt/open-xchange/etc/hazelcast.properties)
@@ -287,9 +281,6 @@ EOF
     ox_add_property html.tag.s '""' /opt/open-xchange/etc/whitelist.properties
 
     # SoftwareChange_Request-2821
-    ox_remove_property com.openexchange.mail.autoconfig.ispdb.proxy /opt/open-xchange/etc/autoconfig.properties
-    ox_remove_property com.openexchange.mail.autoconfig.ispdb.proxy.login /opt/open-xchange/etc/autoconfig.properties
-    ox_remove_property com.openexchange.mail.autoconfig.ispdb.proxy.password /opt/open-xchange/etc/autoconfig.properties
     ox_add_property com.openexchange.mail.autoconfig.http.proxy "" /opt/open-xchange/etc/autoconfig.properties
     ox_add_property com.openexchange.mail.autoconfig.http.proxy.login "" /opt/open-xchange/etc/autoconfig.properties
     ox_add_property com.openexchange.mail.autoconfig.http.proxy.password "" /opt/open-xchange/etc/autoconfig.properties
@@ -384,7 +375,9 @@ EOF
     ox_add_property com.openexchange.mail.transportStartTls false /opt/open-xchange/etc/mail.properties
 
     # SoftwareChange_Request-3350
-    sed -i '/^JAVA_XTRAOPTS=/s/ -XX:+DisableExplicitGC//' /opt/open-xchange/etc/ox-scriptconf.sh
+    if grep "XX:DisableExplicitGC" >/dev/null /opt/open-xchange/etc/ox-scriptconf.sh; then
+      sed -i '/^JAVA_XTRAOPTS=/s/ -XX:+DisableExplicitGC//' /opt/open-xchange/etc/ox-scriptconf.sh
+    fi
 
     # SoftwareChange_Request-3355,3417
     oldlink=$(ox_read_property object_link /opt/open-xchange/etc/notification.properties)
@@ -452,12 +445,14 @@ EOF
     fi
 
     # SoftwareChange_Request-3773
-    sed -i '/^# Maximum number of open Files for the groupware$/{i\
-    # Maximum number of open Files for the groupware. This value will only be\
-    # applied when using sysv init. For systemd have a look at the drop-in configs\
-    # at /etc/systemd/system/open-xchange.service.d
-    d
-    }' /opt/open-xchange/etc/ox-scriptconf.sh
+    if grep "Maximum number of open Files for the groupware" >/dev/null /opt/open-xchange/etc/ox-scriptconf.sh; then
+      sed -i '/^# Maximum number of open Files for the groupware$/{i\
+# Maximum number of open Files for the groupware. This value will only be\
+# applied when using sysv init. For systemd have a look at the drop-in configs\
+# at /etc/systemd/system/open-xchange.service.d
+d
+}' /opt/open-xchange/etc/ox-scriptconf.sh
+    fi
 
     # SoftwareChange_Request-3784
     VALUE=$(ox_read_property com.openexchange.IPCheckWhitelist /opt/open-xchange/etc/server.properties)
@@ -473,14 +468,20 @@ EOF
     fi
 
     # SoftwareChange_Request-3862
-    ox_comment html.tag.form add /opt/open-xchange/etc/whitelist.properties
-    ox_comment html.tag.input add /opt/open-xchange/etc/whitelist.properties
+    if ! egrep "^#\s?html.tag.form" /opt/open-xchange/etc/whitelist.properties; then
+      ox_comment html.tag.form add /opt/open-xchange/etc/whitelist.properties
+    fi
+    if ! egrep "^#\s?html.tag.input" /opt/open-xchange/etc/whitelist.properties; then
+      ox_comment html.tag.input add /opt/open-xchange/etc/whitelist.properties
+    fi
 
     # SoftwareChange_Request-3882
     ox_add_property NPROC 65536 /opt/open-xchange/etc/ox-scriptconf.sh
 
     # SoftwareChange_Request-3934
-    ox_comment html.style.list-style-image add /opt/open-xchange/etc/whitelist.properties
+    if ! egrep "^#\s?html.style.list-style-image" /opt/open-xchange/etc/whitelist.properties; then
+      ox_comment html.style.list-style-image add /opt/open-xchange/etc/whitelist.properties
+    fi
 
     # SoftwareChange_Request-4033
     sed -i 's/com\.hazelcast\.internal\.monitors/com.hazelcast.internal.diagnostics/' /opt/open-xchange/etc/logback.xml
@@ -604,7 +605,9 @@ EOF
 
     # SoftwareChange_Request-4149
     ox_set_property marital_status 'Marital status' /opt/open-xchange/importCSV/open-xchange.properties
-    sed -i 's/employee_type=Number of employee/number_of_employees=Employee ID/g' /opt/open-xchange/importCSV/open-xchange.properties
+    if [ "Number of employee" == "$(ox_read_property employee_type /opt/open-xchange/importCSV/open-xchange.properties)" ]; then
+      sed -i 's/employee_type=Number of employee/number_of_employees=Employee ID/g' /opt/open-xchange/importCSV/open-xchange.properties
+    fi
 
     # SoftwareChange_Request-4204
     pfile=/opt/open-xchange/etc/whitelist.properties
@@ -676,8 +679,7 @@ exit 0
 /opt/open-xchange/sbin/*
 %dir /opt/open-xchange/templates/
 /opt/open-xchange/templates/*
-%dir /opt/open-xchange/etc/hazelcast/
-%config(noreplace) /opt/open-xchange/etc/hazelcast/*
+%dir /opt/open-xchange/etc/hazelcast
 %dir %attr(750, open-xchange, root) /var/log/open-xchange
 %dir /var/spool/open-xchange
 %dir %attr(750, open-xchange, root) /var/spool/open-xchange/uploads
