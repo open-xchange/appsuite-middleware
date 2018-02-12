@@ -3,6 +3,7 @@
 
 Name:          open-xchange-core
 BuildArch:     noarch
+#!BuildIgnore:  post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
 %else
@@ -309,7 +310,7 @@ EOF
 
     # SoftwareChange_Request-2990
     # Bug #53993
-    if ! egrep -q '^\s*<logger.*com\.hazelcast\.internal\.(monitors|diagnostics).*$' /opt/open-xchange/etc/logback.xml; then
+    if ! grep -Eq '^\s*<logger.*com\.hazelcast\.internal\.(monitors|diagnostics).*$' /opt/open-xchange/etc/logback.xml; then
       TMPFILE=$(mktemp)
       rm -f $TMPFILE
       cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -r -
@@ -398,9 +399,16 @@ EOF
     # suffixPattern and replace only %message with %sanitisedMessage in that
     # context
     logconfig=/opt/open-xchange/etc/logback.xml
-    sed -r -i '/<appender .*name="FILE".*>/,/<\/pattern>/ s/%message/%sanitisedMessage/g' $logconfig
-    sed -r -i '/<appender .*name="FILE_COMPAT".*>/,/<\/pattern>/ s/%message/%sanitisedMessage/g' $logconfig
-    sed -r -i '/<appender .*name="SYSLOG".*>/,/<\/suffixPattern>/ s/%message/%sanitisedMessage/g' $logconfig
+    tmp=${logconfig}.tmp
+    cp -a --remove-destination $logconfig $tmp
+    sed -r -i '/<appender .*name="FILE".*>/,/<\/pattern>/ s/%message/%sanitisedMessage/g' $tmp
+    sed -r -i '/<appender .*name="FILE_COMPAT".*>/,/<\/pattern>/ s/%message/%sanitisedMessage/g' $tmp
+    sed -r -i '/<appender .*name="SYSLOG".*>/,/<\/suffixPattern>/ s/%message/%sanitisedMessage/g' $tmp
+    if [[ $(ox_md5 $tmp) != $(ox_md5 $logconfig) ]]; then
+      cat $tmp >$logconfig
+    else
+      rm $tmp
+    fi
 
     # SoftwareChange_Request-3421
     ox_remove_property com.openexchange.mail.transport.enablePublishOnExceededQuota /opt/open-xchange/etc/transport.properties
@@ -468,10 +476,10 @@ d
     fi
 
     # SoftwareChange_Request-3862
-    if ! egrep "^#\s?html.tag.form" /opt/open-xchange/etc/whitelist.properties; then
+    if ! grep -Eq "^#\s?html.tag.form" /opt/open-xchange/etc/whitelist.properties; then
       ox_comment html.tag.form add /opt/open-xchange/etc/whitelist.properties
     fi
-    if ! egrep "^#\s?html.tag.input" /opt/open-xchange/etc/whitelist.properties; then
+    if ! grep -Eq "^#\s?html.tag.input" /opt/open-xchange/etc/whitelist.properties; then
       ox_comment html.tag.input add /opt/open-xchange/etc/whitelist.properties
     fi
 
@@ -479,12 +487,20 @@ d
     ox_add_property NPROC 65536 /opt/open-xchange/etc/ox-scriptconf.sh
 
     # SoftwareChange_Request-3934
-    if ! egrep "^#\s?html.style.list-style-image" /opt/open-xchange/etc/whitelist.properties; then
+    if ! grep -Eq "^#\s?html.style.list-style-image" /opt/open-xchange/etc/whitelist.properties; then
       ox_comment html.style.list-style-image add /opt/open-xchange/etc/whitelist.properties
     fi
 
     # SoftwareChange_Request-4033
-    sed -i 's/com\.hazelcast\.internal\.monitors/com.hazelcast.internal.diagnostics/' /opt/open-xchange/etc/logback.xml
+    logconfig=/opt/open-xchange/etc/logback.xml
+    tmp=${logconfig}.tmp
+    cp -a --remove-destination $logconfig $tmp
+    sed -i 's/com\.hazelcast\.internal\.monitors/com.hazelcast.internal.diagnostics/' $tmp
+    if [[ $(ox_md5 $tmp) != $(ox_md5 $logconfig) ]]; then
+      cat $tmp >$logconfig
+    else
+      rm $tmp
+    fi
 
     # SoftwareChange_Request-4059
     ox_remove_property com.openexchange.mail.enforceSecureConnection /opt/open-xchange/etc/mail.properties
@@ -589,7 +605,7 @@ d
     ox_remove_property com.openexchange.mail.attachmentDisplaySizeLimit /opt/open-xchange/etc/mail.properties
 
     # Bug #53993: Zap duplicate loggers
-    if [[ 1 < $(egrep -c '^\s*<logger.*"com\.hazelcast\.internal\.diagnostics".*$' /opt/open-xchange/etc/logback.xml) ]]; then
+    if [[ 1 < $(grep -Ec '^\s*<logger.*"com\.hazelcast\.internal\.diagnostics".*$' /opt/open-xchange/etc/logback.xml) ]]; then
       TMPFILE=$(mktemp)
       rm -f $TMPFILE
       cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -z -r -
