@@ -955,7 +955,10 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
         @Override
         public NotificationMail generateDeleteMailFor(final NotificationParticipant participant) throws OXException {
-            return stateChanged(reply(participant, ParticipationStatus.DECLINED), ParticipationStatus.DECLINED);
+            if (participant.hasRole(ITipRole.ORGANIZER)) {                
+                return stateChanged(reply(participant, ParticipationStatus.DECLINED), ParticipationStatus.DECLINED);
+            }
+            return null;
         }
 
         @Override
