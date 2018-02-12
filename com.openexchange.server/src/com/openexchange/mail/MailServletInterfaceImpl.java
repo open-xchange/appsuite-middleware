@@ -545,9 +545,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                  * Check for spam action; meaning a move/copy from/to spam folder
                  */
                 String spamFullname = mailAccess.getFolderStorage().getSpamFolder();
+                String trashFullname = mailAccess.getFolderStorage().getTrashFolder();
                 int spamAction;
                 if (usm.isSpamEnabled()) {
-                    spamAction = spamFullname.equals(sourceFullname) ? SPAM_HAM : (spamFullname.equals(destFullname) ? SPAM_SPAM : SPAM_NOOP);
+                    if (spamFullname.equals(sourceFullname)) {
+                        spamAction = trashFullname.equals(destFullname) ? SPAM_NOOP : SPAM_HAM;
+                    } else {
+                        spamAction = (spamFullname.equals(destFullname) ? SPAM_SPAM : SPAM_NOOP);
+                    }
                 } else {
                     spamAction = SPAM_NOOP;
                 }
@@ -721,9 +726,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             if (move) {
                 // Check for spam action; meaning a move/copy from/to spam folder
                 String spamFullname = mailAccess.getFolderStorage().getSpamFolder();
+                String trashFullname = mailAccess.getFolderStorage().getTrashFolder();
                 int spamAction;
                 if (usm.isSpamEnabled()) {
-                    spamAction = spamFullname.equals(sourceFullname) ? SPAM_HAM : (spamFullname.equals(destFullname) ? SPAM_SPAM : SPAM_NOOP);
+                    if (spamFullname.equals(sourceFullname)) {
+                        spamAction = trashFullname.equals(destFullname) ? SPAM_NOOP : SPAM_HAM;
+                    } else {
+                        spamAction = (spamFullname.equals(destFullname) ? SPAM_SPAM : SPAM_NOOP);
+                    }
                 } else {
                     spamAction = SPAM_NOOP;
                 }
