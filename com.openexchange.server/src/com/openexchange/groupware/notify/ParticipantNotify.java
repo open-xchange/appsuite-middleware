@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.notify;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,7 +56,6 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -67,31 +64,13 @@ import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
-import javax.activation.DataHandler;
-import javax.mail.BodyPart;
-import javax.mail.MessagingException;
 import javax.mail.Multipart;
-import javax.mail.Part;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMultipart;
-import com.openexchange.ajax.Attachment;
-import com.openexchange.data.conversion.ical.ConversionError;
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.ICalEmitter;
-import com.openexchange.data.conversion.ical.ICalSession;
-import com.openexchange.data.conversion.ical.SimpleMode;
-import com.openexchange.data.conversion.ical.ZoneInfo;
-import com.openexchange.data.conversion.ical.itip.ITipContainer;
-import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.event.impl.TaskEventInterface2;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.Types;
-import com.openexchange.groupware.attach.AttachmentBase;
-import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.calendar.CalendarCollectionUtils;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
@@ -118,7 +97,6 @@ import com.openexchange.i18n.tools.StringTemplate;
 import com.openexchange.i18n.tools.Template;
 import com.openexchange.i18n.tools.TemplateReplacement;
 import com.openexchange.i18n.tools.TemplateToken;
-import com.openexchange.i18n.tools.replacement.AppointmentActionReplacement;
 import com.openexchange.i18n.tools.replacement.ChangeExceptionsReplacement;
 import com.openexchange.i18n.tools.replacement.CommentsReplacement;
 import com.openexchange.i18n.tools.replacement.ConfirmationActionReplacement;
@@ -135,16 +113,9 @@ import com.openexchange.i18n.tools.replacement.StringReplacement;
 import com.openexchange.i18n.tools.replacement.TaskActionReplacement;
 import com.openexchange.i18n.tools.replacement.TaskPriorityReplacement;
 import com.openexchange.i18n.tools.replacement.TaskStatusReplacement;
-import com.openexchange.java.Streams;
-import com.openexchange.mail.mime.ContentDisposition;
-import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.datasource.MessageDataSource;
-import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.storage.ResourceStorage;
 import com.openexchange.server.impl.EffectivePermission;
@@ -152,12 +123,9 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.TimeZoneUtils;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -383,6 +351,10 @@ public class ParticipantNotify implements TaskEventInterface2 {
      * TODO new object should have all necessary data when coming through the event system.
      */
     private void sendNotification(final CalendarObject oldObj, final CalendarObject newObj, final Session session, final State state, final boolean forceNotifyOthers, final boolean suppressOXReminderHeader, final boolean isUpdate) {
+        if (Types.TASK != state.getModule()) {
+            throw new UnsupportedOperationException();
+        }
+
         // Safety check for passed session reference
         if (session.getUserId() <= 0 || session.getContextId() <= 0) {
             // Illegal session
@@ -413,12 +385,12 @@ public class ParticipantNotify implements TaskEventInterface2 {
          * Check if notification shall be dropped
          */
         if (newObj.containsNotification() && !newObj.getNotification() && newObj.getCreatedBy() == serverSession.getUserId() && !forceNotifyOthers) {
-            LOG.debug("Dropping notification for {}{} ({}) since it indicates to discard its notification", (state.getModule() == Types.APPOINTMENT ? "appointment " : "task "), title, newObj.getObjectID());
+            LOG.debug("Dropping notification for task {} ({}) since it indicates to discard its notification", title, newObj.getObjectID());
             return;
         }
         if (newObj.getParticipants() == null) {
             if (oldObj == null || oldObj.getParticipants() == null) {
-                LOG.debug("Dropping notification for {}{} ({}) since it contains NO participants", (state.getModule() == Types.APPOINTMENT ? "appointment " : "task "), title, newObj.getObjectID());
+                LOG.debug("Dropping notification for task {} ({}) since it contains NO participants", title, newObj.getObjectID());
                 return;
             }
             /*
@@ -466,30 +438,6 @@ public class ParticipantNotify implements TaskEventInterface2 {
         if (!newObj.containsCreationDate() && oldObj != null && oldObj.containsCreationDate()) {
             newObj.setCreationDate(oldObj.getCreationDate());
         }
-        if (Types.APPOINTMENT == state.getModule()) {
-            final Appointment newApp = (Appointment) newObj;
-            final Appointment oldApp = oldObj == null ? null : ((Appointment) oldObj);
-
-            if (!newApp.containsFullTime() && oldApp != null && oldApp.containsFullTime()) {
-                newApp.setFullTime(oldApp.getFullTime());
-            }
-
-            // Set correct recurrence information if CalendarObject is an Appointment
-            if (newApp.getRecurrenceType() != CalendarObject.NO_RECURRENCE) {
-                try {
-                    CalendarCollectionUtils.fillDAO((CalendarDataObject) newApp);
-                    if (oldObj != null) {
-                        CalendarCollectionUtils.fillDAO((CalendarDataObject) oldApp);
-                    }
-                } catch (final Exception e) {
-                    if (e instanceof OXException) {
-                        final StringBuilder builder = new StringBuilder(256).append("Could not set correct recurrence information in notification for appointment").append(title).append(" (").append(newObj.getObjectID()).append("). Cause:\n");
-                        LOG.error("{}", builder, e);
-                    }
-                }
-            }
-        }
-
         /*
          * A map to remember receivers
          */
@@ -530,6 +478,9 @@ public class ParticipantNotify implements TaskEventInterface2 {
     }
 
     private List<MailMessage> createMessageList(final CalendarObject oldObj, final CalendarObject newObj, final State state, final boolean forceNotifyOthers, final boolean isUpdate, final ServerSession session, final Map<Locale, List<EmailableParticipant>> receivers, final String title, final RenderMap renderMap) {
+        if (Types.TASK != state.getModule()) {
+            throw new UnsupportedOperationException();
+        }
         final OXFolderAccess access = new OXFolderAccess(session.getContext());
         final StringBuilder b = new StringBuilder(2048);
         TIntSet allUserIds = null;
@@ -609,7 +560,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
                          * Add to pool
                          */
                         NotificationPool.getInstance().put(new PooledNotification(p, title, state, locale, (RenderMap) renderMap.clone(), session, newObj));
-                        LOG.debug("{} update (id = {}) notification added to pool for receiver {}", (Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task"), newObj.getObjectID(), p.email);
+                        LOG.debug("Task update (id = {}) notification added to pool for receiver {}", newObj.getObjectID(), p.email);
                     } else {
                         /*
                          * Compose message
@@ -622,7 +573,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
                         }
                         if (null != message) {
                             messages.add(message);
-                            LOG.debug("{} (id = {}) \"{}\" notification message generated for receiver {}", (Types.APPOINTMENT == state.getModule() ? "Appointment" : "Task"), newObj.getObjectID(), EmailableParticipant.STATE_NEW == p.state ? "New" : (EmailableParticipant.STATE_REMOVED == p.state ? "Deleted" : state.getType().toString()), p.email);
+                            LOG.debug("Task (id = {}) \"{}\" notification message generated for receiver {}", newObj.getObjectID(), EmailableParticipant.STATE_NEW == p.state ? "New" : (EmailableParticipant.STATE_REMOVED == p.state ? "Deleted" : state.getType().toString()), p.email);
                         }
                     }
                 }
@@ -726,6 +677,9 @@ public class ParticipantNotify implements TaskEventInterface2 {
     private static final Pattern PATTERN_PREFIX_MODIFIED = Pattern.compile("(^|\r?\n)" + Pattern.quote(TemplateReplacement.PREFIX_MODIFIED));
 
     private static MailMessage createParticipantMessage0(final ServerSession session, final CalendarObject cal, final EmailableParticipant p, final boolean canRead, final String title, final TemplateReplacement actionRepl, final State state, final Locale locale, final RenderMap renderMap, final boolean isUpdate, final StringBuilder b) {
+        if (Types.TASK != state.getModule()) {
+            throw new UnsupportedOperationException();
+        }
         final MailMessage msg = new MailMessage();
         final Template createTemplate = state.getTemplate();
         final StringHelper strings = StringHelper.valueOf(locale);
@@ -744,22 +698,12 @@ public class ParticipantNotify implements TaskEventInterface2 {
                  * Get cloned version of render map to apply changed status
                  */
                 final RenderMap clone = clonedRenderMap(renderMap);
-                if (Types.APPOINTMENT == state.getModule()) {
-                    msg.title = b.append(new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_DELETED, locale).getReplacement()).append(": ").append(title).toString();
-                    b.setLength(0);
-                    /*
-                     * Render proper message for removed participant
-                     */
-                    msg.message = new StringTemplate(Notifications.APPOINTMENT_DELETE_MAIL).render(p.getLocale(), clone);
-                } else {
-                    msg.title = b.append(new TaskActionReplacement(TaskActionReplacement.ACTION_DELETED, locale).getReplacement()).append(": ").append(title).toString();
-                    b.setLength(0);
-                    /*
-                     * Render proper message for removed participant
-                     */
-                    msg.message = new StringTemplate(Notifications.TASK_DELETE_MAIL).render(p.getLocale(), clone);
-
-                }
+                msg.title = b.append(new TaskActionReplacement(TaskActionReplacement.ACTION_DELETED, locale).getReplacement()).append(": ").append(title).toString();
+                b.setLength(0);
+                /*
+                 * Render proper message for removed participant
+                 */
+                msg.message = new StringTemplate(Notifications.TASK_DELETE_MAIL).render(p.getLocale(), clone);
             } else if (EmailableParticipant.STATE_NEW == p.state) {
                 /*
                  * Current participant is added by caught update event
@@ -769,28 +713,13 @@ public class ParticipantNotify implements TaskEventInterface2 {
                  * Get cloned version of render map to apply changed status
                  */
                 final RenderMap clone = clonedRenderMap(renderMap);
-                if (Types.APPOINTMENT == state.getModule()) {
-                    msg.title = b.append(new AppointmentActionReplacement(AppointmentActionReplacement.ACTION_NEW, locale).getReplacement()).append(": ").append(title).toString();
-                    b.setLength(0);
-                    /*
-                     * Render proper message for removed participant
-                     */
-                    final String message = getAppointmentCreateTemplate(p, canRead, cal, session);
-                    final String textMessage = new StringTemplate(message).render(p.getLocale(), clone);
-                    if (p.type == Participant.USER && !NotificationConfig.getPropertyAsBoolean(NotificationProperty.INTERNAL_IMIP, false)) {
-                        msg.message = textMessage;
-                    } else {
-                        msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REQUEST, p, strings, b);
-                    }
-                } else {
-                    msg.title = b.append(new TaskActionReplacement(TaskActionReplacement.ACTION_NEW, locale).getReplacement()).append(": ").append(title).toString();
-                    b.setLength(0);
-                    /*
-                     * Render proper message for removed participant
-                     */
-                    final String message = getTaskCreateMessage(p, canRead);
-                    msg.message = new StringTemplate(message).render(p.getLocale(), clone);
-                }
+                msg.title = b.append(new TaskActionReplacement(TaskActionReplacement.ACTION_NEW, locale).getReplacement()).append(": ").append(title).toString();
+                b.setLength(0);
+                /*
+                 * Render proper message for removed participant
+                 */
+                final String message = getTaskCreateMessage(p, canRead);
+                msg.message = new StringTemplate(message).render(p.getLocale(), clone);
             } else {
                 {
                     final List<TemplateReplacement> changes = renderMap.getChanges();
@@ -817,10 +746,10 @@ public class ParticipantNotify implements TaskEventInterface2 {
 
                 String textMessage = "";
                 if (p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE) {
-                    final String template = Types.APPOINTMENT == state.getModule() ? Notifications.APPOINTMENT_UPDATE_MAIL_EXT : Notifications.TASK_UPDATE_MAIL_EXT;
+                    final String template = Notifications.TASK_UPDATE_MAIL_EXT;
                     textMessage = new StringTemplate(template).render(p.getLocale(), renderMap);
                 } else if (!canRead) {
-                    final String template = state.getModule() == Types.APPOINTMENT ? Notifications.APPOINTMENT_UPDATE_MAIL_NO_ACCESS : Notifications.TASK_UPDATE_MAIL_NO_ACCESS;
+                    final String template = Notifications.TASK_UPDATE_MAIL_NO_ACCESS;
                     textMessage = new StringTemplate(template).render(p.getLocale(), renderMap);
                 } else {
                     textMessage = createTemplate.render(p.getLocale(), renderMap);
@@ -836,52 +765,34 @@ public class ParticipantNotify implements TaskEventInterface2 {
                     return null;
                 }
 
-                if (cal.getRecurrenceType() == CalendarObject.NO_RECURRENCE && p.type == Participant.EXTERNAL_USER) {
-                    msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REQUEST, p, strings, b);
-                } else {
-                    msg.message = textMessage;
-                }
+                msg.message = textMessage;
             }
         } else {
             if (State.Type.NEW.equals(state.getType())) {
-                final int owner = getFolderOwner(cal, session);
-                final boolean isOnBehalf = owner != session.getUserId();
                 String textMessage = "";
                 if ((p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE)) {
-                    final String template = strings.getString(Types.APPOINTMENT == state.getModule() ? (isOnBehalf ? Notifications.APPOINTMENT_CREATE_MAIL_ON_BEHALF_EXT : Notifications.APPOINTMENT_CREATE_MAIL_EXT) : Notifications.TASK_CREATE_MAIL_EXT);
+                    final String template = strings.getString(Notifications.TASK_CREATE_MAIL_EXT);
                     textMessage = new StringTemplate(template).render(p.getLocale(), renderMap);
                 } else if (!canRead) {
-                    final String template = strings.getString(state.getModule() == Types.APPOINTMENT ? (isOnBehalf ? Notifications.APPOINTMENT_CREATE_MAIL_ON_BEHALF_NO_ACCESS : Notifications.APPOINTMENT_CREATE_MAIL_NO_ACCESS) : Notifications.TASK_CREATE_MAIL_NO_ACCESS);
+                    final String template = strings.getString(Notifications.TASK_CREATE_MAIL_NO_ACCESS);
                     textMessage = new StringTemplate(template).render(p.getLocale(), renderMap);
                 } else {
                     textMessage = createTemplate.render(p.getLocale(), renderMap);
                 }
-                if (p.type == Participant.USER && !NotificationConfig.getPropertyAsBoolean(NotificationProperty.INTERNAL_IMIP, false)) {
-                    msg.message = textMessage;
-                } else {
-                    msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REQUEST, p, strings, b);
-                }
+                msg.message = textMessage;
             } else if (ParticipantNotify.isStatusUpdate(state)) {
                 String textMessage = "";
                 if ((p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE)) {
-                    final String template = strings.getString(Types.APPOINTMENT == state.getModule() ? Notifications.APPOINTMENT_CONFIRMATION_MAIL_EXT : Notifications.TASK_CONFIRMATION_MAIL_EXT);
+                    final String template = strings.getString(Notifications.TASK_CONFIRMATION_MAIL_EXT);
                     textMessage = new StringTemplate(template).render(p.getLocale(), renderMap);
                 } else {
                     textMessage = createTemplate.render(p.getLocale(), renderMap);
                 }
                 // Attach IMIP Magic only for external users on secondary events, to tell them the state of the appointment, but don't
                 // bother with internal users.
-                if (p.type == Participant.EXTERNAL_USER) {
-                    msg.message = generateMessageMultipart(session, cal, textMessage, state.getModule(), state.getType(), ITipMethod.REPLY, p, strings, b);
-                } else {
-                    msg.message = textMessage;
-                }
+                msg.message = textMessage;
             } else if (state.getType() == State.Type.DELETED) {
-                if (p.type == Participant.USER && !NotificationConfig.getPropertyAsBoolean(NotificationProperty.INTERNAL_IMIP, false)) {
-                    msg.message = createTemplate.render(p.getLocale(), renderMap);
-                } else {
-                    msg.message = generateMessageMultipart(session, cal, createTemplate.render(p.getLocale(), renderMap), state.getModule(), state.getType(), ITipMethod.CANCEL, p, strings, b);
-                }
+                msg.message = createTemplate.render(p.getLocale(), renderMap);
             } else {
                 msg.message = createTemplate.render(p.getLocale(), renderMap);
             }
@@ -912,244 +823,6 @@ public class ParticipantNotify implements TaskEventInterface2 {
         return msg;
     }
 
-    /**
-     * Builds a multipart object containing the text/plain and iCal part (and possible appointment attachments)
-     *
-     * @return The multipart object or given text if building failed
-     */
-    private static Object generateMessageMultipart(final ServerSession session, final CalendarObject cal, final String text, final int module, final State.Type type, final ITipMethod method, final EmailableParticipant p, final StringHelper strings, final StringBuilder b) {
-        if (module == Types.TASK) {
-            return text;
-        }
-        try {
-            /*
-             * Cast to appointment
-             */
-            final Appointment app = (Appointment) cal;
-            /*
-             * Check if appointment has attachments
-             */
-            Multipart mixedMultipart = null;
-            SearchIterator<?> iterator = null;
-            try {
-                final AttachmentBase attachmentBase = Attachment.ATTACHMENT_BASE;
-                final int folderId = app.getParentFolderID();
-                final int objectId = app.getObjectID();
-                final Context context = session.getContext();
-                final User user = session.getUser();
-                final UserConfiguration config = session.getUserConfiguration();
-                iterator = attachmentBase.getAttachments(session, folderId, objectId, Types.APPOINTMENT, context, user, config).results();
-                if (iterator.hasNext()) {
-                    try {
-                        attachmentBase.startTransaction();
-                        mixedMultipart = new MimeMultipart("mixed");
-                        do {
-                            final AttachmentMetadata metadata = (AttachmentMetadata) iterator.next();
-                            /*
-                             * Create appropriate MIME body part
-                             */
-                            final MimeBodyPart bodyPart = new MimeBodyPart();
-                            final ContentType ct;
-                            {
-                                String mimeType = metadata.getFileMIMEType();
-                                if (null == mimeType) {
-                                    mimeType = "application/octet-stream";
-                                }
-                                ct = new ContentType(mimeType);
-                            }
-                            /*
-                             * Set content through a DataHandler
-                             */
-                            InputStream in = attachmentBase.getAttachedFile(session, folderId, objectId, Types.APPOINTMENT, metadata.getId(), context, user, config);
-                            try {
-                                bodyPart.setDataHandler(new DataHandler(new MessageDataSource(in, ct)));
-                            } finally {
-                                Streams.close(in);
-                            }
-                            final String fileName = metadata.getFilename();
-                            if (fileName != null && !ct.containsNameParameter()) {
-                                ct.setNameParameter(fileName);
-                            }
-                            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct.toString()));
-                            bodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                            if (fileName != null) {
-                                final ContentDisposition cd = new ContentDisposition(Part.ATTACHMENT);
-                                cd.setFilenameParameter(fileName);
-                                bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentDisposition(cd.toString()));
-                            }
-                            bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
-                            LOG.debug("Added file attachment to notification message: {}", fileName);
-                            /*
-                             * Append body part
-                             */
-                            mixedMultipart.addBodyPart(bodyPart);
-                        } while (iterator.hasNext());
-                        attachmentBase.commit();
-                    } catch (final Exception e) {
-                        try {
-                            attachmentBase.rollback();
-                        } catch (final OXException e1) {
-                            LOG.error("Attachment transaction rollback failed", e1);
-                        }
-                        LOG.error("File attachment(s) cannot be added.", e);
-                    } finally {
-                        try {
-                            attachmentBase.finish();
-                        } catch (final OXException e) {
-                            LOG.debug("Attachment transaction finish failed", e);
-                        }
-                    }
-                }
-            } catch (final Exception e) {
-                LOG.error("File attachment(s) cannot be added.", e);
-            } finally {
-                SearchIterators.close(iterator);
-            }
-            /*
-             * Generate iCal for appointment
-             */
-            final Multipart alternativeMultipart = new MimeMultipart("alternative");
-            /*
-             * Compose text part
-             */
-            final BodyPart textPart = new MimeBodyPart();
-            if (Participant.RESOURCE == p.type) {
-                try {
-                    /*
-                     * Prepend resource prefix to first text/plain body part
-                     */
-                    textPart.setDataHandler(new DataHandler(new MessageDataSource(b.append(String.format(strings.getString(Notifications.RESOURCE_PREFIX), p.displayName)).append(": ").append(text).toString(), "text/plain; charset=UTF-8")));
-                    //textPart.setContent(b.append(String.format(strings.getString(Notifications.RESOURCE_PREFIX), p.displayName)).append(": ").append(text).toString(), "text/plain; charset=UTF-8");
-                    textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, "text/plain; charset=UTF-8");
-                    b.setLength(0);
-                } catch (final UnsupportedEncodingException e) {
-                    throw new MessagingException("Unsupported encoding.", e);
-                }
-            } else {
-                try {
-                    /*
-                     * Apply text as given
-                     */
-                    textPart.setDataHandler(new DataHandler(new MessageDataSource(text, "text/plain; charset=UTF-8")));
-                    // textPart.setContent(text, "text/plain; charset=UTF-8");
-                    textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, "text/plain; charset=UTF-8");
-                } catch (final UnsupportedEncodingException e) {
-                    throw new MessagingException("Unsupported encoding.", e);
-                }
-            }
-            /*
-             * Compose iCal part
-             */
-            final ICalEmitter emitter = ServerServiceRegistry.getInstance().getService(ICalEmitter.class);
-            final ICalSession icalSession = emitter.createSession(new SimpleMode(ZoneInfo.OUTLOOK));
-            Date until = null;
-            if (CalendarObject.NO_RECURRENCE != app.getRecurrenceType()) {
-                until = app.getEndDate();
-                app.setEndDate(computeFirstOccurrenceEnd(app));
-            }
-            final boolean hasAlarm = app.containsAlarm();
-            final int alarm = app.getAlarm();
-            app.removeAlarm();
-            final ITipContainer iTip = new ITipContainer(method, type, session.getUserId());
-            emitter.writeAppointment(icalSession, app, session.getContext(), iTip, new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>());
-            if (null != until) {
-                app.setEndDate(until);
-            }
-            if (hasAlarm) {
-                app.setAlarm(alarm);
-            }
-            /*
-             * Copy stream
-             */
-            final byte[] icalFile;
-            final boolean isAscii;
-            {
-                final ByteArrayOutputStream byteArrayOutputStream = new UnsynchronizedByteArrayOutputStream();
-                emitter.writeSession(icalSession, byteArrayOutputStream);
-                icalFile = trimICal(byteArrayOutputStream.toByteArray());
-                isAscii = isAscii(icalFile);
-                if (null == mixedMultipart) {
-                    mixedMultipart = new MimeMultipart("mixed");
-                }
-                final BodyPart iCalAttachmentPart = new MimeBodyPart();
-                /*
-                 * Select file name
-                 */
-                final String fileName;
-                switch (method) {
-                    case REQUEST:
-                        fileName = "invite.ics";
-                        break;
-                    case CANCEL:
-                        fileName = "cancel.ics";
-                        break;
-                    default:
-                        fileName = "response.ics";
-                        break;
-                }
-                /*
-                 * Compose content type
-                 */
-                b.append("application/ics; name=\"").append(fileName).append('"');
-                final String ct = b.toString();
-                b.setLength(0);
-                iCalAttachmentPart.setDataHandler(new DataHandler(new MessageDataSource(icalFile, ct)));
-                iCalAttachmentPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(ct));
-                b.append("attachment; filename=\"").append(fileName).append('"');
-                iCalAttachmentPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, b.toString());
-                b.setLength(0);
-                iCalAttachmentPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "base64");
-                mixedMultipart.addBodyPart(iCalAttachmentPart, 0);
-            }
-
-            final BodyPart iCalPart = new MimeBodyPart();
-
-            final String contentType = b.append("text/calendar; charset=UTF-8; ").append(method.getMethod()).toString();
-            b.setLength(0);
-            iCalPart.setDataHandler(new DataHandler(new MessageDataSource(icalFile, contentType)));
-            iCalPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType));
-            iCalPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, isAscii ? "7bit" : "quoted-printable");
-            // iCalPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, Part.INLINE);
-            /*
-             * Add the parts to parental multipart & return
-             */
-            alternativeMultipart.addBodyPart(textPart);
-            alternativeMultipart.addBodyPart(iCalPart);
-            /*
-             * Return appropriate multipart
-             */
-            final BodyPart altBodyPart = new MimeBodyPart();
-            MessageUtility.setContent(alternativeMultipart, altBodyPart);
-            // altBodyPart.setContent(alternativeMultipart);
-            mixedMultipart.addBodyPart(altBodyPart, 0);
-            return mixedMultipart;
-        } catch (final MessagingException e) {
-            LOG.error("Unable to compose message", e);
-        } catch (final ConversionError e) {
-            LOG.error("Unable to compose message", e);
-        } catch (final OXException e) {
-            LOG.error("Unable to compose message", e);
-        }
-        /*
-         * Failed to create multipart
-         */
-        return text;
-    }
-
-    private static final Pattern P_TRIM = Pattern.compile("[a-zA-Z-_]+:\r?\n");
-
-    private static byte[] trimICal(final byte[] icalBytes) {
-        return P_TRIM.matcher(new String(icalBytes, com.openexchange.java.Charsets.UTF_8)).replaceAll("").getBytes(com.openexchange.java.Charsets.UTF_8);
-    }
-
-    private static boolean isAscii(final byte[] bytes) {
-        boolean isAscci = true;
-        for (int i = 0; isAscci && (i < bytes.length); i++) {
-            isAscci = (bytes[i] >= 0);
-        }
-        return isAscci;
-    }
-
     private static String getTaskCreateMessage(final EmailableParticipant p, final boolean canRead) {
         if (p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE) {
             return Notifications.TASK_CREATE_MAIL_EXT;
@@ -1157,36 +830,6 @@ public class ParticipantNotify implements TaskEventInterface2 {
             return Notifications.TASK_CREATE_MAIL_NO_ACCESS;
         } else {
             return Notifications.TASK_CREATE_MAIL;
-        }
-    }
-
-    private static String getAppointmentCreateTemplate(final EmailableParticipant p, final boolean canRead, final CalendarObject cal, final ServerSession session) {
-        final int folderOwner = getFolderOwner(cal, session);
-        if (p.type == Participant.EXTERNAL_USER || p.type == Participant.RESOURCE) {
-            if (folderOwner == session.getUserId()) {
-                return Notifications.APPOINTMENT_CREATE_MAIL_EXT;
-            }
-            return Notifications.APPOINTMENT_CREATE_MAIL_ON_BEHALF_EXT;
-        } else if (!canRead) {
-            if (folderOwner == session.getUserId()) {
-                return Notifications.APPOINTMENT_CREATE_MAIL_NO_ACCESS;
-            }
-            return Notifications.APPOINTMENT_CREATE_MAIL_ON_BEHALF_NO_ACCESS;
-        } else {
-            if (folderOwner == session.getUserId()) {
-                return Notifications.APPOINTMENT_CREATE_MAIL;
-            }
-            return Notifications.APPOINTMENT_CREATE_MAIL_ON_BEHALF;
-        }
-    }
-
-    private static int getFolderOwner(final CalendarObject cal, final ServerSession session) {
-        OXFolderAccess oxfa = new OXFolderAccess(session.getContext());
-        try {
-            return oxfa.getFolderOwner(cal.getParentFolderID());
-        } catch (OXException e) {
-            log(e);
-            return session.getUserId();
         }
     }
 
@@ -2092,7 +1735,7 @@ public class ParticipantNotify implements TaskEventInterface2 {
     /**
      * Gets a value indicating whether the supplied notification {@link State}
      * reflects an update of the accept/decline status or not.
-     * 
+     *
      * @param state The {@link State} to check
      * @return <code>true</code>, if it is a status update, <code>false</code>, otherwise
      */
