@@ -160,8 +160,10 @@ public abstract class AbstractMetricCollector implements MetricCollector {
     public final <T> Gauge<T> getGauge(String name, Class<T> clazz) {
         return (Gauge<T>) checkAndReturn(metricRegistry.getGauges().get(name), name);
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.metrics.MetricCollector#getRatioGauge(java.lang.String, java.lang.Class)
      */
     @Override
@@ -180,10 +182,11 @@ public abstract class AbstractMetricCollector implements MetricCollector {
     }
 
     /**
+     * Checks whether the specified {@link Metric} is <code>null</code>
      * 
-     * @param metric
-     * @param name TODO
-     * @return
+     * @param metric The {@link Metric} to check
+     * @param name The name of the metric
+     * @return The {@link Metric}
      */
     private Metric checkAndReturn(Metric metric, String name) {
         if (metric == null) {
