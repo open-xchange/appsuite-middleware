@@ -15,12 +15,15 @@ properties:
           type: array
           description: Folder path from restored folder down to root folder
           items:
-            id:
-              type: string
-              description: The folder id
-            title:
-              type: string
-              description: The folder title
+            type: object
+            title: FolderPath
+            properties:
+              id:
+                type: string
+                description: The folder id
+              title:
+                type: string
+                description: The folder title
   folders:
     type: array
     description: An array of restored folders.
@@ -35,9 +38,12 @@ properties:
           type: array
           description: Folder path from restored file down to root folder
           items:
-            id:
-              type: string
-              description: The folder id
-            title:
-              type: string
-              description: The folder title
+            type: object
+            title: FolderPath
+            properties:
+              id:
+                type: string
+                description: The folder id
+              title:
+                type: string
+                description: The folder title
