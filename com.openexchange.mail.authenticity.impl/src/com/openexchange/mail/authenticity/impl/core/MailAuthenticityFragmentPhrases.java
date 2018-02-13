@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,52 +47,19 @@
  *
  */
 
-package com.openexchange.mail.authenticity.impl.core.parsers;
+package com.openexchange.mail.authenticity.impl.core;
 
-import java.util.Map;
-import com.openexchange.mail.authenticity.impl.core.MailAuthenticityFragmentPhrases;
-import com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult;
-import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
-import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
-import com.openexchange.mail.authenticity.mechanism.dkim.DKIMAuthMechResult;
-import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResult;
-import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResultHeader;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link DKIMMailAuthenticityMechanismParser}
+ * {@link MailAuthenticityFragmentPhrases}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DKIMMailAuthenticityMechanismParser extends AbstractMailAuthenticityMechanismParser {
+public class MailAuthenticityFragmentPhrases implements LocalizableStrings {
 
-    /**
-     * Initialises a new {@link DKIMMailAuthenticityMechanismParser}.
-     */
-    public DKIMMailAuthenticityMechanismParser() {
-        super(DefaultMailAuthenticityMechanism.DKIM, DKIMResultHeader.HEADER_I, DKIMResultHeader.HEADER_D);
-    }
+    public static final String WITH_IP = "with IP";
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authenticity.impl.core.AbstractMailAuthenticityMechanismParser#parseMechanismResult(java.lang.String)
-     */
-    @Override
-    AuthenticityMechanismResult parseMechanismResult(String value) {
-        return DKIMResult.valueOf(value);
-    }
+    public static final String WITH_DOMAIN = "with domain";
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mail.authenticity.impl.core.AbstractMailAuthenticityMechanismParser#createResult(java.lang.String, com.openexchange.mail.authenticity.mechanism.AuthenticityMechanismResult, java.lang.String, boolean, java.util.Map)
-     */
-    @Override
-    MailAuthenticityMechanismResult createResult(String domain, AuthenticityMechanismResult mechResult, String mechanismName, boolean domainMatch, Map<String, String> attributes) {
-        DKIMAuthMechResult result = new DKIMAuthMechResult(domain, (DKIMResult) mechResult);
-        result.setDomainMatch(domainMatch);
-        result.addProperty("signing_domain", result.getDomain());
-        result.setReason(compileReasonPhrase(mechResult, MailAuthenticityFragmentPhrases.WITH_DOMAIN, result.getDomain()));
-        return result;
-    }
 }

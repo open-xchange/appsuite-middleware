@@ -67,7 +67,7 @@ After a certain amount of time, it can be necessary to delete the collected feed
 The user can also provide a timeframe, that should be considered. Only the data inside this timeframe will be deleted.
 
 # Send Feedback via mail
-In some cases the feedback has to be provided for a set of interested parties to evaluate the result. For this purpose the server provides a service to send the feedback file via email. There are two ways to trigger this, by using the REST service or a CLT, [documented here]({{ site.baseurl }}/middleware/components/commandlinetools/SendFeedbackViaMail.html). Since feedback providing and sending is an administrative task, the service provider must also configure the SMTP server to be used, by setting the properties [described here](https://documentation.open-xchange.com/latest/middleware/configuration/properties.html#userfeedback) in a <code>.properties</code> file, accessible by the server.
+In some cases the feedback has to be provided for a set of interested parties to evaluate the result. For this purpose the server provides a service to send the feedback file via email. There are two ways to trigger this, by using the REST service or a CLT, [documented here]({{ site.baseurl }}/middleware/components/commandlinetools/SendFeedback.html). Since feedback providing and sending is an administrative task, the service provider must also configure the SMTP server to be used, by setting the properties [described here](/components/middleware/config{{ site.baseurl }}/index.html#mode=features&feature=Feedback Mail SMTP-Service) in a <code>.properties</code> file, accessible by the server.
 
 ## Send secure
 

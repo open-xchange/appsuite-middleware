@@ -437,12 +437,12 @@ public final class CSSMatcher {
      * @return <code>true</code> if modified; otherwise <code>false</code>
      */
     protected static boolean checkCSS(final Stringer cssBuilder, final Map<String, Set<String>> styleMap, final String cssPrefix, final boolean removeIfAbsent, final boolean internallyInvoked) {
-        if (cssBuilder.isEmpty()) {
+        if (cssBuilder.isEmpty() || (null == styleMap && Strings.isEmpty(cssPrefix))) {
             return false;
         }
 
         // Schedule separate task to monitor duration
-        // User StringBuffer-based invocation to honor concurrency
+        // Use StringBuffer-based invocation to honor concurrency
         final Stringer cssBld = new StringBufferStringer(new StringBuffer(cssBuilder.toString()));
         cssBuilder.setLength(0);
 
