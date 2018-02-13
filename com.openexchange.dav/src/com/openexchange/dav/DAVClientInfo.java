@@ -84,7 +84,7 @@ public class DAVClientInfo implements ClientInfo {
 
     @Override
     public ClientInfoType getType() {
-        return ClientInfoType.SYNC;
+        return ClientInfoType.DAV;
     }
 
     @Override

@@ -81,9 +81,6 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
             return null;
         }
         DAVUserAgent userAgent = getDAVUserAgent(session);
-        if (DAVUserAgent.UNKNOWN.equals(userAgent)) {
-            return getClientInfo(session.getClient());
-        }
         ReadableUserAgent readableUserAgent = userAgentParser.parse((String) session.getParameter(Session.PARAM_USER_AGENT));
         if (null != readableUserAgent) {
             String osVersion = null;

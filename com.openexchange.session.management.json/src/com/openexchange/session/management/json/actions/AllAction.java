@@ -131,16 +131,17 @@ public class AllAction implements AJAXActionService {
                     String type = deviceInfo.getJSONObject("client").getString("type");
                     switch (type) {
                         case "browser":
-                            browsers.add(0, json);
+                            browsers.put(json);
                             break;
                         case "oxapp":
-                            oxapps.add(0, json);
+                            oxapps.put(json);
                             break;
-                        case "sync":
-                            syncapps.add(0, json);
+                        case "eas":
+                        case "dav":
+                            syncapps.put(json);
                             break;
                         default:
-                            others.add(0, json);
+                            others.put(json);
                             break;
                     }
                 }

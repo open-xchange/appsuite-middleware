@@ -62,7 +62,9 @@ public enum ClientInfoType {
 
     OXAPP("oxapp"),
 
-    SYNC("sync"),
+    EAS("eas"),
+
+    DAV("dav"),
 
     OTHER("other"),
     ;
