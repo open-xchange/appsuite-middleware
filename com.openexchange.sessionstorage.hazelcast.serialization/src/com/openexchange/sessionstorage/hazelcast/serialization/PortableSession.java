@@ -127,7 +127,7 @@ public class PortableSession extends StoredSession implements CustomPortable {
     public static final String PARAMETER_REMOTE_PARAMETER_VALUES = "remoteParameterValues";
     public static final String PARAMETER_NAME_XOAUTH2_TOKEN = "xoauth2";
 
-    /** The class definition for PortableCacheEvent */
+    /** The class definition for PortableSession */
     public static ClassDefinition CLASS_DEFINITION = new ClassDefinitionBuilder(FACTORY_ID, CLASS_ID)
         .addUTFField(PARAMETER_LOGIN_NAME)
         .addUTFField(PARAMETER_PASSWORD)
