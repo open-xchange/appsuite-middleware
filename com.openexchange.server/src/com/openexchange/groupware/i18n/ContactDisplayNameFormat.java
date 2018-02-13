@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.find.contacts;
+package com.openexchange.groupware.i18n;
 
 import com.openexchange.i18n.LocalizableStrings;
 
