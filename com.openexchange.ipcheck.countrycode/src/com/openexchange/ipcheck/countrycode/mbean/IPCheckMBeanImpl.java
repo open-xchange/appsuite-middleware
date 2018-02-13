@@ -195,7 +195,7 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
         // Denied percentages
         int deniedEx = metrics.getDeniedException();
         deniedExceptionPercentage = ((float) deniedEx / totalDenied) * 100;
-        int deniedCC = metrics.getAcceptedEligibleIPChanges();
+        int deniedCC = metrics.getDeniedCountryChanged();
         deniedCountryChangedPercentage = ((float) deniedCC / totalDenied) * 100;
 
         // Overall denied percentages

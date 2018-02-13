@@ -185,7 +185,7 @@ public class IPCheckMetrics {
      *
      * @return The deniedCountryChanged
      */
-    public AtomicInteger getDeniedCountryChanged() {
-        return deniedCountryChanged;
+    public int getDeniedCountryChanged() {
+        return deniedCountryChanged.get();
     }
 }
