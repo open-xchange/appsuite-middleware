@@ -167,7 +167,7 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
      */
     private void accept(String current, String previous, Session session, boolean whiteListedClient, AcceptReason acceptReason) {
         LOGGER.debug("The IP change from '{}' to '{}' was accepted. Reason: '{}'", previous, current, acceptReason.getMessage());
-        IPCheckers.updateIPAddress(current, session, true, whiteListedClient);
+        IPCheckers.updateIPAddress(current, session, whiteListedClient);
         switch (acceptReason) {
             case PRIVATE_IPV4:
                 metrics.incrementAcceptedPrivateIP();
