@@ -746,6 +746,7 @@ public final class SessionHandler {
      * Stores the session (if available) into session storage.
      *
      * @param sessionId The session identifier
+     * @param addIfAbsent Adds the session to storage only if absent
      * @return <code>true</code> if stored; otherwise <code>false</code>
      */
     protected static boolean storeSession(String sessionId, boolean addIfAbsent) {
@@ -920,8 +921,7 @@ public final class SessionHandler {
      *
      * @param session The session to store
      * @param sessionStorageService The storage service
-     * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code> to perform a possibly
-     *            replacing put
+     * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code> to perform a possibly replacing put
      */
     public static void storeSessionAsync(SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent) {
         storeSession(session, sessionStorageService, addIfAbsent, true);

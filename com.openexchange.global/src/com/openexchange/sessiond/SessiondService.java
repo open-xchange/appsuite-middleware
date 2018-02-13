@@ -95,7 +95,7 @@ public interface SessiondService {
      * Stores the session associated with given identifier into session storage (if such a session exists).
      *
      * @param sessionId The session identifier
-     * @param addIfAbsent  Adds the session to storage only if absent
+     * @param addIfAbsent Adds the session to storage only if absent
      * @return <code>true</code> if stored; otherwise <code>false</code>
      * @throws OXException If storing the session fails
      */
