@@ -7,8 +7,10 @@ Bundle-Activator: com.openexchange.user.copy.osgi.Activator
 Bundle-Vendor: Open-Xchange
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.chronos,
+ com.openexchange.chronos.common,
  com.openexchange.chronos.provider,
  com.openexchange.chronos.service,
+ com.openexchange.chronos.storage,
  com.openexchange.context,
  com.openexchange.database,
  com.openexchange.database.provider,
@@ -65,5 +67,3 @@ Import-Package: com.openexchange.chronos,
  org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.user.copy
-Require-Bundle: com.openexchange.chronos.storage,
- com.openexchange.chronos.common
