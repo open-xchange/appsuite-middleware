@@ -49,6 +49,8 @@
 
 package com.openexchange.session.management.impl;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -254,6 +256,15 @@ public class SessionManagementServiceImpl implements SessionManagementService {
 
     private String optLocationFor(Session s, String def, Map<String, String> ip2locationCache, GeoLocationService geoLocationService) {
         String ipAddress = s.getLocalIp();
+
+        try {
+            InetAddress address = InetAddress.getByName(ipAddress);
+            if (address.isLoopbackAddress() || address.isLinkLocalAddress() || address.isSiteLocalAddress()) {
+                return "Intranet";
+            }
+        } catch (UnknownHostException e1) {
+            // ignore and try geolocation service
+        }
 
         // Check "cache" first
         String location = ip2locationCache.get(ipAddress);
