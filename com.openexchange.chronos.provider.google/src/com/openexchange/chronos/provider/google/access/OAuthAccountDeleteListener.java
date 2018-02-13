@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,49 +47,55 @@
  *
  */
 
-package com.openexchange.chronos.provider.google.osgi;
+package com.openexchange.chronos.provider.google.access;
 
-import com.openexchange.chronos.provider.CalendarProvider;
+import static com.openexchange.osgi.Tools.requireService;
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import org.json.JSONException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
-import com.openexchange.chronos.provider.account.CalendarAccountService;
+import com.openexchange.chronos.provider.google.GoogleCalendarConfigField;
 import com.openexchange.chronos.provider.google.GoogleCalendarProvider;
-import com.openexchange.chronos.provider.google.migration.GoogleSubscriptionsMigrationTask;
-import com.openexchange.chronos.service.RecurrenceService;
-import com.openexchange.chronos.storage.CalendarStorageFactory;
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.context.ContextService;
-import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.group.GroupService;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.oauth.OAuthAccountDeleteListener;
-import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
-import com.openexchange.user.UserService;
+import com.openexchange.chronos.provider.google.osgi.Services;
+import com.openexchange.exception.OXException;
 
-public class Activator extends HousekeepingActivator {
+/**
+ * {@link OAuthAccountDeleteListener}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
+ */
+public class OAuthAccountDeleteListener implements com.openexchange.oauth.OAuthAccountDeleteListener{
+
+    private static final Logger LOG = LoggerFactory.getLogger(OAuthAccountDeleteListener.class);
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        //@formatter:off
-        return new Class[] {
-            OAuthService.class, OAuthServiceMetaDataRegistry.class, CalendarAccountService.class, AdministrativeCalendarAccountService.class, LeanConfigurationService.class, RecurrenceService.class,
-            // The services below are only required by migration
-            GenericConfigurationStorageService.class, CalendarStorageFactory.class, ContextService.class, FolderUserPropertyStorage.class, GroupService.class, UserService.class, FolderService.class
-        };
-        //@formatter:on
+    public void onBeforeOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
+        // nothing to do
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        openTrackers();
-        Services.setServiceLookup(this);
-        registerService(CalendarProvider.class, new GoogleCalendarProvider(this));
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new GoogleSubscriptionsMigrationTask()));
-        registerService(OAuthAccountDeleteListener.class, new com.openexchange.chronos.provider.google.access.OAuthAccountDeleteListener());
-    }
+    public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
+        AdministrativeCalendarAccountService administrativeCalendarAccountService = requireService(AdministrativeCalendarAccountService.class, Services.getServiceLookup());
+        List<CalendarAccount> allAccounts = administrativeCalendarAccountService.getAccounts(cid, user, GoogleCalendarProvider.PROVIDER_ID);
 
+        List<CalendarAccount> accountsToDelete = new ArrayList<>(allAccounts.size());
+        for(CalendarAccount acc: allAccounts) {
+            try {
+                if(id == acc.getUserConfiguration().getInt(GoogleCalendarConfigField.OAUTH_ID)) {
+                    accountsToDelete.add(acc);
+                }
+            } catch (JSONException e) {
+                LOG.warn("Unable to check google calendar account with id %s for user %s in context %s: %s", acc.getAccountId(), user, cid, e.getMessage());
+            }
+        }
+
+        administrativeCalendarAccountService.deleteAccounts(cid, user, accountsToDelete);
+
+    }
 }

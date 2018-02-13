@@ -337,11 +337,12 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
 
     @Override
     public void handleExceptions(OXException e) {
+        // TODO handle exception
     }
 
     @Override
     public List<OXException> getWarnings() {
-        // TODO Auto-generated method stub
+        // TODO handle warnings
         return null;
     }
 

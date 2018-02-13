@@ -362,6 +362,17 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         }
         return initAccountStorage(contextId, null).loadAccount(userId, providerId);
     }
+    @Override
+    public List<CalendarAccount> getAccounts(int contextId, int userId, String providerId) throws OXException {
+        List<CalendarAccount> result = new ArrayList<>();
+        List<CalendarAccount> allAccounts = initAccountStorage(contextId, null).loadAccounts(userId);
+        for(CalendarAccount acc: allAccounts) {
+            if(providerId.equals(acc.getProviderId())){
+                result.add(acc);
+            }
+        }
+        return result;
+    }
 
     @Override
     public CalendarAccount updateAccount(int contextId, int userId, int accountId, JSONObject internalConfig, JSONObject userConfig, long clientTimestamp) throws OXException {
@@ -568,6 +579,14 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
             accounts.sort(ACCOUNT_COMPARATOR);
         }
         return accounts;
+    }
+
+    @Override
+    public void deleteAccounts(int contextId, int userId, List<CalendarAccount> accounts) throws OXException {
+        CalendarAccountStorage accountStorage = initAccountStorage(contextId, null);
+        for(CalendarAccount acc: accounts) {
+            accountStorage.deleteAccount(userId, acc.getAccountId(), Long.MAX_VALUE);
+        }
     }
 
 }
