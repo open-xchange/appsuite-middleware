@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.groupware;
 
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_SUPPRESS_ITIP;
 import java.sql.Connection;
 import java.util.LinkedList;
 import java.util.List;
@@ -58,6 +59,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
@@ -79,10 +81,10 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * <li>{@link DeleteEvent#TYPE_USER}</li>
  * <li>{@link DeleteEvent#TYPE_GROUP}</li>
  * <li>{@link DeleteEvent#TYPE_RESOURCE} </li>
- * 
+ *
  * Type {@link DeleteEvent#TYPE_CONTEXT} is handled by com.openexchange.admin.storage.mysqlStorage.OXContextMySQLStorage#deleteTablesData.
  * Type {@link DeleteEvent#TYPE_RESOURCE_GROUP} will thrown an appropriated error.
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
@@ -96,7 +98,7 @@ public final class CalendarDeleteListener implements DeleteListener {
 
     /**
      * Initializes a new {@link CalendarDeleteListener}.
-     * 
+     *
      * @param factory The {@link CalendarStorageFactory}
      * @param calendarUtilities The {@link CalendarUtilities}
      * @param calendarHandlers The {@link CalendarHandler}s to notify
@@ -135,7 +137,7 @@ public final class CalendarDeleteListener implements DeleteListener {
 
     /**
      * Purges the user data
-     * 
+     *
      * @param dbProvider The {@link DBProvider}
      * @param context The {@link Context}
      * @param userId The user identifier
@@ -180,13 +182,13 @@ public final class CalendarDeleteListener implements DeleteListener {
         updater.deleteAccount();
 
         // Trigger calendar events
-        updater.notifyCalendarHandlers(adminSession);
+        updater.notifyCalendarHandlers(adminSession, new DefaultCalendarParameters().set(PARAMETER_SUPPRESS_ITIP, Boolean.TRUE));
     }
 
     /**
      * Removes the given attendee from every event it attends, set the modification date in the event accordingly
      * and finally deletes the attendee.
-     * 
+     *
      * @param dbProvider The {@link DBProvider}
      * @param context The {@link Context}
      * @param attendeeId The identifier of the attendee. Should be either a {@link CalendarUserType#GROUP} or {@link CalendarUserType#RESOURCE}
@@ -196,6 +198,7 @@ public final class CalendarDeleteListener implements DeleteListener {
     private void deleteAttendee(DBProvider dbProvider, Context context, int attendeeId, Session adminSession) throws OXException {
         StorageUpdater updater = new StorageUpdater(context, attendeeId, null, calendarUtilities, factory, dbProvider, calendarHandlers);
         updater.removeAttendeeFrom(updater.searchEvents());
-        updater.notifyCalendarHandlers(adminSession);
+        updater.notifyCalendarHandlers(adminSession, new DefaultCalendarParameters().set(PARAMETER_SUPPRESS_ITIP, Boolean.TRUE));
     }
+
 }

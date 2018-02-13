@@ -67,6 +67,7 @@ import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarHandler;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.UpdateResult;
@@ -112,11 +113,12 @@ class SimpleResultTracker {
      * @param context The {@link Context}
      * @param session The {@link Session} of the context admin
      * @param entityResolver The {@link EntityResolver}
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
      */
-    public void notifyCalenderHandlers(Connection connection, Context context, Session session, EntityResolver entityResolver) {
+    public void notifyCalenderHandlers(Connection connection, Context context, Session session, EntityResolver entityResolver, CalendarParameters parameters) {
         Map<Integer, List<String>> affectedFoldersPerUser = getAffectedFoldersPerUser(context, connection, entityResolver);
         if (false == affectedFoldersPerUser.isEmpty()) {
-            DefaultCalendarEvent calendarEvent = new DefaultCalendarEvent(context.getContextId(), CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), -1, session, affectedFoldersPerUser, Collections.emptyList(), updateResults, deleteResults, null);
+            DefaultCalendarEvent calendarEvent = new DefaultCalendarEvent(context.getContextId(), CalendarAccount.DEFAULT_ACCOUNT.getAccountId(), -1, session, affectedFoldersPerUser, Collections.emptyList(), updateResults, deleteResults, parameters);
             for (CalendarHandler handler : calendarHandlers) {
                 handler.handle(calendarEvent);
             }
