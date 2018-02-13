@@ -91,8 +91,7 @@ public class WebClientInfo implements ClientInfo {
             out = helper.getString(ClientInfoStrings.CLIENT_BROWSER_INFO_MESSAGE);
             return String.format(out, client, browser, browserVersion);
         } else {
-            out = helper.getString(ClientInfoStrings.CLIENT_INFO_MESSAGE);
-            return String.format(out, client);
+            return client;
         }
     }
 

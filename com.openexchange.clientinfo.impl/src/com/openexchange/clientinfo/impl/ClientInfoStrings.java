@@ -68,10 +68,6 @@ public class ClientInfoStrings implements LocalizableStrings {
     // E.g. App Suite UI on Windows 10
     public final static String CLIENT_BROWSER_INFO_MESSAGE = "%1$s on %2$s %3$s";
 
-    // %1$s
-    // E.g. App Suite UI
-    public final static String CLIENT_INFO_MESSAGE = "%1$s";
-
     // Microsoft Exchange ActiveSync Client
     public final static String USM_EAS_CLIENT = "Microsoft Exchange ActiveSync Client";
 
@@ -90,10 +86,6 @@ public class ClientInfoStrings implements LocalizableStrings {
     // %1$s on %2$s
     // E.g. OX Mail App on Android
     public final static String MAILAPP_WITH_PLATFORM = "%1$s on %2$s";
-
-    // %1$s
-    // E.g. OX Mail App
-    public final static String MAILAPP = "%1$s";
 
     private ClientInfoStrings() {
         super();
