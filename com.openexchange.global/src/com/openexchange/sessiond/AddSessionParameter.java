@@ -143,8 +143,10 @@ public interface AddSessionParameter {
     SessionEnhancement getEnhancement();
 
     /**
-     * the identifier of the user-agent using the session.
+     * Gets the identifier of the user-agent using the session.
+     *
      * @return The user-agent
      */
     String getUserAgent();
+
 }

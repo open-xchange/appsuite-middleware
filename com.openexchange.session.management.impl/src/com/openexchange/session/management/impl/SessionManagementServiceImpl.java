@@ -193,7 +193,7 @@ public class SessionManagementServiceImpl implements SessionManagementService {
         }
 
         try {
-            Map<Member, PortableSessionCollection> collectionsByMember = Hazelcasts.executeByMembers(new PortableMultipleSessionRemoteLookUp(session.getUserId(), session.getContextId()), otherMembers, hzInstance);
+            Map<Member, PortableSessionCollection> collectionsByMember = Hazelcasts.executeByMembers(new PortableMultipleSessionRemoteLookUp(session.getUserId(), session.getContextId(), true), otherMembers, hzInstance);
             List<PortableSession> remoteSessions = new ArrayList<>(16);
             for (PortableSessionCollection portableSessionCollection : collectionsByMember.values()) {
                 PortableSession[] portableSessions = portableSessionCollection.getSessions();

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,60 +47,47 @@
  *
  */
 
-package com.openexchange.sessiond.impl;
+package com.openexchange.session.management.impl;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Reply;
+import com.openexchange.session.Session;
+import com.openexchange.session.inspector.Reason;
+import com.openexchange.session.inspector.SessionInspectorService;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 
 /**
- * {@link SessionIdGenerator} - The session ID generator
+ * {@link LocalLastActiveTimestampSetter} - Updates the local last-active time stamp on each session hit.
  *
- * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-
-public abstract class SessionIdGenerator {
+public class LocalLastActiveTimestampSetter implements SessionInspectorService {
 
     /**
-     * Initializes a new {@link SessionIdGenerator}
+     * Initializes a new {@link LocalLastActiveTimestampSetter}.
      */
-    protected SessionIdGenerator() {
+    public LocalLastActiveTimestampSetter() {
         super();
     }
 
-    /**
-     * Gets the session ID generator.
-     *
-     * @return The session ID generator.
-     */
-    public static SessionIdGenerator getInstance() {
-        return UUIDSessionIdGenerator.getInstance();
+    @Override
+    public Reply onSessionHit(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        // Update local last-active time stamp
+        session.setParameter(Session.PARAM_LOCAL_LAST_ACTIVE, Long.valueOf(System.currentTimeMillis()));
+        return Reply.NEUTRAL;
     }
 
-    // -------------------------------------------------------------------------------------------------------------------------------------
+    @Override
+    public Reply onSessionMiss(String sessionId, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        return Reply.NEUTRAL;
+    }
 
-    /**
-     * Creates a new session identifier.
-     *
-     * @param loginName The login name associated with the new session
-     * @return The session identifier
-     * @throws OXException If creating the session identifier fails
-     */
-    public abstract String createSessionId(String loginName) throws OXException;
-
-    /**
-     * Creates a new secret identifier.
-     *
-     * @param loginName The login name associated with the new session
-     * @return The secret identifier
-     * @throws OXException If creating the secret identifier fails
-     */
-    public abstract String createSecretId(String loginName) throws OXException;
-
-    /**
-     * Creates a random identifier.
-     *
-     * @return The random identifier
-     * @throws OXException If creating the random identifier fails
-     */
-    public abstract String createRandomId() throws OXException;
+    @Override
+    public Reply onAutoLoginFailed(Reason reason, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        return Reply.NEUTRAL;
+    }
 
 }

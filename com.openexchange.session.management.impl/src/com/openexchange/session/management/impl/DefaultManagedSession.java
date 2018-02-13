@@ -86,7 +86,7 @@ public class DefaultManagedSession implements ManagedSession {
         private String client;
         private String userAgent;
         private long loginTime;
-        private long    lastActive;
+        private long lastActive;
         private String location;
         private Session session;
 
@@ -101,7 +101,7 @@ public class DefaultManagedSession implements ManagedSession {
             this.client = session.getClient();
             this.userAgent = (String) session.getParameter(Session.PARAM_USER_AGENT);
             this.loginTime = parseLoginTime(session);
-            this.lastActive = parseLastActive(session);
+            this.lastActive = parseLocalLastActive(session);
             location = SessionManagementStrings.UNKNOWN_LOCATION;
             this.session = session;
         }
@@ -110,8 +110,8 @@ public class DefaultManagedSession implements ManagedSession {
             return parseLongNumber(Session.PARAM_LOGIN_TIME, session);
         }
 
-        private static long parseLastActive(Session session) {
-            return parseLongNumber(Session.PARAM_LAST_ACTIVE, session);
+        private static long parseLocalLastActive(Session session) {
+            return parseLongNumber(Session.PARAM_LOCAL_LAST_ACTIVE, session);
         }
 
         private static long parseLongNumber(String paramName, Session session) {
@@ -184,7 +184,7 @@ public class DefaultManagedSession implements ManagedSession {
     private final String client;
     private final String userAgent;
     private final long loginTime;
-    private final long    lastActive;
+    private final long lastActive;
     private final String location;
     private final Session session;
 
