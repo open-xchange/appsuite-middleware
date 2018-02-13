@@ -2130,14 +2130,14 @@ msgstr ""
 
 #. %1$s %2$s
 #. E.g. Drive Client 2.4.0
-#. The default display name format for contacts without department: <firstname> <lastname>
 #.
 #. * The display of a users given and sur name name in e.g. notification mails (Hello John Doe, ...).
 #. * The placeholders mean $givenname $surname.
 #.
+#. The default display name format for contacts without department: <firstname> <lastname>
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:77
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactDisplayNameFormat.java:65
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.notification/src/com/openexchange/notification/NotificationStrings.java:67
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/ContactDisplayNameFormat.java:65
 msgid "%1$s %2$s"
 msgstr ""
 
@@ -3045,11 +3045,6 @@ msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:103
 msgid "false"
-msgstr ""
-
-#. The default display name format for contacts with department: <firstname> <lastname> (department)
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactDisplayNameFormat.java:62
-msgid "%1$s %2$s (%3$s)"
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:64
@@ -5978,6 +5973,11 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:69
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:181
 msgid "Denied concurrent update of user attributes."
+msgstr ""
+
+#. The default display name format for contacts with department: <firstname> <lastname> (department)
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/ContactDisplayNameFormat.java:62
+msgid "%1$s %2$s (%3$s)"
 msgstr ""
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:68
