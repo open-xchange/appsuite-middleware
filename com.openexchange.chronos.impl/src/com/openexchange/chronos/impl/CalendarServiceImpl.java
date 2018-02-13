@@ -471,26 +471,34 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public List<ImportResult> importEvents(CalendarSession session, String folderID, List<Event> events) throws OXException {
-        /*
-         * import events & notify handlers
-         */
-        List<InternalImportResult> results = new InternalCalendarStorageOperation<List<InternalImportResult>>(session) {
-
-            @Override
-            protected List<InternalImportResult> execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new ImportPerformer(storage, session, getFolder(session, folderID)).perform(events);
+        Boolean oldSuppressItip = session.get(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.class);
+        try {
+            if (null == oldSuppressItip) {
+                session.set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
             }
+            /*
+             * import events & notify handlers
+             */
+            List<InternalImportResult> results = new InternalCalendarStorageOperation<List<InternalImportResult>>(session) {
 
-        }.executeUpdate();
-        /*
-         * notify handlers & return userized result
-         */
-        List<ImportResult> importResults = new ArrayList<ImportResult>(results.size());
-        for (InternalImportResult result : results) {
-            importResults.add(result.getImportResult());
-            notifyHandlers(result.getCalendarEvent(session));
+                @Override
+                protected List<InternalImportResult> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                    return new ImportPerformer(storage, session, getFolder(session, folderID)).perform(events);
+                }
+
+            }.executeUpdate();
+            /*
+             * notify handlers & return userized result
+             */
+            List<ImportResult> importResults = new ArrayList<ImportResult>(results.size());
+            for (InternalImportResult result : results) {
+                importResults.add(result.getImportResult());
+                notifyHandlers(result.getCalendarEvent(session));
+            }
+            return importResults;
+        } finally {
+            session.set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, oldSuppressItip);
         }
-        return importResults;
     }
 
     @Override

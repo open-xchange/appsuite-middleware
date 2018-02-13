@@ -455,6 +455,7 @@ public interface CalendarService {
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}</li>
      * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
+     * <li>{@link CalendarParameters#PARAMETER_SUPPRESS_ITIP}, defaulting to {@link Boolean#TRUE} unless overridden</li>
      * <li>{@link CalendarParameters#UID_CONFLICT_STRATEGY}</li>
      * </ul>
      *
