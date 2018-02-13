@@ -56,6 +56,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -128,30 +129,31 @@ public class SessionManagementServiceImpl implements SessionManagementService {
             throw ServiceExceptionCode.absentService(SessiondService.class);
         }
 
-        Set<String> blackListedClients = getBlacklistedClients();
-
         Collection<Session> localSessions = sessiondService.getSessions(session.getUserId(), session.getContextId());
         Collection<PortableSession> remoteSessions = getRemoteSessionsForUser(session);
 
+        Set<String> blackListedClients = getBlacklistedClients();
         String location = getDefaultLocation(session);
 
         GeoLocationService geoLocationService = services.getOptionalService(GeoLocationService.class);
-        Map<String, String> ip2locationCache = new HashMap<>(localSessions.size() + remoteSessions.size());
-        List<ManagedSession> result = new ArrayList<>(localSessions.size() + remoteSessions.size());
+        int totalSize = localSessions.size() + remoteSessions.size();
+        Map<String, String> ip2locationCache = new HashMap<>(totalSize);
+        List<ManagedSession> result = new ArrayList<>(totalSize);
+        Set<String> filter = new HashSet<String>(totalSize, 0.9F);
         for (Session s : localSessions) {
-            if (false == blackListedClients.contains(s.getClient())) {
+            if (filter.add(s.getSessionID()) && false == blackListedClients.contains(s.getClient())) {
                 ManagedSession managedSession = DefaultManagedSession.builder(s).setLocation(optLocationFor(s, location, ip2locationCache, geoLocationService)).build();
                 result.add(managedSession);
             }
         }
 
         for (Session s : remoteSessions) {
-            if (false == blackListedClients.contains(s.getClient())) {
+            if (filter.add(s.getSessionID()) && false == blackListedClients.contains(s.getClient())) {
                 ManagedSession managedSession = DefaultManagedSession.builder(s).setLocation(optLocationFor(s, location, ip2locationCache, geoLocationService)).build();
                 result.add(managedSession);
             }
         }
-        return Collections.unmodifiableCollection(result);
+        return result;
     }
 
     @Override
