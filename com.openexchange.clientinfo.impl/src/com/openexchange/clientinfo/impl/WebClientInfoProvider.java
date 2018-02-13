@@ -158,6 +158,7 @@ public class WebClientInfoProvider implements ClientInfoProvider {
                             } catch (NumberFormatException e) {
                                 osReadableName.append("MacOS X");
                             }
+                            break;
                         case OS_FAMILY_ANDROID:
                             osReadableName.append("Android ").append(osVersionMajor);
                             if (Strings.isNotEmpty(osVersionMinor)) {
