@@ -189,6 +189,14 @@ abstract class AbstractMailAuthenticityMechanismParser implements BiFunction<Map
             mechResult.addProperty(key, attributes.get(key));
         }
     }
+    
+    protected String compileReasonPhrase(AuthenticityMechanismResult mechResult, String phraseFragment, String address) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(mechResult.getDisplayName());
+        builder.append(' ').append(phraseFragment).append(' ');
+        builder.append(address);
+        return builder.toString();
+    }
 
     /**
      * Extracts an optional comment that may reside within parentheses

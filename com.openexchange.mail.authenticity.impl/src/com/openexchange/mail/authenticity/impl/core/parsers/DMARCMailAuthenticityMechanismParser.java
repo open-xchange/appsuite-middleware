@@ -89,7 +89,7 @@ public class DMARCMailAuthenticityMechanismParser extends AbstractMailAuthentici
     @Override
     MailAuthenticityMechanismResult createResult(String domain, AuthenticityMechanismResult mechResult, String mechanismName, boolean domainMatch, Map<String, String> attributes) {
         DMARCAuthMechResult result = new DMARCAuthMechResult(domain, (DMARCResult) mechResult);
-        result.setReason(extractComment(mechanismName));
+        result.setReason(mechResult.getDisplayName());
         result.setDomainMatch(domainMatch);
         result.addProperty("from_domain", result.getDomain());
         return result;
