@@ -94,7 +94,7 @@ public class SPFMailAuthenticityMechanismParser extends AbstractMailAuthenticity
         result.setDomainMatch(domainMatch);
         result.addProperty("mail_from", result.getDomain());
         String reason;
-        if (!Strings.isEmpty(result.getClientIP())) {
+        if (Strings.isNotEmpty(result.getClientIP())) {
             result.addProperty("client_ip", result.getClientIP());
             reason = compileReasonPhrase(mechResult, MailAuthenticityFragmentPhrases.WITH_IP, result.getClientIP());
         } else {
