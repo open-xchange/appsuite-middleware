@@ -47,41 +47,55 @@
  *
  */
 
-package com.openexchange.user.copy.internal.calendar.osgi;
+package com.openexchange.chronos.provider.google.access;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import com.openexchange.user.copy.CopyUserTaskService;
-import com.openexchange.user.copy.internal.calendar.CalendarCopyTask;
-
+import static com.openexchange.osgi.Tools.requireService;
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import org.json.JSONException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
+import com.openexchange.chronos.provider.google.GoogleCalendarConfigField;
+import com.openexchange.chronos.provider.google.GoogleCalendarProvider;
+import com.openexchange.chronos.provider.google.osgi.Services;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link CalendarCopyActivator}
+ * {@link OAuthAccountDeleteListener}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-public class CalendarCopyActivator implements BundleActivator {
+public class OAuthAccountDeleteListener implements com.openexchange.oauth.OAuthAccountDeleteListener{
 
-    private ServiceRegistration<CopyUserTaskService> serviceRegistration = null;
+    private static final Logger LOG = LoggerFactory.getLogger(OAuthAccountDeleteListener.class);
 
-
-    /**
-     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-     */
     @Override
-    public void start(final BundleContext context) throws Exception {
-        serviceRegistration  = context.registerService(CopyUserTaskService.class, new CalendarCopyTask(), null);
+    public void onBeforeOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
+        // nothing to do
     }
 
-    /**
-     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-     */
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        if (serviceRegistration != null) {
-            serviceRegistration.unregister();
+    public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
+        AdministrativeCalendarAccountService administrativeCalendarAccountService = requireService(AdministrativeCalendarAccountService.class, Services.getServiceLookup());
+        List<CalendarAccount> allAccounts = administrativeCalendarAccountService.getAccounts(cid, user, GoogleCalendarProvider.PROVIDER_ID);
+
+        List<CalendarAccount> accountsToDelete = new ArrayList<>(allAccounts.size());
+        for(CalendarAccount acc: allAccounts) {
+            try {
+                if(id == acc.getUserConfiguration().getInt(GoogleCalendarConfigField.OAUTH_ID)) {
+                    accountsToDelete.add(acc);
+                }
+            } catch (JSONException e) {
+                LOG.warn("Unable to check google calendar account with id %s for user %s in context %s: %s", acc.getAccountId(), user, cid, e.getMessage());
+            }
         }
-    }
 
+        administrativeCalendarAccountService.deleteAccounts(cid, user, accountsToDelete);
+
+    }
 }

@@ -56,8 +56,10 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.osgi.ServiceListing;
-import com.openexchange.session.Session;
 
 /**
  * {@link MailFetchListenerRegistry}
@@ -98,14 +100,14 @@ public class MailFetchListenerRegistry {
      * Determines the effective listener chain for specified arguments.
      *
      * @param fetchArguments The fetch arguments
-     * @param session The user's session
+     * @param mailAccess The opened mail access
      * @param state The state, which lets individual listeners store stuff
      * @return The effective listener chain
      * @throws OXException If listener chain cannot be returned
      */
-    public static MailFetchListenerChain determineFetchListenerChainFor(MailFetchArguments fetchArguments, Session session, Map<String, Object> state) throws OXException {
+    public static MailFetchListenerChain determineFetchListenerChainFor(MailFetchArguments fetchArguments, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, Map<String, Object> state) throws OXException {
         MailFetchListenerRegistry registry = INSTANCE_REFERENCE.get();
-        return null == registry ? MailFetchListenerChain.EMPTY_CHAIN : registry.getFetchListenerChainFor(fetchArguments, session, state);
+        return null == registry ? MailFetchListenerChain.EMPTY_CHAIN : registry.getFetchListenerChainFor(fetchArguments, mailAccess, state);
     }
 
     /**
@@ -143,12 +145,12 @@ public class MailFetchListenerRegistry {
      * Gets the effective listener chain for specified arguments.
      *
      * @param fetchArguments The fetch arguments
-     * @param session The user's session
+     * @param mailAccess The mail access
      * @param state The state, which lets individual listeners store stuff
      * @return The effective listener chain
      * @throws OXException If listener chain cannot be returned
      */
-    public MailFetchListenerChain getFetchListenerChainFor(MailFetchArguments fetchArguments, Session session, Map<String, Object> state) throws OXException {
+    public MailFetchListenerChain getFetchListenerChainFor(MailFetchArguments fetchArguments, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, Map<String, Object> state) throws OXException {
         Iterator<MailFetchListener> iterator = this.listeners.iterator();
         if (false == iterator.hasNext()) {
             return MailFetchListenerChain.EMPTY_CHAIN;
@@ -160,7 +162,7 @@ public class MailFetchListenerRegistry {
         boolean anyApplicable = false;
         do {
             MailFetchListener listener = iterator.next();
-            MailAttributation attributation = listener.onBeforeFetch(MailFetchArguments.copy(fetchArguments, fs, hns), session, state);
+            MailAttributation attributation = listener.onBeforeFetch(MailFetchArguments.copy(fetchArguments, fs, hns), mailAccess, state);
             if (attributation.isApplicable()) {
                 applicableListeners.add(listener);
                 fs = attributation.getFields();

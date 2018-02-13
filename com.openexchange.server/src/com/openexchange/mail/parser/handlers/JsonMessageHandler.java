@@ -431,7 +431,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     jsonObject.put(TEXT_PREVIEW, mail.getTextPreview());
                 }
                 MailAuthenticityResult mailAuthenticityResult = mail.getAuthenticityResult();
-                jsonObject.put(AUTHENTICATION_RESULTS, null == mailAuthenticityResult ? JSONObject.EMPTY_OBJECT : JsonMessageHandler.authenticationMechanismResultsToJson(mailAuthenticityResult));
+                jsonObject.put(AUTHENTICATION_RESULTS, null == mailAuthenticityResult ? null : JsonMessageHandler.authenticationMechanismResultsToJson(mailAuthenticityResult));
                 // Guard info
                 if (mail.containsSecurityInfo()) {
                     SecurityInfo securityInfo = mail.getSecurityInfo();
@@ -546,49 +546,58 @@ public final class JsonMessageHandler implements MailMessageHandler {
     @SuppressWarnings("unchecked")
     public static JSONObject authenticationMechanismResultsToJson(MailAuthenticityResult authenticityResult) throws JSONException {
         if (null == authenticityResult) {
-            return JSONObject.EMPTY_OBJECT;
+            return null;
         }
 
+        JSONObject result;
         Map<MailAuthenticityResultKey, Object> attributes = authenticityResult.getAttributes();
-        JSONObject result = new JSONObject(attributes.size());
-        JSONArray unconsideredResults = new JSONArray();
-        for (MailAuthenticityResultKey key : attributes.keySet()) {
-            if (!key.isVisible()) {
-                continue;
-            }
-            Object object = attributes.get(key);
-            if (object instanceof Collection<?>) {
-                Collection<?> col = (Collection<?>) object;
-
-                for (Object o : col) {
-                    if (o instanceof MailAuthenticityMechanismResult) {
-                        MailAuthenticityMechanismResult mechResult = (MailAuthenticityMechanismResult) o;
-                        JSONObject mailAuthMechResultJson = new JSONObject();
-                        mailAuthMechResultJson.put("result", mechResult.getResult().getTechnicalName());
-                        mailAuthMechResultJson.put("reason", mechResult.getReason());
-                        for (String k : mechResult.getProperties().keySet()) {
-                            mailAuthMechResultJson.put(k, mechResult.getProperties().get(k));
-                        }
-                        result.put(mechResult.getMechanism().getTechnicalName(), mailAuthMechResultJson);
-                    } else if (o instanceof Map) {
-                        unconsideredResults.put(JSONCoercion.coerceToJSON(o));
-                    } else {
-                        unconsideredResults.put(o);
-                    }
+        int numOfAttributes = attributes.size();
+        if (numOfAttributes > 0) {
+            result = new JSONObject(numOfAttributes);
+            JSONArray unconsideredResults = new JSONArray();
+            for (MailAuthenticityResultKey key : attributes.keySet()) {
+                if (!key.isVisible()) {
+                    continue;
                 }
-            } else {
-                result.put(key.getKey(), object);
+                Object object = attributes.get(key);
+                if (object instanceof Collection<?>) {
+                    Collection<?> col = (Collection<?>) object;
+
+                    for (Object o : col) {
+                        if (o instanceof MailAuthenticityMechanismResult) {
+                            MailAuthenticityMechanismResult mechResult = (MailAuthenticityMechanismResult) o;
+                            JSONObject mailAuthMechResultJson = new JSONObject();
+                            mailAuthMechResultJson.put("result", mechResult.getResult().getTechnicalName());
+                            mailAuthMechResultJson.put("reason", mechResult.getReason());
+                            for (String k : mechResult.getProperties().keySet()) {
+                                mailAuthMechResultJson.put(k, mechResult.getProperties().get(k));
+                            }
+                            result.put(mechResult.getMechanism().getTechnicalName(), mailAuthMechResultJson);
+                        } else if (o instanceof Map) {
+                            unconsideredResults.put(JSONCoercion.coerceToJSON(o));
+                        } else {
+                            unconsideredResults.put(o);
+                        }
+                    }
+                } else {
+                    result.put(key.getKey(), object);
+                }
             }
+            if (MailAuthenticityStatus.TRUSTED.equals(authenticityResult.getStatus()) && authenticityResult.getAttribute(MailAuthenticityResultKey.IMAGE) != null) {
+                result.put("image", authenticityResult.getAttribute(MailAuthenticityResultKey.IMAGE));
+            }
+            result.put("unconsidered_results", unconsideredResults);
+        } else {
+            result = new JSONObject();
         }
-        if (MailAuthenticityStatus.TRUSTED.equals(authenticityResult.getStatus()) && authenticityResult.getAttribute(MailAuthenticityResultKey.IMAGE) != null) {
-            result.put("image", authenticityResult.getAttribute(MailAuthenticityResultKey.IMAGE));
-        }
-        result.put("unconsidered_results", unconsideredResults);
+
         result.put("status", authenticityResult.getStatus().getTechnicalName());
 
-        CustomPropertyJsonHandler customPropertyJsonHandler = MailJSONActivator.SERVICES.get().getOptionalService(CustomPropertyJsonHandler.class);
-        if(customPropertyJsonHandler != null) {
-            result.put("custom", customPropertyJsonHandler.toJson(authenticityResult.getAttribute(MailAuthenticityResultKey.CUSTOM_PROPERTIES, Map.class)));
+        if (numOfAttributes > 0) {
+            CustomPropertyJsonHandler customPropertyJsonHandler = MailJSONActivator.SERVICES.get().getOptionalService(CustomPropertyJsonHandler.class);
+            if(customPropertyJsonHandler != null) {
+                result.put("custom", customPropertyJsonHandler.toJson(authenticityResult.getAttribute(MailAuthenticityResultKey.CUSTOM_PROPERTIES, Map.class)));
+            }
         }
 
         return result;

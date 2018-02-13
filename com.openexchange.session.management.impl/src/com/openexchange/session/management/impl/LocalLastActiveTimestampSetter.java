@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,49 +47,47 @@
  *
  */
 
-package com.openexchange.user.copy.internal.chronos.calendar.osgi;
+package com.openexchange.session.management.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.service.CalendarUtilities;
-import com.openexchange.chronos.storage.CalendarStorageFactory;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.copy.CopyUserTaskService;
-import com.openexchange.user.copy.internal.chronos.calendar.ChronosCalendarCopyTask;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Reply;
+import com.openexchange.session.Session;
+import com.openexchange.session.inspector.Reason;
+import com.openexchange.session.inspector.SessionInspectorService;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 
 /**
- * {@link ChronosCalendarCopyActivator}
+ * {@link LocalLastActiveTimestampSetter} - Updates the local last-active time stamp on each session hit.
  *
- * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class ChronosCalendarCopyActivator extends HousekeepingActivator {
+public class LocalLastActiveTimestampSetter implements SessionInspectorService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ChronosCalendarCopyActivator.class);
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[]{
-            CalendarStorageFactory.class,
-            CalendarUtilities.class
-        };
+    /**
+     * Initializes a new {@link LocalLastActiveTimestampSetter}.
+     */
+    public LocalLastActiveTimestampSetter() {
+        super();
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle {}", context.getBundle());
-            registerService(CopyUserTaskService.class, new ChronosCalendarCopyTask(this), null);
-        } catch (Exception e) {
-            LOG.error("error starting {}", context.getBundle(), e);
-            throw e;
-        }
+    public Reply onSessionHit(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        // Update local last-active time stamp
+        session.setParameter(Session.PARAM_LOCAL_LAST_ACTIVE, Long.valueOf(System.currentTimeMillis()));
+        return Reply.NEUTRAL;
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle {}", context.getBundle());
-        super.stopBundle();
+    public Reply onSessionMiss(String sessionId, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        return Reply.NEUTRAL;
+    }
+
+    @Override
+    public Reply onAutoLoginFailed(Reason reason, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        return Reply.NEUTRAL;
     }
 
 }

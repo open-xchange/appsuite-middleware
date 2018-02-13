@@ -47,48 +47,49 @@
  *
  */
 
-package com.openexchange.user.copy.internal.reminder.osgi;
+package com.openexchange.user.copy.internal.chronos.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.service.CalendarUtilities;
+import com.openexchange.chronos.storage.CalendarStorageFactory;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.copy.CopyUserTaskService;
-import com.openexchange.user.copy.internal.reminder.ReminderCopyTask;
-
+import com.openexchange.user.copy.internal.chronos.ChronosCopyTask;
 
 /**
- * {@link ReminderCopyActivator}
+ * {@link ChronosCopyActivator}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:Jan-Oliver.Huhn@open-xchange.com">Jan-Oliver Huhn</a>
+ * @since v7.10.0
  */
-public class ReminderCopyActivator implements BundleActivator {
+public class ChronosCopyActivator extends HousekeepingActivator {
 
-    private ServiceRegistration<CopyUserTaskService> serviceRegistration;
+    private static final Logger LOG = LoggerFactory.getLogger(ChronosCopyActivator.class);
 
-
-    /**
-     * Initializes a new {@link ReminderCopyActivator}.
-     */
-    public ReminderCopyActivator() {
-        super();
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[]{
+            CalendarStorageFactory.class,
+            CalendarUtilities.class
+        };
     }
 
-    /* (non-Javadoc)
-     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
-     */
     @Override
-    public void start(final BundleContext context) throws Exception {
-        serviceRegistration = context.registerService(CopyUserTaskService.class, new ReminderCopyTask(), null);
-    }
-
-    /* (non-Javadoc)
-     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-     */
-    @Override
-    public void stop(final BundleContext context) throws Exception {
-        if (serviceRegistration != null) {
-            serviceRegistration.unregister();
+    protected void startBundle() throws Exception {
+        try {
+            LOG.info("starting bundle {}", context.getBundle());
+            registerService(CopyUserTaskService.class, new ChronosCopyTask(this), null);
+        } catch (Exception e) {
+            LOG.error("error starting {}", context.getBundle(), e);
+            throw e;
         }
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        LOG.info("stopping bundle {}", context.getBundle());
+        super.stopBundle();
     }
 
 }

@@ -70,11 +70,6 @@ public class StoredSession implements PutIfAbsent, Serializable {
     /** The parameter name for the alternative session identifier */
     protected static final String PARAM_ALTERNATIVE_ID = Session.PARAM_ALTERNATIVE_ID;
 
-    /**
-     * The parameter name for session storage's {@link java.util.concurrent.Future add task}.
-     */
-    //public static final String PARAM_SST_FUTURE = "__sst-future";
-
     protected String loginName;
     protected String password;
     protected int contextId;

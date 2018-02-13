@@ -51,6 +51,9 @@ package com.openexchange.mail;
 
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.session.Session;
@@ -78,33 +81,33 @@ public interface MailFetchListener {
      * Invoked prior to fetching mails from mail back-end and allows this listener to add its needed fields and/or header names (if any)
      *
      * @param fetchArguments The fetch arguments
-     * @param session The user's session
+     * @param mailAccess The user's session
      * @param state The state, which lets individual listeners store stuff
      * @return The mail attributation
      * @throws OXException If attributation fails
      */
-    MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, Session session, Map<String, Object> state) throws OXException;
+    MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, Map<String, Object> state) throws OXException;
 
     /**
      * Invoked after mails are fetched and allows to modify and/or enhance them.
      *
      * @param mails The fetched mails
      * @param cacheable Whether specified mails are supposed to be cached
-     * @param session The user's session
-     * @param state The state, which was passed to {@link #onBeforeFetch(MailFetchArguments, Session, Map) onBeforeFetch} invocation
+     * @param mailAccess The user's session
+     * @param state The state, which was passed to {@link #onBeforeFetch(MailFetchArguments, MailAccess, Map) onBeforeFetch} invocation
      * @return The listener's result
      * @throws OXException If an aborting error occurs; acts in the same way as returning {@link MailFetchListenerResult#deny(OXException)}
      */
-    MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, Session session, Map<String, Object> state) throws OXException;
+    MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, Map<String, Object> state) throws OXException;
 
     /**
      * Invoked when a single mail has been fully fetched from storage.
      *
      * @param mail The fetched mail
-     * @param session The user's session
+     * @param mailAccess The user's session
      * @return The resulting mail
      * @throws OXException If an aborting error occurs
      */
-    MailMessage onMailFetch(MailMessage mail, Session session) throws OXException;
+    MailMessage onSingleMailFetch(MailMessage mail, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException;
 
 }

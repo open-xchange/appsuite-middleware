@@ -59,20 +59,33 @@ import com.openexchange.java.util.UUIDs;
  */
 public final class UUIDSessionIdGenerator extends SessionIdGenerator {
 
+    private static final UUIDSessionIdGenerator INSTANCE = new UUIDSessionIdGenerator();
+
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static UUIDSessionIdGenerator getInstance() {
+        return INSTANCE;
+    }
+
+    // -------------------------------------------------------------------------------------------------------
+
     /**
      * Initializes a new {@link UUIDSessionIdGenerator}
      */
-    public UUIDSessionIdGenerator() {
+    private UUIDSessionIdGenerator() {
         super();
     }
 
     @Override
-    public String createSessionId(final String userId, final String data) {
+    public String createSessionId(final String loginName) {
         return randomUUID();
     }
 
     @Override
-    public String createSecretId(final String userId, final String data) {
+    public String createSecretId(final String loginName) {
         return randomUUID();
     }
 

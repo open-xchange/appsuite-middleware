@@ -62,7 +62,7 @@ import com.openexchange.user.copy.CopyUserTaskService;
 import com.openexchange.user.copy.ObjectMapping;
 import com.openexchange.user.copy.UserCopyExceptionCodes;
 import com.openexchange.user.copy.internal.CopyTools;
-import com.openexchange.user.copy.internal.chronos.calendar.ChronosCalendarCopyTask;
+import com.openexchange.user.copy.internal.chronos.ChronosCopyTask;
 import com.openexchange.user.copy.internal.connection.ConnectionFetcherTask;
 import com.openexchange.user.copy.internal.contact.ContactCopyTask;
 import com.openexchange.user.copy.internal.context.ContextLoadTask;
@@ -99,7 +99,7 @@ public class AdditionalCopyTask implements CopyUserTaskService {
             ContextLoadTask.class.getName(),
             ConnectionFetcherTask.class.getName(),
             FolderCopyTask.class.getName(),
-            ChronosCalendarCopyTask.class.getName(),
+            ChronosCopyTask.class.getName(),
             ContactCopyTask.class.getName(),
             TaskCopyTask.class.getName()
         };

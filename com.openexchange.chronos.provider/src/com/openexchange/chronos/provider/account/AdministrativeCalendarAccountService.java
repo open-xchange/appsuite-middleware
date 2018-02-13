@@ -101,6 +101,18 @@ public interface AdministrativeCalendarAccountService {
     CalendarAccount getAccount(int contextId, int userId, String providerId) throws OXException;
 
     /**
+     * Gets the accounts of a certain user in a context for a specific calendar provider.
+     * <p/>
+     * Not yet existing accounts from registered auto-provisioning providers won't be created implicitly.
+     *
+     * @param contextId The context identifier
+     * @param userIds The identifier of the users to get the account from
+     * @param providerId The identifier of the provider to get the account from
+     * @return The accounts, or <code>null</code> if there is none
+     */
+    List<CalendarAccount> getAccounts(int contextId, int userId, String providerId) throws OXException;
+
+    /**
      * Updates the configuration data of a specific calendar account.
      *
      * @param contextId The context identifier
@@ -112,5 +124,14 @@ public interface AdministrativeCalendarAccountService {
      * @return The updated calendar account
      */
     CalendarAccount updateAccount(int contextId, int userId, int id, JSONObject internalConfig, JSONObject userConfig, long clientTimestamp) throws OXException;
+
+    /**
+     * Deletes the given accounts
+     *
+     * @param contextId The context identifier
+     * @param userId The identifier of the user owning the accounts
+     * @param accounts The accounts to delete
+     */
+    void deleteAccounts(int contextId, int userId, List<CalendarAccount> accounts) throws OXException;
 
 }

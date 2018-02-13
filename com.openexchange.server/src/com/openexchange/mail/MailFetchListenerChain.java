@@ -55,6 +55,9 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailFetchListenerResult.ListenerReply;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.session.Session;
 
@@ -100,7 +103,7 @@ public class MailFetchListenerChain implements MailFetchListener {
     }
 
     @Override
-    public MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, Session session, Map<String, Object> state) throws OXException {
+    public MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, Map<String, Object> state) throws OXException {
         if (null != optPrecomputedAttributation) {
             return optPrecomputedAttributation;
         }
@@ -115,7 +118,7 @@ public class MailFetchListenerChain implements MailFetchListener {
         boolean anyApplicable = false;
         do {
             MailFetchListener listener = iterator.next();
-            MailAttributation attributation = listener.onBeforeFetch(MailFetchArguments.copy(fetchArguments, fs, hns), session, state);
+            MailAttributation attributation = listener.onBeforeFetch(MailFetchArguments.copy(fetchArguments, fs, hns), mailAccess, state);
             if (attributation.isApplicable()) {
                 fs = attributation.getFields();
                 hns = attributation.getHeaderNames();
@@ -127,7 +130,7 @@ public class MailFetchListenerChain implements MailFetchListener {
     }
 
     @Override
-    public MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, Session session, Map<String, Object> state) throws OXException {
+    public MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, Map<String, Object> state) throws OXException {
         Iterator<MailFetchListener> iterator = this.listeners.iterator();
         if (false == iterator.hasNext()) {
             return MailFetchListenerResult.neutral(mails, true);
@@ -137,7 +140,7 @@ public class MailFetchListenerChain implements MailFetchListener {
         MailMessage[] ms = mails;
         do {
             MailFetchListener listener = iterator.next();
-            MailFetchListenerResult result = listener.onAfterFetch(ms, wannaCache, session, state);
+            MailFetchListenerResult result = listener.onAfterFetch(ms, wannaCache, mailAccess, state);
             if (ListenerReply.NEUTRAL != result.getReply()) {
                 return MailFetchListenerResult.copy(result, wannaCache);
             }
@@ -151,7 +154,7 @@ public class MailFetchListenerChain implements MailFetchListener {
     }
 
     @Override
-    public MailMessage onMailFetch(MailMessage mail, Session session) throws OXException {
+    public MailMessage onSingleMailFetch(MailMessage mail, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
         if (null == mail) {
             return null;
         }
@@ -164,7 +167,7 @@ public class MailFetchListenerChain implements MailFetchListener {
         MailMessage result = mail;
         do {
             MailFetchListener listener = iterator.next();
-            result = listener.onMailFetch(result, session);
+            result = listener.onSingleMailFetch(result, mailAccess);
         } while (iterator.hasNext());
         return result;
     }
