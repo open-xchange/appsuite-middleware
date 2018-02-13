@@ -75,6 +75,26 @@ public class ClientInfoStrings implements LocalizableStrings {
     // Microsoft Exchange ActiveSync Client
     public final static String USM_EAS_CLIENT = "Microsoft Exchange ActiveSync Client";
 
+    // %1$s %2$s on %3$s %4$s
+    // E.g. OX Mail App 1.10 on Android 8.0
+    public final static String MAILAPP_WITH_VERSION_AND_PLATFORM_AND_PLATFORMVERSION = "%1$s %2$s on %3$s %4$s";
+
+    // %1$s on %2$s %3$s
+    // E.g. OX Mail App on Android 8.0
+    public final static String MAILAPP_WITH_PLATFORM_AND_PLATFORMVERSION = "%1$s on %2$s %3$s";
+
+    // %1$s %2$s on %3$s
+    // E.g. OX Mail App 1.10 on Android
+    public final static String MAILAPP_WITH_VERSION_AND_PLATFORM = "%1$s %2$s on %3$s";
+
+    // %1$s on %2$s
+    // E.g. OX Mail App on Android
+    public final static String MAILAPP_WITH_PLATFORM = "%1$s on %2$s";
+
+    // %1$s
+    // E.g. OX Mail App
+    public final static String MAILAPP = "%1$s";
+
     private ClientInfoStrings() {
         super();
     }
