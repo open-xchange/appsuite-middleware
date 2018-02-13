@@ -262,9 +262,17 @@ public class SessionManagementServiceImpl implements SessionManagementService {
         try {
             InetAddress address = InetAddress.getByName(ipAddress);
             if (address.isLoopbackAddress() || address.isLinkLocalAddress() || address.isSiteLocalAddress()) {
-                return "Intranet";
+                UserService userService = services.getService(UserService.class);
+                if (null != userService) {
+                    try {
+                        return StringHelper.valueOf(userService.getUser(s.getUserId(), s.getContextId()).getLocale()).getString(SessionManagementStrings.INTRANET_LOCATION);
+                    } catch (OXException e) {
+                        LOG.warn("", e);
+                    }
+                }
+                return SessionManagementStrings.INTRANET_LOCATION;
             }
-        } catch (UnknownHostException e1) {
+        } catch (UnknownHostException e) {
             // ignore and try geolocation service
         }
 
