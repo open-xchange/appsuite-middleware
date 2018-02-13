@@ -178,7 +178,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                     jsonObject.put(MailJSONField.TEXT_PREVIEW.getKey(), mail.getTextPreview());
                 }
                 MailAuthenticityResult mailAuthenticityResult = mail.getAuthenticityResult();
-                jsonObject.put(MailJSONField.AUTHENTICITY.getKey(), null == mailAuthenticityResult ? JSONObject.EMPTY_OBJECT : JsonMessageHandler.authenticationMechanismResultsToJson(mailAuthenticityResult));
+                jsonObject.put(MailJSONField.AUTHENTICITY.getKey(), null == mailAuthenticityResult ? null : JsonMessageHandler.authenticationMechanismResultsToJson(mailAuthenticityResult));
                 if (mail.containsOriginalId()) {
                     String originalId = mail.getOriginalId();
                     if (null != originalId) {

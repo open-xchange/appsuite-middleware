@@ -69,6 +69,9 @@ import com.openexchange.mail.MailFetchListener;
 import com.openexchange.mail.MailFetchListenerResult;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
 import com.openexchange.mail.authenticity.impl.osgi.Services;
@@ -137,6 +140,10 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         return mailFields.contains(MailField.AUTHENTICATION_OVERALL_RESULT) || mailFields.contains(MailField.AUTHENTICATION_MECHANISM_RESULTS);
     }
 
+    private boolean isFolderAccepted(String fullName, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+        return !fullName.equals(mailAccess.getFolderStorage().getDraftsFolder()) && !fullName.equals(mailAccess.getFolderStorage().getSentFolder());
+    }
+
     @Override
     public boolean accept(MailMessage[] mailsFromCache, MailFetchArguments fetchArguments, Session session) throws OXException {
         if (isNotApplicableFor(fetchArguments, session)) {
@@ -160,7 +167,8 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
     }
 
     @Override
-    public MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, Session session, Map<String, Object> state) throws OXException {
+    public MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, Map<String, Object> state) throws OXException {
+        Session session = mailAccess.getSession();
         if (isNotApplicableFor(fetchArguments, session)) {
             // Special field not contained
             return MailAttributation.NOT_APPLICABLE;
@@ -168,6 +176,10 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
 
         MailAuthenticityHandler handler = handlerRegistry.getHighestRankedHandlerFor(session);
         if (null == handler) {
+            return MailAttributation.NOT_APPLICABLE;
+        }
+
+        if (false == isFolderAccepted(fetchArguments.getFolder().getFullName(), mailAccess)) {
             return MailAttributation.NOT_APPLICABLE;
         }
 
@@ -200,7 +212,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
     }
 
     @Override
-    public MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, final Session session, Map<String, Object> state) throws OXException {
+    public MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, Map<String, Object> state) throws OXException {
         if (null == mails || mails.length == 0) {
             return MailFetchListenerResult.neutral(mails, cacheable);
         }
@@ -211,6 +223,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         }
 
         // int unifiedINBOXAccountId = getUnifiedINBOXAccountId(session);
+        Session session = mailAccess.getSession();
         List<FutureAndMail> submittedTasks = new ArrayList<>(mails.length);
         for (final MailMessage mail : mails) {
             if (mail != null) {
@@ -251,7 +264,22 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
     }
 
     @Override
-    public MailMessage onMailFetch(MailMessage mail, Session session) throws OXException {
+    public MailMessage onSingleMailFetch(MailMessage mail, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+        Session session = mailAccess.getSession();
+        if (false == isAcceptableAccount(mail.getAccountId(), session)) {
+            return mail;
+        }
+
+        MailAuthenticityHandler handler = handlerRegistry.getHighestRankedHandlerFor(session);
+        if (null == handler) {
+            return mail;
+        }
+
+        if (false == isFolderAccepted(mail.getFolder(), mailAccess)) {
+            return mail;
+        }
+
+        handler.handle(session, mail);
         return mail;
     }
 

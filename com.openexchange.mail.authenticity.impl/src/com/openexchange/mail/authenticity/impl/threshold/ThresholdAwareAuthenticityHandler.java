@@ -54,7 +54,6 @@ import com.openexchange.mail.MailField;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.utils.DefaultFolderNamesProvider;
 import com.openexchange.session.Session;
 
 /**
@@ -82,7 +81,7 @@ public class ThresholdAwareAuthenticityHandler implements MailAuthenticityHandle
         if (null == mailMessage) {
             return;
         }
-        if (shouldHandle(mailMessage)) {
+        if (shouldNotHandle(mailMessage)) {
             mailMessage.setAuthenticityResult(MailAuthenticityResult.NOT_ANALYZED_RESULT);
             return;
         }
@@ -112,19 +111,19 @@ public class ThresholdAwareAuthenticityHandler implements MailAuthenticityHandle
 
     /**
      * <p>Determines whether the specified message should be handled by the {@link MailAuthenticityHandler}.</p>
-     * 
+     *
      * <p>Certain criteria are checked to determine that:
      * <ul>
      * <li>If the threshold is set, and if set whether the received date falls before or after that threshold (i.e. the cut-off date)</li>
      * <li>Whether the e-mail lies in Drafts, or Sent folders. If it does then it should not be handled.</li>
      * </ul>
      * </p>
-     * 
+     *
      * @param mailMessage the mail message
      * @return <code>true</code> if the message should be handled; <code>false</code> otherwise
      */
-    private boolean shouldHandle(MailMessage mailMessage) {
-        return (threshold > 0 && mailMessage.getReceivedDate() != null && mailMessage.getReceivedDate().getTime() < threshold) || (DefaultFolderNamesProvider.DEFAULT_PROVIDER.getDrafts().equals(mailMessage.getFolder()) || DefaultFolderNamesProvider.DEFAULT_PROVIDER.getSent().equals(mailMessage.getFolder()));
+    private boolean shouldNotHandle(MailMessage mailMessage) {
+        return (threshold > 0 && mailMessage.getReceivedDate() != null && mailMessage.getReceivedDate().getTime() < threshold);
     }
 
 }
