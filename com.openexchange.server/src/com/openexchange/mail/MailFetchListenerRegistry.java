@@ -59,7 +59,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.osgi.ServiceListing;
+import com.openexchange.session.Session;
 
 /**
  * {@link MailFetchListenerRegistry}
@@ -108,6 +110,20 @@ public class MailFetchListenerRegistry {
     public static MailFetchListenerChain determineFetchListenerChainFor(MailFetchArguments fetchArguments, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, Map<String, Object> state) throws OXException {
         MailFetchListenerRegistry registry = INSTANCE_REFERENCE.get();
         return null == registry ? MailFetchListenerChain.EMPTY_CHAIN : registry.getFetchListenerChainFor(fetchArguments, mailAccess, state);
+    }
+
+    /**
+     * Determines the effective acceptance for specified arguments.
+     *
+     * @param mailsFromCache The mails fetched from cache
+     * @param fetchArguments The fetch arguments
+     * @param session The session providing user data
+     * @return <code>true</code> if accepted; otherwise <code>false</code>
+     * @throws OXException If listener chain cannot be returned
+     */
+    public static boolean determineAcceptance(MailMessage[] mailsFromCache, MailFetchArguments fetchArguments, Session session) throws OXException {
+        MailFetchListenerRegistry registry = INSTANCE_REFERENCE.get();
+        return null == registry ? true : registry.isAccepted(mailsFromCache, fetchArguments, session);
     }
 
     /**
@@ -172,6 +188,31 @@ public class MailFetchListenerRegistry {
         } while (iterator.hasNext());
 
         return anyApplicable ? new MailFetchListenerChain(applicableListeners.build(), MailAttributation.builder(fs, hns).build()) : MailFetchListenerChain.EMPTY_CHAIN;
+    }
+
+    /**
+     * Gets the effective listener chain for specified arguments.
+     *
+     * @param mailsFromCache The mails fetched from cache
+     * @param fetchArguments The fetch arguments
+     * @param session The user's session
+     * @return <code>true</code> if satisfied; otherwise <code>false</code>
+     * @throws OXException If acceptance cannot be checked
+     */
+    public boolean isAccepted(MailMessage[] mailsFromCache, MailFetchArguments fetchArguments, Session session) throws OXException {
+        Iterator<MailFetchListener> iterator = this.listeners.iterator();
+        if (false == iterator.hasNext()) {
+            return true;
+        }
+
+        do {
+            MailFetchListener listener = iterator.next();
+            if (false == listener.accept(mailsFromCache, fetchArguments, session)) {
+                return false;
+            }
+        } while (iterator.hasNext());
+
+        return true;
     }
 
 }

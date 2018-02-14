@@ -69,6 +69,8 @@ import com.openexchange.mail.MailFetchListener;
 import com.openexchange.mail.MailFetchListenerResult;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
+import com.openexchange.mail.MailSessionCache;
+import com.openexchange.mail.MailSessionParameterNames;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -77,6 +79,7 @@ import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
 import com.openexchange.mail.authenticity.impl.osgi.Services;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.session.Session;
@@ -146,6 +149,30 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         return !fullName.equals(mailAccess.getFolderStorage().getDraftsFolder()) && !fullName.equals(mailAccess.getFolderStorage().getSentFolder());
     }
 
+    private boolean isFolderAccepted(String fullName, int accountId, Session session) throws OXException {
+        MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
+
+        Boolean b = mailSessionCache.getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderChecked());
+        if ((b == null) || !b.booleanValue()) {
+            // Don't know better
+            return true;
+        }
+
+        // Default folder were already checked; ensure client does not request authenticity for standard Drafts or Sent folder
+        String[] arr = mailSessionCache.getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderArray());
+        String draftsFullName = arr == null ? null : arr[StorageUtility.INDEX_DRAFTS];
+        if (null != draftsFullName && fullName.equals(draftsFullName)) {
+            return false;
+        }
+
+        String sentFullName = arr == null ? null : arr[StorageUtility.INDEX_SENT];
+        if (null != sentFullName && fullName.equals(sentFullName)) {
+            return false;
+        }
+
+        return true;
+    }
+
     @Override
     public boolean accept(MailMessage[] mailsFromCache, MailFetchArguments fetchArguments, Session session) throws OXException {
         if (isNotApplicableFor(fetchArguments, session)) {
@@ -154,6 +181,10 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
 
         MailAuthenticityHandler handler = handlerRegistry.getHighestRankedHandlerFor(session);
         if (null == handler) {
+            return true;
+        }
+
+        if (false == isFolderAccepted(fetchArguments.getFolder().getFullName(), fetchArguments.getFolder().getAccountId(), session)) {
             return true;
         }
 

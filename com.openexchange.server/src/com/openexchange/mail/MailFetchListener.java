@@ -73,7 +73,7 @@ public interface MailFetchListener {
      * @param fetchArguments The fetch arguments
      * @param session The user's session
      * @return <code>true</code> if satisfied; otherwise <code>false</code>
-     * @throws OXException
+     * @throws OXException If acceptance cannot be checked
      */
     boolean accept(MailMessage[] mailsFromCache, MailFetchArguments fetchArguments, Session session) throws OXException;
 

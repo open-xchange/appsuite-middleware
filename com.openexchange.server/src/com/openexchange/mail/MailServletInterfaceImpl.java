@@ -1939,7 +1939,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         MailField[] useFields = MailField.getFields(fields);
         MailFetchArguments fetchArguments = MailFetchArguments.builder(argument, useFields, headerNames).build();
         Map<String, Object> fetchListenerState = new HashMap<>(4);
-        MailFetchListenerChain listenerChain = MailFetchListenerRegistry.determineFetchListenerChainFor(fetchArguments, mailAccess, fetchListenerState);
         /*-
          * Check for presence in cache
          * TODO: Think about switching to live-fetch if loadHeaders is true. Loading all data once may be faster than
@@ -1948,10 +1947,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         try {
             MailMessage[] mails = MailMessageCache.getInstance().getMessages(uids, accountId, fullName, session.getUserId(), contextId);
             if (null != mails) {
-                boolean accepted = true;
-                if (null != listenerChain) {
-                    accepted = listenerChain.accept(mails, fetchArguments, session);
-                }
+                boolean accepted = MailFetchListenerRegistry.determineAcceptance(mails, fetchArguments, session);
                 if (accepted) {
                     /*
                      * List request can be served from cache; apply proper account ID to (unconnected) mail servlet interface
@@ -2058,6 +2054,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             useFields = mailFieldsForCheck.toArray();
         }
 
+        MailFetchListenerChain listenerChain = MailFetchListenerRegistry.determineFetchListenerChainFor(fetchArguments, mailAccess, fetchListenerState);
         if (null != listenerChain) {
             MailAttributation attributation = listenerChain.onBeforeFetch(fetchArguments, mailAccess, fetchListenerState);
             if (attributation.isApplicable()) {
