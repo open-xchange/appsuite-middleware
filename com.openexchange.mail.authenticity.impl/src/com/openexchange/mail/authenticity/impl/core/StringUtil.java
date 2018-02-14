@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.mail.authenticity.MailAuthenticityAttribute;
 
 /**
@@ -79,26 +80,22 @@ final class StringUtil {
         <T> void add(String key, String value, T collector);
     }
 
-    private static final Map<Class<?>, CollectorAdder> collectorAdders = new HashMap<>();
-    static {
-        collectorAdders.put(HashMap.class, new CollectorAdder() {
+    private static final Map<Class<?>, CollectorAdder> COLLECTOR_ADDERS = ImmutableMap.<Class<?>, CollectorAdder> builder()
+        .put(HashMap.class, new CollectorAdder() {
 
             @Override
             public <T> void add(String key, String value, T collector) {
-                Map<String, String> m = (Map<String, String>) collector;
-                m.put(key, value);
+                ((Map<String, String>) collector).put(key, value);
             }
-        });
-
-        collectorAdders.put(ArrayList.class, new CollectorAdder() {
+        })
+        .put(ArrayList.class, new CollectorAdder() {
 
             @Override
             public <T> void add(String key, String value, T collector) {
-                List<MailAuthenticityAttribute> l = (List<MailAuthenticityAttribute>) collector;
-                l.add(new MailAuthenticityAttribute(key, value));
+                ((List<MailAuthenticityAttribute>) collector).add(new MailAuthenticityAttribute(key, value));
             }
-        });
-    }
+        })
+        .build();
 
     /**
      * Parses the specified element as a key/value {@link Map}
@@ -231,7 +228,7 @@ final class StringUtil {
      * @param collector The {@link T} collector
      */
     private static <T> void add(String key, String value, T collector) {
-        CollectorAdder collectorAdder = collectorAdders.get(collector.getClass());
+        CollectorAdder collectorAdder = COLLECTOR_ADDERS.get(collector.getClass());
         if (collectorAdder == null) {
             throw new IllegalArgumentException("Unsupported collector type '" + collector.getClass() + "'");
         }
@@ -248,7 +245,7 @@ final class StringUtil {
     static List<String> splitElements(CharSequence header) {
         LOGGER.debug("Splitting header: {}", header);
         long start = System.currentTimeMillis();
-        
+
         List<String> split = new ArrayList<>();
         boolean openQuotes = false;
         boolean openParenthesis = false;
