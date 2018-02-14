@@ -94,6 +94,7 @@ import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.CalendarFolder;
+import com.openexchange.chronos.provider.CalendarPermission;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
 import com.openexchange.chronos.provider.DefaultCalendarFolder;
 import com.openexchange.chronos.provider.DefaultCalendarPermission;
@@ -853,7 +854,9 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         folder.setName(settings.getName());
         folder.setId(BasicCalendarAccess.FOLDER_ID);
         folder.setLastModified(settings.getLastModified());
-        folder.setPermissions(Collections.singletonList(DefaultCalendarPermission.adminPermissionsFor(session.getUserId())));
+        folder.setPermissions(Collections.singletonList(new DefaultCalendarPermission(session.getUserId(),
+            CalendarPermission.READ_FOLDER, CalendarPermission.READ_ALL_OBJECTS, CalendarPermission.NO_PERMISSIONS,
+            CalendarPermission.NO_PERMISSIONS, true, false, 0)));
         folder.setSupportedCapabilites(CalendarCapability.getCapabilities(calendarAccess.getClass()));
         folder.setSubscribed(settings.isSubscribed());
         return folder;
