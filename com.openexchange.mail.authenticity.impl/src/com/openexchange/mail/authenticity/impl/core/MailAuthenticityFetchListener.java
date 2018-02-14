@@ -75,6 +75,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
 import com.openexchange.mail.authenticity.impl.osgi.Services;
+import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
@@ -99,6 +100,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
 
     /**
      * Initializes a new {@link MailAuthenticityFetchListener}.
+     * 
      * @param threadPool
      */
     public MailAuthenticityFetchListener(MailAuthenticityHandlerRegistry handlerRegistry, ThreadPoolService threadPool) {
@@ -236,7 +238,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
                     }
                 }
                 */
-                if (accId == MailAccount.DEFAULT_ID /*|| accId == unifiedINBOXAccountId*/) {
+                if (accId == MailAccount.DEFAULT_ID /* || accId == unifiedINBOXAccountId */) {
                     Future<Void> future = threadPool.submit(new MailAuthenticityTask(mail, handler, session));
                     submittedTasks.add(new FutureAndMail(future, mail));
                 }
@@ -275,12 +277,32 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
             return mail;
         }
 
-        if (false == isFolderAccepted(mail.getFolder(), mailAccess)) {
+        if (false == isApplicableFor(mail, mailAccess)) {
+            mail.setAuthenticityResult(MailAuthenticityResult.NOT_ANALYZED_RESULT);
             return mail;
         }
 
         handler.handle(session, mail);
         return mail;
+    }
+
+    /**
+     * Determines whether the specified {@link MailMessage} is applicable for mail authenticity
+     * 
+     * @param mail The {@link MailMessage}
+     * @param mailAccess The {@link MailAccess}
+     * @return <code>true</code> if the message is applicable for mail authenticity; <code>false</code> otherwise
+     * @throws OXException if an error is occurred
+     */
+    private boolean isApplicableFor(MailMessage mail, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+        if (false == isAcceptableAccount(mail.getAccountId(), mailAccess.getSession())) {
+            return false;
+        }
+
+        if (false == isFolderAccepted(mail.getFolder(), mailAccess)) {
+            return false;
+        }
+        return true;
     }
 
     // --------------------------------------------------------------------------------------------------------------

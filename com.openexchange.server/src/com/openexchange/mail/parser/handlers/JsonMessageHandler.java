@@ -520,12 +520,12 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * That is the <code>status</code> and the <code>trustedDomain</code> (if present)
      *
      * @param authenticityResult The authenticity result to create the JSON representation for
-     * @return The JSON representation or an empty {@link JSONObject} if no authenticity result available
+     * @return The JSON representation or <code>null</code> if no authenticity result available
      * @throws JSONException If JSON representation cannot be returned
      */
     public static JSONObject authenticityOverallResultToJson(MailAuthenticityResult authenticityResult) throws JSONException {
         if (null == authenticityResult) {
-            return JSONObject.EMPTY_OBJECT;
+            return null;
         }
 
         JSONObject result = new JSONObject(2);
@@ -540,7 +540,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * Creates the JSON representation for specified <code>MailAuthenticityResult</code> instance.
      *
      * @param authenticityResult The authenticity result to create the JSON representation for
-     * @return The JSON representation or an empty {@link JSONObject} if no authenticity result available
+     * @return The JSON representation or <code>null</code> if no authenticity result available
      * @throws JSONException If JSON representation cannot be returned
      */
     @SuppressWarnings("unchecked")
@@ -595,7 +595,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
         if (numOfAttributes > 0) {
             CustomPropertyJsonHandler customPropertyJsonHandler = MailJSONActivator.SERVICES.get().getOptionalService(CustomPropertyJsonHandler.class);
-            if(customPropertyJsonHandler != null) {
+            if (customPropertyJsonHandler != null) {
                 result.put("custom", customPropertyJsonHandler.toJson(authenticityResult.getAttribute(MailAuthenticityResultKey.CUSTOM_PROPERTIES, Map.class)));
             }
         }
