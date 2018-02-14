@@ -144,7 +144,7 @@ public class FileMetadata implements DocumentMetadata {
     @Override
     public int getId() {
         String fileId = file.getId();
-        return (fileId == FileStorageFileAccess.NEW) ? InfostoreFacade.NEW : Utils.parseUnsignedInt(fileId);
+        return (fileId == FileStorageFileAccess.NEW) ? InfostoreFacade.NEW : Integer.valueOf(fileId);
     }
 
     @Override
@@ -360,8 +360,13 @@ public class FileMetadata implements DocumentMetadata {
              * check for numerical identifiers if set
              */
             String id = file.getId();
-            if (FileStorageFileAccess.NEW != id && Utils.parseUnsignedInt(id) < 0) {
-                throw FileStorageExceptionCodes.INVALID_FILE_IDENTIFIER.create(id);
+            if (FileStorageFileAccess.NEW != id) {
+                try {
+                    // -1 is a valid id
+                    Integer.valueOf(id);
+                } catch (final NumberFormatException e) {
+                    throw FileStorageExceptionCodes.INVALID_FILE_IDENTIFIER.create(e, id);
+                }
             }
 
             String folderID = file.getFolderId();
