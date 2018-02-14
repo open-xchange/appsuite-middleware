@@ -65,6 +65,7 @@ import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
+import com.openexchange.folderstorage.internal.Tools;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.outlook.DuplicateCleaner;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
@@ -335,7 +336,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
             /*
              * Check if real storage supports folder's content types
              */
-            if (supportsContentType(folderContentType, realStorage)) {
+            if (Tools.supportsContentType(folderContentType, realStorage)) {
                 checkOpenedStorage(realStorage, openedStorages);
                 /*
                  * 1. Create in real storage
@@ -503,7 +504,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
     private FolderStorage selectFolderStorage(String treeId, String parentId, ContentType contentType) throws OXException {
         if (null != contentType) {
             for (FolderStorage folderStorage : folderStorageDiscoverer.getFolderStoragesForParent(treeId, parentId)) {
-                if (supportsContentType(contentType, folderStorage)) {
+                if (Tools.supportsContentType(contentType, folderStorage)) {
                     return folderStorage;
                 }
             }
@@ -513,23 +514,6 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, parentId);
         }
         return folderStorage;
-    }
-
-    private static boolean supportsContentType(final ContentType folderContentType, final FolderStorage folderStorage) {
-        final ContentType[] supportedContentTypes = folderStorage.getSupportedContentTypes();
-        if (null == supportedContentTypes) {
-            return false;
-        }
-        if (0 == supportedContentTypes.length) {
-            return true;
-        }
-        final String cts = folderContentType.toString();
-        for (final ContentType supportedContentType : supportedContentTypes) {
-            if (supportedContentType.toString().equals(cts)) {
-                return true;
-            }
-        }
-        return false;
     }
 
 }

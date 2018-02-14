@@ -1550,7 +1550,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
             return null;
         }
 
-        FolderStorage[] neededStorages = registry.getFolderStoragesForParent(treeId, parentId);
+        FolderStorage[] neededStorages = getFolderStoragesForParent(treeId, parentId, storageParameters);
         if (0 == neededStorages.length) {
             return new Folder[0];
         }
@@ -1582,6 +1582,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         }
     }
 
+
     @Override
     public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws OXException {
         Folder parent = getFolder(treeId, parentId, storageParameters);
@@ -1595,7 +1596,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         }
 
         // Get needed storages
-        FolderStorage[] neededStorages = registry.getFolderStoragesForParent(treeId, parentId);
+        FolderStorage[] neededStorages = getFolderStoragesForParent(treeId, parentId, storageParameters);
         if (0 == neededStorages.length) {
             return new SortableId[0];
         }
@@ -2170,6 +2171,39 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         if (null != folderMap) {
             folderMap.clear();
         }
+    }
+
+    private FolderStorage[] getFolderStoragesForParent(String treeId, String parentId, StorageParameters storageParameters) {
+        FolderStorage[] folderStorages = registry.getFolderStoragesForParent(treeId, parentId);
+        if (null == folderStorages || 0 == folderStorages.length || null == storageParameters.getDecorator()) {
+            return folderStorages;
+        }
+        List<ContentType> allowedContentTypes = storageParameters.getDecorator().getAllowedContentTypes();
+        if (null == allowedContentTypes || allowedContentTypes.isEmpty()) {
+            return folderStorages;
+        }
+        List<FolderStorage> possibleStorages = new ArrayList<FolderStorage>(folderStorages.length);
+        for (FolderStorage folderStorage : folderStorages) {
+            /*
+             * only include if at least one allowed content type is supported by storage
+             */
+            if (supportsAnyContentType(folderStorage, allowedContentTypes)) {
+                possibleStorages.add(folderStorage);
+            }
+        }
+        return possibleStorages.toArray(new FolderStorage[possibleStorages.size()]);
+    }
+
+    private static boolean supportsAnyContentType(FolderStorage folderStorage, List<ContentType> allowedContentTypes) {
+        if (null == allowedContentTypes || 0 == allowedContentTypes.size()) {
+            return true;
+        }
+        for (ContentType contentType : allowedContentTypes) {
+            if (Tools.supportsContentType(contentType, folderStorage)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

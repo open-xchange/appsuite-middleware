@@ -59,6 +59,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.Type;
@@ -258,6 +259,30 @@ public final class Tools {
         }
 
         return requestContext.getHostData();
+    }
+
+    /**
+     * Gets a value indicating whether a folder storage supports a certain content type.
+     *
+     * @param folderContentType The content type to check
+     * @param folderStorage The folder storage
+     * @return <code>true</code> if the content type is supported, <code>false</code>, otherwise
+     */
+    public static boolean supportsContentType(final ContentType folderContentType, final FolderStorage folderStorage) {
+        final ContentType[] supportedContentTypes = folderStorage.getSupportedContentTypes();
+        if (null == supportedContentTypes) {
+            return false;
+        }
+        if (0 == supportedContentTypes.length) {
+            return true;
+        }
+        final String cts = folderContentType.toString();
+        for (final ContentType supportedContentType : supportedContentTypes) {
+            if (supportedContentType.toString().equals(cts)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
