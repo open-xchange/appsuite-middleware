@@ -53,6 +53,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
@@ -119,6 +121,17 @@ final class StringUtil {
         return parseToCollector(element, listCollector);
     }
 
+    private static final Pattern REGEX_PAIR;
+    static {
+        String quotedString = "\"(?:\\\"|.)*\"";
+        String token = "\\p{Graph}+";
+        String comment = "\\([^)]*\\)";
+
+        String VALUE = "(?:" + quotedString + "|" + token + ")(?: " + comment + ")?";
+
+        REGEX_PAIR = Pattern.compile("([a-zA-Z0-9-._]+)=(" + VALUE + ")( |;|$)");
+    }
+
     /**
      * Parses the attributes (key value pairs separated by an equals '=' sign) of the specified element to the specified {@link T} collector.
      *
@@ -133,90 +146,108 @@ final class StringUtil {
             return collector;
         }
 
-        StringBuilder keyBuffer = new StringBuilder(32);
-        StringBuilder valueBuffer = new StringBuilder(64);
-        String key = null;
-        boolean valueMode = false;
-        boolean backtracking = false;
-        boolean comment = false;
-        int backtrackIndex = 0;
-        for (int index = 0; index < element.length();) {
-            char c = element.charAt(index);
-            switch (c) {
-                case '=':
-                    if (valueMode) {
-                        if (comment) {
+        boolean useRegex = true;
+        if (useRegex) {
+            Matcher m = REGEX_PAIR.matcher(element);
+            while (m.find()) {
+                String key = m.group(1);
+                String value = m.group(2);
+                add(key, value, collector);
+            }
+        } else {
+            StringBuilder keyBuffer = new StringBuilder(32);
+            StringBuilder valueBuffer = new StringBuilder(64);
+            int length = element.length();
+
+            String key = null;
+            boolean valueMode = false;
+            boolean backtracking = false;
+            boolean comment = false;
+            int backtrackIndex = 0;
+            for (int index = 0; index < length;) {
+                if (valueBuffer.length() >= length) {
+                    // Abort...
+                    LOGGER.warn("Failed to parse: {}", element);
+                    return collector;
+                }
+                char c = element.charAt(index);
+                switch (c) {
+                    case '=':
+                        if (valueMode) {
+                            if (comment) {
+                                valueBuffer.append(c);
+                                index++;
+                                break;
+                            }
+                            // A key found while in value mode, so we backtrack
+                            backtracking = true;
+                            valueMode = false;
+                            index--;
+                        } else {
+                            // Retain the key and switch to value mode
+                            key = keyBuffer.toString();
+                            keyBuffer.setLength(0);
+                            valueMode = true;
+                            index++;
+                        }
+                        break;
+                    case '(':
+                        if (valueMode) {
+                            comment = true;
                             valueBuffer.append(c);
                             index++;
-                            break;
                         }
-                        // A key found while in value mode, so we backtrack
-                        backtracking = true;
-                        valueMode = false;
-                        index--;
-                    } else {
-                        // Retain the key and switch to value mode
-                        key = keyBuffer.toString();
-                        keyBuffer.setLength(0);
-                        valueMode = true;
-                        index++;
-                    }
-                    break;
-                case '(':
-                    if (valueMode) {
-                        comment = true;
-                        valueBuffer.append(c);
-                        index++;
-                    }
-                    break;
-                case ')':
-                    if (valueMode) {
-                        comment = false;
-                        valueBuffer.append(c);
-                        index++;
-                    }
-                    break;
-                case ' ':
-                    if (!valueMode) {
-                        //Remove the key from the value buffer
-                        valueBuffer.setLength(valueBuffer.length() - backtrackIndex);
-                        add(key, valueBuffer.toString().trim(), collector);
-                        // Retain the new key (and reverse if that key came from backtracking)
-                        key = backtracking ? keyBuffer.reverse().toString() : keyBuffer.toString();
-                        // Reset counters
-                        keyBuffer.setLength(0);
-                        valueBuffer.setLength(0);
-                        // Skip to the value of the retained new key (position after the '=' sign)
-                        index += backtrackIndex + 2;
-                        backtrackIndex = 0;
-                        backtracking = false;
-                        valueMode = true;
                         break;
-                    }
-                    // while in value mode spaces are considered as literals, hence fall-through to 'default'
-                default:
-                    if (valueMode) {
-                        // While in value mode append all literals to the value buffer
-                        valueBuffer.append(c);
-                        index++;
-                    } else {
-                        // While in key mode append all key literals to the key buffer...
-                        keyBuffer.append(c);
-                        if (backtracking) {
-                            // ... and if we are backtracking, update the counters
-                            index--;
-                            backtrackIndex++;
-                        } else {
-                            // ... if we are not backtracking and we are in key mode, go forth
+                    case ')':
+                        if (valueMode) {
+                            comment = false;
+                            valueBuffer.append(c);
                             index++;
                         }
-                    }
+                        break;
+                    case ' ':
+                        if (!valueMode) {
+                            //Remove the key from the value buffer
+                            valueBuffer.setLength(valueBuffer.length() - backtrackIndex);
+                            add(key, valueBuffer.toString().trim(), collector);
+                            // Retain the new key (and reverse if that key came from backtracking)
+                            key = backtracking ? keyBuffer.reverse().toString() : keyBuffer.toString();
+                            // Reset counters
+                            keyBuffer.setLength(0);
+                            valueBuffer.setLength(0);
+                            // Skip to the value of the retained new key (position after the '=' sign)
+                            index += backtrackIndex + 2;
+                            backtrackIndex = 0;
+                            backtracking = false;
+                            valueMode = true;
+                            break;
+                        }
+                        // while in value mode spaces are considered as literals, hence fall-through to 'default'
+                    default:
+                        if (valueMode) {
+                            // While in value mode append all literals to the value buffer
+                            valueBuffer.append(c);
+                            index++;
+                        } else {
+                            // While in key mode append all key literals to the key buffer...
+                            keyBuffer.append(c);
+                            if (backtracking) {
+                                // ... and if we are backtracking, update the counters
+                                index--;
+                                backtrackIndex++;
+                            } else {
+                                // ... if we are not backtracking and we are in key mode, go forth
+                                index++;
+                            }
+                        }
+                }
+            }
+            // Add the last pair
+            if (valueBuffer.length() > 0) {
+                add(key, valueBuffer.toString(), collector);
             }
         }
-        // Add the last pair
-        if (valueBuffer.length() > 0) {
-            add(key, valueBuffer.toString(), collector);
-        }
+
         return collector;
     }
 
