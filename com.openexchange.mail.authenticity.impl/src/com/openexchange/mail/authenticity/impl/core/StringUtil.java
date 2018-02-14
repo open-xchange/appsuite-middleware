@@ -51,6 +51,8 @@ package com.openexchange.mail.authenticity.impl.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -90,7 +92,21 @@ final class StringUtil {
                 ((Map<String, String>) collector).put(key, value);
             }
         })
+        .put(LinkedHashMap.class, new CollectorAdder() {
+
+            @Override
+            public <T> void add(String key, String value, T collector) {
+                ((Map<String, String>) collector).put(key, value);
+            }
+        })
         .put(ArrayList.class, new CollectorAdder() {
+
+            @Override
+            public <T> void add(String key, String value, T collector) {
+                ((List<MailAuthenticityAttribute>) collector).add(new MailAuthenticityAttribute(key, value));
+            }
+        })
+        .put(LinkedList.class, new CollectorAdder() {
 
             @Override
             public <T> void add(String key, String value, T collector) {
@@ -139,8 +155,8 @@ final class StringUtil {
      * @return A {@link T} with the key/value attributes of the element
      */
     private static <T> T parseToCollector(CharSequence element, T collector) {
-        // No pairs; return as a singleton collector with the line being both the key and the value
-        if (!element.toString().contains("=")) {
+        if (element.toString().indexOf('=') < 0) {
+            // No pairs; return as a singleton collector with the line being both the key and the value
             String kv = element.toString();
             add(kv, kv, collector);
             return collector;

@@ -103,7 +103,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
 
     /**
      * Initializes a new {@link MailAuthenticityFetchListener}.
-     * 
+     *
      * @param threadPool
      */
     public MailAuthenticityFetchListener(MailAuthenticityHandlerRegistry handlerRegistry, ThreadPoolService threadPool) {
@@ -281,11 +281,11 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
                     submitted.future.get(5, TimeUnit.SECONDS);
                 } catch (ExecutionException e) {
                     MailMessage mail = submitted.mail;
-                    LOGGER.warn("Failed to verify mail authenticity for mail {} in folder {}", mail.getMailId(), mail.getFolder(), e.getCause());
+                    LOGGER.warn("Error while verifying mail authenticity for mail {} in folder {}", mail.getMailId(), mail.getFolder(), e.getCause());
                 } catch (TimeoutException e) {
                     submitted.future.cancel(true);
                     MailMessage mail = submitted.mail;
-                    LOGGER.warn("Verification of mail authenticity for mail {} in folder {} took too long", mail.getMailId(), mail.getFolder());
+                    LOGGER.warn("Timeout while verifying mail authenticity for mail {} in folder {}", mail.getMailId(), mail.getFolder());
                 }
             }
         } catch (InterruptedException e) {
@@ -313,13 +313,26 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
             return mail;
         }
 
-        handler.handle(session, mail);
+        Future<Void> future = threadPool.submit(new MailAuthenticityTask(mail, handler, session));
+        try {
+            future.get(5, TimeUnit.SECONDS);
+        } catch (ExecutionException e) {
+            LOGGER.warn("Error while verifying mail authenticity for mail {} in folder {}", mail.getMailId(), mail.getFolder(), e.getCause());
+        } catch (TimeoutException e) {
+            future.cancel(true);
+            LOGGER.warn("Timeout while verifying mail authenticity for mail {} in folder {}", mail.getMailId(), mail.getFolder());
+        } catch (InterruptedException e) {
+            // Keep interrupted status
+            Thread.currentThread().interrupt();
+            throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
+        }
+
         return mail;
     }
 
     /**
      * Determines whether the specified {@link MailMessage} is applicable for mail authenticity
-     * 
+     *
      * @param mail The {@link MailMessage}
      * @param mailAccess The {@link MailAccess}
      * @return <code>true</code> if the message is applicable for mail authenticity; <code>false</code> otherwise
