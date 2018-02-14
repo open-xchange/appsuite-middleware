@@ -197,52 +197,52 @@ public class Event2Appointment {
             return 0;
         }
         switch (color) {
-            case "#CEE7FF":
+            case "#CFE6FF":
             case "lightblue":
             case "#ADD8E6":
             case "#9bceff":
                 return 1;
-            case "#96BBE8":
+            case "#9BC8F7":
             case "darkblue":
             case "#6ca0df":
             case "#00008B":
                 return 2;
-            case "#C4AFE3":
+            case "#B89AE9":
             case "purple":
             case "#a889d6":
             case "#800080":
                 return 3;
-            case "#F0D8F0":
+            case "#F7C7E0":
             case "pink":
             case "#e2b3e2":
             case "#FFC0CB":
                 return 4;
-            case "#F2D1D2":
+            case "#FFE2E2":
             case "red":
             case "#e7a9ab":
             case "#FF0000":
                 return 5;
-            case "#FFD1A3":
+            case "#FDE2B9":
             case "orange":
             case "#ffb870":
             case "#FFA500":
                 return 6;
-            case "#F7EBB6":
+            case "#FFEEB0":
             case "yellow":
             case "#f2de88":
             case "#FFFF00":
                 return 7;
-            case "#D4DEA7":
+            case "#E6EFBD":
             case "lightgreen":
             case "#c2d082":
             case "#90EE90":
                 return 8;
-            case "#99AF6E":
+            case "#C5D481":
             case "darkgreen":
             case "#809753":
             case "#006400":
                 return 9;
-            case "#666666":
+            case "#6B6B6B":
             case "gray":
             case "#4d4d4d":
             case "#808080":

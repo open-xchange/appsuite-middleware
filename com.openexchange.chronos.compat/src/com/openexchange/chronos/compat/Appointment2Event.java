@@ -189,25 +189,25 @@ public class Appointment2Event {
     public static String getColor(int colorLabel) {
         switch (colorLabel) {
             case 1:
-                return "#CEE7FF"; //"lightblue"; // #9bceff ~ #ADD8E6
+                return "#CFE6FF"; //"lightblue"; // #9bceff ~ #ADD8E6
             case 2:
-                return "#96BBE8"; // "darkblue"; // #6ca0df ~ #00008B
+                return "#9BC8F7"; // "darkblue"; // #6ca0df ~ #00008B
             case 3:
-                return "#C4AFE3"; // "purple"; // #a889d6 ~ #800080
+                return "#B89AE9"; // "purple"; // #a889d6 ~ #800080
             case 4:
-                return "#F0D8F0"; //"pink"; // #e2b3e2 ~ #FFC0CB
+                return "#F7C7E0"; //"pink"; // #e2b3e2 ~ #FFC0CB
             case 5:
-                return "#F2D1D2"; // "red"; // #e7a9ab ~ #FF0000
+                return "FFE2E2"; // "red"; // #e7a9ab ~ #FF0000
             case 6:
-                return "#FFD1A3"; // "orange"; // #ffb870 ~ FFA500
+                return "#FDE2B9"; // "orange"; // #ffb870 ~ FFA500
             case 7:
-                return "#F7EBB6"; // "yellow"; // #f2de88 ~ #FFFF00
+                return "#FFEEB0"; // "yellow"; // #f2de88 ~ #FFFF00
             case 8:
-                return "#D4DEA7"; // "lightgreen"; // #c2d082 ~ #90EE90
+                return "#E6EFBD"; // "lightgreen"; // #c2d082 ~ #90EE90
             case 9:
-                return "#99AF6E"; // "darkgreen"; // #809753 ~ #006400
+                return "#C5D481"; // "darkgreen"; // #809753 ~ #006400
             case 10:
-                return "#666666"; // "gray"; // #4d4d4d ~ #808080
+                return "#6B6B6B"; // "gray"; // #4d4d4d ~ #808080
             default:
                 return null;
         }
