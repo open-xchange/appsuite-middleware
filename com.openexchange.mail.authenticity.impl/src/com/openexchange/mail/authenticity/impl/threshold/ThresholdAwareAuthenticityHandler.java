@@ -120,7 +120,7 @@ public class ThresholdAwareAuthenticityHandler implements MailAuthenticityHandle
      * @return <code>true</code> if the message should be handled; <code>false</code> otherwise
      */
     private boolean shouldHandle(MailMessage mailMessage) {
-        return !(threshold > 0 && mailMessage.getReceivedDate() != null && mailMessage.getReceivedDate().getTime() < threshold);
+        return threshold <= 0 || mailMessage.getReceivedDate() == null || mailMessage.getReceivedDate().getTime() >= threshold;
     }
 
 }
