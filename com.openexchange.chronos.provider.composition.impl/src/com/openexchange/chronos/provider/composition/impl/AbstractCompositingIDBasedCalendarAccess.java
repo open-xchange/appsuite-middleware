@@ -67,6 +67,7 @@ import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.provider.AutoProvisioningCalendarProvider;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
@@ -287,6 +288,18 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
             }
         }
         return accesses;
+    }
+
+    /**
+     * Gets a value indicating whether a specific calendar account is auto-provisioned, i.e. it was created automatically and the user
+     * cannot delete it.
+     *
+     * @param account The account to check
+     * @return <code>true</code> if the account is auto-provisioned, <code>false</code>, otherwise
+     */
+    protected boolean isAutoProvisioned(CalendarAccount account) {
+        CalendarProvider provider = providerRegistry.getCalendarProvider(account.getProviderId());
+        return null != provider && AutoProvisioningCalendarProvider.class.isInstance(provider);
     }
 
     /**

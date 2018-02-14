@@ -423,7 +423,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
                     if (FolderCalendarAccess.class.isInstance(access)) {
                         folders.addAll(withUniqueID(((FolderCalendarAccess) access).getVisibleFolders(), account));
                     } else if (BasicCalendarAccess.class.isInstance(access)) {
-                        folders.add(withUniqueID(getBasicCalendarFolder(((BasicCalendarAccess) access)), account));
+                        folders.add(withUniqueID(getBasicCalendarFolder(((BasicCalendarAccess) access), isAutoProvisioned(account)), account));
                     }
                 }
             } catch (OXException e) {
@@ -447,7 +447,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             }
             if (BasicCalendarAccess.class.isInstance(access)) {
                 Check.folderMatches(getRelativeFolderId(folderId), BasicCalendarAccess.FOLDER_ID);
-                CalendarFolder folder = getBasicCalendarFolder((BasicCalendarAccess) access);
+                CalendarFolder folder = getBasicCalendarFolder((BasicCalendarAccess) access, isAutoProvisioned(account));
                 return withUniqueID(folder, account);
             }
             throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
@@ -847,7 +847,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         return null;
     }
 
-    private CalendarFolder getBasicCalendarFolder(BasicCalendarAccess calendarAccess) {
+    private CalendarFolder getBasicCalendarFolder(BasicCalendarAccess calendarAccess, boolean autoProvisioned) {
         CalendarSettings settings = calendarAccess.getSettings();
         DefaultCalendarFolder folder = new DefaultCalendarFolder();
         folder.setExtendedProperties(settings.getExtendedProperties());
@@ -856,7 +856,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         folder.setLastModified(settings.getLastModified());
         folder.setPermissions(Collections.singletonList(new DefaultCalendarPermission(session.getUserId(),
             CalendarPermission.READ_FOLDER, CalendarPermission.READ_ALL_OBJECTS, CalendarPermission.NO_PERMISSIONS,
-            CalendarPermission.NO_PERMISSIONS, true, false, 0)));
+            CalendarPermission.NO_PERMISSIONS, false == autoProvisioned, false, 0)));
         folder.setSupportedCapabilites(CalendarCapability.getCapabilities(calendarAccess.getClass()));
         folder.setSubscribed(settings.isSubscribed());
         return folder;
