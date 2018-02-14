@@ -111,7 +111,7 @@ public class ChronosCopyTask implements CopyUserTaskService {
 
     private CalendarStorage srcCalendarStorage;
     private CalendarStorage dstCalendarStorage;
-
+      //Preparation for 7.10.1, when calendar availabilities become relevant
 //    private CalendarAvailabilityStorage srcAvailabilityStorage;
 //    private CalendarAvailabilityStorage dstAvailabilityStorage;
 
@@ -190,7 +190,7 @@ public class ChronosCopyTask implements CopyUserTaskService {
         List<FolderProperties> properties = loadSourceFolderProperties(srcCon, srcCtx.getContextId(), srcUsrId, sourceFolderIds);
         exchangePropertyIds(properties, dstCtx.getContextId(), dstUsrId, folderMapping);
         insertDestinationFolderProperties(dstCon, properties);
-        //CalendarAvailabilities, preparation for 7.10.1
+        //Preparation for 7.10.1, when calendar availabilities become relevant
 //        initSourceAvailabilityStorage(srcCtx, srcCon);
 //        initDestinationAvailabilityStorage(dstCtx, dstCon);
 //        List<Available> availabilities = loadSourceAvailabilities(srcUsrId);
@@ -302,6 +302,7 @@ public class ChronosCopyTask implements CopyUserTaskService {
                 srcEvent.setChangeExceptionDates(srcEvent.getChangeExceptionDates());
                 srcEvent.setCategories(srcEvent.getCategories());
                 srcEvent.setFilename(srcEvent.getFilename());
+                srcEvent.setExtendedProperties(srcEvent.getExtendedProperties());
                 dstEventList.put(srcEventId, srcEvent);
             }
         }
@@ -426,16 +427,10 @@ public class ChronosCopyTask implements CopyUserTaskService {
     }
 
     private void initSourceCalendarStorage(Context srcCtx, final Connection readCon) throws OXException {
-//        if (null != srcCalendarStorage) {
-//            this.srcCalendarStorage = null;
-//        }
         this.srcCalendarStorage = createCalendarStorage(srcCtx, DefaultCalendarAccount.DEFAULT_ACCOUNT.getAccountId(), readCon, readCon);
     }
 
     private void initDestinationCalendarStorage(Context dstCtx, final Connection writeCon) throws OXException {
-//        if (null != dstCalendarStorage) {
-//            this.dstCalendarStorage = null;
-//        }
         this.dstCalendarStorage = createCalendarStorage(dstCtx, DefaultCalendarAccount.DEFAULT_ACCOUNT.getAccountId(), writeCon, writeCon);
     }
 
@@ -526,7 +521,7 @@ public class ChronosCopyTask implements CopyUserTaskService {
     }
 
     /**
-     * Preparation for 7.10.1
+     * Preparation for 7.10.1, when calendar availabilities become relevant
      *
     private List<Available> loadSourceAvailabilities(int userId) throws OXException {
         return srcAvailabilityStorage.loadAvailable(userId);
