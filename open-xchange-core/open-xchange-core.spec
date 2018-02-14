@@ -197,9 +197,9 @@ perl -pi -e 's;(^.*?)\s+(.*/(mail|configdb|server|filestorage|management|secret|
 perl -pi -e 's;(^.*?)\s+(.*/(secrets|tokenlogin-secrets))$;$1 %%%attr(640,root,open-xchange) $2;' %{configfiles}
 
 %post
+. /opt/open-xchange/lib/oxfunctions.sh
 if [ ${1:-0} -eq 2 ]; then
     # only when updating
-    . /opt/open-xchange/lib/oxfunctions.sh
 
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
