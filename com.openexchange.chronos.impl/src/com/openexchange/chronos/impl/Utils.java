@@ -131,6 +131,7 @@ import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnFieldOperand;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
@@ -681,23 +682,11 @@ public class Utils {
      * Gets a <i>userized</i> folder by its identifier.
      *
      * @param session The calendar session
-     * @param folderID The identifier of the folder to get
+     * @param folderId The identifier of the folder to get
      * @return The folder
      */
-    public static UserizedFolder getFolder(CalendarSession session, String folderID) throws OXException {
-        try {
-            return Services.getService(FolderService.class).getFolder(FolderStorage.REAL_TREE_ID, folderID, session.getSession(), initDecorator(session));
-        } catch (OXException e) {
-            if ("FLD-0003".equals(e.getErrorCode())) {
-                // com.openexchange.tools.oxfolder.OXFolderExceptionCode.NOT_VISIBLE
-                throw CalendarExceptionCodes.NO_READ_PERMISSION.create(e, folderID);
-            }
-            if ("FLD-1004".equals(e.getErrorCode())) {
-                // com.openexchange.folderstorage.FolderExceptionErrorMessage.NO_STORAGE_FOR_ID
-                throw CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(e, folderID, "");
-            }
-            throw e;
-        }
+    public static UserizedFolder getFolder(CalendarSession session, String folderId) throws OXException {
+        return getFolder(Services.getService(FolderService.class), folderId, session.getSession(), initDecorator(session));
     }
 
     /**
@@ -715,21 +704,38 @@ public class Utils {
         FolderServiceDecorator decorator = initDecorator(session);
         FolderService folderService = Services.getService(FolderService.class);
         for (String folderId : folderIds) {
-            try {
-                folders.add(folderService.getFolder(FolderStorage.REAL_TREE_ID, folderId, session.getSession(), decorator));
-            } catch (OXException e) {
-                if ("FLD-0003".equals(e.getErrorCode())) {
-                    // com.openexchange.tools.oxfolder.OXFolderExceptionCode.NOT_VISIBLE
-                    throw CalendarExceptionCodes.NO_READ_PERMISSION.create(e, folderId);
-                }
-                if ("FLD-1004".equals(e.getErrorCode())) {
-                    // com.openexchange.folderstorage.FolderExceptionErrorMessage.NO_STORAGE_FOR_ID
-                    throw CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(e, folderId, "");
-                }
-                throw e;
-            }
+            folders.add(getFolder(folderService, folderId, session.getSession(), decorator));
         }
         return folders;
+    }
+
+    /**
+     * Gets a <i>userized</i> folder by its identifier.
+     *
+     * @param folderService A reference to the folder service
+     * @param folderId The identifier of the folder to get
+     * @param session The session
+     * @param decorator The folder service decorator to use
+     * @return The folder
+     */
+    private static UserizedFolder getFolder(FolderService folderService, String folderId, Session session, FolderServiceDecorator decorator) throws OXException {
+        try {
+            return folderService.getFolder(FolderStorage.REAL_TREE_ID, folderId, session, decorator);
+        } catch (OXException e) {
+            if ("FLD-0003".equals(e.getErrorCode())) {
+                // com.openexchange.tools.oxfolder.OXFolderExceptionCode.NOT_VISIBLE
+                throw CalendarExceptionCodes.NO_READ_PERMISSION.create(e, folderId);
+            }
+            if ("FLD-1004".equals(e.getErrorCode())) {
+                // com.openexchange.folderstorage.FolderExceptionErrorMessage.NO_STORAGE_FOR_ID
+                throw CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(e, folderId, "");
+            }
+            if ("FLD-0008".equals(e.getErrorCode())) {
+                // com.openexchange.folderstorage.FolderExceptionErrorMessage.NOT_FOUND
+                throw CalendarExceptionCodes.FOLDER_NOT_FOUND.create(e, folderId);
+            }
+            throw e;
+        }
     }
 
     /**
