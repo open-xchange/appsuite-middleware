@@ -77,10 +77,6 @@ public class ThresholdAwareAuthenticityHandler implements MailAuthenticityHandle
 
     @Override
     public void handle(Session session, MailMessage mailMessage) {
-        if (null == mailMessage) {
-            return;
-        }
-
         if (shouldHandle(mailMessage)) {
             authenticityHandler.handle(session, mailMessage);
         }
@@ -120,7 +116,7 @@ public class ThresholdAwareAuthenticityHandler implements MailAuthenticityHandle
      * @return <code>true</code> if the message should be handled; <code>false</code> otherwise
      */
     private boolean shouldHandle(MailMessage mailMessage) {
-        return threshold <= 0 || mailMessage.getReceivedDate() == null || mailMessage.getReceivedDate().getTime() >= threshold;
+        return (mailMessage != null) && (threshold <= 0 || mailMessage.getReceivedDate() == null || mailMessage.getReceivedDate().getTime() >= threshold);
     }
 
 }
