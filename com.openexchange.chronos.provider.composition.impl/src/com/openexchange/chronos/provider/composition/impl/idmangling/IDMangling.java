@@ -72,6 +72,7 @@ import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
@@ -126,12 +127,12 @@ public class IDMangling {
      * Adjusts an exception raised by a specific calendar account so that any referenced identifiers appear in their unique composite
      * representation.
      *
-     * @param e The exception to adjust
+     * @param e The exception to adjust, or <code>null</code> to do nothing
      * @param accountId The identifier of the account
      * @return The possibly adjusted exception
      */
     public static OXException withUniqueIDs(OXException e, int accountId) {
-        if (false == e.isPrefix("CAL")) {
+        if (null == e || false == e.isPrefix("CAL")) {
             return e;
         }
         switch (e.getCode()) {
@@ -261,6 +262,24 @@ public class IDMangling {
         }
         freeBusyResult.setFreeBusyTimes(timesWithUniqueIDs);
         return freeBusyResult;
+    }
+
+    /**
+     * Gets a map of events results result equipped with unique composite identifiers representing results from a specific calendar account.
+     *
+     * @param relativeResults The event results from the account
+     * @param accountId The identifier of the account
+     * @return The events result representations with unique identifiers
+     */
+    public static Map<String, EventsResult> withUniqueIDs(Map<String, EventsResult> relativeResults, int accountId) {
+        if (null == relativeResults || relativeResults.isEmpty()) {
+            return relativeResults;
+        }
+        Map<String, EventsResult> results = new HashMap<String, EventsResult>(relativeResults.size());
+        for (Map.Entry<String, EventsResult> entry : relativeResults.entrySet()) {
+            results.put(getUniqueFolderId(accountId, entry.getKey()), new IDManglingEventsResult(entry.getValue(), accountId));
+        }
+        return results;
     }
 
     /**

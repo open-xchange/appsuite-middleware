@@ -47,61 +47,64 @@
  *
  */
 
-package com.openexchange.chronos.provider.composition.impl.idmangling;
+package com.openexchange.chronos.common;
 
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
-import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.service.ImportResult;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link IDManglingImportResult}
+ * {@link DefaultEventsResult}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class IDManglingImportResult extends IDManglingCalendarResult implements ImportResult {
+public class DefaultEventsResult implements EventsResult {
 
-    private final ImportResult delegate;
-    private final OXException newError;
-    private final List<OXException> newWarnings;
+    private final List<Event> events;
+    private final long timestamp;
+    private final OXException error;
 
-    /**
-     * Initializes a new {@link IDManglingImportResult}.
-     *
-     * @param delegate The result delegate
-     * @param accountId The identifier of the calendar account the result originates in
-     */
-    public IDManglingImportResult(ImportResult delegate, int accountId) {
-        super(delegate, accountId);
-        this.delegate = delegate;
-        this.newError = IDMangling.withUniqueIDs(delegate.getError(), accountId);
-        this.newWarnings = IDMangling.withUniqueID(delegate.getWarnings(), accountId);
+    public DefaultEventsResult(OXException error) {
+        this(null, 0L, error);
+    }
+
+    public DefaultEventsResult(List<Event> events) {
+        this(events, getMaximumTimestamp(events), null);
+    }
+
+    public DefaultEventsResult(List<Event> events, long timestamp) {
+        this(events, timestamp, null);
+    }
+
+    protected DefaultEventsResult(List<Event> events, long timestamp, OXException error) {
+        super();
+        this.events = events;
+        this.timestamp = timestamp;
+        this.error = error;
     }
 
     @Override
-    public int getIndex() {
-        return delegate.getIndex();
+    public List<Event> getEvents() {
+        return events;
     }
 
     @Override
     public OXException getError() {
-        return newError;
+        return error;
     }
 
     @Override
-    public List<OXException> getWarnings() {
-        return newWarnings;
+    public long getTimestamp() {
+        return timestamp;
     }
 
-    @Override
-    public EventID getId() {
-        return null != delegate.getId() ? IDMangling.getUniqueId(accountId, delegate.getId()) : null;
-    }
-
-    @Override
-    public String toString() {
-        return "IDManglingImportResult [accountId=" + accountId + ", delegate=" + delegate + "]";
+    private static long getMaximumTimestamp(Collection<Event> events) {
+        Date timestamp = CalendarUtils.getMaximumTimestamp(events);
+        return null == timestamp ? 0L : timestamp.getTime();
     }
 
 }

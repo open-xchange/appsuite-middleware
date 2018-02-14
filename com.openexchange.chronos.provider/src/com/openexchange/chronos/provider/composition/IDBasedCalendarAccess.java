@@ -75,6 +75,7 @@ import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.chronos.service.ImportResult;
 import com.openexchange.chronos.service.SearchFilter;
@@ -181,7 +182,14 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * @return The events
      */
     default List<Event> getEventsInFolder(String folderId) throws OXException {
-        return getEventsInFolders(Collections.singletonList(folderId));
+        EventsResult eventsResult = getEventsInFolders(Collections.singletonList(folderId)).get(folderId);
+        if (null == eventsResult) {
+            return null;
+        }
+        if (null != eventsResult.getError()) {
+            throw eventsResult.getError();
+        }
+        return eventsResult.getEvents();
     }
 
     /**
@@ -199,9 +207,9 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * </ul>
      *
      * @param folderId The fully qualified identifiers of the folders to get the events from
-     * @return The events
+     * @return The resulting events per requested folder
      */
-    List<Event> getEventsInFolders(List<String> folderIds) throws OXException;
+    Map<String, EventsResult> getEventsInFolders(List<String> folderIds) throws OXException;
 
     /**
      * Gets all events of the session's user attends in.

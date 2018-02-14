@@ -58,6 +58,7 @@ import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -70,6 +71,7 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.json.converter.EventResultConverter;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
@@ -112,8 +114,23 @@ public class AllAction extends ChronosAction {
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
         List<String> folderIds = parseFolderIds(requestData);
-        List<Event> events = null != folderIds ? calendarAccess.getEventsInFolders(folderIds) : calendarAccess.getEventsOfUser();
-        return new AJAXRequestResult(events, CalendarUtils.getMaximumTimestamp(events), EventResultConverter.INPUT_FORMAT);
+        if (null == folderIds) {
+            List<Event> eventsOfUser = calendarAccess.getEventsOfUser();
+            return new AJAXRequestResult(eventsOfUser, CalendarUtils.getMaximumTimestamp(eventsOfUser), EventResultConverter.INPUT_FORMAT);
+        }
+        //TODO adjust response to hold results per folder
+        List<Event> allEvents = new ArrayList<Event>();
+        List<OXException> warnings = new ArrayList<OXException>();
+        Map<String, EventsResult> eventsResults = calendarAccess.getEventsInFolders(folderIds);
+        for (EventsResult result : eventsResults.values()) {
+            if (null != result.getEvents()) {
+                allEvents.addAll(result.getEvents());
+            }
+            if (null != result.getError()) {
+                warnings.add(result.getError());
+            }
+        }
+        return new AJAXRequestResult(allEvents, CalendarUtils.getMaximumTimestamp(allEvents), EventResultConverter.INPUT_FORMAT).addWarnings(warnings);
     }
 
     private static List<String> parseFolderIds(AJAXRequestData requestData) throws OXException {

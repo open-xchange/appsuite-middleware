@@ -50,58 +50,49 @@
 package com.openexchange.chronos.provider.composition.impl.idmangling;
 
 import java.util.List;
-import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.service.ImportResult;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link IDManglingImportResult}
+ * {@link IDManglingEventsResult}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class IDManglingImportResult extends IDManglingCalendarResult implements ImportResult {
+public class IDManglingEventsResult implements EventsResult {
 
-    private final ImportResult delegate;
+    private final EventsResult delegate;
+    private final int accountId;
     private final OXException newError;
-    private final List<OXException> newWarnings;
 
     /**
-     * Initializes a new {@link IDManglingImportResult}.
+     * Initializes a new {@link IDManglingEventsResult}.
      *
      * @param delegate The result delegate
      * @param accountId The identifier of the calendar account the result originates in
      */
-    public IDManglingImportResult(ImportResult delegate, int accountId) {
-        super(delegate, accountId);
+    public IDManglingEventsResult(EventsResult delegate, int accountId) {
+        super();
         this.delegate = delegate;
+        this.accountId = accountId;
         this.newError = IDMangling.withUniqueIDs(delegate.getError(), accountId);
-        this.newWarnings = IDMangling.withUniqueID(delegate.getWarnings(), accountId);
     }
 
     @Override
-    public int getIndex() {
-        return delegate.getIndex();
+    public long getTimestamp() {
+        return delegate.getTimestamp();
+    }
+
+    @Override
+    public List<Event> getEvents() {
+        List<Event> events = delegate.getEvents();
+        return null == events ? null : IDMangling.withUniqueIDs(events, accountId);
     }
 
     @Override
     public OXException getError() {
         return newError;
-    }
-
-    @Override
-    public List<OXException> getWarnings() {
-        return newWarnings;
-    }
-
-    @Override
-    public EventID getId() {
-        return null != delegate.getId() ? IDMangling.getUniqueId(accountId, delegate.getId()) : null;
-    }
-
-    @Override
-    public String toString() {
-        return "IDManglingImportResult [accountId=" + accountId + ", delegate=" + delegate + "]";
     }
 
 }

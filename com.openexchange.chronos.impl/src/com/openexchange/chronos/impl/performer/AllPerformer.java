@@ -54,6 +54,7 @@ import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
+import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.chronos.impl.Utils.isEnforceDefaultAttendee;
 import static com.openexchange.chronos.impl.Utils.isIncludeClassifiedEvents;
@@ -69,14 +70,17 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventFlag;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultEventsResult;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -182,7 +186,7 @@ public class AllPerformer extends AbstractQueryPerformer {
      * @param folders The parent folders to get all events from
      * @return The loaded events
      */
-    public List<Event> perform(List<UserizedFolder> folders) throws OXException {
+    public List<Event> perform21(List<UserizedFolder> folders) throws OXException {
         /*
          * load event data per folder & additional event data per calendar user
          */
@@ -204,11 +208,64 @@ public class AllPerformer extends AbstractQueryPerformer {
          */
         List<Event> allEvents = new ArrayList<Event>();
         boolean includeClassifiedEvents = isIncludeClassifiedEvents(session);
-        for (Map.Entry<UserizedFolder, List<Event>> entry : eventsPerFolder.entrySet()) {
+        for (Entry<UserizedFolder, List<Event>> entry : eventsPerFolder.entrySet()) {
             allEvents.addAll(postProcess(entry.getValue(), entry.getKey(), includeClassifiedEvents, fields));
             getSelfProtection().checkEventCollection(allEvents);
         }
         return allEvents;
+    }
+
+    /**
+     * Performs the operation.
+     *
+     * @param folderIds The identifiers of the parent folders to get all events from
+     * @return The loaded events
+     */
+    public Map<String, EventsResult> perform(List<String> folderIds) throws OXException {
+        if (null == folderIds || folderIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<String, EventsResult> resultsPerFolderId = new HashMap<String, EventsResult>(folderIds.size());
+        /*
+         * get folders, storing a possible exception in the results
+         */
+        List<UserizedFolder> folders = new ArrayList<UserizedFolder>(folderIds.size());
+        for (String folderId : folderIds) {
+            try {
+                folders.add(getFolder(session, folderId));
+            } catch (OXException e) {
+                resultsPerFolderId.put(folderId, new DefaultEventsResult(e));
+            }
+        }
+        /*
+         * load event data per folder & additional event data per calendar user
+         */
+        EventField[] fields = getFields(session);
+        SearchOptions searchOptions = new SearchOptions(session);
+        Map<UserizedFolder, List<Event>> eventsPerFolder = new HashMap<UserizedFolder, List<Event>>(folders.size());
+        for (Entry<Integer, List<UserizedFolder>> entry : getFoldersPerCalendarUserId(folders).entrySet()) {
+            List<Event> eventsForCalendarUser = new ArrayList<Event>();
+            for (UserizedFolder folder : entry.getValue()) {
+                try {
+                    requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
+                    List<Event> eventsInFolder = storage.getEventStorage().searchEvents(getFolderIdTerm(session, folder), searchOptions, fields);
+                    eventsForCalendarUser.addAll(eventsInFolder);
+                    eventsPerFolder.put(folder, eventsInFolder);
+                } catch (OXException e) {
+                    resultsPerFolderId.put(folder.getID(), new DefaultEventsResult(e));
+                }
+            }
+            eventsForCalendarUser = storage.getUtilities().loadAdditionalEventData(i(entry.getKey()), eventsForCalendarUser, fields);
+        }
+        /*
+         * post process events, based on each requested folder's perspective
+         */
+        boolean includeClassifiedEvents = isIncludeClassifiedEvents(session);
+        for (Entry<UserizedFolder, List<Event>> entry : eventsPerFolder.entrySet()) {
+            resultsPerFolderId.put(entry.getKey().getID(), new DefaultEventsResult(postProcess(entry.getValue(), entry.getKey(), includeClassifiedEvents, fields)));
+            getSelfProtection().checkResultMap(resultsPerFolderId);
+        }
+        return resultsPerFolderId;
     }
 
     /**

@@ -59,6 +59,7 @@ import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMa
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.withUniqueID;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.withUniqueIDs;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.ArrayList;
@@ -84,6 +85,7 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.Check;
+import com.openexchange.chronos.common.DefaultEventsResult;
 import com.openexchange.chronos.common.FreeBusyUtils;
 import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
@@ -117,6 +119,7 @@ import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.chronos.service.ImportResult;
 import com.openexchange.chronos.service.SearchFilter;
@@ -240,26 +243,58 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     }
 
     @Override
-    public List<Event> getEventsInFolders(List<String> folderIds) throws OXException {
+    public Map<String, EventsResult> getEventsInFolders(List<String> folderIds) throws OXException {
         if (null == folderIds || folderIds.isEmpty()) {
-            return Collections.emptyList();
+            return Collections.emptyMap();
         }
-        Map<CalendarAccount, List<String>> foldersPerAccount = getRelativeFolderIdsPerAccount(folderIds);
+        Map<String, EventsResult> eventsResults = new HashMap<String, EventsResult>(folderIds.size());
+        /*
+         * get folders per account
+         */
+        Map<Integer, List<String>> relativeFoldersPerAccountId = new HashMap<Integer, List<String>>();
+        for (String uniqueFolderId : folderIds) {
+            try {
+                com.openexchange.tools.arrays.Collections.put(relativeFoldersPerAccountId, I(getAccountId(uniqueFolderId)), getRelativeFolderId(uniqueFolderId));
+            } catch (IllegalArgumentException e) {
+                eventsResults.put(uniqueFolderId, new DefaultEventsResult(CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(e, uniqueFolderId, null)));
+            }
+        }
+        Map<CalendarAccount, List<String>> foldersPerAccount = new HashMap<CalendarAccount, List<String>>(relativeFoldersPerAccountId.size());
+        try {
+            List<CalendarAccount> accounts = getAccounts(I2i(relativeFoldersPerAccountId.keySet()));
+            for (Entry<Integer, List<String>> entry : relativeFoldersPerAccountId.entrySet()) {
+                CalendarAccount account = accounts.stream().filter(a -> i(entry.getKey()) == a.getAccountId()).findFirst().orElse(null);
+                foldersPerAccount.put(account, entry.getValue());
+            }
+        } catch (OXException e) {
+            /*
+             * load each account separately
+             */
+            for (Entry<Integer, List<String>> entry : relativeFoldersPerAccountId.entrySet()) {
+                try {
+                    foldersPerAccount.put(getAccount(i(entry.getKey())), entry.getValue());
+                } catch (OXException x) {
+                    for (String folderId : entry.getValue()) {
+                        eventsResults.put(folderId, new DefaultEventsResult(x));
+                    }
+                }
+            }
+        }
         if (1 == foldersPerAccount.size()) {
             Entry<CalendarAccount, List<String>> entry = foldersPerAccount.entrySet().iterator().next();
             return getEventsInFolders(entry.getKey(), entry.getValue());
         }
-        CompletionService<List<Event>> completionService = getCompletionService();
-        for (Map.Entry<CalendarAccount, List<String>> entry : foldersPerAccount.entrySet()) {
-            completionService.submit(new Callable<List<Event>>() {
+        CompletionService<Map<String, EventsResult>> completionService = getCompletionService();
+        for (Entry<CalendarAccount, List<String>> entry : foldersPerAccount.entrySet()) {
+            completionService.submit(new Callable<Map<String, EventsResult>>() {
 
                 @Override
-                public List<Event> call() throws Exception {
+                public Map<String, EventsResult> call() throws Exception {
                     return getEventsInFolders(entry.getKey(), entry.getValue());
                 }
             });
         }
-        return sort(collectEventListResults(completionService, foldersPerAccount.size()));
+        return collectEventsResults(completionService, foldersPerAccount.size());
     }
 
     @Override
@@ -678,26 +713,32 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
      *
      * @param account The calendar account
      * @param folderIds The relative identifiers of the folders to get the events from
-     * @return The events, already adjusted to contain unique composite identifiers
+     * @return The events results per folder, already adjusted to contain unique composite identifiers
      */
-    private List<Event> getEventsInFolders(CalendarAccount account, List<String> folderIds) throws OXException {
-        List<Event> events = new ArrayList<Event>();
+    private Map<String, EventsResult> getEventsInFolders(CalendarAccount account, List<String> folderIds) throws OXException {
+        Map<String, EventsResult> eventsPerFolderId = new HashMap<String, EventsResult>(folderIds.size());
         try {
             CalendarAccess access = getAccess(account.getAccountId());
             if (FolderCalendarAccess.class.isInstance(access)) {
-                events.addAll(((FolderCalendarAccess) access).getEventsInFolders(folderIds));
+                eventsPerFolderId.putAll(((FolderCalendarAccess) access).getEventsInFolders(folderIds));
             } else if (BasicCalendarAccess.class.isInstance(access)) {
                 for (String folderId : folderIds) {
-                    Check.folderMatches(folderId, BasicCalendarAccess.FOLDER_ID);
-                    events.addAll(((BasicCalendarAccess) access).getEvents());
+                    try {
+                        Check.folderMatches(folderId, BasicCalendarAccess.FOLDER_ID);
+                        eventsPerFolderId.put(folderId, new DefaultEventsResult(((BasicCalendarAccess) access).getEvents()));
+                    } catch (OXException e) {
+                        eventsPerFolderId.put(folderId, new DefaultEventsResult(e));
+                    }
                 }
             } else {
                 throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
             }
         } catch (OXException e) {
-            throw withUniqueIDs(e, account.getAccountId());
+            for (String folderId : folderIds) {
+                eventsPerFolderId.put(folderId, new DefaultEventsResult(e));
+            }
         }
-        return withUniqueIDs(events, account.getAccountId());
+        return withUniqueIDs(eventsPerFolderId, account.getAccountId());
     }
 
     /**
@@ -734,6 +775,34 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         } catch (OXException e) {
             throw withUniqueIDs(e, account.getAccountId());
         }
+    }
+
+    /**
+     * Takes a specific number of event list results from the completion service, and adds them to a single resulting, sorted list of
+     * events.
+     *
+     * @param completionService The completion service to take the results from
+     * @param count The number of results to collect
+     * @return The resulting list of events
+     */
+    private Map<String, EventsResult> collectEventsResults(CompletionService<Map<String, EventsResult>> completionService, int count) throws OXException {
+        Map<String, EventsResult> results = new HashMap<String, EventsResult>();
+        for (int i = 0; i < count; i++) {
+            try {
+                results.putAll(completionService.take().get());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } catch (ExecutionException e) {
+                Throwable cause = e.getCause();
+                if (null != cause && OXException.class.isInstance(e.getCause())) {
+                    throw (OXException) cause;
+                }
+                throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+            getSelfProtection().checkResultMap(results);
+        }
+        return results;
     }
 
     /**

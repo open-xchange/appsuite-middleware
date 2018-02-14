@@ -50,6 +50,7 @@
 package com.openexchange.chronos.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.ajax.fileholder.IFileHolder;
@@ -236,9 +237,9 @@ public interface CalendarService {
      *
      * @param session The calendar session
      * @param folderIds The identifier of the folders to get the events from
-     * @return The events
+     * @return The resulting events from each requested folder
      */
-    List<Event> getEventsInFolders(CalendarSession session, List<String> folderIds) throws OXException;
+    Map<String, EventsResult> getEventsInFolders(CalendarSession session, List<String> folderIds) throws OXException;
 
     /**
      * Gets all events of the session's user.

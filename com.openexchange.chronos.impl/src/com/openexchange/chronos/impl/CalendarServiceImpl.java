@@ -50,13 +50,13 @@
 package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.impl.Utils.getFolder;
-import static com.openexchange.chronos.impl.Utils.getFolders;
 import static com.openexchange.java.Autoboxing.L;
 import static org.slf4j.LoggerFactory.getLogger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.dmfs.rfc5545.DateTime;
@@ -95,6 +95,7 @@ import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarServiceUtilities;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.ImportResult;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
@@ -222,12 +223,12 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public List<Event> getEventsInFolders(CalendarSession session, List<String> folderIds) throws OXException {
-        return new InternalCalendarStorageOperation<List<Event>>(session) {
+    public Map<String, EventsResult> getEventsInFolders(CalendarSession session, List<String> folderIds) throws OXException {
+        return new InternalCalendarStorageOperation<Map<String, EventsResult>>(session) {
 
             @Override
-            protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new AllPerformer(session, storage).perform(getFolders(session, folderIds));
+            protected Map<String, EventsResult> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return new AllPerformer(session, storage).perform(folderIds);
             }
         }.executeQuery();
     }

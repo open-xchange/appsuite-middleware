@@ -47,61 +47,22 @@
  *
  */
 
-package com.openexchange.chronos.provider.composition.impl.idmangling;
+package com.openexchange.chronos.service;
 
 import java.util.List;
-import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.service.ImportResult;
+import com.openexchange.chronos.Event;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link IDManglingImportResult}
+ * {@link EventsResult}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class IDManglingImportResult extends IDManglingCalendarResult implements ImportResult {
+public interface EventsResult extends TimestampedResult {
 
-    private final ImportResult delegate;
-    private final OXException newError;
-    private final List<OXException> newWarnings;
+    List<Event> getEvents();
 
-    /**
-     * Initializes a new {@link IDManglingImportResult}.
-     *
-     * @param delegate The result delegate
-     * @param accountId The identifier of the calendar account the result originates in
-     */
-    public IDManglingImportResult(ImportResult delegate, int accountId) {
-        super(delegate, accountId);
-        this.delegate = delegate;
-        this.newError = IDMangling.withUniqueIDs(delegate.getError(), accountId);
-        this.newWarnings = IDMangling.withUniqueID(delegate.getWarnings(), accountId);
-    }
-
-    @Override
-    public int getIndex() {
-        return delegate.getIndex();
-    }
-
-    @Override
-    public OXException getError() {
-        return newError;
-    }
-
-    @Override
-    public List<OXException> getWarnings() {
-        return newWarnings;
-    }
-
-    @Override
-    public EventID getId() {
-        return null != delegate.getId() ? IDMangling.getUniqueId(accountId, delegate.getId()) : null;
-    }
-
-    @Override
-    public String toString() {
-        return "IDManglingImportResult [accountId=" + accountId + ", delegate=" + delegate + "]";
-    }
+    OXException getError();
 
 }

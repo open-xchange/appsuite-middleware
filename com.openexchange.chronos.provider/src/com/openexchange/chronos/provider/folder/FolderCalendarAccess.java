@@ -50,12 +50,14 @@
 package com.openexchange.chronos.provider.folder;
 
 import java.util.List;
+import java.util.Map;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.provider.CalendarAccess;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.exception.OXException;
 
 /**
@@ -184,8 +186,8 @@ public interface FolderCalendarAccess extends CalendarAccess {
      * </ul>
      *
      * @param folderId The identifier of the folder to get the events from
-     * @return The events
+     * @return The resulting events per folder
      */
-    List<Event> getEventsInFolders(List<String> folderIds) throws OXException;
+    Map<String, EventsResult> getEventsInFolders(List<String> folderIds) throws OXException;
 
 }

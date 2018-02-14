@@ -102,6 +102,7 @@ import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.ImportResult;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
@@ -263,7 +264,7 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
     }
 
     @Override
-    public List<Event> getEventsInFolders(List<String> folderIds) throws OXException {
+    public Map<String, EventsResult> getEventsInFolders(List<String> folderIds) throws OXException {
         return getCalendarService().getEventsInFolders(session, folderIds);
     }
 
