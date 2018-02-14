@@ -1488,7 +1488,7 @@ public final class MimeMessageConverter {
                     setHasAttachment(mailConfig, mailMessage, msg.getFlags().getUserFlags(), new AlternativeHasAttachmentSetter() {
 
                         @Override
-                        public void setAlternative(MailMessage localMail) throws OXException, MessagingException, IOException {
+                        public void setHasAttachment(MailMessage localMail) throws OXException, MessagingException, IOException {
                             ContentType ct = null;
                             try {
                                 final String[] tmp = msg.getHeader(CONTENT_TYPE);
@@ -1953,7 +1953,7 @@ public final class MimeMessageConverter {
                 setHasAttachment(config.getMailConfig(), mail, msg.getFlags().getUserFlags(), new AlternativeHasAttachmentSetter() {
 
                     @Override
-                    public void setAlternative(MailMessage localMail) throws OXException, MessagingException, IOException {
+                    public void setHasAttachment(MailMessage localMail) throws OXException, MessagingException, IOException {
                         ContentType ct = mail.getContentType();
                         examineAttachmentPresence(localMail, ct);
                     }
@@ -2071,7 +2071,7 @@ public final class MimeMessageConverter {
                 }
             }
         }
-        alternative.setAlternative(mail);
+        alternative.setHasAttachment(mail);
     }
 
     /**

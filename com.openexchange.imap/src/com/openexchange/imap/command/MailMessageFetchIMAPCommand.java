@@ -647,7 +647,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             MimeMessageConverter.setHasAttachment(mailConfig, mail, m.getUserFlags(), new AlternativeHasAttachmentSetter() {
 
                 @Override
-                public void setAlternative(MailMessage localMail) throws OXException, MessagingException {
+                public void setHasAttachment(MailMessage localMail) throws OXException, MessagingException {
                     if (determineAttachmentByHeader) {
                         final String cts = localMail.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
                         if (null != cts) {
@@ -1153,7 +1153,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                 MimeMessageConverter.setHasAttachment(mailConfig, msg, msg.getUserFlags(), new AlternativeHasAttachmentSetter() {
 
                     @Override
-                    public void setAlternative(MailMessage localMail) throws OXException, MessagingException {
+                    public void setHasAttachment(MailMessage localMail) throws OXException, MessagingException {
                         boolean hasAttachment = MimeMessageUtility.hasAttachments(bs);
                         if (hasAttachment) {
                             if (checkICal && hasICal(bs)) {
@@ -1233,7 +1233,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                 MimeMessageConverter.setHasAttachment(mailConfig, msg, message.getFlags().getUserFlags(), new AlternativeHasAttachmentSetter() {
 
                     @Override
-                    public void setAlternative(MailMessage localMail) throws OXException, MessagingException {
+                    public void setHasAttachment(MailMessage localMail) throws OXException, MessagingException {
                         String contentType;
                         try {
                             contentType = message.getContentType();

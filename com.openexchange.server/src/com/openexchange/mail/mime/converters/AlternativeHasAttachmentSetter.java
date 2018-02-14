@@ -64,13 +64,13 @@ import com.openexchange.mail.dataobjects.MailMessage;
 public interface AlternativeHasAttachmentSetter {
 
     /**
-     * Sets the hasAttachment for given {@link MailMessage} based on local behavior
+     * Sets the hasAttachment for given {@link MailMessage} based on the implementations desire
      * 
      * @param mail The {@link MailMessage} com.openexchange.mail.dataobjects.MailMessage.hasAttachment should be set for
      * @throws OXException
      * @throws MessagingException
      * @throws IOException
      */
-    void setAlternative(MailMessage mail) throws OXException, MessagingException, IOException;
+    void setHasAttachment(MailMessage mail) throws OXException, MessagingException, IOException;
 
 }

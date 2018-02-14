@@ -365,7 +365,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                 MimeMessageConverter.setHasAttachment(mailConfig, mail, mail.getUserFlags(), new AlternativeHasAttachmentSetter() {
 
                     @Override
-                    public void setAlternative(MailMessage localMail) throws OXException, MessagingException {
+                    public void setHasAttachment(MailMessage localMail) throws OXException, MessagingException {
                         if (determineAttachmentByHeader) {
                             final String cts = localMail.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
                             if (null != cts) {
@@ -828,7 +828,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                 MimeMessageConverter.setHasAttachment(mailConfig, msg, msg.getUserFlags(), new AlternativeHasAttachmentSetter() {
 
                     @Override
-                    public void setAlternative(MailMessage localMail) throws OXException, MessagingException {
+                    public void setHasAttachment(MailMessage localMail) throws OXException, MessagingException {
                         final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
                         final StringBuilder sb = new StringBuilder();
                         sb.append(bs.type).append('/').append(bs.subtype);
@@ -858,7 +858,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                 MimeMessageConverter.setHasAttachment(mailConfig, msg, message.getFlags().getUserFlags(), new AlternativeHasAttachmentSetter() {
 
                     @Override
-                    public void setAlternative(MailMessage localMail) throws OXException, MessagingException {
+                    public void setHasAttachment(MailMessage localMail) throws OXException, MessagingException {
                         String contentType;
                         try {
                             contentType = message.getContentType();
