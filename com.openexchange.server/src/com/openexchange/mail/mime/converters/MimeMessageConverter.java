@@ -2060,6 +2060,9 @@ public final class MimeMessageConverter {
     }
 
     public static void setHasAttachment(MailConfig mailConfig, MailMessage mail, String[] userFlags, AlternativeHasAttachmentSetter alternative) throws OXException, MessagingException, IOException {
+        if (mail.hasAttachment()) { // a previously processed handler decided that the mail has an attachment: don't overwrite it
+            return;
+        }
         if (userFlags != null && userFlags.length > 0 && mailConfig != null && mailConfig.getCapabilities().hasAttachmentSearch()) {
             for (String flag : userFlags) {
                 if (MailMessage.isHasAttachment(flag)) {
