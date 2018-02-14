@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.composition.impl;
 
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getRelativeFolderIdsPerAccountId;
+import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.getUniqueFolderId;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i;
@@ -386,6 +387,47 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
             folderIdsPerAccount.put(account, entry.getValue());
         }
         return folderIdsPerAccount;
+    }
+
+    /**
+     * Gets the relative representation of a list of unique composite folder identifiers, mapped to their associated calendar account.
+     * <p/>
+     * {@link IDMangling#ROOT_FOLDER_IDS} are passed as-is implicitly, mapped to the default account.
+     *
+     * @param uniqueFolderIds The unique composite folder identifiers, e.g. <code>cal://4/35</code>
+     * @param errorsPerFolderId A map to track possible errors that occurred while retrieving the accounts
+     * @return The relative folder identifiers, mapped to their associated calendar account
+     */
+    protected Map<CalendarAccount, List<String>> getRelativeFolderIdsPerAccount(List<String> folderIds, Map<String, OXException> errorsPerFolderId) {
+        Map<Integer, List<String>> folderIdsPerAccountId = getRelativeFolderIdsPerAccountId(folderIds, errorsPerFolderId);
+        if (null == folderIdsPerAccountId || folderIdsPerAccountId.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<CalendarAccount, List<String>> foldersIdsPerAccount = new HashMap<CalendarAccount, List<String>>(folderIdsPerAccountId.size());
+        try {
+            /*
+             * attempt to batch-load all referenced accounts
+             */
+            List<CalendarAccount> accounts = getAccounts(I2i(folderIdsPerAccountId.keySet()));
+            for (Entry<Integer, List<String>> entry : folderIdsPerAccountId.entrySet()) {
+                CalendarAccount account = accounts.stream().filter(a -> i(entry.getKey()) == a.getAccountId()).findFirst().orElse(null);
+                foldersIdsPerAccount.put(account, entry.getValue());
+            }
+        } catch (OXException e) {
+            /*
+             * load each account separately as fallback & track errors
+             */
+            for (Entry<Integer, List<String>> entry : folderIdsPerAccountId.entrySet()) {
+                try {
+                    foldersIdsPerAccount.put(getAccount(i(entry.getKey())), entry.getValue());
+                } catch (OXException x) {
+                    for (String folderId : entry.getValue()) {
+                        errorsPerFolderId.put(getUniqueFolderId(i(entry.getKey()), folderId), x);
+                    }
+                }
+            }
+        }
+        return foldersIdsPerAccount;
     }
 
     /**

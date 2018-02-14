@@ -342,6 +342,33 @@ public class IDMangling {
     }
 
     /**
+     * Gets the relative representation of a list of unique composite folder identifier, mapped to their associated account identifier.
+     * <p/>
+     * {@link IDMangling#ROOT_FOLDER_IDS} are passed as-is implicitly, mapped to the default account.
+     *
+     * @param uniqueFolderIds The unique composite folder identifiers, e.g. <code>cal://4/35</code>
+     * @param errorsPerFolderId A map to track possible errors that occurred when parsing the supplied identifiers
+     * @return The relative folder identifiers, mapped to their associated calendar account identifier
+     */
+    public static Map<Integer, List<String>> getRelativeFolderIdsPerAccountId(List<String> uniqueFolderIds, Map<String, OXException> errorsPerFolderId) {
+        if (null == uniqueFolderIds || uniqueFolderIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<Integer, List<String>> foldersPerAccountId = new HashMap<Integer, List<String>>(uniqueFolderIds.size());
+        for (String uniqueFolderId : uniqueFolderIds) {
+            try {
+                List<String> unmangledId = unmangleFolderId(uniqueFolderId);
+                Integer accountId = Integer.valueOf(unmangledId.get(1));
+                String relativeFolderId = unmangledId.get(2);
+                com.openexchange.tools.arrays.Collections.put(foldersPerAccountId, accountId, relativeFolderId);
+            } catch (IllegalArgumentException e) {
+                errorsPerFolderId.put(uniqueFolderId, CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(e, uniqueFolderId, null));
+            }
+        }
+        return foldersPerAccountId;
+    }
+
+    /**
      * Gets the relative representation of a list of unique full event identifier, mapped to their associated account identifier.
      *
      * @param uniqueFolderIds The unique composite folder identifiers, e.g. <code>cal://4/35</code>
