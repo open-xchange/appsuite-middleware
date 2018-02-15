@@ -1838,9 +1838,9 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * Gets the has-attachment flag
+     * Checks if this mail message is marked to contain (file) attachments
      *
-     * @return the has-attachment flag
+     * @return <code>true</code> if this mail message is marked to contain (file) attachments; otherwise <code>false</code>
      */
     public boolean hasAttachment() {
         return b_hasAttachment ? hasAttachment : alternativeHasAttachment;

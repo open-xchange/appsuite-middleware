@@ -69,9 +69,11 @@ import javax.mail.UIDFolder;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MailDateFormat;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPServerInfo;
 import com.openexchange.imap.services.Services;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.ContentType;
@@ -91,7 +93,9 @@ import com.sun.mail.imap.protocol.INTERNALDATE;
 import com.sun.mail.imap.protocol.Item;
 import com.sun.mail.imap.protocol.RFC822DATA;
 import com.sun.mail.imap.protocol.RFC822SIZE;
+import com.sun.mail.imap.protocol.SNIPPET;
 import com.sun.mail.imap.protocol.UID;
+import com.sun.mail.imap.protocol.X_REAL_UID;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 
@@ -119,6 +123,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
     private final int length;
     private int index;
     private boolean determineAttachmentByHeader;
+    private final boolean examineHasAttachmentUserFlags;
     private final String fullname;
     private final Set<FetchItemHandler> lastHandlers;
     private final TLongObjectMap<MailMessage> map;
@@ -133,14 +138,16 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
      * @param seqNums The sequence numbers to fetch
      * @param fp The fetch profile to use
      * @param serverInfo The IMAP server information
+     * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
      * @throws MessagingException If initialization fails
      */
-    public SimpleFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, int[] seqNums, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
+    public SimpleFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, int[] seqNums, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags) throws MessagingException {
         super(imapFolder);
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             returnDefaultValue = true;
         }
+        this.examineHasAttachmentUserFlags = examineHasAttachmentUserFlags;
         lastHandlers = new HashSet<FetchItemHandler>();
         textPreviewProvider = Services.optService(IMAPTextPreviewProvider.class);
         if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
@@ -172,14 +179,16 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
      * @param uids The UIDs to fetch
      * @param fetchProfile The fetch profile to use
      * @param serverInfo The IMAP server information
+     * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
      * @throws MessagingException If initialization fails
      */
-    public SimpleFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, long[] uids, FetchProfile fetchProfile, IMAPServerInfo imapServerInfo) throws MessagingException {
+    public SimpleFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, long[] uids, FetchProfile fetchProfile, IMAPServerInfo imapServerInfo, boolean examineHasAttachmentUserFlags) throws MessagingException {
         super(imapFolder);
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             returnDefaultValue = true;
         }
+        this.examineHasAttachmentUserFlags = examineHasAttachmentUserFlags;
         lastHandlers = new HashSet<FetchItemHandler>();
         length = uids.length;
         map = new TLongObjectHashMap<MailMessage>(length);
@@ -306,7 +315,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                 final Item item = fetchResponse.getItem(j);
                 FetchItemHandler itemHandler = MAP.get(item.getClass());
                 if (null == itemHandler) {
-                    itemHandler = getItemHandlerByItem(item);
+                    itemHandler = getItemHandlerByItem(item, examineHasAttachmentUserFlags);
                     if (null == itemHandler) {
                         LOG.warn("Unknown FETCH item: {}", item.getClass().getName());
                     } else {
@@ -349,7 +358,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         return true;
     }
 
-    private static FetchItemHandler getItemHandlerByItem(final Item item) {
+    private static FetchItemHandler getItemHandlerByItem(final Item item, boolean examineHasAttachmentUserFlags) {
         if ((item instanceof RFC822DATA) || (item instanceof BODY)) {
             return HEADER_ITEM_HANDLER;
         } else if (item instanceof UID) {
@@ -357,13 +366,19 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         } else if (item instanceof INTERNALDATE) {
             return INTERNALDATE_ITEM_HANDLER;
         } else if (item instanceof Flags) {
-            return FLAGS_ITEM_HANDLER;
+            return new FLAGSFetchItemHandler(examineHasAttachmentUserFlags);
         } else if (item instanceof ENVELOPE) {
             return ENVELOPE_ITEM_HANDLER;
         } else if (item instanceof RFC822SIZE) {
             return SIZE_ITEM_HANDLER;
         } else if (item instanceof BODYSTRUCTURE) {
             return BODYSTRUCTURE_ITEM_HANDLER;
+        } else if (item instanceof X_REAL_UID) {
+            return X_REAL_UID_ITEM_HANDLER;
+        } else if (item instanceof com.sun.mail.imap.protocol.X_MAILBOX) {
+            return X_MAILBOX_ITEM_HANDLER;
+        } else if (item instanceof SNIPPET) {
+            return SNIPPET_ITEM_HANDLER;
         } else {
             return null;
         }
@@ -565,7 +580,14 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         }
     };
 
-    private static final FetchItemHandler FLAGS_ITEM_HANDLER = new FetchItemHandler() {
+    private static final class FLAGSFetchItemHandler implements FetchItemHandler {
+
+        private final boolean examineHasAttachmentUserFlags;
+
+        FLAGSFetchItemHandler(boolean examineHasAttachmentUserFlags) {
+            super();
+            this.examineHasAttachmentUserFlags = examineHasAttachmentUserFlags;
+        }
 
         @Override
         public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
@@ -615,6 +637,10 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                         retval |= MailMessage.FLAG_FORWARDED;
                     } else if (MailMessage.USER_READ_ACK.equalsIgnoreCase(userFlag)) {
                         retval |= MailMessage.FLAG_READ_ACK;
+                    } else if (examineHasAttachmentUserFlags && MailMessage.HAS_ATTACHMENT_LABEL.equalsIgnoreCase(userFlag)) {
+                        msg.setHasAttachment(true);
+                    } else if (examineHasAttachmentUserFlags && MailMessage.HAS_NO_ATTACHMENT_LABEL.equalsIgnoreCase(userFlag)) {
+                        msg.setHasAttachment(false);
                     } else {
                         set.add(userFlag);
                     }
@@ -827,16 +853,61 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         }
     };
 
+    private static final FetchItemHandler X_REAL_UID_ITEM_HANDLER = new FetchItemHandler() {
+
+        @Override
+        public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
+            long originalUid = ((X_REAL_UID) item).uid;
+            msg.setOriginalUid(originalUid);
+        }
+
+        @Override
+        public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
+            // Nothing
+        }
+    };
+
+    private static final FetchItemHandler X_MAILBOX_ITEM_HANDLER = new FetchItemHandler() {
+
+        @Override
+        public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
+            String mailbox = ((com.sun.mail.imap.protocol.X_MAILBOX) item).mailbox;
+            msg.setOriginalFolder(new FullnameArgument(msg.getAccountId(), mailbox));
+        }
+
+        @Override
+        public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
+            // Nothing
+        }
+    };
+
+    private static final FetchItemHandler SNIPPET_ITEM_HANDLER = new FetchItemHandler() {
+
+        @Override
+        public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
+            String textPreview = ((SNIPPET) item).getText();
+            msg.setTextPreview(textPreview);
+        }
+
+        @Override
+        public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
+            // Nothing
+        }
+    };
+
     private static final Map<Class<? extends Item>, FetchItemHandler> MAP;
 
     static {
-        MAP = new HashMap<Class<? extends Item>, FetchItemHandler>(8);
-        MAP.put(UID.class, UID_ITEM_HANDLER);
-        MAP.put(INTERNALDATE.class, INTERNALDATE_ITEM_HANDLER);
-        MAP.put(FLAGS.class, FLAGS_ITEM_HANDLER);
-        MAP.put(ENVELOPE.class, ENVELOPE_ITEM_HANDLER);
-        MAP.put(RFC822SIZE.class, SIZE_ITEM_HANDLER);
-        MAP.put(INTERNALDATE.class, INTERNALDATE_ITEM_HANDLER);
+        ImmutableMap.Builder<Class<? extends Item>, FetchItemHandler> builder = ImmutableMap.builder();
+        builder.put(UID.class, UID_ITEM_HANDLER);
+        builder.put(X_REAL_UID.class, X_REAL_UID_ITEM_HANDLER);
+        builder.put(com.sun.mail.imap.protocol.X_MAILBOX.class, X_MAILBOX_ITEM_HANDLER);
+        builder.put(SNIPPET.class, SNIPPET_ITEM_HANDLER);
+        builder.put(INTERNALDATE.class, INTERNALDATE_ITEM_HANDLER);
+        builder.put(ENVELOPE.class, ENVELOPE_ITEM_HANDLER);
+        builder.put(RFC822SIZE.class, SIZE_ITEM_HANDLER);
+        builder.put(INTERNALDATE.class, INTERNALDATE_ITEM_HANDLER);
+        MAP = builder.build();
     }
 
     /*-

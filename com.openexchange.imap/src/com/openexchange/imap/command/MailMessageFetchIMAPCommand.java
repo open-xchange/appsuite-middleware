@@ -140,6 +140,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
     private boolean checkICal;
     private boolean checkVCard;
     private boolean treatEmbeddedAsAttachment;
+    private final boolean examineHasAttachmentUserFlags;
     private final String fullname;
     private final Set<FetchItemHandler> lastHandlers;
     private final TLongIntHashMap uid2index;
@@ -155,11 +156,13 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param seqNums The sequence numbers to fetch
      * @param fp The fetch profile to use
      * @param serverInfo The IMAP server information deduced from configuration
+     * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
      * @throws MessagingException If initialization fails
      */
-    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, int[] seqNums, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
+    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, int[] seqNums, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags) throws MessagingException {
         super(imapFolder);
         determineAttachmentByHeader = false;
+        this.examineHasAttachmentUserFlags = examineHasAttachmentUserFlags;
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             returnDefaultValue = true;
@@ -200,11 +203,13 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
      * @param fp The fetch profile to use
      * @param serverInfo The IMAP server information deduced from configuration
+     * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
      * @throws MessagingException If initialization fails
      */
-    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
+    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags) throws MessagingException {
         super(imapFolder);
         determineAttachmentByHeader = false;
+        this.examineHasAttachmentUserFlags = examineHasAttachmentUserFlags;
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             returnDefaultValue = true;
@@ -243,11 +248,13 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param uids The UIDs to fetch
      * @param fp The fetch profile to use
      * @param serverInfo The IMAP server information deduced from configuration
+     * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
      * @throws MessagingException If initialization fails
      */
-    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, long[] uids, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
+    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, long[] uids, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags) throws MessagingException {
         super(imapFolder);
         determineAttachmentByHeader = false;
+        this.examineHasAttachmentUserFlags = examineHasAttachmentUserFlags;
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             returnDefaultValue = true;
@@ -487,7 +494,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         boolean error = false;
         MailMessage mail;
         try {
-            mail = handleFetchRespone(fetchResponse, fullname, accountId, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard, treatEmbeddedAsAttachment);
+            mail = handleFetchRespone(fetchResponse, fullname, accountId, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard, treatEmbeddedAsAttachment, examineHasAttachmentUserFlags);
             if (null != mail && null != textPreviewMode) {
                 mail.setTextPreview(textPreviewProvider.getTextPreview(Long.parseLong(mail.getMailId()), textPreviewMode));
             }
@@ -521,14 +528,15 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param fetchResponse The FETCH response to handle
      * @param fullName The full name of associated folder
      * @param accountId The account identifier
+     * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
      * @return The resulting mail message
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If an OX error occurs
      */
-    public static MailMessage handleFetchRespone(final FetchResponse fetchResponse, final String fullName, final int accountId) throws MessagingException, OXException {
+    public static MailMessage handleFetchRespone(final FetchResponse fetchResponse, final String fullName, final int accountId, boolean examineHasAttachmentUserFlags) throws MessagingException, OXException {
         IDMailMessage mail = new IDMailMessage(null, fullName);
         mail.setAccountId(accountId);
-        return handleFetchRespone(mail, fetchResponse, fullName, null, false, false, false, false);
+        return handleFetchRespone(mail, fetchResponse, fullName, null, false, false, false, false, examineHasAttachmentUserFlags);
     }
 
     /**
@@ -537,21 +545,22 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param mail The message to apply to
      * @param fetchResponse The FETCH response to handle
      * @param fullName The full name of associated folder
+     * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
      * @return The resulting mail message
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If an OX error occurs
      */
-    public static MailMessage handleFetchRespone(final IDMailMessage mail, final FetchResponse fetchResponse, final String fullName) throws MessagingException, OXException {
-        return handleFetchRespone(mail, fetchResponse, fullName, null, false, false, false, false);
+    public static MailMessage handleFetchRespone(final IDMailMessage mail, final FetchResponse fetchResponse, final String fullName, boolean examineHasAttachmentUserFlags) throws MessagingException, OXException {
+        return handleFetchRespone(mail, fetchResponse, fullName, null, false, false, false, false, examineHasAttachmentUserFlags);
     }
 
-    private static MailMessage handleFetchRespone(FetchResponse fetchResponse, String fullName, int accountId, Set<FetchItemHandler> lastHandlers, boolean determineAttachmentByHeader, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment) throws MessagingException, OXException {
+    private static MailMessage handleFetchRespone(FetchResponse fetchResponse, String fullName, int accountId, Set<FetchItemHandler> lastHandlers, boolean determineAttachmentByHeader, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment, boolean examineHasAttachmentUserFlags) throws MessagingException, OXException {
         IDMailMessage mail = new IDMailMessage(null, fullName);
         mail.setAccountId(accountId);
-        return handleFetchRespone(mail, fetchResponse, fullName, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard, treatEmbeddedAsAttachment);
+        return handleFetchRespone(mail, fetchResponse, fullName, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard, treatEmbeddedAsAttachment, examineHasAttachmentUserFlags);
     }
 
-    private static MailMessage handleFetchRespone(IDMailMessage mail, FetchResponse fetchResponse, String fullName, Set<FetchItemHandler> lastHandlers, boolean determineAttachmentByHeader, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment) throws MessagingException, OXException {
+    private static MailMessage handleFetchRespone(IDMailMessage mail, FetchResponse fetchResponse, String fullName, Set<FetchItemHandler> lastHandlers, boolean determineAttachmentByHeader, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment, boolean examineHasAttachmentUserFlags) throws MessagingException, OXException {
         final IDMailMessage m;
         if (null == mail) {
             m = new IDMailMessage(null, fullName);
@@ -567,7 +576,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             final Item item = fetchResponse.getItem(j);
             FetchItemHandler itemHandler = map.get(item.getClass());
             if (null == itemHandler) {
-                itemHandler = getItemHandlerByItem(item, checkICal, checkVCard, treatEmbeddedAsAttachment);
+                itemHandler = getItemHandlerByItem(item, checkICal, checkVCard, treatEmbeddedAsAttachment, examineHasAttachmentUserFlags);
                 if (null == itemHandler) {
                     LOG.warn("Unknown FETCH item: {}", item.getClass().getName());
                 } else {
@@ -597,7 +606,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         return m;
     }
 
-    private static FetchItemHandler getItemHandlerByItem(Item item, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment) {
+    private static FetchItemHandler getItemHandlerByItem(Item item, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment, boolean examineHasAttachmentUserFlags) {
         if (item instanceof BODYSTRUCTURE) {
             return new BODYSTRUCTUREFetchItemHandler(checkICal, checkVCard, treatEmbeddedAsAttachment);
         } else if ((item instanceof RFC822DATA) || (item instanceof BODY)) {
@@ -607,7 +616,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         } else if (item instanceof INTERNALDATE) {
             return INTERNALDATE_ITEM_HANDLER;
         } else if (item instanceof Flags) {
-            return FLAGS_ITEM_HANDLER;
+            return new FLAGSFetchItemHandler(examineHasAttachmentUserFlags);
         } else if (item instanceof ENVELOPE) {
             return ENVELOPE_ITEM_HANDLER;
         } else if (item instanceof RFC822SIZE) {
@@ -822,7 +831,14 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
     };
 
-    private static final FetchItemHandler FLAGS_ITEM_HANDLER = new FetchItemHandler() {
+    private static final class FLAGSFetchItemHandler implements FetchItemHandler {
+
+        private final boolean examineHasAttachmentUserFlags;
+
+        FLAGSFetchItemHandler(boolean examineHasAttachmentUserFlags) {
+            super();
+            this.examineHasAttachmentUserFlags = examineHasAttachmentUserFlags;
+        }
 
         @Override
         public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
@@ -872,6 +888,10 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                         retval |= MailMessage.FLAG_FORWARDED;
                     } else if (MailMessage.USER_READ_ACK.equalsIgnoreCase(userFlag)) {
                         retval |= MailMessage.FLAG_READ_ACK;
+                    } else if (examineHasAttachmentUserFlags && MailMessage.HAS_ATTACHMENT_LABEL.equalsIgnoreCase(userFlag)) {
+                        msg.setHasAttachment(true);
+                    } else if (examineHasAttachmentUserFlags && MailMessage.HAS_NO_ATTACHMENT_LABEL.equalsIgnoreCase(userFlag)) {
+                        msg.setHasAttachment(false);
                     } else {
                         set.add(userFlag);
                     }
@@ -1244,7 +1264,6 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         builder.put(com.sun.mail.imap.protocol.X_MAILBOX.class, X_MAILBOX_ITEM_HANDLER);
         builder.put(SNIPPET.class, SNIPPET_ITEM_HANDLER);
         builder.put(INTERNALDATE.class, INTERNALDATE_ITEM_HANDLER);
-        builder.put(FLAGS.class, FLAGS_ITEM_HANDLER);
         builder.put(ENVELOPE.class, ENVELOPE_ITEM_HANDLER);
         builder.put(RFC822SIZE.class, SIZE_ITEM_HANDLER);
         MAP = builder.build();

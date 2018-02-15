@@ -93,6 +93,7 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
     private final boolean uid;
     private final String fullname;
     private final int index;
+    private final boolean examineHasAttachmentUserFlags;
     private final IMAPTextPreviewProvider.Mode textPreviewMode;
     private final IMAPTextPreviewProvider textPreviewProvider;
 
@@ -106,8 +107,9 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
      * @param imapFolder The IMAP folder providing connected protocol
      * @throws MessagingException If initialization fails
      */
-    public MailMessageFillerIMAPCommand(Collection<MailMessage> messages, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo, IMAPFolder imapFolder) throws MessagingException {
+    public MailMessageFillerIMAPCommand(Collection<MailMessage> messages, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, IMAPFolder imapFolder) throws MessagingException {
         super(imapFolder);
+        this.examineHasAttachmentUserFlags = examineHasAttachmentUserFlags;
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             returnDefaultValue = true;
@@ -201,7 +203,7 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
                 try {
                     IDMailMessage idm = (IDMailMessage) message;
                     idm.setAccountId(accountId);
-                    MailMessageFetchIMAPCommand.handleFetchRespone(idm, fetchResponse, fullname);
+                    MailMessageFetchIMAPCommand.handleFetchRespone(idm, fetchResponse, fullname, examineHasAttachmentUserFlags);
                     if (null != textPreviewMode) {
                         idm.setTextPreview(textPreviewProvider.getTextPreview(idm.getUid(), textPreviewMode));
                     }
