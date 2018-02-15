@@ -66,6 +66,8 @@ public class GetTrashContentAction extends AbstractDriveAction {
 
     @Override
     public AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
+        // TODO QS-KR: Is it okay to return a null object and define the format as "json"? wouldnt it be better 
+        // to return an empty JSONObject instead?
         JSONObject result = getDriveService().getUtility().getTrashContent(session);
         return new AJAXRequestResult(result, "json");
     }

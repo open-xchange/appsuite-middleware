@@ -572,35 +572,15 @@ public class DriveUtilityImpl implements DriveUtility {
         JSONObject result = new JSONObject(2);
 
         try {
-            // Add folders
             FileStorageFolder[] subfolders = trashContent.getSubfolders();
             if (subfolders != null && subfolders.length > 0) {
-                JSONArray folderArray = new JSONArray(subfolders.length);
-                for (FileStorageFolder folder : subfolders) {
-                    JSONObject jsonObject = new JsonDirectoryMetadata(syncSession, folder).build(false);
-                    jsonObject.put("name", folder.getName());
-                    if (null != folder.getCreationDate()) {
-                        jsonObject.put("created", folder.getCreationDate().getTime());
-                    }
-                    if (null != folder.getLastModifiedDate()) {
-                        jsonObject.put("modified", folder.getLastModifiedDate().getTime());
-                    }
-                    jsonObject.put("created_by", folder.getCreatedBy());
-                    jsonObject.put("modified_by", folder.getModifiedBy());
-                    folderArray.put(jsonObject);
-                }
+                JSONArray folderArray = loadFolders(syncSession, subfolders);
                 result.put("folders", folderArray);
             }
 
-            // Add files
             SearchIterator<File> files = trashContent.getFiles();
             if (files != null) {
-                JSONArray fileArray = new JSONArray();
-                while (files.hasNext()) {
-                    File file = files.next();
-                    JSONObject jsonObject = new JsonFileMetadata(syncSession, file).build();
-                    fileArray.put(jsonObject);
-                }
+                JSONArray fileArray = loadFiles(syncSession, files);
                 if(fileArray.length() > 0) {
                     result.put("files", fileArray);
                 }
@@ -610,6 +590,34 @@ public class DriveUtilityImpl implements DriveUtility {
         }
 
         return result;
+    }
+
+    private JSONArray loadFiles(SyncSession syncSession, SearchIterator<File> files) throws OXException, JSONException {
+        JSONArray fileArray = new JSONArray();
+        while (files.hasNext()) {
+            File file = files.next();
+            JSONObject jsonObject = new JsonFileMetadata(syncSession, file).build();
+            fileArray.put(jsonObject);
+        }
+        return fileArray;
+    }
+
+    private JSONArray loadFolders(SyncSession syncSession, FileStorageFolder[] subfolders) throws OXException, JSONException {
+        JSONArray folderArray = new JSONArray(subfolders.length);
+        for (FileStorageFolder folder : subfolders) {
+            JSONObject jsonObject = new JsonDirectoryMetadata(syncSession, folder).build(false);
+            jsonObject.put("name", folder.getName());
+            if (null != folder.getCreationDate()) {
+                jsonObject.put("created", folder.getCreationDate().getTime());
+            }
+            if (null != folder.getLastModifiedDate()) {
+                jsonObject.put("modified", folder.getLastModifiedDate().getTime());
+            }
+            jsonObject.put("created_by", folder.getCreatedBy());
+            jsonObject.put("modified_by", folder.getModifiedBy());
+            folderArray.put(jsonObject);
+        }
+        return folderArray;
     }
 
 

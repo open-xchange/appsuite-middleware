@@ -109,6 +109,8 @@ public class DeleteFromTrashAction extends AbstractDriveAction {
         }
 
         getDriveService().getUtility().removeFromTrash(session, files, folders);
+        // TODO QS-KR: Is it okay to return a null object and define the format as "json"? wouldnt it be better 
+        // to return an empty JSONObject instead?
         return new AJAXRequestResult(null, "json");
     }
 

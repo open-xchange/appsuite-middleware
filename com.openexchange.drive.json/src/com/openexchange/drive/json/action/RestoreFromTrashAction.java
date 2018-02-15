@@ -86,38 +86,38 @@ public class RestoreFromTrashAction extends AbstractDriveAction {
         }
 
         JSONObject body = (JSONObject) data;
-
         List<String> files = Collections.emptyList();
         List<String> folders = Collections.emptyList();
+
         try {
             if (body.has("files")) {
-                JSONArray filesArray = body.getJSONArray("files");
-                files = new ArrayList<>(filesArray.length());
-                for (Object o : filesArray) {
-                    if (!(o instanceof String)) {
-                        throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
-                    }
-                    files.add((String) o);
-                }
+                files = parseArrayToList(body, "files");
             }
 
             if (body.has("folders")) {
-                JSONArray foldersArray = body.getJSONArray("folders");
-                folders = new ArrayList<>(foldersArray.length());
-                for (Object o : foldersArray) {
-                    if (!(o instanceof String)) {
-                        throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
-                    }
-                    folders.add((String) o);
-                }
+                folders = parseArrayToList(body, "folders");
             }
-
-
             RestoreContent content = getDriveService().getUtility().restoreFromTrash(session, files, folders);
+         // TODO QS-KR: Is it okay to return a null object and define the format as "json"? wouldnt it be better 
+            // to return an empty JSONObject instead or with empty lists for files and folders? RestoreContent can be null, which may be not so clear at this point.
             return new AJAXRequestResult(toJSON(content, session.getServerSession().getUser().getLocale()), "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
         }
+    }
+    
+    // TODO QS-KR: Maybe document the private methods also
+    
+    private List<String> parseArrayToList(JSONObject body, String arrayName) throws JSONException, OXException {
+        JSONArray array = body.getJSONArray(arrayName);
+        List<String> result = new ArrayList<>(array.length());
+        for (Object o : array) {
+            if (!(o instanceof String)) {
+                throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+            }
+            result.add((String) o);
+        }
+        return result;
     }
 
     private JSONObject toJSON(RestoreContent content, Locale locale) throws JSONException {
@@ -133,46 +133,36 @@ public class RestoreFromTrashAction extends AbstractDriveAction {
 
         JSONObject result = new JSONObject(4);
         if (restoredFiles != null) {
-            JSONArray restoredFilesJSON = new JSONArray(restoredFiles.size());
-            for (Map.Entry<String, FileStorageFolder[]> restoredFilesEntry : restoredFiles.entrySet()) {
-                JSONObject restoredFile = new JSONObject(2);
-                restoredFile.put("name", restoredFilesEntry.getKey());
-
-                FileStorageFolder[] path = restoredFilesEntry.getValue();
-                JSONArray jPath = new JSONArray(path.length);
-                for (FileStorageFolder folder : path) {
-                    JSONObject jPathEntry = new JSONObject(2);
-                    jPathEntry.put("id", folder.getId());
-                    jPathEntry.put("title", folder.getLocalizedName(locale));
-                    jPath.put(jPathEntry);
-                }
-                restoredFile.put("path", jPath);
-                restoredFilesJSON.put(restoredFile);
-            }
-            result.put("files", restoredFilesJSON);
+            JSONArray restoredJSON = parseMapToArray(locale, restoredFiles);
+            result.put("files", restoredJSON);
         }
 
         if (restoredFolders != null) {
-            JSONArray restoredFoldersJSON = new JSONArray(restoredFolders.size());
-            for (Map.Entry<String, FileStorageFolder[]> restoredFoldersEntry : restoredFolders.entrySet()) {
-                JSONObject restoredFolder = new JSONObject(2);
-                restoredFolder.put("name", restoredFoldersEntry.getKey());
-
-                FileStorageFolder[] path = restoredFoldersEntry.getValue();
-                JSONArray jPath = new JSONArray(path.length);
-                for (FileStorageFolder folder : path) {
-                    JSONObject jPathEntry = new JSONObject(2);
-                    jPathEntry.put("id", folder.getId());
-                    jPathEntry.put("title", folder.getLocalizedName(locale));
-                    jPath.put(jPathEntry);
-                }
-                restoredFolder.put("path", jPath);
-                restoredFoldersJSON.put(restoredFolder);
-            }
+            JSONArray restoredFoldersJSON = parseMapToArray(locale, restoredFolders);
             result.put("folders", restoredFoldersJSON);
         }
 
         return result;
+    }
+    
+    private JSONArray parseMapToArray(Locale locale, Map<String, FileStorageFolder[]> restoredContent) throws JSONException {
+        JSONArray restoredJSON = new JSONArray(restoredContent.size());
+        for (Map.Entry<String, FileStorageFolder[]> restoredObject : restoredContent.entrySet()) {
+            JSONObject restored = new JSONObject(2);
+            restored.put("name", restoredObject.getKey());
+
+            FileStorageFolder[] path = restoredObject.getValue();
+            JSONArray jPath = new JSONArray(path.length);
+            for (FileStorageFolder folder : path) {
+                JSONObject jPathEntry = new JSONObject(2);
+                jPathEntry.put("id", folder.getId());
+                jPathEntry.put("title", folder.getLocalizedName(locale));
+                jPath.put(jPathEntry);
+            }
+            restored.put("path", jPath);
+            restoredJSON.put(restored);
+        }
+        return restoredJSON;
     }
 
 }
