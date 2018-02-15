@@ -107,7 +107,6 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
-import com.sun.mail.imap.IMAPTextPreviewProvider;
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
 
@@ -160,7 +159,6 @@ public final class IMAPActivator extends HousekeepingActivator {
             track(CacheEventService.class, listLsubInvalidator);
             trackService(FolderService.class);
             trackService(AuditLogService.class);
-            trackService(IMAPTextPreviewProvider.class);
             openTrackers();
             /*
              * Command provider

@@ -293,7 +293,6 @@ public class IMAPStore extends Store
     private volatile String generatedExternalId = null;
     private Map<String, String> clientParameters = null;
     private ExternalIdGenerator externalIdGenerator = null;
-    private IMAPTextPreviewProvider textPreviewProvider = null;
     private boolean failOnNOFetch = false;
     private final String guid;			// for Yahoo! Mail IMAP
     private boolean throwSearchException = false;
@@ -786,24 +785,6 @@ public class IMAPStore extends Store
      */
     public void setExternalIdGenerator(ExternalIdGenerator externalIdGenerator) {
         this.externalIdGenerator = externalIdGenerator;
-    }
-
-    /**
-     * Gets the text-preview provider
-     *
-     * @return The text-preview provider or <code>null</code>
-     */
-    public IMAPTextPreviewProvider getTextPreviewProvider() {
-        return textPreviewProvider;
-    }
-
-    /**
-     * Sets the text-preview provider
-     *
-     * @param textPreviewProvider The text-preview provider to set
-     */
-    public void setTextPreviewProvider(IMAPTextPreviewProvider textPreviewProvider) {
-        this.textPreviewProvider = textPreviewProvider;
     }
 
     /**

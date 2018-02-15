@@ -72,7 +72,6 @@ import javax.mail.internet.MailDateFormat;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPServerInfo;
-import com.openexchange.imap.services.Services;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -83,7 +82,6 @@ import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
-import com.sun.mail.imap.IMAPTextPreviewProvider;
 import com.sun.mail.imap.protocol.BODY;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 import com.sun.mail.imap.protocol.ENVELOPE;
@@ -127,8 +125,6 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
     private final String fullname;
     private final Set<FetchItemHandler> lastHandlers;
     private final TLongObjectMap<MailMessage> map;
-    private final IMAPTextPreviewProvider.Mode textPreviewMode;
-    private final IMAPTextPreviewProvider textPreviewProvider;
 
     /**
      * Initializes a new {@link SimpleFetchIMAPCommand}.
@@ -149,17 +145,6 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         }
         this.examineHasAttachmentUserFlags = examineHasAttachmentUserFlags;
         lastHandlers = new HashSet<FetchItemHandler>();
-        textPreviewProvider = Services.optService(IMAPTextPreviewProvider.class);
-        if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
-            this.textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.ONLY_IF_AVAILABLE;
-        } else if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS)) {
-            this.textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.REQUIRE;
-        } else {
-            this.textPreviewMode = null;
-        }
-        if (null != textPreviewMode) {
-            fp.add(UIDFolder.FetchProfileItem.UID);
-        }
         command = getFetchCommand(isRev1, fp, false, serverInfo);
         uid = false;
         length = seqNums.length;
@@ -192,17 +177,6 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         lastHandlers = new HashSet<FetchItemHandler>();
         length = uids.length;
         map = new TLongObjectHashMap<MailMessage>(length);
-        textPreviewProvider = Services.optService(IMAPTextPreviewProvider.class);
-        if (fetchProfile.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
-            this.textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.ONLY_IF_AVAILABLE;
-        } else if (fetchProfile.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS)) {
-            this.textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.REQUIRE;
-        } else {
-            this.textPreviewMode = null;
-        }
-        if (null != textPreviewMode) {
-            fetchProfile.add(UIDFolder.FetchProfileItem.UID);
-        }
         if (length == messageCount) {
             fetchProfile.add(UIDFolder.FetchProfileItem.UID);
             command = getFetchCommand(isRev1, fetchProfile, false, imapServerInfo);
@@ -326,9 +300,6 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                     lastHandlers.add(itemHandler);
                     itemHandler.handleItem(item, mail, LOG);
                 }
-            }
-            if (null != textPreviewMode) {
-                mail.setTextPreview(textPreviewProvider.getTextPreview(mail.getUid(), textPreviewMode));
             }
             if (determineAttachmentByHeader) {
                 String cts = mail.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
