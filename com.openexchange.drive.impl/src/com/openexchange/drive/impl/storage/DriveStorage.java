@@ -1353,7 +1353,7 @@ public class DriveStorage {
      */
     public RestoreContent restoreFromTrash(List<String> files, List<String> folders) throws OXException {
         FileStorageFolder trashFolder = getTrashFolder();
-        // TODO QS-KR: Wenn kein Trash folder verfügbar ist, bekommt man nicht null zurück sondern eine
+        // TODO QS-KR: Wenn kein Trash folder verfugbar ist, bekommt man nicht null zuruck sondern eine
         // exception, soll diese durchgereicht werden? Wenn ja, dann kann trashFolder doch eigentlich nicht null
         // sein
         if (trashFolder == null) {
