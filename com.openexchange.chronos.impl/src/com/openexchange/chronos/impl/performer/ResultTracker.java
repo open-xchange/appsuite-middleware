@@ -77,13 +77,13 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.EventOccurrence;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
 import com.openexchange.chronos.impl.AbstractStorageOperation;
+import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.InternalCalendarStorageOperation;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
@@ -98,7 +98,7 @@ public class ResultTracker {
 
     private final CalendarStorage storage;
     private final CalendarSession session;
-    private final UserizedFolder folder;
+    private final CalendarFolder folder;
     private final long timestamp;
     private final InternalCalendarResult result;
     private final SelfProtection protection;
@@ -111,7 +111,7 @@ public class ResultTracker {
      * @param folder The calendar folder representing the current view on the events
      * @param timestamp The timestamp to apply for the result
      */
-    public ResultTracker(CalendarStorage storage, CalendarSession session, UserizedFolder folder, long timestamp, SelfProtection protection) throws OXException {
+    public ResultTracker(CalendarStorage storage, CalendarSession session, CalendarFolder folder, long timestamp, SelfProtection protection) throws OXException {
         super();
         this.storage = storage;
         this.session = session;
@@ -151,10 +151,10 @@ public class ResultTracker {
         /*
          * track affected folders and add 'plain' event creation, as well as (possibly expanded) 'userized' versions
          */
-        result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(createdEvent.getAttendees()));
+        result.addAffectedFolderIds(folder.getId(), getPersonalFolderIds(createdEvent.getAttendees()));
         result.addPlainCreation(createdEvent);
         if (includeAllFolderViews(session)) {
-            for (UserizedFolder visibleFolder : getVisibleFolderViews(createdEvent)) {
+            for (CalendarFolder visibleFolder : getVisibleFolderViews(createdEvent)) {
                 trackUserizedCreation(visibleFolder, createdEvent, originalSeriesMaster);
             }
         } else {
@@ -170,7 +170,7 @@ public class ResultTracker {
      * @param createdEvent The created event
      * @param originalSeriesMaster The series master event in case a new overridden instance was created, or <code>null</code>, otherwise
      */
-    private void trackUserizedCreation(UserizedFolder folder, Event createdEvent, Event originalSeriesMaster) throws OXException {
+    private void trackUserizedCreation(CalendarFolder folder, Event createdEvent, Event originalSeriesMaster) throws OXException {
         if (isInFolder(createdEvent, folder)) {
             /*
              * prepare 'userized' version of created event & expand event series if needed prior adding results
@@ -202,10 +202,10 @@ public class ResultTracker {
         /*
          * track affected folders and add a 'plain' event update, as well as (possibly expanded) 'userized' versions
          */
-        result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(originalEvent.getAttendees()), getPersonalFolderIds(updatedEvent.getAttendees()));
+        result.addAffectedFolderIds(folder.getId(), getPersonalFolderIds(originalEvent.getAttendees()), getPersonalFolderIds(updatedEvent.getAttendees()));
         result.addPlainUpdate(originalEvent, updatedEvent);
         if (includeAllFolderViews(session)) {
-            for (UserizedFolder visibleFolder : getVisibleFolderViews(originalEvent, updatedEvent)) {
+            for (CalendarFolder visibleFolder : getVisibleFolderViews(originalEvent, updatedEvent)) {
                 trackUserizedUpdate(visibleFolder, originalEvent, updatedEvent);
             }
         } else {
@@ -221,7 +221,7 @@ public class ResultTracker {
      * @param originalEvent The original event
      * @param updatedEvent The updated event
      */
-    private void trackUserizedUpdate(UserizedFolder folder, Event originalEvent, Event updatedEvent) throws OXException {
+    private void trackUserizedUpdate(CalendarFolder folder, Event originalEvent, Event updatedEvent) throws OXException {
         if (isInFolder(originalEvent, folder)) {
             if (isInFolder(updatedEvent, folder)) {
                 /*
@@ -283,10 +283,10 @@ public class ResultTracker {
      * @param deletedEvent The deleted event
      */
     public void trackDeletion(Event deletedEvent) throws OXException {
-        result.addAffectedFolderIds(folder.getID(), getPersonalFolderIds(deletedEvent.getAttendees()));
+        result.addAffectedFolderIds(folder.getId(), getPersonalFolderIds(deletedEvent.getAttendees()));
         result.addPlainDeletion(timestamp, deletedEvent);
         if (includeAllFolderViews(session)) {
-            for (UserizedFolder visibleFolder : getVisibleFolderViews(deletedEvent)) {
+            for (CalendarFolder visibleFolder : getVisibleFolderViews(deletedEvent)) {
                 trackUserizedDeletion(visibleFolder, deletedEvent);
             }
         } else {
@@ -301,7 +301,7 @@ public class ResultTracker {
      * @param folder The folder representing the targeted view for userization of the event data
      * @param deletedEvent The deleted event
      */
-    private void trackUserizedDeletion(UserizedFolder folder, Event deletedEvent) throws OXException {
+    private void trackUserizedDeletion(CalendarFolder folder, Event deletedEvent) throws OXException {
         Event originalUserizedEvent = getOriginalUserizedEvent(deletedEvent, folder);
         if (isSeriesMaster(deletedEvent) && isResolveOccurrences(session)) {
             for (Event deletedOccurrence : resolveOccurrences(originalUserizedEvent)) {
@@ -318,14 +318,14 @@ public class ResultTracker {
      * @param event The event
      * @return A list of all folders in which the event appears for the current session user
      */
-    private List<UserizedFolder> getVisibleFolderViews(Event event) throws OXException {
+    private List<CalendarFolder> getVisibleFolderViews(Event event) throws OXException {
         if (PublicType.getInstance().equals(folder.getType()) || false == CalendarUtils.isGroupScheduled(event)) {
             return Collections.singletonList(folder);
         }
-        List<UserizedFolder> visibleFolders = Utils.getVisibleFolders(session, PrivateType.getInstance(), SharedType.getInstance());
-        List<UserizedFolder> folderViews = new ArrayList<UserizedFolder>();
+        List<CalendarFolder> visibleFolders = Utils.getVisibleFolders(session, PrivateType.getInstance(), SharedType.getInstance());
+        List<CalendarFolder> folderViews = new ArrayList<CalendarFolder>();
         for (String folderId : getPersonalFolderIds(event.getAttendees())) {
-            UserizedFolder matchingFolder = visibleFolders.stream().filter(folder -> folderId.equals(folder.getID())).findAny().orElse(null);
+            CalendarFolder matchingFolder = visibleFolders.stream().filter(folder -> folderId.equals(folder.getId())).findAny().orElse(null);
             if (null != matchingFolder) {
                 folderViews.add(matchingFolder);
             }
@@ -340,7 +340,7 @@ public class ResultTracker {
      * @param updatedEvent The updated event data
      * @return A list of all folders in which the event appears for the current session user
      */
-    private List<UserizedFolder> getVisibleFolderViews(Event originalEvent, Event updatedEvent) throws OXException {
+    private List<CalendarFolder> getVisibleFolderViews(Event originalEvent, Event updatedEvent) throws OXException {
         Set<String> affectedFolderIds = new HashSet<String>();
         if (null != originalEvent.getFolderId()) {
             affectedFolderIds.add(originalEvent.getFolderId());
@@ -352,13 +352,13 @@ public class ResultTracker {
         } else {
             affectedFolderIds.addAll(getPersonalFolderIds(updatedEvent.getAttendees()));
         }
-        if (1 == affectedFolderIds.size() && affectedFolderIds.iterator().next().equals(folder.getID())) {
+        if (1 == affectedFolderIds.size() && affectedFolderIds.iterator().next().equals(folder.getId())) {
             return Collections.singletonList(folder);
         }
-        List<UserizedFolder> visibleFolders = Utils.getVisibleFolders(session);
-        List<UserizedFolder> folderViews = new ArrayList<UserizedFolder>();
+        List<CalendarFolder> visibleFolders = Utils.getVisibleFolders(session);
+        List<CalendarFolder> folderViews = new ArrayList<CalendarFolder>();
         for (String folderId : affectedFolderIds) {
-            UserizedFolder matchingFolder = visibleFolders.stream().filter(folder -> folderId.equals(folder.getID())).findAny().orElse(null);
+            CalendarFolder matchingFolder = visibleFolders.stream().filter(folder -> folderId.equals(folder.getId())).findAny().orElse(null);
             if (null != matchingFolder) {
                 folderViews.add(matchingFolder);
             }
@@ -384,7 +384,7 @@ public class ResultTracker {
      * @param folder The folder representing the view on the event
      * @return The original userized version of the event
      */
-    private Event getOriginalUserizedEvent(Event event, UserizedFolder folder) throws OXException {
+    private Event getOriginalUserizedEvent(Event event, CalendarFolder folder) throws OXException {
         Connection oldConnection = session.get(AbstractStorageOperation.PARAM_CONNECTION, Connection.class);
         session.set(AbstractStorageOperation.PARAM_CONNECTION, null);
         try {
@@ -418,7 +418,7 @@ public class ResultTracker {
      * @see Utils#applyExceptionDates
      * @see Utils#anonymizeIfNeeded
      */
-    private Event userize(Event event, UserizedFolder folder) throws OXException {
+    private Event userize(Event event, CalendarFolder folder) throws OXException {
         return userize(session, storage, event, getCalendarUserId(folder));
     }
 

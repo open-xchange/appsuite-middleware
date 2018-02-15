@@ -78,6 +78,7 @@ import com.openexchange.chronos.common.DataAwareRecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.InternalCalendarResult;
@@ -85,7 +86,6 @@ import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
 
@@ -104,7 +104,7 @@ public class SplitPerformer extends AbstractUpdatePerformer {
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
      */
-    public SplitPerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
+    public SplitPerformer(CalendarStorage storage, CalendarSession session, CalendarFolder folder) throws OXException {
         super(storage, session, folder);
     }
 
@@ -226,7 +226,7 @@ public class SplitPerformer extends AbstractUpdatePerformer {
         Check.quotaNotExceeded(storage, session);
         storage.getEventStorage().insertEvent(detachedSeriesMaster);
         storage.getAttendeeStorage().insertAttendees(detachedSeriesMaster.getId(), originalEvent.getAttendees());
-        storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getID(), detachedSeriesMaster.getId(), originalEvent.getAttachments());
+        storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), detachedSeriesMaster.getId(), originalEvent.getAttachments());
         Map<Integer, List<Alarm>> newAlarmsByUserId = insertAlarms(detachedSeriesMaster, originalAlarmsByUserId, true);
         storage.getAlarmTriggerStorage().insertTriggers(detachedSeriesMaster, newAlarmsByUserId);
         resultTracker.trackCreation(loadEventData(detachedSeriesMaster.getId()));

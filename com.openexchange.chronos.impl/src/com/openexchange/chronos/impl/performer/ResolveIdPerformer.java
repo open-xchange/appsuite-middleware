@@ -62,10 +62,10 @@ import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 
 /**
  * {@link ResolveIdPerformer}
@@ -103,7 +103,7 @@ public class ResolveIdPerformer extends AbstractQueryPerformer {
         event = storage.getUtilities().loadAdditionalEventData(calendarUserId, event, null);
         String folderId = CalendarUtils.getFolderView(event, calendarUserId);
         if (false == hasReadPermission(event)) {
-            UserizedFolder folder = getFolder(session, folderId);
+            CalendarFolder folder = getFolder(session, folderId);
             if (false == matches(event.getCreatedBy(), session.getUserId())) {
                 requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
             } else {

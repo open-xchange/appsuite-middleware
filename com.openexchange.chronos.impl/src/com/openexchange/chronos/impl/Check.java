@@ -72,8 +72,6 @@ import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.java.Strings;
 import com.openexchange.quota.Quota;
@@ -117,6 +115,23 @@ public class Check extends com.openexchange.chronos.common.Check {
     }
 
     /**
+     * Checks that an event can be <i>read</i> by the current user, either based on the user's permissions in the calendar folder
+     * representing the actual view on the event, or based on the user participating in the event as organizer or attendee.
+     *
+     * @param folder The calendar folder the event is read in
+     * @param event The event to check
+     * @return The event, after the check for sufficient read permissions took place
+     * @see Utils#isVisible(CalendarFolder, Event)
+     * @throws OXException {@link CalendarExceptionCodes#NO_READ_PERMISSION}
+     */
+    public static Event eventIsVisible(CalendarFolder folder, Event event) throws OXException {
+        if (Utils.isVisible(folder, event)) {
+            return event;
+        }
+        throw CalendarExceptionCodes.NO_READ_PERMISSION.create(folder.getId());
+    }
+
+    /**
      * Checks that the required permissions are fulfilled in a specific userized folder.
      *
      * @param folder The folder to check the permissions for
@@ -124,24 +139,21 @@ public class Check extends com.openexchange.chronos.common.Check {
      * @param requiredReadPermission The required read object permission, or {@link Permission#NO_PERMISSIONS} if none required
      * @param requiredWritePermission The required write object permission, or {@link Permission#NO_PERMISSIONS} if none required
      * @param requiredDeletePermission The required delete object permission, or {@link Permission#NO_PERMISSIONS} if none required
-     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_FOLDER}, {@link CalendarExceptionCodes#NO_READ_PERMISSION}, {@link CalendarExceptionCodes#NO_WRITE_PERMISSION}, {@link CalendarExceptionCodes#NO_DELETE_PERMISSION}
+     * @throws OXException {@link CalendarExceptionCodes#NO_READ_PERMISSION}, {@link CalendarExceptionCodes#NO_WRITE_PERMISSION}, {@link CalendarExceptionCodes#NO_DELETE_PERMISSION}
      */
-    public static void requireCalendarPermission(UserizedFolder folder, int requiredFolderPermission, int requiredReadPermission, int requiredWritePermission, int requiredDeletePermission) throws OXException {
-        if (false == CalendarContentType.class.isInstance(folder.getContentType())) {
-            throw CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(folder.getID(), String.valueOf(folder.getContentType()));
-        }
+    public static void requireCalendarPermission(CalendarFolder folder, int requiredFolderPermission, int requiredReadPermission, int requiredWritePermission, int requiredDeletePermission) throws OXException {
         Permission ownPermission = folder.getOwnPermission();
         if (ownPermission.getFolderPermission() < requiredFolderPermission) {
-            throw CalendarExceptionCodes.NO_READ_PERMISSION.create(folder.getID());
+            throw CalendarExceptionCodes.NO_READ_PERMISSION.create(folder.getId());
         }
         if (ownPermission.getReadPermission() < requiredReadPermission) {
-            throw CalendarExceptionCodes.NO_READ_PERMISSION.create(folder.getID());
+            throw CalendarExceptionCodes.NO_READ_PERMISSION.create(folder.getId());
         }
         if (ownPermission.getWritePermission() < requiredWritePermission) {
-            throw CalendarExceptionCodes.NO_WRITE_PERMISSION.create(folder.getID());
+            throw CalendarExceptionCodes.NO_WRITE_PERMISSION.create(folder.getId());
         }
         if (ownPermission.getDeletePermission() < requiredDeletePermission) {
-            throw CalendarExceptionCodes.NO_DELETE_PERMISSION.create(folder.getID());
+            throw CalendarExceptionCodes.NO_DELETE_PERMISSION.create(folder.getId());
         }
     }
 
@@ -169,11 +181,11 @@ public class Check extends com.openexchange.chronos.common.Check {
      * @return The identifier of the passed folder, after it was checked that it is a valid parent folder of the event
      * @throws OXException {@link CalendarExceptionCodes#EVENT_NOT_FOUND_IN_FOLDER}
      */
-    public static String eventIsInFolder(Event event, UserizedFolder folder) throws OXException {
+    public static String eventIsInFolder(Event event, CalendarFolder folder) throws OXException {
         if (false == Utils.isInFolder(event, folder)) {
-            throw CalendarExceptionCodes.EVENT_NOT_FOUND_IN_FOLDER.create(folder.getID(), event.getId());
+            throw CalendarExceptionCodes.EVENT_NOT_FOUND_IN_FOLDER.create(folder.getId(), event.getId());
         }
-        return folder.getID();
+        return folder.getId();
     }
 
     /**
@@ -185,9 +197,9 @@ public class Check extends com.openexchange.chronos.common.Check {
      * @return The passed classification, after it was checked for validity
      * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_CLASSIFICATION}
      */
-    public static Classification classificationIsValid(Classification classification, UserizedFolder folder) throws OXException {
+    public static Classification classificationIsValid(Classification classification, CalendarFolder folder) throws OXException {
         if (null != classification && false == Classification.PUBLIC.equals(classification) && PublicType.getInstance().equals(folder.getType())) {
-            throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION.create(String.valueOf(classification), folder.getID(), PublicType.getInstance());
+            throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION.create(String.valueOf(classification), folder.getId(), PublicType.getInstance());
         }
         return classification;
     }
@@ -205,11 +217,11 @@ public class Check extends com.openexchange.chronos.common.Check {
      * @return The passed classification, after it was checked for validity
      * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_CLASSIFICATION_FOR_MOVE}
      */
-    public static Classification classificationIsValidOnMove(Classification classification, UserizedFolder folder, UserizedFolder targetFolder) throws OXException {
+    public static Classification classificationIsValidOnMove(Classification classification, CalendarFolder folder, CalendarFolder targetFolder) throws OXException {
         if (null != classification && false == Classification.PUBLIC.equals(classification)) {
             if (PublicType.getInstance().equals(targetFolder.getType()) || getCalendarUserId(folder) != getCalendarUserId(targetFolder)) {
                 throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_MOVE.create(
-                    String.valueOf(classification), folder.getID(), folder.getType(), targetFolder.getID(), targetFolder.getType());
+                    String.valueOf(classification), folder.getId(), folder.getType(), targetFolder.getId(), targetFolder.getType());
             }
         }
         return classification;
@@ -222,11 +234,11 @@ public class Check extends com.openexchange.chronos.common.Check {
      * @param originalEvent The original event to check
      * @throws OXException {@link CalendarExceptionCodes#RESTRICTED_BY_CLASSIFICATION}
      */
-    public static void classificationAllowsUpdate(UserizedFolder folder, Event originalEvent) throws OXException {
+    public static void classificationAllowsUpdate(CalendarFolder folder, Event originalEvent) throws OXException {
         if (false == isPublicClassification(originalEvent)) {
-            int userID = folder.getUser().getId();
+            int userID = folder.getSession().getUserId();
             if (false == matches(originalEvent.getCreatedBy(), userID) && false == contains(originalEvent.getAttendees(), userID)) {
-                throw CalendarExceptionCodes.RESTRICTED_BY_CLASSIFICATION.create(folder.getID(), originalEvent.getId(), String.valueOf(originalEvent.getClassification()));
+                throw CalendarExceptionCodes.RESTRICTED_BY_CLASSIFICATION.create(folder.getId(), originalEvent.getId(), String.valueOf(originalEvent.getClassification()));
             }
         }
     }

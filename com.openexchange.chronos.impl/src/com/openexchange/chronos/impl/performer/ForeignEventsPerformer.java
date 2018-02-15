@@ -55,11 +55,11 @@ import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
@@ -89,7 +89,7 @@ public class ForeignEventsPerformer extends AbstractQueryPerformer {
      * @param folderId The identifier of the folder to check the contained events creator's in
      */
     public boolean perform(String folderId) throws OXException {
-        UserizedFolder folder = getFolder(session, folderId);
+        CalendarFolder folder = getFolder(session, folderId);
         SearchTerm<?> searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
             .addSearchTerm(getFolderIdTerm(session, folder))
             .addSearchTerm(getSearchTerm(EventField.CREATED_BY, SingleOperation.NOT_EQUALS, I(session.getUserId())))

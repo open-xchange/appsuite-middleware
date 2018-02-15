@@ -64,13 +64,13 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.UserizedFolder;
 
 /**
  * {@link AbstractFreeBusyPerformer}
@@ -80,7 +80,7 @@ import com.openexchange.folderstorage.UserizedFolder;
  */
 public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
 
-    private List<UserizedFolder> visibleFolders;
+    private List<CalendarFolder> visibleFolders;
 
     /**
      * Initializes a new {@link AbstractFreeBusyPerformer}.
@@ -94,8 +94,7 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
 
     protected List<Event> readAttendeeData(List<Event> events, Boolean internal) throws OXException {
         if (null != events && 0 < events.size()) {
-            String[] objectIDs = getObjectIDs(events);
-            Map<String, List<Attendee>> attendeesById = storage.getAttendeeStorage().loadAttendees(objectIDs, Boolean.TRUE);
+            Map<String, List<Attendee>> attendeesById = storage.getAttendeeStorage().loadAttendees(getObjectIDs(events), internal);
             for (Event event : events) {
                 event.setAttendees(attendeesById.get(event.getId()));
             }
@@ -144,7 +143,7 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
      *
      * @return The folders, or an empty list if there are none
      */
-    protected List<UserizedFolder> getVisibleFolders() throws OXException {
+    protected List<CalendarFolder> getVisibleFolders() throws OXException {
         if (null == visibleFolders) {
             visibleFolders = Utils.getVisibleFolders(session);
         }
@@ -169,7 +168,7 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
          * check common folder permissions for events with a static parent folder
          */
         if (null != event.getFolderId()) {
-            UserizedFolder folder = findFolder(getVisibleFolders(), event.getFolderId());
+            CalendarFolder folder = findFolder(getVisibleFolders(), event.getFolderId());
             if (null != folder) {
                 int readPermission = folder.getOwnPermission().getReadPermission();
                 if (Permission.READ_ALL_OBJECTS <= readPermission || Permission.READ_OWN_OBJECTS == readPermission && matches(event.getCreatedBy(), session.getUserId())) {
@@ -188,9 +187,9 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
         /*
          * choose the most appropriate attendee folder, otherwise
          */
-        UserizedFolder chosenFolder = null;
+        CalendarFolder chosenFolder = null;
         for (Attendee attendee : event.getAttendees()) {
-            UserizedFolder folder = findFolder(getVisibleFolders(), attendee.getFolderId());
+            CalendarFolder folder = findFolder(getVisibleFolders(), attendee.getFolderId());
             if (null != folder) {
                 int readPermission = folder.getOwnPermission().getReadPermission();
                 if (Permission.READ_ALL_OBJECTS <= readPermission || Permission.READ_OWN_OBJECTS == readPermission && matches(event.getCreatedBy(), session.getUserId())) {
@@ -198,7 +197,7 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
                 }
             }
         }
-        return null == chosenFolder ? null : chosenFolder.getID();
+        return null == chosenFolder ? null : chosenFolder.getId();
     }
 
     /**
@@ -208,7 +207,7 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
      * @param folder2 The second candidate, or <code>null</code> to always choose the first candidate
      * @return The chosen folder, or <code>null</code> in case both candidates were <code>null</code>
      */
-    private static UserizedFolder chooseFolder(UserizedFolder folder1, UserizedFolder folder2) {
+    private static CalendarFolder chooseFolder(CalendarFolder folder1, CalendarFolder folder2) {
         if (null == folder1) {
             return folder2;
         }
@@ -251,10 +250,10 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
      * @param id The identifier of the folder to lookup
      * @return The matching folder, or <code>null</code> if not found
      */
-    private static UserizedFolder findFolder(Collection<UserizedFolder> folders, String id) {
+    private static CalendarFolder findFolder(Collection<CalendarFolder> folders, String id) {
         if (null != folders && null != id) {
-            for (UserizedFolder folder : folders) {
-                if (id.equals(folder.getID())) {
+            for (CalendarFolder folder : folders) {
+                if (id.equals(folder.getId())) {
                     return folder;
                 }
             }

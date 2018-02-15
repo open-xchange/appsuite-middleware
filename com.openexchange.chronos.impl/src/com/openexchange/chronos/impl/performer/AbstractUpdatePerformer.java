@@ -102,6 +102,7 @@ import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.AlarmMapper;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.Role;
@@ -112,7 +113,6 @@ import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
@@ -129,7 +129,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
 
     protected final CalendarUser calendarUser;
     protected final int calendarUserId;
-    protected final UserizedFolder folder;
+    protected final CalendarFolder folder;
     protected final Date timestamp;
 
     protected final ResultTracker resultTracker;
@@ -143,7 +143,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * @param folder The calendar folder representing the current view on the events
      * @param roles The {@link Role}s a user acts as.
      */
-    protected AbstractUpdatePerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder, EnumSet<Role> roles) throws OXException {
+    protected AbstractUpdatePerformer(CalendarStorage storage, CalendarSession session, CalendarFolder folder, EnumSet<Role> roles) throws OXException {
         super(session, storage);
         this.folder = folder;
         this.calendarUser = getCalendarUser(session, folder);
@@ -160,7 +160,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
      */
-    protected AbstractUpdatePerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
+    protected AbstractUpdatePerformer(CalendarStorage storage, CalendarSession session, CalendarFolder folder) throws OXException {
         this(storage, session, folder, EnumSet.noneOf(Role.class));
     }
 
@@ -272,7 +272,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         storage.getEventStorage().insertEventTombstone(tombstone);
         storage.getAttendeeStorage().insertAttendeeTombstones(id, tombstone.getAttendees());
         storage.getAlarmStorage().deleteAlarms(id);
-        storage.getAttachmentStorage().deleteAttachments(session.getSession(), folder.getID(), id, originalEvent.getAttachments());
+        storage.getAttachmentStorage().deleteAttachments(session.getSession(), folder.getId(), id, originalEvent.getAttachments());
         storage.getEventStorage().deleteEvent(id);
         storage.getAttendeeStorage().deleteAttendees(id);
         storage.getAlarmTriggerStorage().deleteTriggers(id);
@@ -399,7 +399,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         /*
          * take over all original attachments
          */
-        storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getID(), exceptionEvent.getId(), originalMasterEvent.getAttachments());
+        storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), exceptionEvent.getId(), originalMasterEvent.getAttachments());
         /*
          * add new change exception date in master
          */
@@ -769,7 +769,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         }
         Check.classificationAllowsUpdate(folder, originalEvent);
         if (isAttendeeSchedulingResource(originalEvent, calendarUserId) && session.getConfig().isRestrictAllowedAttendeeChanges()) {
-            throw CalendarExceptionCodes.NOT_ORGANIZER.create(folder.getID(), originalEvent.getId(), originalEvent.getOrganizer().getUri(), originalEvent.getOrganizer().getSentBy());
+            throw CalendarExceptionCodes.NOT_ORGANIZER.create(folder.getId(), originalEvent.getId(), originalEvent.getOrganizer().getUri(), originalEvent.getOrganizer().getSentBy());
         }
     }
 

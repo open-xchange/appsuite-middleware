@@ -67,13 +67,13 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.DefaultUpdatesResult;
+import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
@@ -150,7 +150,7 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
      * @return The update result holding the new, modified and deleted events as requested
      */
     public UpdatesResult perform(String folderId, long since) throws OXException {
-        UserizedFolder folder = getFolder(session, folderId);
+        CalendarFolder folder = getFolder(session, folderId);
         requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         /*
          * construct search term

@@ -57,12 +57,12 @@ import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.search.SearchTerm;
 
 /**
@@ -90,9 +90,9 @@ public class SequenceNumberPerformer extends AbstractQueryPerformer {
      * @return The sequence number
      */
     public long perform(String folderId) throws OXException {
-        UserizedFolder folder = getFolder(session, folderId);
+        CalendarFolder folder = getFolder(session, folderId);
         requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
-        long timestamp = folder.getLastModifiedUTC().getTime();
+        long timestamp = 0L;//TODO? folder.getLastModifiedUTC().getTime();
         SearchTerm<?> searchTerm = getFolderIdTerm(session, folder);
         SearchOptions sortOptions = new SearchOptions().addOrder(SortOrder.getSortOrder(EventField.TIMESTAMP, SortOrder.Order.DESC)).setLimits(0, 1);
         EventField[] fields = { EventField.TIMESTAMP };

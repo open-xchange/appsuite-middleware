@@ -50,11 +50,11 @@
 package com.openexchange.chronos.impl.performer;
 
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 
 /**
  * {@link TouchPerformer}
@@ -71,7 +71,7 @@ public class TouchPerformer extends AbstractUpdatePerformer {
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
      */
-    public TouchPerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
+    public TouchPerformer(CalendarStorage storage, CalendarSession session, CalendarFolder folder) throws OXException {
         super(storage, session, folder);
     }
 

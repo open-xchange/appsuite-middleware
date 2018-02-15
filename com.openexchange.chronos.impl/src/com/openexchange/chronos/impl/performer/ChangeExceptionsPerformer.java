@@ -51,26 +51,20 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.getFields;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
-import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
-import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
-import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
-import static com.openexchange.folderstorage.Permission.READ_FOLDER;
-import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
@@ -98,30 +92,26 @@ public class ChangeExceptionsPerformer extends AbstractQueryPerformer {
      * Performs the operation.
      *
      * @param folderId The identifier of the parent folder for the event series
-     * @param seriesID The series identifier to get the change exceptions for
+     * @param seriesId The series identifier to get the change exceptions for
      * @return The change exceptions
      */
-    public List<Event> perform(String folderId, String seriesID) throws OXException {
+    public List<Event> perform(String folderId, String seriesId) throws OXException {
         /*
          * load series master first
          */
-        UserizedFolder folder = getFolder(session, folderId);
+        CalendarFolder folder = getFolder(session, folderId);
         EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
-        Event event = storage.getEventStorage().loadEvent(seriesID, fields);
+        Event event = storage.getEventStorage().loadEvent(seriesId, fields);
         if (null == event) {
-            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(seriesID);
+            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(seriesId);
         }
-        if (CalendarUtils.matches(event.getCreatedBy(), session.getUserId())) {
-            requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
-        } else {
-            requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
-        }
+        event = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), event, fields);
         /*
          * construct search term to lookup all change exceptions
          */
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
             .addSearchTerm(getFolderIdTerm(session, folder))
-            .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.EQUALS, seriesID))
+            .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.EQUALS, seriesId))
             .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
         ;
         /*
@@ -133,7 +123,8 @@ public class ChangeExceptionsPerformer extends AbstractQueryPerformer {
         }
         changeExceptions = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), changeExceptions, fields);
         for (Iterator<Event> iterator = changeExceptions.iterator(); iterator.hasNext();) {
-            if (false == Utils.isInFolder(iterator.next(), folder)) {
+            Event changeException = iterator.next();
+            if (false == Utils.isInFolder(changeException, folder) || false == Utils.isVisible(folder, changeException)) {
                 iterator.remove();
             }
         }

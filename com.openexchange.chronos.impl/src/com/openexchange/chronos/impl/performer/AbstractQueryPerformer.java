@@ -78,6 +78,7 @@ import com.openexchange.chronos.EventFlag;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
+import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
@@ -85,7 +86,6 @@ import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.quota.Quota;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -137,7 +137,7 @@ public abstract class AbstractQueryPerformer {
         return matches(event.getCalendarUser(), userId) || matches(event.getCreatedBy(), userId) || isAttendee(event, userId) || isOrganizer(event, userId);
     }
 
-    protected List<Event> readEventsInFolder(UserizedFolder folder, String[] objectIDs, boolean tombstones, Long updatedSince) throws OXException {
+    protected List<Event> readEventsInFolder(CalendarFolder folder, String[] objectIDs, boolean tombstones, Long updatedSince) throws OXException {
         requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         /*
          * construct search term
@@ -198,7 +198,7 @@ public abstract class AbstractQueryPerformer {
      * @param fields The event fields to consider, or <code>null</code> if not specified
      * @return The processed events
      */
-    protected List<Event> postProcess(List<Event> events, UserizedFolder inFolder, boolean includeClassified, EventField[] fields) throws OXException {
+    protected List<Event> postProcess(List<Event> events, CalendarFolder inFolder, boolean includeClassified, EventField[] fields) throws OXException {
         return postProcess(events, inFolder, includeClassified, fields, null);
     }
 
@@ -220,14 +220,14 @@ public abstract class AbstractQueryPerformer {
      * @param flagsGenerator A custom event flags generator, or <code>null</code> to generate the flags in the default way as needed
      * @return The processed events
      */
-    protected List<Event> postProcess(List<Event> events, UserizedFolder inFolder, boolean includeClassified, EventField[] fields, EventFlagsGenerator flagsGenerator) throws OXException {
+    protected List<Event> postProcess(List<Event> events, CalendarFolder inFolder, boolean includeClassified, EventField[] fields, EventFlagsGenerator flagsGenerator) throws OXException {
         List<Event> processedEvents = new ArrayList<Event>(events.size());
         int calendarUserId = getCalendarUserId(inFolder);
         for (Event event : events) {
             if (isExcluded(event, session, includeClassified)) {
                 continue;
             }
-            event.setFolderId(inFolder.getID());
+            event.setFolderId(inFolder.getId());
             if (null == fields || Arrays.contains(fields, EventField.FLAGS)) {
                 event.setFlags(null == flagsGenerator ? getFlags(event, calendarUserId) : flagsGenerator.getFlags(event, calendarUserId));
             }

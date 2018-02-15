@@ -72,6 +72,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchOptions;
@@ -79,7 +80,6 @@ import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.service.SortOrder.Order;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.search.SearchTerm;
 
 /**
@@ -99,7 +99,7 @@ public class ClearPerformer extends AbstractUpdatePerformer {
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
      */
-    public ClearPerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
+    public ClearPerformer(CalendarStorage storage, CalendarSession session, CalendarFolder folder) throws OXException {
         super(storage, session, folder);
     }
 
@@ -160,7 +160,7 @@ public class ClearPerformer extends AbstractUpdatePerformer {
                  */
                 Attendee userAttendee = find(originalEvent.getAttendees(), calendarUserId);
                 if (null == userAttendee) {
-                    throw CalendarExceptionCodes.NO_DELETE_PERMISSION.create(folder.getID());
+                    throw CalendarExceptionCodes.NO_DELETE_PERMISSION.create(folder.getId());
                 }
                 attendeesToDeleteByEvent.add(new AbstractMap.SimpleEntry<Event, Attendee>(originalEvent, userAttendee));
             }
@@ -205,7 +205,7 @@ public class ClearPerformer extends AbstractUpdatePerformer {
         storage.getAttendeeStorage().deleteAttendees(eventIds);
         storage.getEventStorage().deleteEvents(eventIds);
         if (0 < attachmentsByEventId.size()) {
-            storage.getAttachmentStorage().deleteAttachments(session.getSession(), Collections.singletonMap(folder.getID(), attachmentsByEventId));
+            storage.getAttachmentStorage().deleteAttachments(session.getSession(), Collections.singletonMap(folder.getId(), attachmentsByEventId));
         }
         /*
          * track deletions in result

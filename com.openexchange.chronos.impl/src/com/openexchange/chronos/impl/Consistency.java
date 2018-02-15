@@ -58,7 +58,6 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PublicType;
 
 /**
@@ -134,7 +133,7 @@ public class Consistency {
         event.setCreatedBy(createdBy);
     }
 
-    public static void setCalenderUser(CalendarSession session, UserizedFolder folder, Event event) throws OXException {
+    public static void setCalenderUser(CalendarSession session, CalendarFolder folder, Event event) throws OXException {
         if (PublicType.getInstance().equals(folder.getType())) {
             event.setCalendarUser(null);
         } else {
