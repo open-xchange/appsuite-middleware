@@ -560,17 +560,9 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
 
         if (null != delayed) {
-            FetchItemHandler itemHandler = map.get(delayed.getClass());
+            FetchItemHandler itemHandler = getItemHandlerByItem(delayed, checkICal, checkVCard, treatEmbeddedAsAttachment, examineHasAttachmentUserFlags);
             if (null == itemHandler) {
-                itemHandler = getItemHandlerByItem(delayed, checkICal, checkVCard, treatEmbeddedAsAttachment, examineHasAttachmentUserFlags);
-                if (null == itemHandler) {
-                    LOG.warn("Unknown FETCH item: {}", delayed.getClass().getName());
-                } else {
-                    if (null != lastHandlers) {
-                        lastHandlers.add(itemHandler);
-                    }
-                    itemHandler.handleItem(delayed, m, LOG);
-                }
+                LOG.warn("Unknown FETCH item: {}", delayed.getClass().getName());
             } else {
                 if (null != lastHandlers) {
                     lastHandlers.add(itemHandler);

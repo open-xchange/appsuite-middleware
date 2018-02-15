@@ -896,6 +896,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
     static {
         ImmutableMap.Builder<Class<? extends Item>, FetchItemHandler> builder = ImmutableMap.builder();
         builder.put(UID.class, UID_ITEM_HANDLER);
+        builder.put(BODYSTRUCTURE.class, BODYSTRUCTURE_ITEM_HANDLER);
         builder.put(X_REAL_UID.class, X_REAL_UID_ITEM_HANDLER);
         builder.put(com.sun.mail.imap.protocol.X_MAILBOX.class, X_MAILBOX_ITEM_HANDLER);
         builder.put(SNIPPET.class, SNIPPET_ITEM_HANDLER);
