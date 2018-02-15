@@ -3364,6 +3364,7 @@ public final class OXFolderSQL {
             stmt.setString(3, name);
             rs = stmt.executeQuery();
             while (rs.next()) {
+                Databases.closeSQLStuff(rs, stmt);
                 newName = appendIndex(name, ++i);
                 stmt = readCon.prepareStatement(GET_UNUSED_FOLDERNAME_SQL);
                 stmt.setInt(1, ctx.getContextId());
