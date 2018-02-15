@@ -68,7 +68,6 @@ import com.google.api.services.calendar.model.CalendarList;
 import com.google.api.services.calendar.model.CalendarListEntry;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
-import com.openexchange.chronos.provider.AvailabilityAwareCalendarProvider;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.CalendarFolderProperty;
@@ -95,7 +94,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class GoogleCalendarProvider implements BasicCalendarProvider, AvailabilityAwareCalendarProvider {
+public class GoogleCalendarProvider implements BasicCalendarProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(GoogleCalendarProvider.class);
 

@@ -143,4 +143,19 @@ public interface CalendarProvider {
      */
     CalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException;
 
+    /**
+     * Checks whether the provider is available for the given session.
+     * <p/>
+     * This method is invoked from the capability checker for calendar providers, and the general capability check for this calendar
+     * provider is already done at that stage.
+     * <p/>
+     * Returns <code>true</code> by default, and may be overridden to perform additional, provider-specific checks.
+     *
+     * @param session The session
+     * @return <code>true</code> if it is available, <code>false</code> otherwise
+     */
+    default boolean isAvailable(Session session) {
+        return true;
+    }
+
 }
