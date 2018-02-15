@@ -98,16 +98,21 @@ public class RestoreFromTrashAction extends AbstractDriveAction {
                 folders = parseArrayToList(body, "folders");
             }
             RestoreContent content = getDriveService().getUtility().restoreFromTrash(session, files, folders);
-         // TODO QS-KR: Is it okay to return a null object and define the format as "json"? wouldnt it be better 
-            // to return an empty JSONObject instead or with empty lists for files and folders? RestoreContent can be null, which may be not so clear at this point.
             return new AJAXRequestResult(toJSON(content, session.getServerSession().getUser().getLocale()), "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
         }
     }
-    
-    // TODO QS-KR: Maybe document the private methods also
-    
+
+    /**
+     * Parses an the json array with the name arrayName to a {@link List} of {@link String}
+     *
+     * @param body The {@link JSONObject} which contains the {@link JSONArray} field
+     * @param arrayName The name of the {@link JSONArray}
+     * @return A {@link List} of {@link String}
+     * @throws JSONException
+     * @throws OXException
+     */
     private List<String> parseArrayToList(JSONObject body, String arrayName) throws JSONException, OXException {
         JSONArray array = body.getJSONArray(arrayName);
         List<String> result = new ArrayList<>(array.length());
@@ -120,15 +125,23 @@ public class RestoreFromTrashAction extends AbstractDriveAction {
         return result;
     }
 
+    /**
+     * Transforms a {@link RestoreContent} to json
+     *
+     * @param content The {@link RestoreContent}
+     * @param locale The locale to use
+     * @return the {@link JSONObject}
+     * @throws JSONException
+     */
     private JSONObject toJSON(RestoreContent content, Locale locale) throws JSONException {
         if (content == null) {
-            return null;
+            return JSONObject.EMPTY_OBJECT;
         }
 
         Map<String, FileStorageFolder[]> restoredFolders = content.getRestoredFolders();
         Map<String, FileStorageFolder[]> restoredFiles = content.getRestoredFiles();
         if (restoredFiles == null && restoredFolders == null) {
-            return null;
+            return JSONObject.EMPTY_OBJECT;
         }
 
         JSONObject result = new JSONObject(4);
@@ -144,7 +157,15 @@ public class RestoreFromTrashAction extends AbstractDriveAction {
 
         return result;
     }
-    
+
+    /**
+     * Transforms a {@link Map} to a {@link JSONArray}
+     * 
+     * @param locale The locale to use
+     * @param restoredContent The map
+     * @return The {@link JSONArray}
+     * @throws JSONException
+     */
     private JSONArray parseMapToArray(Locale locale, Map<String, FileStorageFolder[]> restoredContent) throws JSONException {
         JSONArray restoredJSON = new JSONArray(restoredContent.size());
         for (Map.Entry<String, FileStorageFolder[]> restoredObject : restoredContent.entrySet()) {

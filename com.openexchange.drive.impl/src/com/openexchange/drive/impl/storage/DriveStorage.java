@@ -1240,7 +1240,6 @@ public class DriveStorage {
      */
     public TrashContent getTrashContent() throws OXException {
         FileStorageFolder trashFolder = getTrashFolder();
-        // TODO QS-KR: Kann eigentlich nur einen Fehler werfen und nicht null sein
         if(trashFolder == null) {
             return null;
         }
@@ -1261,7 +1260,6 @@ public class DriveStorage {
      */
     public void deleteFromTrash(List<String> files, List<String> folders) throws OXException {
         FileStorageFolder trashFolder = getTrashFolder();
-        // TODO QS-KR: Kann eigentlich nur einen Fehler werfen und nicht null sein
         if (trashFolder == null) {
             return;
         }
@@ -1353,9 +1351,6 @@ public class DriveStorage {
      */
     public RestoreContent restoreFromTrash(List<String> files, List<String> folders) throws OXException {
         FileStorageFolder trashFolder = getTrashFolder();
-        // TODO QS-KR: Wenn kein Trash folder verfugbar ist, bekommt man nicht null zuruck sondern eine
-        // exception, soll diese durchgereicht werden? Wenn ja, dann kann trashFolder doch eigentlich nicht null
-        // sein
         if (trashFolder == null) {
             return null;
         }
