@@ -49,72 +49,47 @@
 
 package com.openexchange.ipcheck.countrycode.mbean;
 
-import java.util.Set;
-import com.openexchange.metrics.AbstractMetricCollector;
-import com.openexchange.metrics.MetricMetadata;
+import com.openexchange.metrics.MetricType;
 
 /**
- * {@link IPCheckMetricCollector}
+ * {@link IPCheckMetric}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class IPCheckMetricCollector extends AbstractMetricCollector {
+public enum IPCheckMetric {
+    totalIPChanges(MetricType.METER),
+    acceptedIPChanges(MetricType.METER),
+    deniedIPChanges(MetricType.METER),
+    acceptedPrivateIP(MetricType.METER),
+    acceptedWhiteListed(MetricType.METER),
+    acceptedEligibleIPChanges(MetricType.METER),
+    deniedException(MetricType.METER),
+    deniedCountryChanged(MetricType.METER);
 
-    public static final String COMPONENT_NAME = "ipcheck";
+    private final MetricType metricType;
 
     /**
-     * Initialises a new {@link IPCheckMetricCollector}.
-     * 
-     * @param componentName
+     * Initialises a new {@link IPCheckMetric}.
      */
-    public IPCheckMetricCollector() {
-        super(COMPONENT_NAME);
-        Set<MetricMetadata> metricMetadata = getMetricMetadata();
-        for (IPCheckMetric metric : IPCheckMetric.values()) {
-            metricMetadata.add(new MetricMetadata(metric.getMetricType(), metric.getMetricName()));
-        }
+    private IPCheckMetric(MetricType metricType) {
+        this.metricType = metricType;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.MetricCollector#isEnabled()
+    /**
+     * Gets the metricType
+     *
+     * @return The metricType
      */
-    @Override
-    public boolean isEnabled() {
-        // TODO check from config
-        return true;
+    public MetricType getMetricType() {
+        return metricType;
     }
 
-    public void incrementTotalIPChanges() {
-        getMeter(IPCheckMetric.totalIPChanges.getMetricName()).mark();
-    }
-
-    public void incrementAcceptedIPChanges() {
-        getMeter(IPCheckMetric.acceptedIPChanges.getMetricName()).mark();
-    }
-
-    public void incrementDeniedIPChanges() {
-        getMeter(IPCheckMetric.deniedIPChanges.getMetricName()).mark();
-    }
-
-    public void incrementAcceptedPrivateIP() {
-        getMeter(IPCheckMetric.acceptedPrivateIP.getMetricName()).mark();
-    }
-
-    public void incrementAcceptedWhiteListed() {
-        getMeter(IPCheckMetric.acceptedWhiteListed.getMetricName()).mark();
-    }
-
-    public void incrementAcceptedEligibleIPChange() {
-        getMeter(IPCheckMetric.acceptedEligibleIPChanges.getMetricName()).mark();
-    }
-
-    public void incrementDeniedException() {
-        getMeter(IPCheckMetric.deniedException.getMetricName()).mark();
-    }
-
-    public void incrementDeniedCountryChange() {
-        getMeter(IPCheckMetric.deniedCountryChanged.getMetricName()).mark();
+    /**
+     * Returns the metric's name
+     * 
+     * @return the metric's name
+     */
+    public String getMetricName() {
+        return metricType.name().toLowerCase() + "." + name();
     }
 }

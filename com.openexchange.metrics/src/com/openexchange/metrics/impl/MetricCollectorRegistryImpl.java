@@ -84,7 +84,6 @@ public class MetricCollectorRegistryImpl implements MetricCollectorRegistry {
 
     private static final Logger LOG = LoggerFactory.getLogger(MetricCollectorRegistryImpl.class);
 
-    private static final String DOMAIN_NAME = "com.openexchange.metrics";
     private final Map<MetricType, BiFunction<MetricMetadata, MetricRegistry, Metric>> registerers;
     private final ConcurrentMap<String, MetricCollector> collectors;
     private final Map<MetricType, BiFunction<Metric, MetricMetadata, MetricMBean>> mbeanCreators;
