@@ -958,6 +958,11 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
     }
 
     @Override
+    public boolean isHasAttachment() {
+        return delegatee.isHasAttachment();
+    }
+
+    @Override
     public boolean containsHasAttachment() {
         return delegatee.containsHasAttachment();
     }
@@ -970,6 +975,26 @@ public final class UnifiedMailMessage extends MailMessage implements Delegatized
     @Override
     public void setHasAttachment(final boolean hasAttachment) {
         delegatee.setHasAttachment(hasAttachment);
+    }
+
+    @Override
+    public boolean isAlternativeHasAttachment() {
+        return delegatee.isAlternativeHasAttachment();
+    }
+
+    @Override
+    public boolean containsAlternativeHasAttachment() {
+        return delegatee.containsAlternativeHasAttachment();
+    }
+
+    @Override
+    public void removeAlternativeHasAttachment() {
+        delegatee.removeAlternativeHasAttachment();
+    }
+
+    @Override
+    public void setAlternativeHasAttachment(boolean hasAttachment) {
+        delegatee.setAlternativeHasAttachment(hasAttachment);
     }
 
     @Override

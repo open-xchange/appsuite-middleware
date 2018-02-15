@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.common.CalendarUtils.getFields;
 import static com.openexchange.chronos.common.CalendarUtils.getSearchTerm;
+import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.chronos.EventField;
@@ -85,9 +86,10 @@ public class ForeignEventsPerformer extends AbstractQueryPerformer {
     /**
      * Performs the operation.
      *
-     * @param folder The folder to check the contained events creator's in
+     * @param folderId The identifier of the folder to check the contained events creator's in
      */
-    public boolean perform(UserizedFolder folder) throws OXException {
+    public boolean perform(String folderId) throws OXException {
+        UserizedFolder folder = getFolder(session, folderId);
         SearchTerm<?> searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
             .addSearchTerm(getFolderIdTerm(session, folder))
             .addSearchTerm(getSearchTerm(EventField.CREATED_BY, SingleOperation.NOT_EQUALS, I(session.getUserId())))

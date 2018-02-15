@@ -58,6 +58,8 @@ import com.openexchange.exception.OXException;
  */
 public interface MetricCollectorRegistry {
 
+    public static final String DOMAIN_NAME = "com.openexchange.metrics";
+
     /**
      * Registers the specified {@link MetricCollector}
      * 

@@ -53,6 +53,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import com.openexchange.java.Strings;
 
 /**
@@ -79,10 +81,22 @@ public final class UserAliasUtility {
         if (Strings.isEmpty(possibleAlias)) {
             return false;
         }
-        for (String alias : aliases) {
-            if (null != alias && alias.equalsIgnoreCase(possibleAlias)) {
-                return true;
+
+        try {
+            InternetAddress a = new InternetAddress(possibleAlias);
+            for (String alias : aliases) {
+                try {
+                    InternetAddress aliasAddress = new InternetAddress(alias);
+                    if (a.equals(aliasAddress)) {
+                        // Address part is equalsIgnoreCase
+                        return true;
+                    }
+                } catch (AddressException e) {
+                    // Ignore
+                }
             }
+        } catch (AddressException e) {
+            // Fall through
         }
         return false;
     }

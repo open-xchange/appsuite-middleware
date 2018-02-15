@@ -59,14 +59,26 @@ import com.openexchange.mail.api.MailConfig;
  */
 public class DefaultConverterConfig implements ConverterConfig {
 
-    private boolean considerFolder;
+    private final boolean considerFolder;
     private final MailConfig mailConfig;
-    private boolean includeBody;
+    private final boolean includeBody;
 
+    /**
+     * Initializes a new {@link DefaultConverterConfig}.
+     *
+     * @param mailConfig The mail config
+     */
     public DefaultConverterConfig(MailConfig mailConfig) {
         this(mailConfig, true, false);
     }
 
+    /**
+     * Initializes a new {@link DefaultConverterConfig}.
+     *
+     * @param mailConfig The mail config
+     * @param considerFolder Whether the folder is supposed to be considered during conversion
+     * @param includeBody Whether the body should be included during conversion
+     */
     public DefaultConverterConfig(MailConfig mailConfig, boolean considerFolder, boolean includeBody) {
         super();
         this.considerFolder = considerFolder;

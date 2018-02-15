@@ -47,30 +47,49 @@
  *
  */
 
-package com.openexchange.mail.mime.converters;
+package com.openexchange.ipcheck.countrycode.mbean;
 
-import java.io.IOException;
-import javax.mail.MessagingException;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.api.MailCapabilities;
-import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.metrics.MetricType;
 
 /**
- * {@link AlternativeHasAttachmentSetter} Defines an alternative way of setting hasAttachment flag if {@link MailCapabilities#hasAttachmentSearch()} is disabled
+ * {@link IPCheckMetric}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface AlternativeHasAttachmentSetter {
+public enum IPCheckMetric {
+    totalIPChanges(MetricType.METER),
+    acceptedIPChanges(MetricType.METER),
+    deniedIPChanges(MetricType.METER),
+    acceptedPrivateIP(MetricType.METER),
+    acceptedWhiteListed(MetricType.METER),
+    acceptedEligibleIPChanges(MetricType.METER),
+    deniedException(MetricType.METER),
+    deniedCountryChanged(MetricType.METER);
+
+    private final MetricType metricType;
 
     /**
-     * Sets the hasAttachment for given {@link MailMessage} based on the implementations desire
-     * 
-     * @param mail The {@link MailMessage} com.openexchange.mail.dataobjects.MailMessage.hasAttachment should be set for
-     * @throws OXException
-     * @throws MessagingException
-     * @throws IOException
+     * Initialises a new {@link IPCheckMetric}.
      */
-    void setHasAttachment(MailMessage mail) throws OXException, MessagingException, IOException;
+    private IPCheckMetric(MetricType metricType) {
+        this.metricType = metricType;
+    }
 
+    /**
+     * Gets the metricType
+     *
+     * @return The metricType
+     */
+    public MetricType getMetricType() {
+        return metricType;
+    }
+
+    /**
+     * Returns the metric's name
+     * 
+     * @return the metric's name
+     */
+    public String getMetricName() {
+        return metricType.name().toLowerCase() + "." + name();
+    }
 }

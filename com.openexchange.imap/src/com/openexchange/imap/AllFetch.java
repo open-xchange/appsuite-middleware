@@ -110,12 +110,13 @@ public final class AllFetch {
          * Handles given <code>com.sun.mail.imap.protocol.Item</code> instance and applies it to given message.
          *
          * @param item The item to handle
-         * @param msg The message to apply to
+         * @param config The IMAP config
          * @param logger The logger
+         * @param msg The message to apply to
          * @throws MessagingException If a messaging error occurs
          * @throws OXException If a mail error occurs
          */
-        public abstract void handleItem(final Item item, final MailMessage m, final org.slf4j.Logger logger) throws OXException;
+        public void handleItem(final Item item, final MailMessage m, IMAPConfig config, final org.slf4j.Logger logger) throws OXException;
     }
 
     /**
@@ -128,7 +129,7 @@ public final class AllFetch {
         INTERNALDATE("INTERNALDATE", INTERNALDATE.class, new FetchItemHandler() {
 
             @Override
-            public void handleItem(final Item item, final MailMessage m, final org.slf4j.Logger logger) {
+            public void handleItem(final Item item, final MailMessage m, IMAPConfig config, final org.slf4j.Logger logger) {
                 m.setReceivedDate(((INTERNALDATE) item).getDate());
             }
         }),
@@ -138,7 +139,7 @@ public final class AllFetch {
         UID("UID", UID.class, new FetchItemHandler() {
 
             @Override
-            public void handleItem(final Item item, final MailMessage m, final org.slf4j.Logger logger) {
+            public void handleItem(final Item item, final MailMessage m, IMAPConfig config, final org.slf4j.Logger logger) {
                 m.setMailId(Long.toString(((UID) item).uid));
             }
         }),
@@ -148,8 +149,8 @@ public final class AllFetch {
         FLAGS("FLAGS", FLAGS.class, new FetchItemHandler() {
 
             @Override
-            public void handleItem(final Item item, final MailMessage m, final org.slf4j.Logger logger) throws OXException {
-                MimeMessageConverter.parseFlags((FLAGS) item, m);
+            public void handleItem(final Item item, final MailMessage m, IMAPConfig config, final org.slf4j.Logger logger) throws OXException {
+                MimeMessageConverter.parseFlags((FLAGS) item, config.getCapabilities().hasAttachmentSearch(), m);
             }
         }),
         /**
@@ -158,7 +159,7 @@ public final class AllFetch {
         SIZE("RFC822.SIZE", RFC822SIZE.class, new FetchItemHandler() {
 
             @Override
-            public void handleItem(final Item item, final MailMessage m, final org.slf4j.Logger logger) {
+            public void handleItem(final Item item, final MailMessage m, IMAPConfig config, final org.slf4j.Logger logger) {
                 m.setSize(((RFC822SIZE) item).size);
             }
         }),
@@ -170,7 +171,7 @@ public final class AllFetch {
         ENVELOPE("ENVELOPE", ENVELOPE.class, new FetchItemHandler() {
 
             @Override
-            public void handleItem(final Item item, final MailMessage m, final org.slf4j.Logger logger) {
+            public void handleItem(final Item item, final MailMessage m, IMAPConfig config, final org.slf4j.Logger logger) {
                 final com.sun.mail.imap.protocol.ENVELOPE envelope = (ENVELOPE) item;
                 // Date
                 m.setSentDate(envelope.date);
@@ -326,7 +327,7 @@ public final class AllFetch {
                                 for (final LowCostItem lowCostItem : items) {
                                     final Item item = getItemOf(lowCostItem.getItemClass(), fr, lowCostItem.getItemString(), config, session);
                                     try {
-                                        lowCostItem.getItemHandler().handleItem(item, m, LOG);
+                                        lowCostItem.getItemHandler().handleItem(item, m, config, LOG);
                                     } catch (final OXException e) {
                                         LOG.error("", e);
                                     }

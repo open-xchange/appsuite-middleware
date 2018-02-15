@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,16 +47,70 @@
  *
  */
 
-package com.openexchange.imap.config;
+package com.openexchange.mail.authenticity.impl.helper;
+
+import java.util.Collection;
+import java.util.Collections;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.authenticity.MailAuthenticityHandler;
+import com.openexchange.mail.dataobjects.MailAuthenticityResult;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.session.Session;
 
 
 /**
- * {@link IMAPPropertiesConstants}
+ * {@link NotAnalyzedAuthenticityHandler} - The special handler, which marks every mail as not-analyzed.
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class IMAPPropertiesConstants {
+public class NotAnalyzedAuthenticityHandler implements MailAuthenticityHandler {
 
-    public static final String ATTACHMENT_SEARCH_ENABLED = "com.openexchange.imap.attachmentSearch.enabled";
+    private static final NotAnalyzedAuthenticityHandler INSTANCE = new NotAnalyzedAuthenticityHandler();
+
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static NotAnalyzedAuthenticityHandler getInstance() {
+        return INSTANCE;
+    }
+
+    // ------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link NotAnalyzedAuthenticityHandler}.
+     */
+    private NotAnalyzedAuthenticityHandler() {
+        super();
+    }
+
+    @Override
+    public void handle(Session session, MailMessage mail) {
+        if (null != mail) {
+            mail.setAuthenticityResult(MailAuthenticityResult.NOT_ANALYZED_RESULT);
+        }
+    }
+
+    @Override
+    public Collection<MailField> getRequiredFields() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Collection<String> getRequiredHeaders() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public boolean isEnabled(Session session) {
+        return true;
+    }
+
+    @Override
+    public int getRanking() {
+        return 0;
+    }
+
 }

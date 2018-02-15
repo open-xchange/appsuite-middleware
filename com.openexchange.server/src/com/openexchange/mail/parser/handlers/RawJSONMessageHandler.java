@@ -166,9 +166,7 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                     jsonObject.put(FolderChildFields.FOLDER_ID, prepareFullname(accountId, mail.getFolder()));
                     jsonObject.put(DataFields.ID, mail.getMailId());
                 }
-                jsonObject.put(
-                    MailJSONField.HAS_ATTACHMENTS.getKey(),
-                    mail.containsHasAttachment() ? mail.hasAttachment() : mail.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
+                jsonObject.put(MailJSONField.HAS_ATTACHMENTS.getKey(), mail.hasAttachment());
                 jsonObject.put(MailJSONField.CONTENT_TYPE.getKey(), mail.getContentType().getBaseType());
                 jsonObject.put(MailJSONField.SIZE.getKey(), mail.getSize());
                 // jsonObject.put(MailJSONField.THREAD_LEVEL.getKey(), mail.getThreadLevel());

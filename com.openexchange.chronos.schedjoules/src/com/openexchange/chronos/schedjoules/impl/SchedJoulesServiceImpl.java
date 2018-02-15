@@ -76,6 +76,7 @@ import com.openexchange.chronos.schedjoules.impl.cache.loader.SchedJoulesCountri
 import com.openexchange.chronos.schedjoules.impl.cache.loader.SchedJoulesLanguagesCacheLoader;
 import com.openexchange.chronos.schedjoules.impl.cache.loader.SchedJoulesPageCacheLoader;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Autoboxing;
 
 /**
  * {@link SchedJoulesServiceImpl}
@@ -220,7 +221,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.schedjoules.SchedJoulesService#getCalendar(int, java.net.URL, java.lang.String, long)
      */
     @Override
@@ -228,11 +229,22 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
         return apiCache.getAPI(contextId).calendar().getCalendar(url, etag, lastModified);
     }
 
+    @Override
+    public boolean isAvailable(int contextId) {
+        try {
+            apiCache.getAPI(contextId);
+            return true;
+        } catch (OXException e) {
+            LOG.debug("No SchedJoules API available for context {}: {}", Autoboxing.I(contextId), e.getMessage());
+            return false;
+        }
+    }
+
     ///////////////////////////////////// HELPERS ///////////////////////////////////
 
     /**
      * Filters the specified {@link JSONObject}
-     * 
+     *
      * @param content the {@link JSONObject} to filter
      * @return the filtered {@link JSONObject}
      * @throws OXException if a JSON error is occurred
@@ -254,7 +266,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
 
     /**
      * Filters the specified {@link JSONObject} and removes the 'url' field
-     * 
+     *
      * @param content the {@link JSONObject} to filter
      * @return the filtered {@link JSONObject}
      * @throws OXException if a JSON error is occurred
@@ -273,7 +285,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
 
     /**
      * Filters the specified {@link JSONArray}
-     * 
+     *
      * @param array The {@link JSONArray} to filter
      * @throws OXException if a JSON error is occurred
      * @throws JSONException if JSON parsing error is occurred
@@ -286,7 +298,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
 
     /**
      * Filters the specified {@link JSONObject}
-     * 
+     *
      * @param array The {@link JSONObject} to filter
      * @throws OXException if a JSON error is occurred
      * @throws JSONException if JSON parsing error is occurred
@@ -303,7 +315,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      * Handles the specified {@link ExecutionException}. If the cause of the exception is
      * an {@link OXException} then the cause is thrown, otherwise the {@link ExecutionException} is
      * wrapped in a the {@link SchedJoulesAPIExceptionCodes#UNEXPECTED_ERROR} exception.
-     * 
+     *
      * @param e the {@link ExecutionException} to handle
      * @return the wrapped {@link OXException}
      */

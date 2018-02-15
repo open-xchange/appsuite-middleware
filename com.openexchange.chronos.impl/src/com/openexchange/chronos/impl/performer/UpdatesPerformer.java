@@ -53,6 +53,7 @@ import static com.openexchange.chronos.common.CalendarUtils.getFields;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
+import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.chronos.impl.Utils.isEnforceDefaultAttendee;
 import static com.openexchange.chronos.impl.Utils.isIncludeClassifiedEvents;
@@ -144,11 +145,12 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
     /**
      * Performs the operation.
      *
-     * @param folder The parent folder to get the event from
+     * @param folderId The identifier of the parent folder to get the event from
      * @param since The timestamp since when the updates should be collected
      * @return The update result holding the new, modified and deleted events as requested
      */
-    public UpdatesResult perform(UserizedFolder folder, long since) throws OXException {
+    public UpdatesResult perform(String folderId, long since) throws OXException {
+        UserizedFolder folder = getFolder(session, folderId);
         requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         /*
          * construct search term

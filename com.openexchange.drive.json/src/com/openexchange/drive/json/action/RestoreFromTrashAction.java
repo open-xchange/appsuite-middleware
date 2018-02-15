@@ -86,33 +86,17 @@ public class RestoreFromTrashAction extends AbstractDriveAction {
         }
 
         JSONObject body = (JSONObject) data;
-
         List<String> files = Collections.emptyList();
         List<String> folders = Collections.emptyList();
+
         try {
             if (body.has("files")) {
-                JSONArray filesArray = body.getJSONArray("files");
-                files = new ArrayList<>(filesArray.length());
-                for (Object o : filesArray) {
-                    if (!(o instanceof String)) {
-                        throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
-                    }
-                    files.add((String) o);
-                }
+                files = parseArrayToList(body, "files");
             }
 
             if (body.has("folders")) {
-                JSONArray foldersArray = body.getJSONArray("folders");
-                folders = new ArrayList<>(foldersArray.length());
-                for (Object o : foldersArray) {
-                    if (!(o instanceof String)) {
-                        throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
-                    }
-                    folders.add((String) o);
-                }
+                folders = parseArrayToList(body, "folders");
             }
-
-
             RestoreContent content = getDriveService().getUtility().restoreFromTrash(session, files, folders);
             return new AJAXRequestResult(toJSON(content, session.getServerSession().getUser().getLocale()), "json");
         } catch (JSONException e) {
@@ -120,59 +104,86 @@ public class RestoreFromTrashAction extends AbstractDriveAction {
         }
     }
 
+    /**
+     * Parses an the json array with the name arrayName to a {@link List} of {@link String}
+     *
+     * @param body The {@link JSONObject} which contains the {@link JSONArray} field
+     * @param arrayName The name of the {@link JSONArray}
+     * @return A {@link List} of {@link String}
+     * @throws JSONException
+     * @throws OXException
+     */
+    private List<String> parseArrayToList(JSONObject body, String arrayName) throws JSONException, OXException {
+        JSONArray array = body.getJSONArray(arrayName);
+        List<String> result = new ArrayList<>(array.length());
+        for (Object o : array) {
+            if (!(o instanceof String)) {
+                throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+            }
+            result.add((String) o);
+        }
+        return result;
+    }
+
+    /**
+     * Transforms a {@link RestoreContent} to json
+     *
+     * @param content The {@link RestoreContent}
+     * @param locale The locale to use
+     * @return the {@link JSONObject}
+     * @throws JSONException
+     */
     private JSONObject toJSON(RestoreContent content, Locale locale) throws JSONException {
         if (content == null) {
-            return null;
+            return JSONObject.EMPTY_OBJECT;
         }
 
         Map<String, FileStorageFolder[]> restoredFolders = content.getRestoredFolders();
         Map<String, FileStorageFolder[]> restoredFiles = content.getRestoredFiles();
         if (restoredFiles == null && restoredFolders == null) {
-            return null;
+            return JSONObject.EMPTY_OBJECT;
         }
 
         JSONObject result = new JSONObject(4);
         if (restoredFiles != null) {
-            JSONArray restoredFilesJSON = new JSONArray(restoredFiles.size());
-            for (Map.Entry<String, FileStorageFolder[]> restoredFilesEntry : restoredFiles.entrySet()) {
-                JSONObject restoredFile = new JSONObject(2);
-                restoredFile.put("name", restoredFilesEntry.getKey());
-
-                FileStorageFolder[] path = restoredFilesEntry.getValue();
-                JSONArray jPath = new JSONArray(path.length);
-                for (FileStorageFolder folder : path) {
-                    JSONObject jPathEntry = new JSONObject(2);
-                    jPathEntry.put("id", folder.getId());
-                    jPathEntry.put("title", folder.getLocalizedName(locale));
-                    jPath.put(jPathEntry);
-                }
-                restoredFile.put("path", jPath);
-                restoredFilesJSON.put(restoredFile);
-            }
-            result.put("files", restoredFilesJSON);
+            JSONArray restoredJSON = parseMapToArray(locale, restoredFiles);
+            result.put("files", restoredJSON);
         }
 
         if (restoredFolders != null) {
-            JSONArray restoredFoldersJSON = new JSONArray(restoredFolders.size());
-            for (Map.Entry<String, FileStorageFolder[]> restoredFoldersEntry : restoredFolders.entrySet()) {
-                JSONObject restoredFolder = new JSONObject(2);
-                restoredFolder.put("name", restoredFoldersEntry.getKey());
-
-                FileStorageFolder[] path = restoredFoldersEntry.getValue();
-                JSONArray jPath = new JSONArray(path.length);
-                for (FileStorageFolder folder : path) {
-                    JSONObject jPathEntry = new JSONObject(2);
-                    jPathEntry.put("id", folder.getId());
-                    jPathEntry.put("title", folder.getLocalizedName(locale));
-                    jPath.put(jPathEntry);
-                }
-                restoredFolder.put("path", jPath);
-                restoredFoldersJSON.put(restoredFolder);
-            }
+            JSONArray restoredFoldersJSON = parseMapToArray(locale, restoredFolders);
             result.put("folders", restoredFoldersJSON);
         }
 
         return result;
+    }
+
+    /**
+     * Transforms a {@link Map} to a {@link JSONArray}
+     * 
+     * @param locale The locale to use
+     * @param restoredContent The map
+     * @return The {@link JSONArray}
+     * @throws JSONException
+     */
+    private JSONArray parseMapToArray(Locale locale, Map<String, FileStorageFolder[]> restoredContent) throws JSONException {
+        JSONArray restoredJSON = new JSONArray(restoredContent.size());
+        for (Map.Entry<String, FileStorageFolder[]> restoredObject : restoredContent.entrySet()) {
+            JSONObject restored = new JSONObject(2);
+            restored.put("name", restoredObject.getKey());
+
+            FileStorageFolder[] path = restoredObject.getValue();
+            JSONArray jPath = new JSONArray(path.length);
+            for (FileStorageFolder folder : path) {
+                JSONObject jPathEntry = new JSONObject(2);
+                jPathEntry.put("id", folder.getId());
+                jPathEntry.put("title", folder.getLocalizedName(locale));
+                jPath.put(jPathEntry);
+            }
+            restored.put("path", jPath);
+            restoredJSON.put(restored);
+        }
+        return restoredJSON;
     }
 
 }

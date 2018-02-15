@@ -700,7 +700,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         }
 
         {
-            final String tmp = configuration.getProperty(IMAPPropertiesConstants.ATTACHMENT_SEARCH_ENABLED, STR_FALSE).trim();
+            String tmp = configuration.getProperty("com.openexchange.imap.attachmentSearch.enabled", STR_FALSE).trim();
             enableAttachmentSearch = Boolean.parseBoolean(tmp);
             logBuilder.append("\tEnable attachment search: ").append(enableAttachmentSearch).append('\n');
         }
@@ -735,6 +735,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         sslProtocols = "SSLv3 TLSv1";
         cipherSuites = null;
         hostExtractingGreetingListener = null;
+        enableAttachmentSearch = false;
     }
 
     /**

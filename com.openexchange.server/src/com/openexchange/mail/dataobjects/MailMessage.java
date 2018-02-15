@@ -341,23 +341,23 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * Returns if the provided custom user flag is '$HasAttachment'
-     * 
-     * @param userFlag the flag to check
-     * @return <code>true</code> if the flag is '$HasAttachment'; otherwise <code>false</code>
+     * Checks if the provided user flag is <code>"$HasAttachment"</code>.
+     *
+     * @param userFlag The flag to check
+     * @return <code>true</code> if the flag is <code>"$HasAttachment"</code>; otherwise <code>false</code>
      */
     public static boolean isHasAttachment(String userFlag) {
-        return (userFlag != null && (userFlag.equalsIgnoreCase(MailMessage.HAS_ATTACHMENT_LABEL)));
+        return MailMessage.HAS_ATTACHMENT_LABEL.equalsIgnoreCase(userFlag);
     }
 
     /**
-     * Returns if the provided custom user flag is '$HasNoAttachment'
-     * 
-     * @param userFlag the flag to check
-     * @return <code>true</code> if the flag is '$HasNoAttachment'; otherwise <code>false</code>
+     * Checks if the provided user flag is <code>"$HasNoAttachment"</code>.
+     *
+     * @param userFlag The flag to check
+     * @return <code>true</code> if the flag is <code>"$HasNoAttachment"</code>; otherwise <code>false</code>
      */
     public static boolean isHasNoAttachment(String userFlag) {
-        return (userFlag != null && (userFlag.equalsIgnoreCase(MailMessage.HAS_NO_ATTACHMENT_LABEL)));
+        return MailMessage.HAS_NO_ATTACHMENT_LABEL.equalsIgnoreCase(userFlag);
     }
 
     private static final InternetAddress[] EMPTY_ADDRS = new InternetAddress[0];
@@ -506,6 +506,13 @@ public abstract class MailMessage extends MailPart {
     private boolean hasAttachment;
 
     private boolean b_hasAttachment;
+
+    /**
+     * The alternative flag whether an attachment is present or not.
+     */
+    private boolean alternativeHasAttachment;
+
+    private boolean b_alternativeHasAttachment;
 
     /**
      * Whether a VCard should be appended or not.
@@ -1831,23 +1838,32 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * Gets the hasAttachment
+     * Checks if this mail message is marked to contain (file) attachments
      *
-     * @return the hasAttachment
+     * @return <code>true</code> if this mail message is marked to contain (file) attachments; otherwise <code>false</code>
      */
     public boolean hasAttachment() {
+        return b_hasAttachment ? hasAttachment : alternativeHasAttachment;
+    }
+
+    /**
+     * Gets the has-attachment flag
+     *
+     * @return the has-attachment flag
+     */
+    public boolean isHasAttachment() {
         return hasAttachment;
     }
 
     /**
-     * @return <code>true</code> if hasAttachment is set; otherwise <code>false</code>
+     * @return <code>true</code> if has-attachment flag is set; otherwise <code>false</code>
      */
     public boolean containsHasAttachment() {
         return b_hasAttachment;
     }
 
     /**
-     * Removes the hasAttachment
+     * Removes the has-attachment flag
      */
     public void removeHasAttachment() {
         hasAttachment = false;
@@ -1855,13 +1871,47 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
-     * Sets the hasAttachment
+     * Sets the has-attachment flag
      *
-     * @param hasAttachment the hasAttachment to set
+     * @param hasAttachment the has-attachment flag to set
      */
     public void setHasAttachment(final boolean hasAttachment) {
         this.hasAttachment = hasAttachment;
         b_hasAttachment = true;
+    }
+
+    /**
+     * Gets the alternative has-attachment flag
+     *
+     * @return the alternative has-attachment flag
+     */
+    public boolean isAlternativeHasAttachment() {
+        return alternativeHasAttachment;
+    }
+
+    /**
+     * @return <code>true</code> if alternative has-attachment flag is set; otherwise <code>false</code>
+     */
+    public boolean containsAlternativeHasAttachment() {
+        return b_alternativeHasAttachment;
+    }
+
+    /**
+     * Removes the alternative has-attachment flag
+     */
+    public void removeAlternativeHasAttachment() {
+        alternativeHasAttachment = false;
+        b_alternativeHasAttachment = false;
+    }
+
+    /**
+     * Sets the alternative has-attachment flag
+     *
+     * @param hasAttachment the alternative has-attachment flag to set
+     */
+    public void setAlternativeHasAttachment(final boolean hasAttachment) {
+        this.alternativeHasAttachment = hasAttachment;
+        b_alternativeHasAttachment = true;
     }
 
     @Override

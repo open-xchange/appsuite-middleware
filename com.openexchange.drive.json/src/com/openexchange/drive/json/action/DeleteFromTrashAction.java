@@ -109,7 +109,7 @@ public class DeleteFromTrashAction extends AbstractDriveAction {
         }
 
         getDriveService().getUtility().removeFromTrash(session, files, folders);
-        return new AJAXRequestResult(null, "json");
+        return new AJAXRequestResult(JSONObject.EMPTY_OBJECT, "json");
     }
 
 }

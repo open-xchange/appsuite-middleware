@@ -47,27 +47,35 @@
  *
  */
 
-package com.openexchange.drive.json.action;
+package com.openexchange.metrics.types;
 
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.json.internal.DefaultDriveSession;
-import com.openexchange.exception.OXException;
+import java.util.concurrent.atomic.AtomicLong;
+import com.codahale.metrics.Gauge;
 
 /**
+ * {@link AtomicLongGauge}
  *
- * {@link GetTrashContentAction}
- *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class GetTrashContentAction extends AbstractDriveAction {
+public class AtomicLongGauge implements Gauge<AtomicLong> {
 
-    @Override
-    public AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
-        JSONObject result = getDriveService().getUtility().getTrashContent(session);
-        return new AJAXRequestResult(result == null ? JSONObject.EMPTY_OBJECT : result, "json");
+    private final AtomicLong value;
+
+    /**
+     * Initialises a new {@link AtomicLongGauge}.
+     */
+    public AtomicLongGauge() {
+        super();
+        value = new AtomicLong();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.codahale.metrics.Gauge#getValue()
+     */
+    @Override
+    public AtomicLong getValue() {
+        return value;
+    }
 }

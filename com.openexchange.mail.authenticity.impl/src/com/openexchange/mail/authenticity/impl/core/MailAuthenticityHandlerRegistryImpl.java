@@ -64,7 +64,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
 import com.openexchange.mail.authenticity.MailAuthenticityProperty;
-import com.openexchange.mail.authenticity.impl.threshold.ThresholdAwareAuthenticityHandler;
+import com.openexchange.mail.authenticity.impl.helper.ThresholdAwareAuthenticityHandler;
 import com.openexchange.session.Session;
 import com.openexchange.session.UserAndContext;
 
@@ -114,7 +114,7 @@ public class MailAuthenticityHandlerRegistryImpl implements MailAuthenticityHand
                         highestRankedHandler = new ThresholdAwareAuthenticityHandler(handler, dateThreshold);
                     }
                 }
-                configAndHandler = new ConfigAndHandler(enabled, dateThreshold, highestRankedHandler);
+                configAndHandler = new ConfigAndHandler(dateThreshold, highestRankedHandler);
             } else {
                 // Not enabled
                 configAndHandler = ConfigAndHandler.NOT_ENABLED;
@@ -186,7 +186,11 @@ public class MailAuthenticityHandlerRegistryImpl implements MailAuthenticityHand
         final long dateThreshold;
         final MailAuthenticityHandler highestRankedHandler;
 
-        ConfigAndHandler(boolean enabled, long dateThreshold, MailAuthenticityHandler highestRankedHandler) {
+        ConfigAndHandler(long dateThreshold, MailAuthenticityHandler highestRankedHandler) {
+            this(true, dateThreshold, highestRankedHandler);
+        }
+
+        private ConfigAndHandler(boolean enabled, long dateThreshold, MailAuthenticityHandler highestRankedHandler) {
             super();
             this.enabled = enabled;
             this.dateThreshold = dateThreshold;

@@ -60,7 +60,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.chronos.provider.AvailabilityAwareCalendarProvider;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -119,13 +118,7 @@ public class CalendarProviderTracker extends RankingAwareNearRegistryServiceTrac
                     return false;
                 }
                 ConfigView configView = requireService(ConfigViewFactory.class, services).getView(session.getUserId(), session.getContextId());
-                boolean result = ConfigViews.getDefinedBoolPropertyFrom(getEnabledPropertyName(provider), true, configView);
-
-                if (provider instanceof AvailabilityAwareCalendarProvider) {
-                    return result ? ((AvailabilityAwareCalendarProvider) provider).isAvailable(serverSession) : result;
-                } else {
-                    return result;
-                }
+                return ConfigViews.getDefinedBoolPropertyFrom(getEnabledPropertyName(provider), true, configView) && provider.isAvailable(session);
             }
         }, serviceProperties);
         if (null != checkerRegistrations.putIfAbsent(provider.getId(), checkerRegistration)) {

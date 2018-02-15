@@ -76,6 +76,7 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
+import com.openexchange.mail.authenticity.impl.helper.NotAnalyzedAuthenticityHandler;
 import com.openexchange.mail.authenticity.impl.osgi.Services;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -112,16 +113,20 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         this.threadPool = threadPool;
     }
 
-    private boolean isNotApplicableFor(MailFetchArguments fetchArguments, Session session) throws OXException {
-        return false == isApplicableFor(fetchArguments, session);
+    private boolean isNotApplicableFor(MailFetchArguments fetchArguments, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+        return false == isApplicableFor(fetchArguments, mailAccess);
     }
 
-    private boolean isApplicableFor(MailFetchArguments fetchArguments, Session session) throws OXException {
+    private boolean isApplicableFor(MailFetchArguments fetchArguments, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
         FullnameArgument folder = fetchArguments.getFolder();
-        return null != folder && isAuthResultRequested(fetchArguments) && isAcceptableAccount(folder.getAccountId(), session);
+        return null != folder && isAccountAccepted(folder.getAccountId(), mailAccess.getSession()) && isFolderAccepted(folder.getFullName(), mailAccess);
     }
 
-    private boolean isAcceptableAccount(int accountId, Session session) throws OXException {
+    private boolean isApplicableFor(MailMessage mail, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+        return isAccountAccepted(mail.getAccountId(), mailAccess.getSession()) && isFolderAccepted(mail.getFolder(), mailAccess);
+    }
+
+    private boolean isAccountAccepted(int accountId, Session session) throws OXException {
         if (MailAccount.DEFAULT_ID == accountId) {
             // Primary account
             return true;
@@ -175,16 +180,18 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
 
     @Override
     public boolean accept(MailMessage[] mailsFromCache, MailFetchArguments fetchArguments, Session session) throws OXException {
-        if (isNotApplicableFor(fetchArguments, session)) {
-            return true;
-        }
-
         MailAuthenticityHandler handler = handlerRegistry.getHighestRankedHandlerFor(session);
-        if (null == handler) {
+        if (null == handler || false == isAuthResultRequested(fetchArguments)) {
+            // Not enabled or not requested by client
             return true;
         }
 
+        if (false == isAccountAccepted(fetchArguments.getFolder().getAccountId(), session)) {
+            // Not applicable
+            return true;
+        }
         if (false == isFolderAccepted(fetchArguments.getFolder().getFullName(), fetchArguments.getFolder().getAccountId(), session)) {
+            // Not applicable
             return true;
         }
 
@@ -202,18 +209,16 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
     @Override
     public MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, Map<String, Object> state) throws OXException {
         Session session = mailAccess.getSession();
-        if (isNotApplicableFor(fetchArguments, session)) {
-            // Special field not contained
-            return MailAttributation.NOT_APPLICABLE;
-        }
-
         MailAuthenticityHandler handler = handlerRegistry.getHighestRankedHandlerFor(session);
-        if (null == handler) {
+        if (null == handler || false == isAuthResultRequested(fetchArguments)) {
+            // Not enabled or not requested by client
             return MailAttributation.NOT_APPLICABLE;
         }
 
-        if (false == isFolderAccepted(fetchArguments.getFolder().getFullName(), mailAccess)) {
-            return MailAttributation.NOT_APPLICABLE;
+        if (isNotApplicableFor(fetchArguments, mailAccess)) {
+            // Not applicable
+            state.put(STATE_PARAM_HANDLER, NotAnalyzedAuthenticityHandler.getInstance());
+            return MailAttributation.builder(fetchArguments.getFields(), fetchArguments.getHeaderNames()).build();
         }
 
         MailFields fields = null == fetchArguments.getFields() ? new MailFields() : new MailFields(fetchArguments.getFields());
@@ -252,6 +257,15 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
 
         MailAuthenticityHandler handler = (MailAuthenticityHandler) state.get(STATE_PARAM_HANDLER);
         if (null == handler) {
+            return MailFetchListenerResult.neutral(mails, cacheable);
+        }
+
+        if (handler instanceof NotAnalyzedAuthenticityHandler) {
+            for (final MailMessage mail : mails) {
+                if (mail != null) {
+                    mail.setAuthenticityResult(MailAuthenticityResult.NOT_ANALYZED_RESULT);
+                }
+            }
             return MailFetchListenerResult.neutral(mails, cacheable);
         }
 
@@ -299,18 +313,15 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
     @Override
     public MailMessage onSingleMailFetch(MailMessage mail, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
         Session session = mailAccess.getSession();
-        if (false == isAcceptableAccount(mail.getAccountId(), session)) {
-            return mail;
-        }
-
         MailAuthenticityHandler handler = handlerRegistry.getHighestRankedHandlerFor(session);
         if (null == handler) {
+            // Not enabled
             return mail;
         }
 
         if (false == isApplicableFor(mail, mailAccess)) {
+            // Not applicable
             mail.setAuthenticityResult(MailAuthenticityResult.NOT_ANALYZED_RESULT);
-            return mail;
         }
 
         Future<Void> future = threadPool.submit(new MailAuthenticityTask(mail, handler, session));
@@ -328,25 +339,6 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         }
 
         return mail;
-    }
-
-    /**
-     * Determines whether the specified {@link MailMessage} is applicable for mail authenticity
-     *
-     * @param mail The {@link MailMessage}
-     * @param mailAccess The {@link MailAccess}
-     * @return <code>true</code> if the message is applicable for mail authenticity; <code>false</code> otherwise
-     * @throws OXException if an error is occurred
-     */
-    private boolean isApplicableFor(MailMessage mail, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
-        if (false == isAcceptableAccount(mail.getAccountId(), mailAccess.getSession())) {
-            return false;
-        }
-
-        if (false == isFolderAccepted(mail.getFolder(), mailAccess)) {
-            return false;
-        }
-        return true;
     }
 
     // --------------------------------------------------------------------------------------------------------------

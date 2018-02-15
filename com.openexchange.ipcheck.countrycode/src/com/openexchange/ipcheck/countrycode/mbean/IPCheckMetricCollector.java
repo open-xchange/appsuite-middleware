@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,52 +47,74 @@
  *
  */
 
-package com.openexchange.imap.textpreview.mock;
+package com.openexchange.ipcheck.countrycode.mbean;
 
-import java.util.Random;
-import com.sun.mail.imap.IMAPMessage;
-import com.sun.mail.imap.IMAPTextPreviewProvider;
+import java.util.Set;
+import com.openexchange.metrics.AbstractMetricCollector;
+import com.openexchange.metrics.MetricMetadata;
 
 /**
- * {@link MockIMAPTextPreviewProvider}
+ * {@link IPCheckMetricCollector}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MockIMAPTextPreviewProvider implements IMAPTextPreviewProvider {
+public class IPCheckMetricCollector extends AbstractMetricCollector {
 
-    private final String pseudoTextPreview;
-    private final Random random;
-    private final float probability;
+    public static final String COMPONENT_NAME = "ipcheck";
 
     /**
-     * Initializes a new {@link MockIMAPTextPreviewProvider}.
+     * Initialises a new {@link IPCheckMetricCollector}.
+     * 
+     * @param componentName
      */
-    public MockIMAPTextPreviewProvider(String pseudoTextPreview, float probability) {
-        super();
-        random = new Random();
-        this.probability = probability;
-        this.pseudoTextPreview = pseudoTextPreview;
-    }
-
-    @Override
-    public String getTextPreview(IMAPMessage message, Mode mode) {
-        return getTextPreview(message.getUID(), mode);
-    }
-
-    @Override
-    public String getTextPreview(long uid, Mode mode) {
-        switch (mode) {
-            case ONLY_IF_AVAILABLE:
-                return hasTextPreview() ? pseudoTextPreview : null;
-            case REQUIRE:
-                // fall-through
-            default:
-                return pseudoTextPreview;
+    public IPCheckMetricCollector() {
+        super(COMPONENT_NAME);
+        Set<MetricMetadata> metricMetadata = getMetricMetadata();
+        for (IPCheckMetric metric : IPCheckMetric.values()) {
+            metricMetadata.add(new MetricMetadata(metric.getMetricType(), metric.getMetricName()));
         }
     }
 
-    private boolean hasTextPreview() {
-        return probability >= 1.0F ? true : random.nextFloat() < probability;
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.MetricCollector#isEnabled()
+     */
+    @Override
+    public boolean isEnabled() {
+        // TODO check from config
+        return true;
+    }
+
+    public void incrementTotalIPChanges() {
+        getMeter(IPCheckMetric.totalIPChanges.getMetricName()).mark();
+    }
+
+    public void incrementAcceptedIPChanges() {
+        getMeter(IPCheckMetric.acceptedIPChanges.getMetricName()).mark();
+    }
+
+    public void incrementDeniedIPChanges() {
+        getMeter(IPCheckMetric.deniedIPChanges.getMetricName()).mark();
+    }
+
+    public void incrementAcceptedPrivateIP() {
+        getMeter(IPCheckMetric.acceptedPrivateIP.getMetricName()).mark();
+    }
+
+    public void incrementAcceptedWhiteListed() {
+        getMeter(IPCheckMetric.acceptedWhiteListed.getMetricName()).mark();
+    }
+
+    public void incrementAcceptedEligibleIPChange() {
+        getMeter(IPCheckMetric.acceptedEligibleIPChanges.getMetricName()).mark();
+    }
+
+    public void incrementDeniedException() {
+        getMeter(IPCheckMetric.deniedException.getMetricName()).mark();
+    }
+
+    public void incrementDeniedCountryChange() {
+        getMeter(IPCheckMetric.deniedCountryChanged.getMetricName()).mark();
     }
 }

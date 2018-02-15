@@ -65,7 +65,6 @@ import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPStore;
-import com.sun.mail.imap.IMAPTextPreviewProvider;
 
 /**
  * {@link CapabilitiesCache} - A cache to check for capabilities for a certain IMAP server.
@@ -214,7 +213,7 @@ public final class CapabilitiesCache {
             imapCaps.setChildren(map.containsKey(IMAPCapabilities.CAP_CHILDREN));
             imapCaps.setHasSubscription(!imapConfig.getIMAPProperties().isIgnoreSubscription());
             imapCaps.setFileNameSearch(map.containsKey(IMAPCapabilities.CAP_SEARCH_FILENAME));
-            imapCaps.setTextPreview(map.containsKey(IMAPCapabilities.CAP_TEXT_PREVIEW) || Services.optService(IMAPTextPreviewProvider.class) != null);
+            imapCaps.setTextPreview(map.containsKey(IMAPCapabilities.CAP_TEXT_PREVIEW));
             if (hasSort && imapConfig.getIMAPProperties().isImapSort()) {
                 // IMAP sort supported & enabled
                 try {

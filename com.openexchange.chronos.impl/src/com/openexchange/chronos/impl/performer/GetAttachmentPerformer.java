@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl.performer;
 import static com.openexchange.chronos.common.CalendarUtils.getFields;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
+import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
@@ -89,14 +90,15 @@ public class GetAttachmentPerformer extends AbstractQueryPerformer {
      * Performs the get attachment operation.
      *
      * @param eventId The {@link Event} identifier
-     * @param folder The {@link UserizedFolder}
+     * @param folderId The identifier of the parent folder the event is located in
      * @param managedId The managed identifier of the {@link Attachment}
      * @return The {@link IFileHolder} of the attachment
      * @throws OXException if the attachment is not found, or if the user has no permissions,
      *             or any other error is occurred
      */
-    public IFileHolder performGetAttachment(String eventId, UserizedFolder folder, int managedId) throws OXException {
+    public IFileHolder performGetAttachment(String folderId, String eventId, int managedId) throws OXException {
         // Check the permissions first
+        UserizedFolder folder = getFolder(session, folderId);
         checkPermissions(eventId, folder);
 
         // Search for the attachment with the specified managed id

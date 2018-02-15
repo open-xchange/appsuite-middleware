@@ -84,36 +84,31 @@ final class StringUtil {
         <T> void add(String key, String value, T collector);
     }
 
-    private static final Map<Class<?>, CollectorAdder> COLLECTOR_ADDERS = ImmutableMap.<Class<?>, CollectorAdder> builder()
-        .put(HashMap.class, new CollectorAdder() {
+    private static final Map<Class<?>, CollectorAdder> COLLECTOR_ADDERS = ImmutableMap.<Class<?>, CollectorAdder> builder().put(HashMap.class, new CollectorAdder() {
 
-            @Override
-            public <T> void add(String key, String value, T collector) {
-                ((Map<String, String>) collector).put(key, value);
-            }
-        })
-        .put(LinkedHashMap.class, new CollectorAdder() {
+        @Override
+        public <T> void add(String key, String value, T collector) {
+            ((Map<String, String>) collector).put(key, value);
+        }
+    }).put(LinkedHashMap.class, new CollectorAdder() {
 
-            @Override
-            public <T> void add(String key, String value, T collector) {
-                ((Map<String, String>) collector).put(key, value);
-            }
-        })
-        .put(ArrayList.class, new CollectorAdder() {
+        @Override
+        public <T> void add(String key, String value, T collector) {
+            ((Map<String, String>) collector).put(key, value);
+        }
+    }).put(ArrayList.class, new CollectorAdder() {
 
-            @Override
-            public <T> void add(String key, String value, T collector) {
-                ((List<MailAuthenticityAttribute>) collector).add(new MailAuthenticityAttribute(key, value));
-            }
-        })
-        .put(LinkedList.class, new CollectorAdder() {
+        @Override
+        public <T> void add(String key, String value, T collector) {
+            ((List<MailAuthenticityAttribute>) collector).add(new MailAuthenticityAttribute(key, value));
+        }
+    }).put(LinkedList.class, new CollectorAdder() {
 
-            @Override
-            public <T> void add(String key, String value, T collector) {
-                ((List<MailAuthenticityAttribute>) collector).add(new MailAuthenticityAttribute(key, value));
-            }
-        })
-        .build();
+        @Override
+        public <T> void add(String key, String value, T collector) {
+            ((List<MailAuthenticityAttribute>) collector).add(new MailAuthenticityAttribute(key, value));
+        }
+    }).build();
 
     /**
      * Parses the specified element as a key/value {@link Map}
@@ -162,106 +157,11 @@ final class StringUtil {
             return collector;
         }
 
-        boolean useRegex = true;
-        if (useRegex) {
-            Matcher m = REGEX_PAIR.matcher(element);
-            while (m.find()) {
-                String key = m.group(1);
-                String value = m.group(2);
-                add(key, value, collector);
-            }
-        } else {
-            StringBuilder keyBuffer = new StringBuilder(32);
-            StringBuilder valueBuffer = new StringBuilder(64);
-            int length = element.length();
-
-            String key = null;
-            boolean valueMode = false;
-            boolean backtracking = false;
-            boolean comment = false;
-            int backtrackIndex = 0;
-            for (int index = 0; index < length;) {
-                if (valueBuffer.length() >= length) {
-                    // Abort...
-                    LOGGER.warn("Failed to parse: {}", element);
-                    return collector;
-                }
-                char c = element.charAt(index);
-                switch (c) {
-                    case '=':
-                        if (valueMode) {
-                            if (comment) {
-                                valueBuffer.append(c);
-                                index++;
-                                break;
-                            }
-                            // A key found while in value mode, so we backtrack
-                            backtracking = true;
-                            valueMode = false;
-                            index--;
-                        } else {
-                            // Retain the key and switch to value mode
-                            key = keyBuffer.toString();
-                            keyBuffer.setLength(0);
-                            valueMode = true;
-                            index++;
-                        }
-                        break;
-                    case '(':
-                        if (valueMode) {
-                            comment = true;
-                            valueBuffer.append(c);
-                            index++;
-                        }
-                        break;
-                    case ')':
-                        if (valueMode) {
-                            comment = false;
-                            valueBuffer.append(c);
-                            index++;
-                        }
-                        break;
-                    case ' ':
-                        if (!valueMode) {
-                            //Remove the key from the value buffer
-                            valueBuffer.setLength(valueBuffer.length() - backtrackIndex);
-                            add(key, valueBuffer.toString().trim(), collector);
-                            // Retain the new key (and reverse if that key came from backtracking)
-                            key = backtracking ? keyBuffer.reverse().toString() : keyBuffer.toString();
-                            // Reset counters
-                            keyBuffer.setLength(0);
-                            valueBuffer.setLength(0);
-                            // Skip to the value of the retained new key (position after the '=' sign)
-                            index += backtrackIndex + 2;
-                            backtrackIndex = 0;
-                            backtracking = false;
-                            valueMode = true;
-                            break;
-                        }
-                        // while in value mode spaces are considered as literals, hence fall-through to 'default'
-                    default:
-                        if (valueMode) {
-                            // While in value mode append all literals to the value buffer
-                            valueBuffer.append(c);
-                            index++;
-                        } else {
-                            // While in key mode append all key literals to the key buffer...
-                            keyBuffer.append(c);
-                            if (backtracking) {
-                                // ... and if we are backtracking, update the counters
-                                index--;
-                                backtrackIndex++;
-                            } else {
-                                // ... if we are not backtracking and we are in key mode, go forth
-                                index++;
-                            }
-                        }
-                }
-            }
-            // Add the last pair
-            if (valueBuffer.length() > 0) {
-                add(key, valueBuffer.toString(), collector);
-            }
+        Matcher m = REGEX_PAIR.matcher(element);
+        while (m.find()) {
+            String key = m.group(1);
+            String value = m.group(2);
+            add(key, value, collector);
         }
 
         return collector;

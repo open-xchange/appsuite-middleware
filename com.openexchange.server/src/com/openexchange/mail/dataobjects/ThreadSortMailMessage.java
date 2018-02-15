@@ -601,6 +601,11 @@ public final class ThreadSortMailMessage extends MailMessage {
     }
 
     @Override
+    public boolean isHasAttachment() {
+        return delegatee.isHasAttachment();
+    }
+
+    @Override
     public boolean hasEnclosedParts() throws OXException {
         return delegatee.hasEnclosedParts();
     }
@@ -1188,6 +1193,26 @@ public final class ThreadSortMailMessage extends MailMessage {
     @Override
     public void removeAuthenticityResult() {
         delegatee.removeAuthenticityResult();
+    }
+
+    @Override
+    public boolean isAlternativeHasAttachment() {
+        return delegatee.isAlternativeHasAttachment();
+    }
+
+    @Override
+    public boolean containsAlternativeHasAttachment() {
+        return delegatee.containsAlternativeHasAttachment();
+    }
+
+    @Override
+    public void removeAlternativeHasAttachment() {
+        delegatee.removeAlternativeHasAttachment();
+    }
+
+    @Override
+    public void setAlternativeHasAttachment(boolean hasAttachment) {
+        delegatee.setAlternativeHasAttachment(hasAttachment);
     }
 
     /**

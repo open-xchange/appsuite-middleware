@@ -116,7 +116,11 @@ msgstr ""
 msgid "All-day events"
 msgstr ""
 
+#. *
+#. * The default file name for an ical event export, when using batch data
+#.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:67
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:76
 msgid "Events"
 msgstr ""
 
@@ -4022,7 +4026,7 @@ msgstr ""
 #. *
 #. * The default file name for an ical task export, when using batch data
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:76
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:81
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:92
 msgid "Tasks"
 msgstr ""
@@ -4030,7 +4034,7 @@ msgstr ""
 #. *
 #. * The default file name for an ical task export, when using batch data
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:81
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:86
 msgid "Export"
 msgstr ""
 

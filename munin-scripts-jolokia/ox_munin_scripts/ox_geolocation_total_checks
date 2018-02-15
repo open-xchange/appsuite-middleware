@@ -30,7 +30,7 @@ my $url = $ENV{oxJolokiaUrl};
 my $username = $ENV{oxJolokiaUser};
 my $password = $ENV{oxJolokiaPassword};
 
-callUrl("ipChanges","/read/com.openexchange.ipcheck.countrycode:name=IPCheck%20MBean/IPChangesPerHour");
+callUrl("ipChanges","/read/com.openexchange.metrics:00=ipcheck,name=percentages/IPChangesPerHour");
 
 sub callUrl {
 	my $ua = LWP::UserAgent->new();

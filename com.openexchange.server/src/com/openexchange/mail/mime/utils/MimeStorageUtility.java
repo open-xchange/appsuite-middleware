@@ -386,10 +386,10 @@ public final class MimeStorageUtility {
      * @param searchFields The search fields
      * @param sortField The sort field
      * @param preferEnvelope <code>true</code> to prefer ENVELOPE instead of single fetch items; otherwise <code>false</code>
-     * @param useIMAPAttachmentSearch <code>true</code> to signal that IMAPs attachment search should be used and therefore flags have to be requested.
+     * @param forceAddFlags <code>true</code> to signal that flags have to be requested; otherwise <code>false</code>
      * @return The appropriate IMAP fetch profile
      */
-    public static FetchProfile getFetchProfile(MailField[] fields, String[] headerNames, MailField[] searchFields, MailField sortField, boolean preferEnvelope, boolean useIMAPAttachmentSearch) {
+    public static FetchProfile getFetchProfile(MailField[] fields, String[] headerNames, MailField[] searchFields, MailField sortField, boolean preferEnvelope, boolean forceAddFlags) {
         MailField[] arr;
         {
             List<MailField> list = Arrays.asList(fields);
@@ -477,7 +477,7 @@ public final class MimeStorageUtility {
                 fetchProfile.add(headerName.toString());
             }
         }
-        if (useIMAPAttachmentSearch) {
+        if (forceAddFlags) {
             fetchProfile.add(FetchProfile.Item.FLAGS);
         }
         return fetchProfile;

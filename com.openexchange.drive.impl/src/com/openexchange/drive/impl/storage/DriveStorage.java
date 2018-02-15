@@ -99,7 +99,6 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.search.FileNameTerm;
-import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -1233,16 +1232,32 @@ public class DriveStorage {
         return session.getServerSession().getLogin() + ':' + rootFolderID.toUniqueID() + "# ";
     }
 
+    /**
+     * @return
+     * @throws OXException If no trash folder is available <br>
+     * - If either parent folder does not exist or its subfolders cannot be delivered <br>
+     * - If documents can not be loaded
+     */
     public TrashContent getTrashContent() throws OXException {
         FileStorageFolder trashFolder = getTrashFolder();
         if(trashFolder == null) {
             return null;
         }
         FileStorageFolder[] subfolders = getFolderAccess().getSubfolders(trashFolder.getId(), true);
-        TimedResult<File> documents = getFileAccess().getDocuments(trashFolder.getId());
-        return new TrashContent(subfolders, documents.results());
+        SearchIterator<File> documents = getFileAccess().getDocuments(trashFolder.getId()).results();
+        return new TrashContent(subfolders, documents);
     }
 
+    /**
+     * Delete all given files and folders from trash folder.
+     * 
+     * @param files All filenames to delete
+     * @param folders  All folders, that should be deleted
+     * @throws OXException If no trash folder is available <br>
+     * - If either parent folder does not exist or its subfolders cannot be delivered
+     * - If the needed documents can not be loaded
+     * - If deletion of a file or a folder fails
+     */
     public void deleteFromTrash(List<String> files, List<String> folders) throws OXException {
         FileStorageFolder trashFolder = getTrashFolder();
         if (trashFolder == null) {
@@ -1251,41 +1266,89 @@ public class DriveStorage {
         if (!folders.isEmpty()) {
             FileStorageFolder[] subfolders = getFolderAccess().getSubfolders(trashFolder.getId(), true);
             if (subfolders != null && subfolders.length > 0) {
-                List<String> folderIdsToDelete = new ArrayList<>(folders.size());
-                for (int x = 0; x < subfolders.length; x++) {
-                    if (folders.contains(subfolders[x].getName())) {
-                        folderIdsToDelete.add(subfolders[x].getId());
-                    }
-                }
-                for (String id : folderIdsToDelete) {
-                    try {
-                        getFolderAccess().deleteFolder(id, true);
-                    } catch (OXException ex) {
-                        if (OXFolderExceptionCode.isNotFound(ex)) {
-                            continue;
-                        }
-                        throw ex;
-                    }
-                }
+                deleteAllFolders(folders, subfolders);
             }
         }
 
         if (!files.isEmpty()) {
             SearchIterator<File> documents = getFileAccess().getDocuments(trashFolder.getId()).results();
             if (documents != null && documents.hasNext()) {
-                List<String> fileIdsToDelete = new ArrayList<>(folders.size());
-                do {
-                    File file = documents.next();
-                    if (files.contains(file.getFileName())) {
-                        fileIdsToDelete.add(file.getId());
-                    }
-                } while (documents.hasNext());
-
-                getFileAccess().removeDocument(fileIdsToDelete, FileStorageFileAccess.DISTANT_FUTURE);
+                deleteAllFiles(files, documents);
             }
         }
     }
 
+    /**
+     * Delete all {@link File}s from storage, if their filenames are also contained in the given
+     * files {@link List}.
+     * 
+     * @param files A {@link List} of all relevant filenames
+     * @param documents All relevant {@link File}s
+     * @throws OXException If removal of a file fails <br>
+     * - If iteration over the documents fails
+     */
+    private void deleteAllFiles(List<String> files, SearchIterator<File> documents) throws OXException {
+        List<String> fileIdsToDelete = new ArrayList<>(files.size());
+        do {
+            File file = documents.next();
+            if (files.contains(file.getFileName())) {
+                fileIdsToDelete.add(file.getId());
+            }
+        } while (documents.hasNext());
+        
+        getFileAccess().removeDocument(fileIdsToDelete, FileStorageFileAccess.DISTANT_FUTURE);
+    }
+
+    /**
+     * Deletes all folders, which are contained in both given parameters.
+     * 
+     * @param folders List of all folders
+     * @param subfolders {@link FileStorageFolder} array of all subfolders
+     * @throws OXException If the folder, can not be deleted
+     */
+    private void deleteAllFolders(List<String> folders, FileStorageFolder[] subfolders) throws OXException {
+        List<String> folderIdsToDelete = loadAllFolderIds(folders, subfolders);
+        for (String id : folderIdsToDelete) {
+            try {
+                getFolderAccess().deleteFolder(id, true);
+            } catch (OXException ex) {
+                if (OXFolderExceptionCode.isNotFound(ex)) {
+                    continue;
+                }
+                throw ex;
+            }
+        }
+    }
+
+    /**
+     * Load all folder ids from subfolders into a list, if folders contains the
+     * subfolder name.
+     * 
+     * @param folders the list of all olders
+     * @param subfolders array of subfolders as {@link FileStorageFolder}s
+     * @return a list of folder ids
+     */
+    private List<String> loadAllFolderIds(List<String> folders, FileStorageFolder[] subfolders) {
+        List<String> folderIdsToDelete = new ArrayList<>(folders.size());
+        for (int x = 0; x < subfolders.length; x++) {
+            if (folders.contains(subfolders[x].getName())) {
+                folderIdsToDelete.add(subfolders[x].getId());
+            }
+        }
+        return folderIdsToDelete;
+    }
+
+    /**
+     * Restores the given files and folders from trash, if a trash folder exists.
+     * 
+     * @param files, list of all folder names to restore
+     * @param folders, list of all file names to restore
+     * @return null: if no trash folder exists and if files and folders are empty. <br>
+     * otherwise: {@link RestoreContent} with the restored files and folders.
+     * @throws OXException If no trash folder is available or not supported by the storage <br>
+     *  - If the root, parent or subfolder folder does not exist or could not be fetched<br>
+     *  - If restoration of files or folders fails<br>
+     */
     public RestoreContent restoreFromTrash(List<String> files, List<String> folders) throws OXException {
         FileStorageFolder trashFolder = getTrashFolder();
         if (trashFolder == null) {
@@ -1295,42 +1358,69 @@ public class DriveStorage {
         String rootId = getRootFolder().getId();
 
         Map<String, FileStorageFolder[]> folderRestoreResult = null;
+        String trashFolderId = trashFolder.getId();
         if (!folders.isEmpty()) {
-            FileStorageFolder[] subfolders = getFolderAccess().getSubfolders(trashFolder.getId(), true);
+            FileStorageFolder[] subfolders = getFolderAccess().getSubfolders(trashFolderId, true);
             if (subfolders != null && subfolders.length > 0) {
-                List<String> folderIdsToRestore = new ArrayList<>(folders.size());
-                for (int x = 0; x < subfolders.length; x++) {
-                    if (folders.contains(subfolders[x].getName())) {
-                        folderIdsToRestore.add(subfolders[x].getId());
-                    }
-                }
+                List<String> folderIdsToRestore = loadAllFolderIds(folders, subfolders);
                 folderRestoreResult = getFolderAccess().restoreFolderFromTrash(folderIdsToRestore, rootId);
             }
         }
 
         Map<String, FileStorageFolder[]> fileRestoreResult = null;
         if (!files.isEmpty()) {
-            SearchIterator<File> documents = getFileAccess().getDocuments(trashFolder.getId()).results();
-            Map<String, File> ID2FileMapping = new HashMap<>();
+            SearchIterator<File> documents = getFileAccess().getDocuments(trashFolderId).results();
             if (documents != null && documents.hasNext()) {
-                List<String> fileIdsToRestore = new ArrayList<>(folders.size());
-                do {
-                    File file = documents.next();
-                    if (files.contains(file.getFileName())) {
-                        fileIdsToRestore.add(file.getId());
-                        ID2FileMapping.put(file.getId(), file);
-                    }
-                } while (documents.hasNext());
-
-                Map<FileID, FileStorageFolder[]> restore = getFileAccess().restore(fileIdsToRestore, rootId);
-
-                fileRestoreResult = new HashMap<>(fileIdsToRestore.size());
-                for (Map.Entry<FileID, FileStorageFolder[]> restoreEntry : restore.entrySet()) {
-                    fileRestoreResult.put(ID2FileMapping.get(restoreEntry.getKey().toUniqueID()).getFileName(), restoreEntry.getValue());
-                }
+                fileRestoreResult = restoreFilesFromTrash(files, rootId, documents);
             }
         }
         return new RestoreContent(folderRestoreResult, fileRestoreResult);
+    }
+
+    /**
+     * Restores the given documents in the given directory, identified by the rootId. If the documents
+     * name is not contained in the files list, it will not be restored.
+     * 
+     * @param files {@link List} of all files
+     * @param rootId The destination folder id
+     * @param documents The {@link File}s to restore
+     * @return A {@link Map} of all documents that have been restored
+     * @throws OXException If a documents could not be loaded <br>
+     * - If the restoration of a file, fails.
+     */
+    private Map<String, FileStorageFolder[]> restoreFilesFromTrash(List<String> files, String rootId, SearchIterator<File> documents) throws OXException {
+        Map<String, FileStorageFolder[]> fileRestoreResult;
+        Map<String, File> ID2FileMapping = createFileMap(files, documents);
+
+        List<String> fileIdsToRestore = new ArrayList<>(ID2FileMapping.keySet());
+        Map<FileID, FileStorageFolder[]> restore = getFileAccess().restore(fileIdsToRestore, rootId);
+
+        fileRestoreResult = new HashMap<>(fileIdsToRestore.size());
+        for (Map.Entry<FileID, FileStorageFolder[]> restoreEntry : restore.entrySet()) {
+            fileRestoreResult.put(ID2FileMapping.get(restoreEntry.getKey().toUniqueID()).getFileName(), restoreEntry.getValue());
+        }
+        return fileRestoreResult;
+    }
+
+    /**
+     * Maps all filenames to a {@link File} from docuemnts, if the filename is contained
+     * in the given files {@link List}. 
+     * 
+     * @param files All relevant filenames
+     * @param documents All relevant {@link File}s
+     * @return A {@link Map} of all filenames to the corresponding {@link File}s
+     * @throws OXException If the next {@link File} can not be loaded
+     */
+    private Map<String, File> createFileMap(List<String> files, SearchIterator<File> documents) throws OXException {
+        Map<String, File> ID2FileMapping = new HashMap<>();
+        do {
+            File file = documents.next();
+            if (files.contains(file.getFileName())) {
+                String fileId = file.getId();
+                ID2FileMapping.put(fileId, file);
+            }
+        } while (documents.hasNext());
+        return ID2FileMapping;
     }
 
 }

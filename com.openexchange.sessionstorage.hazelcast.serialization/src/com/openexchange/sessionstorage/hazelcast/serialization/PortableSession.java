@@ -64,6 +64,7 @@ import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
+import com.hazelcast.nio.serialization.VersionedPortable;
 import com.openexchange.hazelcast.serialization.CustomPortable;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.StringAppender;
@@ -76,7 +77,7 @@ import com.openexchange.sessionstorage.StoredSession;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class PortableSession extends StoredSession implements CustomPortable {
+public class PortableSession extends StoredSession implements CustomPortable, VersionedPortable {
 
     private static final long serialVersionUID = -2346327568417617677L;
 
@@ -106,6 +107,14 @@ public class PortableSession extends StoredSession implements CustomPortable {
     /** The unique portable class ID of the {@link PortableSession} */
     public static final int CLASS_ID = 1;
 
+    /**
+     * The class version for {@link PortableSession}
+     * <p>
+     * This number should be incremented whenever fields are added;
+     * see <a href="http://docs.hazelcast.org/docs/latest-development/manual/html/Serialization/Implementing_Portable_Serialization/Versioning_for_Portable_Serialization.html">here</a> for reference.
+     */
+    public static final int CLASS_VERSION = 2;
+
     public static final String PARAMETER_LOGIN_NAME = "loginName";
     public static final String PARAMETER_PASSWORD = "password";
     public static final String PARAMETER_CONTEXT_ID = "contextId";
@@ -125,10 +134,9 @@ public class PortableSession extends StoredSession implements CustomPortable {
     public static final String PARAMETER_LOCAL_LAST_ACTIVE = "localLastActive";
     public static final String PARAMETER_REMOTE_PARAMETER_NAMES = "remoteParameterNames";
     public static final String PARAMETER_REMOTE_PARAMETER_VALUES = "remoteParameterValues";
-    public static final String PARAMETER_NAME_XOAUTH2_TOKEN = "xoauth2";
 
     /** The class definition for PortableSession */
-    public static ClassDefinition CLASS_DEFINITION = new ClassDefinitionBuilder(FACTORY_ID, CLASS_ID)
+    public static ClassDefinition CLASS_DEFINITION = new ClassDefinitionBuilder(FACTORY_ID, CLASS_ID, CLASS_VERSION)
         .addUTFField(PARAMETER_LOGIN_NAME)
         .addUTFField(PARAMETER_PASSWORD)
         .addIntField(PARAMETER_CONTEXT_ID)
@@ -211,6 +219,11 @@ public class PortableSession extends StoredSession implements CustomPortable {
     @Override
     public int getClassId() {
         return CLASS_ID;
+    }
+
+    @Override
+    public int getClassVersion() {
+        return CLASS_VERSION;
     }
 
     @Override

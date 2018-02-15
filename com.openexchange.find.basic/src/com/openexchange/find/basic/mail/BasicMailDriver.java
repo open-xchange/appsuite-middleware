@@ -143,6 +143,7 @@ import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.ANDTerm;
@@ -301,7 +302,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
             @Override
             public List<MailMessage> call(MailServletInterface mailServletInterface, MailFolder folder) throws OXException {
-                SearchTerm<?> searchTerm = prepareSearchTerm(folder, searchRequest);
+                SearchTerm<?> searchTerm = prepareSearchTerm(folder, searchRequest, mailServletInterface.getMailAccess().getMailConfig().getCapabilities());
                 List<MailMessage> messages = searchMessages(mailServletInterface, folder, searchTerm, mailFields, headers, searchRequest.getStart(), searchRequest.getSize());
                 return messages;
             }
@@ -470,9 +471,9 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         return fields;
     }
 
-    protected SearchTerm<?> prepareSearchTerm(MailFolder folder, SearchRequest searchRequest) throws OXException {
+    protected SearchTerm<?> prepareSearchTerm(MailFolder folder, SearchRequest searchRequest, MailCapabilities mailCapabilities) throws OXException {
         List<String> queryFields = searchMailBody ? Constants.QUERY_FIELDS_BODY : Constants.QUERY_FIELDS;
-        SearchTerm<?> queryTerm = prepareQueryTerm(folder, queryFields, searchRequest.getQueries());
+        SearchTerm<?> queryTerm = prepareQueryTerm(folder, queryFields, searchRequest.getQueries(), mailCapabilities);
 
         List<SearchTerm<?>> facetTerms = new LinkedList<SearchTerm<?>>();
         SearchTerm<?> timeTerm = prepareDateTerm(searchRequest, folder);
@@ -480,27 +481,27 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             facetTerms.add(timeTerm);
         }
 
-        SearchTerm<?> subjectTerm = prepareTermForFacet(searchRequest, MailFacetType.SUBJECT, folder, OP.AND, OP.AND, OP.AND);
+        SearchTerm<?> subjectTerm = prepareTermForFacet(searchRequest, MailFacetType.SUBJECT, folder, OP.AND, OP.AND, OP.AND, mailCapabilities);
         if (subjectTerm != null) {
             facetTerms.add(subjectTerm);
         }
 
-        SearchTerm<?> bodyTerm = prepareTermForFacet(searchRequest, MailFacetType.MAIL_TEXT, folder, OP.AND, OP.AND, OP.AND);
+        SearchTerm<?> bodyTerm = prepareTermForFacet(searchRequest, MailFacetType.MAIL_TEXT, folder, OP.AND, OP.AND, OP.AND, mailCapabilities);
         if (bodyTerm != null) {
             facetTerms.add(bodyTerm);
         }
 
-        SearchTerm<?> attachmentTerm = prepareTermForFacet(searchRequest, MailFacetType.FILENAME, folder, OP.AND, OP.AND, OP.AND);
+        SearchTerm<?> attachmentTerm = prepareTermForFacet(searchRequest, MailFacetType.FILENAME, folder, OP.AND, OP.AND, OP.AND, mailCapabilities);
         if (attachmentTerm != null) {
             facetTerms.add(attachmentTerm);
         }
 
-        SearchTerm<?> hasAttachmentTerm = prepareTermForFacet(searchRequest, MailFacetType.HAS_ATTACHMENT, folder, OP.AND, OP.AND, OP.AND);
+        SearchTerm<?> hasAttachmentTerm = prepareTermForFacet(searchRequest, MailFacetType.HAS_ATTACHMENT, folder, OP.AND, OP.AND, OP.AND, mailCapabilities);
         if (hasAttachmentTerm != null) {
             facetTerms.add(hasAttachmentTerm);
         }
 
-        SearchTerm<?> contactsTerm = prepareTermForFacet(searchRequest, MailFacetType.CONTACTS, folder, OP.AND, OP.OR, OP.OR);
+        SearchTerm<?> contactsTerm = prepareTermForFacet(searchRequest, MailFacetType.CONTACTS, folder, OP.AND, OP.OR, OP.OR, mailCapabilities);
         if (contactsTerm != null) {
             facetTerms.add(contactsTerm);
         }
@@ -536,12 +537,12 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         return searchTerm;
     }
 
-    private static SearchTerm<?> prepareQueryTerm(MailFolder folder, List<String> fields, List<String> queries) throws OXException {
+    private static SearchTerm<?> prepareQueryTerm(MailFolder folder, List<String> fields, List<String> queries, MailCapabilities mailCapabilities) throws OXException {
         if (queries == null || queries.isEmpty()) {
             return null;
         }
 
-        return termFor(fields, queries, OP.OR, OP.AND, folder.isSent());
+        return termFor(fields, queries, OP.OR, OP.AND, folder.isSent(), mailCapabilities);
     }
 
     private static SearchTerm<?> prepareDateTerm(SearchRequest searchRequest, MailFolder folder) throws OXException {
@@ -587,7 +588,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         return null;
     }
 
-    private static SearchTerm<?> prepareTermForFacet(SearchRequest searchRequest, FacetType type, MailFolder folder, OP filterOP, OP fieldOP, OP queryOP) throws OXException {
+    private static SearchTerm<?> prepareTermForFacet(SearchRequest searchRequest, FacetType type, MailFolder folder, OP filterOP, OP fieldOP, OP queryOP, MailCapabilities mailCapabilities) throws OXException {
         List<ActiveFacet> facets = searchRequest.getActiveFacets(type);
         if (facets != null && !facets.isEmpty()) {
             List<Filter> filters = new LinkedList<Filter>();
@@ -598,34 +599,34 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
                 }
             }
 
-            return prepareFilterTerm(folder, filters, filterOP, fieldOP, queryOP);
+            return prepareFilterTerm(folder, filters, filterOP, fieldOP, queryOP, mailCapabilities);
         }
 
         return null;
     }
 
-    private static SearchTerm<?> prepareFilterTerm(MailFolder folder, List<Filter> filters, OP filterOP, OP fieldOP, OP queryOP) throws OXException {
+    private static SearchTerm<?> prepareFilterTerm(MailFolder folder, List<Filter> filters, OP filterOP, OP fieldOP, OP queryOP, MailCapabilities mailCapabilities) throws OXException {
         if (filters == null || filters.isEmpty()) {
             return null;
         }
 
         if (filters.size() == 1) {
-            return termFor(filters.get(0), fieldOP, queryOP, folder.isSent());
+            return termFor(filters.get(0), fieldOP, queryOP, folder.isSent(), mailCapabilities);
         }
 
         Iterator<Filter> it = filters.iterator();
         Filter f1 = it.next();
         Filter f2 = it.next();
-        CatenatingTerm finalTerm = catenationFor(filterOP, termFor(f1, fieldOP, queryOP, folder.isSent()), termFor(f2, fieldOP, queryOP, folder.isSent()));
+        CatenatingTerm finalTerm = catenationFor(filterOP, termFor(f1, fieldOP, queryOP, folder.isSent(), mailCapabilities), termFor(f2, fieldOP, queryOP, folder.isSent(), mailCapabilities));
         while (it.hasNext()) {
-            CatenatingTerm newTerm = catenationFor(filterOP, finalTerm.getSecondTerm(), termFor(it.next(), fieldOP, queryOP, folder.isSent()));
+            CatenatingTerm newTerm = catenationFor(filterOP, finalTerm.getSecondTerm(), termFor(it.next(), fieldOP, queryOP, folder.isSent(), mailCapabilities));
             finalTerm.setSecondTerm(newTerm);
         }
 
         return finalTerm;
     }
 
-    private static SearchTerm<?> termFor(Filter filter, OP fieldOP, OP queryOP, boolean isOutgoingFolder) throws OXException {
+    private static SearchTerm<?> termFor(Filter filter, OP fieldOP, OP queryOP, boolean isOutgoingFolder, MailCapabilities mailCapabilities) throws OXException {
         List<String> fields = filter.getFields();
         if (fields == null || fields.isEmpty()) {
             throw FindExceptionCode.INVALID_FILTER_NO_FIELDS.create(filter);
@@ -636,46 +637,46 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             throw FindExceptionCode.INVALID_FILTER_NO_QUERIES.create(filter);
         }
 
-        return termFor(fields, queries, fieldOP, queryOP, isOutgoingFolder);
+        return termFor(fields, queries, fieldOP, queryOP, isOutgoingFolder, mailCapabilities);
     }
 
-    private static SearchTerm<?> termFor(List<String> fields, List<String> queries, OP fieldOP, OP queryOP, boolean isOutgoingFolder) throws OXException {
+    private static SearchTerm<?> termFor(List<String> fields, List<String> queries, OP fieldOP, OP queryOP, boolean isOutgoingFolder, MailCapabilities mailCapabilities) throws OXException {
         if (fields.size() > 1) {
             Iterator<String> it = fields.iterator();
             String f1 = it.next();
             String f2 = it.next();
-            CatenatingTerm finalTerm = catenationFor(fieldOP, termForField(f1, queries, queryOP, isOutgoingFolder), termForField(f2, queries, queryOP, isOutgoingFolder));
+            CatenatingTerm finalTerm = catenationFor(fieldOP, termForField(f1, queries, queryOP, isOutgoingFolder, mailCapabilities), termForField(f2, queries, queryOP, isOutgoingFolder, mailCapabilities));
             while (it.hasNext()) {
                 String f = it.next();
-                CatenatingTerm newTerm = catenationFor(fieldOP, finalTerm.getSecondTerm(), termForField(f, queries, queryOP, isOutgoingFolder));
+                CatenatingTerm newTerm = catenationFor(fieldOP, finalTerm.getSecondTerm(), termForField(f, queries, queryOP, isOutgoingFolder, mailCapabilities));
                 finalTerm.setSecondTerm(newTerm);
             }
 
             return finalTerm;
         }
 
-        return termForField(fields.iterator().next(), queries, queryOP, isOutgoingFolder);
+        return termForField(fields.iterator().next(), queries, queryOP, isOutgoingFolder, mailCapabilities);
     }
 
-    private static SearchTerm<?> termForField(String field, List<String> queries, OP queryOP, boolean isOutgoingFolder) throws OXException {
+    private static SearchTerm<?> termForField(String field, List<String> queries, OP queryOP, boolean isOutgoingFolder, MailCapabilities mailCapabilities) throws OXException {
         if (queries.size() > 1) {
             Iterator<String> it = queries.iterator();
             String q1 = it.next();
             String q2 = it.next();
-            CatenatingTerm finalTerm = catenationFor(queryOP, termForQuery(field, q1, isOutgoingFolder), termForQuery(field, q2, isOutgoingFolder));
+            CatenatingTerm finalTerm = catenationFor(queryOP, termForQuery(field, q1, isOutgoingFolder, mailCapabilities), termForQuery(field, q2, isOutgoingFolder, mailCapabilities));
             while (it.hasNext()) {
                 String q = it.next();
-                CatenatingTerm newTerm = catenationFor(queryOP, finalTerm.getSecondTerm(), termForQuery(field, q, isOutgoingFolder));
+                CatenatingTerm newTerm = catenationFor(queryOP, finalTerm.getSecondTerm(), termForQuery(field, q, isOutgoingFolder, mailCapabilities));
                 finalTerm.setSecondTerm(newTerm);
             }
 
             return finalTerm;
         }
 
-        return termForQuery(field, queries.iterator().next(), isOutgoingFolder);
+        return termForQuery(field, queries.iterator().next(), isOutgoingFolder, mailCapabilities);
     }
 
-    private static SearchTerm<?> termForQuery(String field, String query, boolean isOutgoingFolder) throws OXException {
+    private static SearchTerm<?> termForQuery(String field, String query, boolean isOutgoingFolder, MailCapabilities mailCapabilities) throws OXException {
         if (FIELD_FROM.equals(field)) {
             return new FromTerm(query);
         } else if (FIELD_TO.equals(field)) {
@@ -694,8 +695,14 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             Long timestamp = parsed.getSecond();
             return buildDateTerm(comparison, timestamp.longValue(), isOutgoingFolder);
         } else if (FIELD_FILENAME_NAME.equals(field)) {
+            if (false == mailCapabilities.hasFileNameSearch()) {
+                throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
+            }
             return new FileNameTerm(query);
         } else if (FIELD_HAS_ATTACHMENT.equals(field)) {
+            if (false == mailCapabilities.hasAttachmentSearch()) {
+                throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
+            }
             boolean hasAttachment = Boolean.parseBoolean(query);
             return new UserFlagTerm(hasAttachment ? MailMessage.HAS_ATTACHMENT_LABEL : MailMessage.HAS_NO_ATTACHMENT_LABEL, true);
         }

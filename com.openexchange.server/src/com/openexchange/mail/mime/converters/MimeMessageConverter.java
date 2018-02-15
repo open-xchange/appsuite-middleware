@@ -742,6 +742,7 @@ public final class MimeMessageConverter {
      * @throws OXException If conversion fails
      * @deprecated use {@link MimeMessageConverter#convertMessages(Message[], MailField[], String[], boolean, MailConfig)} instead
      */
+    @Deprecated
     public static MailMessage[] convertMessages(final Message[] msgs, final MailField[] fields) throws OXException {
         return convertMessages(msgs, fields, null, false);
     }
@@ -761,6 +762,7 @@ public final class MimeMessageConverter {
      * @throws OXException If conversion fails
      * @deprecated use {@link MimeMessageConverter#convertMessages(Message[], MailField[], String[], boolean, MailConfig)} instead
      */
+    @Deprecated
     public static MailMessage[] convertMessages(final Message[] msgs, final MailField[] fields, final String[] headerNames, final boolean includeBody) throws OXException {
         return convertMessages(msgs, fields, headerNames, includeBody, null);
     }
@@ -1233,7 +1235,7 @@ public final class MimeMessageConverter {
 
             @Override
             public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException, OXException {
-                parseFlags(((ExtendedMimeMessage) msg).getFlags(), mailMessage);
+                parseFlags(((ExtendedMimeMessage) msg).getFlags(), mailConfig.getCapabilities().hasAttachmentSearch(), mailMessage);
             }
         });
         FILLER_MAP_EXT.put(MailField.THREAD_LEVEL, new MailMessageFieldFiller() {
@@ -1282,7 +1284,7 @@ public final class MimeMessageConverter {
 
             @Override
             public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException, OXException {
-                parseFlags(((ExtendedMimeMessage) msg).getFlags(), mailMessage);
+                parseFlags(((ExtendedMimeMessage) msg).getFlags(), mailConfig.getCapabilities().hasAttachmentSearch(), mailMessage);
                 if (!mailMessage.containsColorLabel()) {
                     mailMessage.setColorLabel(MailMessage.COLOR_LABEL_NONE);
                 }
@@ -1475,70 +1477,83 @@ public final class MimeMessageConverter {
             };
             FILLER_MAP.put(MailField.CONTENT_TYPE, filler);
             FILLER_MAP.put(MailField.MIME_TYPE, filler);
-
         }
 
-        MailMessageFieldFiller attachmentFiller = new MailMessageFieldFiller() {
+        {
+            MailMessageFieldFiller attachmentFiller = new MailMessageFieldFiller() {
 
-            private final String multipart = "multipart";
+                private final String multipart = "multipart/";
 
-            @Override
-            public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException, OXException {
-                try {
-                    setHasAttachment(mailConfig, mailMessage, msg.getFlags().getUserFlags(), new AlternativeHasAttachmentSetter() {
-
-                        @Override
-                        public void setHasAttachment(MailMessage localMail) throws OXException, MessagingException, IOException {
-                            ContentType ct = null;
-                            try {
-                                final String[] tmp = msg.getHeader(CONTENT_TYPE);
-                                if (tmp != null && tmp.length > 0) {
-                                    ct = new ContentType(tmp[0]);
-                                } else {
-                                    ct = new ContentType(MimeTypes.MIME_DEFAULT);
-                                }
-                            } catch (final OXException e) {
-                                /*
-                                 * Cannot occur
-                                 */
-                                LOG1.error(MessageFormat.format("Invalid content type: {0}", msg.getContentType()), e);
-                                try {
-                                    ct = new ContentType(MimeTypes.MIME_DEFAULT);
-                                } catch (final OXException e1) {
-                                    /*
-                                     * Cannot occur
-                                     */
-                                    LOG1.error("", e1);
+                @Override
+                public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException, OXException {
+                    if (null != mailConfig && mailConfig.getCapabilities().hasAttachmentSearch()) {
+                        // Try to determine has-attachment flag by user flags
+                        String[] userFlags = mailMessage.getUserFlags();
+                        if (null == userFlags) {
+                            userFlags = msg.getFlags().getUserFlags();
+                        }
+                        if (null != userFlags && userFlags.length > 0) {
+                            for (String flag : userFlags) {
+                                if (MailMessage.isHasAttachment(flag)) {
+                                    mailMessage.setHasAttachment(true);
+                                    return;
+                                } else if (MailMessage.isHasNoAttachment(flag)) {
+                                    mailMessage.setHasAttachment(false);
                                     return;
                                 }
                             }
-                            if (msg instanceof ExtendedMimeMessage) {
-                                localMail.setHasAttachment(((ExtendedMimeMessage) msg).hasAttachment());
-                            } else {
-                                try {
-                                    localMail.setHasAttachment(ct.startsWith(multipart) && hasAttachments((Part) msg.getContent()));
-                                } catch (final ClassCastException e) {
-                                    // Cast to javax.mail.Multipart failed
-                                    LOG1.debug(new StringBuilder(256).append("Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(e.getMessage()).append(".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
-                                    localMail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
-                                } catch (final MessagingException e) {
-                                    // A messaging error occurred
-                                    LOG1.debug(new StringBuilder(256).append("Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(e.getMessage()).append(".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
-                                    localMail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
-                                }
-                            }
-
                         }
-                    });
-                } catch (final IOException e) {
-                    if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
-                        throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
                     }
-                    throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+
+                    if (msg instanceof ExtendedMimeMessage) {
+                        mailMessage.setAlternativeHasAttachment(((ExtendedMimeMessage) msg).hasAttachment());
+                        return;
+                    }
+
+                    ContentType ct = null;
+                    try {
+                        // Determine Content-Type
+                        try {
+                            String[] tmp = msg.getHeader(CONTENT_TYPE);
+                            if (tmp != null && tmp.length > 0) {
+                                ct = new ContentType(tmp[0]);
+                            } else {
+                                ct = new ContentType(MimeTypes.MIME_DEFAULT);
+                            }
+                        } catch (OXException e) {
+                            /*
+                             * Cannot occur
+                             */
+                            LOG1.error("Invalid content type: {}", msg.getContentType(), e);
+                            try {
+                                ct = new ContentType(MimeTypes.MIME_DEFAULT);
+                            } catch (final OXException e1) {
+                                /*
+                                 * Cannot occur
+                                 */
+                                LOG1.error("", e1);
+                                return;
+                            }
+                        }
+                        mailMessage.setAlternativeHasAttachment(ct.startsWith(multipart) && hasAttachments((Part) msg.getContent()));
+                    } catch (final ClassCastException e) {
+                        // Cast to javax.mail.Multipart failed
+                        LOG1.debug(new StringBuilder(256).append("Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but ").append(e.getMessage()).append(".\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
+                        mailMessage.setAlternativeHasAttachment(null != ct && ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
+                    } catch (final MessagingException e) {
+                        // A messaging error occurred
+                        LOG1.debug(new StringBuilder(256).append("Parsing message's multipart/* content to check for file attachments caused a messaging error: ").append(e.getMessage()).append(".\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.").toString());
+                        mailMessage.setAlternativeHasAttachment(null != ct && ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
+                    } catch (final IOException e) {
+                        if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
+                            throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                        }
+                        throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+                    }
                 }
-            }
-        };
-        FILLER_MAP.put(MailField.ATTACHMENT, attachmentFiller);
+            };
+            FILLER_MAP.put(MailField.ATTACHMENT, attachmentFiller);
+        }
 
         FILLER_MAP.put(MailField.FROM, new MailMessageFieldFiller() {
 
@@ -1600,7 +1615,7 @@ public final class MimeMessageConverter {
 
             @Override
             public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException, OXException {
-                parseFlags(msg.getFlags(), mailMessage);
+                parseFlags(msg.getFlags(), mailConfig.getCapabilities().hasAttachmentSearch(), mailMessage);
             }
         });
         FILLER_MAP.put(MailField.THREAD_LEVEL, new MailMessageFieldFiller() {
@@ -1655,7 +1670,7 @@ public final class MimeMessageConverter {
 
             @Override
             public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException, OXException {
-                parseFlags(msg.getFlags(), mailMessage);
+                parseFlags(msg.getFlags(), mailConfig.getCapabilities().hasAttachmentSearch(), mailMessage);
                 if (!mailMessage.containsColorLabel()) {
                     mailMessage.setColorLabel(MailMessage.COLOR_LABEL_NONE);
                 }
@@ -1685,7 +1700,7 @@ public final class MimeMessageConverter {
 
         /**
          * Gets the full name of the mail folder.
-         * 
+         *
          * @return The full name
          */
         String getFullName();
@@ -1871,8 +1886,7 @@ public final class MimeMessageConverter {
      * @throws OXException If conversion fails
      */
     public static MailMessage convertMessage(final MimeMessage msg, final boolean considerFolder) throws OXException {
-        ConverterConfig config = new DefaultConverterConfig(new DummyMailConfig(), false, false);
-        return convertMessage(msg, config);
+        return convertMessage(msg, new DefaultConverterConfig(DummyMailConfig.getInstance(), considerFolder, false));
     }
 
     /**
@@ -1892,7 +1906,9 @@ public final class MimeMessageConverter {
             /*
              * Parse flags
              */
-            parseFlags(msg.getFlags(), mail);
+            Flags flags = msg.getFlags();
+            boolean examineHasAttachmentUserFlags = null != config.getMailConfig() && config.getMailConfig().getCapabilities().hasAttachmentSearch();
+            parseFlags(flags, examineHasAttachmentUserFlags, mail);
             if (!mail.containsColorLabel()) {
                 mail.setColorLabel(MailMessage.COLOR_LABEL_NONE);
             }
@@ -1948,17 +1964,9 @@ public final class MimeMessageConverter {
                     mail.setContentType(MimeTypes.MIME_DEFAULT);
                 }
             }
-
-            {
-                setHasAttachment(config.getMailConfig(), mail, msg.getFlags().getUserFlags(), new AlternativeHasAttachmentSetter() {
-
-                    @Override
-                    public void setHasAttachment(MailMessage localMail) throws OXException, MessagingException, IOException {
-                        ContentType ct = mail.getContentType();
-                        examineAttachmentPresence(localMail, ct);
-                    }
-                });
-
+            if (false == mail.containsHasAttachment()) {
+                // has-attachment flag not yet set
+                mail.setAlternativeHasAttachment(examineAttachmentPresence(mail, mail.getContentType()));
             }
             {
                 final String[] tmp = mail.getHeader(MessageHeaders.HDR_CONTENT_ID);
@@ -2051,30 +2059,7 @@ public final class MimeMessageConverter {
             throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e, new Object[0]);
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
-            }
-            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
-    }
-
-    public static void setHasAttachment(MailConfig mailConfig, MailMessage mail, String[] userFlags, AlternativeHasAttachmentSetter alternative) throws OXException, MessagingException, IOException {
-        if (mail.hasAttachment()) { // a previously processed handler decided that the mail has an attachment: don't overwrite it
-            return;
-        }
-        if (userFlags != null && userFlags.length > 0 && mailConfig != null && mailConfig.getCapabilities().hasAttachmentSearch()) {
-            for (String flag : userFlags) {
-                if (MailMessage.isHasAttachment(flag)) {
-                    mail.setHasAttachment(true);
-                    return;
-                } else if (MailMessage.isHasNoAttachment(flag)) {
-                    mail.setHasAttachment(false);
-                    return;
-                }
-            }
-        }
-        alternative.setHasAttachment(mail);
     }
 
     /**
@@ -2101,24 +2086,29 @@ public final class MimeMessageConverter {
         }
     }
 
-    protected static void examineAttachmentPresence(MailMessage mail, ContentType ct) throws IOException, OXException {
+    protected static boolean examineAttachmentPresence(MailMessage mail, ContentType ct) throws OXException {
         try {
-            mail.setHasAttachment(hasAttachments(mail, ct.getSubType()));
+            return hasAttachments(mail, ct.getSubType());
         } catch (OXException e) {
             if (!MailExceptionCode.MESSAGING_ERROR.equals(e)) {
                 throw e;
             }
             // A messaging error occurred
             LOG.debug("Parsing message's multipart/* content to check for file attachments caused a messaging error.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.", e);
-            mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
+            return ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED);
         } catch (ClassCastException e) {
             // Cast to javax.mail.Multipart failed
             LOG.debug("Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but is not.\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.", e);
-            mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
+            return ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED);
         } catch (MessagingException e) {
             // A messaging error occurred
             LOG.debug("Parsing message's multipart/* content to check for file attachments caused a messaging error: {}.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.", e.getMessage());
-            mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
+            return ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED);
+        } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -2174,7 +2164,7 @@ public final class MimeMessageConverter {
      *
      * @param msg The MIME message
      * @param uid The UID or <code>null</code>
-     * @param fullname The folder fullname
+     * @param fullname The folder full name
      * @param separator The folder separator character
      * @param fields The desired fields to fill
      * @return An instance of {@link MailMessage} filled with desired fields
@@ -2184,6 +2174,18 @@ public final class MimeMessageConverter {
         return convertMessage(msg, uid, fullname, separator, fields, null);
     }
 
+    /**
+     * Creates a message data object from given MIME message filled with desired fields.
+     *
+     * @param msg The MIME message
+     * @param uid The UID or <code>null</code>
+     * @param fullname The folder full name
+     * @param separator The folder separator character
+     * @param fields The desired fields to fill
+     * @param mailConfig The associated mail config
+     * @return An instance of {@link MailMessage} filled with desired fields
+     * @throws OXException If conversion fails
+     */
     public static MailMessage convertMessage(final MimeMessage msg, final String uid, final String fullname, final char separator, final MailField[] fields, MailConfig mailConfig) throws OXException {
         final MailFields set = new MailFields(fields);
         if (set.contains(MailField.FULL)) {
@@ -2420,10 +2422,11 @@ public final class MimeMessageConverter {
      * Parses specified {@link Flags flags} to given {@link MailMessage mail}.
      *
      * @param flags The flags to parse
+     * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
      * @param mailMessage The mail to apply the flags to
      * @throws OXException If a mail error occurs
      */
-    public static void parseFlags(final Flags flags, final MailMessage mailMessage) throws OXException {
+    public static void parseFlags(final Flags flags, boolean examineHasAttachmentUserFlags, final MailMessage mailMessage) throws OXException {
         int retval = 0;
         if (flags.contains(Flags.Flag.ANSWERED)) {
             retval |= MailMessage.FLAG_ANSWERED;
@@ -2459,6 +2462,10 @@ public final class MimeMessageConverter {
                     retval |= MailMessage.FLAG_FORWARDED;
                 } else if (MailMessage.USER_READ_ACK.equalsIgnoreCase(userFlag)) {
                     retval |= MailMessage.FLAG_READ_ACK;
+                } else if (examineHasAttachmentUserFlags && MailMessage.HAS_ATTACHMENT_LABEL.equalsIgnoreCase(userFlag)) {
+                    mailMessage.setHasAttachment(true);
+                } else if (examineHasAttachmentUserFlags && MailMessage.HAS_NO_ATTACHMENT_LABEL.equalsIgnoreCase(userFlag)) {
+                    mailMessage.setHasAttachment(false);
                 } else {
                     mailMessage.addUserFlag(userFlag);
                 }
@@ -2762,6 +2769,7 @@ public final class MimeMessageConverter {
      * @throws MessagingException If a messaging error occurs
      * @deprecated Use {@link MimeMessageUtility} instead
      */
+    @Deprecated
     public static String getSubject(final Message message) throws MessagingException {
         return MimeMessageUtility.getSubject(message);
     }
@@ -2778,6 +2786,7 @@ public final class MimeMessageConverter {
      * @return The decoded header
      * @deprecated Use {@link MimeMessageUtility} instead
      */
+    @Deprecated
     public static String getSubject(final MailMessage message) {
         return MimeMessageUtility.getSubject(message);
     }
@@ -2794,6 +2803,7 @@ public final class MimeMessageConverter {
      * @throws MessagingException If a messaging error occurs
      * @deprecated Use {@link MimeMessageUtility} instead
      */
+    @Deprecated
     public static InternetAddress[] getAddressHeader(final String name, final Message message) throws MessagingException {
         return MimeMessageUtility.getAddressHeader(name, message);
     }
@@ -2809,6 +2819,7 @@ public final class MimeMessageConverter {
      * @return The parsed address headers as an array of {@link InternetAddress} instances
      * @deprecated Use {@link MimeMessageUtility} instead
      */
+    @Deprecated
     public static InternetAddress[] getAddressHeader(final String name, final MailMessage message) {
         return MimeMessageUtility.getAddressHeader(name, message);
     }
@@ -2820,6 +2831,7 @@ public final class MimeMessageConverter {
      * @return The parsed addresses
      * @deprecated Use {@link MimeMessageUtility} instead
      */
+    @Deprecated
     public static InternetAddress[] getAddressHeader(final String addresses) {
         return MimeMessageUtility.getAddressHeader(addresses);
     }
@@ -2832,6 +2844,7 @@ public final class MimeMessageConverter {
      * @return The sent Date
      * @deprecated Use {@link MimeMessageUtility} instead
      */
+    @Deprecated
     public static Date getSentDate(final MailPart part) {
         return MimeMessageUtility.getSentDate(part);
     }
@@ -2845,6 +2858,7 @@ public final class MimeMessageConverter {
      * @throws MessagingException If sent date cannot be returned
      * @deprecated Use {@link MimeMessageUtility} instead
      */
+    @Deprecated
     public static Date getSentDate(MimeMessage mimeMessage) throws MessagingException {
         return MimeMessageUtility.getSentDate(mimeMessage);
     }
@@ -2856,6 +2870,7 @@ public final class MimeMessageConverter {
      * @param mailMessage The mail message to fill
      * @deprecated Use {@link MimeMessageUtility} instead
      */
+    @Deprecated
     public static void parsePriority(final String priorityStr, final MailMessage mailMessage) {
         MimeMessageUtility.parsePriority(priorityStr, mailMessage);
     }
@@ -2867,6 +2882,7 @@ public final class MimeMessageConverter {
      * @param mailMessage The mail message to fill
      * @deprecated Use {@link MimeMessageUtility} instead
      */
+    @Deprecated
     public static void parseImportance(final String importance, final MailMessage mailMessage) {
         MimeMessageUtility.parsePriority(importance, mailMessage);
     }
@@ -2877,6 +2893,7 @@ public final class MimeMessageConverter {
      * @param priorityStr The header value
      * @deprecated Use {@link MimeMessageUtility} instead
      */
+    @Deprecated
     public static int parsePriority(final String priorityStr) {
         return MimeMessageUtility.parsePriority(priorityStr);
     }
@@ -2887,6 +2904,7 @@ public final class MimeMessageConverter {
      * @param importance The header value
      * @deprecated Use {@link MimeMessageUtility} instead
      */
+    @Deprecated
     public static int parseImportance(final String importance) {
         return MimeMessageUtility.parseImportance(importance);
     }

@@ -47,24 +47,35 @@
  *
  */
 
-package com.openexchange.chronos.provider;
+package com.openexchange.metrics.types;
 
-import com.openexchange.session.Session;
+import java.util.concurrent.atomic.AtomicInteger;
+import com.codahale.metrics.Gauge;
 
 /**
- * {@link AvailabilityAwareCalendarProvider}
+ * {@link AtomicIntegerGauge}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface AvailabilityAwareCalendarProvider {
+public class AtomicIntegerGauge implements Gauge<AtomicInteger> {
+
+    private final AtomicInteger value;
 
     /**
-     * Checks whether the provider is available for the given session
-     *
-     * @param session The session
-     * @return true if it is available, false otherwise
+     * Initialises a new {@link AtomicIntegerGauge}.
      */
-    boolean isAvailable(Session session);
+    public AtomicIntegerGauge() {
+        super();
+        value = new AtomicInteger();
+    }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.codahale.metrics.Gauge#getValue()
+     */
+    @Override
+    public AtomicInteger getValue() {
+        return value;
+    }
 }

@@ -49,8 +49,8 @@
 
 package com.openexchange.chronos.itip.generators.changes.generators;
 
-import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.i;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -280,22 +280,26 @@ public class Participants implements ChangeDescriptionGenerator {
 
         if (difference.getAddedItems() != null && !difference.getAddedItems().isEmpty()) {
             for (Attendee added : difference.getAddedItems()) {
-                if (CalendarUtils.isInternal(added)) {
-                    userIds.add(I(added.getEntity()));
-                    userChange.put(I(added.getEntity()), ChangeType.ADD);
-                } else {
-                    externalChange.put(added.getEMail(), ChangeType.ADD);
+                if (added.getCuType().equals(CalendarUserType.INDIVIDUAL)) {
+                    if (CalendarUtils.isInternal(added)) {
+                        userIds.add(I(added.getEntity()));
+                        userChange.put(I(added.getEntity()), ChangeType.ADD);
+                    } else {
+                        externalChange.put(added.getEMail(), ChangeType.ADD);
+                    }
                 }
             }
         }
 
         if (difference.getRemovedItems() != null && !difference.getRemovedItems().isEmpty()) {
             for (Attendee removed : difference.getRemovedItems()) {
-                if (CalendarUtils.isInternal(removed)) {
-                    userIds.add(I(removed.getEntity()));
-                    userChange.put(I(removed.getEntity()), ChangeType.REMOVE);
-                } else {
-                    externalChange.put(removed.getEMail(), ChangeType.REMOVE);
+                if (removed.getCuType().equals(CalendarUserType.INDIVIDUAL)) {
+                    if (CalendarUtils.isInternal(removed)) {
+                        userIds.add(I(removed.getEntity()));
+                        userChange.put(I(removed.getEntity()), ChangeType.REMOVE);
+                    } else {
+                        externalChange.put(removed.getEMail(), ChangeType.REMOVE);
+                    }
                 }
             }
         }

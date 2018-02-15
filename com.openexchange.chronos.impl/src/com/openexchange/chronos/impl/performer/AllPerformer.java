@@ -183,41 +183,6 @@ public class AllPerformer extends AbstractQueryPerformer {
     /**
      * Performs the operation.
      *
-     * @param folders The parent folders to get all events from
-     * @return The loaded events
-     */
-    public List<Event> perform21(List<UserizedFolder> folders) throws OXException {
-        /*
-         * load event data per folder & additional event data per calendar user
-         */
-        EventField[] fields = getFields(session);
-        SearchOptions searchOptions = new SearchOptions(session);
-        Map<UserizedFolder, List<Event>> eventsPerFolder = new HashMap<UserizedFolder, List<Event>>();
-        for (Map.Entry<Integer, List<UserizedFolder>> entry : getFoldersPerCalendarUserId(folders).entrySet()) {
-            List<Event> eventsForCalendarUser = new ArrayList<Event>();
-            for (UserizedFolder folder : entry.getValue()) {
-                requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
-                List<Event> eventsInFolder = storage.getEventStorage().searchEvents(getFolderIdTerm(session, folder), searchOptions, fields);
-                eventsForCalendarUser.addAll(eventsInFolder);
-                eventsPerFolder.put(folder, eventsInFolder);
-            }
-            eventsForCalendarUser = storage.getUtilities().loadAdditionalEventData(i(entry.getKey()), eventsForCalendarUser, fields);
-        }
-        /*
-         * post process events, based on each requested folder's perspective
-         */
-        List<Event> allEvents = new ArrayList<Event>();
-        boolean includeClassifiedEvents = isIncludeClassifiedEvents(session);
-        for (Entry<UserizedFolder, List<Event>> entry : eventsPerFolder.entrySet()) {
-            allEvents.addAll(postProcess(entry.getValue(), entry.getKey(), includeClassifiedEvents, fields));
-            getSelfProtection().checkEventCollection(allEvents);
-        }
-        return allEvents;
-    }
-
-    /**
-     * Performs the operation.
-     *
      * @param folderIds The identifiers of the parent folders to get all events from
      * @return The loaded events
      */
@@ -271,13 +236,14 @@ public class AllPerformer extends AbstractQueryPerformer {
     /**
      * Performs the operation.
      *
-     * @param folder The parent folder to get all events from
+     * @param folderId The identifier of the parent folder to get all events from
      * @return The loaded events
      */
-    public List<Event> perform(UserizedFolder folder) throws OXException {
+    public List<Event> perform(String folderId) throws OXException {
         /*
          * perform search & userize the results based on the requested folder
          */
+        UserizedFolder folder = getFolder(session, folderId);
         requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         SearchTerm<?> searchTerm = getFolderIdTerm(session, folder);
         EventField[] fields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);

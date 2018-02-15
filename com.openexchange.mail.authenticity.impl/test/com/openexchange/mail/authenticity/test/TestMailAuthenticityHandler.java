@@ -170,7 +170,7 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
         assertDomain("example.com", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN, String.class));
         assertAmount(2);
 
-        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.com", "good signature", DKIMResult.PASS);
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "example.com", "Pass with domain example.com", DKIMResult.PASS);
 
         Map<String, String> unknownMech = (Map) result.getAttribute(MailAuthenticityResultKey.UNCONSIDERED_AUTH_MECH_RESULTS, List.class).get(0);
         Map<String, String> expectedUnknownMech = new HashMap<>();
@@ -204,7 +204,7 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
 
         // Assert considered
         List<MailAuthenticityMechanismResult> results = result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
-        assertAuthenticityMechanismResult(results.get(0), "newyork.example.com", "good signature", DKIMResult.PASS);
+        assertAuthenticityMechanismResult(results.get(0), "newyork.example.com", "Pass with domain newyork.example.com", DKIMResult.PASS);
     }
 
     /**
@@ -221,8 +221,8 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
         assertAmount(2);
 
         List<MailAuthenticityMechanismResult> results = result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
-        assertAuthenticityMechanismResult(results.get(0), "aliceland.com", "no key for signature", DKIMResult.TEMPERROR);
-        assertAuthenticityMechanismResult(results.get(1), "aliceland.com", "ox.io: domain of bob@aliceland.com does not designate 1.2.3.4 as permitted sender", SPFResult.FAIL);
+        assertAuthenticityMechanismResult(results.get(0), "aliceland.com", "Temporary Error with domain aliceland.com", DKIMResult.TEMPERROR);
+        assertAuthenticityMechanismResult(results.get(1), "aliceland.com", "Fail with domain aliceland.com", SPFResult.FAIL);
     }
 
     /**
@@ -239,8 +239,8 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
         assertAmount(2);
 
         List<MailAuthenticityMechanismResult> results = result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
-        assertAuthenticityMechanismResult(results.get(0), "aliceland.com", "p=NONE sp=NONE dis=NONE", DMARCResult.PASS);
-        assertAuthenticityMechanismResult(results.get(1), "aliceland.com", "ox.io: domain of alice@aliceland.com designates 1.2.3.4 as permitted sender", SPFResult.PASS);
+        assertAuthenticityMechanismResult(results.get(0), "aliceland.com", "Pass", DMARCResult.PASS);
+        assertAuthenticityMechanismResult(results.get(1), "aliceland.com", "Pass with domain aliceland.com", SPFResult.PASS);
     }
 
     /**
@@ -257,8 +257,8 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
         assertAmount(2);
 
         List<MailAuthenticityMechanismResult> results = result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
-        assertAuthenticityMechanismResult(results.get(0), "ice.bobland.com", "no key for signature", DKIMResult.TEMPERROR);
-        assertAuthenticityMechanismResult(results.get(1), "ice.bobland.com", "ox.io: domain of alice@ice.bobland.com designates 1.2.3.4 as permitted sender", SPFResult.PASS);
+        assertAuthenticityMechanismResult(results.get(0), "ice.bobland.com", "Temporary Error with domain ice.bobland.com", DKIMResult.TEMPERROR);
+        assertAuthenticityMechanismResult(results.get(1), "ice.bobland.com", "Pass with domain ice.bobland.com", SPFResult.PASS);
     }
 
     /**
@@ -274,7 +274,7 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
         assertDomain("ox.io", result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN, String.class));
         assertAmount(1);
 
-        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "ox.io", "1024-bit key; unprotected key", DKIMResult.PASS);
+        assertAuthenticityMechanismResult((MailAuthenticityMechanismResult) result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class).get(0), "ox.io", "Pass with domain ox.io", DKIMResult.PASS);
 
         Map<String, String> unknownMech = (Map) result.getAttribute(MailAuthenticityResultKey.UNCONSIDERED_AUTH_MECH_RESULTS, List.class).get(0);
         Map<String, String> expectedUnknownMech = new HashMap<>();
@@ -358,7 +358,7 @@ public class TestMailAuthenticityHandler extends AbstractTestMailAuthenticity {
         List<MailAuthenticityMechanismResult> results = result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
         assertAuthenticityMechanismResult(results.get(0), "foobar.com", DMARCResult.NONE);
         assertAuthenticityMechanismResult(results.get(1), "foobar.com", DKIMResult.NONE);
-        assertAuthenticityMechanismResult(results.get(2), "foobar.com", "ox.io: domain of jane.doe@foobar.com designates 1.2.3.4 as permitted sender", SPFResult.PASS);
+        assertAuthenticityMechanismResult(results.get(2), "foobar.com", "Pass with domain foobar.com", SPFResult.PASS);
     }
 
     /**

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,77 +47,38 @@
  *
  */
 
-package com.sun.mail.imap;
+package com.openexchange.mail.mime.converters;
 
-import javax.mail.MessagingException;
-import com.sun.mail.imap.IMAPFolder.SnippetFetchProfileItem;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.api.MailCapabilities;
+import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
- * {@link IMAPTextPreviewProvider}
+ * {@link AlternativeHasAttachmentChecker} - Defines an alternative way of determining the has-attachment flag if {@link MailCapabilities#hasAttachmentSearch()} is disabled.
  *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public interface IMAPTextPreviewProvider {
-    
-    public static enum Mode {
-        /** Requires to generate a text preview for a message */
-        REQUIRE("FUZZY"),
-        /**Only generate a text preview for a message if it is already available/cached */
-        ONLY_IF_AVAILABLE("LAZY=FUZZY"),
-        ;
-        
-        private final String algorithmName;
+public interface AlternativeHasAttachmentChecker {
 
-        private Mode(String algorithmName) {
-            this.algorithmName = Utility.toUpperCase(algorithmName);
-        }
-
-        /**
-         * Gets the algorithm name
-         *
-         * @return The algorithm name
-         */
-        public String getAlgorithmName() {
-            return algorithmName;
-        }
-        
-        /**
-         * Gets the mode for given algorithm name
-         *
-         * @param algorithmName The algorithm name
-         * @return The associated mode or <code>null</code>
-         */
-        public static Mode modeFor(String algorithmName) {
-            if (null == algorithmName) {
-                return null;
-            }
-            
-            for (Mode mode : Mode.values()) {
-                if (mode.algorithmName.equals(algorithmName)) {
-                    return mode;
-                }
-            }
-            return null;
-        }
+    /** The possible results for a has-attachment check */
+    public static enum Result {
+        /** The mail is supposed to contain (file) attachments */
+        HAS_ATTACHMENTS,
+        /** The mail is supposed to <b>not</b> contain (file) attachments */
+        HAS_NO_ATTACHMENTS,
+        /** It is unknown whether the mail contains (file) attachments or not */
+        UNKNOWN;
     }
 
     /**
-     * Gets the text preview for specified message according to given mode.
+     * Checks whether specified mail is considered to hold (file) attachments or not.
      *
-     * @param message The message
-     * @param mode The mode to obey
-     * @return The text preview for specified message
-     * @throws MessagingException If text preview cannot be returned
+     * @param mail The mail to examine
+     * @return <code>true</code> if mail is considered to hold (file) attachments; otherwise <code>false</code>
+     * @throws OXException If check for attachment presence fails
      */
-    String getTextPreview(IMAPMessage message, Mode mode) throws MessagingException;
-    
-    /**
-     * Gets the text preview for referenced message according to given mode.
-     *
-     * @param uid The UID of the message
-     * @param mode The mode to obey
-     * @return The text preview for specified message
-     * @throws MessagingException If text preview cannot be returned
-     */
-    String getTextPreview(long uid, Mode mode) throws MessagingException;
+    Result checkHasAttachment(MailMessage mail) throws OXException;
+
 }
