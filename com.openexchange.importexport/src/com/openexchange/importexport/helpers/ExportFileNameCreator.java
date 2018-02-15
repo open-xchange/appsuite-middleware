@@ -56,6 +56,7 @@ import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
@@ -141,7 +142,7 @@ public class ExportFileNameCreator {
                 } else if (com.openexchange.folderstorage.database.contentType.CalendarContentType.getInstance().equals(userizedFolder.getContentType())) {
                     prefix = getLocalizedFileName(session, ExportDefaultFileNames.ICAL_APPOINTMENT_NAME);
                 } else if (com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance().equals(userizedFolder.getContentType())) {
-                    prefix = getLocalizedFileName(session, ExportDefaultFileNames.ICAL_APPOINTMENT_NAME);
+                    prefix = getLocalizedFileName(session, ExportDefaultFileNames.ICAL_EVENT_NAME);
                 } else if (ContactContentType.getInstance().equals(userizedFolder.getContentType())) {
                     prefix = getLocalizedFileName(session, ExportDefaultFileNames.CONTACTS_NAME);
                 }else {
@@ -180,6 +181,15 @@ public class ExportFileNameCreator {
                     String title = event.getSummary();
                     if (Strings.isEmpty(title)) {
                         sb.append(getLocalizedFileName(session, ExportDefaultFileNames.ICAL_APPOINTMENT_NAME));
+                    } else {
+                        sb.append(title);
+                    }
+                } else if (com.openexchange.folderstorage.calendar.contentType.CalendarContentType.getInstance().equals(folderObj.getContentType())) {
+                    IDBasedCalendarAccess calAccess = ImportExportServices.getIDBasedCalendarAccessFactory().createAccess(session);
+                    Event event = calAccess.getEvent(new EventID(folder, batchId));
+                    String title = event.getSummary();
+                    if (Strings.isEmpty(title)) {
+                        sb.append(getLocalizedFileName(session, ExportDefaultFileNames.ICAL_EVENT_NAME));
                     } else {
                         sb.append(title);
                     }
