@@ -71,17 +71,13 @@ import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MailDateFormat;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPServerInfo;
-import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.services.Services;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.converters.AlternativeHasAttachmentSetter;
-import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
@@ -128,7 +124,6 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
     private final TLongObjectMap<MailMessage> map;
     private final IMAPTextPreviewProvider.Mode textPreviewMode;
     private final IMAPTextPreviewProvider textPreviewProvider;
-    private final MailConfig mailConfig;
 
     /**
      * Initializes a new {@link SimpleFetchIMAPCommand}.
@@ -139,26 +134,9 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
      * @param fp The fetch profile to use
      * @param serverInfo The IMAP server information
      * @throws MessagingException If initialization fails
-     * @deprecated Use {@link #SimpleFetchIMAPCommand(IMAPFolder, boolean, int[], FetchProfile, IMAPServerInfo, IMAPConfig)} instead
      */
     public SimpleFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, int[] seqNums, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
-        this(imapFolder, isRev1, seqNums, fp, serverInfo, null);
-    }
-
-    /**
-     * Initializes a new {@link SimpleFetchIMAPCommand}.
-     *
-     * @param imapFolder The IMAP folder providing connected protocol
-     * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
-     * @param seqNums The sequence numbers to fetch
-     * @param fp The fetch profile to use
-     * @param serverInfo The IMAP server information
-     * @param mailConfig The mail configuration
-     * @throws MessagingException If initialization fails
-     */
-    public SimpleFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, int[] seqNums, FetchProfile fp, IMAPServerInfo serverInfo, MailConfig mailConfig) throws MessagingException {
         super(imapFolder);
-        this.mailConfig = mailConfig;
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             returnDefaultValue = true;
@@ -192,29 +170,12 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
      * @param imapFolder The IMAP folder providing connected protocol
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
      * @param uids The UIDs to fetch
-     * @param serverInfo The IMAP server information
-     * @param fp The fetch profile to use
-     * @deprecated Use {@link #SimpleFetchIMAPCommand(IMAPFolder, boolean, long[], FetchProfile, IMAPServerInfo, IMAPConfig)} instead
-     * @throws MessagingException If initialization fails
-     */
-    public SimpleFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, long[] uids, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
-        this(imapFolder, isRev1, uids, fp, serverInfo, null);
-    }
-
-    /**
-     * Initializes a new {@link SimpleFetchIMAPCommand}.
-     *
-     * @param imapFolder The IMAP folder providing connected protocol
-     * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
-     * @param uids The UIDs to fetch
      * @param fetchProfile The fetch profile to use
      * @param serverInfo The IMAP server information
-     * @param mailConfig The mail configuration
      * @throws MessagingException If initialization fails
      */
-    public SimpleFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, long[] uids, FetchProfile fetchProfile, IMAPServerInfo imapServerInfo, MailConfig mailConfig) throws MessagingException {
+    public SimpleFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, long[] uids, FetchProfile fetchProfile, IMAPServerInfo imapServerInfo) throws MessagingException {
         super(imapFolder);
-        this.mailConfig = mailConfig;
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             returnDefaultValue = true;
@@ -345,7 +306,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                 final Item item = fetchResponse.getItem(j);
                 FetchItemHandler itemHandler = MAP.get(item.getClass());
                 if (null == itemHandler) {
-                    itemHandler = getItemHandlerByItem(item, mailConfig);
+                    itemHandler = getItemHandlerByItem(item);
                     if (null == itemHandler) {
                         LOG.warn("Unknown FETCH item: {}", item.getClass().getName());
                     } else {
@@ -360,22 +321,11 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
             if (null != textPreviewMode) {
                 mail.setTextPreview(textPreviewProvider.getTextPreview(mail.getUid(), textPreviewMode));
             }
-
-            try {
-                MimeMessageConverter.setHasAttachment(mailConfig, mail, mail.getUserFlags(), new AlternativeHasAttachmentSetter() {
-
-                    @Override
-                    public void setHasAttachment(MailMessage localMail) throws OXException, MessagingException {
-                        if (determineAttachmentByHeader) {
-                            final String cts = localMail.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
-                            if (null != cts) {
-                                localMail.setHasAttachment(new ContentType(cts).startsWith("multipart/mixed"));
-                            }
-                        }
-                    }
-                });
-            } catch (IOException e) {
-                LOG.warn("Unable to set 'hasAttachment'", e);
+            if (determineAttachmentByHeader) {
+                String cts = mail.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
+                if (null != cts) {
+                    mail.setAlternativeHasAttachment(new ContentType(cts).startsWith("multipart/mixed"));
+                }
             }
         } catch (final MessagingException e) {
             /*
@@ -399,7 +349,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         return true;
     }
 
-    private static FetchItemHandler getItemHandlerByItem(final Item item, MailConfig mailConfig) {
+    private static FetchItemHandler getItemHandlerByItem(final Item item) {
         if ((item instanceof RFC822DATA) || (item instanceof BODY)) {
             return HEADER_ITEM_HANDLER;
         } else if (item instanceof UID) {
@@ -413,7 +363,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         } else if (item instanceof RFC822SIZE) {
             return SIZE_ITEM_HANDLER;
         } else if (item instanceof BODYSTRUCTURE) {
-            return new BODYSTRUCTUREItemHandler(mailConfig);
+            return BODYSTRUCTURE_ITEM_HANDLER;
         } else {
             return null;
         }
@@ -811,79 +761,51 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         }
     };
 
-    private static final class BODYSTRUCTUREItemHandler implements FetchItemHandler {
-
-        private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BODYSTRUCTUREItemHandler.class);
-
-        private final MailConfig mailConfig;
-
-        BODYSTRUCTUREItemHandler(MailConfig mailConfig) {
-            super();
-            this.mailConfig = mailConfig;
-        }
+    private static final FetchItemHandler BODYSTRUCTURE_ITEM_HANDLER = new FetchItemHandler() {
 
         @Override
         public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) throws OXException {
-            try {
-                MimeMessageConverter.setHasAttachment(mailConfig, msg, msg.getUserFlags(), new AlternativeHasAttachmentSetter() {
-
-                    @Override
-                    public void setHasAttachment(MailMessage localMail) throws OXException, MessagingException {
-                        final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
-                        final StringBuilder sb = new StringBuilder();
-                        sb.append(bs.type).append('/').append(bs.subtype);
-                        if (bs.cParams != null) {
-                            sb.append(bs.cParams);
-                        }
-                        try {
-                            final String contentType = sb.toString();
-                            localMail.setContentType(new ContentType(contentType));
-                            localMail.addHeader("Content-Type", contentType);
-                        } catch (final OXException e) {
-                            logger.warn("", e);
-                            localMail.setContentType(new ContentType(MimeTypes.MIME_DEFAULT));
-                            localMail.addHeader("Content-Type", MimeTypes.MIME_DEFAULT);
-                        }
-                        localMail.setHasAttachment(MimeMessageUtility.hasAttachments(bs));
-                    }
-                });
-            } catch (IOException | MessagingException e) {
-                LOG.warn("Unable to set 'hasAttachment'", e);
+            final BODYSTRUCTURE bs = (BODYSTRUCTURE) item;
+            final StringBuilder sb = new StringBuilder();
+            sb.append(bs.type).append('/').append(bs.subtype);
+            if (bs.cParams != null) {
+                sb.append(bs.cParams);
             }
+
+            try {
+                final String contentType = sb.toString();
+                msg.setContentType(new ContentType(contentType));
+                msg.addHeader("Content-Type", contentType);
+            } catch (final OXException e) {
+                logger.warn("", e);
+                msg.setContentType(new ContentType(MimeTypes.MIME_DEFAULT));
+                msg.addHeader("Content-Type", MimeTypes.MIME_DEFAULT);
+            }
+            msg.setAlternativeHasAttachment(MimeMessageUtility.hasAttachments(bs));
         }
 
         @Override
         public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException, OXException {
+            String contentType;
             try {
-                MimeMessageConverter.setHasAttachment(mailConfig, msg, message.getFlags().getUserFlags(), new AlternativeHasAttachmentSetter() {
-
-                    @Override
-                    public void setHasAttachment(MailMessage localMail) throws OXException, MessagingException {
-                        String contentType;
-                        try {
-                            contentType = message.getContentType();
-                        } catch (final MessagingException e) {
-                            final String[] header = message.getHeader("Content-Type");
-                            if (null != header && header.length > 0) {
-                                contentType = header[0];
-                            } else {
-                                contentType = null;
-                            }
-                        }
-                        if (null == contentType) {
-                            localMail.setHasAttachment(false);
-                        } else {
-                            try {
-                                final ContentType ct = new ContentType(contentType);
-                                localMail.setHasAttachment(ct.startsWith("multipart/") && MimeMessageUtility.hasAttachments((Part) localMail.getContent()));
-                            } catch (final IOException e) {
-                                throw new MessagingException(e.getMessage(), e);
-                            }
-                        }
-                    }
-                });
-            } catch (IOException e) {
-                LOG.warn("Unable to set 'hasAttachment'", e);
+                contentType = message.getContentType();
+            } catch (final MessagingException e) {
+                final String[] header = message.getHeader("Content-Type");
+                if (null != header && header.length > 0) {
+                    contentType = header[0];
+                } else {
+                    contentType = null;
+                }
+            }
+            if (null == contentType) {
+                msg.setHasAttachment(false);
+            } else {
+                try {
+                    final ContentType ct = new ContentType(contentType);
+                    msg.setAlternativeHasAttachment(ct.startsWith("multipart/") && MimeMessageUtility.hasAttachments((Part) message.getContent()));
+                } catch (final IOException e) {
+                    throw new MessagingException(e.getMessage(), e);
+                }
             }
         }
     };

@@ -191,7 +191,7 @@ public final class ThreadSorts {
         for (MailField field : fields) {
             MimeStorageUtility.addFetchItem(fp, field);
         }
-        return getConversations(imapFolder, sortRange, isRev1, fp, serverInfo, searchTerm, mailConfig);
+        return getConversations(imapFolder, sortRange, isRev1, fp, serverInfo, searchTerm);
     }
 
     /**
@@ -204,12 +204,11 @@ public final class ThreadSorts {
      * @param isRev1 Flag for IMAPrev1
      * @param fetchProfile The optional fetch profile to pre-fill messages
      * @param serverInfo The IMAP server information
-     * @param mailConfig The mail configuration
      * @return The conversation listing
      * @throws OXException If parsing fails
      * @throws MessagingException If acquiring the THREAD response fails
      */
-    public static List<List<MailMessage>> getConversations(final IMAPFolder imapFolder, final String sortRange, final boolean isRev1, final FetchProfile fetchProfile, IMAPServerInfo serverInfo, SearchTerm<?> searchTerm, MailConfig mailConfig) throws OXException, MessagingException {
+    public static List<List<MailMessage>> getConversations(final IMAPFolder imapFolder, final String sortRange, final boolean isRev1, final FetchProfile fetchProfile, IMAPServerInfo serverInfo, SearchTerm<?> searchTerm) throws OXException, MessagingException {
         if (null == fetchProfile) {
             return parseConversations(getThreadResponse(imapFolder, sortRange, true, searchTerm), imapFolder.getFullName());
         }
@@ -225,7 +224,7 @@ public final class ThreadSorts {
                 }
             }
             // Fill them
-            new MailMessageFillerIMAPCommand(msgs, isRev1, fetchProfile, serverInfo, imapFolder, mailConfig).doCommand();
+            new MailMessageFillerIMAPCommand(msgs, isRev1, fetchProfile, serverInfo, imapFolder).doCommand();
         }
 
         return conversations;
@@ -241,12 +240,11 @@ public final class ThreadSorts {
      * @param isRev1 Flag for IMAPrev1
      * @param fetchProfile The optional fetch profile to pre-fill messages
      * @param serverInfo The IMAP server information
-     * @param mailConfig The mail configuration
      * @return The conversation listing
      * @throws OXException If parsing fails
      * @throws MessagingException If acquiring the THREAD response fails
      */
-    public static List<Conversation> getConversationList(final IMAPFolder imapFolder, final String sortRange, final boolean isRev1, final FetchProfile fetchProfile, IMAPServerInfo serverInfo, SearchTerm<?> searchTerm, MailConfig mailConfig) throws OXException, MessagingException {
+    public static List<Conversation> getConversationList(final IMAPFolder imapFolder, final String sortRange, final boolean isRev1, final FetchProfile fetchProfile, IMAPServerInfo serverInfo, SearchTerm<?> searchTerm) throws OXException, MessagingException {
         List<List<MailMessage>> conversations = parseConversations(getThreadResponse(imapFolder, sortRange, true, searchTerm), imapFolder.getFullName());
         {
             // Turn conversations to a flat list
@@ -257,7 +255,7 @@ public final class ThreadSorts {
                 }
             }
             // Fill them
-            new MailMessageFillerIMAPCommand(msgs, isRev1, fetchProfile, serverInfo, imapFolder, mailConfig).doCommand();
+            new MailMessageFillerIMAPCommand(msgs, isRev1, fetchProfile, serverInfo, imapFolder).doCommand();
         }
 
         List<Conversation> retval = new ArrayList<>(conversations.size());

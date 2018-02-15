@@ -62,8 +62,21 @@ import com.openexchange.mail.api.UrlInfo;
  * @since v7.10.0
  */
 public class DummyMailConfig extends MailConfig {
+    
+    private static final DummyMailConfig INSTANCE = new DummyMailConfig();
+    
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static DummyMailConfig getInstance() {
+        return INSTANCE;
+    }
+    
+    // -------------------------------------------------------------------------------------------------
 
-    public DummyMailConfig() {
+    private DummyMailConfig() {
         super();
     }
 

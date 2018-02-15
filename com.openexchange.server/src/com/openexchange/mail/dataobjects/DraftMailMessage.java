@@ -886,6 +886,11 @@ public class DraftMailMessage extends MailMessage {
     }
 
     @Override
+    public boolean isHasAttachment() {
+        return message.isHasAttachment();
+    }
+
+    @Override
     public boolean containsHasAttachment() {
         return message.containsHasAttachment();
     }
@@ -898,6 +903,26 @@ public class DraftMailMessage extends MailMessage {
     @Override
     public void setHasAttachment(final boolean hasAttachment) {
         message.setHasAttachment(hasAttachment);
+    }
+
+    @Override
+    public boolean isAlternativeHasAttachment() {
+        return message.isAlternativeHasAttachment();
+    }
+
+    @Override
+    public boolean containsAlternativeHasAttachment() {
+        return message.containsAlternativeHasAttachment();
+    }
+
+    @Override
+    public void removeAlternativeHasAttachment() {
+        message.removeAlternativeHasAttachment();
+    }
+
+    @Override
+    public void setAlternativeHasAttachment(boolean hasAttachment) {
+        message.setAlternativeHasAttachment(hasAttachment);
     }
 
     @Override

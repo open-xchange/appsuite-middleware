@@ -42,6 +42,7 @@ package javax.mail;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * The Flags class represents the set of flags on a Message.  Flags
@@ -102,7 +103,7 @@ public class Flags implements Cloneable, Serializable {
     private int system_flags = 0;
     // used as a case-independent Set that preserves the original case,
     // the key is the lowercase flag name and the value is the original
-    private Hashtable<String, String> user_flags = null;
+    private HashMap<String, String> user_flags = null;
 
     private final static int ANSWERED_BIT 	= 0x01;
     private final static int DELETED_BIT 	= 0x02;
@@ -197,7 +198,7 @@ public class Flags implements Cloneable, Serializable {
     public Flags(Flags flags) {
 	this.system_flags = flags.system_flags;
 	if (flags.user_flags != null)
-	    this.user_flags = (Hashtable)flags.user_flags.clone();
+	    this.user_flags = (HashMap<String, String>)flags.user_flags.clone();
     }
 
     /**
@@ -215,7 +216,7 @@ public class Flags implements Cloneable, Serializable {
      * @param flag	the flag for initialization
      */
     public Flags(String flag) {
-	user_flags = new Hashtable<String, String>(1);
+	user_flags = new HashMap<String, String>(1);
 	user_flags.put(flag.toLowerCase(Locale.ENGLISH), flag);
     }
 
@@ -235,7 +236,7 @@ public class Flags implements Cloneable, Serializable {
      */
     public void add(String flag) {
 	if (user_flags == null)
-	    user_flags = new Hashtable<String, String>(1);
+	    user_flags = new HashMap<String, String>(1);
 	user_flags.put(flag.toLowerCase(Locale.ENGLISH), flag);
     }
 
@@ -248,15 +249,14 @@ public class Flags implements Cloneable, Serializable {
     public void add(Flags f) {
 	system_flags |= f.system_flags; // add system flags
 
-	if (f.user_flags != null) { // add user-defined flags
-	    if (user_flags == null)
-		user_flags = new Hashtable<String, String>(1);
-
-	    Enumeration<String> e = f.user_flags.keys();
-
-	    while (e.hasMoreElements()) {
-		String s = e.nextElement();
-		user_flags.put(s, f.user_flags.get(s));
+	HashMap<String, String> otherUserFlags = f.user_flags;
+    if (otherUserFlags != null) { // add user-defined flags
+	    if (user_flags == null) {
+	        user_flags = new HashMap<String, String>(otherUserFlags);
+	    } else {	        
+	        for (Map.Entry<String,String> entry : otherUserFlags.entrySet()) {
+	            user_flags.put(entry.getKey(), entry.getValue());
+	        }
 	    }
 	}
     }
@@ -289,13 +289,11 @@ public class Flags implements Cloneable, Serializable {
     public void remove(Flags f) {
 	system_flags &= ~f.system_flags; // remove system flags
 
-	if (f.user_flags != null) {
-	    if (user_flags == null)
-		return;
-
-	    Enumeration<String> e = f.user_flags.keys();
-	    while (e.hasMoreElements())
-		user_flags.remove(e.nextElement());
+	HashMap<String, String> otherUserFlags = f.user_flags;
+    if (otherUserFlags != null && user_flags != null) {
+	    for (String key : otherUserFlags.keySet()) {
+	        user_flags.remove(key);
+	    }
 	}
     }
 
@@ -320,18 +318,17 @@ public class Flags implements Cloneable, Serializable {
 	// if we have user flags, and the USER flag is not set in "f",
 	// determine which user flags to clear
 	if (user_flags != null && (f.system_flags & USER_BIT) == 0) {
-	    if (f.user_flags != null) {
-		Enumeration<String> e = user_flags.keys();
-		while (e.hasMoreElements()) {
-		    String key = e.nextElement();
-		    if (!f.user_flags.containsKey(key)) {
+	    HashMap<String, String> otherUserFlags = f.user_flags;
+        if (otherUserFlags != null) {
+		for (String key : user_flags.keySet()) {
+		    if (!otherUserFlags.containsKey(key)) {
 			user_flags.remove(key);
 			changed = true;
 		    }
 		}
 	    } else {
 		// if anything in user_flags, throw them away
-		changed = user_flags.size() > 0;
+		changed = !user_flags.isEmpty();
 		user_flags = null;
 	    }
 	}
@@ -375,14 +372,14 @@ public class Flags implements Cloneable, Serializable {
 	    return false;
 
 	// Check user flags
-	if (f.user_flags != null) {
+	HashMap<String, String> otherUserFlags = f.user_flags;
+    if (otherUserFlags != null) {
 	    if (user_flags == null)
 		return false;
-	    Enumeration<String> e = f.user_flags.keys();
-
-	    while (e.hasMoreElements()) {
-		if (!user_flags.containsKey(e.nextElement()))
-		    return false;
+	    for (String key : otherUserFlags.keySet()) {
+	        if (!user_flags.containsKey(key)) {
+	            return false;
+	        } 
 	    }
 	}
 
@@ -426,9 +423,9 @@ public class Flags implements Cloneable, Serializable {
     public int hashCode() {
 	int hash = system_flags;
 	if (user_flags != null) {
-	    Enumeration<String> e = user_flags.keys();
-	    while (e.hasMoreElements())
-		hash += e.nextElement().hashCode();
+	    for (String key : user_flags.keySet()) {
+	        hash += key.hashCode();
+	    }
 	}
 	return hash;
     }
@@ -466,17 +463,33 @@ public class Flags implements Cloneable, Serializable {
      * @return	array of Strings, each String represents a flag.
      */
     public String[] getUserFlags() {
-    Hashtable<String, String> user_flags = this.user_flags;
+    HashMap<String, String> user_flags = this.user_flags;
     int size;
     if (null == user_flags || (size = user_flags.size()) <= 0) {
         return new String[0];
     }
-        
-    List<String> v = new ArrayList<String>(size);
-    for (Enumeration<String> e = user_flags.elements(); e.hasMoreElements();)
-	    v.add(e.nextElement());
+    
+    String[] v = new String[size];
+    int i = 0;
+    for (String value : user_flags.values()) {
+        v[i++] = value;
+    }
+    return v;
+    }
 
-    return v.toArray(new String[v.size()]);
+    /**
+     * Return all the user flags in this Flags object.  Returns
+     * a list of size zero if no flags are set.
+     *
+     * @return  list of Strings, each String represents a flag.
+     */
+    public List<String> getUserFlagsAsList() {
+    HashMap<String, String> user_flags = this.user_flags;
+    if (null == user_flags || user_flags.isEmpty()) {
+        return java.util.Collections.emptyList();
+    }
+        
+    return new ArrayList<String>(user_flags.values());
     }
 
     /**
@@ -520,7 +533,7 @@ public class Flags implements Cloneable, Serializable {
 	    // ignore, can't happen
 	}
 	if (this.user_flags != null)
-	    f.user_flags = (Hashtable)this.user_flags.clone();
+	    f.user_flags = (HashMap<String, String>)this.user_flags.clone();
 	return f;
     }
 
@@ -548,14 +561,12 @@ public class Flags implements Cloneable, Serializable {
 
 	boolean first = true;
 	if (user_flags != null) {
-	    Enumeration<String> e = user_flags.elements();
-
-	    while (e.hasMoreElements()) {
+	    for (String value : user_flags.values()) {
 		if (first)
 		    first = false;
 		else
 		    sb.append(' ');
-		sb.append(e.nextElement());
+		sb.append(value);
 	    }
 	}
 

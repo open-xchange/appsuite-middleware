@@ -60,7 +60,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPServerInfo;
 import com.openexchange.imap.services.Services;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.utils.StorageUtility;
@@ -96,37 +95,19 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
     private final int index;
     private final IMAPTextPreviewProvider.Mode textPreviewMode;
     private final IMAPTextPreviewProvider textPreviewProvider;
-    private final MailConfig mailConfig;
 
     /**
      * Initializes a new {@link MailMessageFillerIMAPCommand}.
-     * 
+     *
      * @param messages The messages to fill
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
      * @param fp The fetch profile to use
      * @param serverInfo The IMAP server information deduced from configuration
      * @param imapFolder The IMAP folder providing connected protocol
      * @throws MessagingException If initialization fails
-     * @deprecated Use {@link #MailMessageFillerIMAPCommand(Collection, boolean, FetchProfile, IMAPServerInfo, IMAPFolder, MailConfig)} instead
      */
     public MailMessageFillerIMAPCommand(Collection<MailMessage> messages, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo, IMAPFolder imapFolder) throws MessagingException {
-        this(messages, isRev1, fp, serverInfo, imapFolder, null);
-    }
-
-    /**
-     * Initializes a new {@link MailMessageFillerIMAPCommand}.
-     * 
-     * @param messages The messages to fill
-     * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
-     * @param fp The fetch profile to use
-     * @param serverInfo The IMAP server information deduced from configuration
-     * @param imapFolder The IMAP folder providing connected protocol
-     * @param mailConfig The mail configuration
-     * @throws MessagingException If initialization fails
-     */
-    public MailMessageFillerIMAPCommand(Collection<MailMessage> messages, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo, IMAPFolder imapFolder, MailConfig mailConfig) throws MessagingException {
         super(imapFolder);
-        this.mailConfig = mailConfig;
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             returnDefaultValue = true;
@@ -220,7 +201,7 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
                 try {
                     IDMailMessage idm = (IDMailMessage) message;
                     idm.setAccountId(accountId);
-                    MailMessageFetchIMAPCommand.handleFetchRespone(idm, fetchResponse, fullname, mailConfig);
+                    MailMessageFetchIMAPCommand.handleFetchRespone(idm, fetchResponse, fullname);
                     if (null != textPreviewMode) {
                         idm.setTextPreview(textPreviewProvider.getTextPreview(idm.getUid(), textPreviewMode));
                     }

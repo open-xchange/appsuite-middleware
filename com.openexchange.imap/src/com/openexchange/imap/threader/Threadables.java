@@ -82,7 +82,6 @@ import com.openexchange.imap.threader.nntp.ThreadableImpl;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.log.LogProperties;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -268,12 +267,11 @@ public final class Threadables {
      * @param limit The max. number of messages or <code>-1</code>
      * @param fetchProfile The FETCH profile
      * @param serverInfo The IMAP server information
-     * @param mailConfig The mail configuration
      * @return The fetched <tt>MailMessage</tt>s
      * @throws MessagingException If an error occurs
      */
     @SuppressWarnings("unchecked")
-    public static List<MailMessage> getAllMailsFrom(final IMAPFolder imapFolder, final int limit, final FetchProfile fetchProfile, final IMAPServerInfo serverInfo, MailConfig mailConfig) throws MessagingException {
+    public static List<MailMessage> getAllMailsFrom(final IMAPFolder imapFolder, final int limit, final FetchProfile fetchProfile, final IMAPServerInfo serverInfo) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
@@ -331,7 +329,7 @@ public final class Threadables {
                         final String sReferences = "References";
                         for (int j = 0; j < len; j++) {
                             if (sFetch.equals(((IMAPResponse) r[j]).getKey())) {
-                                final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName, serverInfo.getAccountId(), mailConfig);
+                                final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName, serverInfo.getAccountId());
                                 final String references = message.getFirstHeader(sReferences);
                                 if (null == references) {
                                     final String inReplyTo = message.getFirstHeader(sInReplyTo);

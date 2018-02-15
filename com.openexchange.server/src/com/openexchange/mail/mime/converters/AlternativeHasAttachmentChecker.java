@@ -49,28 +49,36 @@
 
 package com.openexchange.mail.mime.converters;
 
-import java.io.IOException;
-import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.dataobjects.MailMessage;
 
 /**
- * {@link AlternativeHasAttachmentSetter} Defines an alternative way of setting hasAttachment flag if {@link MailCapabilities#hasAttachmentSearch()} is disabled
+ * {@link AlternativeHasAttachmentChecker} - Defines an alternative way of determining the has-attachment flag if {@link MailCapabilities#hasAttachmentSearch()} is disabled.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public interface AlternativeHasAttachmentSetter {
+public interface AlternativeHasAttachmentChecker {
+
+    /** The possible results for a has-attachment check */
+    public static enum Result {
+        /** The mail is supposed to contain (file) attachments */
+        HAS_ATTACHMENTS,
+        /** The mail is supposed to <b>not</b> contain (file) attachments */
+        HAS_NO_ATTACHMENTS,
+        /** It is unknown whether the mail contains (file) attachments or not */
+        UNKNOWN;
+    }
 
     /**
-     * Sets the hasAttachment for given {@link MailMessage} based on the implementations desire
-     * 
-     * @param mail The {@link MailMessage} com.openexchange.mail.dataobjects.MailMessage.hasAttachment should be set for
-     * @throws OXException
-     * @throws MessagingException
-     * @throws IOException
+     * Checks whether specified mail is considered to hold (file) attachments or not.
+     *
+     * @param mail The mail to examine
+     * @return <code>true</code> if mail is considered to hold (file) attachments; otherwise <code>false</code>
+     * @throws OXException If check for attachment presence fails
      */
-    void setHasAttachment(MailMessage mail) throws OXException, MessagingException, IOException;
+    Result checkHasAttachment(MailMessage mail) throws OXException;
 
 }

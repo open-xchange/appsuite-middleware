@@ -143,7 +143,10 @@ public final class CompositeMailMessage extends MailMessage {
             addFrom(delegate.getFrom());
         }
         if (delegate.containsHasAttachment()) {
-            setHasAttachment(delegate.hasAttachment());
+            setHasAttachment(delegate.isHasAttachment());
+        }
+        if (delegate.containsAlternativeHasAttachment()) {
+            setAlternativeHasAttachment(delegate.isAlternativeHasAttachment());
         }
         if (delegate.containsHeaders()) {
             final int len = delegate.getHeadersSize();
