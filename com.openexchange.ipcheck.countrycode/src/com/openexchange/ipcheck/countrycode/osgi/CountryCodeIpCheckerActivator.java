@@ -55,7 +55,9 @@ import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.ipcheck.countrycode.CountryCodeIpChecker;
 import com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean;
 import com.openexchange.ipcheck.countrycode.mbean.IPCheckMBeanImpl;
+import com.openexchange.ipcheck.countrycode.mbean.IPCheckMetricCollector;
 import com.openexchange.management.ManagementService;
+import com.openexchange.metrics.MetricCollector;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.TimerService;
 
@@ -90,6 +92,7 @@ public class CountryCodeIpCheckerActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         CountryCodeIpChecker service = new CountryCodeIpChecker(getService(GeoLocationService.class));
         registerService(IPChecker.class, service);
+        registerService(MetricCollector.class, new IPCheckMetricCollector());
 
         ObjectName objectName = new ObjectName(IPCheckMBean.DOMAIN, "name", IPCheckMBean.NAME);
 

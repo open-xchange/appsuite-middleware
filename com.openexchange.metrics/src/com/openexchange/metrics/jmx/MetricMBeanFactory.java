@@ -148,7 +148,10 @@ public final class MetricMBeanFactory {
      *             {@link GaugeMBean} does not follow JMX design patterns for Management Interfaces
      */
     public static GaugeMBean gauge(Metric metric) {
-        checkInstance(metric, Gauge.class);
+        if (!(metric instanceof Gauge)) {
+            throw new IllegalArgumentException("Invalid metric specified for 'Gauge' mbean: '" + metric.getClass() + "'");
+        }
+        //checkInstance(metric, Gauge.class);
         try {
             return new GaugeMBeanImpl((Gauge<?>) metric);
         } catch (NotCompliantMBeanException e) {
