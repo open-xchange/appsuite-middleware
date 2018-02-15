@@ -288,27 +288,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
                     }
                 } else {
                     // Check for redirect rule
-                    int newSize = getRedirectRuleSize(rule);
-                    if (newSize > 0) {
-                        List<Rule> clientrules = clientrulesandrequire.getRules();
-                        Object maxRedirectObj = getExtendedProperties(credentials).get("MAXREDIRECTS");
-                        if (maxRedirectObj != null) {
-                            Integer maxRedirects = (Integer) maxRedirectObj;
-
-                            int sizeOfRedirectRules = 0;
-                            for (Rule r : clientrules) {
-                                if( r.isCommented()){
-                                    // Skip commented rules
-                                    continue;
-                                }
-                                sizeOfRedirectRules += getRedirectRuleSize(r);
-                            }
-
-                            if (sizeOfRedirectRules + newSize > maxRedirects) {
-                                throw MailFilterExceptionCode.TOO_MANY_REDIRECT.create();
-                            }
-                        }
-                    }
+                    checkRedirects(rule, credentials);
                 }
 
                 changeIncomingVacationRule(credentials.getUserid(), credentials.getContextid(), rule);
@@ -358,31 +338,7 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
                 RuleAndPosition rightRule = getRightRuleForUniqueId(clientRulesAndReq.getRules(), uid);
 
                 // Check redirect limit
-                int newSize = getRedirectRuleSize(rule);
-                if (newSize > 0) {
-                    List<Rule> clientrules = clientRulesAndReq.getRules();
-                    Object maxRedirectObj = getExtendedProperties(credentials).get("MAXREDIRECTS");
-                    if (maxRedirectObj != null) {
-                        Integer maxRedirects = (Integer) maxRedirectObj;
-
-                        int sizeOfRedirectRules = 0;
-                        for (Rule r : clientrules) {
-                            if(rightRule.rule.getUniqueId() == r.getUniqueId()){
-                                // Skip updated rule
-                                continue;
-                            }
-                            if( r.isCommented()){
-                                // Skip commented rules
-                                continue;
-                            }
-                            sizeOfRedirectRules += getRedirectRuleSize(r);
-                        }
-
-                        if (sizeOfRedirectRules + newSize > maxRedirects) {
-                            throw MailFilterExceptionCode.TOO_MANY_REDIRECT.create();
-                        }
-                    }
-                }
+                checkRedirects(rule, credentials);
 
                 changeIncomingVacationRule(credentials.getUserid(), credentials.getContextid(), rightRule.rule);
                 if (rightRule.position == rule.getPosition()) {
@@ -877,6 +833,34 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
     }
 
     /**
+     * Checks the amount of redirect rules in the specified {@link Rule} and compares
+     * those with the 'max_redirect' size (if available) from the Sieve server
+     * 
+     * @param rule The {@link Rule}
+     * @param credentials The {@link Credentials}
+     * @throws OXException if the redirect commands in the specified {@link Rule} exceed
+     *             the maximum allowed that is configured on the Sieve server
+     */
+    private void checkRedirects(Rule rule, Credentials credentials) throws OXException {
+        // Check for redirect rule
+        int size = getRedirectRuleSize(rule);
+        if (size <= 0) {
+            return;
+        }
+        Object maxRedirectObject = getExtendedProperties(credentials).get("MAXREDIRECTS");
+        if (maxRedirectObject == null) {
+            return;
+        }
+        if (false == (maxRedirectObject instanceof Integer)) {
+            return;
+        }
+        Integer maxRedirects = (Integer) maxRedirectObject;
+        if (size > maxRedirects) {
+            throw MailFilterExceptionCode.TOO_MANY_REDIRECT.create();
+        }
+    }
+
+    /**
      * Change a vacation rule
      *
      * @param rule the rule to be changed
@@ -1003,9 +987,9 @@ public final class MailFilterServiceImpl implements MailFilterService, Reloadabl
      */
     private int getRedirectRuleSize(Rule rule) {
         int result = 0;
-        if(rule.getIfCommand() != null ){
-            for(ActionCommand command : rule.getIfCommand().getActionCommands()){
-                if(ActionCommand.Commands.REDIRECT.equals(command.getCommand())){
+        if (rule.getIfCommand() != null) {
+            for (ActionCommand command : rule.getIfCommand().getActionCommands()) {
+                if (ActionCommand.Commands.REDIRECT.equals(command.getCommand())) {
                     result++;
                 }
             }
