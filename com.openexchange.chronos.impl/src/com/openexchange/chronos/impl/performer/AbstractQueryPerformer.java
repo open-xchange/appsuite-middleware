@@ -52,7 +52,10 @@ package com.openexchange.chronos.impl.performer;
 import static com.openexchange.chronos.common.CalendarUtils.getFields;
 import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
+import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
+import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
@@ -120,6 +123,18 @@ public abstract class AbstractQueryPerformer {
             selfProtection = SelfProtectionFactory.createSelfProtection(session.getSession(), leanConfigurationService);
         }
         return selfProtection;
+    }
+
+    /**
+     * Gets a value indicating whether a specific event is visible for the current session's user, independently of the underlying folder
+     * permissions, i.e. only considering if the user participates in the event in any form (organizer, attendees, creator, calendar user).
+     *
+     * @param event The event to check
+     * @return <code>true</code> if the event can be read by the current session's user, <code>false</code>, otherwise
+     */
+    protected boolean hasReadPermission(Event event) {
+        int userId = session.getUserId();
+        return matches(event.getCalendarUser(), userId) || matches(event.getCreatedBy(), userId) || isAttendee(event, userId) || isOrganizer(event, userId);
     }
 
     protected List<Event> readEventsInFolder(UserizedFolder folder, String[] objectIDs, boolean tombstones, Long updatedSince) throws OXException {

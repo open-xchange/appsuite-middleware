@@ -53,6 +53,7 @@ import static com.openexchange.chronos.common.CalendarUtils.getFields;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
+import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
@@ -96,13 +97,15 @@ public class ChangeExceptionsPerformer extends AbstractQueryPerformer {
     /**
      * Performs the operation.
      *
+     * @param folderId The identifier of the parent folder for the event series
      * @param seriesID The series identifier to get the change exceptions for
      * @return The change exceptions
      */
-    public List<Event> perform(UserizedFolder folder, String seriesID) throws OXException {
+    public List<Event> perform(String folderId, String seriesID) throws OXException {
         /*
          * load series master first
          */
+        UserizedFolder folder = getFolder(session, folderId);
         EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
         Event event = storage.getEventStorage().loadEvent(seriesID, fields);
         if (null == event) {

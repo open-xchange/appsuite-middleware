@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
+import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
@@ -85,10 +86,11 @@ public class SequenceNumberPerformer extends AbstractQueryPerformer {
     /**
      * Performs the operation.
      *
-     * @param folder The folder to determine the sequence number for
+     * @param folderId The identifier of the folder to determine the sequence number for
      * @return The sequence number
      */
-    public long perform(UserizedFolder folder) throws OXException {
+    public long perform(String folderId) throws OXException {
+        UserizedFolder folder = getFolder(session, folderId);
         requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
         long timestamp = folder.getLastModifiedUTC().getTime();
         SearchTerm<?> searchTerm = getFolderIdTerm(session, folder);

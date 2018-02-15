@@ -236,13 +236,14 @@ public class AllPerformer extends AbstractQueryPerformer {
     /**
      * Performs the operation.
      *
-     * @param folder The parent folder to get all events from
+     * @param folderId The identifier of the parent folder to get all events from
      * @return The loaded events
      */
-    public List<Event> perform(UserizedFolder folder) throws OXException {
+    public List<Event> perform(String folderId) throws OXException {
         /*
          * perform search & userize the results based on the requested folder
          */
+        UserizedFolder folder = getFolder(session, folderId);
         requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         SearchTerm<?> searchTerm = getFolderIdTerm(session, folder);
         EventField[] fields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);

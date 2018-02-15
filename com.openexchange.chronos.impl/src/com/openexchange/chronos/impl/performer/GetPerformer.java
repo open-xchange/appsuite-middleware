@@ -58,6 +58,7 @@ import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.Utils.applyExceptionDates;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
+import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
@@ -95,15 +96,16 @@ public class GetPerformer extends AbstractQueryPerformer {
     /**
      * Performs the operation.
      *
-     * @param folder The parent folder to read the event in
+     * @param folderId The identifier of the parent folder to read the event in
      * @param eventId The identifier of the event to get
      * @param recurrenceId The recurrence identifier of the occurrence to get, or <code>null</code> if no specific occurrence is targeted
      * @return The loaded event
      */
-    public Event perform(UserizedFolder folder, String eventId, RecurrenceId recurrenceId) throws OXException {
+    public Event perform(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
         /*
          * load event data & check permissions
          */
+        UserizedFolder folder = getFolder(session, folderId);
         EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
         Event event = storage.getEventStorage().loadEvent(eventId, fields);
         if (null == event) {
