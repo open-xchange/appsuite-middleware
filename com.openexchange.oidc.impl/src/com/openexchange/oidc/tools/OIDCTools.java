@@ -60,6 +60,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.login.HashCalculator;
@@ -121,6 +122,8 @@ public class OIDCTools {
 
     public static final String DEFAULT_BACKEND_PATH = "oidc";
 
+    public static final String PARAM_DEEP_LINK = "hash";
+
     public static String getPathString(String path) {
         if (Strings.isEmpty(path)) {
             return "";
@@ -133,14 +136,18 @@ public class OIDCTools {
      *
      * @param session The session to add to the location
      * @param uiWebPath The path to use
+     * @param deeplink The deeplink, can be <code>null</code>
      */
-    public static String buildFrontendRedirectLocation(Session session, String uiWebPath) {
+    public static String buildFrontendRedirectLocation(Session session, String uiWebPath, String deeplink) {
         LOG.trace("buildFrontendRedirectLocation(Session session: {}, String uiWebPath: {})", session.getSessionID(), uiWebPath);
         String retval = uiWebPath;
 
         // Prevent HTTP response splitting.
         retval = retval.replaceAll("[\n\r]", "");
         retval = LoginTools.addFragmentParameter(retval, PARAMETER_SESSION, session.getSessionID());
+        if (!Strings.isEmpty(deeplink)) {
+            retval += "&" + AJAXUtility.encodeUrl(deeplink.substring(1), true);
+        }
         return retval;
     }
 

@@ -321,7 +321,7 @@ public class OIDCWebSSoProviderImplTest {
         Mockito.when(this.mockedBackend.validateIdToken(Matchers.any(JWT.class), Matchers.anyString())).thenReturn(mockedClaimSet);
         Mockito.when(mockedAuthRequestInfo.getDomainName()).thenReturn("domainname");
 
-        PowerMockito.doNothing().when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "sendLoginRequestToServer", HttpServletRequest.class, HttpServletResponse.class, OIDCTokenResponse.class, String.class)).withArguments(Matchers.any(HttpServletRequest.class), Matchers.any(HttpServletResponse.class), Matchers.any(OIDCTokenResponse.class), Matchers.anyString());
+        PowerMockito.doNothing().when(this.provider, PowerMockito.method(OIDCWebSSOProviderImpl.class, "sendLoginRequestToServer", HttpServletRequest.class, HttpServletResponse.class, OIDCTokenResponse.class, AuthenticationRequestInfo.class)).withArguments(Matchers.any(HttpServletRequest.class), Matchers.any(HttpServletResponse.class), Matchers.any(OIDCTokenResponse.class), Matchers.any(AuthenticationRequestInfo.class));
 
         try {
             this.provider.authenticateUser(mockedRequest, mockedResponse);

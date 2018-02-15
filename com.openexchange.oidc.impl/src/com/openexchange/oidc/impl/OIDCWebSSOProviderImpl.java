@@ -86,6 +86,7 @@ import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.LoginServlet;
+import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -180,13 +181,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         if (autologinCookie == null) {
             return null;
         }
-
         String redirectURL = this.getAutologinByCookieURL(request, response, autologinCookie);
-        String deeplink = request.getParameter("hash");
-
-        if (!Strings.isEmpty(redirectURL) && !Strings.isEmpty(deeplink)) {
-            redirectURL += "&" + AJAXUtility.encodeUrl(deeplink.substring(1), true);
-        }
         return redirectURL;
     }
 
@@ -225,7 +220,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     private String getRedirectLocationForSession(HttpServletRequest request, Session session) throws OXException {
         LOG.trace("getRedirectLocationForSession(HttpServletRequest request: {}, Session session: {})", request.getRequestURI(), session.getSessionID());
         OIDCTools.validateSession(session, request);
-        return OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig()));
+        return OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig()), request.getParameter(OIDCTools.PARAM_DEEP_LINK));
     }
 
     private String buildLoginRequest(State state, Nonce nonce, HttpServletRequest request) throws OXException {
@@ -279,7 +274,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             if (validTokenResponse == null) {
                 throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create("IDToken validation failed, no claim set could be extracted");
             }
-            this.sendLoginRequestToServer(request, response, tokenResponse, storedRequestInformation.getDomainName());
+            this.sendLoginRequestToServer(request, response, tokenResponse, storedRequestInformation);
         } catch (OXException e) {
             if (e.getExceptionCode() != OIDCExceptionCode.IDTOKEN_GATHERING_ERROR) {
                 throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create(e, e.getMessage());
@@ -326,9 +321,9 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         return (OIDCTokenResponse) tokenResponse;
     }
 
-    private void sendLoginRequestToServer(HttpServletRequest request, HttpServletResponse response, OIDCTokenResponse tokenResponse, String domainName) throws OXException {
-        LOG.trace("sendLoginRequestToServer(HttpServletRequest request: {}, HttpServletResponse response, OIDCTokenResponse tokenResponse: {}, String domainName: {})",
-            request.getRequestURI(), tokenResponse.getOIDCTokens().toJSONObject().toJSONString(), domainName);
+    private void sendLoginRequestToServer(HttpServletRequest request, HttpServletResponse response, OIDCTokenResponse tokenResponse, AuthenticationRequestInfo storedRequestInformation) throws OXException {
+        LOG.trace("sendLoginRequestToServer(HttpServletRequest request: {}, HttpServletResponse response, OIDCTokenResponse tokenResponse: {}, AuthenticationRequestInfo storedRequestInformation: {})",
+            request.getRequestURI(), tokenResponse.getOIDCTokens().toJSONObject().toJSONString(), storedRequestInformation);
         AuthenticationInfo authInfo = this.backend.resolveAuthenticationResponse(request, tokenResponse);
         authInfo.setProperty(OIDCTools.IDTOKEN, tokenResponse.getOIDCTokens().getIDTokenString());
         BearerAccessToken bearerAccessToken = tokenResponse.getTokens().getBearerAccessToken();
@@ -351,11 +346,22 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         try {
             URIBuilder redirectLocation = new URIBuilder()
                 .setScheme(OIDCTools.getRedirectScheme(request))
-                .setHost(domainName)
+                .setHost(storedRequestInformation.getDomainName())
                 .setPath(OIDCTools.getRedirectPathPrefix() + "login")
                 .setParameter(OIDCTools.SESSION_TOKEN, sessionToken)
                 .setParameter(LoginServlet.PARAMETER_ACTION, OIDCTools.OIDC_LOGIN + OIDCTools.getPathString(this.backend.getPath()));
             Tools.disableCaching(response);
+            
+            String deepLink = storedRequestInformation.getDeepLink();
+            if (deepLink != null) {
+                redirectLocation.setParameter(OIDCTools.PARAM_DEEP_LINK, deepLink);
+            }
+
+            String clientID = storedRequestInformation.getUiClientID();
+            if (clientID != null) {
+                redirectLocation.setParameter(LoginFields.CLIENT_PARAM, clientID);
+            }
+            
             loginRedirect = redirectLocation.build().toString();
             LOG.trace("Login request to OXServer: {}",loginRedirect);
             response.sendRedirect(loginRedirect);

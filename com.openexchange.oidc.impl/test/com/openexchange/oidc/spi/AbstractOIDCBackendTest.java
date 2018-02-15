@@ -759,12 +759,12 @@ public class AbstractOIDCBackendTest {
         Mockito.when(mockedSession.getSessionID()).thenReturn(SESSION_ID);
         try {
              abstractBackend.performLogin(mockedRequest, mockedResponse, false);
-             PowerMockito.verifyPrivate(OIDCTools.class, Mockito.times(1)).invoke("buildFrontendRedirectLocation", Matchers.any(Session.class), Matchers.anyString());
+             PowerMockito.verifyPrivate(OIDCTools.class, Mockito.times(1)).invoke("buildFrontendRedirectLocation", Matchers.any(Session.class), Matchers.anyString(), Matchers.anyString());
         } catch (@SuppressWarnings("unused") IOException | JSONException e) {
             fail("An error was not expected but thrown.");
             return;
         } catch (@SuppressWarnings("unused") OXException e) {
-            fail("An error was not expected but thrown.");            
+            fail("An error was not expected but thrown.");
             return;
         }
     }

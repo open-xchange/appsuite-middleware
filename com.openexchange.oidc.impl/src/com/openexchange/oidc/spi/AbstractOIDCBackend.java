@@ -557,7 +557,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         if (session.getContextId() != reservation.getContextId() && session.getUserId() != reservation.getUserId()) {
             this.handleException(null, true, LoginExceptionCodes.LOGIN_DENIED.create(), 0);
         }
-        return OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(getLoginConfiguration(), this.getBackendConfig()));
+        return OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(getLoginConfiguration(), this.getBackendConfig()), request.getParameter(OIDCTools.PARAM_DEEP_LINK));
     }
 
     private void writeSessionDataAsJson(Session session, HttpServletResponse response) throws JSONException, IOException {
@@ -653,11 +653,12 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
     private void sendRedirect(Session session, HttpServletRequest request, HttpServletResponse response, boolean respondWithJson) throws IOException, JSONException {
         LOG.trace("sendRedirect(Session session: {}, HttpServletRequest request: {}, HttpServletResponse response, boolean respondWithJson {})", session.getSessionID(), request.getRequestURI(), respondWithJson);
-        String uiWebPath = OIDCTools.getUIWebPath(getLoginConfiguration(), this.getBackendConfig());
-        String frontendRedirectLocation = OIDCTools.buildFrontendRedirectLocation(session, uiWebPath);
         if (respondWithJson) {
             this.writeSessionDataAsJson(session, response);
         } else {
+            String uiWebPath = OIDCTools.getUIWebPath(getLoginConfiguration(), this.getBackendConfig());
+            // get possible deeplink
+            String frontendRedirectLocation = OIDCTools.buildFrontendRedirectLocation(session, uiWebPath, request.getParameter(OIDCTools.PARAM_DEEP_LINK));
             response.sendRedirect(frontendRedirectLocation);
         }
     }

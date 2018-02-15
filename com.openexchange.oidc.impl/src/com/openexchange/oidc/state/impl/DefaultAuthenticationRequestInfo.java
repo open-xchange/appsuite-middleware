@@ -157,4 +157,9 @@ public class DefaultAuthenticationRequestInfo implements AuthenticationRequestIn
         }
     }
 
+    @Override
+    public String toString() {
+        return "DefaultAuthenticationRequestInfo [state=" + state + ", domainName=" + domainName + ", deepLink=" + deepLink + ", nonce=" + nonce + ", additionalClientInformation=" + additionalClientInformation + ", uiClientID=" + uiClientID + "]";
+    }
+
 }
