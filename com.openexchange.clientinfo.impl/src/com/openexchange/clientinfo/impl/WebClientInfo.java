@@ -55,7 +55,6 @@ import com.openexchange.clientinfo.ClientInfoType;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 
-
 /**
  * {@link WebClientInfo}
  *
@@ -84,15 +83,27 @@ public class WebClientInfo implements ClientInfo {
     public String getDisplayName(Locale locale) {
         StringHelper helper = StringHelper.valueOf(locale);
         String out;
-        if (Strings.isNotEmpty(platform)) {
-            out = helper.getString(ClientInfoStrings.DEFAULT_CLIENT_INFO_MESSAGE);
-            return String.format(out, client, browser, browserVersion, platform);
-        } else if (Strings.isNotEmpty(browser) && Strings.isNotEmpty(browserVersion)) {
-            out = helper.getString(ClientInfoStrings.CLIENT_BROWSER_INFO_MESSAGE);
-            return String.format(out, client, browser, browserVersion);
-        } else {
-            return client;
+
+        if (Strings.isNotEmpty(browser)) {
+            if (Strings.isNotEmpty(platform)) {
+                if (Strings.isNotEmpty(browserVersion)) {
+                    out = helper.getString(ClientInfoStrings.WEB_WITH_CLIENT_CLIENTVERSION_PLATFORM);
+                    return String.format(out, client, browser, browserVersion, platform);
+                } else {
+                    out = helper.getString(ClientInfoStrings.WEB_WITH_CLIENT_PLATFORM);
+                    return String.format(out, client, browser, platform);
+                }
+            } else {
+                if (Strings.isNotEmpty(browserVersion)) {
+                    out = helper.getString(ClientInfoStrings.WEB_WITH_CLIENT_CLIENTVERSION);
+                    return String.format(out, client, browser, browserVersion);
+                } else {
+                    StringBuilder sb = new StringBuilder(client).append(", ").append(browser);
+                    return sb.toString();
+                }
+            }
         }
+        return client;
     }
 
     @Override

@@ -146,7 +146,12 @@ public class WebClientInfoProvider implements ClientInfoProvider {
                     String osVersionMinor = operatingSystem.getVersionNumber().getMinor();
                     switch (os) {
                         case OS_FAMILY_WINDOWS:
-                            osReadableName.append(osMapping.get(getVersionNumber(operatingSystem)));
+                            String mappedOs = osMapping.get(getVersionNumber(operatingSystem));
+                            if (Strings.isNotEmpty(mappedOs)) {
+                                osReadableName.append(mappedOs);
+                            } else {
+                                osReadableName.append("Windows").append(" ").append(osVersionMajor).append(".").append(osVersionMinor);
+                            }
                             break;
                         case OS_FAMILY_MACOS:
                             try {
@@ -183,8 +188,21 @@ public class WebClientInfoProvider implements ClientInfoProvider {
                         }
                     }
                 }
+
                 String browser = info.getName();
                 String browserVersion = info.getVersionNumber().getMajor();
+                if ("Chrome".equals(browser)) {
+                    if (userAgent.contains("Edge")) { // MS Edge
+                        browser = "Edge";
+                        browserVersion = null;
+                    }
+                }
+                if ("Mozilla".equals(browser)) {
+                    if (userAgent.contains("Trident/7.0; rv:11.0")) { //MSIE 11
+                        browser = "Internet Explorer";
+                        browserVersion = "11";
+                    }
+                }
 
                 return new WebClientInfo(client, osReadableName.toString(), os, osVersion, browser, browserVersion);
             }
@@ -209,8 +227,7 @@ public class WebClientInfoProvider implements ClientInfoProvider {
 
     private String getVersionNumber(OperatingSystem operatingSystem) {
         StringBuilder sb = new StringBuilder();
-        sb.append(operatingSystem.getVersionNumber().getMajor());
-        sb.append(operatingSystem.getVersionNumber().getMinor());
+        sb.append(operatingSystem.getVersionNumber().getMajor()).append(".").append(operatingSystem.getVersionNumber().getMinor());
         return sb.toString();
     }
 
