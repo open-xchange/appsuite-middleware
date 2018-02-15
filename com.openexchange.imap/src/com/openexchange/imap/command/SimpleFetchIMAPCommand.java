@@ -285,22 +285,45 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
         boolean error = false;
         try {
             final int itemCount = fetchResponse.getItemCount();
+            Item delayed = null;
             for (int j = 0; j < itemCount; j++) {
-                final Item item = fetchResponse.getItem(j);
-                FetchItemHandler itemHandler = MAP.get(item.getClass());
-                if (null == itemHandler) {
-                    itemHandler = getItemHandlerByItem(item, examineHasAttachmentUserFlags);
+                Item item = fetchResponse.getItem(j);
+                if (examineHasAttachmentUserFlags && item instanceof BODYSTRUCTURE) {
+                    // Delay that item...
+                    delayed = item;
+                } else {
+                    FetchItemHandler itemHandler = MAP.get(item.getClass());
                     if (null == itemHandler) {
-                        LOG.warn("Unknown FETCH item: {}", item.getClass().getName());
+                        itemHandler = getItemHandlerByItem(item, examineHasAttachmentUserFlags);
+                        if (null == itemHandler) {
+                            LOG.warn("Unknown FETCH item: {}", item.getClass().getName());
+                        } else {
+                            lastHandlers.add(itemHandler);
+                            itemHandler.handleItem(item, mail, LOG);
+                        }
                     } else {
                         lastHandlers.add(itemHandler);
                         itemHandler.handleItem(item, mail, LOG);
                     }
-                } else {
-                    lastHandlers.add(itemHandler);
-                    itemHandler.handleItem(item, mail, LOG);
                 }
             }
+
+            if (null != delayed) {
+                FetchItemHandler itemHandler = MAP.get(delayed.getClass());
+                if (null == itemHandler) {
+                    itemHandler = getItemHandlerByItem(delayed, examineHasAttachmentUserFlags);
+                    if (null == itemHandler) {
+                        LOG.warn("Unknown FETCH item: {}", delayed.getClass().getName());
+                    } else {
+                        lastHandlers.add(itemHandler);
+                        itemHandler.handleItem(delayed, mail, LOG);
+                    }
+                } else {
+                    lastHandlers.add(itemHandler);
+                    itemHandler.handleItem(delayed, mail, LOG);
+                }
+            }
+
             if (determineAttachmentByHeader) {
                 String cts = mail.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
                 if (null != cts) {
@@ -778,7 +801,9 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                 msg.setContentType(new ContentType(MimeTypes.MIME_DEFAULT));
                 msg.addHeader("Content-Type", MimeTypes.MIME_DEFAULT);
             }
-            msg.setAlternativeHasAttachment(MimeMessageUtility.hasAttachments(bs));
+            if (false == msg.containsHasAttachment()) {
+                msg.setAlternativeHasAttachment(MimeMessageUtility.hasAttachments(bs));
+            }
         }
 
         @Override
@@ -795,10 +820,10 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                 }
             }
             if (null == contentType) {
-                msg.setHasAttachment(false);
+                msg.setAlternativeHasAttachment(false);
             } else {
                 try {
-                    final ContentType ct = new ContentType(contentType);
+                    ContentType ct = new ContentType(contentType);
                     msg.setAlternativeHasAttachment(ct.startsWith("multipart/") && MimeMessageUtility.hasAttachments((Part) message.getContent()));
                 } catch (final IOException e) {
                     throw new MessagingException(e.getMessage(), e);

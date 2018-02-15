@@ -532,24 +532,50 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         m.setSeqnum(fetchResponse.getNumber());
         final int itemCount = fetchResponse.getItemCount();
         final Map<Class<? extends Item>, FetchItemHandler> map = MAP;
+        Item delayed = null;
         for (int j = itemCount; j-- > 0;) {
-            final Item item = fetchResponse.getItem(j);
-            FetchItemHandler itemHandler = map.get(item.getClass());
-            if (null == itemHandler) {
-                itemHandler = getItemHandlerByItem(item, checkICal, checkVCard, treatEmbeddedAsAttachment, examineHasAttachmentUserFlags);
+            Item item = fetchResponse.getItem(j);
+            if (examineHasAttachmentUserFlags && item instanceof BODYSTRUCTURE) {
+                // Delay that item...
+                delayed = item;
+            } else {
+                FetchItemHandler itemHandler = map.get(item.getClass());
                 if (null == itemHandler) {
-                    LOG.warn("Unknown FETCH item: {}", item.getClass().getName());
+                    itemHandler = getItemHandlerByItem(item, checkICal, checkVCard, treatEmbeddedAsAttachment, examineHasAttachmentUserFlags);
+                    if (null == itemHandler) {
+                        LOG.warn("Unknown FETCH item: {}", item.getClass().getName());
+                    } else {
+                        if (null != lastHandlers) {
+                            lastHandlers.add(itemHandler);
+                        }
+                        itemHandler.handleItem(item, m, LOG);
+                    }
                 } else {
                     if (null != lastHandlers) {
                         lastHandlers.add(itemHandler);
                     }
                     itemHandler.handleItem(item, m, LOG);
                 }
+            }
+        }
+
+        if (null != delayed) {
+            FetchItemHandler itemHandler = map.get(delayed.getClass());
+            if (null == itemHandler) {
+                itemHandler = getItemHandlerByItem(delayed, checkICal, checkVCard, treatEmbeddedAsAttachment, examineHasAttachmentUserFlags);
+                if (null == itemHandler) {
+                    LOG.warn("Unknown FETCH item: {}", delayed.getClass().getName());
+                } else {
+                    if (null != lastHandlers) {
+                        lastHandlers.add(itemHandler);
+                    }
+                    itemHandler.handleItem(delayed, m, LOG);
+                }
             } else {
                 if (null != lastHandlers) {
                     lastHandlers.add(itemHandler);
                 }
-                itemHandler.handleItem(item, m, LOG);
+                itemHandler.handleItem(delayed, m, LOG);
             }
         }
 
@@ -916,7 +942,11 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                         retval |= MailMessage.FLAG_FORWARDED;
                     } else if (MailMessage.USER_READ_ACK.equalsIgnoreCase(userFlag)) {
                         retval |= MailMessage.FLAG_READ_ACK;
-                    } else {
+                    } else if (examineHasAttachmentUserFlags && MailMessage.HAS_ATTACHMENT_LABEL.equalsIgnoreCase(userFlag)) {
+                        msg.setHasAttachment(true);
+                    } else if (examineHasAttachmentUserFlags && MailMessage.HAS_NO_ATTACHMENT_LABEL.equalsIgnoreCase(userFlag)) {
+                        msg.setHasAttachment(false);
+                    }  else {
                         set.add(userFlag);
                     }
                 }
@@ -1058,19 +1088,32 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             msg.setContentType(contentType);
             msg.addHeader("Content-Type", contentType.toString(true));
 
-            boolean hasAttachment = MimeMessageUtility.hasAttachments(bs);
-            if (hasAttachment) {
-                if (checkICal && hasICal(bs)) {
-                    msg.addHeader("X-ICAL", "true");
-                }
+            if (msg.containsHasAttachment()) {
+                boolean hasAttachment = msg.isHasAttachment();
+                if (hasAttachment) {
+                    if (checkICal && hasICal(bs)) {
+                        msg.addHeader("X-ICAL", "true");
+                    }
 
-                if (checkVCard && hasVCard(bs)) {
-                    msg.addHeader("X-VCARD", "true");
+                    if (checkVCard && hasVCard(bs)) {
+                        msg.addHeader("X-VCARD", "true");
+                    }
                 }
-            } else if (treatEmbeddedAsAttachment) {
-                hasAttachment = hasEmbedded(bs);
+            } else {
+                boolean hasAttachment = MimeMessageUtility.hasAttachments(bs);
+                if (hasAttachment) {
+                    if (checkICal && hasICal(bs)) {
+                        msg.addHeader("X-ICAL", "true");
+                    }
+
+                    if (checkVCard && hasVCard(bs)) {
+                        msg.addHeader("X-VCARD", "true");
+                    }
+                } else if (treatEmbeddedAsAttachment) {
+                    hasAttachment = hasEmbedded(bs);
+                }
+                msg.setAlternativeHasAttachment(hasAttachment);
             }
-            msg.setAlternativeHasAttachment(hasAttachment);
         }
 
         boolean hasICal(BODYSTRUCTURE bs) {
