@@ -526,13 +526,14 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
         }
 
         if (mailAccountId == PRIMARY) { // only for primary account
-            tmp = lookUpProperty("com.openexchange.imap.primary.attachmentSearch.enabled");
+            tmp = lookUpProperty("com.openexchange.imap.attachmentSearch.enabled");
             if (null != tmp) {
                 return Boolean.parseBoolean(tmp.trim());
             }
         }
 
-        return lookUpBoolProperty("com.openexchange.imap.attachmentSearch.enabled", IMAPProperties.getInstance().isAttachmentSearchEnabled());
+        // Not applicable for non-primary account
+        return false;
     }
 
 }
