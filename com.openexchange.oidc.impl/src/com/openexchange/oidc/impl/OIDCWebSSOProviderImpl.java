@@ -243,7 +243,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
 
     private void addAuthRequestToStateManager(State state, Nonce nonce, HttpServletRequest request)  throws OXException {
         LOG.trace("addAuthRequestToStateManager(State state: {}, Nonce nonce: {}, HttpServletRequest request: {})", state.getValue(), nonce.getValue(), request.getRequestURI());
-        String deepLink = request.getParameter("deep_link");
+        String deepLink = request.getParameter("hash");
         String uiClientID = OIDCTools.getUiClient(request);
         String hostname = OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class));
         Map<String, String> additionalClientInformation = Collections.emptyMap();
