@@ -127,6 +127,11 @@ public interface File {
 
     void setURL(String url);
 
+    /**
+     * Gets the sequence number associated with this file
+     *
+     * @return The sequence number as a UTC long (the number of milliseconds since January 1, 1970, 00:00:00 GMT)
+     */
     long getSequenceNumber();
 
     String getCategories();
@@ -206,9 +211,11 @@ public interface File {
     void setShareable(boolean shareable);
 
     /**
-     * Sets the sequence Number of the file. This method is required, if the internal timestamp changes while the file is handled in the middleware
-     * If no sequenceNumber is set, the last modified timestamp can be used aswell
-     * @param sequenceNumber The sequence Number as utc long
+     * Sets the sequence number of the file.
+     * <p>
+     * This method needs to be called, if the internal time stamp changes while the file is processed. If no sequenceNumber is set, the last modified time stamp can be used as well.
+     *
+     * @param sequenceNumber The sequence number as a UTC long (the number of milliseconds since January 1, 1970, 00:00:00 GMT)
      */
     void setSequenceNumber(long sequenceNumber);
 

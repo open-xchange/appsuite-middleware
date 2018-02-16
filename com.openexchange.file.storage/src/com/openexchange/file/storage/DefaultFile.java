@@ -233,13 +233,13 @@ public class DefaultFile extends AbstractFile {
 
     @Override
     public long getSequenceNumber() {
+        Long sequenceNumber = this.sequenceNumber;
         if (null != sequenceNumber) {
-            return sequenceNumber;
+            return sequenceNumber.longValue();
         }
-        if (lastModified == null) {
-            return 0;
-        }
-        return lastModified.getTime();
+
+        Date lastModified = this.lastModified;
+        return lastModified == null ? 0 : lastModified.getTime();
     }
 
     @Override
@@ -409,7 +409,7 @@ public class DefaultFile extends AbstractFile {
 
     @Override
     public void setSequenceNumber(long sequenceNumber) {
-        this.sequenceNumber = sequenceNumber;
+        this.sequenceNumber = Long.valueOf(sequenceNumber);
     }
 
 }
