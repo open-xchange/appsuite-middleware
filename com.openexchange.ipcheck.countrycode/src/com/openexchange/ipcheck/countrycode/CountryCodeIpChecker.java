@@ -86,7 +86,7 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
     /**
      * Initializes a new {@link CountryCodeIpChecker}.
      *
-     * @param metricCollector TODO
+     * @param metricCollector The {@link IPCheckMetricCollector}
      */
     public CountryCodeIpChecker(GeoLocationService service, IPCheckMetricCollector metricCollector) {
         super();
@@ -111,7 +111,7 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
             return;
         }
 
-        // ACCEPT: if the IP address are white-listed
+        // ACCEPT: if the IP address is white-listed
         if (IPCheckers.isWhiteListedAddress(current, previous, configuration)) {
             accept(current, previous, session, whiteListedClient, AcceptReason.WHITE_LISTED);
             return;

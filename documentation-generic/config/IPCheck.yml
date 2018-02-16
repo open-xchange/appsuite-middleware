@@ -7,7 +7,6 @@ properties:
         <ul>
           <li><code>none</code> - Implies that no IP check takes place at all</li>
           <li><code>strict</code> - Implies that IP addresses are checked for equality</li>
-          <li><code>countrycode</code> - Requires open-xchange-geoip being installed and performs a plausibility check against IP addresses' country codes</li>
         </ul>
         Note:   
         The [[com.openexchange.IPCheck]] property still has precedence over this property;  

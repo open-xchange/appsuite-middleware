@@ -11,4 +11,4 @@ Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
 Description: The Open-Xchange GeoIP service
- This package provides connectivity to an GeoIP service as well as the possibility to configure an IP check against country code plausibility
+ This package provides connectivity to a GeoIP service
