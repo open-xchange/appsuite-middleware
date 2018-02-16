@@ -319,8 +319,10 @@ public class ChronosCopyTask implements CopyUserTaskService {
                 if (attendee.getEntity() == srcUsrId) {
                     attendee.setFolderId(getDestinationFolder(folderMapping, Integer.parseInt(attendee.getFolderId())));
                     attendee.setEntity(dstUsrId);
-                    attendees.add(attendee);
+                } else if (CalendarUtils.isExternalUser(attendee)) {
+                    attendee.setFolderId(null);
                 }
+                attendees.add(attendee);
             }
             eventMapping.get(srcEventId).setAttendees(attendees);
             dstAttendees.put(eventMapping.get(srcEventId).getId(), attendees);
