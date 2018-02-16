@@ -778,7 +778,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         fullName,
                         valids,
                         valids.length,
-                        getFetchProfile(fields, headerNames, null, null, getIMAPProperties().isFastFetch(), getIMAPProperties().isAttachmentSearchEnabled()),
+                        getFetchProfile(fields, headerNames, null, null, getIMAPProperties().isFastFetch(), examineHasAttachmentUserFlags),
                         imapConfig.getImapCapabilities().hasIMAP4rev1(),
                         false);
                 /*
@@ -796,7 +796,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         fullName,
                         seqNumsMap.values(),
                         seqNumsMap.size(),
-                        getFetchProfile(fields, headerNames, null, null, getIMAPProperties().isFastFetch(), getIMAPProperties().isAttachmentSearchEnabled()),
+                        getFetchProfile(fields, headerNames, null, null, getIMAPProperties().isFastFetch(), examineHasAttachmentUserFlags),
                         imapConfig.getImapCapabilities().hasIMAP4rev1(),
                         true);
                 /*
@@ -1589,7 +1589,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         MimeMessage copy = MimeMessageUtility.newMimeMessage(msg.getMimeStream(), null);
                         mail = MimeMessageConverter.convertMessage(copy, false);
                         // Set flags and received date
-                        MimeMessageConverter.parseFlags(msg.getFlags(), imapConfig.getCapabilities().hasAttachmentMarker(), mail);
+                        MimeMessageConverter.parseFlags(msg.getFlags(), examineHasAttachmentUserFlags, mail);
                         if (!mail.containsColorLabel()) {
                             mail.setColorLabel(MailMessage.COLOR_LABEL_NONE);
                         }
@@ -1844,10 +1844,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              * Fetch (possibly) filtered and sorted sequence numbers
              */
             boolean fetchBody = fields.contains(MailField.BODY) || fields.contains(MailField.FULL);
-            boolean attachmentSearchEnabled = getIMAPProperties().isAttachmentSearchEnabled();
             MailMessage[] mailMessages;
             if (fetchBody) {
-                FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, getIMAPProperties().isFastFetch(), attachmentSearchEnabled);
+                FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, getIMAPProperties().isFastFetch(), examineHasAttachmentUserFlags);
                 List<MailMessage> list = fetchMessages(msgIds, fetchProfile);
                 mailMessages = list.toArray(new MailMessage[list.size()]);
             } else {
@@ -1855,7 +1854,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Body content not requested, we simply return IDMailMessage objects filled with requested fields
                  */
                 boolean isRev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
-                FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, getIMAPProperties().isFastFetch(), attachmentSearchEnabled);
+                FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, getIMAPProperties().isFastFetch(), examineHasAttachmentUserFlags);
                 MailMessage[] tmp = fetchMessages(msgIds, fetchProfile, isRev1);
                 mailMessages = setAccountInfo(tmp);
             }
@@ -1884,7 +1883,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
 
             boolean fetchBody = fields.contains(MailField.BODY) || fields.contains(MailField.FULL);
-            boolean attachmentSearchEnabled = getIMAPProperties().isAttachmentSearchEnabled();
+            boolean attachmentSearchEnabled = examineHasAttachmentUserFlags;
             MailMessage[] mailMessages;
             if (fetchBody) {
                 FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, getIMAPProperties().isFastFetch(), attachmentSearchEnabled);
@@ -2044,7 +2043,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
                 break;
             case FLAG_HAS_ATTACHMENT:
-                if (false == imapConfig.getIMAPProperties().isAttachmentSearchEnabled()) {
+                if (false == examineHasAttachmentUserFlags) {
                     throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
                 }
                 return new UserFlagTerm(MailMessage.USER_HAS_ATTACHMENT, set);

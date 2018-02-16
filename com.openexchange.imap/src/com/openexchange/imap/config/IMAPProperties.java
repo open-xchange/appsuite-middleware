@@ -700,7 +700,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         }
 
         {
-            String tmp = configuration.getProperty("com.openexchange.imap.attachmentSearch.enabled", STR_FALSE).trim();
+            String tmp = configuration.getProperty("com.openexchange.imap.attachmentMarker.enabled", STR_FALSE).trim();
             enableAttachmentSearch = Boolean.parseBoolean(tmp);
             logBuilder.append("\tEnable attachment search: ").append(enableAttachmentSearch).append('\n');
         }
@@ -1111,7 +1111,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     }
 
     @Override
-    public boolean isAttachmentSearchEnabled() {
+    public boolean isAttachmentMarkerEnabled() {
         return enableAttachmentSearch;
     }
 

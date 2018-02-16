@@ -225,7 +225,7 @@ public final class CapabilitiesCache {
                 // The in-memory sorting does sort with primary respect to display name, the actual address
                 imapCaps.setSortDisplay(true);
             }
-            imapCaps.setAttachmentSearchEnabled(imapConfig.getIMAPProperties().isAttachmentSearchEnabled());
+            imapCaps.setAttachmentSearchEnabled(imapConfig.getIMAPProperties().isAttachmentMarkerEnabled());
             /*
              * ACL extension
              */

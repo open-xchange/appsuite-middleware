@@ -170,6 +170,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     private final Context ctx;
     private final IMAPConfig imapConfig;
     private final boolean ignoreSubscriptions;
+    protected final boolean examineHasAttachmentUserFlags;
 
     private Character separator;
     private IMAPDefaultFolderChecker checker;
@@ -191,6 +192,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         ctx = session instanceof ServerSession ? ((ServerSession) session).getContext() : ContextStorage.getStorageContext(session.getContextId());
         imapConfig = imapAccess.getIMAPConfig();
         ignoreSubscriptions = imapConfig.getIMAPProperties().isIgnoreSubscription();
+        examineHasAttachmentUserFlags = imapConfig.getCapabilities().hasAttachmentMarker();
     }
 
     /**
