@@ -186,9 +186,10 @@ public class SetSwitch implements MetadataSwitcher{
 	}
 
 	@Override
-    public Object sequenceNumber() {
-		//impl.setSequenceNumber((Long)value);
-		return null;
+	public Object sequenceNumber() {
+	    if(null == value) { return null; }
+	    impl.setSequenceNumber((Long)value);
+	    return null;
 	}
 
 	@Override

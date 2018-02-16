@@ -597,7 +597,7 @@ public class SearchEngineImpl extends DBService {
                     retval.add("infostore_document.filename");
                     break Metadata2DBSwitch;
                 case Metadata.SEQUENCE_NUMBER:
-                    retval.add("infostore.id");
+                    retval.add("infostore.last_modified");
                     break Metadata2DBSwitch;
                 case Metadata.ID:
                     retval.add("infostore.id");

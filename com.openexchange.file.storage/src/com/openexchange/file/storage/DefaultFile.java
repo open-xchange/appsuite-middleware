@@ -77,6 +77,7 @@ public class DefaultFile extends AbstractFile {
     private long fileSize;
     private String folderId;
     private String id;
+    private Long sequenceNumber;
     private Date lastModified;
     private Date lockedUntil;
     private int modifiedBy;
@@ -232,6 +233,9 @@ public class DefaultFile extends AbstractFile {
 
     @Override
     public long getSequenceNumber() {
+        if (null != sequenceNumber) {
+            return sequenceNumber;
+        }
         if (lastModified == null) {
             return 0;
         }
@@ -401,6 +405,11 @@ public class DefaultFile extends AbstractFile {
     @Override
     public void setShareable(boolean shareable) {
         this.shareable = shareable;
+    }
+
+    @Override
+    public void setSequenceNumber(long sequenceNumber) {
+        this.sequenceNumber = sequenceNumber;
     }
 
 }

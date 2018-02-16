@@ -102,7 +102,7 @@ public class Metadata {
     public static final Metadata CREATED_BY_LITERAL = new Metadata(CREATED_BY, "created_by");
     public static final Metadata FILENAME_LITERAL = new Metadata(FILENAME, "filename", InfostoreStrings.FIELD_FILE_NAME);
     public static final Metadata FILE_MIMETYPE_LITERAL = new Metadata(FILE_MIMETYPE, "file_mimetype");
-    public static final Metadata SEQUENCE_NUMBER_LITERAL = new Metadata(SEQUENCE_NUMBER, "sequence_number");
+    public static final Metadata SEQUENCE_NUMBER_LITERAL = new Metadata(SEQUENCE_NUMBER, "last_modified");
     public static final Metadata CATEGORIES_LITERAL = new Metadata(CATEGORIES, "categories");
     public static final Metadata LOCKED_UNTIL_LITERAL = new Metadata(LOCKED_UNTIL, "locked_until");
     public static final Metadata FILE_MD5SUM_LITERAL = new Metadata(FILE_MD5SUM, "file_md5sum");

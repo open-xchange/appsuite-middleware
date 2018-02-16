@@ -206,6 +206,13 @@ public interface File {
     void setShareable(boolean shareable);
 
     /**
+     * Sets the sequence Number of the file. This method is required, if the internal timestamp changes while the file is handled in the middleware
+     * If no sequenceNumber is set, the last modified timestamp can be used aswell
+     * @param sequenceNumber The sequence Number as utc long
+     */
+    void setSequenceNumber(long sequenceNumber);
+
+    /**
      * Gets the origin folder path.
      *
      * @return The origin folder path or <code>null</code>

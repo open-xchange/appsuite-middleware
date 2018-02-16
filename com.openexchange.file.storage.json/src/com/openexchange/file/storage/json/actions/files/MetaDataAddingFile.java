@@ -384,6 +384,10 @@ public class MetaDataAddingFile implements DelegatingFile {
     }
 
     @Override
+    public void setSequenceNumber(long sequenceNumber) {
+        file.setSequenceNumber(sequenceNumber);
+    }
+
     public FolderPath getOrigin() {
         return file.getOrigin();
     }

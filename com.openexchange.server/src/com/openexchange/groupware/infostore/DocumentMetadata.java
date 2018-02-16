@@ -135,6 +135,8 @@ public interface DocumentMetadata extends Serializable {
     // versioned persistent
     long getSequenceNumber();
 
+    void setSequenceNumber(long sequenceNumber);
+
     String getCategories();
 
     void setCategories(String categories);

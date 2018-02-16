@@ -359,6 +359,10 @@ public class InfostoreFile extends AbstractFile implements UserizedFile {
     }
 
     @Override
+    public void setSequenceNumber(long sequenceNumber) {
+        document.setSequenceNumber(sequenceNumber);
+    }
+
     public FolderPath getOrigin() {
         InfostoreFolderPath folderPath = document.getOriginFolderPath();
         return null == folderPath ? null : FolderPath.copyOf(folderPath);

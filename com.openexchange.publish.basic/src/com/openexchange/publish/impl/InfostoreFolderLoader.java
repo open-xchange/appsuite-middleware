@@ -403,6 +403,10 @@ public class InfostoreFolderLoader implements PublicationDataLoaderService {
         }
 
         @Override
+        public void setSequenceNumber(long sequenceNumber) {
+            documentMetadata.setSequenceNumber(sequenceNumber);
+        }
+
         public InfostoreFolderPath getOriginFolderPath() {
             return documentMetadata.getOriginFolderPath();
         }

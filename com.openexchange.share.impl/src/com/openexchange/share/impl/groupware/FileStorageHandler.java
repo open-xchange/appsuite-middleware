@@ -225,7 +225,7 @@ public class FileStorageHandler implements ModuleHandler {
                 IDBasedAdministrativeFileAccess fileAccess = getAdministrativeFileAccess(parameters.getContext());
                 for (TargetProxy proxy : modified) {
                     File file = ((FileTargetProxy) proxy).getFile();
-                    fileAccess.saveFileMetadata(file, file.getLastModified().getTime(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
+                    fileAccess.saveFileMetadata(file, file.getSequenceNumber(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
                 }
             } else {
                 IDBasedFileAccess fileAccess = getFileAccess(parameters.getSession());
@@ -237,7 +237,7 @@ public class FileStorageHandler implements ModuleHandler {
                         if (false == fileAccess.supports(fileID.getService(), fileID.getAccountId(), FileStorageCapability.OBJECT_PERMISSIONS)) {
                             throw FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(fileID.getService(), file.getFolderId(), parameters.getContext().getContextId());
                         }
-                        fileAccess.saveFileMetadata(file, file.getLastModified().getTime(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
+                        fileAccess.saveFileMetadata(file, file.getSequenceNumber(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
                     }
                     fileAccess.commit();
                 } catch (OXException e) {
@@ -260,7 +260,7 @@ public class FileStorageHandler implements ModuleHandler {
                 IDBasedAdministrativeFileAccess fileAccess = getAdministrativeFileAccess(parameters.getContext());
                 for (TargetProxy proxy : touched) {
                     File file = ((FileTargetProxy) proxy).getFile();
-                    fileAccess.saveFileMetadata(file, file.getLastModified().getTime(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
+                    fileAccess.saveFileMetadata(file, file.getSequenceNumber(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
                 }
             } else {
                 IDBasedFileAccess fileAccess = getFileAccess(parameters.getSession());

@@ -588,6 +588,10 @@ public class JSONDocumentMetadata implements DocumentMetadata {
     }
 
     @Override
+    public void setSequenceNumber(long sequenceNumber) {
+        throw new UnsupportedOperationException();
+    }
+
     public InfostoreFolderPath getOriginFolderPath() {
         throw new UnsupportedOperationException();
     }

@@ -426,6 +426,10 @@ public class IDBasedFolderAccessFolderLoader implements PublicationDataLoaderSer
         }
 
         @Override
+        public void setSequenceNumber(long sequenceNumber) {
+            documentMetadata.setSequenceNumber(sequenceNumber);
+        }
+
         public InfostoreFolderPath getOriginFolderPath() {
             return documentMetadata.getOriginFolderPath();
         }

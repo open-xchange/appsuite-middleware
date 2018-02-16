@@ -81,7 +81,7 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
     protected int createdBy;
     protected String description;
     protected String url;
-    protected long sequenceNumber;
+    protected Long sequenceNumber;
     protected String categories;
     protected Date lockedUntil;
     protected String fileMD5Sum;
@@ -275,7 +275,14 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
 
     @Override
     public long getSequenceNumber() {
-        return sequenceNumber;
+        if (null != sequenceNumber) {
+            return sequenceNumber;
+        }
+        Date lastModDate = getLastModified();
+        if (null != lastModDate) {
+            return lastModDate.getTime();
+        }
+        return 0;
     }
 
     public void setSequenceNumber(long sequenceNumber) {

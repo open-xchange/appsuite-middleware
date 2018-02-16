@@ -685,6 +685,10 @@ public class FileMetadata implements DocumentMetadata {
             }
 
             @Override
+            public void setSequenceNumber(long sequenceNumber) {
+                file.setSequenceNumber(sequenceNumber);
+            }
+
             public InfostoreFolderPath getOriginFolderPath() {
                 return null;
             }
@@ -731,6 +735,10 @@ public class FileMetadata implements DocumentMetadata {
     }
 
     @Override
+    public void setSequenceNumber(long sequenceNumber) {
+        file.setSequenceNumber(sequenceNumber);
+    }
+
     public InfostoreFolderPath getOriginFolderPath() {
         FolderPath folderPath = file.getOrigin();
         return null == folderPath ? null : InfostoreFolderPath.copyOf(folderPath);

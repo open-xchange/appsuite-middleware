@@ -405,4 +405,9 @@ public class IDManglingFile implements DelegatingFile {
         return "IDManglingFile [id=" + id + ", delegateId=" + file.getId() + ", name=" + file.getFileName() + "]";
     }
 
+    @Override
+    public void setSequenceNumber(long sequenceNumber) {
+        file.setSequenceNumber(sequenceNumber);
+    }
+
 }
