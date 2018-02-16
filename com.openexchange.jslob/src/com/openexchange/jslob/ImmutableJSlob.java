@@ -80,6 +80,24 @@ public class ImmutableJSlob implements JSlob, Cloneable {
         return new ImmutableJSlob(jslob.getId(), jslob.getJsonObject(), jslob.getMetaObject());
     }
 
+    /**
+     * Creates the appropriate <code>ImmutableJSlob</code> instance for specified JSlob.
+     *
+     * @param jslobId The JSlob identifier to set
+     * @param jslob The source JSlob
+     * @return The <code>ImmutableJSlob</code> instance
+     */
+    public static ImmutableJSlob valueOf(JSlobId jslobId, JSlob jslob) {
+        if (null == jslob) {
+            return null;
+        }
+
+        if ((jslob instanceof ImmutableJSlob) && (null == jslobId || jslobId.equals(jslob.getId()))) {
+            return (ImmutableJSlob) jslob;
+        }
+        return new ImmutableJSlob(null == jslobId ? jslob.getId() : jslobId, jslob.getJsonObject(), jslob.getMetaObject());
+    }
+
     // -------------------------------------------------------------------------------
 
     private final JSlobId id;

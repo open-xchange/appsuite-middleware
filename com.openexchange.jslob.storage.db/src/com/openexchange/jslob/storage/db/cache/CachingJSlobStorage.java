@@ -57,7 +57,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.caching.Cache;
@@ -212,14 +211,14 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
     private void write2DB(DelayedStoreOp delayedStoreOp, Cache cache) throws OXException {
         Object obj = cache.getFromGroup(delayedStoreOp.id, delayedStoreOp.group);
         if (obj instanceof JSlobReference) {
-            JSlob t = ((JSlobReference) obj).jslob;
+            ImmutableJSlob t = ((JSlobReference) obj).jslob;
 
             if (null != t) {
                 // Write to store
                 delegate.store(delayedStoreOp.jSlobId, t);
 
                 // Propagate among remote caches
-                cache.putInGroup(delayedStoreOp.id, delayedStoreOp.group, new JSlobReference(t.setId(delayedStoreOp.jSlobId)), true);
+                cache.putInGroup(delayedStoreOp.id, delayedStoreOp.group, new JSlobReference(ImmutableJSlob.valueOf(delayedStoreOp.jSlobId, t)), true);
             }
         }
     }
@@ -250,9 +249,9 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
         delegate.storeMultiple(jslobs);
 
         // Invalidate caches
-        for (Entry<JSlobId, JSlob> entry : jslobs.entrySet()) {
+        for (Map.Entry<JSlobId, JSlob> entry : jslobs.entrySet()) {
             JSlobId id = entry.getKey();
-            cache.putInGroup(id.getId(), groupName(id), new JSlobReference(entry.getValue().setId(id)), true);
+            cache.putInGroup(id.getId(), groupName(id), new JSlobReference(ImmutableJSlob.valueOf(id, entry.getValue())), true);
         }
 
         return leave;
