@@ -50,10 +50,15 @@
 package com.openexchange.chronos.provider.caching.internal.response;
 
 import java.util.Date;
+import java.util.TimeZone;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.util.TimeZones;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link ResponseGenerator}
@@ -99,6 +104,23 @@ public class ResponseGenerator {
      */
     protected static Date getUntil(CalendarParameters parameters) {
         return parameters.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+    }
+
+    /**
+     * Gets the timezone valid for the current request, which is either the (possibly overridden) timezone defined via
+     * {@link CalendarParameters#PARAMETER_TIMEZONE}, or as fallback, the session user's default timezone.
+     *
+     * @param parameters The calendar parameters to evaluate
+     * @param session The current session
+     * @return The timezone
+     */
+    public static TimeZone getTimeZone(CalendarParameters parameters, Session session) throws OXException {
+        TimeZone timeZone = parameters.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class);
+        if (null == timeZone) {
+            String timeZoneId = ServerSessionAdapter.valueOf(session).getUser().getTimeZone();
+            timeZone = CalendarUtils.optTimeZone(timeZoneId, TimeZones.UTC);
+        }
+        return timeZone;
     }
 
 }

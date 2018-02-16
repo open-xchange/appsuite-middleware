@@ -52,7 +52,9 @@ package com.openexchange.chronos.provider.caching.internal.response;
 import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import com.google.common.collect.Lists;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -79,6 +81,11 @@ public class AccountResponseGenerator extends ResponseGenerator {
     }
 
     public List<Event> generate() throws OXException {
+        CalendarParameters parameters = cachedCalendarAccess.getParameters();
+        Date from = getFrom(parameters);
+        Date until = getUntil(parameters);
+        TimeZone timeZone = getTimeZone(parameters, cachedCalendarAccess.getSession());
+        SearchOptions searchOptions = new SearchOptions(parameters);
         return new OSGiCalendarStorageOperation<List<Event>>(Services.getServiceLookup(), this.cachedCalendarAccess.getSession().getContextId(), this.cachedCalendarAccess.getAccount().getAccountId()) {
 
             @Override
@@ -88,16 +95,16 @@ public class AccountResponseGenerator extends ResponseGenerator {
                 List<EventField> fieldList = new ArrayList<EventField>(Arrays.asList(fields));
                 fieldList.add(EventField.FOLDER_ID);
                 fields = fieldList.toArray(new EventField[fieldList.size()]);
-
-                SearchOptions searchOptions = new SearchOptions(parameters);
-
                 List<Event> events = storage.getEventStorage().searchEvents(null, searchOptions, fields);
                 List<Event> enhancedEvents = storage.getUtilities().loadAdditionalEventData(cachedCalendarAccess.getAccount().getUserId(), events, fields);
                 List<Event> allEvents = new ArrayList<>();
                 for (Event event : enhancedEvents) {
+                    if (false == CalendarUtils.isInRange(event, from, until, timeZone)) {
+                        continue;
+                    }
                     event.setFlags(getFlags(event, cachedCalendarAccess.getAccount().getUserId()));
                     if (CalendarUtils.isSeriesMaster(event) && isResolveOccurrences(parameters)) {
-                        allEvents.addAll(Lists.newArrayList(Services.getService(RecurrenceService.class).iterateEventOccurrences(event, getFrom(parameters), getUntil(parameters))));
+                        allEvents.addAll(Lists.newArrayList(Services.getService(RecurrenceService.class).iterateEventOccurrences(event, from, until)));
                     } else {
                         allEvents.add(event);
                     }
