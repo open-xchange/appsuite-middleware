@@ -49,8 +49,11 @@
 
 package com.openexchange.mail.transport.config;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -130,8 +133,13 @@ public final class TransportProperties implements ITransportProperties {
     }
 
     private void loadProperties0() {
-        final StringBuilder logBuilder = new StringBuilder(1024);
-        logBuilder.append("\nLoading global transport properties...\n");
+        StringBuilder logBuilder = new StringBuilder(1024);
+        List<Object> args = new ArrayList<Object>(32);
+        String lineSeparator = Strings.getLineSeparator();
+
+        logBuilder.append("{}Loading global transport properties...{}");
+        args.add(lineSeparator);
+        args.add(lineSeparator);
 
         final ConfigurationService configuration = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
 
@@ -141,11 +149,15 @@ public final class TransportProperties implements ITransportProperties {
                 "1048576").trim();
             try {
                 referencedPartLimit = Integer.parseInt(referencedPartLimitStr);
-                logBuilder.append("\tReferenced Part Limit: ").append(referencedPartLimit).append('\n');
+                logBuilder.append("    Referenced Part Limit: {}{}");
+                args.add(referencedPartLimit);
+                args.add(lineSeparator);
             } catch (final NumberFormatException e) {
                 referencedPartLimit = 1048576;
-                logBuilder.append("\tReferenced Part Limit: Invalid value \"").append(referencedPartLimitStr).append(
-                    "\". Setting to fallback ").append(referencedPartLimit).append('\n');
+                logBuilder.append("    Referenced Part Limit: Invalid value \"{}\". Setting to fallback {}{}");
+                args.add(referencedPartLimitStr);
+                args.add(referencedPartLimit);
+                args.add(lineSeparator);
 
             }
         }
@@ -153,7 +165,9 @@ public final class TransportProperties implements ITransportProperties {
         {
             final String defaultTransProvStr = configuration.getProperty("com.openexchange.mail.defaultTransportProvider", "smtp").trim();
             defaultTransportProvider = defaultTransProvStr;
-            logBuilder.append("\tDefault Transport Provider: ").append(defaultTransportProvider).append('\n');
+            logBuilder.append("    Default Transport Provider: {}{}");
+            args.add(defaultTransportProvider);
+            args.add(lineSeparator);
         }
 
         {
@@ -161,17 +175,21 @@ public final class TransportProperties implements ITransportProperties {
                 "com.openexchange.mail.transport.publishingPublicInfostoreFolder",
                 "i18n-defined").trim();
             publishingInfostoreFolder = tmp;
-            logBuilder.append("\tPublishing Infostore Folder Name: \"").append(publishingInfostoreFolder).append('"').append('\n');
+            logBuilder.append("    Publishing Infostore Folder Name: \"{}\"{}");
+            args.add(publishingInfostoreFolder);
+            args.add(lineSeparator);
         }
 
         {
             final String tmp = configuration.getProperty("com.openexchange.mail.transport.removeMimeVersionInSubParts", "false").trim();
             removeMimeVersionInSubParts = Boolean.parseBoolean(tmp);
-            logBuilder.append("\tRemove \"MIME-Version\" header in sub-parts: ").append(removeMimeVersionInSubParts).append('\n');
+            logBuilder.append("    Remove \"MIME-Version\" header in sub-parts: {}{}");
+            args.add(removeMimeVersionInSubParts);
+            args.add(lineSeparator);
         }
 
         logBuilder.append("Global transport properties successfully loaded!");
-        LOG.info(logBuilder.toString());
+        LOG.info(logBuilder.toString(), args.toArray(new Object[args.size()]));
     }
 
     @Override
