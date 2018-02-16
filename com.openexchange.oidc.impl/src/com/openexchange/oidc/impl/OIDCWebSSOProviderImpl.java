@@ -51,7 +51,6 @@ package com.openexchange.oidc.impl;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
@@ -84,7 +83,6 @@ import com.nimbusds.openid.connect.sdk.Nonce;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
 import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
 import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
-import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.login.LoginConfiguration;
@@ -108,7 +106,6 @@ import com.openexchange.oidc.tools.OIDCTools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.session.reservation.SessionReservationService;
-import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -188,12 +185,12 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
     private String getAutologinByCookieURL(HttpServletRequest request, HttpServletResponse response, Cookie oidcAtologinCookie) throws OXException {
         LOG.trace("getAutologinByCookieURL(HttpServletRequest request: {}, HttpServletResponse response, Cookie oidcAtologinCookie: {})", request.getRequestURI(), oidcAtologinCookie != null ? oidcAtologinCookie.getValue() : "null");
         if (oidcAtologinCookie != null) {
-            Session session = this.getSessionFromAutologinCookie(oidcAtologinCookie, request);
+            Session session = OIDCTools.getSessionFromAutologinCookie(oidcAtologinCookie, request);
             if (session != null) {
                 return this.getRedirectLocationForSession(request, session);
             }
             //No session found, log that
-            LOG.debug("No session found for OIDC Cookie with value: {}", oidcAtologinCookie.getValue());
+            LOG.debug("No valid session found for OIDC Cookie with value: {}", oidcAtologinCookie.getValue());
         }
 
         if (oidcAtologinCookie != null) {
@@ -203,18 +200,6 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         }
 
         return null;
-    }
-
-    private Session getSessionFromAutologinCookie(Cookie oidcAtologinCookie, HttpServletRequest request) throws OXException {
-        LOG.trace("getSessionFromAutologinCookie(Cookie oidcAtologinCookie: {})", oidcAtologinCookie.getValue());
-        Session session = null;
-        SessiondService sessiondService = Services.getService(SessiondService.class);
-        Collection<String> sessions = sessiondService.findSessions(SessionFilter.create("(" + OIDCTools.SESSION_COOKIE + "=" + oidcAtologinCookie.getValue() + ")"));
-        if (sessions.size() > 0) {
-            session = sessiondService.getSession(sessions.iterator().next());
-        }
-        OIDCTools.validateSession(session, request);
-        return session;
     }
 
     private String getRedirectLocationForSession(HttpServletRequest request, Session session) throws OXException {

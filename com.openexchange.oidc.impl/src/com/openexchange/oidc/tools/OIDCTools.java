@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.Map;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -77,6 +78,8 @@ import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.osgi.Services;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
+import com.openexchange.sessiond.SessionFilter;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -202,7 +205,7 @@ public class OIDCTools {
         Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
         Cookie secretCookie = cookies.get(LoginServlet.SECRET_PREFIX + session.getHash());
         if (secretCookie == null || !session.getSecret().equals(secretCookie.getValue())) {
-            LOG.debug("No secret cookie found for session: {}", session.getSessionID());
+            LOG.debug("No secret cookie found for session: {}", session);
             throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
         }
     }
@@ -359,5 +362,36 @@ public class OIDCTools {
     public static String getRedirectPathPrefix() {
         DispatcherPrefixService prefixService = Services.getService(DispatcherPrefixService.class);
         return prefixService.getPrefix();
+    }
+    
+    /**
+     * Load a session from the given {@link Cookie}.
+     * 
+     * @param oidcAtologinCookie The cookie where the session is stored.
+     * @param request Used to validate the found session.
+     * @return The loaded session or null, if no session could be found or the validation failed.
+     * @throws OXException If an error occurs while filtering, when finding sessions
+     */
+    public static Session getSessionFromAutologinCookie(Cookie oidcAtologinCookie, HttpServletRequest request) throws OXException {
+        LOG.trace("getSessionFromAutologinCookie(Cookie oidcAtologinCookie: {})", oidcAtologinCookie.getValue());
+        Session session = null;
+        SessiondService sessiondService = Services.getService(SessiondService.class);
+        Collection<String> sessions = sessiondService.findSessions(SessionFilter.create("(" + OIDCTools.SESSION_COOKIE + "=" + oidcAtologinCookie.getValue() + ")"));
+        if (sessions.size() > 0) {
+            session = sessiondService.getSession(sessions.iterator().next());
+        }
+        
+        if (session == null) {
+            return null;
+        }
+        
+        try {
+            OIDCTools.validateSession(session, request);
+        } catch (OXException e) {
+            LOG.debug("Session validation failed for {}", session.getSessionID());
+            session = null;
+        }
+        
+        return session;
     }
 }

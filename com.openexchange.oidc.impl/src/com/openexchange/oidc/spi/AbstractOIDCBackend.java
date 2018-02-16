@@ -55,7 +55,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.text.ParseException;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -121,10 +120,10 @@ import com.openexchange.login.internal.LoginResultImpl;
 import com.openexchange.oidc.AuthenticationInfo;
 import com.openexchange.oidc.OIDCBackend;
 import com.openexchange.oidc.OIDCBackendConfig;
+import com.openexchange.oidc.OIDCBackendConfig.AutologinMode;
 import com.openexchange.oidc.OIDCConfig;
 import com.openexchange.oidc.OIDCExceptionCode;
 import com.openexchange.oidc.OIDCExceptionHandler;
-import com.openexchange.oidc.OIDCBackendConfig.AutologinMode;
 import com.openexchange.oidc.impl.OIDCBackendConfigImpl;
 import com.openexchange.oidc.impl.OIDCConfigImpl;
 import com.openexchange.oidc.osgi.Services;
@@ -133,7 +132,6 @@ import com.openexchange.session.Session;
 import com.openexchange.session.reservation.EnhancedAuthenticated;
 import com.openexchange.session.reservation.Reservation;
 import com.openexchange.session.reservation.SessionReservationService;
-import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -514,7 +512,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         LOG.trace("getAutologinByCookieURL(HttpServletRequest request: {}, HttpServletResponse response, Reservation reservation.token: {}, Cookie oidcAtologinCookie: {}, boolean respondWithJson)", request.getRequestURI(), reservation.getToken(), oidcAtologinCookie != null ? oidcAtologinCookie.getValue() : "null", respondWithJson);
         if (oidcAtologinCookie != null) {
             try {
-                Session session = this.getSessionFromAutologinCookie(oidcAtologinCookie, request);
+                Session session = OIDCTools.getSessionFromAutologinCookie(oidcAtologinCookie, request);
                 if (session != null) {
                     this.updateSession(session, reservation.getState());
                     // the getRedirectLocationForSession does also the validation check of the session
@@ -537,18 +535,6 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
             response.addCookie(toRemove);
         }
         return false;
-    }
-
-    private Session getSessionFromAutologinCookie(Cookie oidcAtologinCookie, HttpServletRequest request) throws OXException {
-        LOG.trace("getSessionFromAutologinCookie(Cookie oidcAtologinCookie: {})", oidcAtologinCookie.getValue());
-        Session session = null;
-        SessiondService sessiondService = Services.getService(SessiondService.class);
-        Collection<String> sessions = sessiondService.findSessions(SessionFilter.create("(" + OIDCTools.SESSION_COOKIE + "=" + oidcAtologinCookie.getValue() + ")"));
-        if (sessions.size() > 0) {
-            session = sessiondService.getSession(sessions.iterator().next());
-        }
-        OIDCTools.validateSession(session, request);
-        return session;
     }
 
     private String getRedirectLocationForSession(HttpServletRequest request, Session session, Reservation reservation) throws OXException, IOException {
