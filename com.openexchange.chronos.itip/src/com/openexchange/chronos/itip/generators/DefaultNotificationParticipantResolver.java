@@ -201,7 +201,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
             participant.setUser(u);
             participant.setContext(ctx);
 
-            String folderIdForUser = util.getFolderIdForUser(session, appId);
+            String folderIdForUser = CalendarUtils.prependDefaultAccount(util.getFolderIdForUser(session, appId));
             if (folderIdForUser == null) {
                 folderIdForUser = update.getFolderId();
             }

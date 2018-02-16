@@ -135,6 +135,11 @@ import com.openexchange.search.internal.operands.ConstantOperand;
  */
 public class CalendarUtils {
 
+    /**
+     * The default calendar account prefix.
+     */
+    public static final String DEFAULT_ACCOUNT_PREFIX = "cal://0/";
+
     /** A timestamp in the distant future as substitute for the client timestamp when circumventing concurrent modification checks */
     public static final long DISTANT_FUTURE = Long.MAX_VALUE;
 
@@ -1813,6 +1818,21 @@ public class CalendarUtils {
             fields.addAll(FLAG_FIELDS);
         }
         return fields.toArray(new EventField[fields.size()]);
+    }
+
+    /**
+     * Prepends the default account to the given folder id if this is a plain numeric folder id.
+     *
+     * @param folderId
+     * @return The folder id with the default account as absolute identifier.
+     */
+    public static String prependDefaultAccount(String folderId) {
+        try {
+            Integer.parseInt(folderId);
+        } catch (NumberFormatException nfe) {
+            return folderId;
+        }
+        return DEFAULT_ACCOUNT_PREFIX + folderId;
     }
 
     /**
