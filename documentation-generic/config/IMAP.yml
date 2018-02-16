@@ -744,3 +744,20 @@ properties:
       file: imap.properties
       packageName: open-xchange-imap
       tags: ["Mail","IMAP"]
+    - key: com.openexchange.imap.attachmentMarker.enabled
+      description: |
+        Enables the use of has-attachment marker for a message through IMAP user flags "$HasAttachment" and "$HasNoAttachment".
+        If enabled, the user is allowed to sort and search messages by has-attachment information. Moreover, advertising
+        whether a message contains file attachments is performed using those flags (if present) instead of examining each
+        message individually.
+        
+        Note:
+        The option "com.openexchange.mail.userFlagsEnabled" is required to be set to "true" (default)
+      defaultValue: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: com.openexchange.mail.userFlagsEnabled
+      file: imap.properties
+      packageName: open-xchange-imap
+      tags: ["Mail","IMAP"]
