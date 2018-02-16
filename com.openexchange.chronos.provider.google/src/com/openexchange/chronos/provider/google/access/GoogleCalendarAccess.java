@@ -74,6 +74,7 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolderProperty;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
+import com.openexchange.chronos.provider.caching.CachingCalendarException;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.provider.google.GoogleCalendarConfigField;
@@ -105,6 +106,7 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
     private static final Logger LOG = LoggerFactory.getLogger(GoogleCalendarAccess.class);
 
     private final GoogleOAuthAccess oauthAccess;
+    private boolean initialized = false;
     private final long refreshInterval;
     private final long requestTimeout;
 
@@ -123,13 +125,32 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
         requestTimeout = GoogleCalendarConfig.getRequestTimeout(session);
         try {
             oauthAccess = new GoogleOAuthAccess(account.getUserConfiguration().getInt(GoogleCalendarConfigField.OAUTH_ID), session);
-            oauthAccess.initialize();
         } catch (JSONException e) {
             throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+        try {
+            init(checkConfig);
+        } catch (OXException e) {
+            // ignore exception for now
+        }
+    }
 
-        if (checkConfig) {
-            initCalendarFolder(session);
+    private void init(boolean checkConfig) throws OXException {
+        if (!initialized) {
+            try {
+                oauthAccess.initialize();
+                initialized = true;
+            } catch (OXException e) {
+                /**
+                 * Initialization of the oauthAccess failed. Stopping initialization of the GoogleCalendarAccess.
+                 * Set refreshInterval to minimum.
+                 */
+                throw CachingCalendarException.create(e);
+            }
+
+            if (checkConfig) {
+                initCalendarFolder(session);
+            }
         }
     }
 
@@ -254,6 +275,7 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
     }
 
     GoogleEventsPage getEventsInFolder(String folderId, String token, boolean isSyncToken) throws OXException {
+        init(true);
         try {
             Calendar googleCal = (Calendar) oauthAccess.getClient().getClient();
             com.google.api.services.calendar.Calendar.Events.List list = googleCal.events().list(folderId);
@@ -315,6 +337,7 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
 
     @Override
     public ExternalCalendarResult getAllEvents() throws OXException {
+        init(true);
         return new GoogleCalendarResult(this);
     }
 
@@ -345,5 +368,4 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
         // TODO handle warnings
         return null;
     }
-
 }

@@ -67,6 +67,7 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
+import com.openexchange.chronos.provider.caching.CachingCalendarException;
 import com.openexchange.chronos.provider.caching.DiffAwareExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.handlers.SearchHandler;
@@ -113,9 +114,9 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     protected Session session;
     protected ServiceLookup services;
 
-    private List<OXException> warnings = new ArrayList<>();
-    private JSONObject originInternalConfiguration;
-    private JSONObject originUserConfiguration;
+    private final List<OXException> warnings = new ArrayList<>();
+    private final JSONObject originInternalConfiguration;
+    private final JSONObject originUserConfiguration;
 
     /**
      * Initializes a new {@link BirthdaysCalendarAccess}.
@@ -328,7 +329,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     protected long getCascadedRefreshInterval() {
         try {
             long providerRefreshInterval = getRefreshInterval();
-            if (providerRefreshInterval > 0) {
+            if (providerRefreshInterval >= 0) {
                 return providerRefreshInterval;
             }
         } catch (OXException e) {
@@ -448,7 +449,10 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         }
     }
 
-    private void handleInternally(CachingHandler cachingHandler, OXException e) {
+    private void handleInternally(CachingHandler cachingHandler, OXException e) throws OXException {
+        if(e instanceof CachingCalendarException) {
+            throw ((CachingCalendarException) e).getExceptionToIgnore();
+        }
         if (e.getExceptionCode() == null || e.getExceptionCode().equals(CalendarExceptionCodes.AUTH_FAILED.create(""))) {
             return;
         }
