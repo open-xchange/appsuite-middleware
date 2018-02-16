@@ -1085,9 +1085,17 @@ public final class IMAPCommandsCollection {
      * @return The total/unread message count
      * @throws MessagingException If determining counts fails
      */
-    public static int[] getTotalAndUnread(final IMAPStore imapStore, final String fullName) throws MessagingException {
-        // TODO: Main method for acquiring STATUS information
+    public static int[] getTotalAndUnread(final IMAPStore imapStore, final String fullName, final boolean excludeDeleted) throws MessagingException {
         final DefaultFolder defaultFolder = (DefaultFolder) imapStore.getDefaultFolder();
+        if (excludeDeleted) {
+            return getTotalAndUnreadBySearch(defaultFolder, fullName);
+        } else {
+            return getTotalAndUnreadByStatus(defaultFolder, fullName);
+        }
+
+    }
+
+    private static int[] getTotalAndUnreadByStatus(DefaultFolder defaultFolder, String fullName) throws MessagingException{
         return ((int[]) defaultFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
@@ -1107,7 +1115,7 @@ public final class IMAPCommandsCollection {
                  * Item arguments
                  */
                 final Argument itemArgs = new Argument();
-                final String[] items = { "MESSAGES", "UNSEEN"};
+                final String[] items = { "MESSAGES", "UNSEEN" };
                 for (int i = 0, len = items.length; i < len; i++) {
                     itemArgs.writeAtom(items[i]);
                 }
@@ -1139,6 +1147,81 @@ public final class IMAPCommandsCollection {
                 protocol.handleResult(response);
                 return ret;
             }
+        }));
+    }
+
+    private static int[] getTotalAndUnreadBySearch(DefaultFolder defaultFolder, String fullName) throws MessagingException{
+       return ((int[]) defaultFolder.doCommand(new IMAPFolder.ProtocolCommand() {
+
+            @Override
+            public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
+                /*
+                 * Encode the mbox as per RFC2060
+                 */
+                final Argument sel_args = new Argument();
+                sel_args.writeString(BASE64MailboxEncoder.encode(fullName));
+                /*
+                 * Perform command
+                 */
+                Response[] selectCommand = performCommand(protocol, "EXAMINE", sel_args);
+                int total = 0;
+                final Response response = selectCommand[selectCommand.length - 1];
+                if(response.isOK()){
+                    for(Response r: selectCommand){
+                        if(r instanceof IMAPResponse && ((IMAPResponse) r).keyEquals("EXISTS")){
+                            total = ((IMAPResponse) r).getNumber();
+                            break;
+                        }
+                    }
+                }
+
+                String command = COMMAND_SEARCH_UNSEEN_NOT_DELETED;
+                Response[] resp = performCommand(protocol, command);
+                int unread = handleSearchResponses(resp, protocol, command);
+                int result[] = new int[]{total, unread};
+                result[result.length - 1] = unread;
+                notifyResponseHandlers(resp, protocol);
+                return result;
+            }
+
+            private int handleSearchResponses(final Response[] r, final IMAPProtocol p, String command) throws ProtocolException {
+                final Response response = r[r.length - 1];
+                int result = 0;
+                if (response.isOK()) {
+                    for (int i = 0, len = r.length - 1; i < len; i++) {
+                        if (!(r[i] instanceof IMAPResponse)) {
+                            r[i] = null;
+                            continue;
+                        }
+                        final IMAPResponse ir = (IMAPResponse) r[i];
+                        /*
+                         * The SEARCH response from the server contains a listing of message sequence numbers corresponding to those
+                         * messages that match the searching criteria.
+                         */
+                        if (ir.keyEquals(COMMAND_SEARCH)) {
+                            while (ir.readAtomString() != null) {
+                                result++;
+                            }
+                        }
+                        r[i] = null;
+                    }
+                    notifyResponseHandlers(r, p);
+                } else if (response.isBAD()) {
+                    if (ImapUtility.isInvalidMessageset(response)) {
+                        return 0;
+                    }
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
+                    throw new BadCommandException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, COMMAND_SEARCH_UNSEEN, ImapUtility.appendCommandInfo(response.toString(), defaultFolder)));
+                } else if (response.isNO()) {
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
+                    throw new CommandFailedException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, COMMAND_SEARCH_UNSEEN, ImapUtility.appendCommandInfo(response.toString(), defaultFolder)));
+                } else {
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
+                    p.handleResult(response);
+                }
+                return result;
+            } // End of handleSearchResponses()
+
         }));
     }
 
@@ -2277,7 +2360,7 @@ public final class IMAPCommandsCollection {
                     final MailFields set = new MailFields(fields);
                     final boolean body = set.contains(MailField.BODY) || set.contains(MailField.FULL);
                     final MailField sort = MailField.toField((sortField == null ? MailSortField.RECEIVED_DATE : sortField).getListField());
-                    final FetchProfile fp = null == sort ? getFetchProfile(fields, fastFetch, mailConfig.getCapabilities().hasAttachmentSearch()) : getFetchProfile(fields, sort, fastFetch, mailConfig.getCapabilities().hasAttachmentSearch());
+                    final FetchProfile fp = getFetchProfile(fields, sort, fastFetch, mailConfig.getCapabilities().hasAttachmentMarker());
                     newMsgs = new MessageFetchIMAPCommand(folder, p.isREV1(), newMsgSeqNums, fp, serverInfo, false, false, body).doCommand();
                 } catch (final MessagingException e) {
                     throw wrapException(e, null);

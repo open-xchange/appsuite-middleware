@@ -59,7 +59,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public interface TrashAwareFolderService {
+public interface TrashAwareFolderService extends FolderService {
 
     /**
      * Deletes the specified folder in given tree.

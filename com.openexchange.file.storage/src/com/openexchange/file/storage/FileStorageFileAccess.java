@@ -72,8 +72,19 @@ public interface FileStorageFileAccess extends TransactionAware {
      */
     public static class IDTuple {
 
-        private String folder;
+        /**
+         * Creates a copy from given tuple
+         *
+         * @param tuple The tuple to copy
+         * @return The copy
+         */
+        public static IDTuple copy(IDTuple tuple) {
+            return null == tuple ? null : new IDTuple(tuple.folder, tuple.id);
+        }
 
+        // --------------------------------------------------------------------
+
+        private String folder;
         private String id;
 
         public IDTuple() {
@@ -90,16 +101,18 @@ public interface FileStorageFileAccess extends TransactionAware {
             return folder;
         }
 
-        public void setFolder(final String folder) {
+        public IDTuple setFolder(final String folder) {
             this.folder = folder;
+            return this;
         }
 
         public String getId() {
             return id;
         }
 
-        public void setId(final String id) {
+        public IDTuple setId(final String id) {
             this.id = id;
+            return this;
         }
 
         @Override
@@ -213,10 +226,10 @@ public interface FileStorageFileAccess extends TransactionAware {
         public Comparator<File> comparatorBy(final File.Field by) {
             final FileComparator fileComparator = new FileComparator(by);
             switch (this) {
-            case ASC:
-                return fileComparator;
-            case DESC:
-                return new InverseComparator(fileComparator);
+                case ASC:
+                    return fileComparator;
+                case DESC:
+                    return new InverseComparator(fileComparator);
             }
             return null;
         }
@@ -224,10 +237,10 @@ public interface FileStorageFileAccess extends TransactionAware {
         public Comparator<File> comparatorBy(final File.Field by, final Comparator<File> comparator) {
             final FileComparator fileComparator = new FileComparator(by, comparator);
             switch (this) {
-            case ASC:
-                return fileComparator;
-            case DESC:
-                return new InverseComparator(fileComparator);
+                case ASC:
+                    return fileComparator;
+                case DESC:
+                    return new InverseComparator(fileComparator);
             }
             return null;
         }

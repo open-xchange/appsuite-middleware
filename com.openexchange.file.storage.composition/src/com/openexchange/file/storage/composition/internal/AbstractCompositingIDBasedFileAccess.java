@@ -49,7 +49,12 @@
 
 package com.openexchange.file.storage.composition.internal;
 
-import static com.openexchange.file.storage.composition.internal.FileStorageTools.*;
+import static com.openexchange.file.storage.composition.internal.FileStorageTools.addIDColumns;
+import static com.openexchange.file.storage.composition.internal.FileStorageTools.checkPatternLength;
+import static com.openexchange.file.storage.composition.internal.FileStorageTools.ensureFolderIDs;
+import static com.openexchange.file.storage.composition.internal.FileStorageTools.extractRemoteAddress;
+import static com.openexchange.file.storage.composition.internal.FileStorageTools.getAccountName;
+import static com.openexchange.file.storage.composition.internal.FileStorageTools.getPathString;
 import static com.openexchange.file.storage.composition.internal.idmangling.IDManglingFileCustomizer.fixIDs;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -59,6 +64,7 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -101,6 +107,7 @@ import com.openexchange.file.storage.FileStorageMultiMove;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FileStorageRandomFileAccess;
 import com.openexchange.file.storage.FileStorageRangeFileAccess;
+import com.openexchange.file.storage.FileStorageRestoringFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
@@ -150,7 +157,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
     private static final TimedResult<File> EMPTY_TIMED_RESULT = Results.emptyTimedResult();
 
     /** The handler registry */
-    private static final AtomicReference<FileStreamHandlerRegistry> HANDLER_REGISTRY = new AtomicReference<FileStreamHandlerRegistry>();
+    private static final AtomicReference<FileStreamHandlerRegistry> HANDLER_REGISTRY = new AtomicReference<>();
 
     /** The service identifier for InfoStore. */
     protected static final String INFOSTORE_SERVICE_ID = "com.openexchange.infostore";
@@ -262,13 +269,13 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         /*
          * determine the file accesses for queried folders
          */
-        Map<FileStorageFileAccess, List<String>> foldersPerFileAccess = new HashMap<FileStorageFileAccess, List<String>>();
+        Map<FileStorageFileAccess, List<String>> foldersPerFileAccess = new HashMap<>();
         for (String folderId : folderIds) {
             FolderID folderID = new FolderID(folderId);
             FileStorageFileAccess fileAccess = getFileAccess(folderID.getService(), folderID.getAccountId());
             List<String> folders = foldersPerFileAccess.get(fileAccess);
             if (null == folders) {
-                folders = new ArrayList<String>();
+                folders = new ArrayList<>();
                 foldersPerFileAccess.put(fileAccess, folders);
             }
             folders.add(folderID.getFolderId());
@@ -276,7 +283,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         /*
          * get folder sequence numbers from file accesses
          */
-        Map<String, Long> sequenceNumbers = new HashMap<String, Long>(folderIds.size());
+        Map<String, Long> sequenceNumbers = new HashMap<>(folderIds.size());
         for (Entry<FileStorageFileAccess, List<String>> entry : foldersPerFileAccess.entrySet()) {
             FileStorageFileAccess fileAccess = entry.getKey();
             String accountID = fileAccess.getAccountAccess().getAccountId();
@@ -298,7 +305,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
     @Override
     public Map<String, String> getETags(List<String> folderIds) throws OXException {
-        Map<String, String> eTags = new HashMap<String, String>();
+        Map<String, String> eTags = new HashMap<>();
         Map<FileStorageFileAccess, List<String>> foldersByFileAccess = getFoldersByFileAccess(folderIds);
         for (Map.Entry<FileStorageFileAccess, List<String>> entry : foldersByFileAccess.entrySet()) {
             FileStorageFileAccess fileAccess = entry.getKey();
@@ -464,7 +471,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         /*
          * get files from multiple storages
          */
-        List<File> documents = new ArrayList<File>(ids.size());
+        List<File> documents = new ArrayList<>(ids.size());
         for (Map.Entry<FileStorageFileAccess, List<IDTuple>> getOp : getOperations.entrySet()) {
             FileStorageFileAccess access = getOp.getKey();
             TimedResult<File> results = fixIDs(access.getDocuments(getOp.getValue(), columns),
@@ -474,7 +481,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         /*
          * re-order according to requested order, extract sequence number
          */
-        List<File> orderedDocuments = new ArrayList<File>(documents.size());
+        List<File> orderedDocuments = new ArrayList<>(documents.size());
         long sequenceNumber = 0;
         for (String id : ids) {
             File file = find(documents, id);
@@ -492,7 +499,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
          * wrap result in search iterator
          */
         final long finalSequenceNumber = sequenceNumber;
-        final SearchIterator<File> searchIterator = new SearchIteratorAdapter<File>(orderedDocuments.iterator(), orderedDocuments.size());
+        final SearchIterator<File> searchIterator = new SearchIteratorAdapter<>(orderedDocuments.iterator(), orderedDocuments.size());
         return new TimedResult<File>() {
 
             @Override
@@ -509,7 +516,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
     @Override
     public SearchIterator<File> getUserSharedDocuments(List<Field> fields, Field sort, SortDirection order) throws OXException {
-        List<SearchIterator<File>> searchIterators = new ArrayList<SearchIterator<File>>();
+        List<SearchIterator<File>> searchIterators = new ArrayList<>();
         List<FileStorageFileAccess> fileStorageAccesses = getAllFileStorageAccesses();
         for (FileStorageFileAccess fileAccess : fileStorageAccesses) {
             if (ObjectPermissionAware.class.isInstance(fileAccess)) {
@@ -518,7 +525,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 searchIterators.add(fixIDs(searchIterator, accountAccess.getService().getId(), accountAccess.getAccountId()));
             }
         }
-        return new MergingSearchIterator<File>(order.comparatorBy(sort), order.equals(SortDirection.ASC), searchIterators);
+        return new MergingSearchIterator<>(order.comparatorBy(sort), order.equals(SortDirection.ASC), searchIterators);
     }
 
     @Override
@@ -638,7 +645,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
          * delete files per storage
          */
         Map<FileStorageFileAccess, List<IDTuple>> deleteOperations = getFilesPerFileAccesses(ids);
-        List<String> notDeleted = new ArrayList<String>(ids.size());
+        List<String> notDeleted = new ArrayList<>(ids.size());
         for (Map.Entry<FileStorageFileAccess, List<IDTuple>> deleteOp : deleteOperations.entrySet()) {
             FileStorageFileAccess access = deleteOp.getKey();
             final List<IDTuple> toDelete = ensureFolderIDs(access, deleteOp.getValue());
@@ -659,7 +666,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 @Override
                 protected List<IDTuple> callInTransaction(FileStorageFileAccess access) throws OXException {
                     List<IDTuple> conflicted = access.removeDocument(toDelete, sequenceNumber, hardDelete);
-                    List<IDTuple> deleted = new ArrayList<FileStorageFileAccess.IDTuple>(toDelete);
+                    List<IDTuple> deleted = new ArrayList<>(toDelete);
                     deleted.removeAll(conflicted);
                     return conflicted;
                 }
@@ -707,7 +714,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             notRemoved = versions;
         }
 
-        Set<String> removed = new HashSet<String>(versions.length);
+        Set<String> removed = new HashSet<>(versions.length);
         for (String i : versions) {
             removed.add(i);
         }
@@ -1023,7 +1030,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
          * take over metadata selectively
          */
         if (null != modifiedColumns && 0 < modifiedColumns.size()) {
-            Set<Field> fieldsToSkip = new HashSet<Field>(modifiedColumns);
+            Set<Field> fieldsToSkip = new HashSet<>(modifiedColumns);
             fieldsToSkip.add(Field.FOLDER_ID);
             fieldsToSkip.add(Field.ID);
             fieldsToSkip.add(Field.LAST_MODIFIED);
@@ -1276,7 +1283,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                     protected List<String> callInTransaction(FileStorageFileAccess access) throws OXException {
                         FileStorageMultiMove multiMove = (FileStorageMultiMove) access;
 
-                        List<IDTuple> sources = new ArrayList<IDTuple>(sourceIds.size());
+                        List<IDTuple> sources = new ArrayList<>(sourceIds.size());
                         for (String sourceId : sourceIds) {
                             FileID sourceID = new FileID(sourceId);
                             sources.add(new IDTuple(sourceID.getFolderId(), sourceID.getFileId()));
@@ -1284,7 +1291,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
                         List<IDTuple> failedOnes = multiMove.move(sources, destinationID.getFolderId(), sequenceNumber, adjustFilenamesAsNeeded);
 
-                        List<String> ids = new ArrayList<String>(sourceIds.size());
+                        List<String> ids = new ArrayList<>(sourceIds.size());
                         for (IDTuple idTuple : failedOnes) {
                             FileID fid = new FileID(destService, destAccountId, idTuple.getId(), idTuple.getId());
                             ids.add(fid.toUniqueID());
@@ -1419,7 +1426,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         Map<FileStorageFileAccess, List<String>> foldersByFileAccess;
         if (null == folderIds || 0 == folderIds.size()) {
             List<FileStorageFileAccess> allFileStorageAccesses = getAllFileStorageAccesses();
-            foldersByFileAccess = new HashMap<FileStorageFileAccess, List<String>>(allFileStorageAccesses.size());
+            foldersByFileAccess = new HashMap<>(allFileStorageAccesses.size());
             for (FileStorageFileAccess fileStorageFileAccess : allFileStorageAccesses) {
                 foldersByFileAccess.put(fileStorageFileAccess, null);
             }
@@ -1452,35 +1459,34 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
              * schedule tasks to perform search in multiple storages concurrently
              */
             ThreadPoolService threadPool = ThreadPools.getThreadPool();
-            CompletionService<SearchIterator<File>> completionService = null != threadPool ?
-                new ThreadPoolCompletionService<SearchIterator<File>>(threadPool) : new CallerRunsCompletionService<SearchIterator<File>>();
-                int count = 0;
-                for (Entry<FileStorageFileAccess, List<String>> entry : foldersByFileAccess.entrySet()) {
-                    if (FileStorageTools.supports(entry.getKey(), FileStorageCapability.SEARCH_BY_TERM)) {
-                        FileStorageAdvancedSearchFileAccess fileAccess = (FileStorageAdvancedSearchFileAccess) entry.getKey();
-                        completionService.submit(getSearchCallable(fileAccess, entry.getValue(), searchTerm, fields, sort, order));
-                        count++;
+            CompletionService<SearchIterator<File>> completionService = null != threadPool ? new ThreadPoolCompletionService<>(threadPool) : new CallerRunsCompletionService<>();
+            int count = 0;
+            for (Entry<FileStorageFileAccess, List<String>> entry : foldersByFileAccess.entrySet()) {
+                if (FileStorageTools.supports(entry.getKey(), FileStorageCapability.SEARCH_BY_TERM)) {
+                    FileStorageAdvancedSearchFileAccess fileAccess = (FileStorageAdvancedSearchFileAccess) entry.getKey();
+                    completionService.submit(getSearchCallable(fileAccess, entry.getValue(), searchTerm, fields, sort, order));
+                    count++;
+                }
+            }
+            /*
+             * collect & filter results
+             */
+            return new FilteringSearchIterator<File>(collectSearchResults(completionService, count, sort, order)) {
+
+                int index = 0;
+
+                @Override
+                public boolean accept(File thing) throws OXException {
+                    try {
+                        if (0 < start && index < start || 0 < end && index >= end) {
+                            return false;
+                        }
+                        return true;
+                    } finally {
+                        index++;
                     }
                 }
-                /*
-                 * collect & filter results
-                 */
-                return new FilteringSearchIterator<File>(collectSearchResults(completionService, count, sort, order)) {
-
-                    int index = 0;
-
-                    @Override
-                    public boolean accept(File thing) throws OXException {
-                        try {
-                            if (0 < start && index < start || 0 < end && index >= end) {
-                                return false;
-                            }
-                            return true;
-                        } finally {
-                            index++;
-                        }
-                    }
-                };
+            };
         }
     }
 
@@ -1551,7 +1557,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
          * Poll them concurrently...
          */
         Collections.sort(all, INFOSTORE_FIRST_COMPARATOR);
-        LinkedList<Future<SearchIterator<File>>> tasks = new LinkedList<Future<SearchIterator<File>>>();
+        LinkedList<Future<SearchIterator<File>>> tasks = new LinkedList<>();
         ThreadPoolService threadPool = ThreadPools.getThreadPool();
         for (int i = 0; i < numOfStorages; i++) {
             final FileStorageFileAccess files = all.get(i);
@@ -1578,7 +1584,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
          *
          * Take first from InfoStore using this thread
          */
-        final Queue<SearchIterator<File>> results = new ConcurrentLinkedQueue<SearchIterator<File>>();
+        final Queue<SearchIterator<File>> results = new ConcurrentLinkedQueue<>();
         {
             SearchIterator<File> it = getFrom(tasks.removeFirst());
             if (null != it) {
@@ -1616,7 +1622,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
 
-        return new MergingSearchIterator<File>(order.comparatorBy(sort), order.equals(SortDirection.ASC), new LinkedList<SearchIterator<File>>(results));
+        return new MergingSearchIterator<>(order.comparatorBy(sort), order.equals(SortDirection.ASC), new LinkedList<>(results));
     }
 
     static <V> V getFrom(Future<V> future) throws OXException {
@@ -1685,6 +1691,48 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         postEvent(event);
     }
 
+    @Override
+    public Map<FileID, FileStorageFolder[]> restore(List<String> fileIds, String defaultDestFolderId) throws OXException {
+        if (null == defaultDestFolderId) {
+            throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create("null");
+        }
+
+        // Parse folder identifier
+        FolderID destinationID = new FolderID(defaultDestFolderId);
+        String destService = destinationID.getService();
+        String destAccountId = destinationID.getAccountId();
+
+        // Check for "RESTORE" capability
+        FileStorageFileAccess fileAccess = getFileAccess(destService, destAccountId);
+        if (false == (fileAccess instanceof FileStorageRestoringFileAccess)) {
+            // Restore is not supported
+            throw FileStorageExceptionCodes.NO_RESTORE_SUPPORT.create();
+        }
+
+        // Any file identifiers given?
+        if (null == fileIds || fileIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        List<IDTuple> idTuples = new ArrayList<>(fileIds.size());
+        for (String fileId : fileIds) {
+            FileID sourceID = new FileID(fileId);
+            if (false == sourceID.getService().equals(destService) || false == sourceID.getAccountId().equals(destAccountId)) {
+                throw FileStorageExceptionCodes.INVALID_FILE_IDENTIFIER.create(fileId);
+            }
+            idTuples.add(new IDTuple(sourceID.getFolderId(), sourceID.getFileId()));
+        }
+
+        Map<IDTuple, FileStorageFolder[]> restored = ((FileStorageRestoringFileAccess) fileAccess).restore(idTuples, defaultDestFolderId);
+        Map<FileID, FileStorageFolder[]> result = new LinkedHashMap<>(restored.size());
+        for (Map.Entry<IDTuple, FileStorageFolder[]> entry : restored.entrySet()) {
+            IDTuple tuple = entry.getKey();
+            FileID fileId = new FileID(destService, destAccountId, tuple.getFolder(), tuple.getId());
+            result.put(fileId, entry.getValue());
+        }
+        return result;
+    }
+
     /**
      * Posts specified event
      *
@@ -1706,8 +1754,8 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
      * @throws OXException
      */
     protected Map<FileStorageFileAccess, List<IDTuple>> getFilesPerFileAccesses(List<String> ids) throws OXException {
-        Map<FileStorageFileAccess, List<IDTuple>> fileAccesses = new HashMap<FileStorageFileAccess, List<IDTuple>>();
-        Map<String, FileStorageFileAccess> identifiedFileAccesses = new HashMap<String, FileStorageFileAccess>();
+        Map<FileStorageFileAccess, List<IDTuple>> fileAccesses = new HashMap<>();
+        Map<String, FileStorageFileAccess> identifiedFileAccesses = new HashMap<>();
         for (String id : ids) {
             FileID fileID = new FileID(id);
             String fileAccessID = fileID.getService() + '/' + fileID.getAccountId();
@@ -1718,7 +1766,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             }
             List<IDTuple> gets = fileAccesses.get(fileAccess);
             if (null == gets) {
-                gets = new ArrayList<IDTuple>();
+                gets = new ArrayList<>();
                 fileAccesses.put(fileAccess, gets);
             }
             gets.add(new IDTuple(fileID.getFolderId(), fileID.getFileId()));
@@ -1795,14 +1843,14 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             return Collections.singletonMap(getFileAccess(folderID.getService(), folderID.getAccountId()),
                 Collections.singletonList(folderID.getFolderId()));
         } else {
-            Map<String, FileStorageFileAccess> fileAccessesByAccount = new HashMap<String, FileStorageFileAccess>();
-            Map<String, List<String>> foldersByAccount = new HashMap<String, List<String>>();
+            Map<String, FileStorageFileAccess> fileAccessesByAccount = new HashMap<>();
+            Map<String, List<String>> foldersByAccount = new HashMap<>();
             for (String uniqueID : folderIds) {
                 FolderID folderID = new FolderID(uniqueID);
                 String key = folderID.getService() + '/' + folderID.getAccountId();
                 List<String> folders = foldersByAccount.get(key);
                 if (null == folders) {
-                    folders = new ArrayList<String>();
+                    folders = new ArrayList<>();
                     foldersByAccount.put(key, folders);
                 }
                 folders.add(folderID.getFolderId());
@@ -1813,7 +1861,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 }
             }
             Map<FileStorageFileAccess, List<String>> foldersByFileAccess =
-                new HashMap<FileStorageFileAccess, List<String>>(foldersByAccount.size());
+                new HashMap<>(foldersByAccount.size());
             for (Entry<String, FileStorageFileAccess> entry : fileAccessesByAccount.entrySet()) {
                 foldersByFileAccess.put(entry.getValue(), foldersByAccount.get(entry.getKey()));
             }
@@ -1831,7 +1879,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
      * @return The warnings, or an empty list if there are none
      */
     private List<OXException> collectWarningsBeforeMove(FileID sourceFileID, File sourceFile, FolderID targetFolderID, List<Field> modifiedColumns) throws OXException {
-        List<OXException> warnings = new ArrayList<OXException>(6);
+        List<OXException> warnings = new ArrayList<>(6);
         if (Strings.isNotEmpty(sourceFile.getDescription()) && (null == modifiedColumns || modifiedColumns.contains(Field.DESCRIPTION))) {
             FolderID sourceFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceFileID.getFolderId());
             FileStorageFolder[] sourcePath = getFolderAccess(sourceFolderID).getPath2DefaultFolder(sourceFolderID.getFolderId());
@@ -1868,7 +1916,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
      * @return The warnings, or an empty list if there are none
      */
     private List<OXException> collectWarningsBeforeSave(File file, FileStorageFileAccess fileAccess, List<Field> modifiedColumns) throws OXException {
-        List<OXException> warnings = new ArrayList<OXException>(4);
+        List<OXException> warnings = new ArrayList<>(4);
         String fileName = null;
         if (Strings.isNotEmpty(file.getDescription()) && (null == modifiedColumns || modifiedColumns.contains(Field.DESCRIPTION)) && !FileStorageTools.supports(fileAccess, Field.DESCRIPTION)) {
             fileName = getFileNameFrom(file, fileAccess);
@@ -1906,7 +1954,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
      * @throws OXException
      */
     private static SearchIterator<File> collectSearchResults(CompletionService<SearchIterator<File>> completionService, int count, Field sort, SortDirection order) throws OXException {
-        List<SearchIterator<File>> searchIterators = new ArrayList<SearchIterator<File>>(count);
+        List<SearchIterator<File>> searchIterators = new ArrayList<>(count);
         for (int i = 0; i < count; i++) {
             SearchIterator<File> searchIterator = null;
             try {
@@ -1925,7 +1973,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 searchIterators.add(searchIterator);
             }
         }
-        return new MergingSearchIterator<File>(order.comparatorBy(sort), order.equals(SortDirection.ASC), searchIterators);
+        return new MergingSearchIterator<>(order.comparatorBy(sort), order.equals(SortDirection.ASC), searchIterators);
     }
 
     /**
@@ -1999,7 +2047,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 index++;
             }
 
-            List<File> files = new LinkedList<File>();
+            List<File> files = new LinkedList<>();
             while (index < to && iter.hasNext()) {
                 files.add(iter.next());
                 index++;

@@ -68,7 +68,6 @@ import com.openexchange.session.management.ManagedSession;
 import com.openexchange.session.management.SessionManagementService;
 import com.openexchange.session.management.SessionManagementStrings;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.user.UserService;
 
 /**
  * {@link AllAction}
@@ -91,11 +90,7 @@ public class AllAction implements AJAXActionService {
         if (null == service) {
             throw ServiceExceptionCode.absentService(SessionManagementService.class);
         }
-        UserService userService = services.getService(UserService.class);
-        Locale locale = Locale.getDefault();
-        if (null != userService) {
-            locale = userService.getUser(session.getUserId(), session.getContextId()).getLocale();
-        }
+        Locale locale = session.getUser().getLocale();
         String unknownLocation = SessionManagementStrings.UNKNOWN_LOCATION;
         StringHelper helper = StringHelper.valueOf(locale);
         if (null != helper) {
@@ -136,16 +131,17 @@ public class AllAction implements AJAXActionService {
                     String type = deviceInfo.getJSONObject("client").getString("type");
                     switch (type) {
                         case "browser":
-                            browsers.add(0, json);
+                            browsers.put(json);
                             break;
                         case "oxapp":
-                            oxapps.add(0, json);
+                            oxapps.put(json);
                             break;
-                        case "sync":
-                            syncapps.add(0, json);
+                        case "eas":
+                        case "dav":
+                            syncapps.put(json);
                             break;
                         default:
-                            others.add(0, json);
+                            others.put(json);
                             break;
                     }
                 }
@@ -188,8 +184,11 @@ public class AllAction implements AJAXActionService {
                     return deviceInfo;
                 }
             }
-            deviceInfo.put("info", "unknown");
-            deviceInfo.put("type", "other");
+            StringHelper helper = StringHelper.valueOf(locale);
+            deviceInfo.put("displayName", helper.getString(SessionManagementStrings.UNKNOWN_DEVICE));
+            JSONObject client = new JSONObject(1);
+            client.put("type", "other");
+            deviceInfo.put("client", client);
             return deviceInfo;
         } catch (JSONException e) {
             // will not happen

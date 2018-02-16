@@ -56,6 +56,7 @@ import java.util.Set;
 import com.openexchange.file.storage.DelegatingFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.FolderPath;
 
 
 /**
@@ -380,6 +381,20 @@ public class MetaDataAddingFile implements DelegatingFile {
     @Override
     public boolean matches(String pattern, Field... fields) {
         return file.matches(pattern, fields);
+    }
+
+    @Override
+    public void setSequenceNumber(long sequenceNumber) {
+        file.setSequenceNumber(sequenceNumber);
+    }
+
+    public FolderPath getOrigin() {
+        return file.getOrigin();
+    }
+
+    @Override
+    public void setOrigin(FolderPath origin) {
+        file.setOrigin(origin);
     }
 
 }

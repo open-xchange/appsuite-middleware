@@ -67,6 +67,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.jslob.JSlobEntry;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -89,8 +90,8 @@ public class BirthdaysCalendarProviderActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ContactService.class, RecurrenceService.class, CalendarUtilities.class, FolderService.class, CalendarStorageFactory.class,
-            DatabaseService.class, ContextService.class, AdministrativeCalendarAccountService.class, ConversionService.class, 
-            CapabilityService.class, CalendarAccountService.class
+            DatabaseService.class, ContextService.class, AdministrativeCalendarAccountService.class, ConversionService.class,
+            CapabilityService.class, CalendarAccountService.class, I18nServiceRegistry.class
         };
     }
 

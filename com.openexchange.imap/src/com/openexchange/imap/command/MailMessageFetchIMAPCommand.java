@@ -65,6 +65,7 @@ import javax.mail.FetchProfile;
 import javax.mail.Flags;
 import javax.mail.Header;
 import javax.mail.Message;
+import javax.mail.MessageRemovedException;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Part;
@@ -77,11 +78,10 @@ import javax.mail.internet.ParameterList;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPServerInfo;
-import com.openexchange.imap.services.Services;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.FullnameArgument;
-import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.ContentType;
@@ -89,14 +89,10 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.converters.AlternativeHasAttachmentSetter;
-import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import com.openexchange.mail.mime.converters.MimeMessageUtils;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.mime.utils.MimeStorageUtility;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
-import com.sun.mail.imap.IMAPTextPreviewProvider;
 import com.sun.mail.imap.protocol.BODY;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 import com.sun.mail.imap.protocol.ENVELOPE;
@@ -142,13 +138,11 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
     private boolean checkICal;
     private boolean checkVCard;
     private boolean treatEmbeddedAsAttachment;
+    private final boolean examineHasAttachmentUserFlags;
     private final String fullname;
     private final Set<FetchItemHandler> lastHandlers;
     private final TLongIntHashMap uid2index;
     private final TIntIntHashMap seqNum2index;
-    private final IMAPTextPreviewProvider.Mode textPreviewMode;
-    private final IMAPTextPreviewProvider textPreviewProvider;
-    private final MailConfig mailConfig;
 
     /**
      * Initializes a new {@link MailMessageFetchIMAPCommand}.
@@ -158,45 +152,19 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param seqNums The sequence numbers to fetch
      * @param fp The fetch profile to use
      * @param serverInfo The IMAP server information deduced from configuration
-     * @throws MessagingException If initialization fails
-     * @deprecated Use {@link #MailMessageFetchIMAPCommand(IMAPFolder, boolean, int[], FetchProfile, IMAPServerInfo, MailConfig)} instead
-     */
-    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, int[] seqNums, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
-        this(imapFolder, isRev1, seqNums, fp, serverInfo, null);
-    }
-
-    /**
-     * Initializes a new {@link MailMessageFetchIMAPCommand}.
-     *
-     * @param imapFolder The IMAP folder providing connected protocol
-     * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
-     * @param seqNums The sequence numbers to fetch
-     * @param fp The fetch profile to use
-     * @param serverInfo The IMAP server information deduced from configuration
-     * @param mailConfig The mail configuration
+     * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
      * @throws MessagingException If initialization fails
      */
-    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, int[] seqNums, FetchProfile fp, IMAPServerInfo serverInfo, MailConfig mailConfig) throws MessagingException {
+    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, int[] seqNums, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags) throws MessagingException {
         super(imapFolder);
-        this.mailConfig = mailConfig;
         determineAttachmentByHeader = false;
+        this.examineHasAttachmentUserFlags = examineHasAttachmentUserFlags;
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             returnDefaultValue = true;
         }
         accountId = null == serverInfo ? 0 : serverInfo.getAccountId();
         lastHandlers = new HashSet<FetchItemHandler>();
-        textPreviewProvider = Services.optService(IMAPTextPreviewProvider.class);
-        if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
-            textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.ONLY_IF_AVAILABLE;
-        } else if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS)) {
-            textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.REQUIRE;
-        } else {
-            this.textPreviewMode = null;
-        }
-        if (null != textPreviewMode) {
-            fp.add(UIDFolder.FetchProfileItem.UID);
-        }
         command = getFetchCommand(isRev1, fp, false, serverInfo);
         uid = false;
         length = seqNums.length;
@@ -220,44 +188,19 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
      * @param fp The fetch profile to use
      * @param serverInfo The IMAP server information deduced from configuration
-     * @throws MessagingException If initialization fails
-     * @deprecated Use {@link #MailMessageFetchIMAPCommand(IMAPFolder, boolean, FetchProfile, IMAPServerInfo, MailConfig)} instead
-     */
-    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
-        this(imapFolder, isRev1, fp, serverInfo, null);
-    }
-
-    /**
-     * Initializes a new {@link MailMessageFetchIMAPCommand} to fetch all messages.
-     *
-     * @param imapFolder The IMAP folder providing connected protocol
-     * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
-     * @param fp The fetch profile to use
-     * @param serverInfo The IMAP server information deduced from configuration
-     * @param mailConfig The mail configuration
+     * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
      * @throws MessagingException If initialization fails
      */
-    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo, MailConfig mailConfig) throws MessagingException {
+    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags) throws MessagingException {
         super(imapFolder);
-        this.mailConfig = mailConfig;
         determineAttachmentByHeader = false;
+        this.examineHasAttachmentUserFlags = examineHasAttachmentUserFlags;
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             returnDefaultValue = true;
         }
         accountId = null == serverInfo ? 0 : serverInfo.getAccountId();
         lastHandlers = new HashSet<FetchItemHandler>();
-        textPreviewProvider = Services.optService(IMAPTextPreviewProvider.class);
-        if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
-            textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.ONLY_IF_AVAILABLE;
-        } else if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS)) {
-            textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.REQUIRE;
-        } else {
-            textPreviewMode = null;
-        }
-        if (null != textPreviewMode) {
-            fp.add(UIDFolder.FetchProfileItem.UID);
-        }
         command = getFetchCommand(isRev1, fp, false, serverInfo);
         uid = false;
         length = messageCount;
@@ -279,28 +222,13 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param uids The UIDs to fetch
      * @param fp The fetch profile to use
      * @param serverInfo The IMAP server information deduced from configuration
-     * @throws MessagingException If initialization fails
-     * @deprecated Use {@link #MailMessageFetchIMAPCommand(IMAPFolder, boolean, long[], FetchProfile, IMAPServerInfo, MailConfig)} instead
-     */
-    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, long[] uids, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
-        this(imapFolder, isRev1, uids, fp, serverInfo, null);
-    }
-
-    /**
-     * Initializes a new {@link MailMessageFetchIMAPCommand}.
-     *
-     * @param imapFolder The IMAP folder providing connected protocol
-     * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
-     * @param uids The UIDs to fetch
-     * @param fp The fetch profile to use
-     * @param serverInfo The IMAP server information deduced from configuration
-     * @param mailConfig The mail configuration
+     * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
      * @throws MessagingException If initialization fails
      */
-    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, long[] uids, FetchProfile fp, IMAPServerInfo serverInfo, MailConfig mailConfig) throws MessagingException {
+    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, long[] uids, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags) throws MessagingException {
         super(imapFolder);
-        this.mailConfig = mailConfig;
         determineAttachmentByHeader = false;
+        this.examineHasAttachmentUserFlags = examineHasAttachmentUserFlags;
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             returnDefaultValue = true;
@@ -312,17 +240,6 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         seqNum2index = null;
         for (int i = 0; i < length; i++) {
             uid2index.put(uids[i], i);
-        }
-        textPreviewProvider = Services.optService(IMAPTextPreviewProvider.class);
-        if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
-            textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.ONLY_IF_AVAILABLE;
-        } else if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS)) {
-            textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.REQUIRE;
-        } else {
-            textPreviewMode = null;
-        }
-        if (null != textPreviewMode) {
-            fp.add(UIDFolder.FetchProfileItem.UID);
         }
         if (length == messageCount) {
             fp.add(UIDFolder.FetchProfileItem.UID);
@@ -540,10 +457,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         boolean error = false;
         MailMessage mail;
         try {
-            mail = handleFetchRespone(fetchResponse, fullname, accountId, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard, treatEmbeddedAsAttachment, mailConfig);
-            if (null != mail && null != textPreviewMode) {
-                mail.setTextPreview(textPreviewProvider.getTextPreview(Long.parseLong(mail.getMailId()), textPreviewMode));
-            }
+            mail = handleFetchRespone(fetchResponse, fullname, accountId, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard, treatEmbeddedAsAttachment, examineHasAttachmentUserFlags);
         } catch (final MessagingException e) {
             /*
              * Discard corrupt message
@@ -574,18 +488,15 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param fetchResponse The FETCH response to handle
      * @param fullName The full name of associated folder
      * @param accountId The account identifier
+     * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
      * @return The resulting mail message
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If an OX error occurs
      */
-    public static MailMessage handleFetchRespone(final FetchResponse fetchResponse, final String fullName, final int accountId) throws MessagingException, OXException {
-        return handleFetchRespone(fetchResponse, fullName, accountId, null);
-    }
-
-    public static MailMessage handleFetchRespone(final FetchResponse fetchResponse, final String fullName, final int accountId, MailConfig mailConfig) throws MessagingException, OXException {
+    public static MailMessage handleFetchRespone(final FetchResponse fetchResponse, final String fullName, final int accountId, boolean examineHasAttachmentUserFlags) throws MessagingException, OXException {
         IDMailMessage mail = new IDMailMessage(null, fullName);
         mail.setAccountId(accountId);
-        return handleFetchRespone(mail, fetchResponse, fullName, null, false, false, false, false, mailConfig);
+        return handleFetchRespone(mail, fetchResponse, fullName, null, false, false, false, false, examineHasAttachmentUserFlags);
     }
 
     /**
@@ -594,25 +505,22 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param mail The message to apply to
      * @param fetchResponse The FETCH response to handle
      * @param fullName The full name of associated folder
+     * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
      * @return The resulting mail message
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If an OX error occurs
      */
-    public static MailMessage handleFetchRespone(final IDMailMessage mail, final FetchResponse fetchResponse, final String fullName) throws MessagingException, OXException {
-        return handleFetchRespone(mail, fetchResponse, fullName, null);
+    public static MailMessage handleFetchRespone(final IDMailMessage mail, final FetchResponse fetchResponse, final String fullName, boolean examineHasAttachmentUserFlags) throws MessagingException, OXException {
+        return handleFetchRespone(mail, fetchResponse, fullName, null, false, false, false, false, examineHasAttachmentUserFlags);
     }
 
-    public static MailMessage handleFetchRespone(final IDMailMessage mail, final FetchResponse fetchResponse, final String fullName, MailConfig mailConfig) throws MessagingException, OXException {
-        return handleFetchRespone(mail, fetchResponse, fullName, null, false, false, false, false, mailConfig);
-    }
-
-    private static MailMessage handleFetchRespone(FetchResponse fetchResponse, String fullName, int accountId, Set<FetchItemHandler> lastHandlers, boolean determineAttachmentByHeader, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment, MailConfig mailConfig) throws MessagingException, OXException {
+    private static MailMessage handleFetchRespone(FetchResponse fetchResponse, String fullName, int accountId, Set<FetchItemHandler> lastHandlers, boolean determineAttachmentByHeader, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment, boolean examineHasAttachmentUserFlags) throws MessagingException, OXException {
         IDMailMessage mail = new IDMailMessage(null, fullName);
         mail.setAccountId(accountId);
-        return handleFetchRespone(mail, fetchResponse, fullName, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard, treatEmbeddedAsAttachment, mailConfig);
+        return handleFetchRespone(mail, fetchResponse, fullName, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard, treatEmbeddedAsAttachment, examineHasAttachmentUserFlags);
     }
 
-    private static MailMessage handleFetchRespone(IDMailMessage mail, FetchResponse fetchResponse, String fullName, Set<FetchItemHandler> lastHandlers, boolean determineAttachmentByHeader, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment, MailConfig mailConfig) throws MessagingException, OXException {
+    private static MailMessage handleFetchRespone(IDMailMessage mail, FetchResponse fetchResponse, String fullName, Set<FetchItemHandler> lastHandlers, boolean determineAttachmentByHeader, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment, boolean examineHasAttachmentUserFlags) throws MessagingException, OXException {
         final IDMailMessage m;
         if (null == mail) {
             m = new IDMailMessage(null, fullName);
@@ -624,41 +532,50 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         m.setSeqnum(fetchResponse.getNumber());
         final int itemCount = fetchResponse.getItemCount();
         final Map<Class<? extends Item>, FetchItemHandler> map = MAP;
+        Item delayed = null;
         for (int j = itemCount; j-- > 0;) {
-            final Item item = fetchResponse.getItem(j);
-            FetchItemHandler itemHandler = map.get(item.getClass());
-            if (null == itemHandler) {
-                itemHandler = getItemHandlerByItem(item, checkICal, checkVCard, treatEmbeddedAsAttachment, mailConfig);
+            Item item = fetchResponse.getItem(j);
+            if (examineHasAttachmentUserFlags && item instanceof BODYSTRUCTURE) {
+                // Delay that item...
+                delayed = item;
+            } else {
+                FetchItemHandler itemHandler = map.get(item.getClass());
                 if (null == itemHandler) {
-                    LOG.warn("Unknown FETCH item: {}", item.getClass().getName());
+                    itemHandler = getItemHandlerByItem(item, checkICal, checkVCard, treatEmbeddedAsAttachment, examineHasAttachmentUserFlags);
+                    if (null == itemHandler) {
+                        LOG.warn("Unknown FETCH item: {}", item.getClass().getName());
+                    } else {
+                        if (null != lastHandlers) {
+                            lastHandlers.add(itemHandler);
+                        }
+                        itemHandler.handleItem(item, m, LOG);
+                    }
                 } else {
                     if (null != lastHandlers) {
                         lastHandlers.add(itemHandler);
                     }
                     itemHandler.handleItem(item, m, LOG);
                 }
+            }
+        }
+
+        if (null != delayed) {
+            FetchItemHandler itemHandler = getItemHandlerByItem(delayed, checkICal, checkVCard, treatEmbeddedAsAttachment, examineHasAttachmentUserFlags);
+            if (null == itemHandler) {
+                LOG.warn("Unknown FETCH item: {}", delayed.getClass().getName());
             } else {
                 if (null != lastHandlers) {
                     lastHandlers.add(itemHandler);
                 }
-                itemHandler.handleItem(item, m, LOG);
+                itemHandler.handleItem(delayed, m, LOG);
             }
         }
-        try {
-            MimeMessageConverter.setHasAttachment(mailConfig, mail, m.getUserFlags(), new AlternativeHasAttachmentSetter() {
 
-                @Override
-                public void setAlternative(MailMessage localMail) throws OXException, MessagingException {
-                    if (determineAttachmentByHeader) {
-                        final String cts = localMail.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
-                        if (null != cts) {
-                            localMail.setHasAttachment(new ContentType(cts).startsWith("multipart/mixed"));
-                        }
-                    }
-                }
-            });
-        } catch (IOException e) {
-            LOG.warn("Unable to set 'hasAttachment'", e);
+        if (determineAttachmentByHeader) {
+            final String cts = m.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
+            if (null != cts) {
+                m.setAlternativeHasAttachment(new ContentType(cts).startsWith("multipart/mixed"));
+            }
         }
 
         // Drop possible set "com.openexchange.mail.mailId" log property
@@ -667,9 +584,9 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         return m;
     }
 
-    private static FetchItemHandler getItemHandlerByItem(Item item, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment, MailConfig mailConfig) {
+    private static FetchItemHandler getItemHandlerByItem(Item item, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment, boolean examineHasAttachmentUserFlags) {
         if (item instanceof BODYSTRUCTURE) {
-            return new BODYSTRUCTUREFetchItemHandler(checkICal, checkVCard, treatEmbeddedAsAttachment, mailConfig);
+            return new BODYSTRUCTUREFetchItemHandler(checkICal, checkVCard, treatEmbeddedAsAttachment);
         } else if ((item instanceof RFC822DATA) || (item instanceof BODY)) {
             return HEADER_ITEM_HANDLER;
         } else if (item instanceof UID) {
@@ -677,7 +594,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         } else if (item instanceof INTERNALDATE) {
             return INTERNALDATE_ITEM_HANDLER;
         } else if (item instanceof Flags) {
-            return FLAGS_ITEM_HANDLER;
+            return new FLAGSFetchItemHandler(examineHasAttachmentUserFlags);
         } else if (item instanceof ENVELOPE) {
             return ENVELOPE_ITEM_HANDLER;
         } else if (item instanceof RFC822SIZE) {
@@ -730,42 +647,42 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
                     @Override
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
-                        mailMessage.addFrom(MimeMessageUtils.getAddressHeader(hdr.getValue()));
+                        mailMessage.addFrom(MimeMessageUtility.getAddressHeader(hdr.getValue()));
                     }
                 });
                 put(MessageHeaders.HDR_TO, new HeaderHandler() {
 
                     @Override
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
-                        mailMessage.addTo(MimeMessageUtils.getAddressHeader(hdr.getValue()));
+                        mailMessage.addTo(MimeMessageUtility.getAddressHeader(hdr.getValue()));
                     }
                 });
                 put(MessageHeaders.HDR_CC, new HeaderHandler() {
 
                     @Override
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
-                        mailMessage.addCc(MimeMessageUtils.getAddressHeader(hdr.getValue()));
+                        mailMessage.addCc(MimeMessageUtility.getAddressHeader(hdr.getValue()));
                     }
                 });
                 put(MessageHeaders.HDR_BCC, new HeaderHandler() {
 
                     @Override
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
-                        mailMessage.addBcc(MimeMessageUtils.getAddressHeader(hdr.getValue()));
+                        mailMessage.addBcc(MimeMessageUtility.getAddressHeader(hdr.getValue()));
                     }
                 });
                 put(MessageHeaders.HDR_REPLY_TO, new HeaderHandler() {
 
                     @Override
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
-                        mailMessage.addReplyTo(MimeMessageUtils.getAddressHeader(hdr.getValue()));
+                        mailMessage.addReplyTo(MimeMessageUtility.getAddressHeader(hdr.getValue()));
                     }
                 });
                 put(MessageHeaders.HDR_DISP_NOT_TO, new HeaderHandler() {
 
                     @Override
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
-                        mailMessage.setDispositionNotification(MimeMessageUtils.getAddressHeader(hdr.getValue())[0]);
+                        mailMessage.setDispositionNotification(MimeMessageUtility.getAddressHeader(hdr.getValue())[0]);
                     }
                 });
                 put(MessageHeaders.HDR_SUBJECT, new HeaderHandler() {
@@ -795,7 +712,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
                         final String value = hdr.getValue();
                         if (null != value) {
-                            mailMessage.setPriority(MimeMessageUtils.parseImportance(value));
+                            mailMessage.setPriority(MimeMessageUtility.parseImportance(value));
                         }
                     }
                 });
@@ -804,7 +721,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                     @Override
                     public void handle(final Header hdr, final IDMailMessage mailMessage) throws OXException {
                         if (!mailMessage.containsPriority()) {
-                            mailMessage.setPriority(MimeMessageUtils.parsePriority(hdr.getValue()));
+                            mailMessage.setPriority(MimeMessageUtility.parsePriority(hdr.getValue()));
                         }
                     }
                 });
@@ -892,7 +809,14 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
     };
 
-    private static final FetchItemHandler FLAGS_ITEM_HANDLER = new FetchItemHandler() {
+    private static final class FLAGSFetchItemHandler implements FetchItemHandler {
+
+        private final boolean examineHasAttachmentUserFlags;
+
+        FLAGSFetchItemHandler(boolean examineHasAttachmentUserFlags) {
+            super();
+            this.examineHasAttachmentUserFlags = examineHasAttachmentUserFlags;
+        }
 
         @Override
         public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
@@ -942,6 +866,10 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                         retval |= MailMessage.FLAG_FORWARDED;
                     } else if (MailMessage.USER_READ_ACK.equalsIgnoreCase(userFlag)) {
                         retval |= MailMessage.FLAG_READ_ACK;
+                    } else if (examineHasAttachmentUserFlags && MailMessage.USER_HAS_ATTACHMENT.equalsIgnoreCase(userFlag)) {
+                        msg.setHasAttachment(true);
+                    } else if (examineHasAttachmentUserFlags && MailMessage.USER_HAS_NO_ATTACHMENT.equalsIgnoreCase(userFlag)) {
+                        msg.setHasAttachment(false);
                     } else {
                         set.add(userFlag);
                     }
@@ -1006,7 +934,11 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                         retval |= MailMessage.FLAG_FORWARDED;
                     } else if (MailMessage.USER_READ_ACK.equalsIgnoreCase(userFlag)) {
                         retval |= MailMessage.FLAG_READ_ACK;
-                    } else {
+                    } else if (examineHasAttachmentUserFlags && MailMessage.USER_HAS_ATTACHMENT.equalsIgnoreCase(userFlag)) {
+                        msg.setHasAttachment(true);
+                    } else if (examineHasAttachmentUserFlags && MailMessage.USER_HAS_NO_ATTACHMENT.equalsIgnoreCase(userFlag)) {
+                        msg.setHasAttachment(false);
+                    }  else {
                         set.add(userFlag);
                     }
                 }
@@ -1112,17 +1044,15 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
     private static final class BODYSTRUCTUREFetchItemHandler implements FetchItemHandler {
 
-        private final boolean checkICal;
-        private final boolean checkVCard;
-        private final boolean treatEmbeddedAsAttachment;
-        private final MailConfig mailConfig;
+        final boolean checkICal;
+        final boolean checkVCard;
+        final boolean treatEmbeddedAsAttachment;
 
-        BODYSTRUCTUREFetchItemHandler(boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment, MailConfig mailConfig) {
+        BODYSTRUCTUREFetchItemHandler(boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment) {
             super();
             this.checkICal = checkICal;
             this.checkVCard = checkVCard;
             this.treatEmbeddedAsAttachment = treatEmbeddedAsAttachment;
-            this.mailConfig = mailConfig;
         }
 
         @Override
@@ -1141,7 +1071,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                             } catch (OXException e) {
                                 final long uid = msg.getUid();
                                 final String folder = msg.getFolder();
-                                LOG.debug("Ignoring invalid parameter in Content-Type header contained in message {} of folder {}.", uid <= 0 ? "<unknown>" : Long.toString(uid), null == folder ? "<unknown>" : folder);
+                                LOG.debug("Ignoring invalid parameter in Content-Type header contained in message {} of folder {}.", uid <= 0 ? "<unknown>" : Long.toString(uid), null == folder ? "<unknown>" : folder, e);
                             }
                         }
                     }
@@ -1150,32 +1080,35 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             msg.setContentType(contentType);
             msg.addHeader("Content-Type", contentType.toString(true));
 
-            try {
-                MimeMessageConverter.setHasAttachment(mailConfig, msg, msg.getUserFlags(), new AlternativeHasAttachmentSetter() {
-
-                    @Override
-                    public void setAlternative(MailMessage localMail) throws OXException, MessagingException {
-                        boolean hasAttachment = MimeMessageUtility.hasAttachments(bs);
-                        if (hasAttachment) {
-                            if (checkICal && hasICal(bs)) {
-                                localMail.addHeader("X-ICAL", "true");
-                            }
-
-                            if (checkVCard && hasVCard(bs)) {
-                                localMail.addHeader("X-VCARD", "true");
-                            }
-                        } else if (treatEmbeddedAsAttachment) {
-                            hasAttachment = hasEmbedded(bs);
-                        }
-                        localMail.setHasAttachment(hasAttachment);
+            if (msg.containsHasAttachment()) {
+                boolean hasAttachment = msg.isHasAttachment();
+                if (hasAttachment) {
+                    if (checkICal && hasICal(bs)) {
+                        msg.addHeader("X-ICAL", "true");
                     }
-                });
-            } catch (MessagingException | IOException e) {
-                LOG.warn("Unable to set 'hasAttachment'", e);
+
+                    if (checkVCard && hasVCard(bs)) {
+                        msg.addHeader("X-VCARD", "true");
+                    }
+                }
+            } else {
+                boolean hasAttachment = MimeMessageUtility.hasAttachments(bs);
+                if (hasAttachment) {
+                    if (checkICal && hasICal(bs)) {
+                        msg.addHeader("X-ICAL", "true");
+                    }
+
+                    if (checkVCard && hasVCard(bs)) {
+                        msg.addHeader("X-VCARD", "true");
+                    }
+                } else if (treatEmbeddedAsAttachment) {
+                    hasAttachment = hasEmbedded(bs);
+                }
+                msg.setAlternativeHasAttachment(hasAttachment);
             }
         }
 
-        private boolean hasICal(BODYSTRUCTURE bs) {
+        boolean hasICal(BODYSTRUCTURE bs) {
             String baseContentType = bs.type + "/" + bs.subtype;
             if (baseContentType.indexOf("calendar") >= 0 || baseContentType.indexOf("ics") >= 0) {
                 return true;
@@ -1193,7 +1126,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             return false;
         }
 
-        private boolean hasVCard(BODYSTRUCTURE bs) {
+        boolean hasVCard(BODYSTRUCTURE bs) {
             String baseContentType = bs.type + "/" + bs.subtype;
             if (baseContentType.indexOf("card") >= 0 || baseContentType.indexOf("vcf") >= 0) {
                 return true;
@@ -1211,7 +1144,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             return false;
         }
 
-        private boolean hasEmbedded(BODYSTRUCTURE bs) {
+        boolean hasEmbedded(BODYSTRUCTURE bs) {
             if ("image".equals(bs.type) && !Strings.isEmpty(bs.id)) {
                 return true;
             }
@@ -1229,36 +1162,27 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
 
         @Override
-        public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException, OXException {
+        public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws OXException {
             try {
-                MimeMessageConverter.setHasAttachment(mailConfig, msg, message.getFlags().getUserFlags(), new AlternativeHasAttachmentSetter() {
-
-                    @Override
-                    public void setAlternative(MailMessage localMail) throws OXException, MessagingException {
-                        String contentType;
-                        try {
-                            contentType = message.getContentType();
-                        } catch (final MessagingException e) {
-                            final String[] header = message.getHeader("Content-Type");
-                            if (null != header && header.length > 0) {
-                                contentType = header[0];
-                            } else {
-                                contentType = null;
-                            }
-                        }
-                        if (null == contentType) {
-                            localMail.setHasAttachment(false);
-                        } else {
-                            try {
-                                localMail.setHasAttachment(MimeMessageUtility.hasAttachments((Part) message.getContent()));
-                            } catch (final IOException e) {
-                                throw new MessagingException(e.getMessage(), e);
-                            }
-                        }
+                String contentType;
+                try {
+                    contentType = message.getContentType();
+                } catch (MessagingException e) {
+                    String[] header = message.getHeader("Content-Type");
+                    if (null != header && header.length > 0) {
+                        contentType = header[0];
+                    } else {
+                        contentType = null;
                     }
-                });
+                }
+                msg.setAlternativeHasAttachment(null == contentType ? false : MimeMessageUtility.hasAttachments((Part) message.getContent()));
+            } catch (MessagingException e) {
+                throw MimeMailException.handleMessagingException(e);
             } catch (IOException e) {
-                LOG.warn("Unable to set 'hasAttachment'", e);
+                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                }
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
             }
         }
     }
@@ -1335,7 +1259,6 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         builder.put(com.sun.mail.imap.protocol.X_MAILBOX.class, X_MAILBOX_ITEM_HANDLER);
         builder.put(SNIPPET.class, SNIPPET_ITEM_HANDLER);
         builder.put(INTERNALDATE.class, INTERNALDATE_ITEM_HANDLER);
-        builder.put(FLAGS.class, FLAGS_ITEM_HANDLER);
         builder.put(ENVELOPE.class, ENVELOPE_ITEM_HANDLER);
         builder.put(RFC822SIZE.class, SIZE_ITEM_HANDLER);
         MAP = builder.build();

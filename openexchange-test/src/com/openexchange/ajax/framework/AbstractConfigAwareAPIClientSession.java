@@ -92,14 +92,14 @@ public abstract class AbstractConfigAwareAPIClientSession extends AbstractAPICli
      */
     protected void setUpConfiguration() throws Exception {
         Map<String, String> map = getNeededConfigurations();
-        if (map.isEmpty()) {
-            return;
+        if (!map.isEmpty()) {
+            // change configuration to new values
+            ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<>(map, getScope(), getReloadables());
+            ChangePropertiesResponse response = getAjaxClient().execute(req);
+            if (oldData != null) {
+                oldData = ResponseWriter.getJSON(response.getResponse()).getJSONObject("data");
+            }
         }
-
-        // Change configuration to new values
-        ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<>(map, getScope(), getReloadables());
-        ChangePropertiesResponse response = getAjaxClient().execute(req);
-        oldData = ResponseWriter.getJSON(response.getResponse()).getJSONObject("data");
     }
 
     /**

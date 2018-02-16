@@ -69,10 +69,18 @@ import com.openexchange.mail.MailFetchListener;
 import com.openexchange.mail.MailFetchListenerResult;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
+import com.openexchange.mail.MailSessionCache;
+import com.openexchange.mail.MailSessionParameterNames;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
+import com.openexchange.mail.authenticity.impl.helper.NotAnalyzedAuthenticityHandler;
 import com.openexchange.mail.authenticity.impl.osgi.Services;
+import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.session.Session;
@@ -96,6 +104,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
 
     /**
      * Initializes a new {@link MailAuthenticityFetchListener}.
+     *
      * @param threadPool
      */
     public MailAuthenticityFetchListener(MailAuthenticityHandlerRegistry handlerRegistry, ThreadPoolService threadPool) {
@@ -104,16 +113,20 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         this.threadPool = threadPool;
     }
 
-    private boolean isNotApplicableFor(MailFetchArguments fetchArguments, Session session) throws OXException {
-        return false == isApplicableFor(fetchArguments, session);
+    private boolean isNotApplicableFor(MailFetchArguments fetchArguments, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+        return false == isApplicableFor(fetchArguments, mailAccess);
     }
 
-    private boolean isApplicableFor(MailFetchArguments fetchArguments, Session session) throws OXException {
+    private boolean isApplicableFor(MailFetchArguments fetchArguments, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
         FullnameArgument folder = fetchArguments.getFolder();
-        return null != folder && isAuthResultRequested(fetchArguments) && isAcceptableAccount(folder.getAccountId(), session);
+        return null != folder && isAccountAccepted(folder.getAccountId(), mailAccess.getSession()) && isFolderAccepted(folder.getFullName(), mailAccess);
     }
 
-    private boolean isAcceptableAccount(int accountId, Session session) throws OXException {
+    private boolean isApplicableFor(MailMessage mail, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+        return isAccountAccepted(mail.getAccountId(), mailAccess.getSession()) && isFolderAccepted(mail.getFolder(), mailAccess);
+    }
+
+    private boolean isAccountAccepted(int accountId, Session session) throws OXException {
         if (MailAccount.DEFAULT_ID == accountId) {
             // Primary account
             return true;
@@ -137,14 +150,48 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         return mailFields.contains(MailField.AUTHENTICATION_OVERALL_RESULT) || mailFields.contains(MailField.AUTHENTICATION_MECHANISM_RESULTS);
     }
 
-    @Override
-    public boolean accept(MailMessage[] mailsFromCache, MailFetchArguments fetchArguments, Session session) throws OXException {
-        if (isNotApplicableFor(fetchArguments, session)) {
+    private boolean isFolderAccepted(String fullName, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+        return !fullName.equals(mailAccess.getFolderStorage().getDraftsFolder()) && !fullName.equals(mailAccess.getFolderStorage().getSentFolder());
+    }
+
+    private boolean isFolderAccepted(String fullName, int accountId, Session session) throws OXException {
+        MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
+
+        Boolean b = mailSessionCache.getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderChecked());
+        if ((b == null) || !b.booleanValue()) {
+            // Don't know better
             return true;
         }
 
+        // Default folder were already checked; ensure client does not request authenticity for standard Drafts or Sent folder
+        String[] arr = mailSessionCache.getParameter(accountId, MailSessionParameterNames.getParamDefaultFolderArray());
+        String draftsFullName = arr == null ? null : arr[StorageUtility.INDEX_DRAFTS];
+        if (null != draftsFullName && fullName.equals(draftsFullName)) {
+            return false;
+        }
+
+        String sentFullName = arr == null ? null : arr[StorageUtility.INDEX_SENT];
+        if (null != sentFullName && fullName.equals(sentFullName)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean accept(MailMessage[] mailsFromCache, MailFetchArguments fetchArguments, Session session) throws OXException {
         MailAuthenticityHandler handler = handlerRegistry.getHighestRankedHandlerFor(session);
-        if (null == handler) {
+        if (null == handler || false == isAuthResultRequested(fetchArguments)) {
+            // Not enabled or not requested by client
+            return true;
+        }
+
+        if (false == isAccountAccepted(fetchArguments.getFolder().getAccountId(), session)) {
+            // Not applicable
+            return true;
+        }
+        if (false == isFolderAccepted(fetchArguments.getFolder().getFullName(), fetchArguments.getFolder().getAccountId(), session)) {
+            // Not applicable
             return true;
         }
 
@@ -160,15 +207,18 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
     }
 
     @Override
-    public MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, Session session, Map<String, Object> state) throws OXException {
-        if (isNotApplicableFor(fetchArguments, session)) {
-            // Special field not contained
+    public MailAttributation onBeforeFetch(MailFetchArguments fetchArguments, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, Map<String, Object> state) throws OXException {
+        Session session = mailAccess.getSession();
+        MailAuthenticityHandler handler = handlerRegistry.getHighestRankedHandlerFor(session);
+        if (null == handler || false == isAuthResultRequested(fetchArguments)) {
+            // Not enabled or not requested by client
             return MailAttributation.NOT_APPLICABLE;
         }
 
-        MailAuthenticityHandler handler = handlerRegistry.getHighestRankedHandlerFor(session);
-        if (null == handler) {
-            return MailAttributation.NOT_APPLICABLE;
+        if (isNotApplicableFor(fetchArguments, mailAccess)) {
+            // Not applicable
+            state.put(STATE_PARAM_HANDLER, NotAnalyzedAuthenticityHandler.getInstance());
+            return MailAttributation.builder(fetchArguments.getFields(), fetchArguments.getHeaderNames()).build();
         }
 
         MailFields fields = null == fetchArguments.getFields() ? new MailFields() : new MailFields(fetchArguments.getFields());
@@ -200,7 +250,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
     }
 
     @Override
-    public MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, final Session session, Map<String, Object> state) throws OXException {
+    public MailFetchListenerResult onAfterFetch(MailMessage[] mails, boolean cacheable, final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, Map<String, Object> state) throws OXException {
         if (null == mails || mails.length == 0) {
             return MailFetchListenerResult.neutral(mails, cacheable);
         }
@@ -210,7 +260,17 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
             return MailFetchListenerResult.neutral(mails, cacheable);
         }
 
+        if (handler instanceof NotAnalyzedAuthenticityHandler) {
+            for (final MailMessage mail : mails) {
+                if (mail != null) {
+                    mail.setAuthenticityResult(MailAuthenticityResult.NOT_ANALYZED_RESULT);
+                }
+            }
+            return MailFetchListenerResult.neutral(mails, cacheable);
+        }
+
         // int unifiedINBOXAccountId = getUnifiedINBOXAccountId(session);
+        Session session = mailAccess.getSession();
         List<FutureAndMail> submittedTasks = new ArrayList<>(mails.length);
         for (final MailMessage mail : mails) {
             if (mail != null) {
@@ -223,7 +283,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
                     }
                 }
                 */
-                if (accId == MailAccount.DEFAULT_ID /*|| accId == unifiedINBOXAccountId*/) {
+                if (accId == MailAccount.DEFAULT_ID /* || accId == unifiedINBOXAccountId */) {
                     Future<Void> future = threadPool.submit(new MailAuthenticityTask(mail, handler, session));
                     submittedTasks.add(new FutureAndMail(future, mail));
                 }
@@ -235,11 +295,11 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
                     submitted.future.get(5, TimeUnit.SECONDS);
                 } catch (ExecutionException e) {
                     MailMessage mail = submitted.mail;
-                    LOGGER.warn("Failed to verify mail authenticity for mail {} in folder {}", mail.getMailId(), mail.getFolder(), e.getCause());
+                    LOGGER.warn("Error while verifying mail authenticity for mail {} in folder {}", mail.getMailId(), mail.getFolder(), e.getCause());
                 } catch (TimeoutException e) {
                     submitted.future.cancel(true);
                     MailMessage mail = submitted.mail;
-                    LOGGER.warn("Verification of mail authenticity for mail {} in folder {} took too long", mail.getMailId(), mail.getFolder());
+                    LOGGER.warn("Timeout while verifying mail authenticity for mail {} in folder {}", mail.getMailId(), mail.getFolder());
                 }
             }
         } catch (InterruptedException e) {
@@ -251,7 +311,33 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
     }
 
     @Override
-    public MailMessage onMailFetch(MailMessage mail, Session session) throws OXException {
+    public MailMessage onSingleMailFetch(MailMessage mail, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+        Session session = mailAccess.getSession();
+        MailAuthenticityHandler handler = handlerRegistry.getHighestRankedHandlerFor(session);
+        if (null == handler) {
+            // Not enabled
+            return mail;
+        }
+
+        if (false == isApplicableFor(mail, mailAccess)) {
+            // Not applicable
+            mail.setAuthenticityResult(MailAuthenticityResult.NOT_ANALYZED_RESULT);
+        }
+
+        Future<Void> future = threadPool.submit(new MailAuthenticityTask(mail, handler, session));
+        try {
+            future.get(5, TimeUnit.SECONDS);
+        } catch (ExecutionException e) {
+            LOGGER.warn("Error while verifying mail authenticity for mail {} in folder {}", mail.getMailId(), mail.getFolder(), e.getCause());
+        } catch (TimeoutException e) {
+            future.cancel(true);
+            LOGGER.warn("Timeout while verifying mail authenticity for mail {} in folder {}", mail.getMailId(), mail.getFolder());
+        } catch (InterruptedException e) {
+            // Keep interrupted status
+            Thread.currentThread().interrupt();
+            throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
+        }
+
         return mail;
     }
 

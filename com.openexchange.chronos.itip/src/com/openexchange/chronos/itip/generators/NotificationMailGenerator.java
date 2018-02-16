@@ -68,7 +68,6 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.EventMapper;
-import com.openexchange.chronos.common.mapping.EventUpdateImpl;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
 import com.openexchange.chronos.itip.ITipMessage;
 import com.openexchange.chronos.itip.ITipMethod;
@@ -77,6 +76,8 @@ import com.openexchange.chronos.itip.Messages;
 import com.openexchange.chronos.itip.generators.changes.PassthroughWrapper;
 import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.ItemUpdate;
@@ -88,8 +89,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.notify.NotificationConfig;
-import com.openexchange.groupware.notify.State;
 import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
+import com.openexchange.groupware.notify.State;
 import com.openexchange.groupware.notify.State.Type;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.AllocatingStringWriter;
@@ -133,7 +134,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
     protected final Event original;
 
-    protected final Session session;
+    protected final CalendarSession session;
 
     protected ITipEventUpdate diff;
 
@@ -180,9 +181,10 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             organizer = actor; // Is that so? As a fallback this could be good enough
         }
 
+        CalendarService calendarService = Services.getService(CalendarService.class);
+        this.session = calendarService.init(session);
         this.original = original;
         this.updated = updated;
-        this.session = session;
 
         if (original != null) {
             this.diff = new ITipEventUpdate(original, updated, true, DEFAULT_SKIP);
@@ -529,6 +531,9 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             return;
         }
         if (!attachmentMemory.hasAttachmentChanged(updated.getId(), ctx.getContextId())) {
+            return;
+        }
+        if (false == mail.getEvent().containsAttachments() || null == mail.getEvent().getAttachments() || mail.getEvent().getAttachments().isEmpty()) {
             return;
         }
         mail.setAttachmentUpdate(true);
@@ -950,7 +955,10 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
         @Override
         public NotificationMail generateDeleteMailFor(final NotificationParticipant participant) throws OXException {
-            return stateChanged(reply(participant, ParticipationStatus.DECLINED), ParticipationStatus.DECLINED);
+            if (participant.hasRole(ITipRole.ORGANIZER)) {                
+                return stateChanged(reply(participant, ParticipationStatus.DECLINED), ParticipationStatus.DECLINED);
+            }
+            return null;
         }
 
         @Override

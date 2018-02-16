@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.AlarmUtils.filterRelativeTriggers;
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
@@ -60,6 +61,7 @@ import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
+import static com.openexchange.java.Autoboxing.i;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
@@ -72,13 +74,13 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PublicType;
 
 /**
@@ -96,7 +98,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
      */
-    public UpdateAttendeePerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
+    public UpdateAttendeePerformer(CalendarStorage storage, CalendarSession session, CalendarFolder folder) throws OXException {
         super(storage, session, folder);
     }
 
@@ -126,7 +128,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         Attendee originalAttendee = Check.attendeeExists(originalEvent, resolvedAttendee);
         if (0 < originalAttendee.getEntity() && calendarUserId != originalAttendee.getEntity() && session.getUserId() != originalAttendee.getEntity()) {
             // TODO: even allowed for proxy user? calendarUserId != originalAttendee.getEntity()
-            throw CalendarExceptionCodes.NO_WRITE_PERMISSION.create(folder.getID());
+            throw CalendarExceptionCodes.NO_WRITE_PERMISSION.create(folder.getId());
         }
         if (needsConflictCheck(originalEvent, originalAttendee, attendee)) {
             Check.noConflicts(storage, session, originalEvent, Collections.singletonList(resolvedAttendee));
@@ -226,9 +228,9 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 Check.quotaNotExceeded(storage, session);
                 storage.getEventStorage().insertEvent(newExceptionEvent);
                 storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), originalSeriesMaster.getAttendees());
-                storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getID(), newExceptionEvent.getId(), originalSeriesMaster.getAttachments());
+                storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newExceptionEvent.getId(), originalSeriesMaster.getAttachments());
                 for (Entry<Integer, List<Alarm>> entry : storage.getAlarmStorage().loadAlarms(originalSeriesMaster).entrySet()) {
-                    insertAlarms(newExceptionEvent, entry.getKey().intValue(), entry.getValue(), true);
+                    insertAlarms(newExceptionEvent, i(entry.getKey()), filterRelativeTriggers(entry.getValue()), true);
                 }
                 newExceptionEvent = loadEventData(newExceptionEvent.getId());
                 resultTracker.trackCreation(newExceptionEvent, originalSeriesMaster);
@@ -306,19 +308,19 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
     }
 
     private void checkFolderUpdate(Event originalEvent, Attendee originalAttendee, String updatedFolderID) throws OXException {
-        if (false == originalAttendee.getFolderId().equals(folder.getID())) {
+        if (false == originalAttendee.getFolderId().equals(folder.getId())) {
             throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(originalEvent.getId(), originalAttendee, AttendeeField.FOLDER_ID);
         }
         if (isSeriesMaster(originalEvent)) {
-            throw CalendarExceptionCodes.MOVE_SERIES_NOT_SUPPORTED.create(originalEvent.getId(), folder.getID(), updatedFolderID);
+            throw CalendarExceptionCodes.MOVE_SERIES_NOT_SUPPORTED.create(originalEvent.getId(), folder.getId(), updatedFolderID);
         }
         if (isSeriesException(originalEvent)) {
-            throw CalendarExceptionCodes.MOVE_OCCURRENCE_NOT_SUPPORTED.create(originalEvent.getId(), folder.getID(), updatedFolderID);
+            throw CalendarExceptionCodes.MOVE_OCCURRENCE_NOT_SUPPORTED.create(originalEvent.getId(), folder.getId(), updatedFolderID);
         }
         if (PublicType.getInstance().equals(folder.getType())) {
             throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(originalEvent.getId(), originalAttendee, AttendeeField.FOLDER_ID);
         }
-        UserizedFolder targetFolder = Utils.getFolder(session, updatedFolderID);
+        CalendarFolder targetFolder = Utils.getFolder(session, updatedFolderID);
         if (folder.getCreatedBy() != targetFolder.getCreatedBy()) {
             throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(originalEvent.getId(), originalAttendee, AttendeeField.FOLDER_ID);
         }

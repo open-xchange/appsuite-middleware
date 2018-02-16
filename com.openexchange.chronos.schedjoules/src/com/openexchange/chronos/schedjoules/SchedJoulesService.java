@@ -64,9 +64,9 @@ public interface SchedJoulesService {
 
     /**
      * Retrieves the starting SchedJoules page.
-     * 
+     *
      * @param contextId The context identifier
-     * 
+     *
      * @return The {@link SchedJoulesResult}
      * @throws OXException if an error is occurred
      */
@@ -75,11 +75,11 @@ public interface SchedJoulesService {
     /**
      * Retrieves the starting SchedJoules page for the specified location
      * in the specified locale
-     * 
+     *
      * @param contextId The context identifier
      * @param locale The locale to use
      * @param location The location to use
-     * 
+     *
      * @return The {@link SchedJoulesResult}
      * @throws OXException if an error is occurred
      */
@@ -87,10 +87,10 @@ public interface SchedJoulesService {
 
     /**
      * Retrieves the SchedJoules page with the specified identifier
-     * 
+     *
      * @param contextId The context identifier
      * @param pageId The page identifier
-     * 
+     *
      * @return The {@link SchedJoulesResult}
      * @throws OXException if an error is occurred
      */
@@ -98,10 +98,10 @@ public interface SchedJoulesService {
 
     /**
      * Retrieves the SchedJoules page with the specified identifier
-     * 
+     *
      * @param contextId The context identifier
      * @param pageId The page identifier
-     * 
+     *
      * @return The {@link SchedJoulesResult}
      * @throws OXException if an error is occurred
      */
@@ -109,10 +109,10 @@ public interface SchedJoulesService {
 
     /**
      * Retrieves a list of supported and localised country names
-     * 
+     *
      * @param contextId The context identifier
      * @param locale The locale
-     * 
+     *
      * @return The {@link SchedJoulesResult}
      * @throws OXException if an error is occurred
      */
@@ -120,9 +120,9 @@ public interface SchedJoulesService {
 
     /**
      * Retrieves a list of supported languages
-     * 
+     *
      * @param contextId The context identifier
-     * 
+     *
      * @return The {@link SchedJoulesResult}
      * @throws OXException if an error is occurred
      */
@@ -131,14 +131,14 @@ public interface SchedJoulesService {
     /**
      * Performs a search with the specified parameters. If the country and/or category identifiers are
      * specified, then a search is only performed within those countries/categories respectively.
-     * 
+     *
      * @param contextId The context identifier
      * @param query The query (free text search query parameter)
      * @param locale The locale. Defaults to 'en' if empty
      * @param countryId The country identifier. Ignored if less than or equal to '0'.
      * @param categoryId The category identifier. Ignored if less than or equal to '0'.
      * @param maxRows The maximum amount of results. Defaults to 20.
-     * 
+     *
      * @return The {@link SchedJoulesResult}
      * @throws OXException if an error is occurred
      */
@@ -146,7 +146,7 @@ public interface SchedJoulesService {
 
     /**
      * Retrieves the calendar data from the specified {@link URL}
-     * 
+     *
      * @param contextId The context identifier
      * @param url The {@link URL} from which to retrieve the ical data
      * @param etag The etag (if available)
@@ -155,4 +155,13 @@ public interface SchedJoulesService {
      * @throws OXException if the calendar data cannot be retrieved
      */
     SchedJoulesCalendar getCalendar(int contextId, URL url, String etag, long lastModified) throws OXException;
+
+    /**
+     * Gets a value indicating whether SchdeJoules-services are properly configured in a specific context.
+     *
+     * @param contextId The context identifier to check
+     * @return <code>true</code> if SchdeJoules services are available, <code>false</code>, otherwise
+     */
+    boolean isAvailable(int contextId);
+
 }

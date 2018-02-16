@@ -50,6 +50,7 @@
 package com.openexchange.groupware.infostore.database.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +61,8 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.session.Session;
 
 public class CreateDocumentAction extends AbstractDocumentListAction {
+
+    private long timestamp;
 
     /**
      * Initializes a new {@link CreateDocumentAction}.
@@ -78,6 +81,7 @@ public class CreateDocumentAction extends AbstractDocumentListAction {
      */
     public CreateDocumentAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context, List<DocumentMetadata> documents, Session session) {
         super(provider, queryCatalog, context, documents, session);
+        setTimestamp(System.currentTimeMillis());
     }
 
     @Override
@@ -107,7 +111,17 @@ public class CreateDocumentAction extends AbstractDocumentListAction {
 
     @Override
     protected Object[] getAdditionals(final DocumentMetadata doc) {
-        return new Object[] { I(getContext().getContextId()) };
+        return new Object[] { L(getTimestamp()), I(getContext().getContextId()) };
     }
 
+    public void setTimestamp(final long ts) {
+        this.timestamp = ts;
+        for (DocumentMetadata documentMeta : getDocuments()) {
+            documentMeta.setSequenceNumber(ts);
+        }
+    }
+
+    public long getTimestamp(){
+        return this.timestamp;
+    }
 }

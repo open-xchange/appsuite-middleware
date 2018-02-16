@@ -59,8 +59,9 @@ import com.openexchange.data.conversion.ical.DefaultParseResult;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.data.conversion.ical.ParseResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.groupware.calendar.CalendarCollectionUtils;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -102,14 +103,20 @@ public class ExtraneousSeriesMasterRecoveryParser implements ICalParser {
             return appointmentsPraseResult;
         }
 
-        CalendarCollectionService tools = registry.getService(CalendarCollectionService.class);
         List<CalendarDataObject> copy = new LinkedList<CalendarDataObject>(appointments);
         int index = 0;
         for (CalendarDataObject appointment : appointments) {
             try {
-                if (appointment.isSequence() && !tools.isOccurrenceDate(appointment.getStartDate().getTime(), -1, appointment, new long[0])) {
+                if (appointment.isSequence() && !CalendarCollectionUtils.isOccurrenceDate(appointment.getStartDate().getTime(), -1, appointment, new long[0])) {
                     final CalendarDataObject clone = appointment.clone();
-                    tools.removeRecurringType(appointment);
+                    appointment.setRecurrenceType(CalendarObject.NONE);
+                    appointment.removeInterval();
+                    appointment.removeUntil();
+                    appointment.removeOccurrence();
+                    appointment.removeDays();
+                    appointment.removeDayInMonth();
+                    appointment.removeMonth();
+                    appointment.removeRecurrenceCount();
                     copy.add(clone);
                 }
             } catch (OXException e) {

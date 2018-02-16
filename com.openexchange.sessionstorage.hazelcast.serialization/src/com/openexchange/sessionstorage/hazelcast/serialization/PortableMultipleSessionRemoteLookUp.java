@@ -99,6 +99,7 @@ public class PortableMultipleSessionRemoteLookUp extends AbstractCustomPortable 
 
     private int userId;
     private int contextId;
+    private boolean withLocalLastActive;
 
     /**
      * Initializes a new {@link PortableMultipleSessionRemoteLookUp}.
@@ -114,9 +115,21 @@ public class PortableMultipleSessionRemoteLookUp extends AbstractCustomPortable 
      * @param contextId The context identifier
      */
     public PortableMultipleSessionRemoteLookUp(int userId, int contextId) {
+        this(userId, contextId, false);
+    }
+
+    /**
+     * Initializes a new {@link PortableMultipleSessionRemoteLookUp}.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param withLocalLastActive <code>true</code> to include the local last-active time stamp for a session; otherwise <code>false</code>
+     */
+    public PortableMultipleSessionRemoteLookUp(int userId, int contextId, boolean withLocalLastActive) {
         super();
         this.userId = userId;
         this.contextId = contextId;
+        this.withLocalLastActive = withLocalLastActive;
     }
 
     @Override
@@ -136,6 +149,12 @@ public class PortableMultipleSessionRemoteLookUp extends AbstractCustomPortable 
         int i = 0;
         for (Session session : sessions) {
             PortableSession portableSession = new PortableSession(session);
+            if (withLocalLastActive) {
+                Object oLocalLastActive = session.getParameter(Session.PARAM_LOCAL_LAST_ACTIVE);
+                if (null != oLocalLastActive) {
+                    portableSession.setLocalLastActive(((Long) oLocalLastActive).longValue());
+                }
+            }
             portableSession.setPassword(OBFUSCATOR_REFERENCE.get().obfuscate(portableSession.getPassword()));
             portableSessions[i++] = portableSession;
         }

@@ -1,0 +1,49 @@
+type: object
+description: The restored files and folders
+properties:
+  files:
+    type: array
+    description: An array of restored files.
+    items:
+      type: object
+      title: RestoredFile
+      properties:
+        name: 
+          type: string
+          description: The name of the file.
+        path:
+          type: array
+          description: Folder path from restored folder down to root folder
+          items:
+            type: object
+            title: FolderPath
+            properties:
+              id:
+                type: string
+                description: The folder id
+              title:
+                type: string
+                description: The folder title
+  folders:
+    type: array
+    description: An array of restored folders.
+    items:
+      type: object
+      title: RestoredFolder
+      properties:
+        name: 
+          type: string
+          description: The name of the file.
+        path:
+          type: array
+          description: Folder path from restored file down to root folder
+          items:
+            type: object
+            title: FolderPath
+            properties:
+              id:
+                type: string
+                description: The folder id
+              title:
+                type: string
+                description: The folder title

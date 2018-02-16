@@ -80,7 +80,9 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactDisplayNameHelper;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.TimeZones;
@@ -250,7 +252,7 @@ public class EventConverter {
     }
 
     private String getDisplayName(Contact contact) {
-        return contact.getDisplayName();
+        return ContactDisplayNameHelper.formatDisplayName(services.getService(I18nServiceRegistry.class), contact, locale);
     }
 
     private String getSummary(Contact contact) {

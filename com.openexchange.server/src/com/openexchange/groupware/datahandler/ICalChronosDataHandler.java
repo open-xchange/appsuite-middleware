@@ -78,7 +78,6 @@ import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -209,7 +208,7 @@ public final class ICalChronosDataHandler extends ICalDataHandler {
         List<ConversionWarning> conversionWarnings = new ArrayList<ConversionWarning>(4);
 
         Context ctx = ContextStorage.getStorageContext(session);
-        TimeZone defaultZone = services.getServiceSafe(CalendarCollectionService.class).getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
+        TimeZone defaultZone = TimeZone.getTimeZone(UserStorage.getInstance().getUser(session.getUserId(), ctx).getTimeZone());
         ICalParser iCalParser = services.getServiceSafe(ICalParser.class);
 
         tasks = parseTaskStream(ctx, iCalParser, inputStreamCopy, conversionErrors, conversionWarnings, defaultZone);

@@ -105,10 +105,6 @@ public final class DeleteAction extends AbstractFolderAction {
 
     @Override
     protected AJAXRequestResult doPerform(final AJAXRequestData request, final ServerSession session) throws OXException, JSONException {
-
-        Boolean extendedResponse = request.getParameter(EXTENDED_RESPONSE, boolean.class, true);
-        extendedResponse = extendedResponse != null ? extendedResponse : false;
-
         /*
          * Parse parameters
          */
@@ -132,6 +128,8 @@ public final class DeleteAction extends AbstractFolderAction {
                 }
             }
         }
+        Boolean extendedResponse = request.getParameter(EXTENDED_RESPONSE, boolean.class, true);
+        extendedResponse = extendedResponse != null ? extendedResponse : Boolean.FALSE;
         /*
          * Compose JSON array with id
          */
@@ -152,7 +150,7 @@ public final class DeleteAction extends AbstractFolderAction {
                 final String folderId = jsonArray.getString(i);
                 try {
                     FolderResponse<?> response = null;
-                    if (extendedResponse && folderService instanceof TrashAwareFolderService) {
+                    if (extendedResponse.booleanValue() && folderService instanceof TrashAwareFolderService) {
                         try {
                             response = ((TrashAwareFolderService) folderService).trashFolder(treeId, folderId, timestamp, session, decorator);
                         } catch (OXException e) {
@@ -163,13 +161,13 @@ public final class DeleteAction extends AbstractFolderAction {
                         }
                     }
 
-                    if(response == null){
+                    if (response == null) {
                         response = folderService.deleteFolder(treeId, folderId, timestamp, session, decorator);
-                        if(extendedResponse){
+                        if (extendedResponse.booleanValue()) {
                             trashResults.add(TrashResult.createUnsupportedTrashResult());
                         }
                     } else {
-                        trashResults.add((TrashResult)response.getResponse());
+                        trashResults.add((TrashResult) response.getResponse());
                     }
                     final Collection<OXException> warnings = response.getWarnings();
                     if (null != warnings && !warnings.isEmpty()) {

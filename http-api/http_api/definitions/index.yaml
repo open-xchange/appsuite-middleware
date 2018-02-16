@@ -58,6 +58,10 @@ FolderSharingNotificationData:
   $ref: ./folders/FolderSharingNotificationData.yaml
 FolderSharingNotificationResponse:
   $ref: ./folders/FolderSharingNotificationResponse.yaml
+FolderRestoreResponse:
+  $ref: ./folders/FolderRestoreResponse.yaml
+FolderPathData:
+  $ref: ./folders/FolderPathData.yaml
 # Module: tasks
 TasksResponse:
   $ref: ./tasks/TasksResponse.yaml
@@ -247,8 +251,6 @@ MailUpdateBody:
   $ref: ./mail/MailUpdateBody.yaml
 MailsAllSeenResponse:
   $ref: ./mail/MailsAllSeenResponse.yaml
-MailUpdatesResponse:
-  $ref: ./mail/MailUpdatesResponse.yaml
 MailResponse:
   $ref: ./mail/MailResponse.yaml
 MailHeadersResponse:
@@ -320,6 +322,8 @@ ResourceUpdatesResponse:
 # Module: infostore
 InfoItemsResponse:
   $ref: ./infostore/InfoItemsResponse.yaml
+InfoItemsRestoreResponse:
+  $ref: ./infostore/InfoItemsRestoreResponse.yaml
 InfoItemListElement:
   $ref: ./infostore/InfoItemListElement.yaml
 InfoItemUpdatesResponse:
@@ -352,6 +356,8 @@ InfoItemSharingNotificationResponse:
   $ref: ./infostore/InfoItemSharingNotificationResponse.yaml
 InfoItemSharingNotificationData:
   $ref: ./infostore/InfoItemSharingNotificationData.yaml
+InfoFolderPathData:
+  $ref: ./infostore/FolderPathData.yaml
 # Module: attachments
 AttachmentsResponse:
   $ref: ./attachments/AttachmentsResponse.yaml
@@ -693,3 +699,6 @@ GetJobResponse:
   $ref: ./jobqueue/GetJobResponse.yaml
 CancelJobResponse:
   $ref: ./jobqueue/CancelJobResponse.yaml
+# Module: OpenId
+InitResponse:
+  $ref: ./openid/InitRequest.yaml

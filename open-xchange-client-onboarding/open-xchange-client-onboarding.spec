@@ -102,6 +102,20 @@ if [ ${1:-0} -eq 2 ]; then # only when updating
     ox_add_property com.openexchange.client.onboarding.caldav.login.customsource false /opt/open-xchange/etc/client-onboarding-caldav.properties
     ox_add_property com.openexchange.client.onboarding.carddav.login.customsource false /opt/open-xchange/etc/client-onboarding-carddav.properties
     ox_add_property com.openexchange.client.onboarding.eas.login.customsource false /opt/open-xchange/etc/client-onboarding-eas.properties
+
+    # SCR-120
+    scenarios=com.openexchange.client.onboarding.windows.desktop.scenarios
+    enabled_scenarios=com.openexchange.client.onboarding.enabledScenarios
+    pfile=/opt/open-xchange/etc/client-onboarding.properties
+
+    scenarios_line=$(ox_read_property ${scenarios} ${pfile})
+    newline=$(sed -r -e 's/oxupdaterinstall *,? *| *,? *oxupdaterinstall//' <<<${scenarios_line})
+    ox_set_property ${scenarios} "${newline}" ${pfile}
+
+    enabled_scenarios_line=$(ox_read_property ${enabled_scenarios} ${pfile})
+    newline=$(sed -r -e 's/oxupdaterinstall *,? *| *,? *oxupdaterinstall//' <<<${enabled_scenarios_line})
+    ox_set_property ${enabled_scenarios} "${newline}" ${pfile}
+
 fi
 
 %clean

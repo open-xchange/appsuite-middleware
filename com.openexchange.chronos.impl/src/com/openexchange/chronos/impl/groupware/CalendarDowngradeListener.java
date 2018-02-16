@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.groupware;
 
+import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_SUPPRESS_ITIP;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -56,6 +57,7 @@ import java.util.stream.Collectors;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
@@ -82,7 +84,7 @@ public class CalendarDowngradeListener implements DowngradeListener {
 
     /**
      * Initializes a new {@link CalendarDeleteListener}.
-     * 
+     *
      * @param factory The {@link CalendarStorageFactory}
      * @param calendarUtilities The {@link CalendarUtilities}
      * @param calendarHandlers The {@link CalendarHandler}s to notify
@@ -117,12 +119,12 @@ public class CalendarDowngradeListener implements DowngradeListener {
             }
             updater.removeAttendeeFrom(eventsToRemoveTheAttendee);
             events.removeAll(eventsToRemoveTheAttendee);
-            
+
             // Delete all other events
             updater.deleteEvent(events, ServerSessionAdapter.valueOf(userId, event.getContext().getContextId()));
 
             // Trigger calendar events
-            updater.notifyCalendarHandlers(event.getSession());
+            updater.notifyCalendarHandlers(event.getSession(), new DefaultCalendarParameters().set(PARAMETER_SUPPRESS_ITIP, Boolean.TRUE));
         }
     }
 

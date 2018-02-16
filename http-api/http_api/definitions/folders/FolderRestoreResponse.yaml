@@ -1,0 +1,10 @@
+type: object
+properties:
+  folder:
+    type: string
+    description: Folder ID
+  path:
+    type: array
+    description: The folder path of the restored folder down to root folder.
+    items:
+      $ref: "#/definitions/FolderPathData"

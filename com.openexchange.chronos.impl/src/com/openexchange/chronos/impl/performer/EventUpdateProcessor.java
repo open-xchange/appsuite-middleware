@@ -98,6 +98,7 @@ import com.openexchange.chronos.common.mapping.DefaultItemUpdate;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.AttendeeHelper;
+import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.DeltaEvent;
@@ -110,7 +111,6 @@ import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.tools.mappings.Mapping;
 
@@ -124,7 +124,7 @@ public class EventUpdateProcessor implements EventUpdate {
 
     private final CalendarSession session;
     private final CalendarUser calendarUser;
-    private final UserizedFolder folder;
+    private final CalendarFolder folder;
 
     private final AttendeeHelper attendeeUpdates;
     private final SimpleCollectionUpdate<Attachment> attachmentUpdates;
@@ -144,7 +144,7 @@ public class EventUpdateProcessor implements EventUpdate {
      * @param timestamp The timestamp to apply in the updated event data
      * @param ignoredFields Additional fields to ignore during the update
      */
-    public EventUpdateProcessor(CalendarSession session, UserizedFolder folder, Event originalEvent, List<Event> originalChangeExceptions, Event updatedEvent, Date timestamp, EventField... ignoredFields) throws OXException {
+    public EventUpdateProcessor(CalendarSession session, CalendarFolder folder, Event originalEvent, List<Event> originalChangeExceptions, Event updatedEvent, Date timestamp, EventField... ignoredFields) throws OXException {
         super();
         this.session = session;
         this.folder = folder;
@@ -271,6 +271,7 @@ public class EventUpdateProcessor implements EventUpdate {
 
     private void ensureConsistency(Event originalEvent, Event updatedEvent, Date timestamp) throws OXException {
         Consistency.adjustAllDayDates(updatedEvent);
+        Consistency.adjustTimeZones(session, calendarUser.getEntity(), updatedEvent, originalEvent);
         /*
          * adjust recurrence-related properties
          */
@@ -430,7 +431,7 @@ public class EventUpdateProcessor implements EventUpdate {
         }
         if (PublicType.getInstance().equals(folder.getType())) {
             if (null == originalEvent.getFolderId() || updatedEvent.containsFolderId()) {
-                updatedEvent.setFolderId(folder.getID());
+                updatedEvent.setFolderId(folder.getId());
             }
             if (null != originalEvent.getCalendarUser() || updatedEvent.containsCalendarUser()) {
                 updatedEvent.setCalendarUser(null);
@@ -466,8 +467,8 @@ public class EventUpdateProcessor implements EventUpdate {
         if (null != originalEvent.getOrganizer() || updatedEvent.containsOrganizer()) {
             updatedEvent.setOrganizer(null);
         }
-        if (false == folder.getID().equals(originalEvent.getFolderId()) || updatedEvent.containsFolderId()) {
-            updatedEvent.setFolderId(folder.getID());
+        if (false == folder.getId().equals(originalEvent.getFolderId()) || updatedEvent.containsFolderId()) {
+            updatedEvent.setFolderId(folder.getId());
         }
         CalendarUser newCalendarUser = PublicType.getInstance().equals(folder.getType()) ? null : calendarUser;
         if (false == matches(newCalendarUser, originalEvent.getCalendarUser()) || updatedEvent.containsCalendarUser()) {

@@ -86,6 +86,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.mapping.EventMapper;
+import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.EventConflictImpl;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -95,7 +96,6 @@ import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.java.Reference;
 
 /**
@@ -344,8 +344,8 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
      * @return The event conflict
      */
     private EventConflict getEventConflict(Event event, List<Attendee> conflictingAttendees, Boolean hardConflict) throws OXException {
-        Event eventData = EventMapper.getInstance().copy(event, null, EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_ID, 
-            EventField.START_DATE, EventField.END_DATE, EventField.TRANSP, EventField.CREATED_BY);        
+        Event eventData = EventMapper.getInstance().copy(event, null, EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_ID,
+            EventField.START_DATE, EventField.END_DATE, EventField.TRANSP, EventField.CREATED_BY);
         if (detailsVisible(event)) {
             eventData = EventMapper.getInstance().copy(event, eventData, EventField.SUMMARY, EventField.LOCATION);
             eventData.setFolderId(chooseFolderID(event));
@@ -473,10 +473,10 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
 
     private Map<String, Permission> getFolderPermissions() throws OXException {
         if (null == folderPermissions) {
-            List<UserizedFolder> folders = getVisibleFolders();
+            List<CalendarFolder> folders = getVisibleFolders();
             folderPermissions = new HashMap<String, Permission>(folders.size());
-            for (UserizedFolder folder : folders) {
-                folderPermissions.put(folder.getID(), folder.getOwnPermission());
+            for (CalendarFolder folder : folders) {
+                folderPermissions.put(folder.getId(), folder.getOwnPermission());
             }
         }
         return folderPermissions;

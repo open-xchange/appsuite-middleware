@@ -71,6 +71,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -99,12 +100,14 @@ import com.openexchange.folderstorage.AfterReadAwareFolderStorage;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
+import com.openexchange.folderstorage.FolderPath;
 import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.LockCleaningFolderStorage;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.RestoringFolderStorage;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StorageParametersUtility;
@@ -140,6 +143,7 @@ import com.openexchange.folderstorage.type.TemplatesType;
 import com.openexchange.folderstorage.type.TrashType;
 import com.openexchange.folderstorage.type.VideosType;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.FolderPathObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.infostore.InfostoreFacades;
@@ -150,6 +154,7 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.java.Collators;
+import com.openexchange.java.util.Tools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -184,7 +189,7 @@ import gnu.trove.set.hash.TIntHashSet;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage, LockCleaningFolderStorage {
+public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage, LockCleaningFolderStorage, RestoringFolderStorage {
 
     /** The logger */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabaseFolderStorage.class);
@@ -283,8 +288,8 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
     }
 
     private static final ConcurrentTIntObjectHashMap<Long> STAMPS = new ConcurrentTIntObjectHashMap<Long>(128);
-    private static final long                              DELAY  = 60 * 60 * 1000;
-    private static final int                               MAX    = 3;
+    private static final long DELAY = 60 * 60 * 1000;
+    private static final int MAX = 3;
 
     @Override
     public void checkConsistency(final String treeId, final StorageParameters storageParameters) throws OXException {
@@ -1760,6 +1765,12 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 }
             }
             {
+                FolderPath originPath = folder.getOriginPath();
+                if (null != originPath) {
+                    updateMe.setOriginPath(originPath.isEmpty() ? FolderPathObject.EMPTY_PATH : FolderPathObject.copyOf(originPath));
+                }
+            }
+            {
                 final Type t = folder.getType();
                 if (null != t) {
                     updateMe.setType(getTypeByFolderType(t));
@@ -1909,7 +1920,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
 
     private boolean isInPublicTree(FolderObject folder, Context context, Connection con, StorageParameters storageParameters) throws OXException {
         int parentId = folder.getParentFolderID();
-        while (true) {
+        while(true) {
             if (parentId == FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID || parentId == FolderObject.SYSTEM_PRIVATE_FOLDER_ID || parentId == FolderObject.SYSTEM_ROOT_FOLDER_ID) {
                 return false;
             }
@@ -2314,7 +2325,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
     private static final class FolderObjectComparator implements Comparator<FolderObject> {
 
         private final Collator collator;
-        private final Context  context;
+        private final Context context;
 
         FolderObjectComparator(Locale locale, Context context) {
             super();
@@ -2368,7 +2379,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
     private static final class FolderNameComparator implements Comparator<FolderObject> {
 
         private final Collator collator;
-        private final Context  context;
+        private final Context context;
 
         FolderNameComparator(Locale locale, Context context) {
             super();
@@ -2514,6 +2525,147 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             provider.close();
         }
 
+    }
+
+    @Override
+    public Map<String, String> restoreFromTrash(String treeId, List<String> folderIds, String defaultDestFolderId, StorageParameters storageParameters) throws OXException {
+        final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
+        try {
+            Connection con = provider.getConnection();
+
+            // Check trash folder
+            int trashFolderId = OXFolderSQL.getUserDefaultFolder(storageParameters.getUserId(), FolderObject.INFOSTORE, FolderObject.TRASH, con, storageParameters.getContext());
+            if (trashFolderId < 0) {
+                throw FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.create(TrashType.getInstance().toString(), treeId);
+            }
+
+            // Get proper folder identifiers
+            List<Integer> fuids = new ArrayList<>(folderIds.size());
+            for (String folderIdentifier : folderIds) {
+                if (false == DatabaseFolderStorageUtility.hasSharedPrefix(folderIdentifier)) {
+                    fuids.add(Integer.valueOf(folderIdentifier));
+                }
+            }
+
+            // Get their paths..
+            Map<Integer, FolderPath> originPaths = OXFolderSQL.getOriginPaths(fuids, storageParameters);
+
+            // ... and iterate them
+            Map<String, String> result = new LinkedHashMap<>(folderIds.size());
+            int defaultDestId = Tools.getUnsignedInteger(defaultDestFolderId);
+            int personalFolderId = -1;
+            boolean[] pathRecreated = new boolean[] { false };
+            for (Map.Entry<Integer, FolderPath> entry : originPaths.entrySet()) {
+                FolderPath originPath = entry.getValue();
+
+                // Determine the folder identifier to start from
+                int folderId;
+                switch (originPath.getType()) {
+                    case PRIVATE:
+                        if (personalFolderId < 0) {
+                            personalFolderId = OXFolderSQL.getUserDefaultFolder(storageParameters.getUserId(), FolderObject.INFOSTORE, FolderObject.PUBLIC, con, storageParameters.getContext());
+                        }
+                        folderId = personalFolderId;
+                        break;
+                    case SHARED:
+                        folderId = FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID;
+                        break;
+                    case PUBLIC:
+                        folderId = FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID;
+                        break;
+                    case UNDEFINED: /* fall-through */
+                    default:
+                        // Restore at given destination folder
+                        folderId = defaultDestId;
+                        originPath = FolderPath.EMPTY_PATH;
+                        break;
+                }
+
+                FolderObject toRestore = getFolderObject(entry.getKey().intValue(), storageParameters.getContext(), con, storageParameters);
+                try {
+                    if (false == isBelowTrashFolder(entry.getKey().intValue(), trashFolderId, defaultDestId, storageParameters, con)) {
+                        throw FolderExceptionErrorMessage.INVALID_FOLDER_ID.create("Folder does not reside in trash folder");
+                    }
+
+                    Permission[] lastParentPermissions = null;
+                    if (false == originPath.isEmpty()) {
+                        pathRecreated[0] = false;
+                        for (String name : originPath.getPathForRestore()) {
+                            Folder folder = ensureFolderExistsForName(treeId, name, folderId, pathRecreated, storageParameters, con);
+                            lastParentPermissions = folder.getPermissions();
+                            folderId = Integer.parseInt(folder.getID());
+                        }
+                    }
+
+                    toRestore.setParentFolderID(folderId);
+                    toRestore.setOriginPath(FolderPathObject.EMPTY_PATH);
+                    if (null != lastParentPermissions) {
+                        for (Permission p : lastParentPermissions) {
+                            if (p.getEntity() != storageParameters.getUserId()) {
+                                toRestore.addPermission(newOCLPermissionFor(p));
+                            }
+                        }
+                    }
+                    String restoredFolderName = OXFolderSQL.getUnusedFolderName(toRestore.getFolderName(), folderId, storageParameters);
+                    toRestore.setFolderName(restoredFolderName);
+                    updateFolder(new DatabaseFolder(toRestore), storageParameters);
+                } catch (OXException e) {
+                    if ("FLD".equals(e.getPrefix()) && 6 == e.getCode()) {
+                        toRestore.setParentFolderID(defaultDestId);
+                        updateFolder(new DatabaseFolder(toRestore), storageParameters);
+                    } else {
+                        throw e;
+                    }
+                }
+                result.put(Integer.toString(entry.getKey().intValue()), Integer.toString(folderId));
+            }
+
+            return result;
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            provider.close();
+        }
+    }
+
+    private Folder ensureFolderExistsForName(String treeId, String name, int parentFolderId, boolean[] pathRecreated, StorageParameters storageParameters, Connection con) throws OXException {
+        if (false == pathRecreated[0]) {
+            SortableId[] subfolders = getSubfolders(treeId, Integer.toString(parentFolderId), storageParameters);
+            for (SortableId sortableId : subfolders) {
+                if (name.equals(sortableId.getName())) {
+                    return getFolder(treeId, sortableId.getId(), storageParameters);
+                }
+            }
+        }
+
+        // Does no more exist; re-create the folder
+        FolderObject fo = getFolderObject(parentFolderId, storageParameters.getContext(), con, storageParameters);
+        FolderObject toCreate = new FolderObject();
+        toCreate.setCreatedBy(storageParameters.getUserId());
+        toCreate.setFolderName(name);
+        toCreate.setParentFolderID(parentFolderId);
+        toCreate.setModule(FolderObject.INFOSTORE);
+        toCreate.setType(fo.getType());
+        for (OCLPermission perm : fo.getPermissions()) {
+            toCreate.addPermission(perm);
+        }
+        DatabaseFolder dfo = new DatabaseFolder(toCreate);
+        createFolder(dfo, storageParameters);
+        pathRecreated[0] = true;
+        return dfo;
+    }
+
+    private boolean isBelowTrashFolder(int folderId, int trashFolderId, int rootFolderId, StorageParameters storageParameters, Connection con) throws OXException {
+        while (folderId > 0) {
+            if (trashFolderId == folderId) {
+                return true;
+            }
+            if (rootFolderId == folderId) {
+                return false;
+            }
+            folderId = getFolderObject(folderId, storageParameters.getContext(), con, storageParameters).getParentFolderID();
+        }
+        return false;
     }
 
 }

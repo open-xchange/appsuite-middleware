@@ -67,10 +67,12 @@ import org.json.JSONObject;
 import com.openexchange.auth.info.AuthType;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.provider.CalendarAccountAttribute;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarProvider;
+import com.openexchange.chronos.provider.ical.auth.AdvancedAuthInfo;
 import com.openexchange.chronos.provider.ical.auth.ICalAuthParser;
 import com.openexchange.chronos.provider.ical.conn.ICalFeedClient;
 import com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionCodes;
@@ -200,7 +202,9 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
         if (null != refreshInterval) {
             proposedConfig.putSafe(REFRESH_INTERVAL, refreshInterval);
         }
-        //TODO: add supplied auth info
+        AdvancedAuthInfo authInfo = feedConfig.getAuthInfo();
+        addAuthInfo(proposedConfig, authInfo);
+
         if (null != color) {
             proposedExtendedProperties.add(COLOR(color, false));
         }
@@ -212,6 +216,19 @@ public class BasicICalCalendarProvider extends BasicCachingCalendarProvider {
         proposedSettings.setName(name);
         proposedSettings.setSubscribed(true);
         return proposedSettings;
+    }
+
+    private void addAuthInfo(JSONObject proposedConfig, AdvancedAuthInfo authInfo) {
+        if (authInfo != null && authInfo.getAuthType() == AuthType.BASIC) {
+            String login = authInfo.getLogin();
+            if (Strings.isNotEmpty(login)) {
+                proposedConfig.putSafe(CalendarAccountAttribute.LOGIN_LITERAL.getName(), login);
+            }
+            String password = authInfo.getPassword();
+            if (Strings.isNotEmpty(password)) {
+                proposedConfig.putSafe(CalendarAccountAttribute.PASSWORD_LITERAL.getName(), password);
+            }
+        }
     }
 
     @Override

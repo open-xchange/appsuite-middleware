@@ -64,6 +64,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.mapping.EventUpdateImpl;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.ical.ImportedComponent;
+import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.InternalImportResult;
 import com.openexchange.chronos.service.CalendarParameters;
@@ -94,7 +95,7 @@ public class ImportPerformer extends AbstractUpdatePerformer {
      * @param folder The calendar folder representing the current view on the events
      * @throws OXException See {@link AbstractUpdatePerformer#AbstractUpdatePerformer(CalendarStorage, CalendarSession, UserizedFolder)}
      */
-    public ImportPerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
+    public ImportPerformer(CalendarStorage storage, CalendarSession session, CalendarFolder folder) throws OXException {
         super(storage, session, folder);
     }
 
@@ -129,7 +130,7 @@ public class ImportPerformer extends AbstractUpdatePerformer {
 
             /*
              * create first event (master or non-recurring)
-             * 
+             *
              * It is NOT possible to add event with another internal organizer
              */
             InternalImportResult result;
@@ -159,7 +160,7 @@ public class ImportPerformer extends AbstractUpdatePerformer {
 
     /**
      * Resolves UID conflicts based on the strategy
-     * 
+     *
      * @param strategy The strategy
      * @param eventGroup The events with UID conflicts sorted by master first
      * @return The imported results
@@ -235,7 +236,7 @@ public class ImportPerformer extends AbstractUpdatePerformer {
 
     /**
      * Add {@link InternalImportResult} of series exceptions to the results
-     * 
+     *
      * @param events The events with the same UID sorted by master first
      * @param results The results to return by the import action
      * @param result The {@link InternalImportResult} of the master event

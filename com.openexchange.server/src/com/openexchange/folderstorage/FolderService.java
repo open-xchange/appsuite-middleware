@@ -501,6 +501,4 @@ public interface FolderService {
      */
     FolderResponse<String> createFolder(Folder folder, Session session, FolderServiceDecorator decorator) throws OXException;
 
-    // TODO: default folder? all visible folders
-
 }

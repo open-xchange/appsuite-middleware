@@ -168,7 +168,7 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
             }
 
             /*
-             * Step 3: Remove old subscriptions and unsubsribe old folder
+             * Step 3: Remove old subscriptions and unsubscribe old folder
              */
             GroupService groupService = Services.getService(GroupService.class);
             UserService userService = Services.getService(UserService.class);
@@ -211,7 +211,7 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { "com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask" };
+        return new String[] { "com.openexchange.chronos.storage.rdb.groupware.ChronosCreateTableTask", "com.openexchange.groupware.update.tasks.AddSharedParentFolderToFolderPermissionTableUpdateTask", "com.openexchange.groupware.update.tasks.AddTypeToFolderPermissionTableUpdateTask","com.openexchange.groupware.update.tasks.AddOriginColumnToInfostoreDocumentTables" };
     }
 
     @Override

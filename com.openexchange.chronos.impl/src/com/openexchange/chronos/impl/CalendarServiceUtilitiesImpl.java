@@ -50,7 +50,6 @@
 package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
-import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.L;
 import java.util.ArrayList;
@@ -67,7 +66,6 @@ import com.openexchange.chronos.service.CalendarServiceUtilities;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.quota.Quota;
 
 /**
@@ -100,23 +98,23 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
     }
 
     @Override
-    public boolean containsForeignEvents(CalendarSession session, final String folderId) throws OXException {
+    public boolean containsForeignEvents(CalendarSession session, String folderId) throws OXException {
         return new InternalCalendarStorageOperation<Boolean>(session) {
 
             @Override
             protected Boolean execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return B(new ForeignEventsPerformer(session, storage).perform(getFolder(session, folderId)));
+                return B(new ForeignEventsPerformer(session, storage).perform(folderId));
             }
         }.executeQuery().booleanValue();
     }
 
     @Override
-    public long countEvents(CalendarSession session, final String folderId) throws OXException {
+    public long countEvents(CalendarSession session, String folderId) throws OXException {
         return new InternalCalendarStorageOperation<Long>(session) {
 
             @Override
             protected Long execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return L(new CountEventsPerformer(session, storage).perform(getFolder(session, folderId)));
+                return L(new CountEventsPerformer(session, storage).perform(folderId));
             }
         }.executeQuery().intValue();
     }
@@ -166,7 +164,7 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
     }
 
     @Override
-    public List<Event> resolveResource(CalendarSession session, String folderID, String resourceName) throws OXException {
+    public List<Event> resolveResource(CalendarSession session, String folderId, String resourceName) throws OXException {
         return new InternalCalendarStorageOperation<List<Event>>(session) {
 
             @Override
@@ -184,13 +182,12 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
                 /*
                  * get event & any overridden instances in folder
                  */
-                UserizedFolder folder = getFolder(session, folderID);
                 try {
-                    Event event = new GetPerformer(session, storage).perform(folder, id, null);
+                    Event event = new GetPerformer(session, storage).perform(folderId, id, null);
                     List<Event> events = new ArrayList<Event>();
                     events.add(event);
                     if (isSeriesMaster(event)) {
-                        events.addAll(new ChangeExceptionsPerformer(session, storage).perform(folder, id));
+                        events.addAll(new ChangeExceptionsPerformer(session, storage).perform(folderId, id));
                     }
                     return events;
                 } catch (OXException e) {
@@ -198,7 +195,7 @@ public class CalendarServiceUtilitiesImpl implements CalendarServiceUtilities {
                         /*
                          * "Event not found in folder..." -> try to load detached occurrences
                          */
-                        List<Event> detachedOccurrences = new ChangeExceptionsPerformer(session, storage).perform(folder, id);
+                        List<Event> detachedOccurrences = new ChangeExceptionsPerformer(session, storage).perform(folderId, id);
                         if (0 < detachedOccurrences.size()) {
                             return detachedOccurrences;
                         }

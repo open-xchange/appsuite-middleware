@@ -56,6 +56,7 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.config.lean.DefaultProperty;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.config.lean.Property;
@@ -163,6 +164,21 @@ public class SelfProtectionFactory {
                     continue;
                 }
                 sum += collection.size();
+            }
+
+            if (sum > eventLimit) {
+                throw CalendarExceptionCodes.TOO_MANY_EVENT_RESULTS.create();
+            }
+        }
+
+        public void checkResultMap(Map<?, ? extends EventsResult> map) throws OXException {
+            int sum = 0;
+            for (Object key : map.keySet()) {
+                EventsResult collection = map.get(key);
+                if (collection == null || null == collection.getEvents()) {
+                    continue;
+                }
+                sum += collection.getEvents().size();
             }
 
             if (sum > eventLimit) {

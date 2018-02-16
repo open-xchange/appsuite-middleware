@@ -53,26 +53,21 @@ import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.getFields;
 import static com.openexchange.chronos.common.CalendarUtils.getFlags;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
-import static com.openexchange.chronos.common.CalendarUtils.matches;
-import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.Utils.applyExceptionDates;
 import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
-import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
-import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
-import static com.openexchange.folderstorage.Permission.READ_FOLDER;
-import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
+import static com.openexchange.chronos.impl.Utils.getFolder;
 import java.util.Date;
 import java.util.Iterator;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 
 /**
  * {@link GetPerformer}
@@ -95,26 +90,23 @@ public class GetPerformer extends AbstractQueryPerformer {
     /**
      * Performs the operation.
      *
-     * @param folder The parent folder to read the event in
+     * @param folderId The identifier of the parent folder to read the event in
      * @param eventId The identifier of the event to get
      * @param recurrenceId The recurrence identifier of the occurrence to get, or <code>null</code> if no specific occurrence is targeted
      * @return The loaded event
      */
-    public Event perform(UserizedFolder folder, String eventId, RecurrenceId recurrenceId) throws OXException {
+    public Event perform(String folderId, String eventId, RecurrenceId recurrenceId) throws OXException {
         /*
          * load event data & check permissions
          */
+        CalendarFolder folder = getFolder(session, folderId, false);
         EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
         Event event = storage.getEventStorage().loadEvent(eventId, fields);
         if (null == event) {
             throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(eventId);
         }
-        if (false == matches(event.getCreatedBy(), session.getUserId())) {
-            requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
-        } else {
-            requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
-        }
         event = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), event, fields);
+        event = Check.eventIsVisible(folder, event);
         event.setFolderId(Check.eventIsInFolder(event, folder));
         event.setFlags(getFlags(event, getCalendarUserId(folder)));
         if (isSeriesMaster(event)) {

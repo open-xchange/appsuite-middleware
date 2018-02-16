@@ -102,6 +102,9 @@ public class FolderExceptionMessages implements LocalizableStrings {
 
     // Folder name contains not allowed characters: \"%1$s\"
     public static final String ILLEGAL_CHARACTERS_MSG = "Folder name contains illegal characters: \"%1$s\"";
+
+    // User tries to restore a folders from trash, but that functionality is not supported
+    public static final String NO_RESTORE_SUPPORT_MSG = "Restore from trash is not supported";
     /**
      * Initializes a new {@link FolderExceptionMessages}
      */

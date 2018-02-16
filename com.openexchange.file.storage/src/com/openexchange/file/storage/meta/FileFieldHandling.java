@@ -290,5 +290,10 @@ public class FileFieldHandling {
             return handler.handle(Field.SHAREABLE, args);
         }
 
+        @Override
+        public Object origin(Object... args) {
+            return handler.handle(Field.ORIGIN, args);
+        }
+
     }
 }

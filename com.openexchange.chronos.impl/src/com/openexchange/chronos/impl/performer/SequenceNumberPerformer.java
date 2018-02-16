@@ -50,18 +50,19 @@
 package com.openexchange.chronos.impl.performer;
 
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
+import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.search.SearchTerm;
 
 /**
@@ -85,12 +86,13 @@ public class SequenceNumberPerformer extends AbstractQueryPerformer {
     /**
      * Performs the operation.
      *
-     * @param folder The folder to determine the sequence number for
+     * @param folderId The identifier of the folder to determine the sequence number for
      * @return The sequence number
      */
-    public long perform(UserizedFolder folder) throws OXException {
+    public long perform(String folderId) throws OXException {
+        CalendarFolder folder = getFolder(session, folderId);
         requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
-        long timestamp = folder.getLastModifiedUTC().getTime();
+        long timestamp = 0L;//TODO? folder.getLastModifiedUTC().getTime();
         SearchTerm<?> searchTerm = getFolderIdTerm(session, folder);
         SearchOptions sortOptions = new SearchOptions().addOrder(SortOrder.getSortOrder(EventField.TIMESTAMP, SortOrder.Order.DESC)).setLimits(0, 1);
         EventField[] fields = { EventField.TIMESTAMP };

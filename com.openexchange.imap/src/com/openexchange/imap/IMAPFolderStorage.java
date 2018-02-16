@@ -170,6 +170,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     private final Context ctx;
     private final IMAPConfig imapConfig;
     private final boolean ignoreSubscriptions;
+    protected final boolean examineHasAttachmentUserFlags;
 
     private Character separator;
     private IMAPDefaultFolderChecker checker;
@@ -191,6 +192,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         ctx = session instanceof ServerSession ? ((ServerSession) session).getContext() : ContextStorage.getStorageContext(session.getContextId());
         imapConfig = imapAccess.getIMAPConfig();
         ignoreSubscriptions = imapConfig.getIMAPProperties().isIgnoreSubscription();
+        examineHasAttachmentUserFlags = imapConfig.getCapabilities().hasAttachmentMarker();
     }
 
     /**
@@ -644,11 +646,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
         try {
             IMAPFolderWorker.checkFailFast(imapStore, fullName);
-
+            boolean ignoreDeletedMailsForFolderCount = IMAPProperties.getInstance().isIgnoreDeletedMails(this.session.getUserId(), this.session.getContextId());
             ListLsubEntry listEntry = ListLsubCache.tryCachedLISTEntry(fullName, accountId, session);
             if (null != listEntry && listEntry.exists()) {
                 try {
-                    return listEntry.canOpen() ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName) : new int[] { 0, 0 };
+                    return listEntry.canOpen() ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName, ignoreDeletedMailsForFolderCount) : new int[] { 0, 0 };
                 } catch (MessagingException e) {
                     return new int[] { 0, 0 };
                 }
@@ -664,7 +666,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
 
             try {
-                return listInfo.canOpen ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName) : new int[] { 0, 0 };
+                return listInfo.canOpen ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName, ignoreDeletedMailsForFolderCount) : new int[] { 0, 0 };
             } catch (MessagingException e) {
                 return new int[] { 0, 0 };
             }
@@ -682,11 +684,12 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
         try {
             IMAPFolderWorker.checkFailFast(imapStore, fullName);
+            boolean ignoreDeletedMailsForFolderCount = IMAPProperties.getInstance().isIgnoreDeletedMails(this.session.getUserId(), this.session.getContextId());
 
             ListLsubEntry listEntry = ListLsubCache.tryCachedLISTEntry(fullName, accountId, session);
             if (null != listEntry && listEntry.exists()) {
                 try {
-                    return listEntry.canOpen() ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName)[1] : 0;
+                    return listEntry.canOpen() ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName, ignoreDeletedMailsForFolderCount)[1] : 0;
                 } catch (MessagingException e) {
                     return 0;
                 }
@@ -702,7 +705,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
 
             try {
-                return listInfo.canOpen ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName)[1] : 0;
+                return listInfo.canOpen ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName, ignoreDeletedMailsForFolderCount)[1] : 0;
             } catch (MessagingException e) {
                 return 0;
             }
@@ -758,11 +761,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
         try {
             IMAPFolderWorker.checkFailFast(imapStore, fullName);
-
             ListLsubEntry listEntry = ListLsubCache.tryCachedLISTEntry(fullName, accountId, session);
             if (null != listEntry && listEntry.exists()) {
                 try {
-                    return listEntry.canOpen() ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName)[0] : 0;
+                    return listEntry.canOpen() ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName, false)[0] : 0;
                 } catch (MessagingException e) {
                     return 0;
                 }
@@ -778,7 +780,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             }
 
             try {
-                return listInfo.canOpen ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName)[0] : 0;
+                return listInfo.canOpen ? IMAPCommandsCollection.getTotalAndUnread(imapStore, fullName, false)[0] : 0;
             } catch (MessagingException e) {
                 return 0;
             }

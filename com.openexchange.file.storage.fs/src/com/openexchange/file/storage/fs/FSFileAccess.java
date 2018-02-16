@@ -382,7 +382,7 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
         if (files == null) {
             return Collections.emptyList();
         }
-        List<File> list = new ArrayList<File>(files.length);
+        List<File> list = new ArrayList<>(files.length);
 
         for (java.io.File fsFile : files) {
             DefaultFile file = new DefaultFile();
@@ -406,7 +406,7 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
 
     @Override
     public TimedResult<File> getDocuments(List<IDTuple> ids, List<Field> fields) throws OXException {
-        List<File> files = new ArrayList<File>(ids.size());
+        List<File> files = new ArrayList<>(ids.size());
         for (IDTuple idTuple : ids) {
             java.io.File fsFile = toFile(idTuple.getFolder(), idTuple.getId());
             DefaultFile file = new DefaultFile();
@@ -427,7 +427,7 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
                 Collections.<File> emptyList(),
                 UNDEFINED_SEQUENCE_NUMBER);
         }
-        List<File> f = new ArrayList<File>();
+        List<File> f = new ArrayList<>();
         for (java.io.File fsFile : files) {
             if (fsFile.lastModified() > updateSince) {
                 DefaultFile file = new DefaultFile();
@@ -453,7 +453,7 @@ public class FSFileAccess implements FileStorageFileAccess, FileStorageEfficient
                 Collections.<File> emptyList(),
                 UNDEFINED_SEQUENCE_NUMBER);
         }
-        List<File> f = new ArrayList<File>();
+        List<File> f = new ArrayList<>();
         for (java.io.File fsFile : files) {
             if (fsFile.lastModified() > updateSince) {
                 DefaultFile file = new DefaultFile();

@@ -62,6 +62,7 @@ import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.service.CalendarHandler;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -243,10 +244,11 @@ class StorageUpdater {
      * Notifies the {@link CalendarHandler}s
      *
      * @param session The {@link Session}
+     * @param parameters Additional calendar parameters, or <code>null</code> if not set
      * @throws OXException In case {@link Connection} can not be acquired
      */
-    void notifyCalendarHandlers(Session session) throws OXException {
-        tracker.notifyCalenderHandlers(dbProvider.getWriteConnection(context), context, session, entityResolver);
+    void notifyCalendarHandlers(Session session, CalendarParameters parameters) throws OXException {
+        tracker.notifyCalenderHandlers(dbProvider.getWriteConnection(context), context, session, entityResolver, parameters);
     }
 
     /**

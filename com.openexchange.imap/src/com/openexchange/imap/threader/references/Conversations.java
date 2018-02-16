@@ -65,14 +65,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPServerInfo;
 import com.openexchange.imap.command.MailMessageFetchIMAPCommand;
-import com.openexchange.imap.services.Services;
 import com.openexchange.imap.threadsort.MessageInfo;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.OrderDirection;
-import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -82,8 +80,6 @@ import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
-import com.sun.mail.imap.IMAPTextPreviewProvider;
-import com.sun.mail.imap.IMAPTextPreviewProvider.Mode;
 import com.sun.mail.imap.protocol.FetchResponse;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 
@@ -201,12 +197,12 @@ public final class Conversations {
      * @param fetchProfile The fetch profile
      * @param serverInfo The IMAP server information
      * @param byEnvelope Whether to build-up using ENVELOPE; otherwise <code>false</code>
-     * @param mailConfig The mail configuration
+     * @param examineHasAttachmentUserFlags Whether has-attachment user flags should be considered
      * @return The unfolded conversations
      * @throws MessagingException If a messaging error occurs
      */
-    public static List<Conversation> conversationsFor(IMAPFolder imapFolder, int lookAhead, OrderDirection order, FetchProfile fetchProfile, IMAPServerInfo serverInfo, boolean byEnvelope, MailConfig mailConfig) throws MessagingException {
-        final List<MailMessage> messages = messagesFor(imapFolder, lookAhead, order, fetchProfile, serverInfo, byEnvelope, mailConfig);
+    public static List<Conversation> conversationsFor(IMAPFolder imapFolder, int lookAhead, OrderDirection order, FetchProfile fetchProfile, IMAPServerInfo serverInfo, boolean byEnvelope, boolean examineHasAttachmentUserFlags) throws MessagingException {
+        final List<MailMessage> messages = messagesFor(imapFolder, lookAhead, order, fetchProfile, serverInfo, byEnvelope, examineHasAttachmentUserFlags);
         if (null == messages || messages.isEmpty()) {
             return Collections.<Conversation> emptyList();
         }
@@ -226,12 +222,12 @@ public final class Conversations {
      * @param fetchProfile The fetch profile
      * @param serverInfo The IMAP server information
      * @param byEnvelope Whether to build-up using ENVELOPE; otherwise <code>false</code>
-     * @param mailConfig The mail configuration
+     * @param examineHasAttachmentUserFlags Hwther has-attachment user flags should be considered
      * @return The messages with conversation information (References, In-Reply-To, Message-Id)
      * @throws MessagingException If a messaging error occurs
      */
     @SuppressWarnings("unchecked")
-    public static List<MailMessage> messagesFor(final IMAPFolder imapFolder, final int lookAhead, final OrderDirection order, final FetchProfile fetchProfile, final IMAPServerInfo serverInfo, final boolean byEnvelope, MailConfig mailConfig) throws MessagingException {
+    public static List<MailMessage> messagesFor(final IMAPFolder imapFolder, final int lookAhead, final OrderDirection order, final FetchProfile fetchProfile, final IMAPServerInfo serverInfo, final boolean byEnvelope, final boolean examineHasAttachmentUserFlags) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
@@ -247,8 +243,6 @@ public final class Conversations {
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
                 final String command;
                 final Response[] r;
-                final IMAPTextPreviewProvider textPreviewProvider = Services.optService(IMAPTextPreviewProvider.class);
-                final Mode textPreviewMode;
                 {
                     StringBuilder sb = new StringBuilder(128).append("FETCH ");
                     if (1 == messageCount) {
@@ -265,16 +259,6 @@ public final class Conversations {
                         }
                     }
                     final FetchProfile fp = null == fetchProfile ? (byEnvelope ? FETCH_PROFILE_CONVERSATION_BY_ENVELOPE : FETCH_PROFILE_CONVERSATION_BY_HEADERS) : checkFetchProfile(fetchProfile, byEnvelope);
-                    if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
-                        textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.ONLY_IF_AVAILABLE;
-                    } else if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS)) {
-                        textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.REQUIRE;
-                    } else {
-                        textPreviewMode = null;
-                    }
-                    if (null != textPreviewMode) {
-                        fp.add(UIDFolder.FetchProfileItem.UID);
-                    }
                     sb.append(" (").append(getFetchCommand(protocol.isREV1(), fp, false, serverInfo)).append(')');
                     command = sb.toString();
                     sb = null;
@@ -295,16 +279,13 @@ public final class Conversations {
                         final String sReferences = "References";
                         for (int j = 0; j < len; j++) {
                             if (r[j] instanceof FetchResponse) {
-                                final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName, serverInfo.getAccountId(), mailConfig);
+                                final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName, serverInfo.getAccountId(), examineHasAttachmentUserFlags);
                                 final String references = message.getFirstHeader(sReferences);
                                 if (null == references) {
                                     final String inReplyTo = message.getFirstHeader(sInReplyTo);
                                     if (null != inReplyTo) {
                                         message.setHeader(sReferences, inReplyTo);
                                     }
-                                }
-                                if (null != textPreviewMode) {
-                                    message.setTextPreview(textPreviewProvider.getTextPreview(Long.parseLong(message.getMailId()), textPreviewMode));
                                 }
                                 mails.add(message);
                                 r[j] = null;

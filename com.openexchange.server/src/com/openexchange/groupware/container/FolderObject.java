@@ -347,6 +347,10 @@ public class FolderObject extends FolderChildObject implements Cloneable {
 
     protected boolean b_fullName;
 
+    protected boolean b_originPath;
+
+    protected FolderPathObject originPath;
+
     /**
      * Initializes a new {@link FolderObject}
      */
@@ -1063,6 +1067,24 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         b_fullName = false;
     }
 
+    public boolean containsOriginPath() {
+        return b_originPath;
+    }
+
+    public void setOriginPath(FolderPathObject originPath) {
+        this.originPath = originPath;
+        b_originPath = true;
+    }
+
+    public FolderPathObject getOriginPath() {
+        return originPath;
+    }
+
+    public void removeOriginPath() {
+        originPath = null;
+        b_originPath = false;
+    }
+
     @Override
     public final void reset() {
         super.reset();
@@ -1075,6 +1097,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         removeSubfolderFlag();
         removeSubfolderIds();
         removeFullName();
+        removeOriginPath();
     }
 
     /**
@@ -1087,7 +1110,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
     }
 
     /**
-     * Fills this folder with all availbable values from given folder and returns itself.
+     * Fills this folder with all available values from given folder and returns itself.
      *
      * @param other The other instance of <code>{@link FolderObject}</code> serving as source
      * @param overwrite <code>true</code> to overwrite even if value is already present; <code>false</code> to only fill value if not
@@ -1146,6 +1169,9 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         }
         if (other.containsType() && (overwrite || !containsType())) {
             setType(other.getType());
+        }
+        if (other.containsOriginPath() && (overwrite || !containsOriginPath())) {
+            setOriginPath(other.getOriginPath());
         }
         return this;
     }
@@ -1417,6 +1443,9 @@ public class FolderObject extends FolderChildObject implements Cloneable {
             } catch (final OXException e) {
                 sb.append("");
             }
+        }
+        if (containsOriginPath()) {
+            sb.append(" Origin Path=").append(getOriginPath());
         }
         return sb.toString();
     }

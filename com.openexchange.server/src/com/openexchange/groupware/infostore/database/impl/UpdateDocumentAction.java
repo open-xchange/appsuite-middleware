@@ -63,6 +63,8 @@ import com.openexchange.session.Session;
 
 public class UpdateDocumentAction extends AbstractDocumentUpdateAction {
 
+    private long updateToTimestamp;
+
     /**
      * Initializes a new {@link UpdateDocumentAction}.
      */
@@ -99,10 +101,12 @@ public class UpdateDocumentAction extends AbstractDocumentUpdateAction {
      */
     public UpdateDocumentAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context, List<DocumentMetadata> documents, List<DocumentMetadata> oldDocuments, Metadata[] modifiedColums, long sequenceNumber, Session session) {
         super(provider, queryCatalog, context, documents, oldDocuments, modifiedColums, sequenceNumber, session);
+        setUpdateToTimestamp(System.currentTimeMillis());
     }
 
     @Override
     protected void undoAction() throws OXException {
+        setUpdateToTimestamp(System.currentTimeMillis());
         int counter = doUpdates(getQueryCatalog().getDocumentUpdate(getModified()), getQueryCatalog().filterForDocument(getModified()), getOldDocuments());
         if (counter < 0) {
             throw InfostoreExceptionCodes.UPDATED_BETWEEN_DO_AND_UNDO.create();
@@ -117,8 +121,8 @@ public class UpdateDocumentAction extends AbstractDocumentUpdateAction {
             fields = getQueryCatalog().filterWritable(fields);
             counter = doUpdates(getQueryCatalog().getDocumentUpdate(fields), fields, getDocuments());
         }
-
-        setTimestamp(System.currentTimeMillis());
+        setTimestamp(getUpdateToTimestamp());
+        setUpdateToTimestamp(System.currentTimeMillis());
         if (counter <= 0) {
             throw InfostoreExceptionCodes.MODIFIED_CONCURRENTLY.create();
         }
@@ -126,6 +130,22 @@ public class UpdateDocumentAction extends AbstractDocumentUpdateAction {
 
     @Override
     protected Object[] getAdditionals(final DocumentMetadata doc) {
-        return new Object[] { I(getContext().getContextId()), I(doc.getId()), L(getTimestamp()) };
+        return new Object[] {  L(getUpdateToTimestamp()), I(getContext().getContextId()), I(doc.getId()), L(getTimestamp()) };
+    }
+
+    @Override
+    public void setTimestamp(final long ts) {
+        super.setTimestamp(ts);
+        for (DocumentMetadata documentMeta : getDocuments()) {
+            documentMeta.setSequenceNumber(ts);
+        }
+    }
+
+    public void setUpdateToTimestamp(final long ts) {
+        this.updateToTimestamp = ts;
+    }
+
+    public long getUpdateToTimestamp(){
+        return this.updateToTimestamp;
     }
 }

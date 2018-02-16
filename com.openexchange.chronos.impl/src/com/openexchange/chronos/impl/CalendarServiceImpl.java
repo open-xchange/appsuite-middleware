@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.dmfs.rfc5545.DateTime;
@@ -94,6 +95,7 @@ import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarServiceUtilities;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.ImportResult;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
@@ -144,56 +146,56 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public List<Event> getChangeExceptions(CalendarSession session, final String folderID, final String objectID) throws OXException {
+    public List<Event> getChangeExceptions(CalendarSession session, String folderId, String objectId) throws OXException {
         return new InternalCalendarStorageOperation<List<Event>>(session) {
 
             @Override
             protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new ChangeExceptionsPerformer(session, storage).perform(getFolder(session, folderID), objectID);
+                return new ChangeExceptionsPerformer(session, storage).perform(folderId, objectId);
             }
         }.executeQuery();
     }
 
     @Override
-    public long getSequenceNumber(CalendarSession session, final String folderID) throws OXException {
+    public long getSequenceNumber(CalendarSession session, String folderId) throws OXException {
         return new InternalCalendarStorageOperation<Long>(session) {
 
             @Override
             protected Long execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return L(new SequenceNumberPerformer(session, storage).perform(getFolder(session, folderID)));
+                return L(new SequenceNumberPerformer(session, storage).perform(folderId));
             }
         }.executeQuery().longValue();
     }
 
     @Override
-    public List<Event> searchEvents(CalendarSession session, final String[] folderIDs, final String pattern) throws OXException {
+    public List<Event> searchEvents(CalendarSession session, String[] folderIds, String pattern) throws OXException {
         return new InternalCalendarStorageOperation<List<Event>>(session) {
 
             @Override
             protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new SearchPerformer(session, storage).perform(folderIDs, pattern);
+                return new SearchPerformer(session, storage).perform(folderIds, pattern);
             }
         }.executeQuery();
     }
 
     @Override
-    public List<Event> searchEvents(CalendarSession session, final String[] folderIDs, final List<SearchFilter> filters, final List<String> queries) throws OXException {
+    public List<Event> searchEvents(CalendarSession session, String[] folderIds, List<SearchFilter> filters, List<String> queries) throws OXException {
         return new InternalCalendarStorageOperation<List<Event>>(session) {
 
             @Override
             protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new SearchPerformer(session, storage).perform(folderIDs, filters, queries);
+                return new SearchPerformer(session, storage).perform(folderIds, filters, queries);
             }
         }.executeQuery();
     }
 
     @Override
-    public Event getEvent(CalendarSession session, final String folderID, final EventID eventId) throws OXException {
+    public Event getEvent(CalendarSession session, String folderId, EventID eventId) throws OXException {
         return new InternalCalendarStorageOperation<Event>(session) {
 
             @Override
             protected Event execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new GetPerformer(session, storage).perform(getFolder(session, folderID), eventId.getObjectID(), eventId.getRecurrenceID());
+                return new GetPerformer(session, storage).perform(folderId, eventId.getObjectID(), eventId.getRecurrenceID());
             }
         }.executeQuery();
     }
@@ -210,12 +212,23 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public List<Event> getEventsInFolder(CalendarSession session, final String folderID) throws OXException {
+    public List<Event> getEventsInFolder(CalendarSession session, String folderId) throws OXException {
         return new InternalCalendarStorageOperation<List<Event>>(session) {
 
             @Override
             protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new AllPerformer(session, storage).perform(getFolder(session, folderID));
+                return new AllPerformer(session, storage).perform(folderId);
+            }
+        }.executeQuery();
+    }
+
+    @Override
+    public Map<String, EventsResult> getEventsInFolders(CalendarSession session, List<String> folderIds) throws OXException {
+        return new InternalCalendarStorageOperation<Map<String, EventsResult>>(session) {
+
+            @Override
+            protected Map<String, EventsResult> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                return new AllPerformer(session, storage).perform(folderIds);
             }
         }.executeQuery();
     }
@@ -243,12 +256,12 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public UpdatesResult getUpdatedEventsInFolder(CalendarSession session, final String folderID, final long updatedSince) throws OXException {
+    public UpdatesResult getUpdatedEventsInFolder(CalendarSession session, String folderId, long updatedSince) throws OXException {
         return new InternalCalendarStorageOperation<UpdatesResult>(session) {
 
             @Override
             protected UpdatesResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new UpdatesPerformer(session, storage).perform(getFolder(session, folderID), updatedSince);
+                return new UpdatesPerformer(session, storage).perform(folderId, updatedSince);
             }
         }.executeQuery();
     }
@@ -459,40 +472,33 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public List<ImportResult> importEvents(CalendarSession session, String folderID, List<Event> events) throws OXException {
-        /*
-         * import events & notify handlers
-         */
-        List<InternalImportResult> results = new InternalCalendarStorageOperation<List<InternalImportResult>>(session) {
-
-            @Override
-            protected List<InternalImportResult> execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new ImportPerformer(storage, session, getFolder(session, folderID)).perform(events);
+        Boolean oldSuppressItip = session.get(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.class);
+        try {
+            if (null == oldSuppressItip) {
+                session.set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
             }
+            /*
+             * import events & notify handlers
+             */
+            List<InternalImportResult> results = new InternalCalendarStorageOperation<List<InternalImportResult>>(session) {
 
-        }.executeUpdate();
-        /*
-         * notify handlers & return userized result
-         */
-        List<ImportResult> importResults = new ArrayList<ImportResult>(results.size());
-        for (InternalImportResult result : results) {
-            importResults.add(result.getImportResult());
-            notifyHandlers(result.getCalendarEvent(session));
-        }
-        return importResults;
-    }
+                @Override
+                protected List<InternalImportResult> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+                    return new ImportPerformer(storage, session, getFolder(session, folderID)).perform(events);
+                }
 
-    private InternalCalendarResult notifyHandlers(InternalCalendarResult result, CalendarSession session) {
-        notifyHandlers(result.getCalendarEvent(session));
-        return result;
-    }
-
-    private void notifyHandlers(CalendarEvent event) {
-        for (CalendarHandler handler : calendarHandlers) {
-            try {
-                handler.handle(event);
-            } catch (Exception e) {
-                getLogger(getClass()).warn("Unexpected error while handling {}: {}", handler, event, e.getMessage(), e);
+            }.executeUpdate();
+            /*
+             * notify handlers & return userized result
+             */
+            List<ImportResult> importResults = new ArrayList<ImportResult>(results.size());
+            for (InternalImportResult result : results) {
+                importResults.add(result.getImportResult());
+                notifyHandlers(result.getCalendarEvent(session));
             }
+            return importResults;
+        } finally {
+            session.set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, oldSuppressItip);
         }
     }
 
@@ -514,9 +520,24 @@ public class CalendarServiceImpl implements CalendarService {
 
             @Override
             protected IFileHolder execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new GetAttachmentPerformer(session, storage).performGetAttachment(eventID.getObjectID(), getFolder(session, eventID.getFolderID()), managedId);
+                return new GetAttachmentPerformer(session, storage).performGetAttachment(eventID.getObjectID(), eventID.getFolderID(), managedId);
             }
         }.executeQuery();
+    }
+
+    private InternalCalendarResult notifyHandlers(InternalCalendarResult result, CalendarSession session) {
+        notifyHandlers(result.getCalendarEvent(session));
+        return result;
+    }
+
+    private void notifyHandlers(CalendarEvent event) {
+        for (CalendarHandler handler : calendarHandlers) {
+            try {
+                handler.handle(event);
+            } catch (Exception e) {
+                getLogger(getClass()).warn("Unexpected error while handling {}: {}", handler, event, e.getMessage(), e);
+            }
+        }
     }
 
 }

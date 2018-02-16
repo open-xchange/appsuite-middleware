@@ -146,7 +146,12 @@ public class WebClientInfoProvider implements ClientInfoProvider {
                     String osVersionMinor = operatingSystem.getVersionNumber().getMinor();
                     switch (os) {
                         case OS_FAMILY_WINDOWS:
-                            osReadableName.append(osMapping.get(getVersionNumber(operatingSystem)));
+                            String mappedOs = osMapping.get(getVersionNumber(operatingSystem));
+                            if (Strings.isNotEmpty(mappedOs)) {
+                                osReadableName.append(mappedOs);
+                            } else {
+                                osReadableName.append("Windows").append(" ").append(osVersionMajor).append(".").append(osVersionMinor);
+                            }
                             break;
                         case OS_FAMILY_MACOS:
                             try {
@@ -158,6 +163,7 @@ public class WebClientInfoProvider implements ClientInfoProvider {
                             } catch (NumberFormatException e) {
                                 osReadableName.append("MacOS X");
                             }
+                            break;
                         case OS_FAMILY_ANDROID:
                             osReadableName.append("Android ").append(osVersionMajor);
                             if (Strings.isNotEmpty(osVersionMinor)) {
@@ -182,11 +188,25 @@ public class WebClientInfoProvider implements ClientInfoProvider {
                         }
                     }
                 }
+
                 String browser = info.getName();
                 String browserVersion = info.getVersionNumber().getMajor();
+                if ("Chrome".equals(browser)) {
+                    if (userAgent.contains("Edge")) { // MS Edge
+                        browser = "Edge";
+                        browserVersion = null;
+                    }
+                }
+                if ("Mozilla".equals(browser)) {
+                    if (userAgent.contains("Trident/7.0; rv:11.0")) { //MSIE 11
+                        browser = "Internet Explorer";
+                        browserVersion = "11";
+                    }
+                }
 
                 return new WebClientInfo(client, osReadableName.toString(), os, osVersion, browser, browserVersion);
             }
+            return getClientInfo(session.getClient());
         }
 
         return null;
@@ -199,14 +219,15 @@ public class WebClientInfoProvider implements ClientInfoProvider {
             client = APPSUITE;
         } else if (Client.OX6_UI.getClientId().equals(clientId)) {
             client = OX6;
+        } else {
+            return null;
         }
         return new WebClientInfo(client, null, null, null, null, null);
     }
 
     private String getVersionNumber(OperatingSystem operatingSystem) {
         StringBuilder sb = new StringBuilder();
-        sb.append(operatingSystem.getVersionNumber().getMajor());
-        sb.append(operatingSystem.getVersionNumber().getMinor());
+        sb.append(operatingSystem.getVersionNumber().getMajor()).append(".").append(operatingSystem.getVersionNumber().getMinor());
         return sb.toString();
     }
 

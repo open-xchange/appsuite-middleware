@@ -53,14 +53,12 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.SortedSet;
-import java.util.TimeZone;
 import java.util.TreeSet;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
-import com.openexchange.chronos.ical.ical4j.mapping.TimeZoneUtils;
 import com.openexchange.exception.OXException;
 import net.fortuna.ical4j.model.DateList;
 import net.fortuna.ical4j.model.DateTime;
@@ -112,8 +110,7 @@ public class ExDateMapping extends AbstractICalMapping<VEvent, Event> {
                     if (DateTime.class.isInstance(date)) {
                         net.fortuna.ical4j.model.TimeZone parsedTimeZone = ((DateTime) date).getTimeZone();
                         if (null != parsedTimeZone) {
-                            TimeZone timeZone = TimeZoneUtils.selectTimeZone(parsedTimeZone, parameters.get(ICalParameters.DEFAULT_TIMEZONE, TimeZone.class));
-                            exceptionDate = new org.dmfs.rfc5545.DateTime(timeZone, date.getTime());
+                            exceptionDate = new org.dmfs.rfc5545.DateTime(parsedTimeZone, date.getTime());
                         } else {
                             exceptionDate = new org.dmfs.rfc5545.DateTime(date.getTime());
                         }

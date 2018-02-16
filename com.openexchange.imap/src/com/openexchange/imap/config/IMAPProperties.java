@@ -123,6 +123,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             boolean fallbackOnFailedSORT;
             boolean useMultipleAddresses;
             boolean useMultipleAddressesUserHash;
+            boolean ignoreDeletedMails;
 
             Params() {
                 super();
@@ -142,6 +143,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         final boolean fallbackOnFailedSORT;
         final boolean useMultipleAddresses;
         final boolean useMultipleAddressesUserHash;
+        final boolean ignoreDeletedMails;
 
         PrimaryIMAPProperties(Params params) {
             super();
@@ -156,6 +158,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             this.fallbackOnFailedSORT = params.fallbackOnFailedSORT;
             this.useMultipleAddresses = params.useMultipleAddresses;
             this.useMultipleAddressesUserHash = params.useMultipleAddressesUserHash;
+            this.ignoreDeletedMails = params.ignoreDeletedMails;
         }
     }
 
@@ -324,6 +327,14 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
             logMessageBuilder.append("  Use User Hash for Multiple IP addresses: {}{}");
             args.add(Autoboxing.valueOf(params.useMultipleAddressesUserHash));
+            args.add(Strings.getLineSeparator());
+        }
+
+        {
+            params.ignoreDeletedMails = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.imap.ignoreDeleted", false, view);
+
+            logMessageBuilder.append("  Ignore deleted mails: {}{}");
+            args.add(Autoboxing.valueOf(params.ignoreDeletedMails));
             args.add(Strings.getLineSeparator());
         }
 
@@ -689,7 +700,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         }
 
         {
-            final String tmp = configuration.getProperty(IMAPPropertiesConstants.ATTACHMENT_SEARCH_ENABLED, STR_FALSE).trim();
+            String tmp = configuration.getProperty("com.openexchange.imap.attachmentMarker.enabled", STR_FALSE).trim();
             enableAttachmentSearch = Boolean.parseBoolean(tmp);
             logBuilder.append("\tEnable attachment search: ").append(enableAttachmentSearch).append('\n');
         }
@@ -724,6 +735,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         sslProtocols = "SSLv3 TLSv1";
         cipherSuites = null;
         hostExtractingGreetingListener = null;
+        enableAttachmentSearch = false;
     }
 
     /**
@@ -782,7 +794,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
             return primaryIMAPProps.useMultipleAddresses;
         } catch (Exception e) {
-            LOG.error("Failed to get host name expression for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), "false", e);
+            LOG.error("Failed to get host name expression for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), Boolean.FALSE.toString(), e);
             return false;
         }
     }
@@ -803,7 +815,24 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
             return primaryIMAPProps.useMultipleAddressesUserHash;
         } catch (Exception e) {
-            LOG.error("Failed to get host name expression for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), "false", e);
+            LOG.error("Failed to get host name expression for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), Boolean.FALSE.toString(), e);
+            return false;
+        }
+    }
+
+    /**
+     * Checks whether deleted mails should be ignored.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> to ignore deleted mails; otherwise <code>false</code>
+     */
+    public boolean isIgnoreDeletedMails(int userId, int contextId) {
+        try {
+            PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
+            return primaryIMAPProps.ignoreDeletedMails;
+        } catch (Exception e) {
+            LOG.error("Failed to get ignoreDeleted for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), Boolean.FALSE.toString(), e);
             return false;
         }
     }
@@ -1082,7 +1111,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     }
 
     @Override
-    public boolean isAttachmentSearchEnabled() {
+    public boolean isAttachmentMarkerEnabled() {
         return enableAttachmentSearch;
     }
 

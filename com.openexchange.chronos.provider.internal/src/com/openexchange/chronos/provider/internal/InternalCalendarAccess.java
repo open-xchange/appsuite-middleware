@@ -102,6 +102,7 @@ import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.ImportResult;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
@@ -193,6 +194,9 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
             folder = folderUpdate;
         }
         if (originalFolder.isSubscribed() != folder.isSubscribed()) {
+            if (originalFolder.isDefaultFolder() && GroupwareFolderType.PRIVATE.equals(originalFolder.getType())) {
+                throw OXException.noPermissionForFolder();
+            }
             Map<String, String> properties = Collections.singletonMap(USER_PROPERTY_PREFIX + "subscribed", String.valueOf(folder.isSubscribed()));
             storeUserProperties(session.getContextId(), folderId, session.getUserId(), properties);
             DefaultGroupwareCalendarFolder folderUpdate = new DefaultGroupwareCalendarFolder(folder);
@@ -257,6 +261,11 @@ public class InternalCalendarAccess implements FolderCalendarAccess, SubscribeAw
     @Override
     public List<Event> getEventsInFolder(String folderId) throws OXException {
         return getCalendarService().getEventsInFolder(session, folderId);
+    }
+
+    @Override
+    public Map<String, EventsResult> getEventsInFolders(List<String> folderIds) throws OXException {
+        return getCalendarService().getEventsInFolders(session, folderIds);
     }
 
     @Override

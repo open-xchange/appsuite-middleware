@@ -52,6 +52,7 @@ package com.openexchange.chronos.itip.analyzers;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -63,6 +64,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnalyzer;
 import com.openexchange.chronos.itip.ITipChange;
@@ -197,7 +199,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
         }
     }
 
-    private void deleteIntro(final ITipChange change, final UserService users, final Context ctx, final TypeWrapper wrapper, final Locale locale) throws OXException {
+    private void deleteIntro(final ITipChange change, final UserService users, final Context ctx, final TypeWrapper wrapper, final Locale locale) {
         final String displayName = displayNameFor(change.getDeletedEvent().getOrganizer(), users, ctx);
         change.setIntroduction(new Sentence(Messages.DELETE_INTRO).add(displayName, ArgumentType.PARTICIPANT).getMessage(wrapper, locale));
 
@@ -272,12 +274,12 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
         return true;
     }
 
-    private void createIntro(final ITipChange change, final UserService users, final Context ctx, final TypeWrapper wrapper, final Locale locale) throws OXException {
+    private void createIntro(final ITipChange change, final UserService users, final Context ctx, final TypeWrapper wrapper, final Locale locale) {
         final String displayName = displayNameFor(change.getNewEvent().getOrganizer(), users, ctx);
         change.setIntroduction(new Sentence(Messages.CREATE_INTRO).add(displayName, ArgumentType.PARTICIPANT).getMessage(wrapper, locale));
     }
 
-    protected String displayNameFor(Organizer organizer, final UserService users, final Context ctx) throws OXException {
+    protected String displayNameFor(Organizer organizer, final UserService users, final Context ctx) {
         if (organizer == null) {
             return "unknown";
         }
@@ -293,7 +295,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
         return "unknown";
     }
 
-    protected Event findAndRemoveMatchingException(final Event exception, final List<Event> exceptions) {
+    protected Event findAndRemoveMatchingException(final Event master, final Event exception, final List<Event> exceptions) {
         for (Iterator<Event> iterator = exceptions.iterator(); iterator.hasNext();) {
             Event existingException = iterator.next();
             if (existingException.getRecurrenceId().compareTo(exception.getRecurrenceId()) == 0) {
@@ -416,26 +418,24 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
         return false;
     }
 
-    protected void ensureParticipant(final Event event, final CalendarSession session, int owner) {
-        List<Attendee> attendees = event.getAttendees();
-        boolean found = false;
-        if (attendees != null) {
-            for (Attendee attendee : attendees) {
-                if (attendee.getEntity() == owner) {
-                    found = true;
-                }
-            }
-        }
-
-        if (!found) {
+    protected void ensureParticipant(final Event original, final Event event, final CalendarSession session, int owner) {
+        if (null == CalendarUtils.find(event.getAttendees(), owner)) {
+            // Owner is a party crasher.. 
             Attendee attendee = new Attendee();
             attendee.setEntity(owner);
             attendee.setPartStat(ParticipationStatus.NEEDS_ACTION);
             attendee.setCuType(CalendarUserType.INDIVIDUAL);
-            if (event.getAttendees() == null) {
-                event.setAttendees(new ArrayList<>());
+
+            List<Attendee> attendees;
+            if (null != original && original.containsAttendees() && null != original.getAttendees()) {
+                attendees = new LinkedList<>(original.getAttendees());
+            } else if (event.containsAttendees() && null != event.getAttendees()) {
+                attendees = new LinkedList<>(event.getAttendees());
+            } else {
+                attendees = new LinkedList<>();
             }
-            event.getAttendees().add(attendee);
+            attendees.add(attendee);
+            event.setAttendees(attendees);
         }
     }
 }

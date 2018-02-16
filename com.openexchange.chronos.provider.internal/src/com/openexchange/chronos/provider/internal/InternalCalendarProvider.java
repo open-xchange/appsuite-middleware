@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.provider.internal;
 
-import static com.openexchange.osgi.Tools.requireService;
 import java.util.EnumSet;
 import java.util.Locale;
 import org.json.JSONObject;
@@ -63,11 +62,8 @@ import com.openexchange.chronos.provider.internal.config.UserConfigHelper;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.update.UpdateStatus;
-import com.openexchange.groupware.update.Updater;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -118,9 +114,6 @@ public class InternalCalendarProvider implements FolderCalendarProvider, AutoPro
     public FolderCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         CalendarService calendarService = services.getService(CalendarService.class);
         CalendarSession calendarSession = calendarService.init(session, parameters);
-        if (usesLegacyStorage(session.getContextId())) {
-            return new LegacyStorageInternalCalendarAccess(calendarSession, account, services);
-        }
         return new InternalCalendarAccess(calendarSession, account, services);
     }
 
@@ -170,18 +163,6 @@ public class InternalCalendarProvider implements FolderCalendarProvider, AutoPro
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         new UserConfigHelper(services).applyLegacyConfig(serverSession, userConfig);
         return new JSONObject();
-    }
-
-    private boolean usesLegacyStorage(int contextId) throws OXException {
-        ConfigurationService configService = requireService(ConfigurationService.class, services);
-        if (configService.getBoolProperty("com.openexchange.chronos.useLegacyStorage", false)) {
-            return true;
-        }
-        UpdateStatus updateStatus = Updater.getInstance().getStatus(contextId);
-        if (false == updateStatus.isExecutedSuccessfully("com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask")) {
-            return true;
-        }
-        return false;
     }
 
 }

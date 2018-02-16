@@ -118,7 +118,7 @@ public class CalendarProviderTracker extends RankingAwareNearRegistryServiceTrac
                     return false;
                 }
                 ConfigView configView = requireService(ConfigViewFactory.class, services).getView(session.getUserId(), session.getContextId());
-                return ConfigViews.getDefinedBoolPropertyFrom(getEnabledPropertyName(provider), true, configView);
+                return ConfigViews.getDefinedBoolPropertyFrom(getEnabledPropertyName(provider), true, configView) && provider.isAvailable(session);
             }
         }, serviceProperties);
         if (null != checkerRegistrations.putIfAbsent(provider.getId(), checkerRegistration)) {

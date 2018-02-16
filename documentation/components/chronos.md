@@ -389,6 +389,7 @@ Depending on the expected amount of calendar data, the timespan where the contex
 #### Logging
 
 To have a verbose progress logging of the migration, the log level for ``com.openexchange.chronos.storage.rdb.migration`` should be increased to ``ALL``, optionally writing to a separate appender. The following snippet shows an example of such an appender/logger pair defined in ``logback.xml``:
+
 ```xml
 <appender class="ch.qos.logback.core.rolling.RollingFileAppender" name="UPGRADE-FILE">
   <file>/var/log/open-xchange/open-xchange-upgrade.log.0</file>
@@ -417,9 +418,16 @@ Especially in larger setups or installation with heavy calendar usage, it's reco
 
 The following list gives an overview about the necessary preparations before performing a test migration - the actual list depends on the concrete setup.
 
+"Prepare an isolated database with the backed up dump or clone of the data to migrate", wollen wir da auf die Dinge hinweisen, über die wir selbst gestolpert waren. Ich hatte folgendes mitgeschrieben:
+
 * Prepare an isolated database with the backed up dump or clone of the data to migrate
-* Configure an isolated OX middleware node against this database (read/write connections and credentials in ``configdb.properties`` to match those in table ``db_pool`` of configdb, database pool identifier in ``globaldb.yml``, ...)
+   - **Important:** the ``db_pool`` table in ConfigDB must be changed to reference the cloned UserDBs
+* Configure an isolated OX middleware node against this database
+   - **Important:** read/write connections and credentials in ``configdb.properties`` must match the cloned ConfigDB
+   - GlobalDB identifier in ``globaldb.yml`` needs to be adjusted
+   - ensure that ``SERVER_NAME`` in ``system.properties`` is adjusted properly
 * Upgrade the open-xchange packages on that middleware node to the new release
+	- **Important:** Do not run scripts like ``listuser``, they will trigger update task runs!
 * Configure logging for ``com.openexchange.chronos.storage.rdb.migration`` appropriately as described above
 * To run the calendar migration task separately, the task's name ``com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask`` should be uncommented or added in the configuration file ``excludedupdatetasks.properties``
 * (Re-)Start the open-xchange service once and execute all other update tasks of the new release by invoking the ``runallupdate`` commandline utility

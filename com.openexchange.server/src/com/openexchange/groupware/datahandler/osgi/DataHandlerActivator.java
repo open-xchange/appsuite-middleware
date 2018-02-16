@@ -57,7 +57,6 @@ import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactor
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.data.conversion.ical.ICalParser;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.datahandler.ICalChronosDataHandler;
 import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
 import com.openexchange.groupware.datahandler.ICalJSONDataHandler;
@@ -77,7 +76,7 @@ public class DataHandlerActivator extends HousekeepingActivator {
      */
     private static final String STR_IDENTIFIER = "identifier";
 
-    private static final Class<?>[] NEEDED_CLASSES = { ICalService.class, ICalParser.class, CalendarCollectionService.class, IDBasedCalendarAccessFactory.class, CalendarService.class, ResultConverterRegistry.class };
+    private static final Class<?>[] NEEDED_CLASSES = { ICalService.class, ICalParser.class, IDBasedCalendarAccessFactory.class, CalendarService.class, ResultConverterRegistry.class };
 
     @Override
     protected Class<?>[] getNeededServices() {

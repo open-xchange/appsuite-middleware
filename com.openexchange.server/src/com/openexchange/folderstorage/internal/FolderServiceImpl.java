@@ -63,6 +63,7 @@ import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.RestoringFolderService;
 import com.openexchange.folderstorage.TrashAwareFolderService;
 import com.openexchange.folderstorage.TrashResult;
 import com.openexchange.folderstorage.Type;
@@ -77,6 +78,7 @@ import com.openexchange.folderstorage.internal.performers.GetPerformer;
 import com.openexchange.folderstorage.internal.performers.ListPerformer;
 import com.openexchange.folderstorage.internal.performers.PathPerformer;
 import com.openexchange.folderstorage.internal.performers.ReinitializePerformer;
+import com.openexchange.folderstorage.internal.performers.RestorePerformer;
 import com.openexchange.folderstorage.internal.performers.SubscribePerformer;
 import com.openexchange.folderstorage.internal.performers.UnsubscribePerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatePerformer;
@@ -95,7 +97,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class FolderServiceImpl implements FolderService, TrashAwareFolderService {
+public final class FolderServiceImpl implements FolderService, TrashAwareFolderService, RestoringFolderService {
 
     /**
      * Initializes a new {@link FolderServiceImpl}.
@@ -344,17 +346,20 @@ public final class FolderServiceImpl implements FolderService, TrashAwareFolderS
     @Override
     public ContentType parseContentType(String value) {
         int module = com.openexchange.java.util.Tools.getUnsignedInteger(value);
-        if (-1 != module) {
-            return ContentTypeRegistry.getInstance().getByModule(module);
-        } else {
-            return ContentTypeRegistry.getInstance().getByString(value);
-        }
+        return module >= 0 ? ContentTypeRegistry.getInstance().getByModule(module) : ContentTypeRegistry.getInstance().getByString(value);
     }
 
     @Override
     public FolderResponse<TrashResult> trashFolder(String treeId, String folderId, Date timeStamp, Session session, FolderServiceDecorator decorator) throws OXException {
         final DeletePerformer performer = new DeletePerformer(ServerSessionAdapter.valueOf(session), decorator);
         TrashResult result = performer.doTrash(treeId, folderId, timeStamp);
+        return FolderResponseImpl.newFolderResponse(result, performer.getWarnings());
+    }
+
+    @Override
+    public FolderResponse<Map<String, List<UserizedFolder>>> restoreFolderFromTrash(String tree, List<String> folderIds, UserizedFolder defaultDestFolder, Session session, FolderServiceDecorator decorator) throws OXException {
+        RestorePerformer performer = new RestorePerformer(ServerSessionAdapter.valueOf(session), decorator);
+        Map<String, List<UserizedFolder>> result = performer.doRestore(tree, folderIds, defaultDestFolder);
         return FolderResponseImpl.newFolderResponse(result, performer.getWarnings());
     }
 

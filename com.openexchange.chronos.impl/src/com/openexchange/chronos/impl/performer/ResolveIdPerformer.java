@@ -55,7 +55,6 @@ import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
 import static com.openexchange.chronos.impl.Utils.applyExceptionDates;
-import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
@@ -63,10 +62,10 @@ import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 
 /**
  * {@link ResolveIdPerformer}
@@ -94,30 +93,30 @@ public class ResolveIdPerformer extends AbstractQueryPerformer {
      */
     public Event perform(String eventId) throws OXException {
         /*
-         * load event data & check permissions
+         * load event data, check permissions & apply folder identifier
          */
         Event event = storage.getEventStorage().loadEvent(eventId, null);
         if (null == event) {
             return null;
         }
-        event = storage.getUtilities().loadAdditionalEventData(session.getUserId(), event, null);
-        /*
-         * derive & apply folder identifier
-         */
-        String folderId = CalendarUtils.getFolderView(event, session.getUserId());
-        UserizedFolder folder = getFolder(session, folderId);
-        if (false == matches(event.getCreatedBy(), session.getUserId())) {
-            requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
-        } else {
-            requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
+        int calendarUserId = session.getUserId();
+        event = storage.getUtilities().loadAdditionalEventData(calendarUserId, event, null);
+        String folderId = CalendarUtils.getFolderView(event, calendarUserId);
+        if (false == hasReadPermission(event)) {
+            CalendarFolder folder = getFolder(session, folderId);
+            if (false == matches(event.getCreatedBy(), session.getUserId())) {
+                requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
+            } else {
+                requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
+            }
         }
         event.setFolderId(folderId);
-        event.setFlags(getFlags(event, getCalendarUserId(folder)));
+        event.setFlags(getFlags(event, calendarUserId));
         /*
          * return event, anonymized as needed
          */
         if (isSeriesMaster(event)) {
-            event = applyExceptionDates(storage, event, getCalendarUserId(folder));
+            event = applyExceptionDates(storage, event, calendarUserId);
         }
         return anonymizeIfNeeded(session, event);
     }

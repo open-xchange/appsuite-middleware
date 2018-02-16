@@ -50,6 +50,7 @@
 package com.openexchange.chronos.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.ajax.fileholder.IFileHolder;
@@ -219,6 +220,26 @@ public interface CalendarService {
      * @return The events
      */
     List<Event> getEventsInFolder(CalendarSession session, String folderID) throws OXException;
+
+    /**
+     * Gets all events from one or more specific calendar folders.
+     * <p/>
+     * The following calendar parameters are evaluated:
+     * <ul>
+     * <li>{@link CalendarParameters#PARAMETER_FIELDS}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_START}</li>
+     * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
+     * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
+     * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
+     * <li>{@link CalendarParameters#PARAMETER_INCLUDE_PRIVATE}</li>
+     * </ul>
+     *
+     * @param session The calendar session
+     * @param folderIds The identifier of the folders to get the events from
+     * @return The resulting events from each requested folder
+     */
+    Map<String, EventsResult> getEventsInFolders(CalendarSession session, List<String> folderIds) throws OXException;
 
     /**
      * Gets all events of the session's user.
@@ -435,6 +456,7 @@ public interface CalendarService {
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}</li>
      * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
+     * <li>{@link CalendarParameters#PARAMETER_SUPPRESS_ITIP}, defaulting to {@link Boolean#TRUE} unless overridden</li>
      * <li>{@link CalendarParameters#UID_CONFLICT_STRATEGY}</li>
      * </ul>
      *

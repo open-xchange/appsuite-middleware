@@ -66,6 +66,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
+import com.openexchange.groupware.infostore.InfostoreFolderPath;
 import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog.FieldChooser;
 import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog.Table;
 import com.openexchange.groupware.infostore.utils.Metadata;
@@ -362,6 +363,13 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
                         }
                     } else {
                         set.setValue(null);
+                    }
+                } else if (m == Metadata.ORIGIN_LITERAL) {
+                    String sFolderPath = rs.getString(column);
+                    if (rs.wasNull()) {
+                        set.setValue(null);
+                    } else {
+                        set.setValue(InfostoreFolderPath.parseFrom(sFolderPath));
                     }
                 } else {
                     set.setValue(process(m, rs.getObject(column)));

@@ -87,6 +87,7 @@ specific field data of single or multiple objects.
 | 317 | supported_capabilities |Array|Each element is a String identifying a supported folder capability as described in [supported capabilities](#supported-capabilities). Only applicable for non-mail folders. Read Only, Since 7.4.0.|
 | 318 | account_id |String|Will be null if the folder does not belong to any account (i.e. if its module doesn't support multiple accounts), is a virtual folder or an account-agnostic system folder. Since 7.8.0.|
 | 319 | folder_name |String|The raw and therefore untranslated name of this folder|
+| 320 | origin |String|The folder's origin path. Since 7.10.0|
 | 3010 | com.openexchange.publish.publicationFlag |Boolean|Indicates whether this folder is published. Read Only, provided by the com.openexchange.publish plugin, since 6.14.|
 | 3020 | com.openexchange.subscribe.subscriptionFlag |Boolean|Indicates whether this folder has subscriptions storing their content in this folder. Read Only, provided by the com.openexchange.subscribe plugin, since 6.14.|
 | 3030 | com.openexchange.folderstorage.displayName |String|Provides the display of the folder's owner. Read Only, Since 6.20.|
@@ -467,6 +468,7 @@ specific field data of single or multiple objects.
 |:----|:------|:------|:-------|
 |108 | object_permissions | Array | Each element is an object described in [Object Permission object](#object-permission-object) (preliminary, available with 7.8.0). |
 |109 | shareable | Boolean | (read-only) Indicates if the item can be shared (preliminary, available with 7.8.0). |
+|712 | origin | String | The file's origin path. Since 7.10.0. |
 |700 | title | String | Title |
 |701 | url | String | Link/URL |
 |702 | filename | String | Displayed filename of the document. |
@@ -475,7 +477,7 @@ specific field data of single or multiple objects.
 |705 | version | Number | Version number of the document. New documents start at 1. Every update increments the version by 1. |
 |706 | description | String | Description |
 |707 | locked_until | Time | The time until which this item will presumably be locked. Only set if the document is currently locked, 0 otherwise. |
-|708 | file_md5sum | String | MD5Sum of the document. Not yet implemented, so this is currently always empty. |
+|708 | file_md5sum | String | MD5Sum of the document, if available. |
 |709 | version_comment | String | A version comment is used to file a changelog for the file. |
 |710 | current_version | Boolean | “true” if this version is the current version “false” otherwise. Note: This is not writeable |
 |711 | number_of_versions | Number | The number of all versions of the infoitem. Note: This is not writeable. |

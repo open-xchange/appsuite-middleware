@@ -64,7 +64,7 @@ public class USMEASClientInfo implements ClientInfo {
 
     @Override
     public ClientInfoType getType() {
-        return ClientInfoType.SYNC;
+        return ClientInfoType.EAS;
     }
 
     @Override

@@ -69,13 +69,13 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.impl.AttendeeHelper;
+import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.java.Strings;
 
@@ -94,7 +94,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
      */
-    public CreatePerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
+    public CreatePerformer(CalendarStorage storage, CalendarSession session, CalendarFolder folder) throws OXException {
         super(storage, session, folder);
     }
 
@@ -118,14 +118,14 @@ public class CreatePerformer extends AbstractUpdatePerformer {
             /*
              * not group-scheduled event (only on a single user's calendar), apply parent folder identifier
              */
-            newEvent.setFolderId(folder.getID());
+            newEvent.setFolderId(folder.getId());
         } else {
             /*
              * group-scheduled event, assign organizer, sequence number and dynamic parent-folder identifier (for non-public folders)
              */
             newEvent.setOrganizer(prepareOrganizer(event.getOrganizer()));
             newEvent.setSequence(event.containsSequence() ? event.getSequence() : 0);
-            newEvent.setFolderId(PublicType.getInstance().equals(folder.getType()) ? folder.getID() : null);
+            newEvent.setFolderId(PublicType.getInstance().equals(folder.getType()) ? folder.getId() : null);
         }
         /*
          * check for conflicts & quota restrictions
@@ -140,7 +140,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
             storage.getAttendeeStorage().insertAttendees(newEvent.getId(), newEvent.getAttendees());
         }
         if (false == isNullOrEmpty(event.getAttachments())) {
-            storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getID(), newEvent.getId(), event.getAttachments());
+            storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newEvent.getId(), event.getAttachments());
         }
         /*
          * reload created event for further processing
@@ -196,7 +196,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
         Check.startAndEndDate(eventData);
         EventMapper.getInstance().copy(eventData, event, EventField.START_DATE, EventField.END_DATE);
         Consistency.adjustAllDayDates(event);
-        //        Consistency.setTimeZone(session, event, calendarUserId);
+        Consistency.adjustTimeZones(session, calendarUserId, event, null);
         /*
          * classification, transparency, color, geo
          */

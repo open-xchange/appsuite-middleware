@@ -49,11 +49,12 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
+import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 
 /**
  * {@link CountEventsPerformer}
@@ -76,9 +77,10 @@ public class CountEventsPerformer extends AbstractQueryPerformer {
     /**
      * Performs the operation.
      *
-     * @param folder The folder to count the contained events in
+     * @param folderId The identifier of the folder to count the contained events in
      */
-    public long perform(UserizedFolder folder) throws OXException {
+    public long perform(String folderId) throws OXException {
+        CalendarFolder folder = getFolder(session, folderId);
         return storage.getEventStorage().countEvents(getFolderIdTerm(session, folder));
     }
 

@@ -72,6 +72,7 @@ import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
@@ -126,12 +127,12 @@ public class IDMangling {
      * Adjusts an exception raised by a specific calendar account so that any referenced identifiers appear in their unique composite
      * representation.
      *
-     * @param e The exception to adjust
+     * @param e The exception to adjust, or <code>null</code> to do nothing
      * @param accountId The identifier of the account
      * @return The possibly adjusted exception
      */
     public static OXException withUniqueIDs(OXException e, int accountId) {
-        if (false == e.isPrefix("CAL")) {
+        if (null == e || false == e.isPrefix("CAL")) {
             return e;
         }
         switch (e.getCode()) {
@@ -264,6 +265,24 @@ public class IDMangling {
     }
 
     /**
+     * Gets a map of events results result equipped with unique composite identifiers representing results from a specific calendar account.
+     *
+     * @param relativeResults The event results from the account
+     * @param accountId The identifier of the account
+     * @return The events result representations with unique identifiers
+     */
+    public static Map<String, EventsResult> withUniqueIDs(Map<String, EventsResult> relativeResults, int accountId) {
+        if (null == relativeResults || relativeResults.isEmpty()) {
+            return relativeResults;
+        }
+        Map<String, EventsResult> results = new HashMap<String, EventsResult>(relativeResults.size());
+        for (Map.Entry<String, EventsResult> entry : relativeResults.entrySet()) {
+            results.put(getUniqueFolderId(accountId, entry.getKey()), new IDManglingEventsResult(entry.getValue(), accountId));
+        }
+        return results;
+    }
+
+    /**
      * Gets the account-relative representation for the supplied event with unique composite identifiers.
      *
      * @param event The event
@@ -317,6 +336,33 @@ public class IDMangling {
                 com.openexchange.tools.arrays.Collections.put(foldersPerAccountId, accountId, relativeFolderId);
             } catch (IllegalArgumentException e) {
                 throw CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(e, uniqueFolderId, null);
+            }
+        }
+        return foldersPerAccountId;
+    }
+
+    /**
+     * Gets the relative representation of a list of unique composite folder identifier, mapped to their associated account identifier.
+     * <p/>
+     * {@link IDMangling#ROOT_FOLDER_IDS} are passed as-is implicitly, mapped to the default account.
+     *
+     * @param uniqueFolderIds The unique composite folder identifiers, e.g. <code>cal://4/35</code>
+     * @param errorsPerFolderId A map to track possible errors that occurred when parsing the supplied identifiers
+     * @return The relative folder identifiers, mapped to their associated calendar account identifier
+     */
+    public static Map<Integer, List<String>> getRelativeFolderIdsPerAccountId(List<String> uniqueFolderIds, Map<String, OXException> errorsPerFolderId) {
+        if (null == uniqueFolderIds || uniqueFolderIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<Integer, List<String>> foldersPerAccountId = new HashMap<Integer, List<String>>(uniqueFolderIds.size());
+        for (String uniqueFolderId : uniqueFolderIds) {
+            try {
+                List<String> unmangledId = unmangleFolderId(uniqueFolderId);
+                Integer accountId = Integer.valueOf(unmangledId.get(1));
+                String relativeFolderId = unmangledId.get(2);
+                com.openexchange.tools.arrays.Collections.put(foldersPerAccountId, accountId, relativeFolderId);
+            } catch (IllegalArgumentException e) {
+                errorsPerFolderId.put(uniqueFolderId, CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(e, uniqueFolderId, null));
             }
         }
         return foldersPerAccountId;

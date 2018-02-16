@@ -56,18 +56,17 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Map.Entry;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.DAVUserAgent;
 import com.openexchange.dav.PreconditionException;
+import com.openexchange.dav.internal.FolderUpdate;
 import com.openexchange.dav.internal.Tools;
 import com.openexchange.dav.mixins.ACL;
 import com.openexchange.dav.mixins.ACLRestrictions;
 import com.openexchange.dav.mixins.CTag;
-import com.openexchange.dav.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.dav.mixins.Invite;
 import com.openexchange.dav.mixins.Principal;
 import com.openexchange.dav.mixins.ShareAccess;
@@ -78,14 +77,12 @@ import com.openexchange.dav.reports.SyncStatus;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.IncorrectString;
 import com.openexchange.exception.OXException.ProblematicAttribute;
-import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.ParameterizedFolder;
 import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.SharedType;
@@ -124,14 +121,14 @@ public abstract class FolderCollection<T> extends DAVCollection {
         this.folder = folder;
         if (null != folder) {
             includeProperties(
-                new CTag(this), 
+                new CTag(this),
                 new SyncToken(this),
-                new ACL(folder.getPermissions()), 
-                new ACLRestrictions(), 
+                new ACL(folder.getPermissions()),
+                new ACLRestrictions(),
                 new SupportedPrivilegeSet(),
-                new ShareAccess(this), 
-                new Invite(this), 
-                new ShareResourceURI(this), 
+                new ShareAccess(this),
+                new Invite(this),
+                new ShareResourceURI(this),
                 new Principal(getOwner())
             );
         }
@@ -420,55 +417,6 @@ public abstract class FolderCollection<T> extends DAVCollection {
             LOG.error("Error resolving owner", e);
         }
         return null != owner ? owner.getDisplayName() : null;
-    }
-
-    private static final class FolderUpdate extends AbstractFolder implements ParameterizedFolder, SetterAwareFolder {
-
-        private static final long serialVersionUID = -367640273380922433L;
-
-        private final Map<FolderField, FolderProperty> properties;
-
-        private boolean containsSubscribed;
-
-        /**
-         * Initializes a new {@link FolderUpdate}.
-         */
-        public FolderUpdate() {
-            super();
-            subscribed = true;
-            this.properties = new HashMap<FolderField, FolderProperty>();
-        }
-
-        @Override
-        public boolean isGlobalID() {
-            return false;
-        }
-
-        @Override
-        public void setProperty(FolderField name, Object value) {
-            if (null == value) {
-                properties.remove(name);
-            } else {
-                properties.put(name, new FolderProperty(name.getName(), value));
-            }
-        }
-
-        @Override
-        public Map<FolderField, FolderProperty> getProperties() {
-            return properties;
-        }
-
-        @Override
-        public void setSubscribed(boolean subscribed) {
-            super.setSubscribed(subscribed);
-            containsSubscribed = true;
-        }
-
-        @Override
-        public boolean containsSubscribed() {
-            return containsSubscribed;
-        }
-
     }
 
 }

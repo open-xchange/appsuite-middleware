@@ -136,19 +136,7 @@ public abstract class AbstractITipAction implements AJAXActionService {
     private InputStream getInputStreamAndFillMailHeader(final AJAXRequestData request, final ServerSession session, final Map<String, String> mailHeader) throws OXException {
         final String ds = request.getParameter("dataSource");
         if (ds != null) {
-            final DataArguments dataArguments = new DataArguments();
-
-            final Object data = request.getData();
-            if (data != null) {
-                final JSONObject body = (JSONObject) data;
-                for (final String string : body.keySet()) {
-                    dataArguments.put(string, body.opt(string).toString());
-                }
-            } else {
-                for (final Map.Entry<String, String> entry : request.getParameters().entrySet()) {
-                    dataArguments.put(entry.getKey(), entry.getValue());
-                }
-            }
+            final DataArguments dataArguments = getDataSource(request);
 
             final ConversionService conversionEngine = services.getService(ConversionService.class);
             if (null == conversionEngine) {
@@ -174,6 +162,23 @@ public abstract class AbstractITipAction implements AJAXActionService {
             }
         }
         return null;
+    }
+
+    protected DataArguments getDataSource(final AJAXRequestData request) {
+        final DataArguments dataArguments = new DataArguments();
+
+        final Object data = request.getData();
+        if (data != null) {
+            final JSONObject body = (JSONObject) data;
+            for (final String string : body.keySet()) {
+                dataArguments.put(string, body.opt(string).toString());
+            }
+        } else {
+            for (final Map.Entry<String, String> entry : request.getParameters().entrySet()) {
+                dataArguments.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return dataArguments;
     }
 
     private void fillMailHeader(final Data<InputStream> dsData, final Map<String, String> mailHeader) {

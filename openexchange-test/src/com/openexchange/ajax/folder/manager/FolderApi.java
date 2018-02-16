@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.folder.manager;
 
+import java.util.HashMap;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.LoginResponse;
@@ -69,7 +70,10 @@ public class FolderApi {
     private FoldersApi foldersApi;
     private final ApiClient client;
     private final TestUser user;
+    private final HashMap<String, Object> rampup;
+    private Integer infostoreFolder = null;
 
+    @SuppressWarnings("unchecked")
     public FolderApi(ApiClient client, TestUser user) throws Exception {
         this.client = client;
         this.user = user;
@@ -77,6 +81,15 @@ public class FolderApi {
 
         LoginResponse login = login(user.getLogin(), user.getPassword(), client);
         this.session = login.getSession();
+        rampup = (HashMap<String, Object>) login.getRampup();
+    }
+
+    @SuppressWarnings("unchecked")
+    public Integer getInfostoreFolder() {
+        if (infostoreFolder == null) {
+            infostoreFolder = (Integer) ((HashMap<String, Object>) ((HashMap<String, Object>) ((HashMap<String, Object>) ((HashMap<String, Object>) rampup.get("jslobs")).get("io.ox/core")).get("tree")).get("folder")).get("infostore");
+        }
+        return infostoreFolder;
     }
 
     /**
@@ -88,7 +101,7 @@ public class FolderApi {
      * @throws Exception
      */
     protected LoginResponse login(String login, String password, ApiClient client) throws Exception {
-        LoginResponse doLogin = new LoginApi(client).doLogin(login, password, false, null, null, null, null, null, null);
+        LoginResponse doLogin = new LoginApi(client).doLogin(login, password, true, null, null, null, null, null, null);
         if (doLogin.getError() == null) {
             LOG.info("Login succesfull for user " + login);
             return doLogin;

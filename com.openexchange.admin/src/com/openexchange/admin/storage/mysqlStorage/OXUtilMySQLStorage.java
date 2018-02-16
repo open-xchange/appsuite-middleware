@@ -2253,7 +2253,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
             int rows = statement.executeUpdate();
             if (rows <= 0) {
-                throw new StorageException("Unable to change to server '" + serverId + "' for the specified schema '" + schemaName + "'");
+                throw new StorageException("Unable to change to server '" + serverId + "' for the specified schema '" + schemaName + "'. The schema is empty.");
             }
 
             connection.commit();
@@ -4040,7 +4040,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
             Database db;
             if (null == optDatabaseId || i(optDatabaseId) <= 0) {
-                db = getNextDBHandleByWeight(configCon);
+                db = getNextDBHandleByWeight(configCon, false);
             } else {
                 db = OXToolStorageInterface.getInstance().loadDatabaseById(i(optDatabaseId));
                 if (db.getMaxUnits().intValue() == 0) {
@@ -4132,7 +4132,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     @Override
-    public Database getNextDBHandleByWeight(final Connection con) throws SQLException, StorageException {
+    public Database getNextDBHandleByWeight(final Connection con, boolean forContext) throws SQLException, StorageException {
         if (this.USE_UNIT == UNIT_CONTEXT) {
             int CONTEXTS_PER_SCHEMA = Integer.parseInt(prop.getProp("CONTEXTS_PER_SCHEMA", "1"));
             int retryCount = 0;
@@ -4140,8 +4140,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 PreparedStatement stmt = null;
                 ResultSet rs = null;
                 try {
-                    boolean preferSchemaCount = true;
-                    if (preferSchemaCount) {
+                    if (forContext) {
                         // Prefer non-exceeded databases having less filled schemas available
                         stmt = con.prepareStatement("SELECT d.db_pool_id,d.url,d.driver,d.login,d.password,d.name,c.read_db_pool_id,c.max_units,p.count,s.schemaname,s.count FROM contexts_per_dbpool AS p JOIN db_cluster AS c ON p.db_pool_id=c.write_db_pool_id LEFT JOIN contexts_per_dbschema AS s ON p.db_pool_id=s.db_pool_id JOIN db_pool AS d ON p.db_pool_id=d.db_pool_id WHERE (c.max_units < 0 OR (c.max_units > 0 AND c.max_units > p.count)) ORDER BY p.count, s.count ASC");
                     } else {
@@ -4183,7 +4182,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                             }
 
                             boolean selectDatabase = true;
-                            if (preferSchemaCount) {
+                            if (forContext) {
                                 String scheme = rs.getString(pos++); // if the value is SQL NULL, the value returned is null
                                 if (null != scheme) {
                                     int schemaCount = rs.getInt(pos++);
@@ -4263,6 +4262,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
                     if (checkNext) { // Loop was exited because rs.next() returned false
                         // No suitable database found
+                        if (forContext) {
+                            throw new StorageException("No suitable database available to complete the operation. Please ensure registered databases are reachable and their schemas have enough capacity left and are up-to-date.");
+                        }
                         throw new StorageException("All not full databases cannot be connected to.");
                     }
                 } finally {

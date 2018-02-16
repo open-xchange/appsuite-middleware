@@ -83,7 +83,7 @@ public abstract class OXUtilStorageInterface {
 
     /**
      * Creates a new instance implementing the group storage interface.
-     * 
+     *
      * @return an instance implementing the group storage interface.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException Storage exception
      */
@@ -237,7 +237,7 @@ public abstract class OXUtilStorageInterface {
 
     /**
      * List all registered file stores.
-     * 
+     *
      * @param pattern a pattern to search for
      * @return an array of file store objects
      * @throws StorageException
@@ -456,7 +456,7 @@ public abstract class OXUtilStorageInterface {
 
     /**
      * Changes the server identifier for the specified schema
-     * 
+     *
      * @param serverId The server identifier
      * @param schemaName The schema name
      * @throws StorageException
@@ -527,9 +527,10 @@ public abstract class OXUtilStorageInterface {
      * Additionally check each master for availability.
      *
      * @param con
+     * @param forContext <code>true</code> if a suitable database is supposed to be determined for a context; otherwise <code>false</code>
      * @return the database
      * @throws SQLException
      * @throws StorageException
      */
-    public abstract Database getNextDBHandleByWeight(Connection con) throws SQLException, StorageException;
+    public abstract Database getNextDBHandleByWeight(Connection con, boolean forContext) throws SQLException, StorageException;
 }

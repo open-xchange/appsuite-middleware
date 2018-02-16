@@ -54,7 +54,7 @@ import org.osgi.framework.BundleContext;
 import com.openexchange.osgi.CompositeBundleActivator;
 import com.openexchange.user.copy.internal.additional.osgi.AdditionalCopyActivator;
 import com.openexchange.user.copy.internal.attachment.osgi.AttachmentCopyActivator;
-import com.openexchange.user.copy.internal.chronos.calendar.osgi.ChronosCalendarCopyActivator;
+import com.openexchange.user.copy.internal.chronos.osgi.ChronosCopyActivator;
 import com.openexchange.user.copy.internal.connection.osgi.ConnectionFetcherActivator;
 import com.openexchange.user.copy.internal.contact.osgi.ContactCopyActivator;
 import com.openexchange.user.copy.internal.context.osgi.ContextLoadActivator;
@@ -85,7 +85,7 @@ public class Activator extends CompositeBundleActivator {
             new UserCopyActivator(),
             new FolderCopyActivator(),
             new ConnectionFetcherActivator(),
-            new ChronosCalendarCopyActivator(),
+            new ChronosCopyActivator(),
             new ContactCopyActivator(),
             new AttachmentCopyActivator(),
             new TaskCopyActivator(),

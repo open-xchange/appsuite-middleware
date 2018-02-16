@@ -237,6 +237,7 @@ public final class ConfigJSlobService implements JSlobService {
         if (com.openexchange.java.Strings.isEmpty(configTreePath) || com.openexchange.java.Strings.isEmpty(jslobPath)) {
             return;
         }
+
         String path = jslobPath.trim();
         String jslobName;
         {
@@ -259,8 +260,10 @@ public final class ConfigJSlobService implements JSlobService {
             }
         }
 
-        equiv.config2lob.put(configTreePath.trim(), path);
-        equiv.lob2config.put(path, configTreePath.trim());
+        String confTreePath = configTreePath.trim();
+        equiv.config2lob.put(confTreePath, path);
+        equiv.lob2config.put(path, confTreePath);
+        LOG.info("Added config-tree equivalent to JSlob: {} > {}", confTreePath, jslobPath);
     }
 
     /**
@@ -290,6 +293,7 @@ public final class ConfigJSlobService implements JSlobService {
         if (equiv != null) {
             equiv.config2lob.remove(configTreePath.trim());
             equiv.lob2config.remove(path);
+            LOG.info("Removed config-tree equivalent from JSlob: {} > {}", configTreePath, jslobPath);
         }
     }
 
@@ -575,9 +579,8 @@ public final class ConfigJSlobService implements JSlobService {
             final SettingStorage stor = SettingStorage.getInstance(session);
             final ConfigTree configTree = ConfigTree.getInstance();
 
-            final Set<Entry<String, String>> entrySet = equiv.config2lob.entrySet();
             final JSONObject jObject = new JSONObject(jsLob.getJsonObject());
-            for (final Map.Entry<String, String> mapping : entrySet) {
+            for (final Map.Entry<String, String> mapping : equiv.config2lob.entrySet()) {
                 final String configTreePath = mapping.getKey();
                 final String lobPath = mapping.getValue();
 

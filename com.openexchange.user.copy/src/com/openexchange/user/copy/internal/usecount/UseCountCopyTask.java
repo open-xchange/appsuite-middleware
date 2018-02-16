@@ -65,7 +65,7 @@ import com.openexchange.user.copy.CopyUserTaskService;
 import com.openexchange.user.copy.ObjectMapping;
 import com.openexchange.user.copy.UserCopyExceptionCodes;
 import com.openexchange.user.copy.internal.CopyTools;
-import com.openexchange.user.copy.internal.chronos.calendar.ChronosCalendarCopyTask;
+import com.openexchange.user.copy.internal.chronos.ChronosCopyTask;
 import com.openexchange.user.copy.internal.connection.ConnectionFetcherTask;
 import com.openexchange.user.copy.internal.contact.ContactCopyTask;
 import com.openexchange.user.copy.internal.context.ContextLoadTask;
@@ -92,7 +92,7 @@ public class UseCountCopyTask implements CopyUserTaskService {
     @Override
     public String[] getAlreadyCopied() {
         return new String[] { UserCopyTask.class.getName(), ContextLoadTask.class.getName(), ConnectionFetcherTask.class.getName(), FolderCopyTask.class.getName(),
-            ChronosCalendarCopyTask.class.getName(), ContactCopyTask.class.getName(), TaskCopyTask.class.getName() };
+            ChronosCopyTask.class.getName(), ContactCopyTask.class.getName(), TaskCopyTask.class.getName() };
     }
 
     @Override

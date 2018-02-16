@@ -305,10 +305,10 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                     if (msg2.isSeen()) {
                         return compareByReceivedDate(msg1, msg2, false);
                     }
-                    return 1;
+                    return -1;
                 }
                 if (msg2.isSeen()) {
-                    return -1;
+                    return 1;
                 }
                 return compareByReceivedDate(msg1, msg2, false);
             }
@@ -375,6 +375,22 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                     return 1;
                 }
                 return compareByReceivedDate(msg1, msg2, false);
+            }
+        });
+        COMPARERS.put(MailSortField.FLAG_HAS_ATTACHMENT, new FieldComparer() {
+
+            @Override
+            public int compareFields(final MailMessage msg1, final MailMessage msg2) throws MessagingException {
+                if (msg1.hasAttachment()) {
+                    if (msg2.hasAttachment()) {
+                        return compareByReceivedDate(msg1, msg2, true);
+                    }
+                    return 1;
+                }
+                if (msg2.hasAttachment()) {
+                    return -1;
+                }
+                return compareByReceivedDate(msg1, msg2, true);
             }
         });
         COMPARERS.put(MailSortField.SIZE, new FieldComparer() {

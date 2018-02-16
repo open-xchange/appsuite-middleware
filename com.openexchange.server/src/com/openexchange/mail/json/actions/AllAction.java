@@ -82,7 +82,6 @@ import com.openexchange.mail.json.osgi.MailJSONActivator;
 import com.openexchange.mail.json.utils.ColumnCollection;
 import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.FlagTerm;
-import com.openexchange.mail.search.ORTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.UserFlagTerm;
 import com.openexchange.server.ServiceLookup;
@@ -223,9 +222,9 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                     if (leftHandLimit == MailRequest.NOT_FOUND || rightHandLimit == MailRequest.NOT_FOUND) {
                         fromToIndices = null;
                     } else {
-                        fromToIndices = new int[] { leftHandLimit < 0 ? 0 : leftHandLimit, rightHandLimit < 0 ? 0 : rightHandLimit};
+                        fromToIndices = new int[] { leftHandLimit < 0 ? 0 : leftHandLimit, rightHandLimit < 0 ? 0 : rightHandLimit };
                         if (fromToIndices[0] >= fromToIndices[1]) {
-                            return new AJAXRequestResult(Collections.<MailMessage>emptyList(), "mail");
+                            return new AJAXRequestResult(Collections.<MailMessage> emptyList(), "mail");
                         }
                     }
                 } else {
@@ -240,28 +239,28 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                         } else {
                             int i = Integer.parseInt(s.substring(0, pos).trim());
                             start = i < 0 ? 0 : i;
-                            i = Integer.parseInt(s.substring(pos+1).trim());
+                            i = Integer.parseInt(s.substring(pos + 1).trim());
                             end = i < 0 ? 0 : i;
                         }
                     } catch (final NumberFormatException e) {
                         throw MailExceptionCode.INVALID_INT_VALUE.create(e, s);
                     }
                     if (start >= end) {
-                        return new AJAXRequestResult(Collections.<MailMessage>emptyList(), "mail");
+                        return new AJAXRequestResult(Collections.<MailMessage> emptyList(), "mail");
                     }
-                    fromToIndices = new int[] {start,end};
+                    fromToIndices = new int[] { start, end };
                 }
             }
 
             final boolean ignoreSeen = req.optBool("unseen");
-            final boolean ignoreDeleted = !req.optBool("deleted", true);
-            final boolean filterApplied = (ignoreSeen || ignoreDeleted);
+            final Boolean ignoreDeleted = getIgnoreDeleted(req);
+            final boolean filterApplied = (ignoreSeen || (ignoreDeleted != null));
             if (filterApplied) {
                 // Ensure flags is contained in provided columns
                 final int fieldFlags = MailListField.FLAGS.getField();
                 boolean found = false;
                 for (int i = 0; !found && i < columns.length; i++) {
-                   found = fieldFlags == columns[i];
+                    found = fieldFlags == columns[i];
                 }
                 if (!found) {
                     final int[] tmp = columns;
@@ -295,68 +294,53 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                 /*
                  * Check for thread-sort
                  */
-                if (("thread".equalsIgnoreCase(sort))) {
-                    it = mailInterface.getAllThreadedMessages(folderId, MailSortField.RECEIVED_DATE.getField(), orderDir, columns, filterApplied ? null : fromToIndices);
-                    for (int i = it.size(); i-- > 0;) {
-                        final MailMessage mm = it.next();
-                        if (!discardMail(mm, ignoreSeen, ignoreDeleted)) {
-                            if (!mm.containsAccountId()) {
-                                mm.setAccountId(mailInterface.getAccountID());
-                            }
-                            mails.add(mm);
+                int sortCol = req.getSortFieldFor(sort);
+                String category_filter = req.getParameter("categoryid");
+                if (filterApplied || category_filter != null) {
+                    mailInterface.openFor(folderId);
+                    SearchTerm<?> searchTerm;
+                    {
+                        SearchTerm<?> first = ignoreSeen ? new FlagTerm(MailMessage.FLAG_SEEN, false) : null;
+                        SearchTerm<?> second;
+                        if (ignoreDeleted != null) {
+                            second = new FlagTerm(MailMessage.FLAG_DELETED, !ignoreDeleted);
+                        } else {
+                            second = null;
                         }
-                    }
-                    warnings = mailInterface.getWarnings();
-                } else {
-                    int sortCol = req.getSortFieldFor(sort);
-                    String category_filter = req.getParameter("categoryid");
-                    if (filterApplied || category_filter != null) {
-                        mailInterface.openFor(folderId);
-                        SearchTerm<?> searchTerm;
-                        {
-                            SearchTerm<?> first = ignoreSeen ? new FlagTerm(MailMessage.FLAG_SEEN, false) : null;
-                            SearchTerm<?> second = ignoreDeleted ? (ignoreSeen ? null /* Already filtered by unseen, thus OR term will always be true */ : new ORTerm(new FlagTerm(MailMessage.FLAG_DELETED, false), new FlagTerm(MailMessage.FLAG_SEEN, false))) : null;
-                            searchTerm = null != first && null != second ? new ANDTerm(first, second) : (null == first ? second : first);
+                        searchTerm = null != first && null != second ? new ANDTerm(first, second) : (null == first ? second : first);
 
-                            // Check if mail categories are enabled
-                            CapabilityService capabilityService = MailJSONActivator.SERVICES.get().getService(CapabilityService.class);
-                            if (null != capabilityService && capabilityService.getCapabilities(req.getSession()).contains("mail_categories")) {
-                                MailCategoriesConfigService categoriesService = MailJSONActivator.SERVICES.get().getOptionalService(MailCategoriesConfigService.class);
-                                if (categoriesService != null && category_filter != null && !category_filter.equals("none")) {
+                        // Check if mail categories are enabled
+                        CapabilityService capabilityService = MailJSONActivator.SERVICES.get().getService(CapabilityService.class);
+                        if (null != capabilityService && capabilityService.getCapabilities(req.getSession()).contains("mail_categories")) {
+                            MailCategoriesConfigService categoriesService = MailJSONActivator.SERVICES.get().getOptionalService(MailCategoriesConfigService.class);
+                            if (categoriesService != null && category_filter != null && !category_filter.equals("none")) {
 
-                                    if (category_filter.equals("general")) {
-                                        // Special case with unkeyword
-                                        String categoryNames[] = categoriesService.getAllFlags(req.getSession(), true, false);
-                                        if (categoryNames.length != 0) {
+                                if (category_filter.equals("general")) {
+                                    // Special case with unkeyword
+                                    String categoryNames[] = categoriesService.getAllFlags(req.getSession(), true, false);
+                                    if (categoryNames.length != 0) {
+                                        if (searchTerm != null) {
+                                            searchTerm = new ANDTerm(searchTerm, new UserFlagTerm(categoryNames, false));
+                                        } else {
+                                            searchTerm = new UserFlagTerm(categoryNames, false);
+                                        }
+                                    }
+                                } else {
+                                    // Normal case with keyword
+                                    String flag = categoriesService.getFlagByCategory(req.getSession(), category_filter);
+                                    if (flag == null) {
+                                        throw MailExceptionCode.INVALID_PARAMETER_VALUE.create(category_filter);
+                                    }
+
+                                    // test if category is a system category
+                                    if (categoriesService.isSystemCategory(category_filter, req.getSession())) {
+                                        // Add active user categories as unkeywords
+                                        String[] unkeywords = categoriesService.getAllFlags(req.getSession(), true, true);
+                                        if (unkeywords.length != 0) {
                                             if (searchTerm != null) {
-                                                searchTerm = new ANDTerm(searchTerm, new UserFlagTerm(categoryNames, false));
+                                                searchTerm = new ANDTerm(searchTerm, new ANDTerm(new UserFlagTerm(flag, true), new UserFlagTerm(unkeywords, false)));
                                             } else {
-                                                searchTerm = new UserFlagTerm(categoryNames, false);
-                                            }
-                                        }
-                                    } else {
-                                        // Normal case with keyword
-                                        String flag = categoriesService.getFlagByCategory(req.getSession(), category_filter);
-                                        if (flag == null) {
-                                            throw MailExceptionCode.INVALID_PARAMETER_VALUE.create(category_filter);
-                                        }
-
-                                        // test if category is a system category
-                                        if (categoriesService.isSystemCategory(category_filter, req.getSession())) {
-                                            // Add active user categories as unkeywords
-                                            String[] unkeywords = categoriesService.getAllFlags(req.getSession(), true, true);
-                                            if (unkeywords.length != 0) {
-                                                if (searchTerm != null) {
-                                                    searchTerm = new ANDTerm(searchTerm, new ANDTerm(new UserFlagTerm(flag, true), new UserFlagTerm(unkeywords, false)));
-                                                } else {
-                                                    searchTerm = new ANDTerm(new UserFlagTerm(flag, true), new UserFlagTerm(unkeywords, false));
-                                                }
-                                            } else {
-                                                if (searchTerm != null) {
-                                                    searchTerm = new ANDTerm(searchTerm, new UserFlagTerm(flag, true));
-                                                } else {
-                                                    searchTerm = new UserFlagTerm(flag, true);
-                                                }
+                                                searchTerm = new ANDTerm(new UserFlagTerm(flag, true), new UserFlagTerm(unkeywords, false));
                                             }
                                         } else {
                                             if (searchTerm != null) {
@@ -365,45 +349,45 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                                                 searchTerm = new UserFlagTerm(flag, true);
                                             }
                                         }
+                                    } else {
+                                        if (searchTerm != null) {
+                                            searchTerm = new ANDTerm(searchTerm, new UserFlagTerm(flag, true));
+                                        } else {
+                                            searchTerm = new UserFlagTerm(flag, true);
+                                        }
                                     }
                                 }
                             }
                         }
-
-                        FullnameArgument fa = prepareMailFolderParam(folderId);
-                        IndexRange indexRange = null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]);
-                        MailSortField sortField = MailSortField.getField(sortCol);
-                        OrderDirection orderDirection = OrderDirection.getOrderDirection(orderDir);
-
-                        MailMessage[] result;
-                        MailField[] fields = MailField.getFields(columns);
-                        result = mailInterface.searchMails(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, fields, headers);
-
-                        for (MailMessage mm : result) {
-                            if (null != mm) {
-                                if (!mm.containsAccountId()) {
-                                    mm.setAccountId(mailInterface.getAccountID());
-                                }
-                                mails.add(mm);
-                            }
-                        }
-
-                        warnings = mailInterface.getWarnings();
-
-                    } else {
-                        // Get iterator
-                        it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns, headers, fromToIndices, AJAXRequestDataTools.parseBoolParameter("continuation", req.getRequest()));
-                        for (int i = it.size(); i-- > 0;) {
-                            final MailMessage mm = it.next();
-                            if (!discardMail(mm, ignoreSeen, ignoreDeleted)) {
-                                if (!mm.containsAccountId()) {
-                                    mm.setAccountId(mailInterface.getAccountID());
-                                }
-                                mails.add(mm);
-                            }
-                        }
-                        warnings = mailInterface.getWarnings();
                     }
+
+                    FullnameArgument fa = prepareMailFolderParam(folderId);
+                    IndexRange indexRange = null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]);
+                    MailSortField sortField = MailSortField.getField(sortCol);
+                    OrderDirection orderDirection = OrderDirection.getOrderDirection(orderDir);
+
+                    MailMessage[] result;
+                    MailField[] fields = MailField.getFields(columns);
+                    result = mailInterface.searchMails(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, fields, headers);
+
+                    for (MailMessage mm : result) {
+                        if (null != mm) {
+                            if (!mm.containsAccountId()) {
+                                mm.setAccountId(mailInterface.getAccountID());
+                            }
+                            mails.add(mm);
+                        }
+                    }
+
+                    warnings = mailInterface.getWarnings();
+
+                } else {
+                    // Get iterator
+                    it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns, headers, fromToIndices, AJAXRequestDataTools.parseBoolParameter("continuation", req.getRequest()));
+                    for (int i = it.size(); i-- > 0;) {
+                        mails.add(it.next());
+                    }
+                    warnings = mailInterface.getWarnings();
                 }
             } finally {
                 SearchIterators.close(it);
@@ -444,18 +428,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
         if (null != id) {
             return id;
         }
-        final String sha1Sum =
-            JsonCaches.getSHA1Sum(
-                "all",
-                req.checkParameter(Mail.PARAMETER_MAILFOLDER),
-                req.checkParameter(AJAXServlet.PARAMETER_COLUMNS),
-                req.getParameter(AJAXServlet.PARAMETER_SORT),
-                req.getParameter(AJAXServlet.PARAMETER_ORDER),
-                req.getParameter("limit"),
-                req.getParameter(AJAXServlet.LEFT_HAND_LIMIT),
-                req.getParameter(AJAXServlet.RIGHT_HAND_LIMIT),
-                req.getParameter("unseen"),
-                req.getParameter("deleted"));
+        final String sha1Sum = JsonCaches.getSHA1Sum("all", req.checkParameter(Mail.PARAMETER_MAILFOLDER), req.checkParameter(AJAXServlet.PARAMETER_COLUMNS), req.getParameter(AJAXServlet.PARAMETER_SORT), req.getParameter(AJAXServlet.PARAMETER_ORDER), req.getParameter("limit"), req.getParameter(AJAXServlet.LEFT_HAND_LIMIT), req.getParameter(AJAXServlet.RIGHT_HAND_LIMIT), req.getParameter("unseen"), req.getParameter("deleted"));
         return sha1Sum;
     }
 

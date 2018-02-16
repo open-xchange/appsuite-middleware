@@ -141,7 +141,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
                 continue;
             }
             Event foundEvent = getEvent(existingEvents, update);
-            if (update.getStatus().equals(EventStatus.CANCELLED)) {
+            if (update.containsStatus() && EventStatus.CANCELLED.equals(update.getStatus())) {
                 if (foundEvent != null) {
                     // add to removed
                     removed.add(foundEvent);
@@ -208,7 +208,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
      */
     private boolean containsMaster(List<Event> events, String uid) {
         for (Event eve : events) {
-            if (eve.getUid().equals(uid) && !eve.containsRecurrenceId()) {
+            if (uid!=null && uid.equals(eve.getUid()) && !eve.containsRecurrenceId()) {
                 return true;
             }
         }
@@ -409,7 +409,7 @@ public class GoogleCalendarResult extends ExternalCalendarResult implements Diff
      * @return true if the event is a delete exception, false otherwise.
      */
     private boolean isDeleteException(Event updated) {
-        return updated.getRecurrenceId() != null && updated.getStatus().equals(EventStatus.CANCELLED);
+        return updated.getRecurrenceId() != null && updated.containsStatus() && EventStatus.CANCELLED.equals(updated.getStatus());
     }
 
     @Override

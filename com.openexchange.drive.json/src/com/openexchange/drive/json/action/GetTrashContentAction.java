@@ -67,7 +67,7 @@ public class GetTrashContentAction extends AbstractDriveAction {
     @Override
     public AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
         JSONObject result = getDriveService().getUtility().getTrashContent(session);
-        return new AJAXRequestResult(result, "json");
+        return new AJAXRequestResult(result == null ? JSONObject.EMPTY_OBJECT : result, "json");
     }
 
 }

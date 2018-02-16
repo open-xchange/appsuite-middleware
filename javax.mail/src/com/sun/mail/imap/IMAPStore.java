@@ -293,7 +293,6 @@ public class IMAPStore extends Store
     private volatile String generatedExternalId = null;
     private Map<String, String> clientParameters = null;
     private ExternalIdGenerator externalIdGenerator = null;
-    private IMAPTextPreviewProvider textPreviewProvider = null;
     private boolean failOnNOFetch = false;
     private final String guid;			// for Yahoo! Mail IMAP
     private boolean throwSearchException = false;
@@ -789,24 +788,6 @@ public class IMAPStore extends Store
     }
 
     /**
-     * Gets the text-preview provider
-     *
-     * @return The text-preview provider or <code>null</code>
-     */
-    public IMAPTextPreviewProvider getTextPreviewProvider() {
-        return textPreviewProvider;
-    }
-
-    /**
-     * Sets the text-preview provider
-     *
-     * @param textPreviewProvider The text-preview provider to set
-     */
-    public void setTextPreviewProvider(IMAPTextPreviewProvider textPreviewProvider) {
-        this.textPreviewProvider = textPreviewProvider;
-    }
-
-    /**
      * Sets the client parameters
      *
      * @param clientParameters The client parameters to set
@@ -950,7 +931,7 @@ public class IMAPStore extends Store
                 case PRIVACYREQUIRED:
                     throw new javax.mail.PrivacyRequiredException(cex.getResponse().getRest(), cex);
                 default:
-                    throw new MessagingException(cex.getMessage(), cex);
+                    throw new javax.mail.LoginFailedException(cex.getMessage(), cex);
             }
         }
 

@@ -59,6 +59,7 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.FolderProperty;
 import com.openexchange.folderstorage.ParameterizedFolder;
+import com.openexchange.folderstorage.FolderPath;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.Type;
@@ -127,6 +128,8 @@ public final class ParsedFolder implements SetterAwareFolder, ParameterizedFolde
     protected Set<String> supportedCapbilitites;
 
     protected Map<FolderField, FolderProperty> properties;
+
+    protected FolderPath originPath;
 
     /**
      * Initializes an empty {@link ParsedFolder}.
@@ -472,7 +475,7 @@ public final class ParsedFolder implements SetterAwareFolder, ParameterizedFolde
     }
 
     @Override
-    public void setProperty(final FolderField name, final Object value) {
+   public void setProperty(final FolderField name, final Object value) {
         if (null == properties) {
             properties = new HashMap<FolderField, FolderProperty>(4);
         }
@@ -495,6 +498,16 @@ public final class ParsedFolder implements SetterAwareFolder, ParameterizedFolde
      */
     public void setProperties(Map<FolderField, FolderProperty> properties) {
         this.properties = properties;
+    }
+
+    @Override
+    public FolderPath getOriginPath() {
+        return originPath;
+    }
+
+    @Override
+    public void setOriginPath(FolderPath originPath) {
+        this.originPath = originPath;
     }
 
 }

@@ -49,8 +49,6 @@
 
 package com.openexchange.folderstorage.database;
 
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccounts;
@@ -58,6 +56,7 @@ import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.FolderPath;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SystemContentType;
 import com.openexchange.folderstorage.Type;
@@ -81,6 +80,7 @@ import com.openexchange.folderstorage.type.TemplatesType;
 import com.openexchange.folderstorage.type.TrashType;
 import com.openexchange.folderstorage.type.VideosType;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.FolderPathObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
@@ -96,6 +96,8 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link DatabaseFolder} - A database folder.
@@ -114,6 +116,7 @@ public class DatabaseFolder extends AbstractFolder {
     private static final String CAPABILITY_LOCKS = Strings.asciiLowerCase(FileStorageCapability.LOCKS.name());
     private static final String CAPABILITY_COUNT_TOTAL = Strings.asciiLowerCase(FileStorageCapability.COUNT_TOTAL.name());
     private static final String CAPABILITY_CASE_INSENSITIVE = Strings.asciiLowerCase(FileStorageCapability.CASE_INSENSITIVE.name());
+    private static final String CAPABILITY_RESTORE = Strings.asciiLowerCase(FileStorageCapability.RESTORE.name());
 
     private static final TIntSet COUNTABLE_MODULES = new TIntHashSet(new int[] { FolderObject.CALENDAR, FolderObject.CONTACT, FolderObject.TASK, FolderObject.INFOSTORE });
 
@@ -161,6 +164,7 @@ public class DatabaseFolder extends AbstractFolder {
             addSupportedCapabilities(CAPABILITY_EXTENDED_METADATA);
             addSupportedCapabilities(CAPABILITY_LOCKS);
             addSupportedCapabilities(CAPABILITY_CASE_INSENSITIVE);
+            addSupportedCapabilities(CAPABILITY_RESTORE);
         }
         int module = contentType.getModule();
         if (COUNTABLE_MODULES.contains(module)) {
@@ -185,6 +189,8 @@ public class DatabaseFolder extends AbstractFolder {
         deefault = folderObject.isDefaultFolder();
         defaultType = deefault ? contentType.getModule() : 0;
         meta = folderObject.getMeta();
+        FolderPathObject folderPathObject = folderObject.getOriginPath();
+        originPath = null == folderPathObject ? null : FolderPath.copyOf(folderPathObject);
     }
 
     @Override

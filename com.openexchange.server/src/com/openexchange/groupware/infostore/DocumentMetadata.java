@@ -135,6 +135,8 @@ public interface DocumentMetadata extends Serializable {
     // versioned persistent
     long getSequenceNumber();
 
+    void setSequenceNumber(long sequenceNumber);
+
     String getCategories();
 
     void setCategories(String categories);
@@ -225,5 +227,19 @@ public interface DocumentMetadata extends Serializable {
      * Sets the original folder ID, if the ID set via {@link #setFolderId(long)} is virtual.
      */
     void setOriginalFolderId(long id);
+
+    /**
+     * Gets the origin folder path
+     *
+     * @return The origin folder path
+     */
+    InfostoreFolderPath getOriginFolderPath();
+
+    /**
+     * Sets the origin folder path
+     *
+     * @param originFolderPath
+     */
+    void setOriginFolderPath(InfostoreFolderPath originFolderPath);
 
 }

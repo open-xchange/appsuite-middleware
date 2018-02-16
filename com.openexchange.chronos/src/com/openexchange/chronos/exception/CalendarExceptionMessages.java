@@ -59,11 +59,11 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class CalendarExceptionMessages implements LocalizableStrings {
 
-    public static final String EVENT_NOT_FOUND_MSG = "The requested event was not found.";
+    public static final String EVENT_NOT_FOUND_MSG = "The requested appointment was not found.";
 
     public static final String FOLDER_NOT_FOUND_MSG = "The requested folder was not found.";
 
-    public static final String ATTENDEE_NOT_FOUND_MSG = "The requested attendee was not found.";
+    public static final String ATTENDEE_NOT_FOUND_MSG = "The requested participant was not found.";
 
     public static final String ACCOUNT_NOT_FOUND_MSG = "The requested calendar account was not found.";
 
@@ -77,7 +77,7 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String NO_PERMISSION_MSG = "The operation could not be completed due to insufficient permissions.";
 
-    public static final String NOT_ORGANIZER_MSG = "This modification can only be performed by the organizer of the event.";
+    public static final String NOT_ORGANIZER_MSG = "This modification can only be performed by the organizer of the appointment.";
 
     public static final String MISSING_CAPABILITY_MSG = "The operation could not be completed due to missing capabilities.";
 
@@ -85,39 +85,39 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String CONCURRENT_MODIFICATION_MSG = "The operation could not be completed due to a concurrent modification. Please reload the data and try again.";
 
-    public static final String UID_CONFLICT_MSG = "The event could not be created due to another conflicting event with the same unique identifier.";
+    public static final String UID_CONFLICT_MSG = "The appointment could not be created due to another conflicting appointment with the same unique identifier.";
 
-    public static final String EVENT_CONFLICTS_MSG = "The event conflicts with one or more other events.";
+    public static final String EVENT_CONFLICTS_MSG = "The appointment conflicts with one or more other appointments.";
 
     public static final String MANDATORY_FIELD_MSG = "The field \"%1$s\" is mandatory. Please supply a valid value and try again.";
 
-    public static final String END_BEFORE_START_MSG = "The end date lies before the start date. Please correct the event times and try again.";
+    public static final String END_BEFORE_START_MSG = "The end date lies before the start date. Please correct the appointment times and try again.";
 
-    public static final String UNSUPPORTED_CLASSIFICATION_MSG = "Events in non-personal folders must not be classified as \"private\" or \"confidential\".";
+    public static final String UNSUPPORTED_CLASSIFICATION_MSG = "Appointments in non-personal folders must not be classified as \"private\" or \"confidential\".";
 
-    public static final String UNSUPPORTED_CLASSIFICATION_FOR_MOVE_MSG = "Events classified as \"private\" or \"confidential\" cannot be moved to this type of folder.";
+    public static final String UNSUPPORTED_CLASSIFICATION_FOR_MOVE_MSG = "Appointments classified as \"private\" or \"confidential\" cannot be moved to this type of folder.";
 
-    public static final String UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE_MSG = "Occurrences of event series must not be classified differently.";
+    public static final String UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE_MSG = "Occurrences of appointment series must not be classified differently.";
 
     public static final String INVALID_RRULE_MSG = "The supplied recurrence rule is invalid. Please correct the rule and try again.";
 
-    public static final String INVALID_ALARM_MSG = "The supplied alarm is invalid. Please correct the alarm and try again.";
+    public static final String INVALID_ALARM_MSG = "The supplied reminder is invalid. Please correct the reminder and try again.";
 
     public static final String INVALID_TIMEZONE_MSG = "The supplied timezone is invalid. Please select a valid timezone and try again.";
 
     public static final String INVALID_GEO_LOCATION_MSG = "The supplied geographical location is invalid. Please select valid coordinates and try again.";
 
-    public static final String INCOMPATIBLE_DATE_TYPES_MSG = "The supplied types of start and end date are incompatible. Please correct the event times and try again.";
+    public static final String INCOMPATIBLE_DATE_TYPES_MSG = "The supplied types of start and end date are incompatible. Please correct the appointment times and try again.";
 
     public static final String UNSUPPORTED_RRULE_MSG = "The supplied recurrence rule is not supported. Please use adjust the rule and try again.";
 
-    public static final String INVALID_RECURRENCE_ID_MSG = "The targeted occurrence is not part of the event series. Please select a valid recurrence identifier and try again.";
+    public static final String INVALID_RECURRENCE_ID_MSG = "The targeted occurrence is not part of the appointment series. Please select a valid recurrence identifier and try again.";
 
-    public static final String INVALID_SPLIT_MSG = "The split of the event series cannot be performed. Please select a valid split point and try again.";
+    public static final String INVALID_SPLIT_MSG = "The split of the appointment series cannot be performed. Please select a valid split point and try again.";
 
-    public static final String MOVE_SERIES_NOT_SUPPORTED_MSG = "Moving an event series into another folder is not supported.";
+    public static final String MOVE_SERIES_NOT_SUPPORTED_MSG = "Moving an appointment series into another folder is not supported.";
 
-    public static final String MOVE_OCCURRENCE_NOT_SUPPORTED_MSG = "Moving an occurrence of an event series into another folder is not supported.";
+    public static final String MOVE_OCCURRENCE_NOT_SUPPORTED_MSG = "Moving an occurrence of an appointment series into another folder is not supported.";
 
     public static final String INVALID_CALENDAR_USER_MSG = "The calendar user \"%1$s\" is invalid.";
 
@@ -143,11 +143,11 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String ATTACHMENT_NOT_FOUND_MSG = "The requested attachment was not found.";
 
-    public static final String TOO_MANY_EVENTS_MSG = "Too many events are queried. Please choose a shorter timeframe.";
+    public static final String TOO_MANY_EVENTS_MSG = "Too many appointments are queried. Please choose a shorter timeframe.";
 
-    public static final String TOO_MANY_ATTENDEES_MSG = "The event contains too many attendees.";
+    public static final String TOO_MANY_ATTENDEES_MSG = "The appointment contains too many participants.";
 
-    public static final String TOO_MANY_ALARMS_MSG = "The event contains too many alarms.";
+    public static final String TOO_MANY_ALARMS_MSG = "The appointment contains too many reminders.";
 
     /**
      * Initializes a new {@link CalendarExceptionMessages}.

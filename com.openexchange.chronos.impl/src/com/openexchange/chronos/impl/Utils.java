@@ -50,12 +50,16 @@
 package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getRecurrenceIds;
+import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isClassifiedFor;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isInRange;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.CalendarUtils.matches;
+import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
 import static com.openexchange.chronos.impl.AbstractStorageOperation.PARAM_CONNECTION;
 import static com.openexchange.java.Autoboxing.I;
@@ -66,6 +70,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -77,7 +82,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
-import org.slf4j.LoggerFactory;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarStrings;
@@ -128,6 +133,7 @@ import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnFieldOperand;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
@@ -153,6 +159,145 @@ public class Utils {
         EventField.ID, EventField.TIMESTAMP, EventField.MODIFIED_BY, EventField.FOLDER_ID, EventField.SERIES_ID,
         EventField.RECURRENCE_RULE, EventField.SEQUENCE, EventField.START_DATE, EventField.TRANSP
     };
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Utils.class);
+
+    /** Windows to Olson timezone mappings */
+    private static final Map<String, String> WINDOWS2OLSON = ImmutableMap.<String, String> builder() // @formatter:off
+        .put("Saint Pierre Standard Time", "America/Miquelon")
+        .put("Greenwich Standard Time", "Atlantic/Reykjavik")
+        .put("Tasmania Standard Time", "Australia/Hobart")
+        .put("Magallanes Standard Time", "America/Punta_Arenas")
+        .put("Central European Standard Time", "Europe/Warsaw")
+        .put("Azores Standard Time", "Atlantic/Azores")
+        .put("Arabic Standard Time", "Asia/Baghdad")
+        .put("Samoa Standard Time", "Pacific/Apia")
+        .put("SA Western Standard Time", "America/La_Paz")
+        .put("Bahia Standard Time", "America/Bahia")
+        .put("Pakistan Standard Time", "Asia/Karachi")
+        .put("Libya Standard Time", "Africa/Tripoli")
+        .put("Yakutsk Standard Time", "Asia/Yakutsk")
+        .put("Sakhalin Standard Time", "Asia/Sakhalin")
+        .put("Norfolk Standard Time", "Pacific/Norfolk")
+        .put("Afghanistan Standard Time", "Asia/Kabul")
+        .put("Fiji Standard Time", "Pacific/Fiji")
+        .put("Central Brazilian Standard Time", "America/Cuiaba")
+        .put("Cuba Standard Time", "America/Havana")
+        .put("Aleutian Standard Time", "America/Adak")
+        .put("Pacific SA Standard Time", "America/Santiago")
+        .put("Egypt Standard Time", "Africa/Cairo")
+        .put("Arab Standard Time", "Asia/Riyadh")
+        .put("Taipei Standard Time", "Asia/Taipei")
+        .put("UTC-02", "Etc/GMT+2")
+        .put("West Bank Standard Time", "Asia/Hebron")
+        .put("Alaskan Standard Time", "America/Anchorage")
+        .put("Omsk Standard Time", "Asia/Omsk")
+        .put("Eastern Standard Time", "America/New_York")
+        .put("Myanmar Standard Time", "Asia/Rangoon")
+        .put("Syria Standard Time", "Asia/Damascus")
+        .put("Russian Standard Time", "Europe/Moscow")
+        .put("Mountain Standard Time (Mexico)", "America/Chihuahua")
+        .put("Magadan Standard Time", "Asia/Magadan")
+        .put("Iran Standard Time", "Asia/Tehran")
+        .put("Marquesas Standard Time", "Pacific/Marquesas")
+        .put("Azerbaijan Standard Time", "Asia/Baku")
+        .put("E. South America Standard Time", "America/Sao_Paulo")
+        .put("Turks And Caicos Standard Time", "America/Grand_Turk")
+        .put("UTC-09", "Etc/GMT+9")
+        .put("Russia Time Zone 3", "Europe/Samara")
+        .put("UTC-08", "Etc/GMT+8")
+        .put("E. Africa Standard Time", "Africa/Nairobi")
+        .put("Nepal Standard Time", "Asia/Katmandu")
+        .put("UTC+12", "Etc/GMT-12")
+        .put("Turkey Standard Time", "Europe/Istanbul")
+        .put("China Standard Time", "Asia/Shanghai")
+        .put("UTC+13", "Etc/GMT-13")
+        .put("Mountain Standard Time", "America/Denver")
+        .put("West Pacific Standard Time", "Pacific/Port_Moresby")
+        .put("AUS Central Standard Time", "Australia/Darwin")
+        .put("Newfoundland Standard Time", "America/St_Johns")
+        .put("N. Central Asia Standard Time", "Asia/Novosibirsk")
+        .put("SA Eastern Standard Time", "America/Cayenne")
+        .put("Singapore Standard Time", "Asia/Singapore")
+        .put("Vladivostok Standard Time", "Asia/Vladivostok")
+        .put("Haiti Standard Time", "America/Port-au-Prince")
+        .put("North Asia East Standard Time", "Asia/Irkutsk")
+        .put("Jordan Standard Time", "Asia/Amman")
+        .put("Bangladesh Standard Time", "Asia/Dhaka")
+        .put("Venezuela Standard Time", "America/Caracas")
+        .put("Cen. Australia Standard Time", "Australia/Adelaide")
+        .put("W. Australia Standard Time", "Australia/Perth")
+        .put("Mauritius Standard Time", "Indian/Mauritius")
+        .put("Central Standard Time", "America/Chicago")
+        .put("Tomsk Standard Time", "Asia/Tomsk")
+        .put("Arabian Standard Time", "Asia/Dubai")
+        .put("North Korea Standard Time", "Asia/Pyongyang")
+        .put("AUS Eastern Standard Time", "Australia/Sydney")
+        .put("Namibia Standard Time", "Africa/Windhoek")
+        .put("UTC", "Etc/GMT")
+        .put("North Asia Standard Time", "Asia/Krasnoyarsk")
+        .put("Central America Standard Time", "America/Guatemala")
+        .put("Kaliningrad Standard Time", "Europe/Kaliningrad")
+        .put("Aus Central W. Standard Time", "Australia/Eucla")
+        .put("New Zealand Standard Time", "Pacific/Auckland")
+        .put("SA Pacific Standard Time", "America/Bogota")
+        .put("Chatham Islands Standard Time", "Pacific/Chatham")
+        .put("Cape Verde Standard Time", "Atlantic/Cape_Verde")
+        .put("Pacific Standard Time", "America/Los_Angeles")
+        .put("US Eastern Standard Time", "America/Indianapolis")
+        .put("W. Mongolia Standard Time", "Asia/Hovd")
+        .put("Caucasus Standard Time", "Asia/Yerevan")
+        .put("Ulaanbaatar Standard Time", "Asia/Ulaanbaatar")
+        .put("India Standard Time", "Asia/Calcutta")
+        .put("Easter Island Standard Time", "Pacific/Easter")
+        .put("E. Europe Standard Time", "Europe/Chisinau")
+        .put("W. Central Africa Standard Time", "Africa/Lagos")
+        .put("W. Europe Standard Time", "Europe/Berlin")
+        .put("Sri Lanka Standard Time", "Asia/Colombo")
+        .put("Korea Standard Time", "Asia/Seoul")
+        .put("Saratov Standard Time", "Europe/Saratov")
+        .put("Tonga Standard Time", "Pacific/Tongatapu")
+        .put("Tokyo Standard Time", "Asia/Tokyo")
+        .put("Tocantins Standard Time", "America/Araguaina")
+        .put("Israel Standard Time", "Asia/Jerusalem")
+        .put("Central Standard Time (Mexico)", "America/Mexico_City")
+        .put("Bougainville Standard Time", "Pacific/Bougainville")
+        .put("Central Asia Standard Time", "Asia/Almaty")
+        .put("UTC-11", "Etc/GMT+11")
+        .put("US Mountain Standard Time", "America/Phoenix")
+        .put("Ekaterinburg Standard Time", "Asia/Yekaterinburg")
+        .put("Eastern Standard Time (Mexico)", "America/Cancun")
+        .put("Georgian Standard Time", "Asia/Tbilisi")
+        .put("Argentina Standard Time", "America/Buenos_Aires")
+        .put("Line Islands Standard Time", "Pacific/Kiritimati")
+        .put("Hawaiian Standard Time", "Pacific/Honolulu")
+        .put("Central Europe Standard Time", "Europe/Budapest")
+        .put("GMT Standard Time", "Europe/London")
+        .put("West Asia Standard Time", "Asia/Tashkent")
+        .put("FLE Standard Time", "Europe/Kiev")
+        .put("Canada Central Standard Time", "America/Regina")
+        .put("Montevideo Standard Time", "America/Montevideo")
+        .put("Central Pacific Standard Time", "Pacific/Guadalcanal")
+        .put("Lord Howe Standard Time", "Australia/Lord_Howe")
+        .put("South Africa Standard Time", "Africa/Johannesburg")
+        .put("Atlantic Standard Time", "America/Halifax")
+        .put("Astrakhan Standard Time", "Europe/Astrakhan")
+        .put("Paraguay Standard Time", "America/Asuncion")
+        .put("Romance Standard Time", "Europe/Paris")
+        .put("Greenland Standard Time", "America/Godthab")
+        .put("E. Australia Standard Time", "Australia/Brisbane")
+        .put("Russia Time Zone 11", "Asia/Kamchatka")
+        .put("GTB Standard Time", "Europe/Bucharest")
+        .put("Russia Time Zone 10", "Asia/Srednekolymsk")
+        .put("Belarus Standard Time", "Europe/Minsk")
+        .put("Altai Standard Time", "Asia/Barnaul")
+        .put("Morocco Standard Time", "Africa/Casablanca")
+        .put("SE Asia Standard Time", "Asia/Bangkok")
+        .put("Dateline Standard Time", "Etc/GMT+12")
+        .put("Transbaikal Standard Time", "Asia/Chita")
+        .put("Middle East Standard Time", "Asia/Beirut")
+        .put("Pacific Standard Time (Mexico)", "America/Tijuana")
+    .build(); // @formatter:on
 
     /**
      * Gets a value indicating whether the current calendar user should be added as default attendee to events implicitly or not,
@@ -239,26 +384,26 @@ public class Utils {
      * @param folder The folder to construct the search term for
      * @return The search term
      */
-    public static SearchTerm<?> getFolderIdTerm(CalendarSession session, UserizedFolder folder) {
+    public static SearchTerm<?> getFolderIdTerm(CalendarSession session, CalendarFolder folder) {
         SearchTerm<?> searchTerm;
         if (PublicType.getInstance().equals(folder.getType())) {
             /*
              * match the event's common folder identifier
              */
-            searchTerm = getSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, folder.getID());
+            searchTerm = getSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, folder.getId());
         } else {
             /*
              * for personal folders, match against the corresponding attendee's folder
              */
             searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
                 .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(folder.getCreatedBy())))
-                .addSearchTerm(getSearchTerm(AttendeeField.FOLDER_ID, SingleOperation.EQUALS, folder.getID()));
+                .addSearchTerm(getSearchTerm(AttendeeField.FOLDER_ID, SingleOperation.EQUALS, folder.getId()));
             if (false == isEnforceDefaultAttendee(session)) {
                 /*
                  * also match the event's common folder identifier if no default attendee is enforced
                  */
                 searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-                    .addSearchTerm(getSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, folder.getID()))
+                    .addSearchTerm(getSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, folder.getId()))
                     .addSearchTerm(searchTerm);
             }
         }
@@ -273,44 +418,109 @@ public class Utils {
         return searchTerm;
     }
 
-    //    /**
-    //     * Gets a single search term using the field itself as column operand and a second operand.
-    //     *
-    //     * @param <V> The operand's type
-    //     * @param <E> The field type
-    //     * @param operation The operation to use
-    //     * @param operand The second operand
-    //     * @return A single search term
-    //     */
-    //    public static <V, E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation, Operand<V> operand) {
-    //        return getSearchTerm(field, operation).addOperand(operand);
-    //    }
-    //
-    //    /**
-    //     * Gets a single search term using the field itself as column operand and adds the supplied value as constant operand.
-    //     *
-    //     * @param <V> The operand's type
-    //     * @param <E> The field type
-    //     * @param operation The operation to use
-    //     * @param operand The value to use as constant operand
-    //     * @return A single search term
-    //     */
-    //    public static <V, E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation, V operand) {
-    //        return getSearchTerm(field, operation, new ConstantOperand<V>(operand));
-    //    }
-    //
-    //    /**
-    //     * Gets a single search term using the field itself as single column operand.
-    //     *
-    //     * @param <E> The field type
-    //     * @param operation The operation to use
-    //     * @param operand The value to use as constant operand
-    //     * @return A single search term
-    //     */
-    //    public static <E extends Enum<?>> SingleSearchTerm getSearchTerm(E field, SingleOperation operation) {
-    //        return new SingleSearchTerm(operation).addOperand(new ColumnFieldOperand<E>(field));
-    //    }
-    //
+    /**
+     * Selects a well-known and valid timezone based on a client-supplied timezone, using different fallbacks if no exactly matching
+     * timezone is available.
+     *
+     * @param session The calendar session
+     * @param calendarUserId The identifier of the calendar user
+     * @param timeZone The timezone as supplied by the client
+     * @param originalTimeZone The original timezone in case of updates, or <code>null</code> if not available
+     * @return The selected timezone, or <code>null</code> if passed timezoen reference was <code>null</code>
+     */
+    public static TimeZone selectTimeZone(CalendarSession session, int calendarUserId, TimeZone timeZone, TimeZone originalTimeZone) throws OXException {
+        if (null == timeZone) {
+            return null;
+        }
+        /*
+         * try to match by timezone identifier first
+         */
+        TimeZone matchingTimeZone = optTimeZone(timeZone.getID(), null);
+        if (null != matchingTimeZone) {
+            return matchingTimeZone;
+        }
+        /*
+         * try and match a known timezone with the same rules (original timezone, calendar user timezone, session user timezone)
+         */
+        if (null != originalTimeZone && timeZone.hasSameRules(originalTimeZone)) {
+            LOG.debug("No matching timezone found for '{}', falling back to original timezone '{}'.", timeZone.getID(), originalTimeZone);
+            return originalTimeZone;
+        }
+        /*
+         * use calendar user's / session user's timezone if same rules are effective
+         */
+        TimeZone calendarUserTimeZone = session.getEntityResolver().getTimeZone(calendarUserId);
+        if (timeZone.hasSameRules(calendarUserTimeZone)) {
+            LOG.debug("No matching timezone found for '{}', falling back to calendar user's timezone '{}'.", timeZone.getID(), calendarUserTimeZone);
+            return calendarUserTimeZone;
+        }
+        if (session.getUserId() != calendarUserId) {
+            TimeZone sessionUserTimeZone = session.getEntityResolver().getTimeZone(session.getUserId());
+            if (timeZone.hasSameRules(sessionUserTimeZone)) {
+                LOG.debug("No matching timezone found for '{}', falling back to session user's timezone '{}'.", timeZone.getID(), sessionUserTimeZone);
+                return sessionUserTimeZone;
+            }
+        }
+        /*
+         * select matching olson timezone for a known windows timezone
+         */
+        TimeZone mappedTimeZone = optTimeZone(WINDOWS2OLSON.get(timeZone.getID()));
+        if (null != mappedTimeZone) {
+            LOG.debug("No matching timezone found for '{}', falling back to mapped olson timezone '{}'.", timeZone.getID(), mappedTimeZone);
+            return mappedTimeZone;
+        }
+        /*
+         * select the timezone with the same rules, and most similar identifier
+         */
+        List<TimeZone> timeZonesWithSameRules = getWithSameRules(timeZone);
+        if (timeZonesWithSameRules.isEmpty()) {
+            LOG.warn("No timezone with matching rules found for '{}', falling back to calendar user timezone '{}'.", timeZone.getID(), calendarUserTimeZone);
+            return calendarUserTimeZone;
+        }
+        timeZonesWithSameRules.sort(Comparator.comparingInt(tz -> levenshteinDistance(tz.getID(), timeZone.getID())));
+        TimeZone fallbackTimeZone = timeZonesWithSameRules.get(0);
+        LOG.warn("No matching timezone found for '{}', falling back to '{}'.", timeZone.getID(), fallbackTimeZone);
+        return fallbackTimeZone;
+    }
+
+    private static List<TimeZone> getWithSameRules(TimeZone timeZone) {
+        List<TimeZone> timeZones = new ArrayList<TimeZone>();
+        for (String timeZoneId : TimeZone.getAvailableIDs(timeZone.getRawOffset())) {
+            TimeZone candidateTimeZone = optTimeZone(timeZoneId);
+            if (timeZone.hasSameRules(candidateTimeZone)) {
+                timeZones.add(candidateTimeZone);
+            }
+        }
+        return timeZones;
+    }
+
+    /**
+     * Measures the distance between two strings, based on the <i>Levenshtein</i> algorithm.
+     *
+     * @param a The first string
+     * @param b The second string
+     * @return The result
+     * @see <a href="http://rosettacode.org/wiki/Levenshtein_distance#Java">Levenshtein Distance</a>
+     */
+    private static int levenshteinDistance(String a, String b) {
+        a = a.toLowerCase();
+        b = b.toLowerCase();
+        int[] costs = new int[b.length() + 1];
+        for (int j = 0; j < costs.length; j++) {
+            costs[j] = j;
+        }
+        for (int i = 1; i <= a.length(); i++) {
+            costs[0] = i;
+            int nw = i - 1;
+            for (int j = 1; j <= b.length(); j++) {
+                int cj = Math.min(1 + Math.min(costs[j], costs[j - 1]), a.charAt(i - 1) == b.charAt(j - 1) ? nw : nw + 1);
+                nw = costs[j];
+                costs[j] = cj;
+            }
+        }
+        return costs[b.length()];
+    }
+
     /**
      * <i>Anonymizes</i> an event in case it is not marked as {@link Classification#PUBLIC}, and the session's user is neither creator, nor
      * attendee of the event.
@@ -423,7 +633,7 @@ public class Utils {
      * @param folder The folder to get the calendar user for
      * @return The calendar user
      */
-    public static CalendarUser getCalendarUser(CalendarSession session, UserizedFolder folder) throws OXException {
+    public static CalendarUser getCalendarUser(CalendarSession session, CalendarFolder folder) throws OXException {
         int calendarUserId = getCalendarUserId(folder);
         return session.getEntityResolver().applyEntityData(new CalendarUser(), calendarUserId);
     }
@@ -435,22 +645,11 @@ public class Utils {
      * @param folder The folder to get the calendar user for
      * @return The identifier of the calendar user
      */
-    public static int getCalendarUserId(UserizedFolder folder) {
+    public static int getCalendarUserId(CalendarFolder folder) {
         if (SharedType.getInstance().equals(folder.getType())) {
             return folder.getCreatedBy();
         }
-        return folder.getUser().getId();
-    }
-
-    /**
-     * Gets the "acting" calendar user for a specific folder, i.e. the proxy user who is acting on behalf of the calendar owner, which is
-     * the current session's user in case the folder is a "shared" calendar, otherwise <code>null</code> for "private" or "public" folders.
-     *
-     * @param folder The folder to determine the proxy user for
-     * @return The proxy calendar user, or <code>null</code> if the current session's user is acting on behalf of it's own
-     */
-    public static User getProxyUser(UserizedFolder folder) throws OXException {
-        return SharedType.getInstance().equals(folder.getType()) ? folder.getUser() : null;
+        return folder.getSession().getUserId();
     }
 
     /**
@@ -461,33 +660,114 @@ public class Utils {
      * @param folder The folder where the event should appear in
      * @return <code>true</code> if the event <i>is</i> in the folder, <code>false</code>, otherwise
      */
-    public static boolean isInFolder(Event event, UserizedFolder folder) throws OXException {
+    public static boolean isInFolder(Event event, CalendarFolder folder) throws OXException {
         if (PublicType.getInstance().equals(folder.getType()) || false == isGroupScheduled(event)) {
-            return folder.getID().equals(event.getFolderId());
+            return folder.getId().equals(event.getFolderId());
         } else {
             Attendee userAttendee = CalendarUtils.find(event.getAttendees(), folder.getCreatedBy());
-            return null != userAttendee && folder.getID().equals(userAttendee.getFolderId());
+            return null != userAttendee && folder.getId().equals(userAttendee.getFolderId());
         }
+    }
+
+    /**
+     * Gets a value indicating whether an event in a specific folder is visible to the the current user or not, either based on the
+     * user's permissions in the calendar folder representing the actual view on the event, or based on the user participating in the
+     * event as organizer or attendee.
+     *
+     * @param folder The calendar folder the event is read in
+     * @param event The event to check
+     * @return <code>true</code> if the event can be read, <code>false</code>, otherwise
+     */
+    public static boolean isVisible(CalendarFolder folder, Event event) {
+        int userId = folder.getSession().getUserId();
+        Permission ownPermission = folder.getOwnPermission();
+        if (ownPermission.getReadPermission() >= Permission.READ_ALL_OBJECTS) {
+            return true;
+        }
+        if (ownPermission.getReadPermission() == Permission.READ_OWN_OBJECTS && matches(event.getCreatedBy(), userId)) {
+            return true;
+        }
+        if (matches(event.getCalendarUser(), userId) || isAttendee(event, userId) || isOrganizer(event, userId)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Gets a <i>userized</i> calendar folder by its identifier.
+     *
+     * @param session The calendar session
+     * @param folderId The identifier of the folder to get
+     * @return The folder
+     */
+    public static CalendarFolder getFolder(CalendarSession session, String folderId) throws OXException {
+        return getFolder(session, folderId, true);
+    }
+
+    /**
+     * Gets a <i>userized</i> calendar folder by its identifier.
+     *
+     * @param session The calendar session
+     * @param folderId The identifier of the folder to get
+     * @param failIfNotVisible <code>true</code> to fail if the folder is not visible for the current session's user, <code>false</code>, otherwise
+     * @return The folder
+     */
+    public static CalendarFolder getFolder(CalendarSession session, String folderId, boolean failIfNotVisible) throws OXException {
+        return getFolder(Services.getService(FolderService.class), folderId, session.getSession(), initDecorator(session), failIfNotVisible);
+    }
+
+    /**
+     * Gets multiple <i>userized</i> folders by their identifier.
+     *
+     * @param session The calendar session
+     * @param folderIds The identifiers of the folders to get
+     * @return The folders
+     */
+    public static List<CalendarFolder> getFolders(CalendarSession session, List<String> folderIds) throws OXException {
+        if (null == folderIds || 0 == folderIds.size()) {
+            return Collections.emptyList();
+        }
+        List<CalendarFolder> folders = new ArrayList<CalendarFolder>(folderIds.size());
+        FolderServiceDecorator decorator = initDecorator(session);
+        FolderService folderService = Services.getService(FolderService.class);
+        for (String folderId : folderIds) {
+            folders.add(getFolder(folderService, folderId, session.getSession(), decorator, true));
+        }
+        return folders;
     }
 
     /**
      * Gets a <i>userized</i> folder by its identifier.
      *
-     * @param session The calendar session
-     * @param folderID The identifier of the folder to get
+     * @param folderService A reference to the folder service
+     * @param folderId The identifier of the folder to get
+     * @param session The session
+     * @param decorator The folder service decorator to use
+     * @param failIfNotVisible <code>true</code> to fail with an appropriate exception in case the folder is not visible for
+     *            the current session' user, <code>false</code>, otherwise
      * @return The folder
      */
-    public static UserizedFolder getFolder(CalendarSession session, String folderID) throws OXException {
+    private static CalendarFolder getFolder(FolderService folderService, String folderId, Session session, FolderServiceDecorator decorator, boolean failIfNotVisible) throws OXException {
         try {
-            return Services.getService(FolderService.class).getFolder(FolderStorage.REAL_TREE_ID, folderID, session.getSession(), initDecorator(session));
+            return new CalendarFolder(folderService.getFolder(FolderStorage.REAL_TREE_ID, folderId, session, decorator));
         } catch (OXException e) {
             if ("FLD-0003".equals(e.getErrorCode())) {
                 // com.openexchange.tools.oxfolder.OXFolderExceptionCode.NOT_VISIBLE
-                throw CalendarExceptionCodes.NO_READ_PERMISSION.create(e, folderID);
+                if (false == failIfNotVisible && 1 == 2) {
+                    FolderObject folderObject = optFolderObject(session, folderId, (Connection) decorator.getProperty(Connection.class.getName()));
+                    if (null != folderObject) {
+                        return new CalendarFolder(session, folderObject, Permission.NO_PERMISSIONS);
+                    }
+                }
+                throw CalendarExceptionCodes.NO_READ_PERMISSION.create(e, folderId);
             }
             if ("FLD-1004".equals(e.getErrorCode())) {
                 // com.openexchange.folderstorage.FolderExceptionErrorMessage.NO_STORAGE_FOR_ID
-                throw CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(e, folderID, "");
+                throw CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(e, folderId, "");
+            }
+            if ("FLD-0008".equals(e.getErrorCode())) {
+                // com.openexchange.folderstorage.FolderExceptionErrorMessage.NOT_FOUND
+                throw CalendarExceptionCodes.FOLDER_NOT_FOUND.create(e, folderId);
             }
             throw e;
         }
@@ -564,7 +844,7 @@ public class Utils {
             return seriesMaster;
         }
         /*
-         * check which change exceptions exist where the user is not attending
+         * check which change exceptions exist where the user is attending
          */
         SortedSet<RecurrenceId> changeExceptionDates = seriesMaster.getChangeExceptionDates();
         if (null == changeExceptionDates || 0 == changeExceptionDates.size()) {
@@ -573,24 +853,25 @@ public class Utils {
         CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
             .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.EQUALS, seriesMaster.getSeriesId()))
             .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.NOT_EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
-            .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.NOT_EQUALS, I(forUser)))
+            .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(forUser)))
         ;
         EventField[] fields = new EventField[] { EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_ID };
-        List<Event> unattendedChangeExceptions = storage.getEventStorage().searchEvents(searchTerm, null, fields);
-        if (null == unattendedChangeExceptions || 0 == unattendedChangeExceptions.size()) {
+        List<Event> attendedChangeExceptions = storage.getEventStorage().searchEvents(searchTerm, null, fields);
+        if (attendedChangeExceptions.size() == changeExceptionDates.size()) {
             return seriesMaster;
         }
         /*
          * apply a 'userized' version of exception dates by moving exception date from change- to delete-exceptions
          */
-        SortedSet<RecurrenceId> userizedChangeExceptions = new TreeSet<RecurrenceId>(changeExceptionDates);
+        SortedSet<RecurrenceId> userizedChangeExceptions = getRecurrenceIds(attendedChangeExceptions);
         SortedSet<RecurrenceId> userizedDeleteExceptions = new TreeSet<RecurrenceId>();
         if (null != seriesMaster.getDeleteExceptionDates()) {
             userizedDeleteExceptions.addAll(seriesMaster.getDeleteExceptionDates());
         }
-        for (Event unattendedChangeException : unattendedChangeExceptions) {
-            userizedChangeExceptions.remove(unattendedChangeException.getRecurrenceId());
-            userizedDeleteExceptions.add(unattendedChangeException.getRecurrenceId());
+        for (RecurrenceId originalChangeExceptionDate : seriesMaster.getChangeExceptionDates()) {
+            if (false == userizedChangeExceptions.contains(originalChangeExceptionDate)) {
+                userizedDeleteExceptions.add(originalChangeExceptionDate);
+            }
         }
         return new DelegatingEvent(seriesMaster) {
 
@@ -651,7 +932,7 @@ public class Utils {
      * @param session The underlying calendar session
      * @return The folders, or an empty list if there are none
      */
-    public static List<UserizedFolder> getVisibleFolders(CalendarSession session) throws OXException {
+    public static List<CalendarFolder> getVisibleFolders(CalendarSession session) throws OXException {
         return getVisibleFolders(session, PrivateType.getInstance(), SharedType.getInstance(), PublicType.getInstance());
     }
 
@@ -662,15 +943,17 @@ public class Utils {
      * @param types The folder types to include
      * @return The folders, or an empty list if there are none
      */
-    public static List<UserizedFolder> getVisibleFolders(CalendarSession session, Type... types) throws OXException {
-        List<UserizedFolder> visibleFolders = new ArrayList<UserizedFolder>();
+    public static List<CalendarFolder> getVisibleFolders(CalendarSession session, Type... types) throws OXException {
+        List<CalendarFolder> visibleFolders = new ArrayList<CalendarFolder>();
         FolderService folderService = Services.getService(FolderService.class);
         for (Type type : types) {
             FolderResponse<UserizedFolder[]> response = folderService.getVisibleFolders(
                 FolderStorage.REAL_TREE_ID, CalendarContentType.getInstance(), type, false, session.getSession(), initDecorator(session));
             UserizedFolder[] folders = response.getResponse();
             if (null != folders && 0 < folders.length) {
-                visibleFolders.addAll(Arrays.asList(folders));
+                for (UserizedFolder folder : folders) {
+                    visibleFolders.add(new CalendarFolder(folder));
+                }
             }
         }
         return visibleFolders;
@@ -692,7 +975,7 @@ public class Utils {
             Connection connection = optConnection(session);
             folderAccess = null != connection ? new OXFolderAccess(connection, context) : new OXFolderAccess(context);
         } catch (OXException e) {
-            LoggerFactory.getLogger(Utils.class).warn("Error collecting affected folders", e);
+            LOG.warn("Error collecting affected folders", e);
             return affectedFoldersPerUser;
         }
         for (String folderId : folderIds) {
@@ -702,7 +985,7 @@ public class Utils {
                     com.openexchange.tools.arrays.Collections.put(affectedFoldersPerUser, userId, folderId);
                 }
             } catch (Exception e) {
-                LoggerFactory.getLogger(Utils.class).warn("Error collecting affected users for folder {}; skipping.", folderId, e);
+                LOG.warn("Error collecting affected users for folder {}; skipping.", folderId, e);
             }
         }
         return affectedFoldersPerUser;
@@ -747,8 +1030,7 @@ public class Utils {
                         int[] groupMembers = entityResolver.getGroupMembers(permission.getEntity());
                         affectedUsers.addAll(Arrays.asList(i2I(groupMembers)));
                     } catch (OXException e) {
-                        LoggerFactory.getLogger(Utils.class).warn("Error resolving members of group {} for for folder {}; skipping.",
-                            I(permission.getEntity()), I(folder.getObjectID()), e);
+                        LOG.warn("Error resolving members of group {} for for folder {}; skipping.", I(permission.getEntity()), I(folder.getObjectID()), e);
                     }
                 } else {
                     affectedUsers.add(I(permission.getEntity()));
@@ -766,7 +1048,7 @@ public class Utils {
      * @param entityResolver The entity resolver to use
      * @return The identifiers of the affected folders for each user
      */
-    public static Set<Integer> getAffectedUsers(UserizedFolder folder, EntityResolver entityResolver) {
+    public static Set<Integer> getAffectedUsers(CalendarFolder folder, EntityResolver entityResolver) {
         Permission[] permissions = folder.getPermissions();
         if (null == permissions || 0 == permissions.length) {
             return Collections.emptySet();
@@ -779,8 +1061,7 @@ public class Utils {
                         int[] groupMembers = entityResolver.getGroupMembers(permission.getEntity());
                         affectedUsers.addAll(Arrays.asList(i2I(groupMembers)));
                     } catch (OXException e) {
-                        LoggerFactory.getLogger(Utils.class).warn("Error resolving members of group {} for for folder {}; skipping.",
-                            I(permission.getEntity()), folder.getID(), e);
+                        LOG.warn("Error resolving members of group {} for for folder {}; skipping.", I(permission.getEntity()), folder.getId(), e);
                     }
                 } else {
                     affectedUsers.add(I(permission.getEntity()));
@@ -873,6 +1154,25 @@ public class Utils {
      */
     public static Connection optConnection(CalendarSession session) {
         return session.get(AbstractStorageOperation.PARAM_CONNECTION, Connection.class, null);
+    }
+
+    /**
+     * Attempts to load a folder object from the storage.
+     *
+     * @param session The current session
+     * @param folderId The identifier of the folder to load
+     * @param optConnection An optional read connection to use, or <code>null</code> if not available
+     * @return The folder, or <code>null</code> if any error occurred
+     */
+    private static FolderObject optFolderObject(Session session, String folderId, Connection optConnection) {
+        try {
+            Context context = ServerSessionAdapter.valueOf(session).getContext();
+            OXFolderAccess folderAccess = new OXFolderAccess(optConnection, context);
+            return folderAccess.getFolderObject(Integer.parseInt(folderId));
+        } catch (NumberFormatException | OXException e) {
+            LOG.warn("Error getting folder object {}.", folderId, e);
+            return null;
+        }
     }
 
 }

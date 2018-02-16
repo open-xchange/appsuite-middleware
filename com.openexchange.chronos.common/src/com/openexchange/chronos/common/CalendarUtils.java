@@ -135,6 +135,11 @@ import com.openexchange.search.internal.operands.ConstantOperand;
  */
 public class CalendarUtils {
 
+    /**
+     * The default calendar account prefix.
+     */
+    public static final String DEFAULT_ACCOUNT_PREFIX = "cal://0/";
+
     /** A timestamp in the distant future as substitute for the client timestamp when circumventing concurrent modification checks */
     public static final long DISTANT_FUTURE = Long.MAX_VALUE;
 
@@ -418,7 +423,7 @@ public class CalendarUtils {
      * @return <code>true</code> if the attendee is internal, <code>false</code>, otherwise
      */
     public static boolean isExternalUser(Attendee attendee) {
-        return null != attendee && CalendarUserType.INDIVIDUAL.equals(attendee.getCuType()) && attendee.getEntity() == 0;
+        return null != attendee && CalendarUserType.INDIVIDUAL.equals(attendee.getCuType()) && attendee.getEntity() <= 0;
     }
 
     /**
@@ -582,16 +587,16 @@ public class CalendarUtils {
      * Gets the maximum timestamp of a collection of events.
      *
      * @param events The events to get the maximum timestamp from
-     * @return The maximum timestamp, or <code>0</code> if the supplied collection was <code>null</code> or empty
+     * @return The maximum timestamp as {@link Date}, or <code>null</code> if the supplied collection was <code>null</code> or empty
      */
-    public static long getMaximumTimestamp(Collection<Event> events) {
-        long maximumTimestamp = 0L;
+    public static Date getMaximumTimestamp(Collection<Event> events) {
+        long maximumTimestamp = Integer.MIN_VALUE;
         for (Event event : events) {
             if (null != event) {
                 maximumTimestamp = Math.max(maximumTimestamp, event.getTimestamp());
             }
         }
-        return maximumTimestamp;
+        return Integer.MIN_VALUE == maximumTimestamp ? null : new Date(maximumTimestamp);
     }
 
     /**
@@ -1717,7 +1722,7 @@ public class CalendarUtils {
      *            comparison, or <code>null</code> to fall back to UTC
      * @return The sorted events
      */
-    public static List<Event> sortEvents(List<Event> events, final SortOrder[] sortOrders, final TimeZone timeZone) throws OXException {
+    public static List<Event> sortEvents(List<Event> events, final SortOrder[] sortOrders, final TimeZone timeZone) {
         if (null == events || 2 > events.size() || null == sortOrders || 0 == sortOrders.length) {
             return events;
         }
@@ -1813,6 +1818,21 @@ public class CalendarUtils {
             fields.addAll(FLAG_FIELDS);
         }
         return fields.toArray(new EventField[fields.size()]);
+    }
+
+    /**
+     * Prepends the default account to the given folder id if this is a plain numeric folder id.
+     *
+     * @param folderId
+     * @return The folder id with the default account as absolute identifier.
+     */
+    public static String prependDefaultAccount(String folderId) {
+        try {
+            Integer.parseInt(folderId);
+        } catch (NumberFormatException nfe) {
+            return folderId;
+        }
+        return DEFAULT_ACCOUNT_PREFIX + folderId;
     }
 
     /**

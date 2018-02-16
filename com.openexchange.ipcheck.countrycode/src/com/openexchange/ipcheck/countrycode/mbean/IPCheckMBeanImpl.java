@@ -71,8 +71,8 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IPCheckMBeanImpl.class);
 
-    private final MetricAware<IPCheckMetrics> metricAware;
-    private IPCheckMetrics metrics;
+    private final MetricAware<IPCheckMetricCollector> metricAware;
+    private IPCheckMetricCollector metricCollector;
 
     /** Window size for average calculation: 1 day */
     private static final long WINDOW_SIZE = 24L * 60L * 60000L;
@@ -126,7 +126,7 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
      * @param services The {@link ServiceLookup} instance
      * @throws NotCompliantMBeanException
      */
-    public IPCheckMBeanImpl(ServiceLookup services, MetricAware<IPCheckMetrics> metricAware) throws NotCompliantMBeanException {
+    public IPCheckMBeanImpl(ServiceLookup services, MetricAware<IPCheckMetricCollector> metricAware) throws NotCompliantMBeanException {
         super(services, IPCheckMBean.NAME, IPCheckMBean.class);
         this.metricAware = metricAware;
         measurements = new LinkedBlockingDeque<Measurement>();
@@ -145,9 +145,9 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
             @Override
             public void run() {
                 try {
-                    long accepted = metrics.getAcceptedEligibleIPChanges();
-                    long denied = metrics.getDeniedIPChanges();
-                    long ipChanges = metrics.getTotalIPChanges();
+                    long accepted = metricCollector.getMeter(IPCheckMetric.acceptedEligibleIPChanges.getMetricName()).getCount();
+                    long denied = metricCollector.getMeter(IPCheckMetric.deniedIPChanges.getMetricName()).getCount();
+                    long ipChanges = metricCollector.getMeter(IPCheckMetric.totalIPChanges.getMetricName()).getCount();
                     measurements.add(new Measurement(accepted, denied, ipChanges));
                     cleanUp();
                 } catch (Exception e) {
@@ -173,18 +173,18 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
      */
     private void calculatePercentages() {
         // Work with local copies
-        int total = metrics.getTotalIPChanges();
-        int totalAccepted = metrics.getAcceptedIPChanges();
-        int totalDenied = metrics.getDeniedIPChanges();
+        long total = metricCollector.getMeter(IPCheckMetric.totalIPChanges.getMetricName()).getCount();
+        long totalAccepted = metricCollector.getMeter(IPCheckMetric.acceptedIPChanges.getMetricName()).getCount();
+        long totalDenied = metricCollector.getMeter(IPCheckMetric.deniedIPChanges.getMetricName()).getCount();
         acceptedPercentage = ((float) totalAccepted / total) * 100;
         deniedPercentage = ((float) totalDenied / total) * 100;
 
         // Accepted percentages
-        int acceptedPrivate = metrics.getAcceptedPrivateIP();
+        long acceptedPrivate = metricCollector.getMeter(IPCheckMetric.acceptedPrivateIP.getMetricName()).getCount();
         acceptedPrivatePercentage = ((float) acceptedPrivate / totalAccepted) * 100;
-        int acceptedWL = metrics.getAcceptedWhiteListed();
+        long acceptedWL = metricCollector.getMeter(IPCheckMetric.acceptedWhiteListed.getMetricName()).getCount();
         acceptedWhiteListedPercentage = ((float) acceptedWL / totalAccepted) * 100;
-        int acceptedEligible = metrics.getAcceptedEligibleIPChanges();
+        long acceptedEligible = metricCollector.getMeter(IPCheckMetric.acceptedEligibleIPChanges.getMetricName()).getCount();
         acceptedEligilePercentage = ((float) acceptedEligible / totalAccepted) * 100;
 
         // Overall accepted percentages
@@ -193,9 +193,9 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
         acceptedEligileOverallPercentage = ((float) acceptedEligible / total) * 100;
 
         // Denied percentages
-        int deniedEx = metrics.getDeniedException();
+        long deniedEx = metricCollector.getMeter(IPCheckMetric.deniedException.getMetricName()).getCount();
         deniedExceptionPercentage = ((float) deniedEx / totalDenied) * 100;
-        int deniedCC = metrics.getAcceptedEligibleIPChanges();
+        long deniedCC = metricCollector.getMeter(IPCheckMetric.deniedCountryChanged.getMetricName()).getCount();
         deniedCountryChangedPercentage = ((float) deniedCC / totalDenied) * 100;
 
         // Overall denied percentages
@@ -261,7 +261,7 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
      */
     @Override
     protected void refresh() {
-        metrics = metricAware.getMetricsObject();
+        metricCollector = metricAware.getMetricsObject();
         calculatePercentages();
         calculateChangesPerHour();
     }
@@ -294,86 +294,6 @@ public class IPCheckMBeanImpl extends AnnotatedDynamicStandardMBean implements I
     @Override
     public long getDeniedIPChangesPerHour() {
         return deniedChangesPerHour;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ipcheck.mbean.IPCheckMBean#getIPChanges()
-     */
-    @Override
-    public int getIPChanges() {
-        return metrics.getTotalIPChanges();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ipcheck.mbean.IPCheckMBean#getAcceptedIPChanges()
-     */
-    @Override
-    public int getAcceptedIPChanges() {
-        return metrics.getAcceptedIPChanges();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ipcheck.mbean.IPCheckMBean#getDeniedIPChanges()
-     */
-    @Override
-    public int getDeniedIPChanges() {
-        return metrics.getDeniedIPChanges();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getAcceptedPrivateIPChanges()
-     */
-    @Override
-    public int getAcceptedPrivateIPChanges() {
-        return metrics.getAcceptedPrivateIP();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getAcceptedWhiteListedIPChanges()
-     */
-    @Override
-    public int getAcceptedWhiteListedIPChanges() {
-        return metrics.getAcceptedWhiteListed();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getAcceptedCountryCodeNotChanged()
-     */
-    @Override
-    public int getDeniedCountryChanges() {
-        return metrics.getAcceptedEligibleIPChanges();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getDeniedExceptionIPChanges()
-     */
-    @Override
-    public int getDeniedExceptionIPChanges() {
-        return metrics.getDeniedException();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean#getDeniedDefaultIPChanges()
-     */
-    @Override
-    public int getAcceptedEligibleIPChanges() {
-        return metrics.getDeniedCountryChanges();
     }
 
     /*

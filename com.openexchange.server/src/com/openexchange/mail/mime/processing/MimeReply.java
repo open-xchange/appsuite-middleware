@@ -110,7 +110,6 @@ import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import com.openexchange.mail.mime.converters.MimeMessageUtils;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.dataobjects.NestedMessageMailPart;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
@@ -388,7 +387,7 @@ public final class MimeReply extends AbstractMimeProcessing {
                         /*
                          * Message holds header 'Reply-To'
                          */
-                        tmpSet.addAll(Arrays.asList(MimeMessageUtils.getAddressHeader(unfold(replyTo[0]))));
+                        tmpSet.addAll(Arrays.asList(MimeMessageUtility.getAddressHeader(unfold(replyTo[0]))));
                         fromAdded = false;
                     }
                 }

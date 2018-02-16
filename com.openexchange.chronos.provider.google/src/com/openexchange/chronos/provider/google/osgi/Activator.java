@@ -63,7 +63,9 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.tools.oxfolder.property.FolderUserPropertyStorage;
 import com.openexchange.user.UserService;
@@ -72,12 +74,13 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { OAuthService.class, CalendarAccountService.class, AdministrativeCalendarAccountService.class, LeanConfigurationService.class, RecurrenceService.class };
-    }
-
-    @Override
-    protected Class<?>[] getOptionalServices() {
-        return new Class[] { GenericConfigurationStorageService.class, CalendarStorageFactory.class, ContextService.class, FolderUserPropertyStorage.class, GroupService.class, UserService.class, FolderService.class };
+        //@formatter:off
+        return new Class[] {
+            OAuthService.class, OAuthServiceMetaDataRegistry.class, CalendarAccountService.class, AdministrativeCalendarAccountService.class, LeanConfigurationService.class, RecurrenceService.class,
+            // The services below are only required by migration
+            GenericConfigurationStorageService.class, CalendarStorageFactory.class, ContextService.class, FolderUserPropertyStorage.class, GroupService.class, UserService.class, FolderService.class
+        };
+        //@formatter:on
     }
 
     @Override
@@ -86,6 +89,7 @@ public class Activator extends HousekeepingActivator {
         Services.setServiceLookup(this);
         registerService(CalendarProvider.class, new GoogleCalendarProvider(this));
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new GoogleSubscriptionsMigrationTask()));
+        registerService(OAuthAccountDeleteListener.class, new com.openexchange.chronos.provider.google.access.OAuthAccountDeleteListener());
     }
 
 }

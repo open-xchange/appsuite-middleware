@@ -73,7 +73,6 @@ import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
-import com.sun.mail.imap.IMAPTextPreviewProvider;
 import com.sun.mail.imap.IMAPFolder.FetchProfileItem;
 import com.sun.mail.imap.protocol.BODY;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
@@ -169,8 +168,6 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
     private ExtendedMimeMessage[] retval;
     private final boolean loadBody;
     private boolean determineAttachmentByHeader;
-    private final IMAPTextPreviewProvider.Mode textPreviewMode;
-    private final IMAPTextPreviewProvider textPreviewProvider;
 
     /**
      * Initializes a new {@link MessageFetchIMAPCommand}.
@@ -209,17 +206,6 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
             returnDefaultValue = true;
         }
         this.loadBody = loadBody;
-        textPreviewProvider = Services.optService(IMAPTextPreviewProvider.class);
-        if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
-            textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.ONLY_IF_AVAILABLE;
-        } else if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS)) {
-            textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.REQUIRE;
-        } else {
-            textPreviewMode = null;
-        }
-        if (null != textPreviewMode) {
-            fp.add(UIDFolder.FetchProfileItem.UID);
-        }
         command = getFetchCommand(isRev1, fp, loadBody, serverInfo);
         set(arr, isSequential, keepOrder);
     }
@@ -369,17 +355,6 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
         args = 1 == messageCount ? new String[] { "1" } : ARGS_ALL;
         uid = false;
         length = fetchLen;
-        this.textPreviewProvider = Services.optService(IMAPTextPreviewProvider.class);
-        if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
-            textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.ONLY_IF_AVAILABLE;
-        } else if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS)) {
-            textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.REQUIRE;
-        } else {
-            textPreviewMode = null;
-        }
-        if (null != textPreviewMode) {
-            fp.add(UIDFolder.FetchProfileItem.UID);
-        }
         command = getFetchCommand(isRev1, fp, loadBody, serverInfo);
         retval = new ExtendedMimeMessage[length];
         index = 0;

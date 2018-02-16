@@ -103,6 +103,10 @@ public abstract class AbstractICalEventExporter extends AbstractICalExporter {
         ICalParameters iCalParameters = iCalService.initParameters();
         CalendarExport calendarExport = iCalService.exportICal(iCalParameters);
         for (Event event : eventList) {
+            if(event == null) {
+                // Skip not existing events
+                continue;
+            }
             calendarExport.add(event);
         }
         if (null != optOut) {

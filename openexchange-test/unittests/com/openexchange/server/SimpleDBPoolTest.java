@@ -6,13 +6,14 @@ import java.sql.Connection;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.groupware.CalendarTest;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.server.impl.DBPool;
 
 public class SimpleDBPoolTest {
+
+    private final static int contextid = 1;
 
     @Before
     public void setUp() throws Exception {
@@ -26,7 +27,7 @@ public class SimpleDBPoolTest {
 
     @Test
     public void testBasicPoolFunctions() throws Throwable {
-        final Context context = new ContextImpl(CalendarTest.contextid);
+        final Context context = new ContextImpl(contextid);
 
         final int testsize = 50; // DBPool.getSize(context, true);
         final Connection con[] = new Connection[testsize];
@@ -51,7 +52,7 @@ public class SimpleDBPoolTest {
 
     @Test
     public void testClosedConnectionsInPool() throws Throwable {
-        final Context context = new ContextImpl(CalendarTest.contextid);
+        final Context context = new ContextImpl(contextid);
 
         final int testsize = 50; // DBPool.getSize(context, true);
         final Connection con[] = new Connection[testsize];

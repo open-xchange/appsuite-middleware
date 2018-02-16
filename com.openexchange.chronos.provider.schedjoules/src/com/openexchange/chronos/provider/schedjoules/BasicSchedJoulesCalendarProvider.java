@@ -124,6 +124,12 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
     }
 
     @Override
+    public boolean isAvailable(Session session) {
+        SchedJoulesService schedJoulesService = services.getService(SchedJoulesService.class);
+        return null != schedJoulesService && schedJoulesService.isAvailable(session.getContextId());
+    }
+
+    @Override
     public BasicCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
         return new BasicSchedJoulesCalendarAccess(services, session, account, parameters);
     }
@@ -150,7 +156,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.basic.BasicCalendarProvider#probe(com.openexchange.session.Session, com.openexchange.chronos.provider.basic.CalendarSettings, com.openexchange.chronos.service.CalendarParameters)
      */
     @Override
@@ -190,7 +196,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarProvider#configureAccountOpt(com.openexchange.session.Session, com.openexchange.chronos.provider.basic.CalendarSettings,
      * com.openexchange.chronos.service.CalendarParameters)
      */
@@ -234,7 +240,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarProvider#reconfigureAccountOpt(com.openexchange.session.Session, com.openexchange.chronos.provider.CalendarAccount,
      * com.openexchange.chronos.provider.basic.CalendarSettings, com.openexchange.chronos.service.CalendarParameters)
      */
@@ -257,7 +263,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarProvider#triggerCacheInvalidation(com.openexchange.session.Session, org.json.JSONObject, org.json.JSONObject)
      */
     @Override
@@ -267,7 +273,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
 
     /**
      * Checks if the locale changed and if so applies that change.
-     * 
+     *
      * @param session The groupware {@link Session}
      * @param account The {@link CalendarAccount}
      * @param settings The {@link CalendarSettings}
@@ -306,7 +312,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
     /**
      * Get the optional locale attribute from the specified user configuration. If not present,
      * the locale is extracted from the specified {@link Session}.
-     * 
+     *
      * @param session The groupware {@link Session}
      * @param userConfig The {@link JSONObject} containing the user configuration
      * @return The value of the {@link SchedJoulesFields#LOCALE} attribute if present, otherwise the locale from the specified {@link Session}
@@ -319,7 +325,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
     /**
      * Retrieves the item identifier form the specified {@link JSONObject}. If not present it tries to retrieve it
      * from the already existing user configuration of the specified {@link CalendarAccount}
-     * 
+     *
      * @param session The groupware {@link Session}
      * @param account The {@link CalendarAccount}
      * @param userConfig The user configuration
@@ -336,7 +342,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
 
     /**
      * Retrieves the item identifier form the specified {@link JSONObject}
-     * 
+     *
      * @param session The groupware {@link Session}
      * @param userConfig The user configuration
      * @return the item identifier
@@ -352,7 +358,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
 
     /**
      * Retrieves the refresh interval from the specified user configuration
-     * 
+     *
      * @param session The groupware {@link Session}
      * @param userConfig The user configuration
      * @return The value of the refresh interval

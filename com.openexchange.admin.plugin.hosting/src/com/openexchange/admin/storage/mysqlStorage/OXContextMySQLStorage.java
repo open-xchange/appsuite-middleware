@@ -1565,7 +1565,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 Database givenDatabase = ctx.getWriteDatabase();
                 if (null == givenDatabase) {
                     // No database specified
-                    db = utils.getNextDBHandleByWeight(configCon);
+                    db = utils.getNextDBHandleByWeight(configCon, true);
                     // Resolved with respect to schema?
                     String preferredSchema = db.getScheme();
                     if (null != preferredSchema) {

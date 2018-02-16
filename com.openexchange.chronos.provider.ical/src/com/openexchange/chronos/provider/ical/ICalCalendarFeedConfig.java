@@ -120,7 +120,7 @@ public class ICalCalendarFeedConfig {
         private void adaptScheme() {
             try {
                 URI uri = new URI(this.feedUrl);
-                if (ICalCalendarProviderProperties.supportedSchemes().contains(uri.getScheme())) {
+                if (ICalCalendarProviderProperties.supportedSchemes().contains(uri.getScheme()) && uri.getScheme().equalsIgnoreCase("webcal")) {
                     URIBuilder newUriBuilder = new URIBuilder(uri).setScheme("http");
                     this.feedUrl = newUriBuilder.build().toString();
                 }

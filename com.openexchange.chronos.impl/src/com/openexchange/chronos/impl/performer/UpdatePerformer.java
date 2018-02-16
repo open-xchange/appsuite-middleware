@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.performer;
 
+import static com.openexchange.chronos.common.AlarmUtils.filterRelativeTriggers;
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getExceptionDateUpdates;
@@ -59,9 +60,11 @@ import static com.openexchange.chronos.common.CalendarUtils.isOpaqueTransparency
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
+import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -77,6 +80,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RecurrenceRange;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.impl.Role;
@@ -88,7 +92,6 @@ import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.SimpleCollectionUpdate;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.tools.arrays.Arrays;
 
 /**
@@ -112,7 +115,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @param folder The calendar folder representing the current view on the events
      * @param roles The {@link Role}s a user acts as.
      */
-    public UpdatePerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder, EnumSet<Role> roles) throws OXException {
+    public UpdatePerformer(CalendarStorage storage, CalendarSession session, CalendarFolder folder, EnumSet<Role> roles) throws OXException {
         super(storage, session, folder, roles);
     }
 
@@ -123,7 +126,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
      */
-    public UpdatePerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
+    public UpdatePerformer(CalendarStorage storage, CalendarSession session, CalendarFolder folder) throws OXException {
         super(storage, session, folder);
     }
 
@@ -201,9 +204,9 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             Check.quotaNotExceeded(storage, session);
             storage.getEventStorage().insertEvent(newExceptionEvent);
             storage.getAttendeeStorage().insertAttendees(newExceptionEvent.getId(), originalSeriesMaster.getAttendees());
-            storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getID(), newExceptionEvent.getId(), originalSeriesMaster.getAttachments());
+            storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), newExceptionEvent.getId(), originalSeriesMaster.getAttachments());
             for (Entry<Integer, List<Alarm>> entry : storage.getAlarmStorage().loadAlarms(originalSeriesMaster).entrySet()) {
-                insertAlarms(newExceptionEvent, entry.getKey().intValue(), entry.getValue(), true);
+                insertAlarms(newExceptionEvent, i(entry.getKey()), filterRelativeTriggers(entry.getValue()), true);
             }
             newExceptionEvent = loadEventData(newExceptionEvent.getId());
             resultTracker.trackCreation(newExceptionEvent, originalSeriesMaster);
@@ -242,8 +245,11 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * handle new delete exceptions from the calendar user's point of view beforehand
          */
-        if (isSeriesMaster(originalEvent) && eventData.containsDeleteExceptionDates() && updateDeleteExceptions(originalEvent, eventData)) {
-            originalEvent = loadEventData(originalEvent.getId());
+        if (isSeriesMaster(originalEvent) && eventData.containsDeleteExceptionDates() && false == deleteRemovesEvent(originalEvent)) {
+            if (updateDeleteExceptions(originalEvent, eventData)) {
+                originalEvent = loadEventData(originalEvent.getId());
+            }
+            ignoredFields = null != ignoredFields ? Arrays.add(ignoredFields, EventField.DELETE_EXCEPTION_DATES) : new EventField[] { EventField.DELETE_EXCEPTION_DATES };
         }
         /*
          * prepare event update & check conflicts as needed
@@ -397,7 +403,6 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
                         deleteFromRecurrence(originalEvent, recurrenceId, userAttendee);
                     }
                 }
-                updatedEvent.removeDeleteExceptionDates();
                 return true;
             }
         }
@@ -414,13 +419,14 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @return <code>true</code> if there were changes, <code>false</code>, otherwise
      */
     private boolean storeEventUpdate(Event originalEvent, Event deltaEvent, Set<EventField> updatedFields) throws OXException {
-        if (updatedFields.isEmpty()) {
+        HashSet<EventField> updatedEventFields = new HashSet<EventField>(updatedFields);
+        updatedEventFields.removeAll(java.util.Arrays.asList(EventField.ATTACHMENTS, EventField.ALARMS, EventField.ATTENDEES));
+        if (updatedEventFields.isEmpty()) {
             return false;
         }
         boolean realChange = false;
-        for (EventField updatedField : updatedFields) {
-            if (Arrays.contains(SKIPPED_FIELDS, updatedField) ||
-                EventField.ATTENDEES.equals(updatedField) || EventField.ALARMS.equals(updatedField) || EventField.ATTACHMENTS.equals(updatedField)) {
+        for (EventField updatedField : updatedEventFields) {
+            if (Arrays.contains(SKIPPED_FIELDS, updatedField)) {
                 continue;
             }
             realChange = true;
@@ -497,10 +503,10 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         }
         requireWritePermissions(originalEvent);
         if (0 < attachmentUpdates.getRemovedItems().size()) {
-            storage.getAttachmentStorage().deleteAttachments(session.getSession(), folder.getID(), originalEvent.getId(), attachmentUpdates.getRemovedItems());
+            storage.getAttachmentStorage().deleteAttachments(session.getSession(), folder.getId(), originalEvent.getId(), attachmentUpdates.getRemovedItems());
         }
         if (0 < attachmentUpdates.getAddedItems().size()) {
-            storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getID(), originalEvent.getId(), attachmentUpdates.getAddedItems());
+            storage.getAttachmentStorage().insertAttachments(session.getSession(), folder.getId(), originalEvent.getId(), attachmentUpdates.getAddedItems());
         }
         return true;
     }

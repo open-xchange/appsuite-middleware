@@ -71,6 +71,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.SearchUtils;
 import com.openexchange.chronos.common.mapping.EventMapper;
+import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
@@ -79,7 +80,6 @@ import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -128,17 +128,17 @@ public class SearchPerformer extends AbstractQueryPerformer {
      */
     public List<Event> perform(String[] folderIDs, List<SearchFilter> filters, List<String> queries) throws OXException {
         Check.minimumSearchPatternLength(queries, minimumSearchPatternLength);
-        List<UserizedFolder> folders = getFolders(folderIDs);
+        List<CalendarFolder> folders = getFolders(folderIDs);
         EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
         SearchOptions sortOptions = new SearchOptions(session);
         List<Event> events = new ArrayList<Event>();
         List<Event> foundEvents = storage.getEventStorage().searchEvents(buildSearchTerm(folders, queries), filters, sortOptions, fields);
         for (Event event : storage.getUtilities().loadAdditionalEventData(-1, foundEvents, fields)) {
-            List<UserizedFolder> foldersForEvent = getFoldersForEvent(folders, event);
+            List<CalendarFolder> foldersForEvent = getFoldersForEvent(folders, event);
             if (1 == foldersForEvent.size()) {
                 events.addAll(postProcess(Collections.singletonList(event), foldersForEvent.get(0), false, fields));
             } else {
-                for (UserizedFolder folder : foldersForEvent) {
+                for (CalendarFolder folder : foldersForEvent) {
                     Event copiedEvent = EventMapper.getInstance().copy(event, new Event(), (EventField[]) null);
                     events.addAll(postProcess(Collections.singletonList(copiedEvent), folder, false, fields));
                 }
@@ -148,7 +148,7 @@ public class SearchPerformer extends AbstractQueryPerformer {
         return sortEvents(events);
     }
 
-    private SearchTerm<?> buildSearchTerm(List<UserizedFolder> folders, List<String> queries) throws OXException {
+    private SearchTerm<?> buildSearchTerm(List<CalendarFolder> folders, List<String> queries) throws OXException {
         SearchTerm<?> queriesTerm = SearchUtils.buildSearchTerm(queries);
         if (null == queriesTerm) {
             return getFolderIdsTerm(folders);
@@ -214,7 +214,7 @@ public class SearchPerformer extends AbstractQueryPerformer {
         return searchTerm;
     }
 
-    private static SearchTerm<?> getFolderIdsTerm(List<UserizedFolder> folders) throws OXException {
+    private static SearchTerm<?> getFolderIdsTerm(List<CalendarFolder> folders) throws OXException {
         if (null == folders || 0 == folders.size()) {
             return null;
         }
@@ -226,9 +226,9 @@ public class SearchPerformer extends AbstractQueryPerformer {
         Set<String> publicFoldersOnlyOwn = new HashSet<String>();
         Map<Integer, Set<String>> personalFoldersPerEntity = new HashMap<Integer, Set<String>>();
         Map<Integer, Set<String>> personalFoldersPerEntityOnlyOwn = new HashMap<Integer, Set<String>>();
-        for (UserizedFolder folder : folders) {
+        for (CalendarFolder folder : folders) {
             requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
-            String folderID = folder.getID();
+            String folderID = folder.getId();
             if (PublicType.getInstance().equals(folder.getType())) {
                 if (folder.getOwnPermission().getReadPermission() < Permission.READ_ALL_OBJECTS) {
                     publicFoldersOnlyOwn.add(folderID);
@@ -273,12 +273,12 @@ public class SearchPerformer extends AbstractQueryPerformer {
         return 1 == compositeTerm.getOperands().length ? compositeTerm.getOperands()[0] : compositeTerm;
     }
 
-    private List<UserizedFolder> getFolders(String[] folderIDs) throws OXException {
-        List<UserizedFolder> folders;
+    private List<CalendarFolder> getFolders(String[] folderIDs) throws OXException {
+        List<CalendarFolder> folders;
         if (null == folderIDs) {
             folders = getVisibleFolders(session);
         } else {
-            folders = new ArrayList<UserizedFolder>(folderIDs.length);
+            folders = new ArrayList<CalendarFolder>(folderIDs.length);
             for (String folderID : folderIDs) {
                 folders.add(getFolder(session, folderID));
             }
@@ -286,9 +286,9 @@ public class SearchPerformer extends AbstractQueryPerformer {
         return folders;
     }
 
-    private static List<UserizedFolder> getFoldersForEvent(List<UserizedFolder> possibleFolders, Event event) throws OXException {
-        List<UserizedFolder> folders = new ArrayList<UserizedFolder>();
-        for (UserizedFolder folder : possibleFolders) {
+    private static List<CalendarFolder> getFoldersForEvent(List<CalendarFolder> possibleFolders, Event event) throws OXException {
+        List<CalendarFolder> folders = new ArrayList<CalendarFolder>();
+        for (CalendarFolder folder : possibleFolders) {
             if (Utils.isInFolder(event, folder)) {
                 folders.add(folder);
             }

@@ -23,7 +23,6 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.lang_2.6.0.v201205030909.jar" sourcepath="/com.openexchange.bundles/source/org.apache.commons.lang.source_2.6.0.v201205030909.jar"/>
 	<classpathentry kind="lib" path="lib/okio-1.9.0.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.annotation"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.calendar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.conversion"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.conversion.engine"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.data.conversion.ical.ical4j"/>
@@ -107,7 +106,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.google.gdata"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.share"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.share.impl"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.subscribe.google"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.oauth.google"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.oauth"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.google.api.client"/>

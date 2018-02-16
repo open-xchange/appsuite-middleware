@@ -110,13 +110,6 @@ public class ICalExporter extends AbstractExporter {
         if (!canExport(session, format, batchIds.getKey(), optionalParams)) {
             return false;
         }
-        for (String objectId : batchIds.getValue()) {
-            try {
-                Integer.parseInt(objectId);
-            } catch (NumberFormatException e) {
-                return false;
-            }
-        }
         return true;
     }
 

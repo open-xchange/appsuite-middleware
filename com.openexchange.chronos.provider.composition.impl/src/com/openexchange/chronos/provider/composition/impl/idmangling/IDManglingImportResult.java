@@ -63,6 +63,8 @@ import com.openexchange.exception.OXException;
 public class IDManglingImportResult extends IDManglingCalendarResult implements ImportResult {
 
     private final ImportResult delegate;
+    private final OXException newError;
+    private final List<OXException> newWarnings;
 
     /**
      * Initializes a new {@link IDManglingImportResult}.
@@ -73,6 +75,8 @@ public class IDManglingImportResult extends IDManglingCalendarResult implements 
     public IDManglingImportResult(ImportResult delegate, int accountId) {
         super(delegate, accountId);
         this.delegate = delegate;
+        this.newError = IDMangling.withUniqueIDs(delegate.getError(), accountId);
+        this.newWarnings = IDMangling.withUniqueID(delegate.getWarnings(), accountId);
     }
 
     @Override
@@ -82,12 +86,12 @@ public class IDManglingImportResult extends IDManglingCalendarResult implements 
 
     @Override
     public OXException getError() {
-        return null != delegate.getError() ? IDMangling.withUniqueIDs(delegate.getError(), accountId) : null;
+        return newError;
     }
 
     @Override
     public List<OXException> getWarnings() {
-        return IDMangling.withUniqueID(delegate.getWarnings(), accountId);
+        return newWarnings;
     }
 
     @Override

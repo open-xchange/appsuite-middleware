@@ -70,7 +70,7 @@ public interface ITipIntegrationUtility {
 
     List<EventConflict> getConflicts(Event event, CalendarSession session) throws OXException;
 
-    List<Event> getExceptions(Event original, Session session) throws OXException;
+    List<Event> getExceptions(Event original, CalendarSession session) throws OXException;
 
     String getPrivateCalendarFolderId(CalendarSession session) throws OXException;
 

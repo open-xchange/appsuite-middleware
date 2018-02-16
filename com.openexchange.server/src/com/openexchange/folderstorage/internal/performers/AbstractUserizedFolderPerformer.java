@@ -1069,6 +1069,19 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         return null != supportedCapabilities && supportedCapabilities.contains(CAPABILITY_AUTO_RENAME_FOLDERS);
     }
 
+    private static final String CAPABILITY_RESTORE = Strings.asciiLowerCase(FileStorageCapability.RESTORE.name());
+
+    /**
+     * Checks of specified folder supports the {@link FileStorageCapability#RESTORE RESTORE} capability.
+     *
+     * @param folder The folder to check
+     * @return <code>true</code> if specified folder supports that capability; otherwise <code>false</code>
+     */
+    protected static boolean supportsRestore(Folder folder) {
+        Set<String> supportedCapabilities = null == folder ? null : folder.getSupportedCapabilities();
+        return null != supportedCapabilities && supportedCapabilities.contains(CAPABILITY_RESTORE);
+    }
+
     // -----------------------------------------------------------------------------------------------
 
     /** Options for performing name-based folder checks */

@@ -267,6 +267,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     public static final String ACTION_TRASH = "trash";
 
+    public static final String ACTION_RESTORE = "restore";
+
     /**
      * The parameter 'from' specifies index of starting entry in list of objects dependent on given order criteria and folder id
      */

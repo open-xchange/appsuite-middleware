@@ -52,6 +52,7 @@ package com.openexchange.chronos.itip;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -69,7 +70,6 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
@@ -99,15 +99,13 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
     }
 
     @Override
-    public List<Event> getExceptions(final Event original, final Session session) throws OXException {
-        String folderId = original.getFolderId();
-        if (Strings.isEmpty(folderId)) {
-            return Collections.emptyList();
+    public List<Event> getExceptions(final Event original, final CalendarSession session) throws OXException {
+        CalendarStorage storage = getStorage(session);
+        List<Event> exceptions = storage.getEventStorage().loadExceptions(original.getId(), null);
+        for (Event exception : exceptions) {
+            applyEventData(session, storage, exception);
         }
-        CalendarService calendarService = Services.getService(CalendarService.class);
-        CalendarSession calendarSession = calendarService.init(session);
-        List<Event> changeExceptions = calendarService.getChangeExceptions(calendarSession, folderId, original.getId());
-        return changeExceptions;
+        return exceptions;
     }
 
     @Override
@@ -122,6 +120,11 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
     private Event load(final CalendarSession session, String id) throws OXException {
         CalendarStorage storage = getStorage(session);
         Event event = storage.getEventStorage().loadEvent(id, null);
+        applyEventData(session, storage, event);
+        return event;
+    }
+
+    private void applyEventData(final CalendarSession session, CalendarStorage storage, Event event) throws OXException {
         event.setFlags(CalendarUtils.getFlags(event, session.getUserId()));
         event.setAttendees(storage.getAttendeeStorage().loadAttendees(event.getId()));
         for (Attendee attendee : event.getAttendees()) {
@@ -130,9 +133,12 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
             }
         }
         if (event.getFolderId() == null) {
-            event.setFolderId(getFolderIdForUser(session.getSession(), id));
+            event.setFolderId(getFolderIdForUser(session.getSession(), event.getId()));
         }
-        return event;
+        List<Attachment> attachments = storage.getAttachmentStorage().loadAttachments(event.getId());
+        if (null != attachments && false == attachments.isEmpty()) {
+            event.setAttachments(attachments);
+        }
     }
 
     @Override

@@ -282,4 +282,15 @@ public interface DriveUtility {
      */
     void removeFromTrash(DriveSession session, List<String> files, List<String> folders) throws OXException;
 
+    /**
+     * Restores the given files and folders from the trash.
+     *
+     * @param session The session
+     * @param files The names of the files
+     * @param folders The names of the folders
+     * @return {@link RestoreContent} the restored files and folders
+     * @throws OXException
+     */
+    RestoreContent restoreFromTrash(DriveSession session, List<String> files, List<String> folders) throws OXException;
+
 }

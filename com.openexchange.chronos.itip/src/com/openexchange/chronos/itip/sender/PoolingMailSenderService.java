@@ -54,7 +54,6 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.EventNotificationPoolService;
 import com.openexchange.chronos.itip.generators.NotificationMail;
-import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.State.Type;
 import com.openexchange.session.Session;
@@ -64,6 +63,7 @@ public class PoolingMailSenderService implements MailSenderService {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PoolingMailSenderService.class);
 
     private final EventNotificationPoolService pool;
+
     private final MailSenderService delegate;
 
     public PoolingMailSenderService(EventNotificationPoolService pool, MailSenderService delegate) {
@@ -116,9 +116,9 @@ public class PoolingMailSenderService implements MailSenderService {
     /**
      * Sends the mail directly, but makes the aware of this to avoid duplicate Mails.
      * 
-     * @param mail
-     * @param session
-     * @throws OXException
+     * @param mail The {@link NotificationMail} to send
+     * @param session The {@link Session}
+     * @throws OXException In case sending fails
      */
     private void poolAwareDirectSend(NotificationMail mail, Session session, CalendarUser principal) throws OXException {
         pool.aware(mail.getEvent(), mail.getRecipient(), session);
@@ -126,25 +126,25 @@ public class PoolingMailSenderService implements MailSenderService {
     }
 
     private boolean isStateChange(NotificationMail mail) {
-        Type stateType = mail.getStateType();
-        if (stateType == Type.ACCEPTED || stateType == Type.DECLINED || stateType == Type.TENTATIVELY_ACCEPTED || stateType == Type.NONE_ACCEPTED) {
-            return true;
+        switch (mail.getStateType()) {
+            case ACCEPTED:
+            case DECLINED:
+            case TENTATIVELY_ACCEPTED:
+            case NONE_ACCEPTED:
+            case MODIFIED:
+                return true;
+            default:
+                return false;
         }
-        return false;
     }
 
     private boolean shouldEnqueue(NotificationMail mail) throws OXException {
         if (!mail.getActor().equals(mail.getOnBehalfOf())) {
             return false;
         }
-        if (mail.getOriginal() == null || mail.getEvent() == null) {
-            return false;
-        }
-        Type stateType = mail.getStateType();
-        if (stateType == Type.MODIFIED || isStateChange(mail)) {
+        if (isStateChange(mail)) {
             return !needsFastTrack(mail);
         }
-
         return false;
     }
 
@@ -166,5 +166,4 @@ public class PoolingMailSenderService implements MailSenderService {
     private boolean isDeleteMail(NotificationMail mail) {
         return mail.getStateType() == Type.DELETED && !isChangeExceptionsMail(mail);
     }
-
 }

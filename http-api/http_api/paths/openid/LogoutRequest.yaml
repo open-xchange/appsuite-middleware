@@ -1,0 +1,18 @@
+/logout:
+  get:
+    operationId: logout
+    tags:
+      - OpenID
+    summary: Initiate the communication with the OpenID module
+    description: |
+      The logout request will terminate everx session for the current user and redirect him to the 
+      configured after logout page.
+    parameters:
+      - in: query
+        name: state
+        type: string
+        description: The state which started the logout process.
+        required: true
+    responses:
+      302:
+        description: A redirect to the after logout page.

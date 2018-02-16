@@ -69,13 +69,13 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RecurrenceRange;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.InternalCalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 
 /**
  * {@link DeletePerformer}
@@ -92,7 +92,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
      * @param session The calendar session
      * @param folder The calendar folder representing the current view on the events
      */
-    public DeletePerformer(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
+    public DeletePerformer(CalendarStorage storage, CalendarSession session, CalendarFolder folder) throws OXException {
         super(storage, session, folder);
     }
 
@@ -156,7 +156,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
         /*
          * no delete permissions, otherwise
          */
-        throw CalendarExceptionCodes.NO_DELETE_PERMISSION.create(folder.getID());
+        throw CalendarExceptionCodes.NO_DELETE_PERMISSION.create(folder.getId());
     }
 
     /**
@@ -272,7 +272,7 @@ public class DeletePerformer extends AbstractUpdatePerformer {
         /*
          * no delete permissions, otherwise
          */
-        throw CalendarExceptionCodes.NO_DELETE_PERMISSION.create(folder.getID());
+        throw CalendarExceptionCodes.NO_DELETE_PERMISSION.create(folder.getId());
     }
 
     /**

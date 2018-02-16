@@ -1,0 +1,90 @@
+/init:
+  get:
+    operationId: init
+    tags:
+      - OpenID
+    summary: Initiate the communication with the OpenID module
+    description: |
+      The init request is used to initiate communication with the OpenID module from a UI client.
+      It may be used to login or logout a user or to initiate the authorization process from  a third party.
+    parameters:
+      - in: formData
+        name: flow
+        type: string
+        description: |
+          One of the three following strings can be used, {login, logout, thirdParty}. Either one 
+          will start the corresponding process in the OpenID module.
+        required: true
+      - in: formData
+        name: redirect
+        type: boolean
+        description: |
+          Describes wether the response will be in form of a redirect or an URL placed in a 'redirect' parameter 
+          in a JSON body.
+        required: true
+      - in: query
+        type: string
+        name: hash
+        description: The hash value from where the request was triggered for later deeplink purposes.
+        required: false
+      - in: formData
+        type: string
+        name: client
+        description: The client identifier.
+        required: false
+      - in: query
+        type: string
+        name: version
+        description: The client version.
+        required: false  
+    responses:
+      200:
+        description: A JSON object containing the redirect URL in an own 'redirect' parameter.
+        schema:
+          $ref: "#/definitions/InitResponse"
+      302:
+        description: A redirect to the OpenID provider for user authentication.
+  post:
+    operationId: init
+    tags:
+      - OpenID
+    summary: Initiate the communication with the OpenID module
+    description: |
+      The init request as a POST is for thirdParty flow only. Will directly inititate the login process.
+    parameters:
+      - in: formData
+        name: flow
+        type: string
+        description: |
+          Only 'thirdParty' as value possible.
+        required: true
+      - in: formData
+        name: redirect
+        type: boolean
+        description: |
+          Describes wether the response will be in form of a redirect or an URL placed in a 'redirect' parameter 
+          in a JSON body.
+        required: true
+      - in: query
+        type: string
+        name: hash
+        description: The hash value from where the request was triggered for later deeplink purposes.
+        required: false
+      - in: formData
+        type: string
+        name: client
+        description: The client identifier.
+        required: false
+      - in: query
+        type: string
+        name: version
+        description: The client version.
+        required: false  
+    responses:
+      200:
+        description: A JSON object containing the redirect URL in an own 'redirect' parameter.
+        schema:
+          $ref: "#/definitions/InitResponse"
+      302:
+        description: A redirect to the OpenID provider for user authentication.
+      

@@ -1,0 +1,276 @@
+feature_name: OpenID
+feature_description: |
+  The properties for the oidc module
+properties:
+    - key: com.openexchange.oidc.enabled
+      description: |
+        Switch to enable disable the core OpenID feature.
+      defaultValue: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+      
+    - key: com.openexchange.oidc.startDefaultBackend
+      description: |
+         Start the default core OpenID backend.
+      defaultValue: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+      
+    - key: com.openexchange.oidc.clientId
+      description: |
+        The client id, which was assigned by thr OP to this client/backend
+        on registration
+      defaultValue:
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+    - key: com.openexchange.oidc.rpRedirectURIInit
+      description: |
+        The path to the init servlet of this backend
+      defaultValue:
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+      
+    - key: com.openexchange.oidc.rpRedirectURIAuth
+      description: |
+        The path to the authentication servlet of this backend
+      defaultValue:
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+      
+    - key: com.openexchange.oidc.opAuthorizationEndpoint
+      description: |
+        The OPs authorization endpoint
+      defaultValue:
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+      
+    - key: com.openexchange.oidc.opTokenEndpoint
+      description: |
+        The OPs token endpoint
+      defaultValue:
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+      
+    - key: com.openexchange.oidc.clientSecret
+      description: |
+        The client secret, which was assigned by the OP to this client/backend
+        on registration
+      defaultValue:
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+      
+    - key: com.openexchange.oidc.opJwkSetEndpoint
+      description: |
+        The OPs JWK Set endpoint
+      defaultValue:
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+      
+    - key: com.openexchange.oidc.jwsAlgorithm
+      description: |
+        The used JWS encryption algorithm
+      defaultValue:
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+      
+    - key: com.openexchange.oidc.scope
+      description: |
+        The used scope
+      defaultValue: OpenID
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+      
+    - key: com.openexchange.oidc.opIssuer
+      description: |
+        The OPs issuer path
+      defaultValue:
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+      
+    - key: com.openexchange.oidc.responseType
+      description: |
+        The OPs response type, which also identifies the used flow
+      defaultValue: code
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+      
+    - key: com.openexchange.oidc.opLogoutEndpoint
+      description: |
+        The OPs logout endpoint
+      defaultValue:
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+      
+    - key: com.openexchange.oidc.rpRedirectURIPostSSOLogout
+      description: |
+        The location where the Browser should be redirected after logout
+        from OP
+      defaultValue:
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+      
+    - key: com.openexchange.oidc.ssoLogout
+      description: |
+        Whether to redirect to the OP on logout trigger from client or not
+      defaultValue: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+      
+    - key: com.openexchange.oidc.rpRedirectURILogout
+      description: |
+        Where to redirect the user after a valid logout
+      defaultValue: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+      
+    - key: com.openexchange.oidc.autologinCookieMode
+      description: |
+        Which login mode is enabled look at {@link OIDCBackendConfig.AutologinMode} for all valid values,
+        so far the following values are valid: {off, ox_direct, sso_redirect}.
+        off - no autologin
+        ox_direct - load user session from cookie and load Appsuite directly
+        sso_redirect - check for a valid session on OPs side before login into
+          a valid session loaded from a cookie
+      defaultValue: 'off'
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+      
+    - key: com.openexchange.oidc.oauthRefreshTime
+      description: |
+        Time in milliseconds determines how long before the expiration of the
+        OAuth AccessToken a new AccessToken should be requested. "refresh_token"
+        grant type must be registered for this client.
+      defaultValue: 60000
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+      
+    - key: com.openexchange.oidc.uiWebPath
+      description: |
+        This backends UI path
+      defaultValue:
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+      
+    - key: com.openexchange.oidc.backendPath
+      description: |
+        This backends servlet path, which is appended to the default /oidc/ path.
+      defaultValue:
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]
+
+    - key: com.openexchange.oidc.hosts
+      description: |
+        This contains a comma separated list of hosts, that this backend supports.
+      defaultValue:
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: 
+      packageName: open-xchange-oidc
+      tags: ["OpenID"]

@@ -49,6 +49,7 @@
 
 package com.openexchange.ipcheck.countrycode.mbean;
 
+
 /**
  * {@link IPCheckMBean}
  *
@@ -56,72 +57,14 @@ package com.openexchange.ipcheck.countrycode.mbean;
  */
 public interface IPCheckMBean {
 
-    static final String DOMAIN = "com.openexchange.ipcheck.countrycode";
-
-    static String NAME = "IPCheck MBean";
+    static String NAME = "com.openexchange.metrics" + ":00=" + IPCheckMetricCollector.COMPONENT_NAME + ",name=percentages";
 
     /**
      * Returns the total amount of IP checks per hour
-     * 
+     *
      * @return the total amount of IP checks per hour
      */
     long getIPChangesPerHour();
-
-    /**
-     * Returns the total amount of IP changes that were observed in sessions
-     * 
-     * @return the total amount of IP changes
-     */
-    int getIPChanges();
-
-    /**
-     * Returns the total amount of accepted IP changes
-     * 
-     * @return the total amount of accepted IP changes
-     */
-    int getAcceptedIPChanges();
-
-    /**
-     * Returns the total amount of denied IP changes
-     * 
-     * @return the total amount of denied IP changes
-     */
-    int getDeniedIPChanges();
-
-    /**
-     * Returns the amount of accepted IP changes due to a private IPv4 change
-     * 
-     * @return the amount of accepted IP changes due to a private IPv4 change
-     */
-    int getAcceptedPrivateIPChanges();
-
-    /**
-     * Returns the amount of accepted IP changes due to a white-listed IP
-     * 
-     * @return the amount of accepted IP changes due to a white-listed IP
-     */
-    int getAcceptedWhiteListedIPChanges();
-
-    /**
-     * Returns the amount of denied IP changes due to country changes
-     * 
-     * @return the amount of denied IP changes due to country changes
-     */
-    int getDeniedCountryChanges();
-
-    /**
-     * Returns the amount of denied IP changes due to an exception
-     * 
-     * @return the amount of denied IP changes due to an exception
-     */
-    int getDeniedExceptionIPChanges();
-
-    /**
-     * Returns the amount of accepted eligible IP changes
-     * 
-     * @return the amount of accepted eligible IP changes
-     */
-    int getAcceptedEligibleIPChanges();
 
     /**
      * Gets the acceptedPercentage

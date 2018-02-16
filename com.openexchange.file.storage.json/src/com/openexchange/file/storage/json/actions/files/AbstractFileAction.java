@@ -209,6 +209,10 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
             failure(req, e);
             LOG.error("", e);
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, "Null dereference.");
+        } catch (RuntimeException e) {
+            failure(req, e);
+            LOG.error("", e);
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             after(req);
 

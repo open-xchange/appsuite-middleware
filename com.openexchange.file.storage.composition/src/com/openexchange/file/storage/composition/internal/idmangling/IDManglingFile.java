@@ -56,6 +56,7 @@ import java.util.Set;
 import com.openexchange.file.storage.DelegatingFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.FolderPath;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 
@@ -390,8 +391,23 @@ public class IDManglingFile implements DelegatingFile {
     }
 
     @Override
+    public FolderPath getOrigin() {
+        return file.getOrigin();
+    }
+
+    @Override
+    public void setOrigin(FolderPath origin) {
+        file.setOrigin(origin);
+    }
+
+    @Override
     public String toString() {
         return "IDManglingFile [id=" + id + ", delegateId=" + file.getId() + ", name=" + file.getFileName() + "]";
+    }
+
+    @Override
+    public void setSequenceNumber(long sequenceNumber) {
+        file.setSequenceNumber(sequenceNumber);
     }
 
 }

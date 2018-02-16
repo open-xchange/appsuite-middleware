@@ -52,6 +52,7 @@ package com.openexchange.publish.services;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
@@ -62,6 +63,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentAndMetadata;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.InfostoreFolderPath;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
@@ -334,6 +336,11 @@ public class SimInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
+    public List<IDTuple> moveDocuments(ServerSession session, List<IDTuple> ids, long sequenceNumber, String targetFolderID, boolean adjustFilenamesAsNeeded, Map<String, InfostoreFolderPath> originPath) throws OXException {
+        return ids;
+    }
+
+    @Override
     public DocumentMetadata getDocumentMetadata(int id, int version, Context context) throws OXException {
         // TODO Auto-generated method stub
         return null;
@@ -391,6 +398,15 @@ public class SimInfostoreFacade implements InfostoreFacade {
     @Override
     public void touch(int id, Context context) throws OXException {
         //
+    }
+
+    @Override
+    public List<IDTuple> restore(Map<String, List<IDTuple>> toRestore, ServerSession session) throws OXException {
+        List<IDTuple> tuples = new LinkedList<>();
+        for (Map.Entry<String, List<IDTuple>> entry : toRestore.entrySet()) {
+            tuples.addAll(entry.getValue());
+        }
+        return tuples;
     }
 
 }

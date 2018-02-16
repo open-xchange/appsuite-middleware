@@ -50,10 +50,12 @@
 package com.openexchange.importexport.exporters.ical;
 
 import java.io.OutputStream;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.tools.session.ServerSession;
@@ -77,7 +79,12 @@ public class ICalCompositeEventExporter extends AbstractICalEventExporter {
 
     @Override
     protected ThresholdFileHolder exportBatchData(ServerSession session, OutputStream out) throws OXException {
-        return exportChronosEvents(getCalendarAccess(session).getEvents(convertBatchDataToEventIds()), out);
+        List<EventID> eventIds = convertBatchDataToEventIds();
+        if(eventIds.size() == 1) {
+            return exportChronosEvents(Collections.singletonList(getCalendarAccess(session).getEvent(eventIds.get(0))), out);
+        } else {
+            return exportChronosEvents(getCalendarAccess(session).getEvents(eventIds), out);
+        }
     }
 
     private IDBasedCalendarAccess getCalendarAccess(ServerSession session) throws OXException {

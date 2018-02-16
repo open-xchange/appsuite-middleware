@@ -72,7 +72,6 @@ import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 
 /**
  * {@link InternalCalendarResult}
@@ -85,7 +84,7 @@ public class InternalCalendarResult {
     private final CalendarSession session;
     private final int calendarUserId;
     private final Set<String> affectedFolderIds;
-    private final UserizedFolder folder;
+    private final CalendarFolder folder;
 
     private List<CreateResult> creations;
     private List<CreateResult> userizedCreations;
@@ -101,7 +100,7 @@ public class InternalCalendarResult {
      * @param calendarUserId The actual calendar user
      * @param folder The calendar folder representing the current view on the events
      */
-    public InternalCalendarResult(CalendarSession session, int calendarUserId, UserizedFolder folder) {
+    public InternalCalendarResult(CalendarSession session, int calendarUserId, CalendarFolder folder) {
         super();
         this.session = session;
         this.calendarUserId = calendarUserId;
@@ -314,17 +313,17 @@ public class InternalCalendarResult {
      * @return The calendar result
      */
     public CalendarResult getUserizedResult() {
-        return new DefaultCalendarResult(session.getSession(), calendarUserId, folder.getID(), userizedCreations, userizedUpdates, userizedDeletions);
+        return new DefaultCalendarResult(session.getSession(), calendarUserId, folder.getId(), userizedCreations, userizedUpdates, userizedDeletions);
     }
 
     private Map<Integer, List<String>> getAffectedFoldersPerUser() {
         if (null == affectedFolderIds || 0 == affectedFolderIds.size()) {
             return Collections.emptyMap();
         }
-        if (1 == affectedFolderIds.size() && null != folder && folder.getID().equals(affectedFolderIds.iterator().next())) {
+        if (1 == affectedFolderIds.size() && null != folder && folder.getId().equals(affectedFolderIds.iterator().next())) {
             Map<Integer, List<String>> affectedFoldersPerUser = new HashMap<Integer, List<String>>();
             for (Integer userId : Utils.getAffectedUsers(folder, session.getEntityResolver())) {
-                affectedFoldersPerUser.put(userId, Collections.singletonList(folder.getID()));
+                affectedFoldersPerUser.put(userId, Collections.singletonList(folder.getId()));
             }
             return affectedFoldersPerUser;
         }

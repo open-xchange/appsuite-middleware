@@ -81,6 +81,7 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.ReinitializableFolderStorage;
 import com.openexchange.folderstorage.RemoveAfterAccessFolder;
+import com.openexchange.folderstorage.RestoringFolderStorage;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
@@ -137,7 +138,7 @@ import gnu.trove.map.hash.TObjectIntHashMap;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CacheFolderStorage implements ReinitializableFolderStorage, FolderCacheInvalidationService, TrashAwareFolderStorage, SubfolderListingFolderStorage {
+public final class CacheFolderStorage implements ReinitializableFolderStorage, FolderCacheInvalidationService, TrashAwareFolderStorage, SubfolderListingFolderStorage, RestoringFolderStorage {
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CacheFolderStorage.class);
 
@@ -747,7 +748,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
             if (null != pathPerformer) {
                 try {
                     pathPerformer.getStorageParameters().setIgnoreCache(Boolean.TRUE);
-                    pathPerformer.getStorageParameters().putParameter(FolderType.GLOBAL, "DO_NOT_CACHE", true);
+                    pathPerformer.getStorageParameters().putParameter(FolderType.GLOBAL, "DO_NOT_CACHE", Boolean.TRUE);
                     if (existsFolder(treeId, id, StorageType.WORKING, pathPerformer.getStorageParameters())) {
                         UserizedFolder[] path = pathPerformer.doPath(treeId, id, true);
                         ids = new ArrayList<String>(path.length);
@@ -1387,7 +1388,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
                         return null;
                     }
                 }
-                LOG.debug("Locally loaded folder {} from context {} for user {}", folderId, contextId, params.getUserId());
+                LOG.debug("Locally loaded folder {} from context {} for user {}", folderId, Integer.valueOf(contextId), Integer.valueOf(params.getUserId()));
                 return folder;
             }
         }
@@ -1549,7 +1550,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
             return null;
         }
 
-        FolderStorage[] neededStorages = registry.getFolderStoragesForParent(treeId, parentId);
+        FolderStorage[] neededStorages = getFolderStoragesForParent(treeId, parentId, storageParameters);
         if (0 == neededStorages.length) {
             return new Folder[0];
         }
@@ -1581,6 +1582,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         }
     }
 
+
     @Override
     public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws OXException {
         Folder parent = getFolder(treeId, parentId, storageParameters);
@@ -1594,7 +1596,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         }
 
         // Get needed storages
-        FolderStorage[] neededStorages = registry.getFolderStoragesForParent(treeId, parentId);
+        FolderStorage[] neededStorages = getFolderStoragesForParent(treeId, parentId, storageParameters);
         if (0 == neededStorages.length) {
             return new SortableId[0];
         }
@@ -1844,6 +1846,32 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
                 storage.rollback(storageParameters);
             }
         }
+    }
+
+    @Override
+    public Map<String, String> restoreFromTrash(String treeId, List<String> folderIds, String defaultDestFolderId, StorageParameters storageParameters) throws OXException {
+        FolderStorage folderStorage = registry.getFolderStorage(treeId, defaultDestFolderId);
+        if (null == folderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, defaultDestFolderId);
+        }
+
+        if (false == RestoringFolderStorage.class.isInstance(folderStorage)) {
+            throw FolderExceptionErrorMessage.NO_RESTORE_SUPPORT.create();
+        }
+
+        for (String folderId : folderIds) {
+            FolderStorage storage = registry.getFolderStorage(treeId, folderId);
+            if (null == storage) {
+                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, defaultDestFolderId);
+            }
+
+            if (false == folderStorage.equals(storage)) {
+                throw FolderExceptionErrorMessage.INVALID_FOLDER_ID.create(folderId);
+            }
+        }
+
+        RestoringFolderStorage restoringFolderStorage = (RestoringFolderStorage) folderStorage;
+        return restoringFolderStorage.restoreFromTrash(treeId, folderIds, defaultDestFolderId, storageParameters);
     }
 
     /*-
@@ -2143,6 +2171,39 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         if (null != folderMap) {
             folderMap.clear();
         }
+    }
+
+    private FolderStorage[] getFolderStoragesForParent(String treeId, String parentId, StorageParameters storageParameters) {
+        FolderStorage[] folderStorages = registry.getFolderStoragesForParent(treeId, parentId);
+        if (null == folderStorages || 0 == folderStorages.length || null == storageParameters.getDecorator()) {
+            return folderStorages;
+        }
+        List<ContentType> allowedContentTypes = storageParameters.getDecorator().getAllowedContentTypes();
+        if (null == allowedContentTypes || allowedContentTypes.isEmpty()) {
+            return folderStorages;
+        }
+        List<FolderStorage> possibleStorages = new ArrayList<FolderStorage>(folderStorages.length);
+        for (FolderStorage folderStorage : folderStorages) {
+            /*
+             * only include if at least one allowed content type is supported by storage
+             */
+            if (supportsAnyContentType(folderStorage, allowedContentTypes)) {
+                possibleStorages.add(folderStorage);
+            }
+        }
+        return possibleStorages.toArray(new FolderStorage[possibleStorages.size()]);
+    }
+
+    private static boolean supportsAnyContentType(FolderStorage folderStorage, List<ContentType> allowedContentTypes) {
+        if (null == allowedContentTypes || 0 == allowedContentTypes.size()) {
+            return true;
+        }
+        for (ContentType contentType : allowedContentTypes) {
+            if (Tools.supportsContentType(contentType, folderStorage)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

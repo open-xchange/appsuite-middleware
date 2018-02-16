@@ -57,7 +57,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.4
  */
-public interface TrashAwareFolderStorage {
+public interface TrashAwareFolderStorage extends FolderStorage {
 
     /**
      * Deletes the folder denoted by specified folder ID.

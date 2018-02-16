@@ -407,4 +407,14 @@ public final class RemoveAfterAccessFolderWrapper implements RemoveAfterAccessFo
         folder.setSupportedCapabilities(capabilities);
     }
 
+    @Override
+    public FolderPath getOriginPath() {
+        return folder.getOriginPath();
+    }
+
+    @Override
+    public void setOriginPath(FolderPath originPath) {
+        folder.setOriginPath(originPath);
+    }
+
 }

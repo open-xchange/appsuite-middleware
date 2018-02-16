@@ -76,7 +76,6 @@ import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PublicType;
 
 /**
@@ -90,7 +89,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttendeeHelper.class);
 
     private final CalendarSession session;
-    private final UserizedFolder folder;
+    private final CalendarFolder folder;
     private final List<Attendee> originalAttendees;
     private final List<Attendee> attendeesToInsert;
     private final List<Attendee> attendeesToDelete;
@@ -103,7 +102,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
      * @param folder The parent folder of the event being processed
      * @param requestedAttendees The list of attendees, as supplied by the client
      */
-    public static AttendeeHelper onNewEvent(CalendarSession session, UserizedFolder folder, List<Attendee> requestedAttendees) throws OXException {
+    public static AttendeeHelper onNewEvent(CalendarSession session, CalendarFolder folder, List<Attendee> requestedAttendees) throws OXException {
         AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, null);
         attendeeHelper.processNewEvent(emptyForNull(requestedAttendees));
         return attendeeHelper;
@@ -117,7 +116,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
      * @param originalAttendees The original list of attendees
      * @param updatedAttendees The new/updated list of attendees, as supplied by the client
      */
-    public static AttendeeHelper onUpdatedEvent(CalendarSession session, UserizedFolder folder, List<Attendee> originalAttendees, List<Attendee> updatedAttendees) throws OXException {
+    public static AttendeeHelper onUpdatedEvent(CalendarSession session, CalendarFolder folder, List<Attendee> originalAttendees, List<Attendee> updatedAttendees) throws OXException {
         AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, originalAttendees);
         attendeeHelper.processUpdatedEvent(emptyForNull(updatedAttendees));
         return attendeeHelper;
@@ -132,7 +131,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
      * @param originalAttendees The original list of attendees
      * @param updatedEvent The updated event data as supplied by the client
      */
-    public static AttendeeHelper onUpdatedEvent(CalendarSession session, UserizedFolder folder, List<Attendee> originalAttendees, Event updatedEvent) throws OXException {
+    public static AttendeeHelper onUpdatedEvent(CalendarSession session, CalendarFolder folder, List<Attendee> originalAttendees, Event updatedEvent) throws OXException {
         AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, originalAttendees);
         if (updatedEvent.containsAttendees()) {
             attendeeHelper.processUpdatedEvent(emptyForNull(updatedEvent.getAttendees()));
@@ -147,7 +146,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
      * @param folder The parent folder of the event being processed
      * @param originalAttendees The original list of attendees
      */
-    public static AttendeeHelper onDeletedEvent(CalendarSession session, UserizedFolder folder, List<Attendee> originalAttendees) throws OXException {
+    public static AttendeeHelper onDeletedEvent(CalendarSession session, CalendarFolder folder, List<Attendee> originalAttendees) throws OXException {
         AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, originalAttendees);
         attendeeHelper.processDeletedEvent();
         return attendeeHelper;
@@ -160,7 +159,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
      * @param folder The parent folder of the event being processed
      * @param originalAttendees The original attendees of the event, or <code>null</code> for new event creations
      */
-    private AttendeeHelper(CalendarSession session, UserizedFolder folder, List<Attendee> originalAttendees) throws OXException {
+    private AttendeeHelper(CalendarSession session, CalendarFolder folder, List<Attendee> originalAttendees) throws OXException {
         super();
         this.session = session;
         this.folder = folder;
@@ -387,14 +386,14 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
      * @param requestedAttendees The attendees as supplied by the client, or <code>null</code> if not available
      * @return The default attendee
      */
-    public static Attendee getDefaultAttendee(CalendarSession session, UserizedFolder folder, List<Attendee> requestedAttendees) throws OXException {
+    public static Attendee getDefaultAttendee(CalendarSession session, CalendarFolder folder, List<Attendee> requestedAttendees) throws OXException {
         /*
          * prepare attendee for default calendar user in folder
          */
         int calendarUserId = getCalendarUserId(folder);
         Attendee defaultAttendee = session.getEntityResolver().prepareUserAttendee(calendarUserId);
         defaultAttendee.setPartStat(ParticipationStatus.ACCEPTED);
-        defaultAttendee.setFolderId(PublicType.getInstance().equals(folder.getType()) ? null : folder.getID());
+        defaultAttendee.setFolderId(PublicType.getInstance().equals(folder.getType()) ? null : folder.getId());
         if (session.getUserId() != calendarUserId) {
             defaultAttendee.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUserId()));
         }

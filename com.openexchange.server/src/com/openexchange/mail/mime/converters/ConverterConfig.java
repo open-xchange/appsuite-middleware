@@ -49,10 +49,11 @@
 
 package com.openexchange.mail.mime.converters;
 
+import javax.mail.internet.MimeMessage;
 import com.openexchange.mail.api.MailConfig;
 
 /**
- * {@link ConverterConfig}
+ * {@link ConverterConfig} that contains setting considered while converting {@link MimeMessage}s.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
@@ -60,22 +61,22 @@ import com.openexchange.mail.api.MailConfig;
 public interface ConverterConfig {
 
     /**
-     * Returns the {@link MailConfig} for the user
-     * 
+     * Checks the {@link MailConfig} for the user
+     *
      * @return The {@link MailConfig}
      */
     MailConfig getMailConfig();
 
     /**
-     * Returns if the folder should be considered while adding data to the mail
-     * 
+     * Checks if the folder should be considered while adding data to the mail
+     *
      * @return <code>true</code> if the folder should be considered; otherwise <code>false</code>
      */
     boolean isConsiderFolder();
 
     /**
-     * Returns if the body should be included while adding data to the mail
-     * 
+     * Checks if the body should be included while adding data to the mail
+     *
      * @return <code>true</code> if the body should be included; otherwise <code>false</code>
      */
     boolean isIncludeBody();

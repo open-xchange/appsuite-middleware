@@ -66,19 +66,19 @@ import com.openexchange.chronos.service.RecurrenceService;
  */
 public class RecurrenceTests {
 
-    private RecurrenceService recurrenceService = new RecurrenceServiceImpl();
+    private final RecurrenceService recurrenceService = new RecurrenceServiceImpl();
 
     private class Validator {
 
         private int count;
-        private String check;
+        private final String check;
 
         Validator(String check) {
             this.check = check;
             this.count = 0;
         }
 
-        Validator _(String expect) {
+        Validator feed(String expect) {
             if (expect.equals("INTERVAL=1")) {
                 if (check.contains("INTERVAL=1")) {
                     increaseCount(expect.length());
@@ -106,43 +106,45 @@ public class RecurrenceTests {
     }
 
     @Before
-    public void setUp() {}
+    public void setUp() {
+        // Nothing to do
+    }
 
     @Test
     public void testSimpleRecurringRules() throws Exception {
         TimeZone tz = TimeZone.getTimeZone("UTC");
         Validator v = new Validator(Recurrence.getRecurrenceRule("t|1|i|1|s|1222865100000|", tz, false));
-        v._("FREQ=DAILY")._("INTERVAL=1").assertlength();
+        v.feed("FREQ=DAILY").feed("INTERVAL=1").assertlength();
 
         v = new Validator(Recurrence.getRecurrenceRule("t|1|i|1|s|1222865100000|e|1222992000000|o|3|", tz, false));
-        v._("FREQ=DAILY")._("INTERVAL=1")._("COUNT=3").assertlength();
+        v.feed("FREQ=DAILY").feed("INTERVAL=1").feed("COUNT=3").assertlength();
 
         v = new Validator(Recurrence.getRecurrenceRule("t|1|i|1|s|1222865100000|e|1223769600000|", tz, false));
-        v._("FREQ=DAILY")._("INTERVAL=1")._("UNTIL=20081012T124500Z").assertlength();
+        v.feed("FREQ=DAILY").feed("INTERVAL=1").feed("UNTIL=20081012T124500Z").assertlength();
 
         v = new Validator(Recurrence.getRecurrenceRule("t|2|i|1|a|8|s|1222840800000|", tz, false));
-        v._("FREQ=WEEKLY")._("BYDAY=WE")._("INTERVAL=1").assertlength();
+        v.feed("FREQ=WEEKLY").feed("BYDAY=WE").feed("INTERVAL=1").assertlength();
 
         v = new Validator(Recurrence.getRecurrenceRule("t|2|i|1|a|40|s|1222840800000|e|1224028800000|o|5|", tz, false));
-        v._("FREQ=WEEKLY")._("BYDAY=WE,FR")._("INTERVAL=1")._("COUNT=5").assertlength();
+        v.feed("FREQ=WEEKLY").feed("BYDAY=WE,FR").feed("INTERVAL=1").feed("COUNT=5").assertlength();
 
         v = new Validator(Recurrence.getRecurrenceRule("t|2|i|2|a|62|s|1222840800000|e|1224460800000|", tz, false));
-        v._("FREQ=WEEKLY")._("BYDAY=MO,TU,WE,TH,FR")._("INTERVAL=2")._("UNTIL=20081020T060000Z").assertlength();
+        v.feed("FREQ=WEEKLY").feed("BYDAY=MO,TU,WE,TH,FR").feed("INTERVAL=2").feed("UNTIL=20081020T060000Z").assertlength();
 
         v = new Validator(Recurrence.getRecurrenceRule("t|3|i|2|b|3|s|1223013600000|e|1238716800000|o|4|", tz, false));
-        v._("FREQ=MONTHLY")._("BYMONTHDAY=3")._("INTERVAL=2")._("COUNT=4").assertlength();
+        v.feed("FREQ=MONTHLY").feed("BYMONTHDAY=3").feed("INTERVAL=2").feed("COUNT=4").assertlength();
 
         v = new Validator(Recurrence.getRecurrenceRule("t|5|i|1|a|32|b|2|s|1223618400000|e|1229040000000|", tz, false));
-        v._("FREQ=MONTHLY")._("BYSETPOS=2")._("BYDAY=FR")._("INTERVAL=1")._("UNTIL=20081212T060000Z").assertlength();
+        v.feed("FREQ=MONTHLY").feed("BYSETPOS=2").feed("BYDAY=FR").feed("INTERVAL=1").feed("UNTIL=20081212T060000Z").assertlength();
 
         v = new Validator(Recurrence.getRecurrenceRule("t|5|i|1|a|65|b|5|s|1225004400000|e|1228003200000|o|2|", tz, false));
-        v._("FREQ=MONTHLY")._("BYSETPOS=-1")._("BYDAY=SU,SA")._("INTERVAL=1")._("COUNT=2").assertlength();
+        v.feed("FREQ=MONTHLY").feed("BYSETPOS=-1").feed("BYDAY=SU,SA").feed("INTERVAL=1").feed("COUNT=2").assertlength();
 
         v = new Validator(Recurrence.getRecurrenceRule("t|4|i|1|b|8|c|9|s|1223445600000|", tz, false));
-        v._("FREQ=YEARLY")._("BYMONTHDAY=8")._("BYMONTH=10")._("INTERVAL=1").assertlength();
+        v.feed("FREQ=YEARLY").feed("BYMONTHDAY=8").feed("BYMONTH=10").feed("INTERVAL=1").assertlength();
 
         v = new Validator(Recurrence.getRecurrenceRule("t|6|i|1|a|8|b|3|c|9|s|1224050400000|e|1350432000000|o|5|", tz, false));
-        v._("FREQ=YEARLY")._("BYDAY=WE")._("BYSETPOS=3")._("BYMONTH=10")._("INTERVAL=1")._("COUNT=5").assertlength();
+        v.feed("FREQ=YEARLY").feed("BYDAY=WE").feed("BYSETPOS=3").feed("BYMONTH=10").feed("INTERVAL=1").feed("COUNT=5").assertlength();
     }
 
     @Test
@@ -169,36 +171,36 @@ public class RecurrenceTests {
     public void testTimeZoneRecurringRules() throws Exception {
         java.util.TimeZone tz = TimeZone.getTimeZone("Europe/Berlin");
         Validator v = new Validator(Recurrence.getRecurrenceRule("t|1|i|1|s|1222865100000|", tz, false));
-        v._("FREQ=DAILY")._("INTERVAL=1").assertlength();
+        v.feed("FREQ=DAILY").feed("INTERVAL=1").assertlength();
 
         v = new Validator(Recurrence.getRecurrenceRule("t|1|i|1|s|1222865100000|e|1222992000000|o|3|", tz, false));
-        v._("FREQ=DAILY")._("INTERVAL=1")._("COUNT=3").assertlength();
+        v.feed("FREQ=DAILY").feed("INTERVAL=1").feed("COUNT=3").assertlength();
 
         v = new Validator(Recurrence.getRecurrenceRule("t|1|i|1|s|1222865100000|e|1223769600000|", tz, false));
-        v._("FREQ=DAILY")._("INTERVAL=1")._("UNTIL=20081012T124500Z").assertlength();
+        v.feed("FREQ=DAILY").feed("INTERVAL=1").feed("UNTIL=20081012T124500Z").assertlength();
 
         v = new Validator(Recurrence.getRecurrenceRule("t|2|i|1|a|8|s|1222840800000|", tz, false));
-        v._("FREQ=WEEKLY")._("BYDAY=WE")._("INTERVAL=1").assertlength();
+        v.feed("FREQ=WEEKLY").feed("BYDAY=WE").feed("INTERVAL=1").assertlength();
 
         v = new Validator(Recurrence.getRecurrenceRule("t|2|i|1|a|40|s|1222840800000|e|1224028800000|o|5|", tz, false));
-        v._("FREQ=WEEKLY")._("BYDAY=WE,FR")._("INTERVAL=1")._("COUNT=5").assertlength();
+        v.feed("FREQ=WEEKLY").feed("BYDAY=WE,FR").feed("INTERVAL=1").feed("COUNT=5").assertlength();
 
         v = new Validator(Recurrence.getRecurrenceRule("t|2|i|2|a|62|s|1222840800000|e|1224460800000|", tz, false));
-        v._("FREQ=WEEKLY")._("BYDAY=MO,TU,WE,TH,FR")._("INTERVAL=2")._("UNTIL=20081020T060000Z").assertlength();
+        v.feed("FREQ=WEEKLY").feed("BYDAY=MO,TU,WE,TH,FR").feed("INTERVAL=2").feed("UNTIL=20081020T060000Z").assertlength();
 
         v = new Validator(Recurrence.getRecurrenceRule("t|3|i|2|b|3|s|1223013600000|e|1238716800000|o|4|", tz, false));
-        v._("FREQ=MONTHLY")._("BYMONTHDAY=3")._("INTERVAL=2")._("COUNT=4").assertlength();
+        v.feed("FREQ=MONTHLY").feed("BYMONTHDAY=3").feed("INTERVAL=2").feed("COUNT=4").assertlength();
 
         v = new Validator(Recurrence.getRecurrenceRule("t|5|i|1|a|32|b|2|s|1223618400000|e|1229040000000|", tz, false));
-        v._("FREQ=MONTHLY")._("BYSETPOS=2")._("BYDAY=FR")._("INTERVAL=1")._("UNTIL=20081212T070000Z").assertlength();
+        v.feed("FREQ=MONTHLY").feed("BYSETPOS=2").feed("BYDAY=FR").feed("INTERVAL=1").feed("UNTIL=20081212T070000Z").assertlength();
 
         v = new Validator(Recurrence.getRecurrenceRule("t|5|i|1|a|65|b|5|s|1225004400000|e|1228003200000|o|2|", tz, false));
-        v._("FREQ=MONTHLY")._("BYSETPOS=-1")._("BYDAY=SU,SA")._("INTERVAL=1")._("COUNT=2").assertlength();
+        v.feed("FREQ=MONTHLY").feed("BYSETPOS=-1").feed("BYDAY=SU,SA").feed("INTERVAL=1").feed("COUNT=2").assertlength();
 
         v = new Validator(Recurrence.getRecurrenceRule("t|4|i|1|b|8|c|9|s|1223445600000|", tz, false));
-        v._("FREQ=YEARLY")._("BYMONTHDAY=8")._("BYMONTH=10")._("INTERVAL=1").assertlength();
+        v.feed("FREQ=YEARLY").feed("BYMONTHDAY=8").feed("BYMONTH=10").feed("INTERVAL=1").assertlength();
 
         v = new Validator(Recurrence.getRecurrenceRule("t|6|i|1|a|8|b|3|c|9|s|1224050400000|e|1350432000000|o|5|", tz, false));
-        v._("FREQ=YEARLY")._("BYDAY=WE")._("BYSETPOS=3")._("BYMONTH=10")._("INTERVAL=1")._("COUNT=5").assertlength();
+        v.feed("FREQ=YEARLY").feed("BYDAY=WE").feed("BYSETPOS=3").feed("BYMONTH=10").feed("INTERVAL=1").feed("COUNT=5").assertlength();
     }
 }

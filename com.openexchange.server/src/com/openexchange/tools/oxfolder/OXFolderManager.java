@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.util.Collection;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FolderPath;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
@@ -223,7 +224,33 @@ public abstract class OXFolderManager {
      *                   trash folder if possible
      * @return An instance of <tt>FolderObject</tt> representing deleted folder
      */
-    public abstract FolderObject deleteFolder(FolderObject fo, boolean checkPermissions, long lastModified, boolean hardDelete) throws OXException;
+    public FolderObject deleteFolder(FolderObject fo, boolean checkPermissions, long lastModified, boolean hardDelete) throws OXException {
+        return deleteFolder(fo, checkPermissions, lastModified, hardDelete, null);
+    }
+
+    /**
+     * Deletes a folder identified by given folder object. This operation causes a recursive traversal of all folder's subfolders to check
+     * if user can delete them, too. Furthermore user's permission on contained objects are checked as well. <b>NOTE:</b> given instance of
+     * <tt>FolderObject</tt> is going to be completely filled from storage. Thus it does not matter if you further work on this routine's
+     * return value or with parameter value.
+     * <p>
+     * If <code>hardDelete</code> is not set, the storage supports a trash folder, and the folder is not yet located below that trash
+     * folder, it is backed up (including the subfolder tree), otherwise it is deleted permanently.
+     * <p>
+     * While another backup folder with the same name already exists below default trash folder, an increasing serial number is appended to
+     * folder name until its name is unique inside default trash folder's subfolders. E.g.: If folder "DeleteMe" already exists below
+     * default trash folder, the next name would be "DeleteMe (2)". If again a folder "DeleteMe (2)" already exists below default trash
+     * folder, the next name would be "DeleteMe (3)", and so no.
+     *
+     * @param fo The folder object at least containing the ID of the folder that shall be deleted
+     * @param checkPermissions Whether permissions shall be checked or not
+     * @param lastModified The last-modified time stamp which is written into database; usually {@link System#currentTimeMillis()}.
+     * @param hardDelete <code>true</code> to permanently delete the folder, <code>false</code> to move the folder to the default
+     *                   trash folder if possible
+     * @param originPath
+     * @return An instance of <tt>FolderObject</tt> representing deleted folder
+     */
+    public abstract FolderObject deleteFolder(FolderObject fo, boolean checkPermissions, long lastModified, boolean hardDelete, FolderPath originPath) throws OXException;
 
     /**
      * Deletes the validated folder.

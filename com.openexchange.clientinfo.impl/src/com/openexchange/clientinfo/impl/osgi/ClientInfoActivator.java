@@ -52,6 +52,7 @@ package com.openexchange.clientinfo.impl.osgi;
 import com.openexchange.clientinfo.ClientInfoProvider;
 import com.openexchange.clientinfo.ClientInfoService;
 import com.openexchange.clientinfo.impl.ClientInfoServiceImpl;
+import com.openexchange.clientinfo.impl.MailAppClientInfoProvider;
 import com.openexchange.clientinfo.impl.USMEASClientInfoProvider;
 import com.openexchange.clientinfo.impl.WebClientInfoProvider;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -91,6 +92,7 @@ public class ClientInfoActivator extends HousekeepingActivator {
         registerService(ClientInfoService.class, service);
         registerService(ClientInfoProvider.class, new USMEASClientInfoProvider(), 15);
         registerService(ClientInfoProvider.class, new WebClientInfoProvider(this), 20);
+        registerService(ClientInfoProvider.class, new MailAppClientInfoProvider(this), 25);
     }
 
 }
