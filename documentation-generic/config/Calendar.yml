@@ -2,7 +2,7 @@ feature_name: Calendar
 properties:
     - key: com.openexchange.calendar.schedjoules.enabled
       description: |
-	    Configures if the <i>schedjoules</i> calendar provider is available for a user or not. 
+        Configures if the <i>schedjoules</i> calendar provider is available for a user or not. 
       defaultValue: true
       version: 7.10.0
       reloadable: true
@@ -24,7 +24,7 @@ properties:
       tags: ["Calendar","Subscribe","Limit"]
     - key: com.openexchange.calendar.ical.enabled
       description: |
-	    Configures if the <i>ical</i> calendar provider is available for a user or not. 
+        Configures if the <i>ical</i> calendar provider is available for a user or not. 
       defaultValue: true
       version: 7.10.0
       reloadable: true
@@ -46,7 +46,7 @@ properties:
       tags: ["Calendar","Subscribe","Limit"]
     - key: com.openexchange.calendar.google.enabled
       description: |
-	    Configures if the <i>google</i> calendar provider is available for a user or not. 
+        Configures if the <i>google</i> calendar provider is available for a user or not. 
       defaultValue: true
       version: 7.10.0
       reloadable: true
