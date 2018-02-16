@@ -61,7 +61,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-imageconverter-api"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-imap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-l10n"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-linkedin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-mailfilter"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-mail-categories"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-manage-group-resource"/>
