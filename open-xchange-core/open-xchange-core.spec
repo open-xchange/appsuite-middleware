@@ -3,7 +3,6 @@
 
 Name:          open-xchange-core
 BuildArch:     noarch
-#!BuildIgnore:  post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
 BuildRequires: ant
 %else
@@ -309,20 +308,6 @@ EOF
     fi
 
     # SoftwareChange_Request-2990
-    # Bug #53993
-    if ! grep -Eq '^\s*<logger.*com\.hazelcast\.internal\.(monitors|diagnostics).*$' /opt/open-xchange/etc/logback.xml; then
-      TMPFILE=$(mktemp)
-      rm -f $TMPFILE
-      cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -r -
-<configuration>
-    <logger name="com.hazelcast.internal.monitors" level="INFO"/>
-</configuration>
-EOF
-      if [ -e $TMPFILE ]; then
-        cat $TMPFILE > /opt/open-xchange/etc/logback.xml
-        rm -f $TMPFILE
-      fi
-    fi
     ox_add_property com.openexchange.hazelcast.healthMonitorLevel silent /opt/open-xchange/etc/hazelcast.properties
 
     # SoftwareChange_Request-2993
@@ -348,8 +333,8 @@ EOF
 </configuration>
 EOF
     if [ -e $TMPFILE ]; then
-        cat $TMPFILE > /opt/open-xchange/etc/logback.xml
-        rm -f $TMPFILE
+      cat $TMPFILE > /opt/open-xchange/etc/logback.xml
+      rm -f $TMPFILE
     fi
 
     # SoftwareChange_Request-3159
@@ -453,7 +438,7 @@ EOF
     fi
 
     # SoftwareChange_Request-3773
-    if grep "Maximum number of open Files for the groupware" >/dev/null /opt/open-xchange/etc/ox-scriptconf.sh; then
+    if grep '^# Maximum number of open Files for the groupware$' >/dev/null /opt/open-xchange/etc/ox-scriptconf.sh; then
       sed -i '/^# Maximum number of open Files for the groupware$/{i\
 # Maximum number of open Files for the groupware. This value will only be\
 # applied when using sysv init. For systemd have a look at the drop-in configs\
@@ -476,10 +461,10 @@ d
     fi
 
     # SoftwareChange_Request-3862
-    if ! grep -Eq "^#\s?html.tag.form" /opt/open-xchange/etc/whitelist.properties; then
+    if ! grep -Eq "^#\s?html.tag.form" >/dev/null /opt/open-xchange/etc/whitelist.properties; then
       ox_comment html.tag.form add /opt/open-xchange/etc/whitelist.properties
     fi
-    if ! grep -Eq "^#\s?html.tag.input" /opt/open-xchange/etc/whitelist.properties; then
+    if ! grep -Eq "^#\s?html.tag.input" >/dev/null /opt/open-xchange/etc/whitelist.properties; then
       ox_comment html.tag.input add /opt/open-xchange/etc/whitelist.properties
     fi
 
@@ -487,19 +472,32 @@ d
     ox_add_property NPROC 65536 /opt/open-xchange/etc/ox-scriptconf.sh
 
     # SoftwareChange_Request-3934
-    if ! grep -Eq "^#\s?html.style.list-style-image" /opt/open-xchange/etc/whitelist.properties; then
+    if ! grep -Eq "^#\s?html.style.list-style-image" >/dev/null /opt/open-xchange/etc/whitelist.properties; then
       ox_comment html.style.list-style-image add /opt/open-xchange/etc/whitelist.properties
     fi
 
     # SoftwareChange_Request-4033
-    logconfig=/opt/open-xchange/etc/logback.xml
-    tmp=${logconfig}.tmp
-    cp -a --remove-destination $logconfig $tmp
-    sed -i 's/com\.hazelcast\.internal\.monitors/com.hazelcast.internal.diagnostics/' $tmp
-    if [[ $(ox_md5 $tmp) != $(ox_md5 $logconfig) ]]; then
-      cat $tmp >$logconfig
-    else
-      rm $tmp
+    # Bug #53993: Zap duplicate loggers
+    TMPFILE=$(mktemp)
+    rm -f $TMPFILE
+    cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -m -
+<configuration>
+    <logger name="com.hazelcast.internal.monitors" level="INFO"/>
+</configuration>
+EOF
+    if [ -e $TMPFILE ]; then
+      cat $TMPFILE > /opt/open-xchange/etc/logback.xml
+      rm -f $TMPFILE
+    fi
+    rm -f $TMPFILE
+    cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -z -r -
+<configuration>
+    <logger name="com.hazelcast.internal.diagnostics" level="INFO"/>
+</configuration>
+EOF
+    if [ -e $TMPFILE ]; then
+      cat $TMPFILE > /opt/open-xchange/etc/logback.xml
+      rm -f $TMPFILE
     fi
 
     # SoftwareChange_Request-4059
@@ -604,21 +602,6 @@ d
     # SoftwareChange_Request-4098
     ox_remove_property com.openexchange.mail.attachmentDisplaySizeLimit /opt/open-xchange/etc/mail.properties
 
-    # Bug #53993: Zap duplicate loggers
-    if [[ 1 < $(grep -Ec '^\s*<logger.*"com\.hazelcast\.internal\.diagnostics".*$' /opt/open-xchange/etc/logback.xml) ]]; then
-      TMPFILE=$(mktemp)
-      rm -f $TMPFILE
-      cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -z -r -
-<configuration>
-    <logger name="com.hazelcast.internal.diagnostics" level="INFO"/>
-</configuration>
-EOF
-      if [ -e $TMPFILE ]; then
-        cat $TMPFILE > /opt/open-xchange/etc/logback.xml
-        rm -f $TMPFILE
-      fi
-    fi
-
     # SoftwareChange_Request-4149
     ox_set_property marital_status 'Marital status' /opt/open-xchange/importCSV/open-xchange.properties
     if [ "Number of employee" == "$(ox_read_property employee_type /opt/open-xchange/importCSV/open-xchange.properties)" ]; then
@@ -635,6 +618,7 @@ EOF
     # SoftwareChange_Request-4249
     set -e
     TMPFILE=$(mktemp)
+    rm -f $TMPFILE
     /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -s 4249 -o $TMPFILE
     if [ -e $TMPFILE ]; then
       cat $TMPFILE > /opt/open-xchange/etc/logback.xml
