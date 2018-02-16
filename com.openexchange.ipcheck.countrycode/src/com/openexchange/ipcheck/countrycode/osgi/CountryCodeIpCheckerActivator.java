@@ -57,7 +57,7 @@ import com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean;
 import com.openexchange.ipcheck.countrycode.mbean.IPCheckMBeanImpl;
 import com.openexchange.ipcheck.countrycode.mbean.IPCheckMetricCollector;
 import com.openexchange.management.ManagementService;
-import com.openexchange.metrics.MetricCollector;
+import com.openexchange.metrics.MetricService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.TimerService;
 
@@ -85,15 +85,12 @@ public class CountryCodeIpCheckerActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { GeoLocationService.class, ManagementService.class, TimerService.class };
+        return new Class<?>[] { GeoLocationService.class, ManagementService.class, TimerService.class, MetricService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        IPCheckMetricCollector metricCollector = new IPCheckMetricCollector();
-        registerService(MetricCollector.class, metricCollector);
-
-        CountryCodeIpChecker service = new CountryCodeIpChecker(getService(GeoLocationService.class), metricCollector);
+        CountryCodeIpChecker service = new CountryCodeIpChecker(getService(GeoLocationService.class), new IPCheckMetricCollector(getService(MetricService.class)));
         registerService(IPChecker.class, service);
 
         ObjectName objectName = new ObjectName(IPCheckMBean.NAME);
@@ -105,7 +102,7 @@ public class CountryCodeIpCheckerActivator extends HousekeepingActivator {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
      */
     @Override

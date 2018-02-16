@@ -52,7 +52,7 @@ package com.openexchange.metrics.jmx.impl;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import javax.management.NotCompliantMBeanException;
-import com.codahale.metrics.Meter;
+import com.codahale.metrics.Metered;
 import com.openexchange.metrics.jmx.MeterMBean;
 
 /**
@@ -65,22 +65,34 @@ public class MeterMBeanImpl extends AbstractMetricMBean implements MeterMBean {
     private static final String DESCRIPTION = "Meter MBean";
     private final double rateFactor;
     private final String rateUnit;
-    private final Meter meter;
+    private final Metered meter;
 
     /**
      * Initialises a new {@link MeterMBeanImpl}.
-     * 
+     *
      * @throws NotCompliantMBeanException
      */
-    public MeterMBeanImpl(Meter meter, String rateItem, TimeUnit rateUnit) throws NotCompliantMBeanException {
+    public MeterMBeanImpl(Metered meter, String rateItem, TimeUnit rateUnit) throws NotCompliantMBeanException {
         super(DESCRIPTION, MeterMBean.class);
         this.meter = meter;
-        this.rateFactor = rateUnit.toSeconds(1);
-        this.rateUnit = rateItem + "/" + calculateRateUnit(rateUnit);
+        this.rateFactor = TimeUnit.SECONDS.toSeconds(1); // TODO
+        this.rateUnit = rateItem + "/" + calculateRateUnit(TimeUnit.SECONDS); // TODO
     }
 
     /**
-     * 
+     * Initialises a new {@link MeterMBeanImpl}.
+     *
+     * @throws NotCompliantMBeanException
+     */
+    protected MeterMBeanImpl(String description, Class<?> mbeanInterface, Metered meter, String rateItem, TimeUnit rateUnit) throws NotCompliantMBeanException {
+        super(description, mbeanInterface);
+        this.meter = meter;
+        this.rateFactor = TimeUnit.SECONDS.toSeconds(1); // TODO
+        this.rateUnit = rateItem + "/" + calculateRateUnit(TimeUnit.SECONDS); // TODO
+    }
+
+    /**
+     *
      * @param unit
      * @return
      */
@@ -91,7 +103,7 @@ public class MeterMBeanImpl extends AbstractMetricMBean implements MeterMBean {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.metrics.jmx.MeterMBean#getCount()
      */
     @Override
@@ -101,7 +113,7 @@ public class MeterMBeanImpl extends AbstractMetricMBean implements MeterMBean {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.metrics.jmx.MeterMBean#getMeanRate()
      */
     @Override
@@ -111,7 +123,7 @@ public class MeterMBeanImpl extends AbstractMetricMBean implements MeterMBean {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.metrics.jmx.MeterMBean#getOneMinuteRate()
      */
     @Override
@@ -121,7 +133,7 @@ public class MeterMBeanImpl extends AbstractMetricMBean implements MeterMBean {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.metrics.jmx.MeterMBean#getFiveMinuteRate()
      */
     @Override
@@ -131,7 +143,7 @@ public class MeterMBeanImpl extends AbstractMetricMBean implements MeterMBean {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.metrics.jmx.MeterMBean#getFifteenMinuteRate()
      */
     @Override
@@ -141,7 +153,7 @@ public class MeterMBeanImpl extends AbstractMetricMBean implements MeterMBean {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.metrics.jmx.MeterMBean#getRateUnit()
      */
     @Override

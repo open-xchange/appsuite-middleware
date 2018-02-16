@@ -51,8 +51,10 @@ package com.openexchange.filestore.s3.metrics;
 
 import com.amazonaws.metrics.RequestMetricCollector;
 import com.amazonaws.metrics.ServiceMetricCollector;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.filestore.s3.internal.S3FileStoreProperty;
+import com.openexchange.metrics.MetricService;
 
 /**
  * {@link S3FileStorageMetricCollector}
@@ -61,55 +63,72 @@ import com.openexchange.server.ServiceLookup;
  */
 public class S3FileStorageMetricCollector extends com.amazonaws.metrics.MetricCollector {
 
-    private final S3FileStorageRequestMetricCollector s3FileStorageRequestMetricCollector;
-    private S3FileStorageServiceMetricCollector s3FileStorageServiceMetricCollector;
-    private final S3FileStorageDelegateMetricCollector delegateCollector;
+    private boolean started;
+    private final MetricService metrics;
+    private final LeanConfigurationService config;
+    private RequestMetricCollector s3FileStorageRequestMetricCollector;
+    private ServiceMetricCollector s3FileStorageServiceMetricCollector;
+
 
     /**
      * Initialises a new {@link S3FileStorageMetricCollector}.
-     * 
+     *
      * @throws OXException
      */
-    public S3FileStorageMetricCollector(ServiceLookup services, S3FileStorageDelegateMetricCollector delegateCollector) throws OXException {
+    public S3FileStorageMetricCollector(MetricService metrics, LeanConfigurationService config) {
         super();
-        this.delegateCollector = delegateCollector;
-        s3FileStorageRequestMetricCollector = new S3FileStorageRequestMetricCollector(delegateCollector);
-        s3FileStorageServiceMetricCollector = new S3FileStorageServiceMetricCollector(delegateCollector);
+        this.metrics = metrics;
+        this.config = config;
+        start();
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.amazonaws.metrics.MetricCollector#start()
      */
     @Override
-    public boolean start() {
-        return true;
-    }
+    public synchronized boolean start() {
+        if (!started) {
+            s3FileStorageRequestMetricCollector = new S3FileStorageRequestMetricCollector(metrics);
+            s3FileStorageServiceMetricCollector = new S3FileStorageServiceMetricCollector(metrics);
+            started = true;
+            return true;
+        }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.amazonaws.metrics.MetricCollector#stop()
-     */
-    @Override
-    public boolean stop() {
         return false;
     }
 
     /*
      * (non-Javadoc)
-     * 
-     * @see com.amazonaws.metrics.MetricCollector#isEnabled()
+     *
+     * @see com.amazonaws.metrics.MetricCollector#stop()
      */
     @Override
-    public boolean isEnabled() {
-        return delegateCollector.isEnabled();
+    public synchronized boolean stop() {
+        if (started) {
+            s3FileStorageRequestMetricCollector = RequestMetricCollector.NONE;
+            s3FileStorageServiceMetricCollector = ServiceMetricCollector.NONE;
+            started = false;
+            return true;
+        }
+
+        return false;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
+     * @see com.amazonaws.metrics.MetricCollector#isEnabled()
+     */
+    @Override
+    public boolean isEnabled() {
+        return config.getBooleanProperty(S3FileStoreProperty.metricCollection);
+    }
+
+    /*
+     * (non-Javadoc)
+     *
      * @see com.amazonaws.metrics.MetricCollector#getRequestMetricCollector()
      */
     @Override
@@ -119,7 +138,7 @@ public class S3FileStorageMetricCollector extends com.amazonaws.metrics.MetricCo
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.amazonaws.metrics.MetricCollector#getServiceMetricCollector()
      */
     @Override

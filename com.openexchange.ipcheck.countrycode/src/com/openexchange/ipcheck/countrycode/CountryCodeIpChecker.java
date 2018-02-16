@@ -85,7 +85,7 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
 
     /**
      * Initializes a new {@link CountryCodeIpChecker}.
-     * 
+     *
      * @param metricCollector TODO
      */
     public CountryCodeIpChecker(GeoLocationService service, IPCheckMetricCollector metricCollector) {

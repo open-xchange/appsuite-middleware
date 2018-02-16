@@ -60,7 +60,7 @@ import com.openexchange.metrics.jmx.TimerMBean;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class TimerMBeanImpl extends AbstractMetricMBean implements TimerMBean {
+public class TimerMBeanImpl extends MeterMBeanImpl implements TimerMBean {
 
     private static final String DESCRIPTION = "Timer MBean";
     private final Timer timer;
@@ -69,19 +69,19 @@ public class TimerMBeanImpl extends AbstractMetricMBean implements TimerMBean {
 
     /**
      * Initialises a new {@link TimerMBeanImpl}.
-     * 
+     *
      * @throws NotCompliantMBeanException
      */
     public TimerMBeanImpl(Timer timer, TimeUnit timeUnit) throws NotCompliantMBeanException {
-        super(DESCRIPTION, TimerMBean.class);
+        super(DESCRIPTION, TimerMBean.class, timer, "events", timeUnit);
         this.timer = timer;
-        this.durationFactor = 1.0 / timeUnit.toNanos(1);
-        this.durationUnit = timeUnit.toString().toLowerCase(Locale.US);
+        this.durationFactor = 1.0 / TimeUnit.MILLISECONDS.toNanos(1); // TODO
+        this.durationUnit = TimeUnit.MILLISECONDS.toString().toLowerCase(Locale.US); // TODO
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.metrics.jmx.TimerMBean#getMin()
      */
     @Override
@@ -91,7 +91,7 @@ public class TimerMBeanImpl extends AbstractMetricMBean implements TimerMBean {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.metrics.jmx.TimerMBean#getMax()
      */
     @Override
@@ -101,7 +101,7 @@ public class TimerMBeanImpl extends AbstractMetricMBean implements TimerMBean {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.metrics.jmx.TimerMBean#getMean()
      */
     @Override
@@ -111,7 +111,7 @@ public class TimerMBeanImpl extends AbstractMetricMBean implements TimerMBean {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.metrics.jmx.TimerMBean#getStdDev()
      */
     @Override
@@ -121,7 +121,7 @@ public class TimerMBeanImpl extends AbstractMetricMBean implements TimerMBean {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.metrics.jmx.TimerMBean#get50thPercentile()
      */
     @Override
@@ -131,7 +131,7 @@ public class TimerMBeanImpl extends AbstractMetricMBean implements TimerMBean {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.metrics.jmx.TimerMBean#get75thPercentile()
      */
     @Override
@@ -141,7 +141,7 @@ public class TimerMBeanImpl extends AbstractMetricMBean implements TimerMBean {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.metrics.jmx.TimerMBean#get95thPercentile()
      */
     @Override
@@ -151,7 +151,7 @@ public class TimerMBeanImpl extends AbstractMetricMBean implements TimerMBean {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.metrics.jmx.TimerMBean#get98thPercentile()
      */
     @Override
@@ -161,7 +161,7 @@ public class TimerMBeanImpl extends AbstractMetricMBean implements TimerMBean {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.metrics.jmx.TimerMBean#get99thPercentile()
      */
     @Override
@@ -171,7 +171,7 @@ public class TimerMBeanImpl extends AbstractMetricMBean implements TimerMBean {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.metrics.jmx.TimerMBean#get999thPercentile()
      */
     @Override
@@ -181,7 +181,7 @@ public class TimerMBeanImpl extends AbstractMetricMBean implements TimerMBean {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.metrics.jmx.TimerMBean#values()
      */
     @Override
@@ -191,11 +191,13 @@ public class TimerMBeanImpl extends AbstractMetricMBean implements TimerMBean {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.metrics.jmx.TimerMBean#getDurationUnit()
      */
     @Override
     public String getDurationUnit() {
         return durationUnit;
     }
+
+
 }

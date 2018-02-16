@@ -56,7 +56,7 @@ import com.openexchange.management.MBeanMethodAnnotation;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface TimerMBean extends MetricMBean {
+public interface TimerMBean extends MeterMBean {
 
     /**
      * Returns the lowest value in the snapshot.
@@ -148,7 +148,7 @@ public interface TimerMBean extends MetricMBean {
 
     /**
      * Returns the sampling unit
-     * 
+     *
      * @return the sampling unit
      */
     @MBeanMethodAnnotation(description = "Returns the sampling unit.", parameterDescriptions = { "" }, parameters = { "" })

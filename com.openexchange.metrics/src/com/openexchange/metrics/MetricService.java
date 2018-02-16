@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -46,40 +46,71 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.metrics;
 
-package com.openexchange.filestore.s3.metrics;
-
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.filestore.s3.internal.S3FileStoreProperty;
-import com.openexchange.metrics.AbstractMetricCollector;
-import com.openexchange.server.ServiceLookup;
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Histogram;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistry.MetricSupplier;
+import com.codahale.metrics.Timer;
 
 /**
- * {@link S3FileStorageDelegateMetricCollector}
+ * {@link MetricService}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class S3FileStorageDelegateMetricCollector extends AbstractMetricCollector {
-
-    private static final String COMPONENT_NAME = "s3";
-
-    private final ServiceLookup services;
+public interface MetricService {
 
     /**
-     * Initialises a new {@link S3FileStorageDelegateMetricCollector}.
+     * Gets an existing {@link Histogram} for the given name or creates and
+     * remembers a new one if it doesn't exist yet.
+     *
+     * @param group The metric group
+     * @param name The metric name
+     * @return the metric instance
      */
-    public S3FileStorageDelegateMetricCollector(ServiceLookup services) {
-        super(COMPONENT_NAME);
-        this.services = services;
-    }
+    Histogram getHistogram(String group, String name);
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.MetricCollector#isEnabled()
+    /**
+     * Gets an existing {@link Timer} for the given name or creates and
+     * remembers a new one if it doesn't exist yet.
+     *
+     * @param group The metric group
+     * @param name The metric name
+     * @return the metric instance
      */
-    @Override
-    public boolean isEnabled() {
-        return services.getService(LeanConfigurationService.class).getBooleanProperty(S3FileStoreProperty.metricCollection);
-    }
+    Timer getTimer(String group, String name);
+
+    /**
+     * Gets an existing {@link Counter} for the given name or creates and
+     * remembers a new one if it doesn't exist yet.
+     *
+     * @param group The metric group
+     * @param name The metric name
+     * @return the metric instance
+     */
+    Counter getCounter(String group, String name);
+
+    /**
+     * Gets an existing {@link Gauge} for the given name or creates and
+     * remembers a new one if it doesn't exist yet.
+     *
+     * @param group The metric group
+     * @param name The metric name
+     * @return the metric instance
+     */
+    @SuppressWarnings("rawtypes")
+    Gauge getGauge(String group, String name, MetricSupplier<Gauge> metricSupplier);
+
+    /**
+     * Gets an existing {@link Meter} for the given name or creates and
+     * remembers a new one if it doesn't exist yet.
+     *
+     * @param group The metric group
+     * @param name The metric name
+     * @return the metric instance
+     */
+    Meter getMeter(String group, String name);
+
 }

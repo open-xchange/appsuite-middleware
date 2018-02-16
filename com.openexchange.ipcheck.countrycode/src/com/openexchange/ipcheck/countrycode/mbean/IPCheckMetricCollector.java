@@ -49,41 +49,31 @@
 
 package com.openexchange.ipcheck.countrycode.mbean;
 
-import java.util.Set;
-import com.openexchange.metrics.AbstractMetricCollector;
-import com.openexchange.metrics.MetricMetadata;
+import com.codahale.metrics.Meter;
+import com.openexchange.metrics.MetricService;
 
 /**
  * {@link IPCheckMetricCollector}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class IPCheckMetricCollector extends AbstractMetricCollector {
+public class IPCheckMetricCollector {
 
     public static final String COMPONENT_NAME = "ipcheck";
+    private MetricService metrics;
 
     /**
      * Initialises a new {@link IPCheckMetricCollector}.
-     * 
+     *
      * @param componentName
      */
-    public IPCheckMetricCollector() {
-        super(COMPONENT_NAME);
-        Set<MetricMetadata> metricMetadata = getMetricMetadata();
-        for (IPCheckMetric metric : IPCheckMetric.values()) {
-            metricMetadata.add(new MetricMetadata(metric.getMetricType(), metric.getMetricName()));
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.MetricCollector#isEnabled()
-     */
-    @Override
-    public boolean isEnabled() {
-        // TODO check from config
-        return true;
+    public IPCheckMetricCollector(MetricService metrics) {
+        super();
+        this.metrics = metrics;
+        //Set<MetricMetadata> metricMetadata = getMetricMetadata();
+        //for (IPCheckMetric metric : IPCheckMetric.values()) {
+        //    metricMetadata.add(new MetricMetadata(metric.getMetricType(), metric.getMetricName()));
+        //}
     }
 
     public void incrementTotalIPChanges() {
@@ -116,5 +106,9 @@ public class IPCheckMetricCollector extends AbstractMetricCollector {
 
     public void incrementDeniedCountryChange() {
         getMeter(IPCheckMetric.deniedCountryChanged.getMetricName()).mark();
+    }
+
+    Meter getMeter(String metricName) {
+        return metrics.getMeter(COMPONENT_NAME, metricName);
     }
 }

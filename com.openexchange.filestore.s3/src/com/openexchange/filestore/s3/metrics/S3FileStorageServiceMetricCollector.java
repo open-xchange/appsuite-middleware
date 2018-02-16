@@ -49,13 +49,13 @@
 
 package com.openexchange.filestore.s3.metrics;
 
-import java.util.concurrent.TimeUnit;
 import com.amazonaws.metrics.ByteThroughputProvider;
 import com.amazonaws.metrics.ServiceLatencyProvider;
 import com.amazonaws.metrics.ServiceMetricCollector;
-import com.openexchange.metrics.MetricCollector;
-import com.openexchange.metrics.MetricMetadata;
-import com.openexchange.metrics.MetricType;
+import com.amazonaws.metrics.ThroughputMetricType;
+import com.amazonaws.services.s3.metrics.S3ServiceMetric;
+import com.codahale.metrics.Meter;
+import com.openexchange.metrics.MetricService;
 
 /**
  * {@link S3FileStorageServiceMetricCollector}
@@ -64,35 +64,38 @@ import com.openexchange.metrics.MetricType;
  */
 public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector {
 
-    private static final String COUNTER_TOTAL_BYTES = "counter.totalBytes";
-    private static final String METER_THROUPUT = "meter.throughput";
-
-    private final MetricCollector internalCollector;
+    private MetricService metrics;
 
     /**
      * Initialises a new {@link S3FileStorageServiceMetricCollector}.
      */
-    public S3FileStorageServiceMetricCollector(MetricCollector metricCollector) {
+    public S3FileStorageServiceMetricCollector(MetricService metrics) {
         super();
-        internalCollector = metricCollector;
-        internalCollector.getMetricMetadata().add(new MetricMetadata(MetricType.METER, METER_THROUPUT, "bytes", TimeUnit.SECONDS));
-        internalCollector.getMetricMetadata().add(new MetricMetadata(MetricType.COUNTER, COUNTER_TOTAL_BYTES));
+        this.metrics = metrics;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.amazonaws.metrics.ServiceMetricCollector#collectByteThroughput(com.amazonaws.metrics.ByteThroughputProvider)
      */
     @Override
     public void collectByteThroughput(final ByteThroughputProvider provider) {
-        internalCollector.getMeter(METER_THROUPUT).mark(new Double(provider.getByteCount()).longValue());
-        internalCollector.getCounter(COUNTER_TOTAL_BYTES).inc(provider.getByteCount());
+        ThroughputMetricType throughputMetricType = provider.getThroughputMetricType();
+        String name = throughputMetricType.name();
+        if (throughputMetricType == S3ServiceMetric.S3DownloadThroughput) {
+            name = "DownloadThroughput";
+        } else if (throughputMetricType == S3ServiceMetric.S3UploadThroughput) {
+            name = "UploadThroughput";
+        }
+        Meter meter = metrics.getMeter("s3", name);
+        int bytes = provider.getByteCount();
+        meter.mark(Integer.toUnsignedLong(bytes));
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.amazonaws.metrics.ServiceMetricCollector#collectLatency(com.amazonaws.metrics.ServiceLatencyProvider)
      */
     @Override

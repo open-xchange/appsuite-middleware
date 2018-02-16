@@ -49,21 +49,16 @@
 
 package com.openexchange.filestore.s3.metrics;
 
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import com.amazonaws.Request;
 import com.amazonaws.Response;
-import com.amazonaws.http.HttpMethodName;
 import com.amazonaws.metrics.AwsSdkMetrics;
 import com.amazonaws.metrics.RequestMetricCollector;
 import com.amazonaws.util.AWSRequestMetrics;
 import com.amazonaws.util.AWSRequestMetrics.Field;
 import com.amazonaws.util.TimingInfo;
-import com.codahale.metrics.Counter;
 import com.codahale.metrics.Timer;
-import com.openexchange.metrics.MetricCollector;
-import com.openexchange.metrics.MetricMetadata;
-import com.openexchange.metrics.MetricType;
+import com.openexchange.metrics.MetricService;
 
 /**
  * {@link S3FileStorageRequestMetricCollector}
@@ -72,24 +67,19 @@ import com.openexchange.metrics.MetricType;
  */
 public class S3FileStorageRequestMetricCollector extends RequestMetricCollector {
 
-    private final MetricCollector internalCollector;
+    private final MetricService metrics;
 
     /**
      * Initialises a new {@link S3FileStorageRequestMetricCollector}.
      */
-    public S3FileStorageRequestMetricCollector(MetricCollector metricCollector) {
+    public S3FileStorageRequestMetricCollector(MetricService metrics) {
         super();
-        internalCollector = metricCollector;
-        Set<MetricMetadata> metricMetadata = metricCollector.getMetricMetadata();
-        for (HttpMethodName method : HttpMethodName.values()) {
-            metricMetadata.add(new MetricMetadata(MetricType.TIMER, "timer." + method.name()));
-            metricMetadata.add(new MetricMetadata(MetricType.COUNTER, "counter." + method.name()));
-        }
+        this.metrics = metrics;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.amazonaws.metrics.RequestMetricCollector#collectMetrics(com.amazonaws.Request, com.amazonaws.Response)
      */
     @Override
@@ -99,7 +89,7 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
 
     /**
      * Measures the the runtime of the specified {@link Request}
-     * 
+     *
      * @param request The {@link Request} for which to measure the runtime
      */
     private void timeRequest(Request<?> request) {
@@ -110,17 +100,18 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
 
             AWSRequestMetrics metrics = request.getAWSRequestMetrics();
             TimingInfo timingInfo = metrics.getTimingInfo();
-            long longValue = timingInfo.getTimeTakenMillisIfKnown().longValue();
-            Field predefined = (Field) type;
-            switch (predefined) {
-                case ClientExecuteTime:
-                    String methodName = request.getHttpMethod().name();
-                    Timer timer = internalCollector.getTimer("timer." + methodName);
-                    timer.update(longValue, TimeUnit.MILLISECONDS);
-                    Counter counter = internalCollector.getCounter("counter." + methodName);
-                    counter.inc(longValue);
-                default:
-                    break;
+            Double timeTakenMillisIfKnown = timingInfo.getTimeTakenMillisIfKnown();
+            if (timeTakenMillisIfKnown != null) {
+                long longValue = timeTakenMillisIfKnown.longValue();
+                Field predefined = (Field) type;
+                switch (predefined) {
+                    case ClientExecuteTime:
+                        String methodName = request.getHttpMethod().name();
+                        Timer timer = this.metrics.getTimer("s3", "RequestTimes." + methodName);
+                        timer.update(longValue, TimeUnit.MILLISECONDS);
+                    default:
+                        break;
+                }
             }
         }
     }

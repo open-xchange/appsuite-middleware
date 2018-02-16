@@ -49,11 +49,12 @@
 
 package com.openexchange.metrics.osgi;
 
+import org.osgi.framework.ServiceReference;
 import com.openexchange.management.ManagementService;
-import com.openexchange.metrics.MetricCollector;
-import com.openexchange.metrics.MetricCollectorRegistry;
-import com.openexchange.metrics.impl.MetricCollectorRegistryImpl;
+import com.openexchange.metrics.MetricService;
+import com.openexchange.metrics.impl.MetricServiceImpl;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
  * {@link MetricActivator}
@@ -71,31 +72,40 @@ public class MetricActivator extends HousekeepingActivator {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
      */
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ManagementService.class };
+        return new Class<?>[] { };
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.osgi.DeferredActivator#startBundle()
      */
     @Override
     protected void startBundle() throws Exception {
-        MetricCollectorRegistry registry = new MetricCollectorRegistryImpl(this);
-        registerService(MetricCollectorRegistry.class, registry);
+        final MetricServiceImpl metricService = new MetricServiceImpl();
+        registerService(MetricService.class, metricService);
+        track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
+            @Override
+            public void added(ServiceReference<ManagementService> ref, ManagementService service) {
+                metricService.setManagementService(service);
+            }
 
-        track(MetricCollector.class, new MetricCollectorServiceTracker(context, registry));
+            @Override
+            public void removed(ServiceReference<ManagementService> ref, ManagementService service) {
+                metricService.unsetManagementService(service);
+            }
+        });
         openTrackers();
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
      */
     @Override

@@ -49,7 +49,6 @@
 
 package com.openexchange.ipcheck.countrycode.mbean;
 
-import com.openexchange.metrics.MetricCollectorRegistry;
 
 /**
  * {@link IPCheckMBean}
@@ -58,11 +57,11 @@ import com.openexchange.metrics.MetricCollectorRegistry;
  */
 public interface IPCheckMBean {
 
-    static String NAME = MetricCollectorRegistry.DOMAIN_NAME + ":00=" + IPCheckMetricCollector.COMPONENT_NAME + ",name=percentages";
+    static String NAME = "com.openexchange.metrics" + ":00=" + IPCheckMetricCollector.COMPONENT_NAME + ",name=percentages";
 
     /**
      * Returns the total amount of IP checks per hour
-     * 
+     *
      * @return the total amount of IP checks per hour
      */
     long getIPChangesPerHour();
