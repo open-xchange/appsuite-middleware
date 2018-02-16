@@ -1112,7 +1112,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     @Override
     public boolean isAttachmentMarkerEnabled() {
-        return enableAttachmentSearch;
+        return isUserFlagsEnabled() ? enableAttachmentSearch : false;
     }
 
 }

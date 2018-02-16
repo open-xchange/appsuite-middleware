@@ -520,6 +520,10 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
 
     @Override
     public boolean isAttachmentMarkerEnabled() {
+        if (false == isUserFlagsEnabled()) {
+            return false;
+        }
+
         String tmp = getAccountProperty("com.openexchange.imap.attachmentMarker.enabled");
         if (null != tmp) {
             return Boolean.parseBoolean(tmp.trim());

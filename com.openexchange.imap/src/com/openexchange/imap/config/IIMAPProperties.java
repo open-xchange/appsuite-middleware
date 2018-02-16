@@ -211,7 +211,7 @@ public interface IIMAPProperties extends IMailProperties {
 
     /**
      * Checks if attachment marker is enabled.
-     * 
+     *
      * @return <code>true</code> if attachment marker is enabled for the underlying IMAP; otherwise <code>false</code>
      */
     public boolean isAttachmentMarkerEnabled();
