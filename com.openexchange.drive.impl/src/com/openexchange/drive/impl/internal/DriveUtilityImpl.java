@@ -106,6 +106,13 @@ import com.openexchange.tools.iterator.SearchIterator;
  */
 public class DriveUtilityImpl implements DriveUtility {
 
+    private static final String MODIFIED_BY = "modified_by";
+    private static final String CREATED_BY = "created_by";
+    private static final String MODIFIED = "modified";
+    private static final String CREATED = "created";
+    private static final String NAME = "name";
+    private static final String CHECKSUM = "checksum";
+    private static final String PATH = "path";
     private static final DriveUtility instance = new DriveUtilityImpl();
 
     /**
@@ -164,8 +171,8 @@ public class DriveUtilityImpl implements DriveUtility {
         try {
             for (FileStorageFolder subfolder : folders) {
                 JSONObject jsonObject = new JsonDirectoryMetadata(syncSession, subfolder).build(false);
-                jsonObject.put("path", syncSession.getStorage().getPath(subfolder.getId()));
-                jsonObject.put("name", subfolder.getName());
+                jsonObject.put(PATH, syncSession.getStorage().getPath(subfolder.getId()));
+                jsonObject.put(NAME, subfolder.getName());
                 metadata.add(jsonObject);
             }
         } catch (JSONException e) {
@@ -462,8 +469,8 @@ public class DriveUtilityImpl implements DriveUtility {
         JSONArray jsonArray = new JSONArray(files.size());
         for (File file : files) {
             JSONObject jsonObject = new JsonFileMetadata(session, file).build(fileStorageCapabilities);
-            jsonObject.put("path", session.getStorage().getPath(file.getFolderId()));
-            jsonObject.put("checksum", ChecksumProvider.getChecksum(session, file).getChecksum());
+            jsonObject.put(PATH, session.getStorage().getPath(file.getFolderId()));
+            jsonObject.put(CHECKSUM, ChecksumProvider.getChecksum(session, file).getChecksum());
             jsonArray.put(jsonObject);
         }
         return jsonArray;
@@ -483,9 +490,9 @@ public class DriveUtilityImpl implements DriveUtility {
         for (int i = 0; i < folderIDs.size(); i++) {
             FileStorageFolder folder = folders.get(i);
             JSONObject jsonObject = new JsonDirectoryMetadata(session, folder).build(false);
-            jsonObject.put("checksum", checksums.get(i).getChecksum());
-            jsonObject.put("path", session.getStorage().getPath(folder.getId()));
-            jsonObject.put("name", folder.getName());
+            jsonObject.put(CHECKSUM, checksums.get(i).getChecksum());
+            jsonObject.put(PATH, session.getStorage().getPath(folder.getId()));
+            jsonObject.put(NAME, folder.getName());
             jsonArray.put(jsonObject);
         }
         return jsonArray;
@@ -497,8 +504,8 @@ public class DriveUtilityImpl implements DriveUtility {
             throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(fileVersion.getName(), fileVersion.getChecksum(), path);
         }
         JSONObject jsonObject = new JsonFileMetadata(session, session.getStorage().getFile(file.getId())).build();
-        jsonObject.put("path", session.getStorage().getPath(file.getFolderId()));
-        jsonObject.put("checksum", ChecksumProvider.getChecksum(session, file).getChecksum());
+        jsonObject.put(PATH, session.getStorage().getPath(file.getFolderId()));
+        jsonObject.put(CHECKSUM, ChecksumProvider.getChecksum(session, file).getChecksum());
         return jsonObject;
     }
 
@@ -506,17 +513,17 @@ public class DriveUtilityImpl implements DriveUtility {
         ServerDirectoryVersion serverVersion = ServerDirectoryVersion.valueOf(directoryVersion, session);
         FileStorageFolder folder = session.getStorage().getFolder(serverVersion.getPath());
         JSONObject jsonObject = new JsonDirectoryMetadata(session, folder).build(false);
-        jsonObject.put("checksum", serverVersion.getChecksum());
-        jsonObject.put("path", serverVersion.getPath());
-        jsonObject.put("name", folder.getName());
+        jsonObject.put(CHECKSUM, serverVersion.getChecksum());
+        jsonObject.put(PATH, serverVersion.getPath());
+        jsonObject.put(NAME, folder.getName());
         if (null != folder.getCreationDate()) {
-            jsonObject.put("created", folder.getCreationDate().getTime());
+            jsonObject.put(CREATED, folder.getCreationDate().getTime());
         }
         if (null != folder.getLastModifiedDate()) {
-            jsonObject.put("modified", folder.getLastModifiedDate().getTime());
+            jsonObject.put(MODIFIED, folder.getLastModifiedDate().getTime());
         }
-        jsonObject.put("created_by", folder.getCreatedBy());
-        jsonObject.put("modified_by", folder.getModifiedBy());
+        jsonObject.put(CREATED_BY, folder.getCreatedBy());
+        jsonObject.put(MODIFIED_BY, folder.getModifiedBy());
         return jsonObject;
     }
 
@@ -606,15 +613,15 @@ public class DriveUtilityImpl implements DriveUtility {
         JSONArray folderArray = new JSONArray(subfolders.length);
         for (FileStorageFolder folder : subfolders) {
             JSONObject jsonObject = new JsonDirectoryMetadata(syncSession, folder).build(false);
-            jsonObject.put("name", folder.getName());
+            jsonObject.put(NAME, folder.getName());
             if (null != folder.getCreationDate()) {
-                jsonObject.put("created", folder.getCreationDate().getTime());
+                jsonObject.put(CREATED, folder.getCreationDate().getTime());
             }
             if (null != folder.getLastModifiedDate()) {
-                jsonObject.put("modified", folder.getLastModifiedDate().getTime());
+                jsonObject.put(MODIFIED, folder.getLastModifiedDate().getTime());
             }
-            jsonObject.put("created_by", folder.getCreatedBy());
-            jsonObject.put("modified_by", folder.getModifiedBy());
+            jsonObject.put(CREATED_BY, folder.getCreatedBy());
+            jsonObject.put(MODIFIED_BY, folder.getModifiedBy());
             folderArray.put(jsonObject);
         }
         return folderArray;
