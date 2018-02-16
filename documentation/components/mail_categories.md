@@ -114,7 +114,7 @@ For example if you use dovecot with pigeonhole you can configure sieve scripts w
 
     require "imap4flags";
 
-    if header :contains "from" ["facebook.com","twitter.com","youtube.com","plus.google.com","vimeo.com","tumblr.com","pinterest.com","instagram.com","flickr.com","xing.com"]
+    if header :contains "from" ["facebook.com","twitter.com","youtube.com","plus.google.com","vimeo.com","tumblr.com","pinterest.com","instagram.com","flickr.com","xing.com","linkedin.com"]
     {
       addflag "$social";
     }
@@ -135,7 +135,7 @@ Set com.openexchange.mail.categories.apply.ox.rules to true
 
 and uncomment or add the example mail address lists:
 
-    com.openexchange.mail.categories.rules.social=facebook.com,twitter.com,youtube.com,plus.google.com,vimeo.com,tumblr.com,pinterest.com,instagram.com,flickr.com,xing.com
+    com.openexchange.mail.categories.rules.social=facebook.com,twitter.com,youtube.com,plus.google.com,vimeo.com,tumblr.com,pinterest.com,instagram.com,flickr.com,xing.com,linkedin.com
     com.openexchange.mail.categories.rules.purchases=amazon.de,paypal.de,ebay.de,ebay-kleinanzeigen.de,zalando.de,immobilienscout24.de,autoscout24.de,notebooksbilliger.de,otto.de,tchibo.de,lidl.de,aldi.de,aliexpress.com,bonprix.de,conrad.de,reichelt.de,orders.apple.com,euro.apple.com,cyberport.de,alternate.de,audible.de,steampowered.com,mytoys.de,ikea.com,hm.com,mediamarkt.de,saturn.de
     com.openexchange.mail.categories.rules.promotion=netflix.com,dhl.de,unitymedia.de,finanztip.de
 
@@ -220,7 +220,7 @@ Finally your ```mail-categories.properties``` file should look similar to this:
     # Defaults to 'false'
     com.openexchange.mail.categories.apply.ox.rules=true
 
-    com.openexchange.mail.categories.rules.social=facebook.com,twitter.com,youtube.com,plus.google.com,vimeo.com,tumblr.com,pinterest.com,instagram.com,flickr.com,xing.com
+    com.openexchange.mail.categories.rules.social=facebook.com,twitter.com,youtube.com,plus.google.com,vimeo.com,tumblr.com,pinterest.com,instagram.com,flickr.com,xing.com,linkedin.com
 
     com.openexchange.mail.categories.rules.purchases=amazon.de,paypal.de,ebay.de,ebay-kleinanzeigen.de,zalando.de,immobilienscout24.de,autoscout24.de,notebooksbilliger.de,otto.de,tchibo.de,lidl.de,aldi.de,aliexpress.com,bonprix.de,conrad.de,reichelt.de,orders.apple.com,euro.apple.com,cyberport.de,alternate.de,audible.de,steampowered.com,mytoys.de,ikea.com,hm.com,mediamarkt.de,saturn.de
 
