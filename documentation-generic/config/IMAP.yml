@@ -751,6 +751,8 @@ properties:
         whether a message contains file attachments is performed using those flags (if present) instead of examining each
         message individually.
         
+        Applies only to the primary mail account!
+        
         Note:
         The option "com.openexchange.mail.userFlagsEnabled" is required to be set to "true" (default)
       defaultValue: false
