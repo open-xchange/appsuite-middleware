@@ -753,7 +753,7 @@ public class Utils {
         } catch (OXException e) {
             if ("FLD-0003".equals(e.getErrorCode())) {
                 // com.openexchange.tools.oxfolder.OXFolderExceptionCode.NOT_VISIBLE
-                if (false == failIfNotVisible && 1 == 2) {
+                if (false == failIfNotVisible) {
                     FolderObject folderObject = optFolderObject(session, folderId, (Connection) decorator.getProperty(Connection.class.getName()));
                     if (null != folderObject) {
                         return new CalendarFolder(session, folderObject, Permission.NO_PERMISSIONS);

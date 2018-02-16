@@ -85,10 +85,14 @@ import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.type.PrivateType;
+import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.tools.arrays.Arrays;
 
 /**
  * {@link AllPerformer}
@@ -97,6 +101,12 @@ import com.openexchange.search.SingleSearchTerm.SingleOperation;
  * @since v7.10.0
  */
 public class AllPerformer extends AbstractQueryPerformer {
+
+    /** The synthetic identifier of the virtual 'all my events' calendar */
+    private static final String VIRTUAL_ALL = "all";
+
+    /** The synthetic identifier of the virtual 'all my events in public folders' calendar */
+    private static final String VIRTUAL_ALL_PUBLIC = "allPublic";
 
     /**
      * Initializes a new {@link AllPerformer}.
@@ -127,57 +137,7 @@ public class AllPerformer extends AbstractQueryPerformer {
      * @return The loaded events
      */
     public List<Event> perform(Boolean rsvp, ParticipationStatus[] partStats) throws OXException {
-        /*
-         * search for events the current session's user attends
-         */
-        SearchTerm<?> searchTerm = getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(session.getUserId()));
-        if (null != rsvp) {
-            /*
-             * only include events with matching rsvp
-             */
-            searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-                .addSearchTerm(searchTerm)
-                .addSearchTerm(getSearchTerm(AttendeeField.RSVP, SingleOperation.EQUALS, rsvp))
-            ;
-        }
-        if (null != partStats) {
-            /*
-             * only include events with matching participation status
-             */
-            if (0 == partStats.length) {
-                return Collections.emptyList();
-            }
-            if (1 == partStats.length) {
-                searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-                    .addSearchTerm(searchTerm)
-                    .addSearchTerm(getSearchTerm(AttendeeField.PARTSTAT, SingleOperation.EQUALS, partStats[0]))
-                ;
-            } else {
-                CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-                for (ParticipationStatus partStat : partStats) {
-                    orTerm.addSearchTerm(getSearchTerm(AttendeeField.PARTSTAT, SingleOperation.EQUALS, partStat));
-                }
-                searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-                    .addSearchTerm(searchTerm)
-                    .addSearchTerm(orTerm)
-                ;
-            }
-        }
-        if (false == isEnforceDefaultAttendee(session)) {
-            /*
-             * also include not group-scheduled events associated with the calendar user
-             */
-            searchTerm = new CompositeSearchTerm(CompositeOperation.OR)
-                .addSearchTerm(getSearchTerm(EventField.CALENDAR_USER, SingleOperation.EQUALS, I(session.getUserId())))
-                .addSearchTerm(searchTerm);
-        }
-        /*
-         * perform search & userize the results for the current session's user
-         */
-        EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
-        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
-        events = storage.getUtilities().loadAdditionalEventData(session.getUserId(), events, fields);
-        return postProcess(events, session.getUserId(), true, fields);
+        return getEventsOfUser(rsvp, partStats, null);
     }
 
     /**
@@ -197,8 +157,26 @@ public class AllPerformer extends AbstractQueryPerformer {
         List<CalendarFolder> folders = new ArrayList<CalendarFolder>(folderIds.size());
         for (String folderId : folderIds) {
             try {
-                folders.add(getFolder(session, folderId));
+                if (VIRTUAL_ALL.equals(folderId)) {
+                    /*
+                     * add all events the user attends from all folders
+                     */
+                    resultsPerFolderId.put(folderId, new DefaultEventsResult(getEventsOfUser(null, null, null)));
+                } else if (VIRTUAL_ALL_PUBLIC.equals(folderId)) {
+                    /*
+                     * add all events the user attends from all public folders
+                     */
+                    resultsPerFolderId.put(folderId, new DefaultEventsResult(getEventsOfUser(null, null, new Type[] { PublicType.getInstance() })));
+                } else {
+                    /*
+                     * remember folder id for batch-retrieval
+                     */
+                    folders.add(getFolder(session, folderId));
+                }
             } catch (OXException e) {
+                /*
+                 * track error for folder
+                 */
                 resultsPerFolderId.put(folderId, new DefaultEventsResult(e));
             }
         }
@@ -231,6 +209,87 @@ public class AllPerformer extends AbstractQueryPerformer {
             getSelfProtection().checkResultMap(resultsPerFolderId);
         }
         return resultsPerFolderId;
+    }
+
+    /**
+     * Gets all events the current session user attends.
+     *
+     * @param partStats The participation status to include, or <code>null</code> to include all events independently of the user
+     *            attendee's participation status
+     * @param rsvp The reply expectation to include, or <code>null</code> to include all events independently of the user attendee's
+     *            rsvp status
+     * @param folderTypes The folder types to include, or <code>null</code> to include all events independently of the type of the folder
+     *            they're located in
+     * @return The loaded events
+     */
+    private List<Event> getEventsOfUser(Boolean rsvp, ParticipationStatus[] partStats, Type[] folderTypes) throws OXException {
+        /*
+         * search for events the current session's user attends
+         */
+        SearchTerm<?> searchTerm = getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(session.getUserId()));
+        if (null != rsvp) {
+            /*
+             * only include events with matching rsvp
+             */
+            searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+                .addSearchTerm(searchTerm)
+                .addSearchTerm(getSearchTerm(AttendeeField.RSVP, SingleOperation.EQUALS, rsvp))
+            ;
+        }
+        if (null != partStats) {
+            /*
+             * only include events with matching participation status
+             */
+            if (0 == partStats.length) {
+                return Collections.emptyList();
+            }
+            if (1 == partStats.length) {
+                searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+                    .addSearchTerm(searchTerm)
+                    .addSearchTerm(getSearchTerm(AttendeeField.PARTSTAT, SingleOperation.EQUALS, partStats[0]))
+                ;
+            } else {
+                CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+                for (ParticipationStatus partStat : partStats) {
+                    orTerm.addSearchTerm(getSearchTerm(AttendeeField.PARTSTAT, SingleOperation.EQUALS, partStat));
+                }
+                searchTerm = new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(searchTerm).addSearchTerm(orTerm);
+            }
+        }
+        if (false == isEnforceDefaultAttendee(session)) {
+            /*
+             * also include not group-scheduled events associated with the calendar user
+             */
+            searchTerm = new CompositeSearchTerm(CompositeOperation.OR)
+                .addSearchTerm(getSearchTerm(EventField.CALENDAR_USER, SingleOperation.EQUALS, I(session.getUserId())))
+                .addSearchTerm(searchTerm)
+            ;
+        }
+        boolean includePrivate = null == folderTypes || Arrays.contains(folderTypes, PrivateType.getInstance());
+        boolean includePublic = null == folderTypes || Arrays.contains(folderTypes, PublicType.getInstance());
+        if (includePublic && false == includePrivate) {
+            /*
+             * only include events in public folders (that have a common folder identifier assigned)
+             */
+            searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+                .addSearchTerm(new CompositeSearchTerm(CompositeOperation.NOT)
+                    .addSearchTerm(getSearchTerm(EventField.FOLDER_ID, SingleOperation.ISNULL)
+            ));
+        } else if (false == includePublic && includePrivate) {
+            /*
+             * only include events in non-public folders (that have no common folder identifier assigned)
+             */
+            searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+                .addSearchTerm(getSearchTerm(EventField.FOLDER_ID, SingleOperation.ISNULL)
+            );
+        }
+        /*
+         * perform search & userize the results for the current session's user
+         */
+        EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
+        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
+        events = storage.getUtilities().loadAdditionalEventData(session.getUserId(), events, fields);
+        return postProcess(events, session.getUserId(), true, fields);
     }
 
     /**
