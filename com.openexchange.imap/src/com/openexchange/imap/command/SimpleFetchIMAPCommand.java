@@ -631,9 +631,9 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                         retval |= MailMessage.FLAG_FORWARDED;
                     } else if (MailMessage.USER_READ_ACK.equalsIgnoreCase(userFlag)) {
                         retval |= MailMessage.FLAG_READ_ACK;
-                    } else if (examineHasAttachmentUserFlags && MailMessage.HAS_ATTACHMENT_LABEL.equalsIgnoreCase(userFlag)) {
+                    } else if (examineHasAttachmentUserFlags && MailMessage.USER_HAS_ATTACHMENT.equalsIgnoreCase(userFlag)) {
                         msg.setHasAttachment(true);
-                    } else if (examineHasAttachmentUserFlags && MailMessage.HAS_NO_ATTACHMENT_LABEL.equalsIgnoreCase(userFlag)) {
+                    } else if (examineHasAttachmentUserFlags && MailMessage.USER_HAS_NO_ATTACHMENT.equalsIgnoreCase(userFlag)) {
                         msg.setHasAttachment(false);
                     } else {
                         set.add(userFlag);

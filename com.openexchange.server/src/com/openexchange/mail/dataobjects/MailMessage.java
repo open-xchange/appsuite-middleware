@@ -198,6 +198,20 @@ public abstract class MailMessage extends MailPart {
      */
     public static final String USER_SPAM = "$Junk";
 
+    /**
+     * Marks if the mail has an attachment
+     *
+     * @value $HasAttachment
+     */
+    public static final String USER_HAS_ATTACHMENT = "$HasAttachment";
+
+    /**
+     * Marks if the mail has no attachment
+     *
+     * @value $HasNoAttachment
+     */
+    public static final String USER_HAS_NO_ATTACHMENT = "$HasNoAttachment";
+
     /*-
      * ------------------- Priority ------------------------------
      */
@@ -249,20 +263,6 @@ public abstract class MailMessage extends MailPart {
      * The <code>string</code> with all valid color flags whitespace separated
      */
     private static final Set<String> ALL_COLOR_LABELS = ImmutableSet.of("$cl_0", "$cl_1", "$cl_2", "$cl_3", "$cl_4", "$cl_5", "$cl_6", "$cl_7", "$cl_8", "$cl_9", "$cl_10", "cl_0", "cl_1", "cl_2", "cl_3", "cl_4", "cl_5", "cl_6", "cl_7", "cl_8", "cl_9", "cl_10");
-
-    /*-
-     * ------------------- Attachment Label ------------------------------
-     */
-
-    /**
-     * Marks if the mail has an attachment
-     */
-    public static final String HAS_ATTACHMENT_LABEL = "$HasAttachment";
-
-    /**
-     * Marks if the mail has no attachment
-     */
-    public static final String HAS_NO_ATTACHMENT_LABEL = "$HasNoAttachment";
 
     /**
      * Determines the corresponding <code>int</code> value of a given color label's string representation.
@@ -347,7 +347,7 @@ public abstract class MailMessage extends MailPart {
      * @return <code>true</code> if the flag is <code>"$HasAttachment"</code>; otherwise <code>false</code>
      */
     public static boolean isHasAttachment(String userFlag) {
-        return MailMessage.HAS_ATTACHMENT_LABEL.equalsIgnoreCase(userFlag);
+        return MailMessage.USER_HAS_ATTACHMENT.equalsIgnoreCase(userFlag);
     }
 
     /**
@@ -357,7 +357,7 @@ public abstract class MailMessage extends MailPart {
      * @return <code>true</code> if the flag is <code>"$HasNoAttachment"</code>; otherwise <code>false</code>
      */
     public static boolean isHasNoAttachment(String userFlag) {
-        return MailMessage.HAS_NO_ATTACHMENT_LABEL.equalsIgnoreCase(userFlag);
+        return MailMessage.USER_HAS_NO_ATTACHMENT.equalsIgnoreCase(userFlag);
     }
 
     private static final InternetAddress[] EMPTY_ADDRS = new InternetAddress[0];

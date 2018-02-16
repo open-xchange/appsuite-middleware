@@ -313,7 +313,7 @@ public class IMAPCapabilities extends MailCapabilities {
             hasIMAP4()).append(", hasIMAP4rev1=").append(hasIMAP4rev1()).append(", hasNamespace=").append(hasNamespace()).append(
             ", hasThreadOrderedSubject=").append(hasThreadOrderedSubject()).append(", hasUIDPlus=").append(hasUIDPlus()).append(
             ", hasSortDisplay=").append(hasSortDisplay()).append(", hasFileNameSearch=").append(hasFileNameSearch())
-            .append(", hasAttachmentSearch=").append(hasAttachmentSearch()).toString();
+            .append(", hasAttachmentSearch=").append(hasAttachmentMarker()).toString();
     }
 
     /**
@@ -345,7 +345,7 @@ public class IMAPCapabilities extends MailCapabilities {
     }
 
     @Override
-    public boolean hasAttachmentSearch() {
+    public boolean hasAttachmentMarker() {
         return hasAttachmentSearch;
     }
 

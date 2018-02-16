@@ -191,7 +191,7 @@ public final class ThreadSorts {
         for (MailField field : fields) {
             MimeStorageUtility.addFetchItem(fp, field);
         }
-        return getConversations(imapFolder, sortRange, isRev1, fp, serverInfo, mailConfig.getCapabilities().hasAttachmentSearch(), searchTerm);
+        return getConversations(imapFolder, sortRange, isRev1, fp, serverInfo, mailConfig.getCapabilities().hasAttachmentMarker(), searchTerm);
     }
 
     /**

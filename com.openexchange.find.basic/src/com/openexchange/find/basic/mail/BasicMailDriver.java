@@ -239,7 +239,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
                 Object[] vals = new Object[3];
                 vals[0] = folder;
                 vals[1] = prefixAvailable ? Boolean.valueOf(mailServletInterface.getMailConfig().getCapabilities().hasFileNameSearch()) : Boolean.FALSE;
-                vals[2] = Boolean.valueOf(mailServletInterface.getMailConfig().getCapabilities().hasAttachmentSearch());
+                vals[2] = Boolean.valueOf(mailServletInterface.getMailConfig().getCapabilities().hasAttachmentMarker());
 
                 return vals;
             }
@@ -700,11 +700,11 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             }
             return new FileNameTerm(query);
         } else if (FIELD_HAS_ATTACHMENT.equals(field)) {
-            if (false == mailCapabilities.hasAttachmentSearch()) {
+            if (false == mailCapabilities.hasAttachmentMarker()) {
                 throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
             }
             boolean hasAttachment = Boolean.parseBoolean(query);
-            return new UserFlagTerm(hasAttachment ? MailMessage.HAS_ATTACHMENT_LABEL : MailMessage.HAS_NO_ATTACHMENT_LABEL, true);
+            return new UserFlagTerm(hasAttachment ? MailMessage.USER_HAS_ATTACHMENT : MailMessage.USER_HAS_NO_ATTACHMENT, true);
         }
 
         throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);

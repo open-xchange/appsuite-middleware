@@ -1235,7 +1235,7 @@ public final class MimeMessageConverter {
 
             @Override
             public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException, OXException {
-                parseFlags(((ExtendedMimeMessage) msg).getFlags(), mailConfig.getCapabilities().hasAttachmentSearch(), mailMessage);
+                parseFlags(((ExtendedMimeMessage) msg).getFlags(), mailConfig.getCapabilities().hasAttachmentMarker(), mailMessage);
             }
         });
         FILLER_MAP_EXT.put(MailField.THREAD_LEVEL, new MailMessageFieldFiller() {
@@ -1284,7 +1284,7 @@ public final class MimeMessageConverter {
 
             @Override
             public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException, OXException {
-                parseFlags(((ExtendedMimeMessage) msg).getFlags(), mailConfig.getCapabilities().hasAttachmentSearch(), mailMessage);
+                parseFlags(((ExtendedMimeMessage) msg).getFlags(), mailConfig.getCapabilities().hasAttachmentMarker(), mailMessage);
                 if (!mailMessage.containsColorLabel()) {
                     mailMessage.setColorLabel(MailMessage.COLOR_LABEL_NONE);
                 }
@@ -1486,7 +1486,7 @@ public final class MimeMessageConverter {
 
                 @Override
                 public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException, OXException {
-                    if (null != mailConfig && mailConfig.getCapabilities().hasAttachmentSearch()) {
+                    if (null != mailConfig && mailConfig.getCapabilities().hasAttachmentMarker()) {
                         // Try to determine has-attachment flag by user flags
                         String[] userFlags = mailMessage.getUserFlags();
                         if (null == userFlags) {
@@ -1615,7 +1615,7 @@ public final class MimeMessageConverter {
 
             @Override
             public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException, OXException {
-                parseFlags(msg.getFlags(), mailConfig.getCapabilities().hasAttachmentSearch(), mailMessage);
+                parseFlags(msg.getFlags(), mailConfig.getCapabilities().hasAttachmentMarker(), mailMessage);
             }
         });
         FILLER_MAP.put(MailField.THREAD_LEVEL, new MailMessageFieldFiller() {
@@ -1670,7 +1670,7 @@ public final class MimeMessageConverter {
 
             @Override
             public void fillField(final MailConfig mailConfig, final MailMessage mailMessage, final Message msg) throws MessagingException, OXException {
-                parseFlags(msg.getFlags(), mailConfig.getCapabilities().hasAttachmentSearch(), mailMessage);
+                parseFlags(msg.getFlags(), mailConfig.getCapabilities().hasAttachmentMarker(), mailMessage);
                 if (!mailMessage.containsColorLabel()) {
                     mailMessage.setColorLabel(MailMessage.COLOR_LABEL_NONE);
                 }
@@ -1907,7 +1907,7 @@ public final class MimeMessageConverter {
              * Parse flags
              */
             Flags flags = msg.getFlags();
-            boolean examineHasAttachmentUserFlags = null != config.getMailConfig() && config.getMailConfig().getCapabilities().hasAttachmentSearch();
+            boolean examineHasAttachmentUserFlags = null != config.getMailConfig() && config.getMailConfig().getCapabilities().hasAttachmentMarker();
             parseFlags(flags, examineHasAttachmentUserFlags, mail);
             if (!mail.containsColorLabel()) {
                 mail.setColorLabel(MailMessage.COLOR_LABEL_NONE);
@@ -2462,9 +2462,9 @@ public final class MimeMessageConverter {
                     retval |= MailMessage.FLAG_FORWARDED;
                 } else if (MailMessage.USER_READ_ACK.equalsIgnoreCase(userFlag)) {
                     retval |= MailMessage.FLAG_READ_ACK;
-                } else if (examineHasAttachmentUserFlags && MailMessage.HAS_ATTACHMENT_LABEL.equalsIgnoreCase(userFlag)) {
+                } else if (examineHasAttachmentUserFlags && MailMessage.USER_HAS_ATTACHMENT.equalsIgnoreCase(userFlag)) {
                     mailMessage.setHasAttachment(true);
-                } else if (examineHasAttachmentUserFlags && MailMessage.HAS_NO_ATTACHMENT_LABEL.equalsIgnoreCase(userFlag)) {
+                } else if (examineHasAttachmentUserFlags && MailMessage.USER_HAS_NO_ATTACHMENT.equalsIgnoreCase(userFlag)) {
                     mailMessage.setHasAttachment(false);
                 } else {
                     mailMessage.addUserFlag(userFlag);

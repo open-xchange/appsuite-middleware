@@ -602,7 +602,7 @@ public final class IMAPConversationWorker {
         IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(fullName);
         imapFolder.open(IMAPFolder.READ_ONLY);
         try {
-            boolean examineHasAttachmentUserFlags = mailConfig.getCapabilities().hasAttachmentSearch();
+            boolean examineHasAttachmentUserFlags = mailConfig.getCapabilities().hasAttachmentMarker();
             if (mergeWithSent) {
                 FetchProfile fetchProfile = IMAPMessageStorage.checkFetchProfile(getFetchProfile(usedFields.toArray(), headerNames, null, null, true, examineHasAttachmentUserFlags));
                 List<MailMessage> msgs = new LinkedList<>();
@@ -702,7 +702,7 @@ public final class IMAPConversationWorker {
         }
         final boolean byEnvelope = false;
         final boolean isRev1 = imapMessageStorage.getImapConfig().getImapCapabilities().hasIMAP4rev1();
-        final boolean examineHasAttachmentUserFlags = imapMessageStorage.getImapConfig().getImapCapabilities().hasAttachmentSearch();
+        final boolean examineHasAttachmentUserFlags = imapMessageStorage.getImapConfig().getImapCapabilities().hasAttachmentMarker();
 
         List<List<MailMessage>> list;
         if (mergeWithSent) {

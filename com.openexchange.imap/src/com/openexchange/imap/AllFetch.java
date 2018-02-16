@@ -150,7 +150,7 @@ public final class AllFetch {
 
             @Override
             public void handleItem(final Item item, final MailMessage m, IMAPConfig config, final org.slf4j.Logger logger) throws OXException {
-                MimeMessageConverter.parseFlags((FLAGS) item, config.getCapabilities().hasAttachmentSearch(), m);
+                MimeMessageConverter.parseFlags((FLAGS) item, config.getCapabilities().hasAttachmentMarker(), m);
             }
         }),
         /**

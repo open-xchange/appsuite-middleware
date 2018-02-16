@@ -1589,7 +1589,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         MimeMessage copy = MimeMessageUtility.newMimeMessage(msg.getMimeStream(), null);
                         mail = MimeMessageConverter.convertMessage(copy, false);
                         // Set flags and received date
-                        MimeMessageConverter.parseFlags(msg.getFlags(), imapConfig.getCapabilities().hasAttachmentSearch(), mail);
+                        MimeMessageConverter.parseFlags(msg.getFlags(), imapConfig.getCapabilities().hasAttachmentMarker(), mail);
                         if (!mail.containsColorLabel()) {
                             mail.setColorLabel(MailMessage.COLOR_LABEL_NONE);
                         }
@@ -2047,7 +2047,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 if (false == imapConfig.getIMAPProperties().isAttachmentSearchEnabled()) {
                     throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
                 }
-                return new UserFlagTerm(MailMessage.HAS_ATTACHMENT_LABEL, set);
+                return new UserFlagTerm(MailMessage.USER_HAS_ATTACHMENT, set);
             default:
                 break;
         }
