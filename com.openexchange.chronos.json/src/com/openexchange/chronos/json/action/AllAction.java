@@ -57,6 +57,7 @@ import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_UPDA
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -69,6 +70,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.json.converter.EventResultConverter;
+import com.openexchange.chronos.json.converter.EventsPerFolderResultConverter;
 import com.openexchange.chronos.json.oauth.ChronosOAuthScope;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.EventsResult;
@@ -118,19 +120,19 @@ public class AllAction extends ChronosAction {
             List<Event> eventsOfUser = calendarAccess.getEventsOfUser();
             return new AJAXRequestResult(eventsOfUser, CalendarUtils.getMaximumTimestamp(eventsOfUser), EventResultConverter.INPUT_FORMAT);
         }
-        //TODO adjust response to hold results per folder
-        List<Event> allEvents = new ArrayList<Event>();
-        List<OXException> warnings = new ArrayList<OXException>();
         Map<String, EventsResult> eventsResults = calendarAccess.getEventsInFolders(folderIds);
-        for (EventsResult result : eventsResults.values()) {
-            if (null != result.getEvents()) {
-                allEvents.addAll(result.getEvents());
-            }
-            if (null != result.getError()) {
-                warnings.add(result.getError());
-            }
+        return new AJAXRequestResult(eventsResults, getMaximumTimestamp(eventsResults), EventsPerFolderResultConverter.INPUT_FORMAT);
+    }
+
+    private static Date getMaximumTimestamp(Map<String, EventsResult> eventsResults) {
+        if (null == eventsResults || eventsResults.isEmpty()) {
+            return null;
         }
-        return new AJAXRequestResult(allEvents, CalendarUtils.getMaximumTimestamp(allEvents), EventResultConverter.INPUT_FORMAT).addWarnings(warnings);
+        long maximumTimestamp = 0L;
+        for (Map.Entry<String, EventsResult> entry : eventsResults.entrySet()) {
+            maximumTimestamp = Math.max(maximumTimestamp, entry.getValue().getTimestamp());
+        }
+        return new Date(maximumTimestamp);
     }
 
     private static List<String> parseFolderIds(AJAXRequestData requestData) throws OXException {

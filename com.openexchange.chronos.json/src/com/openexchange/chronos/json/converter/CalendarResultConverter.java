@@ -102,14 +102,10 @@ public class CalendarResultConverter extends EventResultConverter {
          * check and convert result object
          */
         Object resultObject = result.getResultObject();
-        Boolean extendedEntities = requestData.getParameter("extendedEntities", Boolean.class, true);
-        if (extendedEntities == null) {
-            extendedEntities = false;
-        }
         if (resultObject instanceof CalendarResult) {
-            resultObject = convertCalendarResult((CalendarResult) resultObject, getTimeZoneID(requestData, session), session, getFields(requestData), extendedEntities);
+            resultObject = convertCalendarResult((CalendarResult) resultObject, getTimeZoneID(requestData, session), session, getFields(requestData), isExtendedEntities(requestData));
         } else if (resultObject instanceof UpdatesResult) {
-            resultObject = convertCalendarResult((UpdatesResult) resultObject, getTimeZoneID(requestData, session), session, getFields(requestData), extendedEntities);
+            resultObject = convertCalendarResult((UpdatesResult) resultObject, getTimeZoneID(requestData, session), session, getFields(requestData), isExtendedEntities(requestData));
         } else {
             throw new UnsupportedOperationException();
         }

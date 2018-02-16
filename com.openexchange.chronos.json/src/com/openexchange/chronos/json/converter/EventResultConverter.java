@@ -131,21 +131,16 @@ public class EventResultConverter implements ResultConverter {
          * check and convert result object
          */
         Object resultObject = result.getResultObject();
-        Boolean extendedEntities = requestData.getParameter("extendedEntities", Boolean.class, true);
-        if (extendedEntities == null) {
-            extendedEntities = false;
-        }
-
         if (Event.class.isInstance(resultObject)) {
             /*
              * only one event to convert
              */
-            resultObject = convertEvent((Event) resultObject, getTimeZoneID(requestData, session), session, getFields(requestData), extendedEntities);
+            resultObject = convertEvent((Event) resultObject, getTimeZoneID(requestData, session), session, getFields(requestData), isExtendedEntities(requestData));
         } else if (List.class.isInstance(resultObject)) {
             /*
              * convert list of events
              */
-            resultObject = convertEvents((List<Event>) resultObject, getTimeZoneID(requestData, session), session, getFields(requestData), extendedEntities);
+            resultObject = convertEvents((List<Event>) resultObject, getTimeZoneID(requestData, session), session, getFields(requestData), isExtendedEntities(requestData));
         } else {
             throw new UnsupportedOperationException();
         }
@@ -226,6 +221,11 @@ public class EventResultConverter implements ResultConverter {
 
     protected static Set<EventField> getFields(AJAXRequestData requestData) throws OXException {
         return EventMapper.getInstance().parseFields(requestData.getParameter(CalendarParameters.PARAMETER_FIELDS));
+    }
+
+    protected static boolean isExtendedEntities(AJAXRequestData requestData) throws OXException {
+        Boolean value = requestData.getParameter("extendedEntities", Boolean.class, true);
+        return null != value ? value.booleanValue() : false;
     }
 
     /**

@@ -106,12 +106,8 @@ public class MultipleCalendarResultConverter extends CalendarResultConverter {
          * check and convert result object
          */
         Object resultObject = result.getResultObject();
-        Boolean extendedEntities = requestData.getParameter("extendedEntities", Boolean.class, true);
-        if (extendedEntities == null) {
-            extendedEntities = false;
-        }
         if (resultObject instanceof List) {
-            resultObject = convertCalendarResult((List<CalendarResult>) resultObject, getTimeZoneID(requestData, session), requestData.getSession(), getFields(requestData), extendedEntities);
+            resultObject = convertCalendarResult((List<CalendarResult>) resultObject, getTimeZoneID(requestData, session), requestData.getSession(), getFields(requestData), isExtendedEntities(requestData));
         } else {
             throw new UnsupportedOperationException();
         }
