@@ -469,9 +469,9 @@ public class Flags implements Cloneable, Serializable {
     }
     
     String[] v = new String[size];
-    int i = 0;
-    for (String value : user_flags.values()) {
-        v[i++] = value;
+    Iterator<String> it = user_flags.values().iterator();
+    for (int i = 0; i < size; i++) {
+        v[i] = it.next();
     }
     return v;
     }
