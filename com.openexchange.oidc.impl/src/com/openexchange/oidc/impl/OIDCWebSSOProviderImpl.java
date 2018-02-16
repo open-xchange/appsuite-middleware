@@ -371,7 +371,7 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
             LogoutRequest logoutRequest = this.backend.getLogoutFromIDPRequest(session);
             String domainName = OIDCTools.getDomainName(request, services.getOptionalService(HostnameService.class));
 
-            String redirectURI = getResumeURL(request, response, domainName);
+            String redirectURI = getResumeURL(request, response, domainName, session);
 
             DefaultLogoutRequestInfo defaultLogoutRequestInfo = new DefaultLogoutRequestInfo(logoutRequest.getState().getValue(), domainName, session.getSessionID(), redirectURI);
             this.stateManagement.addLogoutRequest(defaultLogoutRequestInfo, LOGOUT_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS);
@@ -383,12 +383,13 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         return logoutRequestString;
     }
 
-    private String getResumeURL(HttpServletRequest request, HttpServletResponse response, String domainName) {
+    private String getResumeURL(HttpServletRequest request, HttpServletResponse response, String domainName, Session session) {
         String redirectURI = "";
+        String path = OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig()), request.getParameter("hash"));
         URIBuilder redirectLocation = new URIBuilder()
             .setScheme(OIDCTools.getRedirectScheme(request))
             .setHost(domainName)
-            .setPath(request.getParameter("deep_link") == null ? OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig()) : request.getParameter("deep_link"));
+            .setPath(path);
         Tools.disableCaching(response);
         try {
             redirectURI = redirectLocation.build().toString();

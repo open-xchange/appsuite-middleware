@@ -104,7 +104,7 @@ import com.openexchange.session.reservation.SessionReservationService;
  * @since v7.10.0
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ LoginConfiguration.class, Services.class, OIDCWebSSOProviderImpl.class, OIDCTokenResponseParser.class })
+@PrepareForTest({ LoginConfiguration.class, Services.class, OIDCWebSSOProviderImpl.class, OIDCTokenResponseParser.class, OIDCTools.class })
 public class OIDCWebSSoProviderImplTest {
 
     @Mock
@@ -146,6 +146,7 @@ public class OIDCWebSSoProviderImplTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         PowerMockito.mockStatic(Services.class);
+        PowerMockito.mockStatic(OIDCTools.class);
         PowerMockito.when(Services.getService(SessionReservationService.class)).thenReturn(mockedSessionReservation);
 
         PowerMockito.mockStatic(OIDCTokenResponseParser.class);
@@ -345,6 +346,7 @@ public class OIDCWebSSoProviderImplTest {
         URI resultUri = new URI("logoutRequest");
         PowerMockito.when(backendLogout.toURI()).thenReturn(resultUri);
         String result = provider.getLogoutRedirectRequest(mockedRequest, mockedResponse);
+        PowerMockito.doReturn("path").when(OIDCTools.class, "buildFrontendRedirectLocation", Matchers.any(Session.class), Matchers.anyString(), Matchers.anyString());
         assertTrue("Wrong request as result", result.equals("logoutRequest"));
     }
 

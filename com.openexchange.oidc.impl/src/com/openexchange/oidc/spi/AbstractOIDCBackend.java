@@ -625,7 +625,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
     private Cookie createOIDCAutologinCookie(HttpServletRequest request, Session session, String uuid) throws OXException {
         LOG.trace("createOIDCAutologinCookie(HttpServletRequest request: {}, Session session: {}, String uuid: {})", request.getRequestURI(), session.getSessionID(), uuid);
-        String hash = HashCalculator.getInstance().getHash(request, LoginTools.parseUserAgent(request), LoginTools.parseClient(request, false, getLoginConfiguration().getDefaultClient()));
+        String hash = OIDCTools.calculateHash(request, getLoginConfiguration());
         Cookie oidcAutologinCookie = new Cookie(OIDCTools.AUTOLOGIN_COOKIE_PREFIX + hash, uuid);
         oidcAutologinCookie.setPath("/");
         oidcAutologinCookie.setSecure(Tools.considerSecure(request));

@@ -258,9 +258,13 @@ public class OIDCTools {
      */
     public static Cookie loadAutologinCookie(HttpServletRequest request, LoginConfiguration loginConfiguration) throws OXException {
         LOG.trace("loadAutologinCookie(HttpServletRequest request: {}, LoginConfiguration loginConfiguration)", request.getRequestURI());
-        String hash = HashCalculator.getInstance().getHash(request, LoginTools.parseUserAgent(request), LoginTools.parseClient(request, false, loginConfiguration.getDefaultClient()));
+        String hash = calculateHash(request, loginConfiguration);
         Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
         return cookies.get(OIDCTools.AUTOLOGIN_COOKIE_PREFIX + hash);
+    }
+    
+    public static String calculateHash(HttpServletRequest request, LoginConfiguration loginConfiguration) throws OXException {
+        return HashCalculator.getInstance().getHash(request, LoginTools.parseUserAgent(request), LoginTools.parseClient(request, false, loginConfiguration.getDefaultClient()));
     }
 
     /**
