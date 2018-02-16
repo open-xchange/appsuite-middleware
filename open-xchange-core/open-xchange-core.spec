@@ -206,6 +206,9 @@ if [ ${1:-0} -eq 2 ]; then
     # Fix for bug 25999
     ox_remove_property com.openexchange.servlet.sessionCleanerInterval /opt/open-xchange/etc/server.properties
 
+    # SoftwareChange_Request-2456
+    ox_add_property com.openexchange.caching.jcs.remoteInvalidationForPersonalFolders false /opt/open-xchange/etc/cache.properties
+
     # SoftwareChange_Request-2464
     ox_add_property com.openexchange.hazelcast.shutdownOnOutOfMemory false /opt/open-xchange/etc/hazelcast.properties
 
@@ -477,7 +480,6 @@ d
     fi
 
     # SoftwareChange_Request-4033
-    # Bug #53993: Zap duplicate loggers
     TMPFILE=$(mktemp)
     rm -f $TMPFILE
     cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -m -
@@ -489,6 +491,7 @@ EOF
       cat $TMPFILE > /opt/open-xchange/etc/logback.xml
       rm -f $TMPFILE
     fi
+    # Bug #53993: Zap duplicate loggers
     rm -f $TMPFILE
     cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -z -r -
 <configuration>
