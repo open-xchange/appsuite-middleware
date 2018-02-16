@@ -274,15 +274,8 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         insertTriggers(event, alarmsPerAttendee);
     }
 
-    /**
-     * Creates new alarm triggers
-     *
-     * @param event The event to insert the triggers for
-     * @param alarmsPerAttendee A map of alarms per attendee
-     * @throws OXException
-     */
     @Override
-    public void insertTriggers(Event event, Map<Integer, List<Alarm>> alarmsPerAttendee) throws OXException {
+    public void insertTriggers(Event event, Map<Integer, List<Alarm>> alarmsPerUserId) throws OXException {
         RecurrenceId recurrenceId = null;
         if (event.containsRecurrenceRule() && event.getRecurrenceRule() != null && event.getRecurrenceId() == null && event.getId().equals(event.getSeriesId())) {
 
@@ -295,9 +288,9 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             recurrenceId = new DefaultRecurrenceId(iterateRecurrenceIds.next().getValue());
 
         }
-        for (Integer userId : alarmsPerAttendee.keySet()) {
+        for (Integer userId : alarmsPerUserId.keySet()) {
 
-            List<Alarm> alarms = alarmsPerAttendee.get(userId);
+            List<Alarm> alarms = alarmsPerUserId.get(userId);
             if (alarms == null || alarms.isEmpty()) {
                 // Skip user in case no alarms are available
                 continue;

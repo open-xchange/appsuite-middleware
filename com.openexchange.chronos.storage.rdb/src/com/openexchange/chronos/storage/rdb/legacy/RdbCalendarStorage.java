@@ -92,13 +92,14 @@ public class RdbCalendarStorage implements CalendarStorage {
      * @param entityResolver The entity resolver to use
      * @param dbProvider The database provider to use
      * @param txPolicy The transaction policy
+     * @throws OXException
      */
-    public RdbCalendarStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+    public RdbCalendarStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException {
         super();
         eventStorage = new RdbEventStorage(context, entityResolver, dbProvider, txPolicy);
         attendeeStorage = new RdbAttendeeStorage(context, entityResolver, dbProvider, txPolicy);
         alarmStorage = new RdbAlarmStorage(context, entityResolver, dbProvider, txPolicy);
-        alarmTriggerStorage = new RdbAlarmTriggerStorage(context, entityResolver, dbProvider, txPolicy);
+        alarmTriggerStorage = new RdbAlarmTriggerStorage(context, entityResolver, dbProvider, txPolicy, alarmStorage);
         attachmentStorage = new RdbAttachmentStorage(context, dbProvider, txPolicy);
         accountStorage = com.openexchange.chronos.storage.rdb.RdbCalendarAccountStorage.init(context, dbProvider, txPolicy);
         storageUtilities = new RdbCalendarStorageUtilities(this);
