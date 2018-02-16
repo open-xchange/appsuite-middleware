@@ -259,15 +259,6 @@ public abstract class AbstractOIDCBackendConfig implements OIDCBackendConfig {
             }
 
             @Override
-            public <T> T getDefaultValue(Class<T> clazz) {
-                Object defaultValue = getDefaultValue();
-                if (defaultValue .getClass().isAssignableFrom(clazz)) {
-                    return clazz.cast(defaultValue);
-                }
-                throw new IllegalArgumentException("The object cannot be converted to the specified type '" + clazz.getCanonicalName() + "'");
-            }
-
-            @Override
             public Object getDefaultValue() {
                 return backendProperty.getDefaultValue();
             }

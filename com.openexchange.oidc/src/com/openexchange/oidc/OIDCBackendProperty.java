@@ -117,7 +117,7 @@ public enum OIDCBackendProperty implements Property {
     /**
      * ssoLogout - Whether to redirect to the OP on logout trigger from client or not
      */
-    ssoLogout(OIDCProperty.PREFIX, false),
+    ssoLogout(OIDCProperty.PREFIX, "false"),
     /**
      * redirectURILogout - Where to redirect the user after a valid logout
      */
@@ -138,7 +138,7 @@ public enum OIDCBackendProperty implements Property {
      * OAuth {@link AccessToken} a new {@link AccessToken} should be requested. "refresh_token"
      * grant type must be registered for this client.
      */
-    oauthRefreshTime(OIDCProperty.PREFIX, 60000),
+    oauthRefreshTime(OIDCProperty.PREFIX, "60000"),
     /**
      * uiWebPath - This backends UI path
      */
@@ -166,14 +166,6 @@ public enum OIDCBackendProperty implements Property {
         return fqn + name();
     }
 
-    @Override
-    public <T> T getDefaultValue(Class<T> clazz) {
-        if (defaultValue.getClass().isAssignableFrom(clazz)) {
-            return clazz.cast(defaultValue);
-        }
-        throw new IllegalArgumentException("The object cannot be converted to the specified type '" + clazz.getCanonicalName() + "'");
-    }
-    
     public Object getDefaultValue() {
         return this.defaultValue;
     }
