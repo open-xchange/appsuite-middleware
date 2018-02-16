@@ -241,6 +241,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 if (null != attendeeUpdate) {
                     storage.getAttendeeStorage().updateAttendee(newExceptionEvent.getId(), attendeeUpdate);
                 }
+                resultTracker.trackUpdate(newExceptionEvent, loadEventData(newExceptionEvent.getId()));
                 /*
                  * add change exception date to series master & track results
                  */
