@@ -98,6 +98,7 @@ import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
+import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestImpl;
 import com.openexchange.ajax.login.LoginTools;
@@ -622,9 +623,10 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         return session;
     }
 
-    private Cookie createOIDCAutologinCookie(HttpServletRequest request, Session session, String uuid) {
+    private Cookie createOIDCAutologinCookie(HttpServletRequest request, Session session, String uuid) throws OXException {
         LOG.trace("createOIDCAutologinCookie(HttpServletRequest request: {}, Session session: {}, String uuid: {})", request.getRequestURI(), session.getSessionID(), uuid);
-        Cookie oidcAutologinCookie = new Cookie(OIDCTools.AUTOLOGIN_COOKIE_PREFIX + session.getHash(), uuid);
+        String hash = HashCalculator.getInstance().getHash(request, LoginTools.parseUserAgent(request), LoginTools.parseClient(request, false, getLoginConfiguration().getDefaultClient()));
+        Cookie oidcAutologinCookie = new Cookie(OIDCTools.AUTOLOGIN_COOKIE_PREFIX + hash, uuid);
         oidcAutologinCookie.setPath("/");
         oidcAutologinCookie.setSecure(Tools.considerSecure(request));
         oidcAutologinCookie.setMaxAge(-1);

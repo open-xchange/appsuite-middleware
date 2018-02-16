@@ -171,14 +171,20 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         return loginRequest;
     }
 
-    private String getAutologinURLFromOIDCCookie(HttpServletRequest request, HttpServletResponse response) throws OXException {
+    private String getAutologinURLFromOIDCCookie(HttpServletRequest request, HttpServletResponse response) {
+        String redirectURL = "";
         LOG.trace("getAutologinURLFromOIDCCookie(HttpServletRequest request: {}, HttpServletResponse response)", request.getRequestURI());
-        Cookie autologinCookie = OIDCTools.loadAutologinCookie(request, this.loginConfiguration);
+        try {
+            Cookie autologinCookie = OIDCTools.loadAutologinCookie(request, this.loginConfiguration);
 
-        if (autologinCookie == null) {
-            return null;
+            if (autologinCookie == null) {
+                return null;
+            }
+            redirectURL = this.getAutologinByCookieURL(request, response, autologinCookie);
+        } catch (OXException e) {
+            LOG.debug("Failed to load autologin url for request: {}", request.getRequestURI());
         }
-        String redirectURL = this.getAutologinByCookieURL(request, response, autologinCookie);
+        
         return redirectURL;
     }
 
@@ -204,7 +210,6 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
 
     private String getRedirectLocationForSession(HttpServletRequest request, Session session) throws OXException {
         LOG.trace("getRedirectLocationForSession(HttpServletRequest request: {}, Session session: {})", request.getRequestURI(), session.getSessionID());
-        OIDCTools.validateSession(session, request);
         return OIDCTools.buildFrontendRedirectLocation(session, OIDCTools.getUIWebPath(this.loginConfiguration, this.backend.getBackendConfig()), request.getParameter(OIDCTools.PARAM_DEEP_LINK));
     }
 
