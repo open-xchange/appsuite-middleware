@@ -107,7 +107,7 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
                 switch (predefined) {
                     case ClientExecuteTime:
                         String methodName = request.getHttpMethod().name();
-                        Timer timer = this.metrics.getTimer("s3", "RequestTimes." + methodName);
+                        Timer timer = this.metrics.timer("s3", "RequestTimes." + methodName);
                         timer.update(longValue, TimeUnit.MILLISECONDS);
                     default:
                         break;

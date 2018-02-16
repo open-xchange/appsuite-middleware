@@ -80,7 +80,7 @@ public interface MetricService {
      * @param name The metric name
      * @return the metric instance
      */
-    Timer getTimer(String group, String name);
+    Timer timer(String group, String name);
 
     /**
      * Gets an existing {@link Counter} for the given name or creates and
@@ -111,6 +111,8 @@ public interface MetricService {
      * @param name The metric name
      * @return the metric instance
      */
-    Meter getMeter(String group, String name);
+    Meter meter(String group, String name);
+
+    com.openexchange.metrics.Meter meter(MeterDescriptor descriptor);
 
 }

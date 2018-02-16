@@ -71,9 +71,11 @@ import com.codahale.metrics.MetricRegistryListener;
 import com.codahale.metrics.Timer;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
+import com.openexchange.metrics.MeterDescriptor;
 import com.openexchange.metrics.MetricMetadata;
 import com.openexchange.metrics.MetricService;
 import com.openexchange.metrics.MetricType;
+import com.openexchange.metrics.impl.dropwizard.MeterImpl;
 import com.openexchange.metrics.jmx.MetricMBean;
 import com.openexchange.metrics.jmx.MetricMBeanFactory;
 
@@ -102,7 +104,7 @@ public class MetricServiceImpl implements MetricService {
     }
 
     @Override
-    public Timer getTimer(String group, String name) {
+    public Timer timer(String group, String name) {
         return registry.timer(MetricRegistry.name(group, name));
     }
 
@@ -118,8 +120,14 @@ public class MetricServiceImpl implements MetricService {
     }
 
     @Override
-    public Meter getMeter(String group, String name) {
+    public Meter meter(String group, String name) {
         return registry.meter(MetricRegistry.name(group, name));
+    }
+
+    @Override
+    public com.openexchange.metrics.Meter meter(MeterDescriptor descriptor) {
+        Meter delegate = registry.meter(MetricRegistry.name(descriptor.getGroup(), descriptor.getName()));
+        return new MeterImpl(delegate);
     }
 
     public void setManagementService(ManagementService service) {
