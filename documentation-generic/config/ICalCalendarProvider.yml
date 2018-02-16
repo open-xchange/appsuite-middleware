@@ -22,7 +22,6 @@ properties:
       file: chronos.properties
       packageName: open-xchange-core
       tags: ["Chronos", "Calendar", "ICal Calendar Provider"]
-      properties:
     - key: com.openexchange.chronos.provider.ical.schemes
       description: |
         Defines schemes that are allowed to access a feed. All given schemes have to support port 80 or 443.
@@ -34,7 +33,6 @@ properties:
       file: chronos.properties
       packageName: open-xchange-core
       tags: ["Chronos", "Calendar", "ICal Calendar Provider"]
-      properties:
     - key: com.openexchange.chronos.provider.ical.maxFileSize
       description: |
         Defines the maximum size of an ICal file that will be allowed for processing. Feeds that exceed this limit cannot be subscribed.
@@ -46,7 +44,6 @@ properties:
       file: chronos.properties
       packageName: open-xchange-core
       tags: ["Chronos", "Calendar", "ICal Calendar Provider"]
-      properties:
     - key: com.openexchange.chronos.provider.ical.maxConnections
       description: |
         Defines the maximum possible number of connections used to access the calendar feed.
@@ -58,7 +55,6 @@ properties:
       file: chronos.properties
       packageName: open-xchange-core
       tags: ["Chronos", "Calendar", "ICal Calendar Provider"]
-      properties:
     - key: com.openexchange.chronos.provider.ical.maxConnectionsPerRoute
       description: |
         Defines the maximum possible number of connections per host used to access the calendar feed.
@@ -81,7 +77,6 @@ properties:
       file: chronos.properties
       packageName: open-xchange-core
       tags: ["Chronos", "Calendar", "ICal Calendar Provider"]
-      properties:
     - key: com.openexchange.chronos.provider.ical.socketReadTimeout
       description: |
         Defines the timeout on waiting to read data
