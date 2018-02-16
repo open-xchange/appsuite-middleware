@@ -49,6 +49,7 @@
 
 package com.openexchange.jslob.config;
 
+import static com.openexchange.ajax.tools.JSONCoercion.coerceToJSON;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -589,7 +590,7 @@ public final class ConfigJSlobService implements JSlobService {
                 try {
                     setting = configTree.getSettingByPath(configTreePath);
                 } catch (OXException e) {
-                    LOG.warn("Illegal config-tree path: {}. Please check paths.perfMap file (JSlob ID: {}) OR if path-associatd bundle has been started.", configTreePath, lobPath, e);
+                    LOG.warn("Illegal config-tree path: {}. Please check paths.perfMap file (JSlob ID: {}) OR if path-associated bundle has been started.", configTreePath, lobPath, e);
                 } catch (Exception e) {
                     LOG.warn("Failed to get setting by config-tree path: {} (JSlob ID: {}).", configTreePath, lobPath, e);
                 }
@@ -606,6 +607,8 @@ public final class ConfigJSlobService implements JSlobService {
                     } catch (Exception e) {
                         LOG.warn("Failed to read value for config-tree path: {} (JSlob ID: {})", configTreePath, lobPath, e);
                     }
+                } else {
+                    LOG.debug("Failed to obtain setting for config-tree path: {} (JSlob ID: {})", configTreePath, lobPath);
                 }
             }
             jsLob.setJsonObject(jObject);
@@ -640,38 +643,39 @@ public final class ConfigJSlobService implements JSlobService {
      * @throws JSONException if the conversion to java script objects fails.
      */
     private static Object convert2JS(final Setting setting) throws JSONException {
-        Object retval = null;
         if (setting.isLeaf()) {
-            final Object[] multiValue = setting.getMultiValue();
+            Object[] multiValue = setting.getMultiValue();
             if (null == multiValue) {
-                final Object singleValue = setting.getSingleValue();
+                // Not a multi-value
+                Object singleValue = setting.getSingleValue();
                 if (null == singleValue) {
-                    retval = JSONObject.NULL;
-                } else if (singleValue instanceof JSONObject) {
-                    retval = singleValue;
-                } else {
-                    try {
-                        retval = new JSONObject(singleValue.toString());
-                    } catch (final JSONException e) {
-                        retval = singleValue;
-                    }
+                    return JSONObject.NULL;
                 }
-            } else {
-                final JSONArray array = new JSONArray(multiValue.length);
-                for (final Object value : multiValue) {
-                    array.put(value);
+                if (singleValue instanceof JSONObject) {
+                    return singleValue;
                 }
-                retval = array;
+                try {
+                    return new JSONObject(singleValue.toString());
+                } catch (JSONException e) {
+                    return singleValue;
+                }
             }
-        } else {
-            final Setting[] elements = setting.getElements();
-            final JSONObject json = new JSONObject(elements.length);
-            for (final Setting subSetting : elements) {
-                json.put(subSetting.getName(), convert2JS(subSetting));
+
+            // Handle multi-value
+            JSONArray array = new JSONArray(multiValue.length);
+            for (Object value : multiValue) {
+                array.put(coerceToJSON(value));
             }
-            retval = json;
+            return array;
         }
-        return retval;
+
+        // Not a leaf element; recursive invocation needed
+        Setting[] elements = setting.getElements();
+        JSONObject json = new JSONObject(elements.length);
+        for (Setting subSetting : elements) {
+            json.put(subSetting.getName(), convert2JS(subSetting));
+        }
+        return json;
     }
 
     @Override
