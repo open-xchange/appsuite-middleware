@@ -91,6 +91,20 @@ public class DefaultJSlob implements JSlob, Cloneable {
      */
     public static final DefaultJSlob EMPTY_JSLOB = new EmptyJSlob();
 
+    /**
+     * Creates a <code>DefaultJSlob</code> instance from specified JSlob.
+     *
+     * @param other The JSlob to copy from
+     * @return The resulting <code>DefaultJSlob</code> instance
+     */
+    public static DefaultJSlob copyOf(JSlob other) {
+        if (null == other) {
+            return null;
+        }
+
+        return other instanceof DefaultJSlob ? (DefaultJSlob) other : new DefaultJSlob(other);
+    }
+
     private JSONObject jsonObject;
     private JSONObject metaObject;
     private JSlobId id;
@@ -118,7 +132,7 @@ public class DefaultJSlob implements JSlob, Cloneable {
      *
      * @param other The other JSlob
      */
-    public DefaultJSlob(final JSlob other) {
+    private DefaultJSlob(final JSlob other) {
         super();
         JSONObject jo = other.getJsonObject();
         this.jsonObject = null == jo ? null : new JSONObject(jo);

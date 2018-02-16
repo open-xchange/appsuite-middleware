@@ -367,53 +367,60 @@ public final class ConfigJSlobService implements JSlobService {
         final int userId = session.getUserId();
         final int contextId = session.getContextId();
 
-        final Collection<JSlob> list = getStorage().list(new JSlobId(SERVICE_ID, null, userId, contextId));
-        final List<JSlob> ret = new ArrayList<JSlob>(list.size() << 1);
+        List<JSlob> ret;
         boolean coreIncluded = false;
-        for (final JSlob jSlob : list) {
 
-            addConfigTreeToJslob(session, new DefaultJSlob(jSlob));
-            ret.add(get(jSlob.getId().getId(), session));
-            if (jSlob.getId().getId().equals(CORE)) {
-                coreIncluded = true;
+        // Load from storage
+        {
+            Collection<JSlob> list = getStorage().list(new JSlobId(SERVICE_ID, null, userId, contextId));
+            ret = new ArrayList<JSlob>(list.size() << 1);
+            for (final JSlob jSlob : list) {
+                addConfigTreeToJslob(session, DefaultJSlob.copyOf(jSlob));
+                ret.add(get(jSlob.getId().getId(), session));
+                if (jSlob.getId().getId().equals(CORE)) {
+                    coreIncluded = true;
+                }
             }
-
         }
 
         // Append config tree & config cascade settings
-        ConfigView view = getConfigViewFactory().getView(userId, contextId);
-        ConcurrentMap<String, Map<String, AttributedProperty>> preferenceItems = preferenceItemsReference.get();
-        for (final Entry<String, Map<String, AttributedProperty>> entry : preferenceItems.entrySet()) {
-            final DefaultJSlob jSlob = new DefaultJSlob(new JSONObject());
-            jSlob.setId(new JSlobId(SERVICE_ID, entry.getKey(), userId, contextId));
+        {
+            ConfigView view = getConfigViewFactory().getView(userId, contextId);
+            ConcurrentMap<String, Map<String, AttributedProperty>> preferenceItems = preferenceItemsReference.get();
+            for (final Entry<String, Map<String, AttributedProperty>> entry : preferenceItems.entrySet()) {
+                final DefaultJSlob jSlob = new DefaultJSlob(new JSONObject());
+                jSlob.setId(new JSlobId(SERVICE_ID, entry.getKey(), userId, contextId));
 
-            addConfigTreeToJslob(session, jSlob);
+                addConfigTreeToJslob(session, jSlob);
 
-            for (final Entry<String, AttributedProperty> entry2 : entry.getValue().entrySet()) {
-                add2JSlob(entry2.getValue(), jSlob, view);
+                for (final Entry<String, AttributedProperty> entry2 : entry.getValue().entrySet()) {
+                    add2JSlob(entry2.getValue(), jSlob, view);
+                }
+
+                if (jSlob.getId().getId().equals(CORE)) {
+                    coreIncluded = true;
+                }
+
+                ret.add(jSlob);
             }
-
-            if (jSlob.getId().getId().equals(CORE)) {
-                coreIncluded = true;
-            }
-
-            ret.add(jSlob);
         }
 
         // Append registered JSlob entries
-        for (Entry<String, Map<String, JSlobEntryWrapper>> entry : jSlobEntryRegistry.getAvailableJSlobEntries().entrySet()) {
-            DefaultJSlob jSlob = new DefaultJSlob(new JSONObject());
-            jSlob.setId(new JSlobId(SERVICE_ID, entry.getKey(), userId, contextId));
+        {
+            for (Entry<String, Map<String, JSlobEntryWrapper>> entry : jSlobEntryRegistry.getAvailableJSlobEntries().entrySet()) {
+                DefaultJSlob jSlob = new DefaultJSlob(new JSONObject());
+                jSlob.setId(new JSlobId(SERVICE_ID, entry.getKey(), userId, contextId));
 
-            for (final Entry<String, JSlobEntryWrapper> entry2 : entry.getValue().entrySet()) {
-                add2JSlob(entry2.getValue(), jSlob, session);
+                for (final Entry<String, JSlobEntryWrapper> entry2 : entry.getValue().entrySet()) {
+                    add2JSlob(entry2.getValue(), jSlob, session);
+                }
+
+                if (jSlob.getId().getId().equals(CORE)) {
+                    coreIncluded = true;
+                }
+
+                ret.add(jSlob);
             }
-
-            if (jSlob.getId().getId().equals(CORE)) {
-                coreIncluded = true;
-            }
-
-            ret.add(jSlob);
         }
 
         if (!coreIncluded) {
@@ -450,12 +457,13 @@ public final class ConfigJSlobService implements JSlobService {
         // Get from storage
         final DefaultJSlob jsonJSlob;
         {
-            final JSlob opt = getStorage().opt(new JSlobId(SERVICE_ID, id, userId, contextId));
+            JSlobId jslobId = new JSlobId(SERVICE_ID, id, userId, contextId);
+            final JSlob opt = getStorage().opt(jslobId);
             if (null == opt) {
                 jsonJSlob = new DefaultJSlob(new JSONObject());
-                jsonJSlob.setId(new JSlobId(SERVICE_ID, id, userId, contextId));
+                jsonJSlob.setId(jslobId);
             } else {
-                jsonJSlob = new DefaultJSlob(opt);
+                jsonJSlob = DefaultJSlob.copyOf(opt);
             }
         }
 
@@ -512,7 +520,7 @@ public final class ConfigJSlobService implements JSlobService {
                     jsonJSlob = new DefaultJSlob(new JSONObject());
                     jsonJSlob.setId(new JSlobId(SERVICE_ID, id, userId, contextId));
                 } else {
-                    jsonJSlob = new DefaultJSlob(opt);
+                    jsonJSlob = DefaultJSlob.copyOf(opt);
                 }
             }
 
@@ -702,7 +710,7 @@ public final class ConfigJSlobService implements JSlobService {
             }
 
             // Clone it
-            final DefaultJSlob jsonJSlob = new DefaultJSlob(jSlob);
+            final DefaultJSlob jsonJSlob = DefaultJSlob.copyOf(jSlob);
             final JSONObject jObject = jsonJSlob.getJsonObject();
 
             // Remember the paths to purge
@@ -940,7 +948,7 @@ public final class ConfigJSlobService implements JSlobService {
                     storageObject = new JSONObject();
                     jsonJSlob = new DefaultJSlob(storageObject);
                 } else {
-                    jsonJSlob = new DefaultJSlob(opt);
+                    jsonJSlob = DefaultJSlob.copyOf(opt);
                     storageObject = jsonJSlob.getJsonObject();
                 }
             }
