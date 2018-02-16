@@ -124,3 +124,62 @@ com.openexchange.share.extendedPermissions:
   type: array
   items:
     $ref: "#/definitions/FolderExtendedPermission"
+com.openexchange.calendar.extendedProperties:
+  type: object
+  description: Contains the extended properties for calendar folders
+  properties:
+    description:
+      type: object
+      description: The description of the folder
+      properties:
+        value:
+          type: string
+    usedForSync:
+      type: object
+      description: Indicates whether the folder should be considered for synchronization with external clients or not.
+      properties:
+        value:
+          type: string
+    color:
+      type: object
+      description: Indicates the color the folder should be displayed with
+      properties:
+        value:
+          type: string
+    scheduleTransp:
+      type: object
+      description: Indicates whether the calendar object resources in a calendar collection will affect the owner's busy time information or not
+      properties:
+        value:
+          type: string
+com.openexchange.calendar.config:
+  type: object
+  description: Holds arbitrary, provider-specific configuration data for calendar accounts.
+  properties:
+    enabled:
+      type: boolean
+      description: Defines if the account is enabled.
+    color:
+      type: string
+      description: Defines the account color.
+    uri:
+      type: string
+      description: (ical provider only) The URI of the ICal feed that should be subscribed.
+    refreshInterval:
+      type: string
+      description: (ical provider only) Defines the refresh interval used for the subscribed ICal feed.
+    login:
+      type: string
+      description: (ical provider only) Defines an optional login for the subscribed ICal feed.
+    password:
+      type: string
+      description: (ical provider only) An optional password for the subscribed ICal feed.
+    itemId:
+      type: string
+      description: (schedjoules provider only) Unique identifier for schedjoules feed.
+    locale:
+      type: string
+      description: (schedjoules provider only) The locale of the subscribed schedjoules feed.
+com.openexchange.calendar.provider:
+  type: string
+  description: Denotes the identifier of the underlying calendar provider.

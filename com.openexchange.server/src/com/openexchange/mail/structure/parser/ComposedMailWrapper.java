@@ -916,6 +916,11 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     }
 
     @Override
+    public boolean isHasAttachment() {
+        return mail.isHasAttachment();
+    }
+
+    @Override
     public boolean containsHasAttachment() {
         return mail.containsHasAttachment();
     }
@@ -928,6 +933,26 @@ final class ComposedMailWrapper extends ComposedMailMessage {
     @Override
     public void setHasAttachment(final boolean hasAttachment) {
         mail.setHasAttachment(hasAttachment);
+    }
+
+    @Override
+    public boolean isAlternativeHasAttachment() {
+        return mail.isAlternativeHasAttachment();
+    }
+
+    @Override
+    public boolean containsAlternativeHasAttachment() {
+        return mail.containsAlternativeHasAttachment();
+    }
+
+    @Override
+    public void removeAlternativeHasAttachment() {
+        mail.removeAlternativeHasAttachment();
+    }
+
+    @Override
+    public void setAlternativeHasAttachment(boolean hasAttachment) {
+        mail.setAlternativeHasAttachment(hasAttachment);
     }
 
     @Override

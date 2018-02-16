@@ -49,25 +49,22 @@
 
 package com.openexchange.calendar.printing.days;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import com.openexchange.api2.AppointmentSQLInterface;
-import com.openexchange.calendar.printing.CPAppointment;
+import java.util.concurrent.TimeUnit;
+import org.dmfs.rfc5545.DateTime;
 import com.openexchange.calendar.printing.CPCalendar;
+import com.openexchange.calendar.printing.CPEvent;
 import com.openexchange.calendar.printing.CPParameters;
 import com.openexchange.calendar.printing.CPTool;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.calendar.Constants;
-import com.openexchange.groupware.calendar.RecurringResultInterface;
-import com.openexchange.groupware.calendar.RecurringResultsInterface;
-import com.openexchange.groupware.container.Appointment;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * Takes the list of appointments and calculates on which days an appointment has to appear.
@@ -76,32 +73,27 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class Partitioner {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Partitioner.class);
     private final CPParameters params;
     private final CPCalendar cal;
-    private final AppointmentSQLInterface appointmentSql;
-    private final CalendarCollectionService calendarTools;
     private final Context context;
     private Date firstDay;
     private Date lastDay;
     private Date displayStart;
     private Date displayEnd;
 
-    public Partitioner(final CPParameters params, final CPCalendar cal, final Context context, final AppointmentSQLInterface appointmentSql, final CalendarCollectionService calendarTools) {
+    public Partitioner(final CPParameters params, final CPCalendar cal, final Context context) {
         super();
         this.params = params;
         this.cal = cal;
         this.context = context;
-        this.appointmentSql = appointmentSql;
-        this.calendarTools = calendarTools;
     }
 
-    public List<Day> partition(final List<Appointment> idList, int userId) {
+    public List<Day> partition(ServiceLookup services, final List<Event> idList, int userId) {
         final SortedMap<Date, Day> dayMap = new TreeMap<Date, Day>();
         preFill(dayMap);
 
-        for (final Appointment appointment : idList) {
-            calculateToDays(dayMap, appointment, userId);
+        for (final Event event : idList) {
+            calculateToDays(services, dayMap, event, userId);
         }
 
         final List<Day> retval = new ArrayList<Day>(dayMap.size());
@@ -128,7 +120,7 @@ public class Partitioner {
         firstDay = CalendarTools.getDayStart(cal, params.getStart());
         // omit the last millisecond of the end, because this must be exclusive and we calculate always inclusive.
         lastDay = CalendarTools.getDayStart(cal, new Date(params.getEnd().getTime() - 1));
-        final long days = (lastDay.getTime() - firstDay.getTime()) / Constants.MILLI_DAY;
+        final long days = TimeUnit.MILLISECONDS.toDays(lastDay.getTime() - firstDay.getTime());
         if (days >= 27 && days <= 31) {
             makeMonthBlock(firstDay, lastDay);
         } else {
@@ -150,56 +142,32 @@ public class Partitioner {
         displayEnd = cal.getTime();
     }
 
-    private void calculateToDays(final SortedMap<Date, Day> dayMap, final Appointment appointmentId, int userId) {
-        try {
-            final Appointment appointment = appointmentSql.getObjectById(appointmentId.getObjectID(), appointmentId.getParentFolderID());
-            if (CPTool.hasDeclined(appointment, userId)) {
-                return;
-            }
-            if (appointment.isMaster()) {
-                final RecurringResultsInterface results = calendarTools.calculateRecurring(appointment, displayStart.getTime(), CalendarTools.getDayEnd(cal, displayEnd).getTime(), 0);
-                if (results == null) {
-                    addToMap(dayMap, appointment);
-                } else {
-                    for (int i = 0; i < results.size(); i++) {
-                        final RecurringResultInterface result = results.getRecurringResult(i);
-                        final Appointment occurrence = appointment.clone();
-                        occurrence.setStartDate(new Date(result.getStart()));
-                        occurrence.setEndDate(new Date(result.getEnd()));
-                        addToMap(dayMap, occurrence);
-                    }
-                }
-            } else {
-                addToMap(dayMap, appointment);
-            }
-        } catch (final OXException e) {
-            LOG.error("", e);
-        } catch (final SQLException e) {
-            LOG.error("", e);
+    private void calculateToDays(ServiceLookup services, final SortedMap<Date, Day> dayMap, final Event event, int userId) {
+        if (CPTool.hasDeclined(event, userId)) {
+            return;
         }
-    }
-
-    private void addToMap(final SortedMap<Date, Day> dayMap, final Appointment appointment) {
-        if (appointment.getFullTime()) {
+        if (CalendarUtils.isAllDay(event)) {
             // always have time at 00:00 UTC -> move to 00:00 of user time zone to ease following calculation
-            final long start = appointment.getStartDate().getTime();
-            appointment.setStartDate(new Date(start - cal.getTimeZone().getOffset(start)));
-            final long end = appointment.getEndDate().getTime();
-            appointment.setEndDate(new Date(end - cal.getTimeZone().getOffset(end)));
+            final long start = event.getStartDate().getTimestamp();
+            long offset = cal.getTimeZone().getOffset(start);
+            event.setStartDate(new DateTime(start - offset));
+            final long end = event.getEndDate().getTimestamp();
+            offset = cal.getTimeZone().getOffset(end);
+            event.setEndDate(new DateTime(end - offset));
         }
-        Date dest = CalendarTools.getDayStart(cal, appointment.getStartDate());
+        Date dest = CalendarTools.getDayStart(cal, CalendarUtils.asDate(event.getStartDate()));
         Day day = dayMap.get(dest);
         Date endOfDay = CalendarTools.getDayEnd(cal, dest);
         do {
-            final CPAppointment cpAppointment = new CPAppointment(appointment, cal, context);
-            if (dest.after(appointment.getStartDate())) {
+            final CPEvent cpAppointment = new CPEvent(services, event, cal, context);
+            if (dest.after(CalendarUtils.asDate(event.getStartDate()))) {
                 cpAppointment.setStartDate(dest);
             }
-            if (!endOfDay.after(appointment.getEndDate())) {
+            if (!endOfDay.after(CalendarUtils.asDate(event.getEndDate()))) {
                 cpAppointment.setEndDate(endOfDay);
             }
             if (null != day) {
-                if (appointment.getFullTime()) {
+                if (CalendarUtils.isAllDay(event)) {
                     day.addWholeDay(cpAppointment);
                 } else {
                     day.add(cpAppointment);
@@ -208,6 +176,6 @@ public class Partitioner {
             dest = CalendarTools.getDayStart(cal, new Date(endOfDay.getTime() + 1));
             day = dayMap.get(dest);
             endOfDay = CalendarTools.getDayEnd(cal, dest);
-        } while (appointment.getEndDate().after(dest));
+        } while (CalendarUtils.asDate(event.getEndDate()).after(dest));
     }
 }

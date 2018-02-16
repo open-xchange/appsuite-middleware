@@ -83,18 +83,22 @@ public enum Client {
     /**
      * The client for Outlook OXtender2 AddIn: <code>"OpenXchange.HTTPClient.OXAddIn"</code>
      */
+    @Deprecated
     OUTLOOK_OXTENDER2_ADDIN("OpenXchange.HTTPClient.OXAddIn", "The client identifier for Outlook OXtender2 AddIn"),
     /**
      * The client for OX Notifier: <code>"OpenXchange.HTTPClient.OXNotifier"</code>
      */
+    @Deprecated
     OXNOTIFIER("OpenXchange.HTTPClient.OXNotifier", "The client identifier for OX Notifier"),
     /**
      * The client for Outlook Updater 1: <code>"com.open-xchange.updater.olox1"</code>
      */
+    @Deprecated
     OUTLOOK_UPDATER1("com.open-xchange.updater.olox1", "The client identifier for Outlook Updater v1"),
     /**
      * The client for Outlook Updater 2: <code>"com.open-xchange.updater.olox2"</code>
      */
+    @Deprecated
     OUTLOOK_UPDATER2("com.open-xchange.updater.olox2", "The client identifier for Outlook Updater v2"),
     /**
      * The client for CardDAV: <code>"CARDDAV"</code>

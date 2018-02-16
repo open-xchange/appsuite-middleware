@@ -50,10 +50,6 @@
 package com.openexchange.imap.command;
 
 import static com.openexchange.imap.command.MailMessageFetchIMAPCommand.getFetchCommand;
-import gnu.trove.list.TLongList;
-import gnu.trove.list.array.TLongArrayList;
-import gnu.trove.map.TLongObjectMap;
-import gnu.trove.map.hash.TLongObjectHashMap;
 import java.util.Collection;
 import javax.mail.FetchProfile;
 import javax.mail.FetchProfile.Item;
@@ -63,16 +59,17 @@ import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPServerInfo;
-import com.openexchange.imap.services.Services;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.utils.StorageUtility;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
-import com.sun.mail.imap.IMAPTextPreviewProvider;
 import com.sun.mail.imap.protocol.FetchResponse;
 import com.sun.mail.imap.protocol.UID;
-
+import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TLongArrayList;
+import gnu.trove.map.TLongObjectMap;
+import gnu.trove.map.hash.TLongObjectHashMap;
 
 /**
  * {@link MailMessageFillerIMAPCommand} - Fills a given collection of messages.
@@ -94,14 +91,21 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
     private final boolean uid;
     private final String fullname;
     private final int index;
-    private final IMAPTextPreviewProvider.Mode textPreviewMode;
-    private final IMAPTextPreviewProvider textPreviewProvider;
+    private final boolean examineHasAttachmentUserFlags;
 
     /**
      * Initializes a new {@link MailMessageFillerIMAPCommand}.
+     *
+     * @param messages The messages to fill
+     * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
+     * @param fp The fetch profile to use
+     * @param serverInfo The IMAP server information deduced from configuration
+     * @param imapFolder The IMAP folder providing connected protocol
+     * @throws MessagingException If initialization fails
      */
-    public MailMessageFillerIMAPCommand(Collection<MailMessage> messages, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo, IMAPFolder imapFolder) throws MessagingException {
+    public MailMessageFillerIMAPCommand(Collection<MailMessage> messages, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo, boolean examineHasAttachmentUserFlags, IMAPFolder imapFolder) throws MessagingException {
         super(imapFolder);
+        this.examineHasAttachmentUserFlags = examineHasAttachmentUserFlags;
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             returnDefaultValue = true;
@@ -121,17 +125,6 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
         }
         this.messages = tm;
         this.uids = tuids.toArray();
-        textPreviewProvider = Services.optService(IMAPTextPreviewProvider.class);
-        if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS_LAZY)) {
-            textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.ONLY_IF_AVAILABLE;
-        } else if (fp.contains(IMAPFolder.SnippetFetchProfileItem.SNIPPETS)) {
-            textPreviewMode = null == textPreviewProvider ? null : IMAPTextPreviewProvider.Mode.REQUIRE;
-        } else {
-            textPreviewMode = null;
-        }
-        if (null != textPreviewMode) {
-            fp.add(UIDFolder.FetchProfileItem.UID);
-        }
         if (length == messageCount) {
             command = getFetchCommand(isRev1, checkFetchProfile(fp), false, serverInfo);
             args = (1 == length ? new String[] { "1" } : ARGS_ALL);
@@ -195,10 +188,7 @@ public final class MailMessageFillerIMAPCommand extends AbstractIMAPCommand<Void
                 try {
                     IDMailMessage idm = (IDMailMessage) message;
                     idm.setAccountId(accountId);
-                    MailMessageFetchIMAPCommand.handleFetchRespone(idm, fetchResponse, fullname);
-                    if (null != textPreviewMode) {
-                        idm.setTextPreview(textPreviewProvider.getTextPreview(idm.getUid(), textPreviewMode));
-                    }
+                    MailMessageFetchIMAPCommand.handleFetchRespone(idm, fetchResponse, fullname, examineHasAttachmentUserFlags);
                 } catch (OXException e) {
                     /*
                      * Discard corrupt message

@@ -96,12 +96,14 @@ public class Bug14111Test extends AbstractAJAXSession {
         super();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
         client = getClient();
         tz = client.getValues().getTimeZone();
         calendar = GregorianCalendar.getInstance(tz);
+        calendar.add(Calendar.DAY_OF_YEAR, 1);
         appointment = createAppointment();
         exception = createException();
     }
@@ -142,6 +144,7 @@ public class Bug14111Test extends AbstractAJAXSession {
         }
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         try {

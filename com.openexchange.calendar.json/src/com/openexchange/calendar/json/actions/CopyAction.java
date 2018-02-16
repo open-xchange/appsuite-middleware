@@ -49,11 +49,7 @@
 
 package com.openexchange.calendar.json.actions;
 
-import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
-import java.sql.SQLException;
 import java.util.Date;
-import java.util.TimeZone;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -62,20 +58,16 @@ import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.writer.AppointmentWriter;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
-
 
 /**
  * {@link CopyAction}
@@ -87,67 +79,32 @@ public final class CopyAction extends AppointmentAction {
 
     /**
      * Initializes a new {@link CopyAction}.
-     * @param services
+     *
+     * @param services A service lookup reference
      */
-    public CopyAction(final ServiceLookup services) {
+    public CopyAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final AppointmentAJAXRequest req) throws OXException, JSONException {
-        final int id = req.checkInt(AJAXServlet.PARAMETER_ID);
-        final int inFolder = req.checkInt(AJAXServlet.PARAMETER_FOLDERID);
-        final boolean ignoreConflicts = req.checkBoolean(AppointmentFields.IGNORE_CONFLICTS);
-        final JSONObject jData = req.getData();
-        final int folderId = DataParser.checkInt(jData, FolderChildFields.FOLDER_ID);
-        final TimeZone timeZone;
-        {
-            final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-            timeZone = null == timeZoneId ? req.getTimeZone() : getTimeZone(timeZoneId);
+    protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
+        if (false == Boolean.parseBoolean(request.getParameter(AppointmentFields.IGNORE_CONFLICTS))) {
+            session.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.TRUE);
         }
-
-        final ServerSession session = req.getSession();
-
-        final AppointmentSqlFactoryService factoryService = getService();
-        if (null == factoryService) {
-            throw ServiceExceptionCode.absentService(AppointmentSqlFactoryService.class);
+        String folderId = request.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+        String objectId = request.checkParameter(AJAXServlet.PARAMETER_ID);
+        JSONObject jsonObject = request.getData();
+        String targetFolderID = DataParser.checkString(jsonObject, FolderChildFields.FOLDER_ID);
+        Event event = session.getCalendarService().getEvent(session, folderId, new EventID(folderId, objectId));
+        event.removeId();
+        event.removeUid();
+        event.removeFolderId();
+        CalendarResult result = session.getCalendarService().createEvent(session, targetFolderID, event);
+        if (null != result.getCreations() && 0 < result.getCreations().size()) {
+            String id = result.getCreations().get(0).getCreatedEvent().getId();
+            return new AJAXRequestResult(new JSONObject().put(DataFields.ID, id), new Date(result.getTimestamp()), "json");
         }
-        final AppointmentSQLInterface appointmentSql = factoryService.createAppointmentSql(session);
-
-        Date timestamp = new Date(0);
-
-        // final JSONObject jsonResponseObject = new JSONObject();
-        CalendarDataObject appointmentObj = null;
-        try {
-            appointmentObj = appointmentSql.getObjectById(id, inFolder);
-        } catch (final SQLException exc) {
-            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(exc, new Object[0]);
-        }
-
-        appointmentObj.removeObjectID();
-        appointmentObj.removeUid();
-        appointmentObj.setParentFolderID(folderId);
-        appointmentObj.setIgnoreConflicts(ignoreConflicts);
-        final Appointment[] conflicts = appointmentSql.insertAppointmentObject(appointmentObj);
-
-        final JSONObject jsonResponseObj = new JSONObject();
-
-        if (conflicts != null) {
-            final JSONArray jsonConflictArray = new JSONArray(conflicts.length);
-            final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone).setSession(req.getSession());
-            for (int a = 0; a < conflicts.length; a++) {
-                final JSONObject jsonAppointmentObj = new JSONObject();
-                appointmentWriter.writeAppointment(conflicts[a], jsonAppointmentObj);
-                jsonConflictArray.put(jsonAppointmentObj);
-            }
-            jsonResponseObj.put("conflicts", jsonConflictArray);
-        } else {
-            jsonResponseObj.put(DataFields.ID, appointmentObj.getObjectID());
-            timestamp = appointmentObj.getLastModified();
-            countObjectUse(session, appointmentObj);
-        }
-
-        return new AJAXRequestResult(jsonResponseObj, timestamp, "json");
+        return null; //TODO: conflicts
     }
 
 }

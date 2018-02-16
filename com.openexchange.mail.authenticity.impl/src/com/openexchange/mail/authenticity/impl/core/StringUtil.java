@@ -51,10 +51,15 @@ package com.openexchange.mail.authenticity.impl.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.mail.authenticity.MailAuthenticityAttribute;
 
 /**
@@ -79,26 +84,31 @@ final class StringUtil {
         <T> void add(String key, String value, T collector);
     }
 
-    private static final Map<Class<?>, CollectorAdder> collectorAdders = new HashMap<>();
-    static {
-        collectorAdders.put(HashMap.class, new CollectorAdder() {
+    private static final Map<Class<?>, CollectorAdder> COLLECTOR_ADDERS = ImmutableMap.<Class<?>, CollectorAdder> builder().put(HashMap.class, new CollectorAdder() {
 
-            @Override
-            public <T> void add(String key, String value, T collector) {
-                Map<String, String> m = (Map<String, String>) collector;
-                m.put(key, value);
-            }
-        });
+        @Override
+        public <T> void add(String key, String value, T collector) {
+            ((Map<String, String>) collector).put(key, value);
+        }
+    }).put(LinkedHashMap.class, new CollectorAdder() {
 
-        collectorAdders.put(ArrayList.class, new CollectorAdder() {
+        @Override
+        public <T> void add(String key, String value, T collector) {
+            ((Map<String, String>) collector).put(key, value);
+        }
+    }).put(ArrayList.class, new CollectorAdder() {
 
-            @Override
-            public <T> void add(String key, String value, T collector) {
-                List<MailAuthenticityAttribute> l = (List<MailAuthenticityAttribute>) collector;
-                l.add(new MailAuthenticityAttribute(key, value));
-            }
-        });
-    }
+        @Override
+        public <T> void add(String key, String value, T collector) {
+            ((List<MailAuthenticityAttribute>) collector).add(new MailAuthenticityAttribute(key, value));
+        }
+    }).put(LinkedList.class, new CollectorAdder() {
+
+        @Override
+        public <T> void add(String key, String value, T collector) {
+            ((List<MailAuthenticityAttribute>) collector).add(new MailAuthenticityAttribute(key, value));
+        }
+    }).build();
 
     /**
      * Parses the specified element as a key/value {@link Map}
@@ -122,6 +132,17 @@ final class StringUtil {
         return parseToCollector(element, listCollector);
     }
 
+    private static final Pattern REGEX_PAIR;
+    static {
+        String quotedString = "\"(?:\\\"|.)*\"";
+        String token = "\\p{Graph}+";
+        String comment = "\\([^)]*\\)";
+
+        String VALUE = "(?:" + quotedString + "|" + token + ")(?: " + comment + ")?";
+
+        REGEX_PAIR = Pattern.compile("([a-zA-Z0-9-._]+)=(" + VALUE + ")( |;|$)");
+    }
+
     /**
      * Parses the attributes (key value pairs separated by an equals '=' sign) of the specified element to the specified {@link T} collector.
      *
@@ -129,97 +150,20 @@ final class StringUtil {
      * @return A {@link T} with the key/value attributes of the element
      */
     private static <T> T parseToCollector(CharSequence element, T collector) {
-        // No pairs; return as a singleton collector with the line being both the key and the value
-        if (!element.toString().contains("=")) {
+        if (element.toString().indexOf('=') < 0) {
+            // No pairs; return as a singleton collector with the line being both the key and the value
             String kv = element.toString();
             add(kv, kv, collector);
             return collector;
         }
 
-        StringBuilder keyBuffer = new StringBuilder(32);
-        StringBuilder valueBuffer = new StringBuilder(64);
-        String key = null;
-        boolean valueMode = false;
-        boolean backtracking = false;
-        boolean comment = false;
-        int backtrackIndex = 0;
-        for (int index = 0; index < element.length();) {
-            char c = element.charAt(index);
-            switch (c) {
-                case '=':
-                    if (valueMode) {
-                        if (comment) {
-                            valueBuffer.append(c);
-                            index++;
-                            break;
-                        }
-                        // A key found while in value mode, so we backtrack
-                        backtracking = true;
-                        valueMode = false;
-                        index--;
-                    } else {
-                        // Retain the key and switch to value mode
-                        key = keyBuffer.toString();
-                        keyBuffer.setLength(0);
-                        valueMode = true;
-                        index++;
-                    }
-                    break;
-                case '(':
-                    if (valueMode) {
-                        comment = true;
-                        valueBuffer.append(c);
-                        index++;
-                    }
-                    break;
-                case ')':
-                    if (valueMode) {
-                        comment = false;
-                        valueBuffer.append(c);
-                        index++;
-                    }
-                    break;
-                case ' ':
-                    if (!valueMode) {
-                        //Remove the key from the value buffer
-                        valueBuffer.setLength(valueBuffer.length() - backtrackIndex);
-                        add(key, valueBuffer.toString().trim(), collector);
-                        // Retain the new key (and reverse if that key came from backtracking)
-                        key = backtracking ? keyBuffer.reverse().toString() : keyBuffer.toString();
-                        // Reset counters
-                        keyBuffer.setLength(0);
-                        valueBuffer.setLength(0);
-                        // Skip to the value of the retained new key (position after the '=' sign)
-                        index += backtrackIndex + 2;
-                        backtrackIndex = 0;
-                        backtracking = false;
-                        valueMode = true;
-                        break;
-                    }
-                    // while in value mode spaces are considered as literals, hence fall-through to 'default'
-                default:
-                    if (valueMode) {
-                        // While in value mode append all literals to the value buffer
-                        valueBuffer.append(c);
-                        index++;
-                    } else {
-                        // While in key mode append all key literals to the key buffer...
-                        keyBuffer.append(c);
-                        if (backtracking) {
-                            // ... and if we are backtracking, update the counters
-                            index--;
-                            backtrackIndex++;
-                        } else {
-                            // ... if we are not backtracking and we are in key mode, go forth
-                            index++;
-                        }
-                    }
-            }
+        Matcher m = REGEX_PAIR.matcher(element);
+        while (m.find()) {
+            String key = m.group(1);
+            String value = m.group(2);
+            add(key, value, collector);
         }
-        // Add the last pair
-        if (valueBuffer.length() > 0) {
-            add(key, valueBuffer.toString(), collector);
-        }
+
         return collector;
     }
 
@@ -231,7 +175,7 @@ final class StringUtil {
      * @param collector The {@link T} collector
      */
     private static <T> void add(String key, String value, T collector) {
-        CollectorAdder collectorAdder = collectorAdders.get(collector.getClass());
+        CollectorAdder collectorAdder = COLLECTOR_ADDERS.get(collector.getClass());
         if (collectorAdder == null) {
             throw new IllegalArgumentException("Unsupported collector type '" + collector.getClass() + "'");
         }
@@ -248,7 +192,7 @@ final class StringUtil {
     static List<String> splitElements(CharSequence header) {
         LOGGER.debug("Splitting header: {}", header);
         long start = System.currentTimeMillis();
-        
+
         List<String> split = new ArrayList<>();
         boolean openQuotes = false;
         boolean openParenthesis = false;

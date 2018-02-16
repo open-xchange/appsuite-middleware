@@ -50,9 +50,12 @@
 package com.openexchange.groupware.reminder.json.actions;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,6 +63,13 @@ import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.ReminderWriter;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmTrigger;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.ReminderService;
@@ -97,30 +107,13 @@ public final class UpdatesAction extends AbstractReminderAction {
             final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
             timeZone = null == timeZoneId ? req.getTimeZone() : getTimeZone(timeZoneId);
         }
-
+        final ReminderWriter reminderWriter = new ReminderWriter(timeZone);
         final JSONArray jsonResponseArray = new JSONArray();
             final ServerSession session = req.getSession();
             final ReminderService reminderService = ServerServiceRegistry.getInstance().getService(ReminderService.class, true);
 
             List<ReminderObject> reminders = reminderService.listModifiedReminder(session, session.getUserId(), timestamp);
             for(ReminderObject reminder: reminders){
-                final ReminderWriter reminderWriter = new ReminderWriter(timeZone);
-
-                if (reminder.isRecurrenceAppointment()) {
-                    // final int targetId = reminder.getTargetId();
-                    // final int inFolder = reminder.getFolder();
-
-                    // currently disabled because not used by the UI
-                    // final ReminderObject latestReminder = getLatestReminder(targetId, inFolder, sessionObj, end);
-                    //
-                    // if (latestReminder == null) {
-                    // continue;
-                    // } else {
-                    // reminderObj.setDate(latestReminder.getDate());
-                    // reminderObj.setRecurrencePosition(latestReminder.getRecurrencePosition());
-                    // }
-                }
-
                 try {
                     if (hasModulePermission(reminder, session) && stillAccepted(reminder, session)) {
                         final JSONObject jsonReminderObj = new JSONObject(12);
@@ -133,6 +126,24 @@ public final class UpdatesAction extends AbstractReminderAction {
                     }
                     LOG.warn("Cannot load target object of this reminder.", e);
                     deleteReminderSafe(session, reminder, session.getUserId(), reminderService);
+                }
+            }
+
+            CalendarService calendarService = ServerServiceRegistry.getInstance().getService(CalendarService.class);
+            CalendarSession calendarSession = calendarService.init(session);
+            calendarSession.set(CalendarParameters.PARAMETER_RANGE_END, new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7)));
+            UpdatesResult updatedEventsOfUser = calendarService.getUpdatedEventsOfUser(calendarSession, timestamp.getTime());
+
+            List<AlarmTrigger> triggers = calendarService.getAlarmTriggers(calendarSession, Collections.singleton("DISPLAY"));
+            List<Integer> updatedAlarmIds = new ArrayList<>();
+            for(Event eve : updatedEventsOfUser.getNewAndModifiedEvents()){
+                for(Alarm alarm: eve.getAlarms()){
+                    updatedAlarmIds.add(alarm.getId());
+                }
+            }
+            for (AlarmTrigger trigger: triggers) {
+                if (updatedAlarmIds.contains(trigger.getAlarm())) {
+                    convertAlarmTrigger2Reminder(calendarSession, trigger, reminderWriter, jsonResponseArray);
                 }
             }
 

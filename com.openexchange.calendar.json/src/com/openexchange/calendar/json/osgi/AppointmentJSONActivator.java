@@ -49,19 +49,25 @@
 
 package com.openexchange.calendar.json.osgi;
 
+import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.calendar.json.AppointmentActionFactory;
-import com.openexchange.calendar.json.converters.AppointmentIcalResultConverter;
 import com.openexchange.calendar.json.converters.AppointmentResultConverter;
+import com.openexchange.calendar.json.converters.EventResultConverter;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
-import com.openexchange.data.conversion.ical.ICalEmitter;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.chronos.itip.ITipActionPerformerFactoryService;
+import com.openexchange.chronos.itip.ITipAnalyzerService;
+import com.openexchange.chronos.itip.json.ITipActionFactory;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.RecurrenceService;
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 import com.openexchange.objectusecount.ObjectUseCountService;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.user.UserService;
 
 /**
@@ -71,7 +77,9 @@ import com.openexchange.user.UserService;
  */
 public class AppointmentJSONActivator extends AJAXModuleActivator {
 
-    private static final Class<?>[] NEEDED = new Class[] { UserService.class, CalendarCollectionService.class, AppointmentSqlFactoryService.class, ICalEmitter.class };
+    private static final Class<?>[] NEEDED = new Class[] {
+        CalendarService.class, UserService.class, RecurrenceService.class, ConversionService.class, ITipActionPerformerFactoryService.class, ITipAnalyzerService.class
+    };
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -85,7 +93,22 @@ public class AppointmentJSONActivator extends AJAXModuleActivator {
         //        registerService(TargetService.class, new ModifyThroughDependant(), props);
         registerModule(new AppointmentActionFactory(this), "calendar");
         registerService(ResultConverter.class, new AppointmentResultConverter(this));
-        registerService(ResultConverter.class, new AppointmentIcalResultConverter(this));
+        registerService(ResultConverter.class, new EventResultConverter(this));
+
+
+
+        RankingAwareNearRegistryServiceTracker<ITipAnalyzerService> rankingTracker = new RankingAwareNearRegistryServiceTracker<>(context, ITipAnalyzerService.class, 0);
+        RankingAwareNearRegistryServiceTracker<ITipActionPerformerFactoryService> factoryTracker = new RankingAwareNearRegistryServiceTracker<>(context, ITipActionPerformerFactoryService.class, 0);
+        ServiceTracker<CapabilityService, CapabilityService> capabilityTracker = track(CapabilityService.class);
+        rememberTracker(rankingTracker);
+        rememberTracker(factoryTracker);
+        rememberTracker(capabilityTracker);
+        openTrackers();
+
+        ITipActionFactory.INSTANCE = new ITipActionFactory(this, rankingTracker, factoryTracker);
+        registerModule(ITipActionFactory.INSTANCE, "calendar/itip");
+
+
         registerService(OAuthScopeProvider.class, new AbstractScopeProvider(AppointmentActionFactory.OAUTH_READ_SCOPE, OAuthScopeDescription.READ_ONLY) {
 
             @Override

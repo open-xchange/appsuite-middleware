@@ -1,0 +1,25 @@
+/folders?action=restore:
+  put:
+    operationId: restoreFolders
+    tags:
+      - Folders
+    summary: Restore specified folders from trash folder
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamFolderTree"
+      - in: body
+        name: body
+        description: A JSON array of folder ids that shall be restored.
+        required: true
+        schema:
+          type: array
+          items:
+            type: string
+            description: The folder id
+    responses:
+      200:
+        description: |
+          A JSON object containing an array with data for all folders requested to restore. Each array element describes one folder.
+          In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/FolderRestoreResponse"

@@ -72,7 +72,7 @@ public abstract class DateMapping<O> extends DefaultJsonMapping<Date, O> {
 	 * @param ajaxName The AJAX name
 	 * @param columnID The column identifier
 	 */
-	public DateMapping(final String ajaxName, final int columnID) {
+    public DateMapping(final String ajaxName, final Integer columnID) {
 		super(ajaxName, columnID);
 	}
 

@@ -65,7 +65,7 @@ import com.openexchange.session.Session;
  */
 public abstract class TimeMapping<O> extends DefaultJsonMapping<Date, O> {
 
-	public TimeMapping(final String ajaxName, final int columnID) {
+    public TimeMapping(final String ajaxName, final Integer columnID) {
 		super(ajaxName, columnID);
 	}
 

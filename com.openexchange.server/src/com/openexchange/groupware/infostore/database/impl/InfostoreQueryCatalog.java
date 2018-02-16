@@ -99,14 +99,14 @@ public class InfostoreQueryCatalog {
     public static final Metadata[] INFOSTORE_FIELDS = new Metadata[] {
         Metadata.ID_LITERAL, Metadata.FOLDER_ID_LITERAL, Metadata.VERSION_LITERAL, Metadata.COLOR_LABEL_LITERAL,
         Metadata.CREATION_DATE_LITERAL, Metadata.LAST_MODIFIED_LITERAL, Metadata.CREATED_BY_LITERAL, Metadata.MODIFIED_BY_LITERAL,
-        Metadata.LAST_MODIFIED_UTC_LITERAL };
+        Metadata.LAST_MODIFIED_UTC_LITERAL, Metadata.ORIGIN_LITERAL };
 
     public static final Set<Metadata> INFOSTORE_FIELDS_SET = ImmutableSet.copyOf(INFOSTORE_FIELDS);
 
     public static final Metadata[] DEL_INFOSTORE_FIELDS = new Metadata[] {
         Metadata.ID_LITERAL, Metadata.FOLDER_ID_LITERAL, Metadata.VERSION_LITERAL,
         Metadata.CREATION_DATE_LITERAL, Metadata.LAST_MODIFIED_LITERAL, Metadata.CREATED_BY_LITERAL, Metadata.MODIFIED_BY_LITERAL,
-        Metadata.LAST_MODIFIED_UTC_LITERAL, Metadata.COLOR_LABEL_LITERAL };
+        Metadata.LAST_MODIFIED_UTC_LITERAL, Metadata.COLOR_LABEL_LITERAL, Metadata.ORIGIN_LITERAL };
 
     public static final Set<Metadata> DEL_INFOSTORE_FIELDS_SET = ImmutableSet.copyOf(DEL_INFOSTORE_FIELDS);
 
@@ -178,16 +178,16 @@ public class InfostoreQueryCatalog {
 
         public MetadataSwitcher getFieldSwitcher() {
             switch (this) {
-            case INFOSTORE:
-                return new InfostoreColumnsSwitch();
-            case DEL_INFOSTORE:
-                return new DelInfostoreColumnsSwitch();
-            case INFOSTORE_DOCUMENT:
-                return new InfostoreDocumentColumnsSwitch();
-            case DEL_INFOSTORE_DOCUMENT:
-                return new DelInfostoreDocumentColumnsSwitch();
-            default:
-                throw new IllegalArgumentException("Will not happen");
+                case INFOSTORE:
+                    return new InfostoreColumnsSwitch();
+                case DEL_INFOSTORE:
+                    return new DelInfostoreColumnsSwitch();
+                case INFOSTORE_DOCUMENT:
+                    return new InfostoreDocumentColumnsSwitch();
+                case DEL_INFOSTORE_DOCUMENT:
+                    return new DelInfostoreDocumentColumnsSwitch();
+                default:
+                    throw new IllegalArgumentException("Will not happen");
             }
         }
     }
@@ -266,14 +266,14 @@ public class InfostoreQueryCatalog {
 
     public List<String> getDelete(final Table t, final List<DocumentMetadata> documents, boolean includeVersions) {
         switch (t) {
-        default:
-            break;
-        case INFOSTORE_DOCUMENT:
-        case DEL_INFOSTORE_DOCUMENT:
-            throw new IllegalArgumentException("getDelete is only applicable for the non version tables infostore and del_infostore");
+            default:
+                break;
+            case INFOSTORE_DOCUMENT:
+            case DEL_INFOSTORE_DOCUMENT:
+                throw new IllegalArgumentException("getDelete is only applicable for the non version tables infostore and del_infostore");
         }
         final int size = documents.size();
-        final List<String> l = new ArrayList<String>(2);
+        final List<String> l = new ArrayList<>(2);
         // Versions
         if (includeVersions) {
             final Table versionTable = Table.INFOSTORE.equals(t) ? Table.INFOSTORE_DOCUMENT : Table.DEL_INFOSTORE_DOCUMENT;
@@ -300,13 +300,13 @@ public class InfostoreQueryCatalog {
 
     public List<String> getSingleDelete(final Table t) {
         switch (t) {
-        default:
-            break;
-        case INFOSTORE_DOCUMENT:
-        case DEL_INFOSTORE_DOCUMENT:
-            throw new IllegalArgumentException("getDelete is only applicable for the non version tables infostore and del_infostore");
+            default:
+                break;
+            case INFOSTORE_DOCUMENT:
+            case DEL_INFOSTORE_DOCUMENT:
+                throw new IllegalArgumentException("getDelete is only applicable for the non version tables infostore and del_infostore");
         }
-        final List<String> l = new ArrayList<String>(2);
+        final List<String> l = new ArrayList<>(2);
         // Versions
         {
             final Table versionTable = Table.INFOSTORE.equals(t) ? Table.INFOSTORE_DOCUMENT : Table.DEL_INFOSTORE_DOCUMENT;
@@ -424,7 +424,7 @@ public class InfostoreQueryCatalog {
     }
 
     public Metadata[] filterForDocument(final Metadata[] modified) {
-        final List<Metadata> m = new ArrayList<Metadata>();
+        final List<Metadata> m = new ArrayList<>();
         final Set<Metadata> knownFields = Table.INFOSTORE.getFieldSet();
         for (final Metadata metadata : modified) {
             if (knownFields.contains(metadata)) {
@@ -472,7 +472,7 @@ public class InfostoreQueryCatalog {
     }
 
     public Metadata[] filterForVersion(final Metadata[] modified) {
-        final List<Metadata> m = new ArrayList<Metadata>();
+        final List<Metadata> m = new ArrayList<>();
         final Set<Metadata> knownFields = Table.INFOSTORE_DOCUMENT.getFieldSet();
         for (final Metadata metadata : modified) {
             if (metadata == Metadata.VERSION_LITERAL) {
@@ -497,12 +497,12 @@ public class InfostoreQueryCatalog {
 
     public String getVersionDelete(final Table t, final List<DocumentMetadata> documents) {
         switch (t) {
-        default:
-            break;
-        case INFOSTORE:
-        case DEL_INFOSTORE:
-            throw new IllegalArgumentException(
-                "getVersionDelete is only applicable for the version tables infostore_document and del_infostore_document");
+            default:
+                break;
+            case INFOSTORE:
+            case DEL_INFOSTORE:
+                throw new IllegalArgumentException(
+                    "getVersionDelete is only applicable for the version tables infostore_document and del_infostore_document");
         }
         final StringBuilder delete = new StringBuilder("DELETE FROM ").append(t.getTablename()).append(" WHERE ( ");
         for (final DocumentMetadata doc : documents) {
@@ -516,27 +516,27 @@ public class InfostoreQueryCatalog {
 
     public String getSingleVersionDelete(final Table t) {
         switch (t) {
-        default:
-            break;
-        case INFOSTORE:
-        case DEL_INFOSTORE:
-            throw new IllegalArgumentException(
-                "getVersionDelete is only applicable for the version tables infostore_document and del_infostore_document");
+            default:
+                break;
+            case INFOSTORE:
+            case DEL_INFOSTORE:
+                throw new IllegalArgumentException(
+                    "getVersionDelete is only applicable for the version tables infostore_document and del_infostore_document");
         }
         final StringBuilder delete = new StringBuilder("DELETE FROM ").append(t.getTablename()).append(" WHERE ").append(
             Metadata.ID_LITERAL.doSwitch(t.getFieldSwitcher())).append(" = ? AND ").append(
-            Metadata.VERSION_LITERAL.doSwitch(t.getFieldSwitcher())).append(" = ? AND cid = ?");
+                Metadata.VERSION_LITERAL.doSwitch(t.getFieldSwitcher())).append(" = ? AND cid = ?");
         return delete.toString();
     }
 
     public String getAllVersionsDelete(final Table t) {
         switch (t) {
-        default:
-            break;
-        case INFOSTORE:
-        case DEL_INFOSTORE:
-            throw new IllegalArgumentException(
-                "getVersionDelete is only applicable for the version tables infostore_document and del_infostore_document");
+            default:
+                break;
+            case INFOSTORE:
+            case DEL_INFOSTORE:
+                throw new IllegalArgumentException(
+                    "getVersionDelete is only applicable for the version tables infostore_document and del_infostore_document");
         }
         final StringBuilder delete = new StringBuilder("DELETE FROM ").append(t.getTablename()).append(" WHERE ").append(
             Metadata.ID_LITERAL.doSwitch(t.getFieldSwitcher())).append(" = ? AND cid = ?");
@@ -566,7 +566,7 @@ public class InfostoreQueryCatalog {
     public String getListQuery(final int[] id, final Metadata[] metadata, final FieldChooser wins, final int contextId) {
         final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins)).append(SQL_CHUNK04).append(contextId).append(
             SQL_CHUNK03).append(contextId).append(
-            " AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id WHERE infostore.id IN (");
+                " AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id WHERE infostore.id IN (");
         for (final int i : id) {
             builder.append(i).append(',');
         }
@@ -626,7 +626,7 @@ public class InfostoreQueryCatalog {
     public String getVersionsQuery(final int id, final Metadata[] metadata, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
         final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins)).append(SQL_CHUNK04).append(contextId).append(
             SQL_CHUNK03).append(contextId).append(" AND infostore.id = infostore_document.infostore_id ").append(" WHERE infostore.id = ").append(
-            id);
+                id);
         if (sort != null) {
             builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
         }
@@ -654,7 +654,7 @@ public class InfostoreQueryCatalog {
     public String getDeletedDocumentsQuery(final long folderId, final long since, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
         final StringBuilder builder = new StringBuilder("SELECT infostore.id, infostore.folder_id").append(
             " FROM del_infostore as infostore WHERE infostore.folder_id = ").append(folderId).append(" AND infostore.cid = ").append(
-            contextId).append(SQL_CHUNK05).append(since);
+                contextId).append(SQL_CHUNK05).append(since);
         if (null != sort && Table.DEL_INFOSTORE.getFieldSet().contains(sort)) {
             builder.append(STR_ORDER_BY).append(sort.doSwitch(Table.DEL_INFOSTORE.getFieldSwitcher())).append(' ').append(order(order));
         }
@@ -664,7 +664,7 @@ public class InfostoreQueryCatalog {
     public String getNewDocumentsQuery(final long folderId, final int userId, final long since, final Metadata[] metadata, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
         final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins)).append(SQL_CHUNK04).append(contextId).append(
             SQL_CHUNK03).append(contextId).append(SQL_CHUNK01).append(folderId).append(" AND infostore.creating_date >= ").append(since).append(
-            SQL_CHUNK02).append(userId);
+                SQL_CHUNK02).append(userId);
         if (sort != null) {
             builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
         }
@@ -674,7 +674,7 @@ public class InfostoreQueryCatalog {
     public String getModifiedDocumentsQuery(final long folderId, final int userId, final long since, final Metadata[] metadata, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
         final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins)).append(SQL_CHUNK04).append(contextId).append(
             SQL_CHUNK03).append(contextId).append(SQL_CHUNK01).append(folderId).append(SQL_CHUNK05).append(since).append(SQL_CHUNK02).append(
-            userId);
+                userId);
         if (sort != null) {
             builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
         }
@@ -684,7 +684,7 @@ public class InfostoreQueryCatalog {
     public String getDeletedDocumentsQuery(final long folderId, final int userId, final long since, final Metadata sort, final int order, final FieldChooser wins, final int contextId) {
         final StringBuilder builder = new StringBuilder("SELECT infostore.id, infostore.folder_id").append(
             " FROM del_infostore as infostore WHERE infostore.folder_id = ").append(folderId).append(" AND infostore.cid = ").append(
-            contextId).append(SQL_CHUNK05).append(since).append(SQL_CHUNK02).append(userId);
+                contextId).append(SQL_CHUNK05).append(since).append(SQL_CHUNK02).append(userId);
         if (sort != null) {
             builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
         }
@@ -706,8 +706,8 @@ public class InfostoreQueryCatalog {
     public String getAllDocumentsQuery(final String where, final Metadata[] metadata, final DocumentWins wins, final int contextId) {
         final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins)).append(SQL_CHUNK04).append(contextId).append(
             SQL_CHUNK03).append(contextId).append(
-            " AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id WHERE ").append(
-            where);
+                " AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id WHERE ").append(
+                    where);
         return builder.toString();
     }
 
@@ -765,7 +765,7 @@ public class InfostoreQueryCatalog {
             .append(" infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id")
             .append(" WHERE object_permission.created_by = ").append(userId)
             .append(" AND object_permission.permission_id != ").append(userId)
-        ;
+            ;
         if (sort != null) {
             stringBuilder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
         }
@@ -837,6 +837,10 @@ public class InfostoreQueryCatalog {
         return builder.toString();
     }
 
+    public String getDocumentOriginQuery() {
+        return "SELECT origin FROM infostore WHERE cid = ? AND id = ? AND folder_id = ? AND origin IS NOT NULL";
+    }
+
     private static void appendEntityConstraint(StringBuilder builder, String tablePrefix, int userId, int[] groups) {
         if (groups != null && groups.length > 0) {
             builder.append(" ((").append(tablePrefix).append(".group_flag <> 1 AND ").append(tablePrefix).append(".permission_id = ").append(userId).append(") OR (").append(tablePrefix).append(".group_flag = 1 AND ").append(tablePrefix).append(".permission_id IN (");
@@ -856,10 +860,7 @@ public class InfostoreQueryCatalog {
     }
 
     private String order(final int order) {
-        if (order == InfostoreFacade.DESC) {
-            return "DESC";
-        }
-        return "ASC";
+        return order == InfostoreFacade.DESC ? "DESC" : "ASC";
     }
 
     public String[] getFieldTuple(final Metadata field, final FieldChooser wins) {
@@ -1032,6 +1033,11 @@ public class InfostoreQueryCatalog {
             return null;
         }
 
+        @Override
+        public Object origin() {
+            return "origin";
+        }
+
     }
 
     public static final class DelInfostoreColumnsSwitch implements MetadataSwitcher {
@@ -1169,6 +1175,11 @@ public class InfostoreQueryCatalog {
         @Override
         public Object shareable() {
             return null;
+        }
+
+        @Override
+        public Object origin() {
+            return "origin";
         }
 
     }
@@ -1310,6 +1321,11 @@ public class InfostoreQueryCatalog {
             return null;
         }
 
+        @Override
+        public Object origin() {
+            return "origin";
+        }
+
     }
 
     public static final class DelInfostoreDocumentColumnsSwitch implements MetadataSwitcher {
@@ -1447,6 +1463,11 @@ public class InfostoreQueryCatalog {
         @Override
         public Object shareable() {
             return null;
+        }
+
+        @Override
+        public Object origin() {
+            return "origin";
         }
 
     }

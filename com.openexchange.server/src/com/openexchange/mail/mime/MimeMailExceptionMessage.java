@@ -205,4 +205,19 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
     // Timeout while trying to send to the following recipient: %1$s
     public static final String SEND_TIMED_OUT_ERROR_MSG_DISPLAY = "Timeout while trying to send to the following recipient: %1$s. Please try again later.";
 
+    // Mail server denies access
+    public static final String AUTHORIZATION_FAILED_MSG_DISPLAY = "Mail server denies access.";
+
+    // The user tried to append or move a message to a mail folder, which does not exist.
+    public static final String TRYCREATE_MSG_DISPLAY = "Destination folder does not exist. Please try to create it and retry the operation.";
+
+    // Temporary failure because a subsystem is down. For example, an IMAP server that uses an LDAP server for authentication might use this response code when the LDAP/Radius server is down.
+    public static final String TEMPORARY_AUTH_FAILURE_MSG_DISPLAY = "A temporary failure occurred during login. Please try again later.";
+
+    // Either authentication succeeded or the server no longer had the necessary data; either way, access is no longer permitted using that passphrase. The client or user should get a new passphrase.
+    public static final String PASSWORD_EXPIRED_MSG_DISPLAY = "Access to mail server is no longer permitted using your password. Please obtain a new one.";
+
+    // Access to mail server is not permitted due to a lack of privacy. E.g. client is supposed to switch to a connection with Transport Layer Security (TLS).
+    public static final String PRIVACY_REQUIRED_MSG_DISPLAY = "Access to mail server is not permitted due to a lack of privacy.";
+
 }

@@ -140,7 +140,6 @@ import com.sun.mail.iap.StarttlsRequiredException;
 import com.sun.mail.imap.GreetingListener;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
-import com.sun.mail.imap.IMAPTextPreviewProvider;
 import com.sun.mail.imap.JavaIMAPStore;
 
 /**
@@ -441,7 +440,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 LOG.error("Error while closing IMAP message storage: {}", e.getMessage()).toString(), e));
             } finally {
                 messageStorage = null;
-        
+
             }
         }
         if (logicTools != null) {
@@ -819,7 +818,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                         public Void call() throws Exception {
                             MailAccountStorageService mass = Services.optService(MailAccountStorageService.class);
                             if (null != mass) {
-                                mass.incrementFailedMailAuthCount(accountId, session.getUserId(), session.getContextId());
+                                mass.incrementFailedMailAuthCount(accountId, session.getUserId(), session.getContextId(), null);
                             }
                             return null;
                         }
@@ -1070,11 +1069,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * @throws MessagingException If operation fails
      */
     public static void doIMAPConnect(javax.mail.Session imapSession, IMAPStore imapStore, String server, int port, String login, String pw, int accountId, Session session, boolean knownExternal) throws MessagingException {
-        IMAPTextPreviewProvider textPreviewProvider = Services.optService(IMAPTextPreviewProvider.class);
-        if (null != textPreviewProvider) {
-            imapStore.setTextPreviewProvider(textPreviewProvider);
-        }
-        
         Object kerberosSubject = imapSession.getProperties().get("mail.imap.sasl.kerberosSubject");
         if (null == kerberosSubject) {
             imapStore.connect(server, port, login, pw);
@@ -1089,13 +1083,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             String eventId = knownExternal ? "imap.external.login" : (MailAccount.DEFAULT_ID == accountId ? "imap.primary.login" : "imap.external.login");
             auditLogService.log(eventId, DefaultAttribute.valueFor(Name.LOGIN, session.getLoginName()), DefaultAttribute.valueFor(Name.IP_ADDRESS, session.getLocalIp()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.arbitraryFor("imap.login", login), DefaultAttribute.arbitraryFor("imap.server", server), DefaultAttribute.arbitraryFor("imap.port", Integer.toString(port)));
         }
-        
+
         String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
         if (null != sessionInformation) {
             LogProperties.put(LogProperties.Name.MAIL_SESSION, sessionInformation);
         }
         java.net.InetAddress remoteAddress = imapStore.getRemoteAddress();
-        if (null != remoteAddress) {            
+        if (null != remoteAddress) {
             LogProperties.put(LogProperties.Name.MAIL_HOST_REMOTE_ADDRESS, remoteAddress.getHostAddress());
         }
     }

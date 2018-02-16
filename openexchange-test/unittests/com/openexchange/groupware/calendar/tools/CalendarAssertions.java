@@ -53,9 +53,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import java.util.HashSet;
 import java.util.Set;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -104,15 +102,6 @@ public class CalendarAssertions {
         if (mustFail) {
             fail(problems.toString());
         }
-    }
-
-    public static void assertInPrivateFolder(final CommonAppointments appointments, final Appointment appointment) throws OXException {
-        for (final Appointment currentAppointment : appointments.getPrivateAppointments()) {
-            if (appointment.getObjectID() == currentAppointment.getObjectID()) {
-                return;
-            }
-        }
-        fail("Couldn't find " + appointment.getObjectID() + " in private appointments");
     }
 
     private static String stringify(final Set<? extends Participant> unexpected) {

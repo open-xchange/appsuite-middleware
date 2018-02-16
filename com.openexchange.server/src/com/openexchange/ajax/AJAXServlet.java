@@ -267,6 +267,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     public static final String ACTION_TRASH = "trash";
 
+    public static final String ACTION_RESTORE = "restore";
+
     /**
      * The parameter 'from' specifies index of starting entry in list of objects dependent on given order criteria and folder id
      */
@@ -344,6 +346,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * Appointment, etc.) that should be transfered to client
      */
     public static final String PARAMETER_COLUMNS = "columns";
+
+    /**
+     * Similar to {@link #PARAMETER_COLUMNS} this field provides the fields of an event that should be returned.
+     */
+    public static final String PARAMETER_CHRONOS_FIELDS = "fields";
 
     public static final String PARAMETER_SEARCHPATTERN = "pattern";
 

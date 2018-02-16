@@ -65,7 +65,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.geolocation.GeoInformation;
 import com.openexchange.geolocation.GeoLocationExceptionCodes;
 import com.openexchange.geolocation.GeoLocationService;
-import com.openexchange.ipcheck.countrycode.mbean.IPCheckMetrics;
+import com.openexchange.ipcheck.countrycode.mbean.IPCheckMetricCollector;
 import com.openexchange.management.MetricAware;
 import com.openexchange.session.Session;
 
@@ -76,25 +76,27 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since v7.8.4
  */
-public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetrics> {
+public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetricCollector> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CountryCodeIpChecker.class);
 
     private final GeoLocationService service;
-    private final IPCheckMetrics metrics;
+    private IPCheckMetricCollector metricCollector;
 
     /**
      * Initializes a new {@link CountryCodeIpChecker}.
+     * 
+     * @param metricCollector TODO
      */
-    public CountryCodeIpChecker(GeoLocationService service) {
+    public CountryCodeIpChecker(GeoLocationService service, IPCheckMetricCollector metricCollector) {
         super();
         this.service = service;
-        metrics = new IPCheckMetrics();
+        this.metricCollector = metricCollector;
     }
 
     @Override
     public void handleChangedIp(String current, String previous, Session session, IPCheckConfiguration configuration) throws OXException {
-        metrics.incrementTotalIPChanges();
+        metricCollector.incrementTotalIPChanges();
 
         boolean whiteListedClient = IPCheckers.isWhitelistedClient(session, configuration);
         // ACCEPT: If session-associated client is white-listed
@@ -151,8 +153,8 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
      * @see com.openexchange.management.MetricAware#getMetricsObject()
      */
     @Override
-    public IPCheckMetrics getMetricsObject() {
-        return metrics;
+    public IPCheckMetricCollector getMetricsObject() {
+        return metricCollector;
     }
 
     ///////////////////////////////////////////// HELPERS //////////////////////////////////////////////////
@@ -167,19 +169,19 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
      */
     private void accept(String current, String previous, Session session, boolean whiteListedClient, AcceptReason acceptReason) {
         LOGGER.debug("The IP change from '{}' to '{}' was accepted. Reason: '{}'", previous, current, acceptReason.getMessage());
-        IPCheckers.updateIPAddress(current, session, true, whiteListedClient);
+        IPCheckers.updateIPAddress(current, session, whiteListedClient);
         switch (acceptReason) {
             case PRIVATE_IPV4:
-                metrics.incrementAcceptedPrivateIP();
+                metricCollector.incrementAcceptedPrivateIP();
                 break;
             case WHITE_LISTED:
-                metrics.incrementAcceptedWhiteListed();
+                metricCollector.incrementAcceptedWhiteListed();
                 break;
             case ELIGIBLE:
             default:
-                metrics.incrementAcceptedEligibleIPChange();
+                metricCollector.incrementAcceptedEligibleIPChange();
         }
-        metrics.incrementAcceptedIPChanges();
+        metricCollector.incrementAcceptedIPChanges();
     }
 
     /**
@@ -210,15 +212,15 @@ public class CountryCodeIpChecker implements IPChecker, MetricAware<IPCheckMetri
 
         switch (reason) {
             case EXCEPTION:
-                metrics.incrementDeniedException();
+                metricCollector.incrementDeniedException();
                 break;
             case COUNTRY_CHANGE:
-                metrics.incrementDeniedCountryChange();
+                metricCollector.incrementDeniedCountryChange();
                 break;
             default:
                 break;
         }
-        metrics.incrementDeniedIPChanges();
+        metricCollector.incrementDeniedIPChanges();
         IPCheckers.kick(current, session);
     }
 

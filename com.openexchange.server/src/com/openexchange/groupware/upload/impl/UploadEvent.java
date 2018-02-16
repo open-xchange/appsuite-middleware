@@ -70,39 +70,8 @@ public class UploadEvent implements Upload {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UploadEvent.class);
 
     /*-
-     * ------------ Constants ------------
-     */
-
-    /**
-     * Affiliation ID for an upload dedicated to mail module.
-     */
-    public static final int MAIL_UPLOAD = 1;
-
-    /**
-     * Affiliation ID for an upload dedicated to calendar module.
-     */
-    public static final int APPOINTMENT_UPLOAD = 2;
-
-    /**
-     * Affiliation ID for an upload dedicated to task module.
-     */
-    public static final int TASK_UPLOAD = 3;
-
-    /**
-     * Affiliation ID for an upload dedicated to contact module.
-     */
-    public static final int CONTACT_UPLOAD = 4;
-
-    /**
-     * Affiliation ID for an upload dedicated to infostore module.
-     */
-    public static final int DOCUMENT_UPLOAD = 5;
-
-    /*-
      * ------------ Members ------------
      */
-
-    private int affiliationId = -1;
 
     private final Map<String, List<UploadFile>> uploadFilesByFieldName;
 
@@ -120,24 +89,6 @@ public class UploadEvent implements Upload {
         uploadFilesByFieldName = new LinkedHashMap<String, List<UploadFile>>();
         formFields = new HashMap<String, String>();
         parameters = new HashMap<String, Object>();
-    }
-
-    /**
-     * Gets the affiliation ID.
-     *
-     * @return The affiliation ID.
-     */
-    public final int getAffiliationId() {
-        return affiliationId;
-    }
-
-    /**
-     * Sets the affiliation ID.
-     *
-     * @param affiliationId The affiliation ID.
-     */
-    public final void setAffiliationId(int affiliationId) {
-        this.affiliationId = affiliationId;
     }
 
     /**

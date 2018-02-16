@@ -1,0 +1,17 @@
+type: object
+required:
+- id
+- folder
+properties:
+  folder:
+    type: string
+    description: The identifier of the folder.
+  id:
+    type: string
+    description: The identifier of the event.
+  recurrenceId:
+    type: string
+    description: The recurrence id of this recurrence.
+  recurrenceRange:
+    type: string
+    description: The targeted range specified with the recurrence id.

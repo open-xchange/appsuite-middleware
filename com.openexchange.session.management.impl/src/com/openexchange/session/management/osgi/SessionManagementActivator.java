@@ -57,7 +57,9 @@ import com.openexchange.config.Reloadables;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.geolocation.GeoLocationService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.session.inspector.SessionInspectorService;
 import com.openexchange.session.management.SessionManagementService;
+import com.openexchange.session.management.impl.LocalLastActiveTimestampSetter;
 import com.openexchange.session.management.impl.SessionManagementProperty;
 import com.openexchange.session.management.impl.SessionManagementServiceImpl;
 import com.openexchange.sessiond.SessiondService;
@@ -90,6 +92,8 @@ public class SessionManagementActivator extends HousekeepingActivator implements
         trackService(GeoLocationService.class);
         trackService(HazelcastInstance.class);
         openTrackers();
+
+        registerService(SessionInspectorService.class, new LocalLastActiveTimestampSetter());
 
         SessionManagementServiceImpl sessionManagementImpl = new SessionManagementServiceImpl(this);
         this.sessionManagementImpl = sessionManagementImpl;

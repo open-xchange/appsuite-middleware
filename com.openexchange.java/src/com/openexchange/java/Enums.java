@@ -75,11 +75,11 @@ public class Enums {
         if (null != value) {
             return value;
         }
-        throw new IllegalArgumentException("No enum value '" + name + "' in Enum " + enumeration.getClass().getName());
+        throw new IllegalArgumentException("No enum value '" + name + "' in Enum " + enumeration);
     }
 
     /**
-     * Parses the supplied value to an enumeration constant, ignore-case.
+     * Parses the supplied value to an enumeration constant, ignoring case, and assuming '<code>_</code>' for '<code>-</code>' characters.
      *
      * @param enumeration The enumeration class from which to return a constant
      * @param name The name of the constant to return
@@ -88,8 +88,12 @@ public class Enums {
      * @throws NullPointerException If <code>enumeration</code> is <code>null</code>
      */
     public static <T extends Enum<T>> T parse(Class<T> enumeration, String name, T defaultValue) {
+        if (null == name) {
+            return defaultValue;
+        }
+        String checkedName = name.replace('-', '_');
         for (T value : enumeration.getEnumConstants()) {
-            if (value.name().equalsIgnoreCase(name)) {
+            if (checkedName.equalsIgnoreCase(value.name())) {
                 return value;
             }
         }

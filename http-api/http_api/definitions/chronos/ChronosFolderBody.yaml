@@ -1,0 +1,9 @@
+type: object
+properties:
+  folders:
+    type: array
+    description: The folder ids to query.
+    items: 
+      type: string
+      title: folderId
+      description: The id of a folder to query.

@@ -56,6 +56,7 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.FolderPath;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
@@ -348,6 +349,15 @@ class DummyFolder implements Folder {
 
     @Override
     public void setBits(int bits) {
+    }
+
+    @Override
+    public FolderPath getOriginPath() {
+        return null;
+    }
+
+    @Override
+    public void setOriginPath(FolderPath originPath) {
     }
 
     @Override

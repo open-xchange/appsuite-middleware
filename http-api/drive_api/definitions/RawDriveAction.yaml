@@ -4,9 +4,15 @@ action:
 version:
   type: object
   description: The (original) file- or directory-version referenced by the action. See [FileVersion](#/definitions/FileVersion) and [DirectoryVersion](#/definitions/DirectoryVersion) model.
+  title: Version
+  properties:
+    $ref: ./RawVersion.yaml
 newVersion:
   type: object
+  title: NewVersion
   description: The (new) file- or directory-version referenced by the action. See [FileVersion](#/definitions/FileVersion) and [DirectoryVersion](#/definitions/DirectoryVersion) model.
+  properties:
+    $ref: ./RawVersion.yaml
 path:
   type: string
   description: The path to the synchronized folder, relative to the root folder.

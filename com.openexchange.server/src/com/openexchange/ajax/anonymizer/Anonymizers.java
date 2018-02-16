@@ -50,12 +50,15 @@
 package com.openexchange.ajax.anonymizer;
 
 import java.util.Locale;
+import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.share.ShareService;
 
 
 /**
@@ -104,6 +107,58 @@ public final class Anonymizers {
      */
     public static boolean isGuest(Session session) throws OXException {
         return null != session && UserStorage.getInstance().isGuest(session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Checks if specified session denotes the context administrator.
+     *
+     * @param session The session
+     * @return <code>true</code> if specified user entity identifier denotes the context administrator; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    public static boolean isAdminUser(Session session) throws OXException {
+        return ContextStorage.getStorageContext(session.getContextId()).getMailadmin() == session.getUserId();
+    }
+
+    /**
+     * Gets all users that shared something to specified guest.
+     * <p/>
+     * More concrete, gets the identifiers of all other user entities present in the permissions of all shared folders and items the
+     * guest user has access to, i.e. the IDs of those users the guest user is allowed to to "see".
+     *
+     * @param contextID The context identifier
+     * @param guestID The guest identifier
+     * @return The identifiers from sharing users, or an empty set if there are none
+     */
+    public static Set<Integer> getSharingUsersFor(int contextID, int guestID) throws OXException {
+        return ServerServiceRegistry.getServize(ShareService.class).getSharingUsersFor(contextID, guestID);
+    }
+
+    /**
+     * Checks if specified user entity identifier is a non-visible guest user for session-associated user.
+     *
+     * @param possibleGuestId The identifier of the user entity to check
+     * @param session The session to check for
+     * @return <code>true</code> if specified user entity identifier is a non-visible guest; otherwise <code>false</code>
+     * @throws OXException If non-visibility cannot be checked
+     */
+    public static boolean isNonVisibleGuest(int possibleGuestId, Session session) throws OXException {
+        if (null == session) {
+            // Unable to check
+            return false;
+        }
+
+        if (isAdminUser(session)) {
+            // Context administrator may see all users/guests
+            return false;
+        }
+
+        if (false == UserStorage.getInstance().isGuest(possibleGuestId, session.getContextId())) {
+            // Provided user entity identifier does not point to a guest
+            return false;
+        }
+
+        return false == ServerServiceRegistry.getServize(ShareService.class).isGuestVisibleTo(possibleGuestId, session);
     }
 
     /**

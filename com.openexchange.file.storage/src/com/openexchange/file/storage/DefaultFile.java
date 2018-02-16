@@ -90,6 +90,7 @@ public class DefaultFile extends AbstractFile {
     private Map<String, Object> dynamicProperties;
     private List<FileStorageObjectPermission> objectPermissions;
     private boolean shareable;
+    private FolderPath origin;
 
     /**
      * Initializes a new {@link DefaultFile}.
@@ -261,10 +262,20 @@ public class DefaultFile extends AbstractFile {
     public boolean isCurrentVersion() {
         return isCurrentVersion;
     }
-    
+
     @Override
     public boolean isShareable() {
         return shareable;
+    }
+
+    @Override
+    public FolderPath getOrigin() {
+        return origin;
+    }
+
+    @Override
+    public void setOrigin(FolderPath origin) {
+        this.origin = origin;
     }
 
     @Override
@@ -386,7 +397,7 @@ public class DefaultFile extends AbstractFile {
     public List<FileStorageObjectPermission> getObjectPermissions() {
         return objectPermissions;
     }
-    
+
     @Override
     public void setShareable(boolean shareable) {
         this.shareable = shareable;

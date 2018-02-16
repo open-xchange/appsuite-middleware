@@ -115,7 +115,6 @@ import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.ContentProvider;
 import com.openexchange.mail.parser.MailMessageHandler;
@@ -418,11 +417,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 if (unreadMessages >= 0) {
                     jsonObject.put(UNREAD, unreadMessages);
                 }
-                if (mail.containsHasAttachment()) {
-                    // jsonObject.put(HAS_ATTACHMENTS, mail.containsHasAttachment() ? mail.hasAttachment() : mail.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
-                    // See bug 42695 & 42862
-                    jsonObject.put(HAS_ATTACHMENTS, mail.hasAttachment());
-                }
+                jsonObject.put(HAS_ATTACHMENTS, mail.hasAttachment());
                 jsonObject.put(CONTENT_TYPE, mail.getContentType().getBaseType());
                 jsonObject.put(SIZE, mail.getSize());
                 jsonObject.put(ACCOUNT_NAME, mail.getAccountName());
@@ -432,7 +427,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     jsonObject.put(TEXT_PREVIEW, mail.getTextPreview());
                 }
                 MailAuthenticityResult mailAuthenticityResult = mail.getAuthenticityResult();
-                jsonObject.put(AUTHENTICATION_RESULTS, null == mailAuthenticityResult ? JSONObject.EMPTY_OBJECT : JsonMessageHandler.authenticationMechanismResultsToJson(mailAuthenticityResult));
+                jsonObject.put(AUTHENTICATION_RESULTS, null == mailAuthenticityResult ? null : JsonMessageHandler.authenticationMechanismResultsToJson(mailAuthenticityResult));
                 // Guard info
                 if (mail.containsSecurityInfo()) {
                     SecurityInfo securityInfo = mail.getSecurityInfo();
@@ -521,12 +516,12 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * That is the <code>status</code> and the <code>trustedDomain</code> (if present)
      *
      * @param authenticityResult The authenticity result to create the JSON representation for
-     * @return The JSON representation or an empty {@link JSONObject} if no authenticity result available
+     * @return The JSON representation or <code>null</code> if no authenticity result available
      * @throws JSONException If JSON representation cannot be returned
      */
     public static JSONObject authenticityOverallResultToJson(MailAuthenticityResult authenticityResult) throws JSONException {
         if (null == authenticityResult) {
-            return JSONObject.EMPTY_OBJECT;
+            return null;
         }
 
         JSONObject result = new JSONObject(2);
@@ -541,55 +536,64 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * Creates the JSON representation for specified <code>MailAuthenticityResult</code> instance.
      *
      * @param authenticityResult The authenticity result to create the JSON representation for
-     * @return The JSON representation or an empty {@link JSONObject} if no authenticity result available
+     * @return The JSON representation or <code>null</code> if no authenticity result available
      * @throws JSONException If JSON representation cannot be returned
      */
     @SuppressWarnings("unchecked")
     public static JSONObject authenticationMechanismResultsToJson(MailAuthenticityResult authenticityResult) throws JSONException {
         if (null == authenticityResult) {
-            return JSONObject.EMPTY_OBJECT;
+            return null;
         }
 
+        JSONObject result;
         Map<MailAuthenticityResultKey, Object> attributes = authenticityResult.getAttributes();
-        JSONObject result = new JSONObject(attributes.size());
-        JSONArray unconsideredResults = new JSONArray();
-        for (MailAuthenticityResultKey key : attributes.keySet()) {
-            if (!key.isVisible()) {
-                continue;
-            }
-            Object object = attributes.get(key);
-            if (object instanceof Collection<?>) {
-                Collection<?> col = (Collection<?>) object;
-
-                for (Object o : col) {
-                    if (o instanceof MailAuthenticityMechanismResult) {
-                        MailAuthenticityMechanismResult mechResult = (MailAuthenticityMechanismResult) o;
-                        JSONObject mailAuthMechResultJson = new JSONObject();
-                        mailAuthMechResultJson.put("result", mechResult.getResult().getTechnicalName());
-                        mailAuthMechResultJson.put("reason", mechResult.getReason());
-                        for (String k : mechResult.getProperties().keySet()) {
-                            mailAuthMechResultJson.put(k, mechResult.getProperties().get(k));
-                        }
-                        result.put(mechResult.getMechanism().getTechnicalName(), mailAuthMechResultJson);
-                    } else if (o instanceof Map) {
-                        unconsideredResults.put(JSONCoercion.coerceToJSON(o));
-                    } else {
-                        unconsideredResults.put(o);
-                    }
+        int numOfAttributes = attributes.size();
+        if (numOfAttributes > 0) {
+            result = new JSONObject(numOfAttributes);
+            JSONArray unconsideredResults = new JSONArray();
+            for (MailAuthenticityResultKey key : attributes.keySet()) {
+                if (!key.isVisible()) {
+                    continue;
                 }
-            } else {
-                result.put(key.getKey(), object);
+                Object object = attributes.get(key);
+                if (object instanceof Collection<?>) {
+                    Collection<?> col = (Collection<?>) object;
+
+                    for (Object o : col) {
+                        if (o instanceof MailAuthenticityMechanismResult) {
+                            MailAuthenticityMechanismResult mechResult = (MailAuthenticityMechanismResult) o;
+                            JSONObject mailAuthMechResultJson = new JSONObject();
+                            mailAuthMechResultJson.put("result", mechResult.getResult().getTechnicalName());
+                            mailAuthMechResultJson.put("reason", mechResult.getReason());
+                            for (String k : mechResult.getProperties().keySet()) {
+                                mailAuthMechResultJson.put(k, mechResult.getProperties().get(k));
+                            }
+                            result.put(mechResult.getMechanism().getTechnicalName(), mailAuthMechResultJson);
+                        } else if (o instanceof Map) {
+                            unconsideredResults.put(JSONCoercion.coerceToJSON(o));
+                        } else {
+                            unconsideredResults.put(o);
+                        }
+                    }
+                } else {
+                    result.put(key.getKey(), object);
+                }
             }
+            if (MailAuthenticityStatus.TRUSTED.equals(authenticityResult.getStatus()) && authenticityResult.getAttribute(MailAuthenticityResultKey.IMAGE) != null) {
+                result.put("image", authenticityResult.getAttribute(MailAuthenticityResultKey.IMAGE));
+            }
+            result.put("unconsidered_results", unconsideredResults);
+        } else {
+            result = new JSONObject();
         }
-        if (MailAuthenticityStatus.TRUSTED.equals(authenticityResult.getStatus()) && authenticityResult.getAttribute(MailAuthenticityResultKey.IMAGE) != null) {
-            result.put("image", authenticityResult.getAttribute(MailAuthenticityResultKey.IMAGE));
-        }
-        result.put("unconsidered_results", unconsideredResults);
+
         result.put("status", authenticityResult.getStatus().getTechnicalName());
 
-        CustomPropertyJsonHandler customPropertyJsonHandler = MailJSONActivator.SERVICES.get().getOptionalService(CustomPropertyJsonHandler.class);
-        if(customPropertyJsonHandler != null) {
-            result.put("custom", customPropertyJsonHandler.toJson(authenticityResult.getAttribute(MailAuthenticityResultKey.CUSTOM_PROPERTIES, Map.class)));
+        if (numOfAttributes > 0) {
+            CustomPropertyJsonHandler customPropertyJsonHandler = MailJSONActivator.SERVICES.get().getOptionalService(CustomPropertyJsonHandler.class);
+            if (customPropertyJsonHandler != null) {
+                result.put("custom", customPropertyJsonHandler.toJson(authenticityResult.getAttribute(MailAuthenticityResultKey.CUSTOM_PROPERTIES, Map.class)));
+            }
         }
 
         return result;
@@ -874,7 +878,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                      */
                     int priority = MailMessage.PRIORITY_NORMAL;
                     if (null != entry.getValue()) {
-                        priority = MimeMessageConverter.parseImportance(entry.getValue());
+                        priority = MimeMessageUtility.parseImportance(entry.getValue());
                         jsonObject.put(PRIORITY, priority);
                     }
                 } else if (MessageHeaders.HDR_X_PRIORITY.equalsIgnoreCase(headerName)) {
@@ -884,7 +888,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                          */
                         int priority = MailMessage.PRIORITY_NORMAL;
                         if (null != entry.getValue()) {
-                            priority = MimeMessageConverter.parsePriority(entry.getValue());
+                            priority = MimeMessageUtility.parsePriority(entry.getValue());
                         }
                         jsonObject.put(PRIORITY, priority);
                     }
@@ -1021,6 +1025,13 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
             throw x;
         }
+        String identifier = id;
+        /*
+         * Adjust DI if virtually inserted; e.g. MimeForward
+         */
+        if (isVirtual(contentType)) {
+            identifier = "0";
+        }
         if (textAppended) {
             /*
              * A text part has already been detected as message's body
@@ -1033,7 +1044,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                      */
                     if (textWasEmpty) {
                         if (usm.isDisplayHtmlInlineContent()) {
-                            JSONObject jsonObject = asDisplayHtml(id, contentType.getBaseType(), htmlContent, contentType.getCharsetParameter());
+                            JSONObject jsonObject = asDisplayHtml(identifier, contentType.getBaseType(), htmlContent, contentType.getCharsetParameter());
                             if (includePlainText) {
                                 try {
                                     String plainText = html2text(htmlContent);
@@ -1044,7 +1055,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                             }
                         } else {
                             try {
-                                asDisplayText(id, contentType.getBaseType(), htmlContent, fileName, false);
+                                asDisplayText(identifier, contentType.getBaseType(), htmlContent, fileName, false);
                                 getAttachmentListing().removeFirst();
                             } catch (RuntimeException e) {
                                 throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -1080,7 +1091,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                      */
                     if (attachHTMLAlternativePart) {
                         try {
-                            JSONObject attachment = asAttachment(id, contentType.getBaseType(), htmlContent.length(), fileName, null);
+                            JSONObject attachment = asAttachment(identifier, contentType.getBaseType(), htmlContent.length(), fileName, null);
                             attachment.put(VIRTUAL, true);
                         } catch (final JSONException e) {
                             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -1090,7 +1101,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     /*
                      * Return HTML content as-is
                      */
-                    asRawContent(id, contentType.getBaseType(), new HtmlSanitizeResult(htmlContent));
+                    asRawContent(identifier, contentType.getBaseType(), new HtmlSanitizeResult(htmlContent));
                 } else {
                     /*
                      * Discard
@@ -1123,7 +1134,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                  * Add HTML part as attachment
                  */
                 try {
-                    JSONObject attachment = asAttachment(id, contentType.getBaseType(), htmlContent.length(), fileName, null);
+                    JSONObject attachment = asAttachment(identifier, contentType.getBaseType(), htmlContent.length(), fileName, null);
                     attachment.put(VIRTUAL, true);
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -1144,7 +1155,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                          */
                         asRawContent(plainText.id, plainText.contentType, new HtmlSanitizeResult(plainText.content));
                     } else {
-                        JSONObject jsonObject = asDisplayHtml(id, contentType.getBaseType(), htmlContent, contentType.getCharsetParameter());
+                        JSONObject jsonObject = asDisplayHtml(identifier, contentType.getBaseType(), htmlContent, contentType.getCharsetParameter());
                         if (includePlainText) {
                             try {
                                 /*
@@ -1158,17 +1169,17 @@ public final class JsonMessageHandler implements MailMessageHandler {
                         }
                     }
                 } else {
-                    asDisplayText(id, contentType.getBaseType(), htmlContent, fileName, DisplayMode.DISPLAY.isIncluded(displayMode));
+                    asDisplayText(identifier, contentType.getBaseType(), htmlContent, fileName, DisplayMode.DISPLAY.isIncluded(displayMode));
                 }
             } else if (DisplayMode.RAW.equals(displayMode)) {
                 /*
                  * Return HTML content as-is
                  */
-                asRawContent(id, contentType.getBaseType(), new HtmlSanitizeResult(htmlContent));
+                asRawContent(identifier, contentType.getBaseType(), new HtmlSanitizeResult(htmlContent));
             } else {
                 try {
                     JSONObject jsonObject = new JSONObject(6);
-                    jsonObject.put(ID, id);
+                    jsonObject.put(ID, identifier);
                     jsonObject.put(CONTENT_TYPE, contentType.getBaseType());
                     jsonObject.put(SIZE, htmlContent.length());
                     jsonObject.put(DISPOSITION, Part.INLINE);

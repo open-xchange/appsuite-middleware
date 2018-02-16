@@ -120,9 +120,6 @@ public final class SessionHandler {
         }
     };
 
-    /** The session identifier generator */
-    private static volatile SessionIdGenerator sessionIdGenerator;
-
     /** The applied configuration */
     static volatile SessiondConfigInterface config;
 
@@ -167,11 +164,6 @@ public final class SessionHandler {
         SessionHandler.userConfigRegistry = userConfigRegistry;
         SessionData sessionData = new SessionData(config.getNumberOfSessionContainers(), config.getMaxSessions(), config.getRandomTokenTimeout(), config.getNumberOfLongTermSessionContainers(), config.isAutoLogin());
         SESSION_DATA_REF.set(sessionData);
-        try {
-            sessionIdGenerator = SessionIdGenerator.getInstance();
-        } catch (OXException exc) {
-            LOG.error("create instance of SessionIdGenerator", exc);
-        }
         noLimit = (config.getMaxSessions() == 0);
         asyncPutToSessionStorage = config.isAsyncPutToSessionStorage();
         obfuscator = new Obfuscator(config.getObfuscationKey().toCharArray());
@@ -194,7 +186,6 @@ public final class SessionHandler {
             obfuscator = null;
             o.destroy();
         }
-        sessionIdGenerator = null;
         userConfigRegistry.clear();
         config = null;
         noLimit = false;
@@ -755,9 +746,10 @@ public final class SessionHandler {
      * Stores the session (if available) into session storage.
      *
      * @param sessionId The session identifier
+     * @param addIfAbsent Adds the session to storage only if absent
      * @return <code>true</code> if stored; otherwise <code>false</code>
      */
-    protected static boolean storeSession(String sessionId) {
+    protected static boolean storeSession(String sessionId, boolean addIfAbsent) {
         if (null == sessionId) {
             return false;
         }
@@ -772,7 +764,7 @@ public final class SessionHandler {
             return false;
         }
 
-        return putIntoSessionStorage(sessionControl.getSession(), true, asyncPutToSessionStorage);
+        return putIntoSessionStorage(sessionControl.getSession(), addIfAbsent, asyncPutToSessionStorage);
     }
 
     /**
@@ -808,6 +800,8 @@ public final class SessionHandler {
         if (Strings.isNotEmpty(userAgent)) {
             newSession.setParameter(Session.PARAM_USER_AGENT, userAgent);
         }
+
+        // Set time stamp
         newSession.setParameter(Session.PARAM_LOGIN_TIME, Long.valueOf(System.currentTimeMillis()));
 
         // Either add session or yield short-time token for it
@@ -821,7 +815,7 @@ public final class SessionHandler {
             // Post event for created session
             postSessionCreation(addedSession);
         } else {
-            String serverToken = sessionIdGenerator.createRandomId();
+            String serverToken = SessionIdGenerator.getInstance().createRandomId();
             // TODO change return type and return an interface that allows to dynamically add additional return values.
             newSession.setParameter("serverToken", serverToken);
             TokenSessionContainer.getInstance().addSession(newSession, clientToken, serverToken);
@@ -850,9 +844,9 @@ public final class SessionHandler {
      */
     private static SessionImpl createNewSession(int userId, String loginName, String password, int contextId, String clientHost, String login, String authId, String hash, String client, boolean tranzient) throws OXException {
         // Generate identifier, secret, and random
-        SessionIdGenerator sessionIdGenerator = SessionHandler.sessionIdGenerator;
-        String sessionId = sessionIdGenerator.createSessionId(loginName, clientHost);
-        String secret = sessionIdGenerator.createSecretId(loginName, Long.toString(System.currentTimeMillis()));
+        SessionIdGenerator sessionIdGenerator = SessionIdGenerator.getInstance();
+        String sessionId = sessionIdGenerator.createSessionId(loginName);
+        String secret = sessionIdGenerator.createSecretId(loginName);
         String randomToken = sessionIdGenerator.createRandomId();
 
         // Create the instance
@@ -927,8 +921,7 @@ public final class SessionHandler {
      *
      * @param session The session to store
      * @param sessionStorageService The storage service
-     * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code> to perform a possibly
-     *            replacing put
+     * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code> to perform a possibly replacing put
      */
     public static void storeSessionAsync(SessionImpl session, final SessionStorageService sessionStorageService, final boolean addIfAbsent) {
         storeSession(session, sessionStorageService, addIfAbsent, true);
@@ -1405,11 +1398,6 @@ public final class SessionHandler {
         if (considerSessionStorage && null == sessionControl) {
             sessionControl = optSessionFromSessionStorage(sessionId, sessionData);
         }
-
-        if (null != sessionControl) {
-            sessionControl.getSession().setParameter(Session.PARAM_LAST_ACTIVE, Long.valueOf(System.currentTimeMillis()));
-        }
-
         return sessionControl;
     }
 
@@ -1504,9 +1492,6 @@ public final class SessionHandler {
                     LOG.error("", e);
                 }
             }
-        }
-        if (null != sessionControl) {
-            sessionControl.getSession().setParameter(Session.PARAM_LAST_ACTIVE, Long.valueOf(System.currentTimeMillis()));
         }
         return sessionControl;
     }

@@ -112,6 +112,21 @@ public class HtmlSanitizeOptions {
             parserPreference = ParserPreference.NONE;
         }
 
+        /** Sets this builder arguments according to specified <code>HtmlSanitizeOptions</code> instance */
+        public Builder copyFrom(HtmlSanitizeOptions options) {
+            this.session = options.optSession();
+            this.sanitize = options.isSanitize();
+            this.optConfigName = options.getOptConfigName();
+            this.dropExternalImages = options.isDropExternalImages();
+            this.modified = options.getModified();
+            this.cssPrefix = options.getCssPrefix();
+            this.maxContentSize = options.getMaxContentSize();
+            this.suppressLinks = options.isSuppressLinks();
+            this.replaceBodyWithDiv = options.isReplaceBodyWithDiv();
+            this.parserPreference = options.getParserPreference();
+            return this;
+        }
+
         /** Sets the parser preference */
         public Builder setParserPreference(ParserPreference parserPreference) {
             this.parserPreference = parserPreference;

@@ -168,5 +168,10 @@ public enum FileStorageCapability {
      */
     AUTO_RENAME_FOLDERS,
 
+    /**
+     * Has the capability to restore files from trash folder to their original location
+     */
+    RESTORE,
+
     ;
 }

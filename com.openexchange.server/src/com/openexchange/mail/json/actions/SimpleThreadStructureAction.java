@@ -79,6 +79,7 @@ import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.json.osgi.MailJSONActivator;
 import com.openexchange.mail.json.utils.ColumnCollection;
 import com.openexchange.mail.search.ANDTerm;
+import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.UserFlagTerm;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -283,8 +284,8 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             long lookAhead = req.getMax();
             boolean includeSent = req.optBool("includeSent", false);
             boolean ignoreSeen = req.optBool("unseen", false);
-            boolean ignoreDeleted = !req.optBool("deleted", true);
-            boolean filterApplied = (ignoreSeen || ignoreDeleted);
+            Boolean ignoreDeleted = getIgnoreDeleted(req);
+            boolean filterApplied = (ignoreSeen || (ignoreDeleted != null));
             if (filterApplied) {
                 // Ensure flags is contained in provided columns
                 int fieldFlags = MailListField.FLAGS.getField();
@@ -374,6 +375,11 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                         }
                     }
                 }
+
+                if (ignoreDeleted != null) {
+                    SearchTerm<?> deleteTerm = new FlagTerm(MailMessage.FLAG_DELETED, false == ignoreDeleted.booleanValue());
+                    searchTerm = searchTerm == null ? deleteTerm : new ANDTerm(deleteTerm, searchTerm);
+                }
             }
 
             // -------
@@ -412,7 +418,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                     foundUnseen = false;
                     for (final Iterator<MailMessage> tmp = list.iterator(); tmp.hasNext();) {
                         final MailMessage message = tmp.next();
-                        if (discardMail(message, false, ignoreDeleted)) {
+                        if (message == null) {
                             // Ignore mail
                             tmp.remove();
                         } else {

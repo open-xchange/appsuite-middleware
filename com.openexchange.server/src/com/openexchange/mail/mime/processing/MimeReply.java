@@ -387,7 +387,7 @@ public final class MimeReply extends AbstractMimeProcessing {
                         /*
                          * Message holds header 'Reply-To'
                          */
-                        tmpSet.addAll(Arrays.asList(MimeMessageConverter.getAddressHeader(unfold(replyTo[0]))));
+                        tmpSet.addAll(Arrays.asList(MimeMessageUtility.getAddressHeader(unfold(replyTo[0]))));
                         fromAdded = false;
                     }
                 }
@@ -786,6 +786,14 @@ public final class MimeReply extends AbstractMimeProcessing {
                     replyPrefix = HtmlProcessing.htmlFormat(new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).append(nextLine).toString());
                 } else {
                     replyPrefix = new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).append(nextLine).toString();
+                }
+            }
+            if (isHtml) {
+                HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                if (null != htmlService) {
+                    String wellFormedHtmlDoc = htmlService.getWellFormedHTMLDocument(textBuilder.toString());
+                    textBuilder.setLength(0);
+                    textBuilder.append(wellFormedHtmlDoc);
                 }
             }
             /*-

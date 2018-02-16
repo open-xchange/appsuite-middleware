@@ -358,7 +358,12 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * The specified MIME type is not allowed being set
      */
-    DENIED_MIME_TYPE("The specified MIME type is not allowed being set", Category.CATEGORY_USER_INPUT, 71, OXExceptionStrings.MESSAGE_DENIED);
+    DENIED_MIME_TYPE("The specified MIME type is not allowed being set", Category.CATEGORY_USER_INPUT, 71, OXExceptionStrings.MESSAGE_DENIED),
+
+    /**
+     * Restore from trash is not supported
+     */
+    NO_RESTORE_SUPPORT("Restore from trash is not supported", Category.CATEGORY_ERROR, 72, FileStorageExceptionMessages.NO_RESTORE_SUPPORT_MSG),
     ;
 
     /**

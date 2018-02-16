@@ -205,7 +205,7 @@ public class TrashCleaner implements Runnable {
     }
 
     private SearchIterator<DocumentMetadata> searchDeletableFiles(UserizedFolder folder) throws OXException {
-        int[] folderIDs = { Integer.parseInt(folder.getID()) };
+        int[] folderIDs = { Utils.parseUnsignedInt(folder.getID()) };
         SearchTerm<?> searchTerm = buildSearchTerm();
         Metadata[] columns = { Metadata.LAST_MODIFIED_LITERAL, Metadata.ID_LITERAL, Metadata.SEQUENCE_NUMBER_LITERAL };
         InfostoreSearchEngine searchEngine = Services.getService(InfostoreSearchEngine.class);

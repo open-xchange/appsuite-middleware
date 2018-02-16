@@ -82,5 +82,6 @@ public interface FileFieldSwitcher {
     Object meta(Object...args);
     Object objectPermissions(Object...args);
     Object shareable(Object...args);
+    Object origin(Object...args);
 
 }

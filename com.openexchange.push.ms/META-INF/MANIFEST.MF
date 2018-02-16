@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.push.ms
 Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.openexchange.config,
+Import-Package: com.openexchange.chronos,
+ com.openexchange.config,
  com.openexchange.context,
  com.openexchange.crypto,
  com.openexchange.event,

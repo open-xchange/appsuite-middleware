@@ -520,17 +520,19 @@ public final class MailAccountIMAPProperties extends MailAccountProperties imple
 
     @Override
     public boolean isAttachmentSearchEnabled() {
-        String tmp = getAccountProperty(IMAPPropertiesConstants.ATTACHMENT_SEARCH_ENABLED);
+        String tmp = getAccountProperty("com.openexchange.imap.attachmentSearch.enabled");
         if (null != tmp) {
             return Boolean.parseBoolean(tmp.trim());
         }
 
         if (mailAccountId == PRIMARY) { // only for primary account
-            tmp = lookUpProperty(IMAPPropertiesConstants.ATTACHMENT_SEARCH_ENABLED);
+            tmp = lookUpProperty("com.openexchange.imap.attachmentSearch.enabled");
             if (null != tmp) {
                 return Boolean.parseBoolean(tmp.trim());
             }
         }
+
+        // Not applicable for non-primary account
         return false;
     }
 

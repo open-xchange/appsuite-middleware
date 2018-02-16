@@ -49,34 +49,18 @@
 
 package com.openexchange.calendar.json.actions;
 
-import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.TimeZone;
+import java.util.Set;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.calendar.RecurringResultInterface;
-import com.openexchange.groupware.calendar.RecurringResultsInterface;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.search.AppointmentSearchObject;
-import com.openexchange.groupware.search.Order;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.iterator.SearchIterator;
-
 
 /**
  * {@link NewAppointmentsSearchAction}
@@ -86,124 +70,37 @@ import com.openexchange.tools.iterator.SearchIterator;
 @OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
 public final class NewAppointmentsSearchAction extends AppointmentAction {
 
-    private static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(NewAppointmentsSearchAction.class);
+    private static final Set<String> REQUIRED_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
+        AJAXServlet.PARAMETER_COLUMNS, AJAXServlet.PARAMETER_START, AJAXServlet.PARAMETER_END
+    );
+
+    private static final Set<String> OPTIONAL_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
+        AJAXServlet.PARAMETER_TIMEZONE, AJAXServlet.PARAMETER_SORT, AJAXServlet.PARAMETER_ORDER, AJAXServlet.PARAMETER_LIMIT
+    );
 
     /**
      * Initializes a new {@link NewAppointmentsSearchAction}.
-     * @param services
+     *
+     * @param services A service lookup reference
      */
-    public NewAppointmentsSearchAction(final ServiceLookup services) {
+    public NewAppointmentsSearchAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult perform(final AppointmentAJAXRequest req) throws OXException, JSONException {
-        final TimeZone timeZone;
-        {
-            final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
-            timeZone = null == timeZoneId ? req.getTimeZone() : getTimeZone(timeZoneId);
-        }
-        final Date start = req.checkTime(AJAXServlet.PARAMETER_START, timeZone);
-        final Date end = req.checkTime(AJAXServlet.PARAMETER_END, timeZone);
+    protected Set<String> getRequiredParameters() {
+        return REQUIRED_PARAMETERS;
+    }
 
-        final Date startUTC = req.checkDate(AJAXServlet.PARAMETER_START);
-        final Date endUTC = req.checkDate(AJAXServlet.PARAMETER_END);
+    @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
 
-        int orderBy = req.optInt(AJAXServlet.PARAMETER_SORT);
-
-        if (orderBy == 0) {
-            orderBy = CalendarObject.START_DATE;
-        }
-
-        String orderDirString = req.getParameter(AJAXServlet.PARAMETER_ORDER);
-        if (orderDirString == null) {
-            orderDirString = "asc";
-        }
-        final Order orderDir = OrderFields.parse(orderDirString);
-
-        final int limit = req.checkInt("limit");
-
-        Date timestamp = new Date(0);
-
-        final AppointmentSearchObject searchObj = new AppointmentSearchObject();
-        searchObj.setMinimumEndDate(start);
-        searchObj.setMaximumStartDate(end);
-        searchObj.setUserIDs(Collections.singleton(Integer.valueOf(req.getSession().getUserId())));
-        searchObj.setOnlyPrivateAppointments(true);
-
-        final LinkedList<Appointment> linkedAppointmentList = new LinkedList<Appointment>();
-
-
-        SearchIterator<Appointment> searchIterator = null;
-        try {
-            final AppointmentSqlFactoryService factoryService = getService();
-            if (null == factoryService) {
-                throw ServiceExceptionCode.absentService(AppointmentSqlFactoryService.class);
-            }
-            final AppointmentSQLInterface appointmentsql = factoryService.createAppointmentSql(req.getSession());
-            final CalendarCollectionService recColl = getService(CalendarCollectionService.class);
-            searchIterator = appointmentsql.searchAppointments(searchObj, orderBy, orderDir, _appointmentFields);
-
-            final List<Appointment> appointmentList = new ArrayList<Appointment>();
-            while (searchIterator.hasNext()) {
-                final Appointment appointmentobject = searchIterator.next();
-                boolean processed = false;
-                if (appointmentobject.getRecurrenceType() != CalendarObject.NONE && appointmentobject.getRecurrencePosition() == 0) {
-                    // Commented this because this is done in CalendarOperation.next():726 that calls extractRecurringInformation()
-                    // appointmentobject.calculateRecurrence();
-                    RecurringResultsInterface recuResults = null;
-                    try {
-                        recuResults = recColl.calculateRecurring(appointmentobject, startUTC.getTime(), endUTC.getTime(), 0);
-                        processed = true;
-                    } catch (final OXException x) {
-                        LOG.error("Can not calculate recurrence {}:{}", appointmentobject.getObjectID(), req.getSession().getContextId(), x);
-                    }
-                    if (recuResults != null && recuResults.size() > 0) {
-                        final RecurringResultInterface result = recuResults.getRecurringResult(0);
-                        appointmentobject.setStartDate(new Date(result.getStart()));
-                        appointmentobject.setEndDate(new Date(result.getEnd()));
-                        appointmentobject.setRecurrencePosition(result.getPosition());
-
-                        if (appointmentobject.getFullTime()) {
-                            if (recColl.inBetween(appointmentobject.getStartDate().getTime(), appointmentobject.getEndDate().getTime(), startUTC.getTime(), endUTC.getTime())) {
-                                compareStartDateForList(linkedAppointmentList, appointmentobject, limit);
-                            }
-                        } else {
-                            compareStartDateForList(linkedAppointmentList, appointmentobject, limit);
-                        }
-                    }
-                }
-                if (!processed) {
-                    if (appointmentobject.getFullTime() && (startUTC != null && endUTC != null)) {
-                        if (recColl.inBetween(appointmentobject.getStartDate().getTime(), appointmentobject.getEndDate().getTime(), startUTC.getTime(), endUTC.getTime())) {
-                            compareStartDateForList(linkedAppointmentList, appointmentobject, limit);
-                        }
-                    } else {
-                        compareStartDateForList(linkedAppointmentList, appointmentobject, limit);
-                    }
-                }
-
-                if (timestamp.before(appointmentobject.getLastModified())) {
-                    timestamp = appointmentobject.getLastModified();
-                }
-            }
-
-            for (int a = 0; a < linkedAppointmentList.size(); a++) {
-                final Appointment appointmentObj = linkedAppointmentList.get(a);
-                if (appointmentObj.getFullTime()) {
-                    checkAndAddAppointment(appointmentList, appointmentObj, startUTC, endUTC, recColl);
-                } else {
-                    appointmentList.add(appointmentObj);
-                }
-            }
-
-            return new AJAXRequestResult(appointmentList, timestamp, "appointment");
-        } finally {
-            if (searchIterator != null) {
-                searchIterator.close();
-            }
-        }
+    @Override
+    protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
+        List<Event> events = session.getCalendarService().getEventsOfUser(session);
+        return getAppointmentResultWithTimestamp(getEventConverter(session), events);
     }
 
 }

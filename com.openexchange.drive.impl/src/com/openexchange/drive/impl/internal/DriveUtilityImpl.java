@@ -69,6 +69,8 @@ import com.openexchange.drive.DriveUtility;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.FolderStats;
 import com.openexchange.drive.NotificationParameters;
+import com.openexchange.drive.RestoreContent;
+import com.openexchange.drive.TrashContent;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.checksum.ChecksumProvider;
@@ -95,6 +97,7 @@ import com.openexchange.session.Session;
 import com.openexchange.share.LinkUpdate;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.Entities;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * {@link DriveUtilityImpl}
@@ -559,6 +562,66 @@ public class DriveUtilityImpl implements DriveUtility {
     }
 
     @Override
+    public JSONObject getTrashContent(DriveSession session) throws OXException {
+        SyncSession syncSession = new SyncSession(session);
+        DriveStorage storage = syncSession.getStorage();
+        if (false == storage.hasTrashFolder()) {
+            return null;
+        }
+        TrashContent trashContent = storage.getTrashContent();
+        JSONObject result = new JSONObject(2);
+
+        try {
+            FileStorageFolder[] subfolders = trashContent.getSubfolders();
+            if (subfolders != null && subfolders.length > 0) {
+                JSONArray folderArray = loadFolders(syncSession, subfolders);
+                result.put("folders", folderArray);
+            }
+
+            SearchIterator<File> files = trashContent.getFiles();
+            if (files != null) {
+                JSONArray fileArray = loadFiles(syncSession, files);
+                if(fileArray.length() > 0) {
+                    result.put("files", fileArray);
+                }
+            }
+        } catch (JSONException ex) {
+            throw DriveExceptionCodes.IO_ERROR.create(ex, ex.getMessage());
+        }
+
+        return result;
+    }
+
+    private JSONArray loadFiles(SyncSession syncSession, SearchIterator<File> files) throws OXException, JSONException {
+        JSONArray fileArray = new JSONArray();
+        while (files.hasNext()) {
+            File file = files.next();
+            JSONObject jsonObject = new JsonFileMetadata(syncSession, file).build();
+            fileArray.put(jsonObject);
+        }
+        return fileArray;
+    }
+
+    private JSONArray loadFolders(SyncSession syncSession, FileStorageFolder[] subfolders) throws OXException, JSONException {
+        JSONArray folderArray = new JSONArray(subfolders.length);
+        for (FileStorageFolder folder : subfolders) {
+            JSONObject jsonObject = new JsonDirectoryMetadata(syncSession, folder).build(false);
+            jsonObject.put("name", folder.getName());
+            if (null != folder.getCreationDate()) {
+                jsonObject.put("created", folder.getCreationDate().getTime());
+            }
+            if (null != folder.getLastModifiedDate()) {
+                jsonObject.put("modified", folder.getLastModifiedDate().getTime());
+            }
+            jsonObject.put("created_by", folder.getCreatedBy());
+            jsonObject.put("modified_by", folder.getModifiedBy());
+            folderArray.put(jsonObject);
+        }
+        return folderArray;
+    }
+
+
+    @Override
     public FolderStats emptyTrash(DriveSession session) throws OXException {
         DriveStorage storage = new SyncSession(session).getStorage();
         if (false == storage.hasTrashFolder()) {
@@ -567,6 +630,16 @@ public class DriveUtilityImpl implements DriveUtility {
         FileStorageFolder trashFolder = storage.getTrashFolder();
         storage.getFolderAccess().clearFolder(trashFolder.getId(), true);
         return storage.getFolderStats(trashFolder.getId(), true);
+    }
+
+    @Override
+    public void removeFromTrash(DriveSession session, List<String> files, List<String> folders) throws OXException {
+        new SyncSession(session).getStorage().deleteFromTrash(files, folders);
+    }
+
+    @Override
+    public RestoreContent restoreFromTrash(DriveSession session, List<String> files, List<String> folders) throws OXException {
+        return new SyncSession(session).getStorage().restoreFromTrash(files, folders);
     }
 
 }

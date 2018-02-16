@@ -5,10 +5,10 @@ properties:
     description: The name of the file the metadata belongs to.
   checksum:
     type: string
-    description: The file's checksum. Only set if metadata is not retrieved through [Metadata synchronization](#metadata-synchronization).
+    description: The file's checksum. Only set if metadata is not retrieved through [Metadata synchronization](#metadata-synchronization) or via getTrashContent action.
   path:
     type: string
-    description: The path of the parent directory. Only set if metadata is not retrieved through [Metadata synchronization](#metadata-synchronization).
+    description: The path of the parent directory. Only set if metadata is not retrieved through [Metadata synchronization](#metadata-synchronization) or via getTrashContent action.
   created:
     type: integer
     format: int64

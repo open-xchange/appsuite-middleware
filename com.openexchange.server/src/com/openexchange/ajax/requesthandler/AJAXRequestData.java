@@ -85,6 +85,7 @@ import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.internal.HostDataImpl;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
+import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.json.actions.AbstractMailAction;
@@ -1401,23 +1402,42 @@ public class AJAXRequestData {
     }
 
     private void processUpload(long maxFileSize, long maxOverallSize) throws OXException {
-        if (!multipart || null == httpServletRequest) {
+        HttpServletRequest localHttpServletRequest = httpServletRequest;
+        if (null == localHttpServletRequest) {
             return;
         }
-        final List<UploadFile> thisFiles = this.files;
-        synchronized (thisFiles) {
-            UploadEvent uploadEvent = this.uploadEvent;
-            if (null == uploadEvent) {
-                uploadEvent = AJAXServlet.processUploadStatic(httpServletRequest, maxFileSize, maxOverallSize, session);
-                this.uploadEvent = uploadEvent;
-                final Iterator<UploadFile> iterator = uploadEvent.getUploadFilesIterator();
-                while (iterator.hasNext()) {
-                    thisFiles.add(iterator.next());
+        if (multipart) {
+            final List<UploadFile> thisFiles = this.files;
+            synchronized (thisFiles) {
+                UploadEvent uploadEvent = this.uploadEvent;
+                if (null == uploadEvent) {
+                    uploadEvent = AJAXServlet.processUploadStatic(localHttpServletRequest, maxFileSize, maxOverallSize, session);
+                    this.uploadEvent = uploadEvent;
+                    final Iterator<UploadFile> iterator = uploadEvent.getUploadFilesIterator();
+                    while (iterator.hasNext()) {
+                        thisFiles.add(iterator.next());
+                    }
+                    final Iterator<String> names = uploadEvent.getFormFieldNames();
+                    while (names.hasNext()) {
+                        final String name = names.next();
+                        putParameter0(name, uploadEvent.getFormField(name), false);
+                    }
                 }
-                final Iterator<String> names = uploadEvent.getFormFieldNames();
-                while (names.hasNext()) {
-                    final String name = names.next();
-                    putParameter0(name, uploadEvent.getFormField(name), false);
+            }
+        } else if (localHttpServletRequest.getMethod().equalsIgnoreCase("PUT") && Boolean.parseBoolean(localHttpServletRequest.getParameter("binary"))) {
+            // Process simple binary upload
+            final List<UploadFile> files = this.files;
+            synchronized (files) {
+                if (files.isEmpty()) {
+                    UploadEvent uploadEvent = this.uploadEvent;
+                    if (null == uploadEvent) {
+                        uploadEvent = UploadUtility.processPutUpload(localHttpServletRequest, maxFileSize, maxOverallSize, session);
+                        this.uploadEvent = uploadEvent;
+                        final Iterator<UploadFile> iterator = uploadEvent.getUploadFilesIterator();
+                        while (iterator.hasNext()) {
+                            files.add(iterator.next());
+                        }
+                    }
                 }
             }
         }

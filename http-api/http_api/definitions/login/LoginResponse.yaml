@@ -17,5 +17,5 @@ properties:
     type: string
     description: The users locale (e.g. "en_US").
   rampup:
-    type: string
+    type: object
     description: Contains various client specific rampup data. Only set if the rampup parameter is set to 'true'.

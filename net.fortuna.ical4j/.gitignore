@@ -1,4 +1,6 @@
 /net/
 /zoneinfo/
 /zoneinfo-global/
+/zoneinfo-outlook/
+/zoneinfo-outlook-global/
 /tz.alias

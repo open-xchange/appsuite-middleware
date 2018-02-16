@@ -1,0 +1,22 @@
+/chronos?action=getAttachment:
+  get:
+    operationId: getEventAttachment
+    tags:
+      - Chronos
+    summary: Gets the attachment of an event.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/QueryParamChronosID"
+      - $ref: "#/parameters/QueryParamChronosFolder"
+      - in: query
+        name: managedId
+        type: integer
+        description: The identifier of the attachment.
+        required: true
+    responses:
+      200:
+        description: The attachment's raw data. In case of errors the
+          responsible fields in the response are filled (see [Error handling](#error-handling)).
+        schema:
+          type: string
+          format: binary

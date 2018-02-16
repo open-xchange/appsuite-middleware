@@ -194,4 +194,9 @@ public class GetSwitch implements MetadataSwitcher {
         return metadata.isShareable();
     }
 
+    @Override
+    public Object origin() {
+        return metadata.getOriginFolderPath();
+    }
+
 }

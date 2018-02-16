@@ -49,7 +49,6 @@
 
 package com.openexchange.user.json.anonymizer;
 
-import java.util.Set;
 import com.openexchange.ajax.anonymizer.AnonymizerService;
 import com.openexchange.ajax.anonymizer.Anonymizers;
 import com.openexchange.ajax.anonymizer.Module;
@@ -59,9 +58,6 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.session.Session;
-import com.openexchange.share.ShareService;
-import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.user.json.osgi.Services;
 
 /**
  * {@link ContactAnonymizerService}
@@ -94,26 +90,7 @@ public class ContactAnonymizerService implements AnonymizerService<Contact> {
             return null;
         }
 
-        // Do not anonymize yourself
-        if (session.getUserId() == entity.getInternalUserId()) {
-            return entity;
-        }
-
-        // Check if associated guest was invited by given user entity
-        if (entity.getInternalUserId() > 0) {
-            if (entity.getInternalUserId() == ServerSessionAdapter.valueOf(session).getUser().getCreatedBy()) {
-                return entity;
-            }
-            ShareService shareService = Services.getService(ShareService.class);
-            if (null != shareService) {
-                Set<Integer> userIds = shareService.getSharingUsersFor(session.getContextId(), session.getUserId());
-                if (userIds.contains(Integer.valueOf(entity.getInternalUserId()))) {
-                    return entity;
-                }
-            }
-        }
-
-        // Otherwise anonymize the user contact
+        // Anonymize the contact
         Contact anonymizedContact = new Contact();
         ContactMapper instance = ContactMapper.getInstance();
         for (ContactField contactField : WHITELIST_FIELDS) {

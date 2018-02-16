@@ -53,16 +53,15 @@ import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
-
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.DefaultParseResult;
-import com.openexchange.data.conversion.ical.FreeBusyInformation;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.data.conversion.ical.ParseResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.groupware.calendar.CalendarCollectionUtils;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -104,14 +103,20 @@ public class ExtraneousSeriesMasterRecoveryParser implements ICalParser {
             return appointmentsPraseResult;
         }
 
-        CalendarCollectionService tools = registry.getService(CalendarCollectionService.class);
         List<CalendarDataObject> copy = new LinkedList<CalendarDataObject>(appointments);
         int index = 0;
         for (CalendarDataObject appointment : appointments) {
             try {
-                if (appointment.isSequence() && !tools.isOccurrenceDate(appointment.getStartDate().getTime(), -1, appointment, new long[0])) {
+                if (appointment.isSequence() && !CalendarCollectionUtils.isOccurrenceDate(appointment.getStartDate().getTime(), -1, appointment, new long[0])) {
                     final CalendarDataObject clone = appointment.clone();
-                    tools.removeRecurringType(appointment);
+                    appointment.setRecurrenceType(CalendarObject.NONE);
+                    appointment.removeInterval();
+                    appointment.removeUntil();
+                    appointment.removeOccurrence();
+                    appointment.removeDays();
+                    appointment.removeDayInMonth();
+                    appointment.removeMonth();
+                    appointment.removeRecurrenceCount();
                     copy.add(clone);
                 }
             } catch (OXException e) {
@@ -137,16 +142,6 @@ public class ExtraneousSeriesMasterRecoveryParser implements ICalParser {
     public String parseProperty(final String propertyName, final InputStream ical) {
         return delegate.parseProperty(propertyName, ical);
     }
-
-	@Override
-	public ParseResult<FreeBusyInformation> parseFreeBusy(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
-		return delegate.parseFreeBusy(icalText, defaultTZ, ctx, errors, warnings);
-	}
-
-	@Override
-	public ParseResult<FreeBusyInformation> parseFreeBusy(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
-		return delegate.parseFreeBusy(ical, defaultTZ, ctx, errors, warnings);
-	}
 
 	@Override
 	public void setLimit(int limit) {

@@ -59,32 +59,37 @@ import com.openexchange.i18n.LocalizableStrings;
  * @since v7.10
  */
 public final class ExportDefaultFileNames implements LocalizableStrings {
-    
+
     /**
      * The default file name for a vcard and csv export, when using batch data
      */
     public static final String CONTACTS_NAME = "Contacts";
-    
+
     /**
      * The default file name for an ical appointment export, when using batch data
      */
     public static final String ICAL_APPOINTMENT_NAME = "Appointments";
-    
+
+    /**
+     * The default file name for an ical event export, when using batch data
+     */
+    public static final String ICAL_EVENT_NAME = "Events";
+
     /**
      * The default file name for an ical task export, when using batch data
      */
     public static final String ICAL_TASKS_NAME = "Tasks";
-    
+
     /**
      * The default file name for an ical task export, when using batch data
      */
     public static final String DEFAULT_NAME = "Export";
-    
+
     /**
      * Initializes a new {@link ExportDefaultFileNames}.
      */
     private ExportDefaultFileNames() {
         super();
     }
-    
+
 }

@@ -65,6 +65,7 @@ import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
+import com.openexchange.folderstorage.internal.Tools;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.outlook.DuplicateCleaner;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
@@ -153,11 +154,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
         if (!KNOWN_TREES.contains(treeId)) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Create not supported by tree " + treeId);
         }
-        final FolderStorage parentStorage = folderStorageDiscoverer.getFolderStorage(treeId, parentId);
-        if (null == parentStorage) {
-            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, parentId);
-        }
-
+        FolderStorage parentStorage = selectFolderStorage(treeId, parentId, toCreate.getContentType());
         TransactionManager transactionManager = TransactionManager.initTransaction(storageParameters);
         boolean rollbackTransaction = true;
         /*
@@ -332,14 +329,14 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
 
     private String doCreateVirtual(final Folder toCreate, final String parentId, final String treeId, final FolderStorage virtualStorage, final List<FolderStorage> openedStorages, final TransactionManager transactionManager, ComparedFolderPermissions comparedPermissions) throws OXException {
         final ContentType folderContentType = toCreate.getContentType();
-        final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, parentId);
+        final FolderStorage realStorage = selectFolderStorage(FolderStorage.REAL_TREE_ID, parentId, folderContentType);
         if (realStorage.equals(virtualStorage)) {
             doCreateReal(toCreate, parentId, FolderStorage.REAL_TREE_ID, realStorage, transactionManager, comparedPermissions);
         } else {
             /*
              * Check if real storage supports folder's content types
              */
-            if (supportsContentType(folderContentType, realStorage)) {
+            if (Tools.supportsContentType(folderContentType, realStorage)) {
                 checkOpenedStorage(realStorage, openedStorages);
                 /*
                  * 1. Create in real storage
@@ -495,21 +492,28 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
         }
     }
 
-    private static boolean supportsContentType(final ContentType folderContentType, final FolderStorage folderStorage) {
-        final ContentType[] supportedContentTypes = folderStorage.getSupportedContentTypes();
-        if (null == supportedContentTypes) {
-            return false;
-        }
-        if (0 == supportedContentTypes.length) {
-            return true;
-        }
-        final String cts = folderContentType.toString();
-        for (final ContentType supportedContentType : supportedContentTypes) {
-            if (supportedContentType.toString().equals(cts)) {
-                return true;
+    /**
+     * Selects a folder storage for a new folder, considering the targeted folder tree and parent folder, as well as the content type for
+     * the new folder.
+     *
+     * @param treeId The identifier of the targeted folder tree
+     * @param parentId The identifier of the parent folder
+     * @param contentType The content type for the new folder, or <code>null</code> if not set
+     * @return The parent folder storage appropriate for the new folder
+     */
+    private FolderStorage selectFolderStorage(String treeId, String parentId, ContentType contentType) throws OXException {
+        if (null != contentType) {
+            for (FolderStorage folderStorage : folderStorageDiscoverer.getFolderStoragesForParent(treeId, parentId)) {
+                if (Tools.supportsContentType(contentType, folderStorage)) {
+                    return folderStorage;
+                }
             }
         }
-        return false;
+        FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, parentId);
+        if (null == folderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, parentId);
+        }
+        return folderStorage;
     }
 
 }

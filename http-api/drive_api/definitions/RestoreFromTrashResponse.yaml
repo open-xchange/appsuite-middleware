@@ -1,0 +1,6 @@
+type: object
+description: A json object containing the restored files and folders and their new path.
+properties:
+  $ref: ./CommonResponseData.yaml
+  data:
+    $ref: "#/definitions/RestoreFromTrashData"

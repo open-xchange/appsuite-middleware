@@ -192,7 +192,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         if (authHeaders == null || authHeaders.length == 0) {
             // Pass on to custom handlers
             mailMessage.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
-            logMetrics(Collections.emptyList(), mailMessage.getAuthenticityResult());
+            logMetrics(mailMessage.getMessageId(), Collections.emptyList(), mailMessage.getAuthenticityResult());
             return;
         }
 
@@ -200,7 +200,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         if (from == null || from.length == 0) {
             // Pass on to custom handlers
             mailMessage.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
-            logMetrics(Arrays.asList(authHeaders), mailMessage.getAuthenticityResult());
+            logMetrics(mailMessage.getMessageId(), Arrays.asList(authHeaders), mailMessage.getAuthenticityResult());
             return;
         }
 
@@ -212,7 +212,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             LOGGER.error("An error occurred during parsing the 'Authentication-Results' header: {}", e.getMessage(), e);
         }
         mailMessage.setAuthenticityResult(authenticityResult);
-        logMetrics(headers, mailMessage.getAuthenticityResult());
+        logMetrics(mailMessage.getMessageId(), headers, mailMessage.getAuthenticityResult());
 
         trustedMailService.handle(session, mailMessage);
     }
@@ -313,7 +313,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             throw MailExceptionCode.INTERRUPT_ERROR.create();
         }
 
-        determineOverallResult(overallResult, results, unconsideredResults);
+        determineOverallResult(overallResult, results);
 
         overallResult.addAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, results);
         overallResult.addAttribute(MailAuthenticityResultKey.UNCONSIDERED_AUTH_MECH_RESULTS, unconsideredResults);
@@ -361,7 +361,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * 
      * <p>If multiple results of a specific mechanism are present, then the best result
      * will be picked for that particular mechanism (according to their natural
-     * {@link Enum} ordering).</p>
+     * {@link Enum} ordering) and the rest results of that mechanism will be discarded.</p>
      * 
      * <p>If the DMARC mechanism result is 'PASS' then the overall status is marked as 'PASS' or
      * if is 'FAIL' then the overall status is marked as 'FAIL, and no further action is performed.</p>
@@ -371,16 +371,15 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      *
      * @param overallResult The overall {@link MailAuthenticityResult}
      * @param results A {@link List} with the results of the known mechanisms
-     * @param unconsideredResults A {@link List} with the unknown/unconsidered results
      */
-    private void determineOverallResult(final MailAuthenticityResult overallResult, final List<MailAuthenticityMechanismResult> results, final List<Map<String, String>> unconsideredResults) {
+    private void determineOverallResult(final MailAuthenticityResult overallResult, final List<MailAuthenticityMechanismResult> results) {
         // Separate results
         SeparatedResults separatedResults = separateAndClearResults(results);
 
         // Pick the best results for all mechanisms
-        MailAuthenticityMechanismResult bestOfDMARC = pickBestResult(separatedResults.getDmarcResults(), unconsideredResults);
-        MailAuthenticityMechanismResult bestOfDKIM = pickBestResult(separatedResults.getDkimResults(), unconsideredResults);
-        MailAuthenticityMechanismResult bestOfSPF = pickBestResult(separatedResults.getSpfResults(), unconsideredResults);
+        MailAuthenticityMechanismResult bestOfDMARC = pickBestResult(separatedResults.getDmarcResults());
+        MailAuthenticityMechanismResult bestOfDKIM = pickBestResult(separatedResults.getDkimResults());
+        MailAuthenticityMechanismResult bestOfSPF = pickBestResult(separatedResults.getSpfResults());
         separatedResults = null; // Might help GC
 
         // Re-add best ones to results
@@ -540,15 +539,14 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     }
 
     /**
-     * Picks the best {@link MailAuthenticityMechanismResult} from the specified {@link List} of results
+     * Picks the best {@link MailAuthenticityMechanismResult} from the specified {@link List} of results.
      *
      * @param results The {@link List} with the {@link MailAuthenticityMechanismResult}s
-     * @param unconsideredResults The {@link List} with the unconsidered results
      * @return The best {@link MailAuthenticityMechanismResult} according to their natural ordering,
      *         or <code>null</code> if the {@link List} is empty, or the first (and only) element
      *         if the {@link List} is a singleton
      */
-    private MailAuthenticityMechanismResult pickBestResult(List<MailAuthenticityMechanismResult> results, List<Map<String, String>> unconsideredResults) {
+    private MailAuthenticityMechanismResult pickBestResult(List<MailAuthenticityMechanismResult> results) {
         int size = results.size();
         if (size == 0) {
             return null;
@@ -570,12 +568,6 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             }
         }
 
-        // Add the rest to unconsidered list and remove from the original
-        for (MailAuthenticityMechanismResult result : results) {
-            if (result != bestResult) {
-                unconsideredResults.add(convert(result));
-            }
-        }
         return bestResult;
     }
 
@@ -606,24 +598,6 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         }
 
         return unknownResults;
-    }
-
-    /**
-     * Converts the specified {@link MailAuthenticityMechanismResult} to a {@link Map}
-     *
-     * @param result The {@link MailAuthenticityMechanismResult} to convert
-     * @return A {@link Map} with the converted {@link MailAuthenticityMechanismResult}
-     */
-    private Map<String, String> convert(MailAuthenticityMechanismResult result) {
-        final Map<String, String> unconsidered = new HashMap<>(6);
-        unconsidered.put("mechanism", result.getMechanism().getTechnicalName());
-        unconsidered.put("result", result.getResult().getTechnicalName());
-        unconsidered.put("domain", result.getDomain());
-        String reason = result.getReason();
-        if (!Strings.isEmpty(reason)) {
-            unconsidered.put("reason", reason);
-        }
-        return unconsidered;
     }
 
     /**
@@ -756,9 +730,12 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @param authHeaders the raw headers
      * @param overallResult the overall result
      */
-    private void logMetrics(final List<String> authHeaders, MailAuthenticityResult overallResult) {
+    private void logMetrics(String mailId, final List<String> authHeaders, MailAuthenticityResult overallResult) {
         MailAuthenticityMetricLogger metricLogger = services.getService(MailAuthenticityMetricLogger.class);
-        metricLogger.log(authHeaders, overallResult);
+        if (metricLogger == null) {
+            return;
+        }
+        metricLogger.log(mailId, authHeaders, overallResult);
     }
 
     ///////////////////////////////// HELPER CLASSES /////////////////////////////////

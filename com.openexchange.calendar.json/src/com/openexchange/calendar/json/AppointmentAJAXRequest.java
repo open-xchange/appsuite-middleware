@@ -67,7 +67,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-public final class AppointmentAJAXRequest {
+public class AppointmentAJAXRequest {
 
     private final ServerSession session;
 

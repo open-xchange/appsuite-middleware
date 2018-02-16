@@ -56,7 +56,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.composition.crypto.CryptographicAwareIDBasedFileAccessFactory;
-import com.openexchange.file.storage.json.osgi.FileFieldCollector;
+import com.openexchange.file.storage.json.FileFieldCollector;
+import com.openexchange.file.storage.json.osgi.OSGiFileFieldCollector;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.preview.PreviewService;
@@ -74,14 +75,14 @@ import com.openexchange.threadpool.ThreadPoolService;
 public class Services {
 
     private static AtomicReference<ServiceLookup> LOOKUP_REF = new AtomicReference<ServiceLookup>();
-    private static AtomicReference<FileFieldCollector> FIELD_COLLECTOR = new AtomicReference<FileFieldCollector>();
+    private static AtomicReference<OSGiFileFieldCollector> FIELD_COLLECTOR = new AtomicReference<OSGiFileFieldCollector>();
 
     /**
      * Sets the file field collector instance.
      *
      * @param fieldCollector The field collector to set
      */
-    public static void setFieldCollector(FileFieldCollector fieldCollector) {
+    public static void setFieldCollector(OSGiFileFieldCollector fieldCollector) {
         FIELD_COLLECTOR.set(fieldCollector);
     }
 

@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.charset.spi.CharsetProvider;
@@ -69,17 +68,12 @@ import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.internal.CacheEventServiceImpl;
 import com.openexchange.caching.internal.JCSCacheService;
 import com.openexchange.caching.internal.JCSCacheServiceInit;
-import com.openexchange.calendar.CalendarAdministration;
-import com.openexchange.calendar.CalendarReminderDelete;
-import com.openexchange.calendar.api.AppointmentSqlFactory;
-import com.openexchange.calendar.api.CalendarCollection;
-import com.openexchange.calendar.cache.CalendarVolatileCache;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.internal.AbstractCapabilityService;
-import com.openexchange.charset.internal.CollectionCharsetProvider;
 import com.openexchange.charset.CustomCharsetProvider;
 import com.openexchange.charset.CustomCharsetProviderInit;
+import com.openexchange.charset.internal.CollectionCharsetProvider;
 import com.openexchange.charset.internal.ModifyCharsetExtendedProvider;
 import com.openexchange.cluster.timer.ClusterTimerService;
 import com.openexchange.cluster.timer.impl.ClusterTimerServiceImpl;
@@ -114,7 +108,6 @@ import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedBy;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
-import com.openexchange.event.impl.AppointmentEventInterface;
 import com.openexchange.event.impl.EventDispatcher;
 import com.openexchange.event.impl.EventQueue;
 import com.openexchange.event.impl.TaskEventInterface;
@@ -132,16 +125,12 @@ import com.openexchange.group.internal.GroupInit;
 import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.alias.impl.RdbAliasStorage;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarAdministrationService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.configuration.ParticipantConfig;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.groupware.impl.id.IDGeneratorServiceImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
-import com.openexchange.groupware.reminder.internal.TargetRegistry;
 import com.openexchange.groupware.update.internal.InternalList;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.internal.HtmlServiceImpl;
@@ -261,10 +250,6 @@ public final class Init {
          * Reads system.properties.
          */
         com.openexchange.configuration.SystemConfig.getInstance(),
-        /**
-         * Reads the calendar.properties.
-         */
-        com.openexchange.groupware.calendar.CalendarConfig.getInstance(),
         /**
          * Initialization for alias charset provider
          */
@@ -403,10 +388,6 @@ public final class Init {
         startTestServices = System.currentTimeMillis();
         startAndInjectCache();
         System.out.println("startAndInjectCache took " + (System.currentTimeMillis() - startTestServices) + "ms.");
-
-        startTestServices = System.currentTimeMillis();
-        startAndInjectCalendarServices();
-        System.out.println("startAndInjectCalendarServices took " + (System.currentTimeMillis() - startTestServices) + "ms.");
 
         startTestServices = System.currentTimeMillis();
         startAndInjectDatabaseBundle();
@@ -677,37 +658,6 @@ public final class Init {
             }
         };
         return new OXException(9999, null == message ? "[Not available]" : message, cause);
-    }
-
-    private static void startAndInjectCalendarServices() {
-        if (null == TestServiceRegistry.getInstance().getService(CalendarCollectionService.class)) {
-            TestServiceRegistry.getInstance().addService(CalendarCollectionService.class, new CalendarCollection());
-            TestServiceRegistry.getInstance().addService(AppointmentSqlFactoryService.class, new AppointmentSqlFactory());
-            TargetRegistry.getInstance().addService(Types.APPOINTMENT, new CalendarReminderDelete());
-            TestServiceRegistry.getInstance().addService(CalendarAdministrationService.class, new CalendarAdministration());
-
-            if (null == CalendarVolatileCache.getInstance()) {
-                try {
-                    /*
-                     * Important cache configuration constants
-                     */
-                    final String regionName = CalendarVolatileCache.REGION;
-                    final int maxObjects = 10000000;
-                    final int maxLifeSeconds = 300;
-                    final int idleTimeSeconds = 180;
-                    final int shrinkerIntervalSeconds = 60;
-                    /*
-                     * Compose cache configuration
-                     */
-                    final byte[] ccf = ("jcs.region." + regionName + "=LTCP\n" + "jcs.region." + regionName + ".cacheattributes=org.apache.jcs.engine.CompositeCacheAttributes\n" + "jcs.region." + regionName + ".cacheattributes.MaxObjects=" + maxObjects + "\n" + "jcs.region." + regionName + ".cacheattributes.MemoryCacheName=org.apache.jcs.engine.memory.lru.LRUMemoryCache\n" + "jcs.region." + regionName + ".cacheattributes.UseMemoryShrinker=true\n" + "jcs.region." + regionName + ".cacheattributes.MaxMemoryIdleTimeSeconds=" + idleTimeSeconds + "\n" + "jcs.region." + regionName + ".cacheattributes.ShrinkerIntervalSeconds=" + shrinkerIntervalSeconds + "\n" + "jcs.region." + regionName + ".elementattributes=org.apache.jcs.engine.ElementAttributes\n" + "jcs.region." + regionName + ".elementattributes.IsEternal=false\n" + "jcs.region." + regionName + ".elementattributes.MaxLifeSeconds=" + maxLifeSeconds + "\n" + "jcs.region." + regionName + ".elementattributes.IdleTime=" + idleTimeSeconds + "\n" + "jcs.region." + regionName + ".elementattributes.IsSpool=false\n" + "jcs.region." + regionName + ".elementattributes.IsRemote=false\n" + "jcs.region." + regionName + ".elementattributes.IsLateral=false\n").getBytes();
-                    final CacheService cacheService = TestServiceRegistry.getInstance().getService(CacheService.class);
-                    cacheService.loadConfiguration(new ByteArrayInputStream(ccf));
-                    CalendarVolatileCache.initInstance(cacheService.getCache(regionName));
-                } catch (final OXException e) {
-                    throw new IllegalStateException(e.getMessage(), e);
-                }
-            }
-        }
     }
 
     private static void startAndInjectXMLServices() {
@@ -994,12 +944,7 @@ public final class Init {
     private static void startAndInjectEventBundle() throws Exception {
         if (null == TestServiceRegistry.getInstance().getService(EventAdmin.class)) {
             EventQueue.setNewEventDispatcher(new EventDispatcher() {
-
-                @Override
-                public void addListener(final AppointmentEventInterface listener) {
-                    // Do nothing.
-                }
-
+                
                 @Override
                 public void addListener(final TaskEventInterface listener) {
                     // Do nothing.

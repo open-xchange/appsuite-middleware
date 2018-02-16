@@ -49,7 +49,9 @@
 
 package com.openexchange.groupware.infostore.search.impl;
 
-import static com.openexchange.groupware.infostore.InfostoreSearchEngine.*;
+import static com.openexchange.groupware.infostore.InfostoreSearchEngine.ASC;
+import static com.openexchange.groupware.infostore.InfostoreSearchEngine.DESC;
+import static com.openexchange.groupware.infostore.InfostoreSearchEngine.NOT_SET;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -75,6 +77,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
+import com.openexchange.groupware.infostore.InfostoreFolderPath;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
@@ -632,6 +635,9 @@ public class SearchEngineImpl extends DBService {
                 case Metadata.META:
                     retval.add("infostore_document.meta");
                     break Metadata2DBSwitch;
+                case Metadata.ORIGIN:
+                    retval.add("infostore.origin");
+                    break Metadata2DBSwitch;
             }
         }
         return (retval.toArray(new String[0]));
@@ -896,6 +902,12 @@ public class SearchEngineImpl extends DBService {
                             } finally {
                                 Streams.close(jsonBlobStream);
                             }
+                        }
+                        break;
+                    case Metadata.ORIGIN:
+                        String sFolderPath = result.getString(++columnIndex);
+                        if (false == result.wasNull() &&  null != sFolderPath) {
+                            retval.setOriginFolderPath(InfostoreFolderPath.parseFrom(sFolderPath));
                         }
                         break;
                     default:

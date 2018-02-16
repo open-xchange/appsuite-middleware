@@ -508,7 +508,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 HttpRequestBase request = null;
                 try {
                     String fid = toOneDriveFolderId(folderId);
-                    List<String> ids = new LinkedList<String>();
+                    List<String> ids = new LinkedList<>();
 
                     int limit = 100;
                     int offset = 0;
@@ -600,7 +600,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 HttpRequestBase request = null;
                 try {
                     String fid = toOneDriveFolderId(folderId);
-                    List<File> files = new LinkedList<File>();
+                    List<File> files = new LinkedList<>();
 
                     int limit = 100;
                     int offset = 0;
@@ -651,7 +651,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 HttpRequestBase request = null;
                 try {
                     String fid = toOneDriveFolderId(folderId);
-                    List<File> files = new LinkedList<File>();
+                    List<File> files = new LinkedList<>();
 
                     int limit = 100;
                     int offset = 0;
@@ -700,7 +700,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
             protected TimedResult<File> doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 try {
-                    List<File> files = new LinkedList<File>();
+                    List<File> files = new LinkedList<>();
 
                     for (IDTuple id : ids) {
                         HttpGet method = new HttpGet(buildUri(id.getId(), initiateQueryString()));
@@ -745,7 +745,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
     public SearchIterator<File> search(final String pattern, List<Field> fields, final String folderId, final boolean includeSubfolders, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
         final Map<String, Boolean> allowedFolders;
         if (null != folderId) {
-            allowedFolders = new HashMap<String, Boolean>();
+            allowedFolders = new HashMap<>();
             allowedFolders.put(folderId, Boolean.TRUE);
         } else {
             allowedFolders = null;
@@ -756,7 +756,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
             protected SearchIterator<File> doPerform(HttpClient httpClient) throws OXException, JSONException, IOException {
                 HttpRequestBase request = null;
                 try {
-                    List<File> files = new LinkedList<File>();
+                    List<File> files = new LinkedList<>();
                     int limit = 100;
                     int offset = 0;
                     int resultsFound;
@@ -819,7 +819,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         files = files.subList(start, toIndex);
                     }
 
-                    return new SearchIteratorAdapter<File>(files.iterator(), files.size());
+                    return new SearchIteratorAdapter<>(files.iterator(), files.size());
                 } finally {
                     reset(request);
                 }
@@ -864,7 +864,7 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
             return Collections.emptyMap();
         }
         FileStorageFolderAccess folderAccess = getAccountAccess().getFolderAccess();
-        Map<String, Long> sequenceNumbers = new HashMap<String, Long>(folderIds.size());
+        Map<String, Long> sequenceNumbers = new HashMap<>(folderIds.size());
         for (String folderId : folderIds) {
             Date lastModifiedDate = folderAccess.getFolder(folderId).getLastModifiedDate();
             sequenceNumbers.put(folderId, null != lastModifiedDate ? Long.valueOf(lastModifiedDate.getTime()) : null);

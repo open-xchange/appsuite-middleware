@@ -437,12 +437,12 @@ public final class CSSMatcher {
      * @return <code>true</code> if modified; otherwise <code>false</code>
      */
     protected static boolean checkCSS(final Stringer cssBuilder, final Map<String, Set<String>> styleMap, final String cssPrefix, final boolean removeIfAbsent, final boolean internallyInvoked) {
-        if (cssBuilder.isEmpty()) {
+        if (cssBuilder.isEmpty() || (null == styleMap && Strings.isEmpty(cssPrefix))) {
             return false;
         }
 
         // Schedule separate task to monitor duration
-        // User StringBuffer-based invocation to honor concurrency
+        // Use StringBuffer-based invocation to honor concurrency
         final Stringer cssBld = new StringBufferStringer(new StringBuffer(cssBuilder.toString()));
         cssBuilder.setLength(0);
 
@@ -1018,16 +1018,16 @@ public final class CSSMatcher {
             if (null != elementName) {
                 Set<String> allowedValuesSet = styleMap.get(toLowerCase(elementName));
                 if (null != allowedValuesSet) {
-                    elemBuilder.append(elementName).append(':').append(' ');
                     final String elementValues = m.group(2);
                     boolean hasValues = false;
                     if (matches(elementValues, allowedValuesSet)) {
                         /*
                          * Direct match
                          */
-                        if (HtmlServices.containsEventHandler(elementValues)) {
+                        if (HtmlServices.containsEventHandler(elementValues) || false == HtmlServices.isSafe(elementValues, elementValues)) {
                             modified = true;
                         } else {
+                            elemBuilder.append(elementName).append(':').append(' ');
                             elemBuilder.append(elementValues);
                             hasValues = true;
                         }
@@ -1035,10 +1035,11 @@ public final class CSSMatcher {
                         boolean first = true;
                         for (String token : splitToTokens(elementValues)) {
                             if (matches(token, allowedValuesSet)) {
-                                if (HtmlServices.containsEventHandler(token)) {
+                                if (HtmlServices.containsEventHandler(token) || false == HtmlServices.isSafe(elementValues, elementValues)) {
                                     modified = true;
                                 } else {
                                     if (first) {
+                                        elemBuilder.append(elementName).append(':').append(' ');
                                         first = false;
                                     } else {
                                         elemBuilder.append(' ');
@@ -1070,10 +1071,15 @@ public final class CSSMatcher {
                      */
                     modified = true;
                 } else {
-                    if (cssBuilder.length() > 0) {
-                        cssBuilder.append(' ');
+                    String elementValues = m.group(2);
+                    if ((elementValues.indexOf('<') >= 0 || elementValues.indexOf('>') >= 0) || HtmlServices.containsEventHandler(elementValues) || false == HtmlServices.isSafe(elementValues, elementValues)) {
+                        modified = true;
+                    } else {
+                        if (cssBuilder.length() > 0) {
+                            cssBuilder.append(' ');
+                        }
+                        cssBuilder.append(m.group());
                     }
-                    cssBuilder.append(m.group());
                 }
             }
         } while (!thread.isInterrupted() && m.find());

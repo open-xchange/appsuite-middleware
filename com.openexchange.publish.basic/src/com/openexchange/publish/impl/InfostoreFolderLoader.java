@@ -59,6 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.InfostoreFolderPath;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.publish.EscapeMode;
 import com.openexchange.publish.Publication;
@@ -399,6 +400,16 @@ public class InfostoreFolderLoader implements PublicationDataLoaderService {
         @Override
         public void setOriginalFolderId(long id) {
             documentMetadata.setOriginalFolderId(id);
+        }
+
+        @Override
+        public InfostoreFolderPath getOriginFolderPath() {
+            return documentMetadata.getOriginFolderPath();
+        }
+
+        @Override
+        public void setOriginFolderPath(InfostoreFolderPath originFolderPath) {
+            documentMetadata.setOriginFolderPath(originFolderPath);
         }
     }
 

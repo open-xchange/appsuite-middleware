@@ -72,6 +72,7 @@ import com.openexchange.ajax.folder.api2.SubscribeTest;
 import com.openexchange.ajax.folder.api2.UpdateTest;
 import com.openexchange.ajax.folder.api2.UpdatesTest;
 import com.openexchange.ajax.folder.api2.VisibleFoldersTest;
+import com.openexchange.ajax.folder.api_client.MailFolderCountTest;
 import com.openexchange.ajax.infostore.test.Bug37211Test;
 import com.openexchange.ajax.infostore.test.InfostoreObjectCountTest;
 import com.openexchange.test.concurrent.ParallelSuite;
@@ -138,7 +139,10 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug44895Test.class,
     PermissionsCascadeTest.class,
 
-    PublicFolderMovePermissionTest.class
+    PublicFolderMovePermissionTest.class,
+
+    // API Client tests
+    MailFolderCountTest.class
 
 })
 public final class FolderTestSuite {

@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.appointment.bugtests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
@@ -74,6 +76,7 @@ public class Bug39571Test extends AbstractAJAXSession {
     private int nextYear;
     private Appointment single;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -117,6 +120,15 @@ public class Bug39571Test extends AbstractAJAXSession {
         series.setEndDate(TimeTools.D("01.08." + nextYear + " 09:30"));
         series.setLastModified(new Date(Long.MAX_VALUE));
         catm.update(series);
-        assertTrue("Excpected conflicting ressource.", catm.getLastResponse().hasConflicts());
+
+        if (false == catm.getLastResponse().hasConflicts()) {
+            // new implementation might leave existing exception unchanged, so expect no conflict if still there
+            Appointment reloadedException = catm.get(exception);
+            assertNotNull(reloadedException);
+            assertEquals(exception.getStartDate(), reloadedException.getStartDate());
+            assertEquals(exception.getEndDate(), reloadedException.getEndDate());
+        } else {
+            assertTrue("Excpected conflicting ressource.", catm.getLastResponse().hasConflicts());
+        }
     }
 }

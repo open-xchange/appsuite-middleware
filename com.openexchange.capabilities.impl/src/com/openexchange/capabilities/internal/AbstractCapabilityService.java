@@ -749,6 +749,8 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             if (!Strings.isEmpty(user.getMail())) {
                 capabilities.add(getCapability("edit_password"));
             }
+            capabilities.remove("mailfilter_v2");
+            capabilities.remove("mailfilter");
         }
     }
 

@@ -188,7 +188,6 @@ public class UpdateTest extends AppointmentTest {
 
         appointmentObj.setStartDate(calendarStart.getTime());
         appointmentObj.setEndDate(calendarEnd.getTime());
-        appointmentObj.setOrganizer(testUser.getUser());
 
         final Calendar recurrenceStart = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         final int startDay = calendarStart.get(Calendar.DAY_OF_MONTH);

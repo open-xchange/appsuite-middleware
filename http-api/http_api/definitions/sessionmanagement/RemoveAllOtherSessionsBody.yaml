@@ -1,0 +1,5 @@
+type: object
+properties:
+  sessionIdToKeep:
+    type: string
+    description: Session identifier to not be remove. All other clients are being removed, excpeted blacklisted ones.

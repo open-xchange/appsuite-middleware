@@ -52,6 +52,7 @@ package com.openexchange.dav;
 import java.util.Locale;
 import com.openexchange.clientinfo.ClientInfo;
 import com.openexchange.clientinfo.ClientInfoType;
+import com.openexchange.java.Strings;
 
 
 /**
@@ -63,20 +64,58 @@ import com.openexchange.clientinfo.ClientInfoType;
 public class DAVClientInfo implements ClientInfo {
 
     private final String app;
+    private final String osFamily;
+    private final String osVersion;
+    private final String client;
+    private final String clientVersion;
 
     public DAVClientInfo(String app) {
+        this(app, null, null, null, null);
+    }
+
+    public DAVClientInfo(String app, String osFamily, String osVersion, String client, String clientVersion) {
         super();
         this.app = app;
+        this.osFamily = osFamily;
+        this.osVersion = osVersion;
+        this.client = client;
+        this.clientVersion = clientVersion;
     }
 
     @Override
     public ClientInfoType getType() {
-        return ClientInfoType.SYNC;
+        return ClientInfoType.DAV;
     }
 
     @Override
-    public String toString(Locale locale) {
+    public String getDisplayName(Locale locale) {
         return app;
+    }
+
+    @Override
+    public String getOSFamily() {
+        if (Strings.isNotEmpty(osFamily)) {
+            return osFamily.toLowerCase();
+        }
+        return null;
+    }
+
+    @Override
+    public String getOSVersion() {
+        return osVersion;
+    }
+
+    @Override
+    public String getClientName() {
+        if (Strings.isNotEmpty(client)) {
+            return client.toLowerCase();
+        }
+        return null;
+    }
+
+    @Override
+    public String getClientVersion() {
+        return clientVersion;
     }
 
 }

@@ -26,15 +26,15 @@ properties:
       description: |
         Appointments and tasks are available via the CalDAV interface if they fall 
         into a configurable timeframe. This value specifies the start time of this 
-        interval, i.e. how far past appointments should be considered. More formal, 
-        this value defines the negative offset relative to the current date 
-        representing the minimum end time of appointments to be synchronized.
-        Possible values are: <code>one_month</code>, <code>one_year</code> and <code>six_months</code>.
-      defaultValue: one_month
+        interval, i.e. how  many days in the past should be considered. More formal, 
+        this value defines the negative offset in days relative to the current date 
+        representing the minimum end time of appointments and tasks to be synchronized.
+        A value of "0" disables the limit, which is the default. 
+      defaultValue: 0
       version: 
       reloadable: false
-      configcascadeAware: false
-      related:
+      configcascadeAware: true
+      related: com.openexchange.caldav.interval.end
       file: caldav.properties
       packageName: open-xchange-dav
       tags: ["CalDAV", "Limit", "Appointment"]
@@ -42,15 +42,15 @@ properties:
       description: |
         Appointments and tasks are available via the CalDAV interface if they fall 
         into a configurable timeframe. This value specifies the end time of this
-        interval, i.e. how far future appointments should be considered. More 
-        formal, this value defines the positive offset relative to the current date 
-        representing the maximum start time of appointments to be synchronized.
-        Possible values are: <code>one_year</code> and <code>two_years</code>.
-      defaultValue: one_year
+        interval, i.e. how many days in the future should be considered. More formal, 
+        this value defines the positive offset in days relative to the current date 
+        representing the maximum start time of appointments and tasks to be synchronized.
+        A value of "0" disables the limit, which is the default. 
+      defaultValue: 0
       version:
       reloadable: false
-      configcascadeAware: false
-      related:
+      configcascadeAware: true
+      related: com.openexchange.caldav.interval.start
       file: caldav.properties
       packageName: open-xchange-dav
       tags: ["CalDAV", "Limit", "Appointment"]

@@ -79,7 +79,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link TransformImageClientAction}
  *
  * @author <a href="mailto:kai.ahrens@open-xchange.com">Kai Ahrens</a>
- * @since v7.8.4
+ * @since v7.10.0
  */
 public class TransformImageClientAction extends TransformImageAction {
 
@@ -112,7 +112,7 @@ public class TransformImageClientAction extends TransformImageAction {
                     m_clientStatusValid.set(ret = imageClient.isConnected());
                 } catch (OXException e) {
                     // only tracing here
-                    LOG.trace(e.getMessage());
+                    LOG.trace(Throwables.getRootCause(e).getMessage());
                 }
             }
         }
@@ -140,7 +140,7 @@ public class TransformImageClientAction extends TransformImageAction {
                     }
                 }
             } catch (IOException e) {
-                LOG.error(e.getMessage());
+                LOG.error(Throwables.getRootCause(e).getMessage());
             }
 
             cacheKey = new StringBuilder().append(size).append('-').append(crcImage.getValue()).toString();
@@ -162,14 +162,15 @@ public class TransformImageClientAction extends TransformImageAction {
             if (isValid()) {
                 try {
                     IImageClient imageClient = this.m_imageClient.get();
-                    final InputStream imageInputStm = imageClient.getImage(cacheKey, xformParams.getFormatString(), Integer.toString(session.getContext().getContextId()));
+                    final InputStream imageInputStm = imageClient.getImage(cacheKey, "auto", Integer.toString(session.getContext().getContextId()));
 
                     if (null != imageInputStm) {
                         ret = new FileHolder(imageInputStm, -1, xformParams.getImageMimeType(), cacheKey);
                     }
                 } catch (ImageConverterException e) {
-                    LOG.trace("TransformImageClientAction received an exception when trying to get a cached resource frrom the Image Server: " + Throwables.getRootCause(e));
                     // OK, we just didn't get a result
+                    LOG.trace("TransformImageClientAction received an exception when trying to get a cached resource from the Image Server: " +
+                        Throwables.getRootCause(e).getMessage());
                 }
             } else {
                 ret = super.getCachedResource(session, cacheKey, xformParams);
@@ -208,7 +209,7 @@ public class TransformImageClientAction extends TransformImageAction {
             try (final InputStream srcImageStm = file.getStream()) {
                 if (null != srcImageStm) {
                     IImageClient imageClient = this.m_imageClient.get();
-                    try (final InputStream resultImageStm = imageClient.cacheAndGetImage(cacheKey, xformParams.getFormatString(), srcImageStm, getContextIdString(session))) {
+                    try (final InputStream resultImageStm = imageClient.cacheAndGetImage(cacheKey, "auto", srcImageStm, getContextIdString(session))) {
                         if (null != resultImageStm) {
                             final ThresholdFileHolder imageData = new ThresholdFileHolder();
                             imageData.write(resultImageStm);

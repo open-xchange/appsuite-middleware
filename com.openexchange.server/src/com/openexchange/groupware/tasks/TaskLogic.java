@@ -71,7 +71,7 @@ import com.openexchange.annotation.Nullable;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupStorage;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.groupware.calendar.CalendarCollectionUtils;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
 import com.openexchange.groupware.calendar.RecurringResultsInterface;
@@ -86,7 +86,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.TaskParticipant.Type;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.impl.DBPool;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -268,22 +267,22 @@ public final class TaskLogic {
             throw TaskExceptionCode.INVALID_PERCENTAGE.create(Integer.valueOf(progress));
         }
         switch (task.getStatus()) {
-        case Task.NOT_STARTED:
-            if (0 != progress) {
-                throw TaskExceptionCode.PERCENTAGE_NOT_ZERO.create(Integer.valueOf(progress));
-            }
-            break;
-        case Task.IN_PROGRESS:
-        case Task.DEFERRED:
-        case Task.WAITING:
-            // Nothing to check. The progress can be everything between 0 and
-            // 100.
-            break;
-        case Task.DONE:
-            // Status DONE should not require a 100% progress.
-            break;
-        default:
-            throw TaskExceptionCode.INVALID_TASK_STATE.create(Integer.valueOf(task.getStatus()));
+            case Task.NOT_STARTED:
+                if (0 != progress) {
+                    throw TaskExceptionCode.PERCENTAGE_NOT_ZERO.create(Integer.valueOf(progress));
+                }
+                break;
+            case Task.IN_PROGRESS:
+            case Task.DEFERRED:
+            case Task.WAITING:
+                // Nothing to check. The progress can be everything between 0 and
+                // 100.
+                break;
+            case Task.DONE:
+                // Status DONE should not require a 100% progress.
+                break;
+            default:
+                throw TaskExceptionCode.INVALID_TASK_STATE.create(Integer.valueOf(task.getStatus()));
         }
     }
 
@@ -394,12 +393,7 @@ public final class TaskLogic {
             task.setUntil(null);
             occurrenceRemoved = true;
         }
-        try {
-            final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class, true);
-            recColl.checkRecurring(task);
-        } catch (final OXException e) {
-            throw e;
-        }
+        CalendarCollectionUtils.checkRecurring(task);
         if (daysRemoved) {
             task.setDays(0);
         }
@@ -412,6 +406,7 @@ public final class TaskLogic {
 
     /**
      * Verifies that the priority of tasks is only in the allowed range.
+     * 
      * @param task task that priority should be tested.
      * @throws OXException if task contains an invalid priority value.
      */
@@ -469,8 +464,7 @@ public final class TaskLogic {
         }
 
         task.setRecurrenceCalculator((int) ((task.getEndDate().getTime() - task.getStartDate().getTime()) / (Constants.MILLI_DAY)));
-        final CalendarCollectionService service = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-        final RecurringResultsInterface results = service.calculateRecurring(task, 0, 0, 1);
+        final RecurringResultsInterface results = CalendarCollectionUtils.calculateRecurring(task, 0, 0, 1, CalendarCollectionUtils.MAX_OCCURRENCESE, false);
         if (null == results || 0 == results.size()) {
             return;
         }
@@ -491,21 +485,21 @@ public final class TaskLogic {
         final Set<InternalParticipant> retval = new HashSet<InternalParticipant>();
         for (final Participant participant : participants) {
             switch (participant.getType()) {
-            case Participant.GROUP:
-                final GroupParticipant group = (GroupParticipant) participant;
-                final int[] member = GroupStorage.getInstance().getGroup(group.getIdentifier(), ctx).getMember();
-                if (member.length == 0) {
-                    throw TaskExceptionCode.GROUP_IS_EMPTY.create(group.getDisplayName());
-                }
-                for (final int userId : member) {
-                    retval.add(new InternalParticipant(new UserParticipant(userId), I(group.getIdentifier())));
-                }
-                break;
-            case Participant.USER:
-            case Participant.EXTERNAL_USER:
-                break;
-            default:
-                throw TaskExceptionCode.UNKNOWN_PARTICIPANT.create(Integer.valueOf(participant.getType()));
+                case Participant.GROUP:
+                    final GroupParticipant group = (GroupParticipant) participant;
+                    final int[] member = GroupStorage.getInstance().getGroup(group.getIdentifier(), ctx).getMember();
+                    if (member.length == 0) {
+                        throw TaskExceptionCode.GROUP_IS_EMPTY.create(group.getDisplayName());
+                    }
+                    for (final int userId : member) {
+                        retval.add(new InternalParticipant(new UserParticipant(userId), I(group.getIdentifier())));
+                    }
+                    break;
+                case Participant.USER:
+                case Participant.EXTERNAL_USER:
+                    break;
+                default:
+                    throw TaskExceptionCode.UNKNOWN_PARTICIPANT.create(Integer.valueOf(participant.getType()));
             }
         }
         return retval;
@@ -526,28 +520,28 @@ public final class TaskLogic {
         }
         for (final Participant participant : participants) {
             switch (participant.getType()) {
-            case Participant.USER:
-                retval.add(new InternalParticipant((UserParticipant) participant, null));
-                break;
-            case Participant.GROUP:
-                final GroupParticipant group = (GroupParticipant) participant;
-                final int[] member = GroupStorage.getInstance().getGroup(group.getIdentifier(), ctx).getMember();
-                if (member.length == 0) {
-                    throw TaskExceptionCode.GROUP_IS_EMPTY.create(group.getDisplayName());
-                }
-                for (final int userId : member) {
-                    final InternalParticipant tParticipant = new InternalParticipant(new UserParticipant(userId), I(group.getIdentifier()));
-                    // Prefer the single added participant before being a group member
-                    if (!retval.contains(tParticipant)) {
-                        retval.add(tParticipant);
+                case Participant.USER:
+                    retval.add(new InternalParticipant((UserParticipant) participant, null));
+                    break;
+                case Participant.GROUP:
+                    final GroupParticipant group = (GroupParticipant) participant;
+                    final int[] member = GroupStorage.getInstance().getGroup(group.getIdentifier(), ctx).getMember();
+                    if (member.length == 0) {
+                        throw TaskExceptionCode.GROUP_IS_EMPTY.create(group.getDisplayName());
                     }
-                }
-                break;
-            case Participant.EXTERNAL_USER:
-                retval.add(new ExternalParticipant((ExternalUserParticipant) participant));
-                break;
-            default:
-                throw TaskExceptionCode.UNKNOWN_PARTICIPANT.create(Integer.valueOf(participant.getType()));
+                    for (final int userId : member) {
+                        final InternalParticipant tParticipant = new InternalParticipant(new UserParticipant(userId), I(group.getIdentifier()));
+                        // Prefer the single added participant before being a group member
+                        if (!retval.contains(tParticipant)) {
+                            retval.add(tParticipant);
+                        }
+                    }
+                    break;
+                case Participant.EXTERNAL_USER:
+                    retval.add(new ExternalParticipant((ExternalUserParticipant) participant));
+                    break;
+                default:
+                    throw TaskExceptionCode.UNKNOWN_PARTICIPANT.create(Integer.valueOf(participant.getType()));
             }
         }
         return retval;
@@ -569,24 +563,24 @@ public final class TaskLogic {
         final Map<Integer, Participant> groups = new HashMap<Integer, Participant>();
         for (final TaskParticipant participant : participants) {
             switch (participant.getType()) {
-            case INTERNAL:
-                final InternalParticipant internal = (InternalParticipant) participant;
-                final Integer groupId = internal.getGroupId();
-                if (null == groupId) {
-                    retval.add(internal.getUser());
-                } else {
-                    final GroupParticipant group = new GroupParticipant(groupId.intValue());
-                    if (!groups.containsKey(groupId)) {
-                        groups.put(groupId, group);
+                case INTERNAL:
+                    final InternalParticipant internal = (InternalParticipant) participant;
+                    final Integer groupId = internal.getGroupId();
+                    if (null == groupId) {
+                        retval.add(internal.getUser());
+                    } else {
+                        final GroupParticipant group = new GroupParticipant(groupId.intValue());
+                        if (!groups.containsKey(groupId)) {
+                            groups.put(groupId, group);
+                        }
                     }
-                }
-                break;
-            case EXTERNAL:
-                final ExternalParticipant external = (ExternalParticipant) participant;
-                retval.add(external.getExternal());
-                break;
-            default:
-                break;
+                    break;
+                case EXTERNAL:
+                    final ExternalParticipant external = (ExternalParticipant) participant;
+                    retval.add(external.getExternal());
+                    break;
+                default:
+                    break;
             }
         }
         retval.addAll(groups.values());
@@ -688,8 +682,7 @@ public final class TaskLogic {
         // Recurring calculation sets until date itself and may add some time
         // in some conditions cause an overflow if MAX_VALUE is set and no
         // new recurrence is calculated.
-        final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
-        final RecurringResultsInterface rr = recColl.calculateRecurring(task, 0, 0, 2);
+        final RecurringResultsInterface rr = CalendarCollectionUtils.calculateRecurring(task, 0, 0, 2, CalendarCollectionUtils.MAX_OCCURRENCESE, false);
         final RecurringResultInterface result = rr.getRecurringResult(0);
         final Date[] retval;
         if (null == result) {

@@ -66,6 +66,7 @@ public class SupportedCalendarComponentSet extends SingleXMLPropertyMixin {
 
     public static final String VEVENT = "VEVENT";
     public static final String VTODO = "VTODO";
+    public static final String VAVAILABILITY = "VAVAILABILITY";
 
     private final String[] components;
 

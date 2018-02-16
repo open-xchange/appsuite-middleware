@@ -213,6 +213,11 @@ public class AllAction extends AbstractFileStorageAccountAction {
             caps.add(FileStorageCapability.AUTO_RENAME_FOLDERS.name());
         }
 
+        supported = capabilityAware.supports(FileStorageCapability.RESTORE);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.RESTORE.name());
+        }
+
         return caps;
     }
 

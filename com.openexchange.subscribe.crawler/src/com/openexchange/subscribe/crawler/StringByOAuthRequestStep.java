@@ -59,6 +59,18 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.gargoylesoftware.htmlunit.Page;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.openexchange.exception.OXException;
+import com.openexchange.rest.client.httpclient.HttpClients;
+import com.openexchange.subscribe.crawler.internal.AbstractStep;
+import com.openexchange.subscribe.crawler.internal.HasLoginPage;
+import com.openexchange.subscribe.crawler.internal.LoginStep;
 import net.oauth.OAuth;
 import net.oauth.OAuthAccessor;
 import net.oauth.OAuthConsumer;
@@ -68,18 +80,6 @@ import net.oauth.OAuthServiceProvider;
 import net.oauth.client.OAuthClient;
 import net.oauth.client.httpclient4.HttpClient4;
 import net.oauth.client.httpclient4.HttpClientPool;
-import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.params.HttpParams;
-import com.gargoylesoftware.htmlunit.Page;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.html.HtmlPage;
-import com.openexchange.exception.OXException;
-import com.openexchange.subscribe.crawler.internal.AbstractStep;
-import com.openexchange.subscribe.crawler.internal.HasLoginPage;
-import com.openexchange.subscribe.crawler.internal.LoginStep;
 
 /**
  * {@link StringByOAuthRequestStep}
@@ -102,8 +102,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
 
     private final SingleConnectionPool connectionPool = new SingleConnectionPool();
 
-    public StringByOAuthRequestStep() {
-    }
+    public StringByOAuthRequestStep() {}
 
     public StringByOAuthRequestStep(final String username, final String password, final String consumerSecret, final String consumerKey, final String requestUrl, final String authorizationUrl, final String accessUrl, final String callbackUrl, final String nameOfUserField, final String nameOfPasswordField, final String apiRequest) {
         this.username = username;
@@ -121,6 +120,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.subscribe.crawler.internal.AbstractStep#execute(com.gargoylesoftware.htmlunit.WebClient)
      */
     @Override
@@ -157,7 +157,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
                 LOG.info("Successfully requested authorization-url: {}", response.URL);
 
                 // Fill out form / confirm the access otherwise
-                final LoginPageByFormActionRegexStep authorizeStep = new LoginPageByFormActionRegexStep("", response.URL,  username, password, "/uas/oauth/authorize/submit", nameOfUserField, nameOfPasswordField, ".*", 1, "");
+                final LoginPageByFormActionRegexStep authorizeStep = new LoginPageByFormActionRegexStep("", response.URL, username, password, "/uas/oauth/authorize/submit", nameOfUserField, nameOfPasswordField, ".*", 1, "");
                 authorizeStep.execute(webClient);
                 loginPage = authorizeStep.getLoginPage();
                 final HtmlPage pageWithVerifier = authorizeStep.getOutput();
@@ -168,7 +168,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
                 // get the verifier
                 final Pattern pattern = Pattern.compile("access-code\">([0-9]*)<");
                 final Matcher matcher = pattern.matcher(pageString2);
-                if (matcher.find() && matcher.groupCount() == 1){
+                if (matcher.find() && matcher.groupCount() == 1) {
                     verifier = matcher.group(1);
                     LOG.info("Request authorized, verifier found.");
                 } else {
@@ -183,7 +183,6 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
             } catch (final OAuthException e) {
                 LOG.error(e.toString());
             }
-
 
             // Access and confirm using the verifier
             try {
@@ -230,6 +229,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.subscribe.crawler.internal.LoginStep#getBaseUrl()
      */
     @Override
@@ -239,6 +239,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.subscribe.crawler.internal.LoginStep#setPassword(java.lang.String)
      */
     @Override
@@ -248,6 +249,7 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.subscribe.crawler.internal.LoginStep#setUsername(java.lang.String)
      */
     @Override
@@ -261,11 +263,11 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
         return new OAuthAccessor(consumer);
     }
 
-    private OAuthMessage sendRequest(final Map map, final String url) throws IOException, URISyntaxException, OAuthException {
-        final List<Map.Entry> params = new ArrayList<Map.Entry>();
-        final Iterator it = map.entrySet().iterator();
+    private OAuthMessage sendRequest(final Map<?, ?> map, final String url) throws IOException, URISyntaxException, OAuthException {
+        final List<Map.Entry<?, ?>> params = new ArrayList<Map.Entry<?, ?>>();
+        final Iterator<?> it = map.entrySet().iterator();
         while (it.hasNext()) {
-            final Map.Entry p = (Map.Entry) it.next();
+            final Map.Entry<?, ?> p = (Map.Entry<?, ?>) it.next();
             params.add(new OAuth.Parameter((String) p.getKey(), (String) p.getValue()));
         }
         final OAuthAccessor accessor = createOAuthAccessor();
@@ -347,36 +349,29 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
         return password;
     }
 
-
     public String getNameOfUserField() {
         return nameOfUserField;
     }
-
 
     public void setNameOfUserField(final String nameOfUserField) {
         this.nameOfUserField = nameOfUserField;
     }
 
-
     public String getNameOfPasswordField() {
         return nameOfPasswordField;
     }
-
 
     public void setNameOfPasswordField(final String nameOfPasswordField) {
         this.nameOfPasswordField = nameOfPasswordField;
     }
 
-
     public String getApiRequest() {
         return apiRequest;
     }
 
-
     public void setApiRequest(final String apiRequest) {
         this.apiRequest = apiRequest;
     }
-
 
     @Override
     public Page getLoginPage() {
@@ -385,28 +380,34 @@ public class StringByOAuthRequestStep extends AbstractStep<String, Object> imple
 
     private static class SingleConnectionPool implements HttpClientPool {
 
-        private DefaultHttpClient client;
+        private static final Logger LOG = LoggerFactory.getLogger(SingleConnectionPool.class);
+
+        private CloseableHttpClient client;
+
+        /**
+         * Initializes a new {@link SingleConnectionPool}.
+         */
+        public SingleConnectionPool() {
+            super();
+        }
 
         @Override
         public HttpClient getHttpClient(final URL server) {
-            if(client != null) {
-                return client;
-            }
-            client = new DefaultHttpClient();
-            final ClientConnectionManager mgr = client.getConnectionManager();
-            if (!(mgr instanceof ThreadSafeClientConnManager)) {
-                final HttpParams params = client.getParams();
-                client = new DefaultHttpClient(new ThreadSafeClientConnManager(params, mgr.getSchemeRegistry()), params);
+            if (client == null) {
+                client = HttpClients.getHttpClient("Open-Xchange-Subscribe-Crawler/1.0.0");
             }
 
             return client;
         }
 
         public void shutdown() {
-            client.getConnectionManager().shutdown();
+            try {
+                client.close();
+            } catch (IOException e) {
+                LOG.warn("Unable to close client: {}", e.getMessage(), e);
+            }
         }
 
     }
-
 
 }

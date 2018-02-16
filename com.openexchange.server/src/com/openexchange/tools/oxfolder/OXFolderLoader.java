@@ -50,8 +50,6 @@
 package com.openexchange.tools.oxfolder;
 
 import static com.openexchange.tools.sql.DBUtils.closeResources;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -66,10 +64,13 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.FolderPathObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Streams;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 
 /**
  * {@link OXFolderLoader}
@@ -115,7 +116,7 @@ public final class OXFolderLoader {
     }
 
     private static final String SQL_LOAD_F =
-        "SELECT parent, fname, module, type, creating_date, created_from, changing_date, changed_from, permission_flag, subfolder_flag, default_flag, meta FROM #TABLE# WHERE cid = ? AND fuid = ?";
+        "SELECT parent, fname, module, type, creating_date, created_from, changing_date, changed_from, permission_flag, subfolder_flag, default_flag, meta, origin FROM #TABLE# WHERE cid = ? AND fuid = ?";
 
     /**
      * Loads specified folder from database.
@@ -156,6 +157,12 @@ public final class OXFolderLoader {
                 folderObj.setLastModified(new Date(rs.getLong(7)));
                 folderObj.setModifiedBy(parseStringValue(rs.getString(8), ctx));
                 folderObj.setPermissionFlag(rs.getInt(9));
+                String sFolderPath = rs.getString(13);
+                if (rs.wasNull()) {
+                    folderObj.setOriginPath(null);
+                } else {
+                    folderObj.setOriginPath(FolderPathObject.parseFrom(sFolderPath));
+                }
                 final int defaultFolder = rs.getInt(11);
                 if (rs.wasNull()) {
                     folderObj.setDefaultFolder(false);

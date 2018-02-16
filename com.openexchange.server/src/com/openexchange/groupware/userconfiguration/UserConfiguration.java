@@ -113,6 +113,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * The permission bit for WebDAV/XML access.
      * @deprecated
      */
+    @Deprecated
     public static final int WEBDAV_XML = UserPermissionBits.WEBDAV_XML;
 
     /**
@@ -208,6 +209,7 @@ public class UserConfiguration implements Serializable, Cloneable {
     /**
      * The permission bit for OLOX v2.0 access.
      */
+    @Deprecated
     public static final int OLOX20 = UserPermissionBits.OLOX20;
 
     /**
@@ -413,6 +415,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      * @deprecated
      */
+    @Deprecated
     public boolean hasWebDAVXML() {
         return capabilities.contains(Permission.WEBDAV_XML.getCapabilityName());
     }
@@ -514,6 +517,15 @@ public class UserConfiguration implements Serializable, Cloneable {
      */
     public boolean hasPortal() {
         return capabilities.contains("portal");
+    }
+
+    /**
+     * Returns if user is a guest
+     *
+     * @return <code>true</code> if user is a Guest
+     */
+    public boolean isGuest() {
+        return capabilities.contains("guest");
     }
 
     /**
@@ -655,6 +667,7 @@ public class UserConfiguration implements Serializable, Cloneable {
     /**
      * Checks if this user configuration indicates that the user may use OLOX2.0.
      */
+    @Deprecated
     public boolean hasOLOX20() {
         return capabilities.contains(Permission.OLOX20.getCapabilityName());
     }

@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.infostore.internal;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -94,6 +95,7 @@ public class FieldMapping {
         field2metadata.put(File.Field.META, Metadata.META_LITERAL);
         field2metadata.put(File.Field.OBJECT_PERMISSIONS, Metadata.OBJECT_PERMISSIONS_LITERAL);
         field2metadata.put(File.Field.SHAREABLE, Metadata.SHAREABLE_LITERAL);
+        field2metadata.put(File.Field.ORIGIN, Metadata.ORIGIN_LITERAL);
     }
 
     public static Metadata getMatching(File.Field field) {
@@ -105,11 +107,33 @@ public class FieldMapping {
         for(int i = 0; i < retval.length; i++) {
             retval[i] = getMatching(fields.get(i));
         }
-        return retval;
+        return removeNullElements(retval);
     }
 
     public static int getSortDirection(SortDirection order) {
         return SortDirection.DESC.equals(order) ? InfostoreFacade.DESC : InfostoreFacade.ASC;
+    }
+
+    private static Metadata[] removeNullElements(Metadata[] source) {
+        List<Metadata> tmp = null;
+        for (int i = 0; i < source.length; i++) {
+            Metadata metadata = source[i];
+            if (null == metadata) {
+                if (null == tmp) {
+                    tmp = new ArrayList<>(source.length);
+                    if (i > 0) {
+                        for (int j = 0; j < i; j++) {
+                            tmp.add(metadata);
+                        }
+                    }
+                }
+            } else {
+                if (null != tmp) {
+                    tmp.add(metadata);
+                }
+            }
+        }
+        return null == tmp ? source : tmp.toArray(new Metadata[tmp.size()]);
     }
 
 }

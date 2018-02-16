@@ -49,11 +49,13 @@
 
 package com.openexchange.mail.mime;
 
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Set;
 import javax.mail.BodyPart;
 import com.google.common.collect.ImmutableSet;
-import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.chronos.ical.ICalService;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -92,15 +94,12 @@ public final class IcsMimeFilter extends MimeFilter {
                 /*
                  * Check ICal part for a valid METHOD and its presence in Content-Type header
                  */
-                final ICalParser iCalParser = ServerServiceRegistry.getInstance().getService(ICalParser.class);
-                if (iCalParser != null) {
-                    try {
-                        final String method = iCalParser.parseProperty("METHOD", MessageUtility.getPartInputStream(bodyPart));
-                        return null != method && ITIP_METHODS.contains(method.toUpperCase());
-                    } catch (final RuntimeException e) {
-                        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(IcsMimeFilter.class);
-                        logger.warn("A runtime error occurred.", e);
-                    }
+                try {
+                    final String method = getICalMethod(MessageUtility.getPartInputStream(bodyPart));
+                    return null != method && ITIP_METHODS.contains(method.toUpperCase());
+                } catch (final Exception e) {
+                    final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(IcsMimeFilter.class);
+                    logger.warn("A runtime error occurred.", e);
                 }
                 return false;
             }
@@ -115,20 +114,21 @@ public final class IcsMimeFilter extends MimeFilter {
                 /*
                  * Check ICal part for a valid METHOD and its presence in Content-Type header
                  */
-                final ICalParser iCalParser = ServerServiceRegistry.getInstance().getService(ICalParser.class);
-                if (iCalParser != null) {
-                    try {
-                        final String method = iCalParser.parseProperty("METHOD", bodyPart.getInputStream());
-                        return null != method && ITIP_METHODS.contains(method.toUpperCase());
-                    } catch (final Exception e) {
-                        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(IcsMimeFilter.class);
-                        logger.warn("An error occurred.", e);
-                    }
+                try {
+                    final String method = getICalMethod(bodyPart.getInputStream());
+                    return null != method && ITIP_METHODS.contains(method.toUpperCase());
+                } catch (final Exception e) {
+                    final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(IcsMimeFilter.class);
+                    logger.warn("An error occurred.", e);
                 }
                 return false;
             }
         }
         return false;
+    }
+
+    private static String getICalMethod(InputStream inputStream) throws OXException {
+        return ServerServiceRegistry.getInstance().getService(ICalService.class, true).importICal(inputStream, null).getMethod();
     }
 
 }

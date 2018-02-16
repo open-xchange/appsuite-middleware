@@ -1215,6 +1215,7 @@ public class OXException extends Exception implements OXExceptionConstants {
         return problematics.isEmpty() ? EMPTY_PROBLEMATICS : problematics.toArray(new ProblematicAttribute[problematics.size()]);
     }
 
+
     /*-
      * ----------------------------- Arguments related methods -----------------------------
      */
