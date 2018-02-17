@@ -64,6 +64,10 @@ public class SNIPPET implements Item {
     public SNIPPET(FetchResponse r) throws ParsingException {
 	r.skipSpaces();
 
+	if (r.readByte() != '(')
+        throw new ParsingException(
+        "SNIPPET parse error: missing ``('' at start");
+
 	algorithm = r.readString(' ');
 	if (r.readByte() != ' ') {
         throw new ParsingException("SNIPPET parse error: missing space at algorithm end");
@@ -75,6 +79,10 @@ public class SNIPPET implements Item {
 	    text = "";
 	}
 	this.text = text;
+
+	if (!r.isNextNonSpace(')')) // eat the end ')'
+        throw new ParsingException(
+        "SNIPPET parse error: missing ``)'' at end");
     }
 
     /**
