@@ -61,6 +61,7 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.common.Check;
@@ -125,6 +126,16 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
     @Override
     public EnumSet<CalendarCapability> getCapabilities() {
         return CalendarCapability.getCapabilities(BirthdaysCalendarAccess.class);
+    }
+
+    @Override
+    public boolean isAvailable(Session session) {
+        try {
+            return ServerSessionAdapter.valueOf(session).getUserPermissionBits().hasContact();
+        } catch (OXException e) {
+            LoggerFactory.getLogger(BirthdaysCalendarProvider.class).warn("Unexpected error while checking contacts calendar availability", e);
+            return false;
+        }
     }
 
     @Override
