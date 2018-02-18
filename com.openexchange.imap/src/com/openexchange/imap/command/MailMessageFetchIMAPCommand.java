@@ -68,7 +68,6 @@ import javax.mail.Message;
 import javax.mail.MessageRemovedException;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
-import javax.mail.Part;
 import javax.mail.UIDFolder;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -1175,7 +1174,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                         contentType = null;
                     }
                 }
-                msg.setAlternativeHasAttachment(null == contentType ? false : MimeMessageUtility.hasAttachments((Part) message.getContent()));
+                msg.setAlternativeHasAttachment(null == contentType ? false : MimeMessageUtility.hasAttachments(message));
             } catch (MessagingException e) {
                 throw MimeMailException.handleMessagingException(e);
             } catch (IOException e) {
