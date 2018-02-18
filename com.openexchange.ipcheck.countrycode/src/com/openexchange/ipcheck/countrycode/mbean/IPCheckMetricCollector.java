@@ -60,7 +60,7 @@ import com.openexchange.metrics.MetricService;
 public class IPCheckMetricCollector {
 
     public static final String COMPONENT_NAME = "ipcheck";
-    private MetricService metrics;
+    private final MetricService metrics;
 
     /**
      * Initialises a new {@link IPCheckMetricCollector}.
@@ -109,6 +109,6 @@ public class IPCheckMetricCollector {
     }
 
     Meter getMeter(String metricName) {
-        return metrics.getMeter(COMPONENT_NAME, metricName);
+        return metrics.meter(COMPONENT_NAME, metricName);
     }
 }
