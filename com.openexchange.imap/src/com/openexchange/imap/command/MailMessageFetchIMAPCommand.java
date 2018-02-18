@@ -107,6 +107,8 @@ import com.sun.mail.imap.protocol.X_REAL_UID;
 import gnu.trove.impl.Constants;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TLongIntHashMap;
+import gnu.trove.procedure.TIntIntProcedure;
+import gnu.trove.procedure.TLongIntProcedure;
 
 /**
  * {@link MailMessageFetchIMAPCommand} - performs a prefetch of messages in given folder with only those fields set that need to be present for
@@ -358,19 +360,27 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
     @Override
     protected MailMessage[] getReturnVal() throws MessagingException {
         if (null != seqNum2index) {
-            for (final int seqNum : seqNum2index.keys()) {
-                final int pos = seqNum2index.get(seqNum);
-                if (pos > 0) {
-                    retval[pos] = handleMessage(seqNum);
+            seqNum2index.forEachEntry(new TIntIntProcedure() {
+
+                @Override
+                public boolean execute(int seqNum, int pos) {
+                    if (pos > 0) {
+                        retval[pos] = handleMessage(seqNum);
+                    }
+                    return true;
                 }
-            }
+            });
         } else if (null != uid2index) {
-            for (final long uid : uid2index.keys()) {
-                final int pos = uid2index.get(uid);
-                if (pos > 0) {
-                    retval[pos] = handleMessage(uid);
+            uid2index.forEachEntry(new TLongIntProcedure() {
+
+                @Override
+                public boolean execute(long uid, int pos) {
+                    if (pos > 0) {
+                        retval[pos] = handleMessage(uid);
+                    }
+                    return true;
                 }
-            }
+            });
         } else if (index < length) {
             String server = imapFolder.getStore().toString();
             int pos = server.indexOf('@');
