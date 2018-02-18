@@ -64,25 +64,39 @@ public class SNIPPET implements Item {
     public SNIPPET(FetchResponse r) throws ParsingException {
 	r.skipSpaces();
 
-	if (r.readByte() != '(')
-        throw new ParsingException(
-        "SNIPPET parse error: missing ``('' at start");
+	byte b = r.peekByte();
+	if (b != '(') {
+	    // Expect: ``SNIPPET (FUZZY "Some text")''
+	    r.readByte();
+	    algorithm = r.readString(' ');
+	    if (r.readByte() != ' ') {
+	        throw new ParsingException("SNIPPET parse error: missing space at algorithm end");
+	    }
 
-	algorithm = r.readString(' ');
-	if (r.readByte() != ' ') {
-        throw new ParsingException("SNIPPET parse error: missing space at algorithm end");
-    }
+	    String text = r.readUtf8AtomString();
+	    if ("NIL".equalsIgnoreCase(text)) {
+	        // Snippet is empty
+	        text = "";
+	    }
+	    this.text = text;
 
-	String text = r.readUtf8AtomString();
-	if (text != null && text.equalsIgnoreCase("NIL")) {
-	    // Snippet is empty
-	    text = "";
+	    if (!r.isNextNonSpace(')')) // eat the end ')'
+	        throw new ParsingException(
+	        "SNIPPET parse error: missing ``)'' at end");
+	} else {
+        // Expect: ``SNIPPET FUZZY "Some text"''
+	    algorithm = r.readString(' ');
+	    if (r.readByte() != ' ') {
+	        throw new ParsingException("SNIPPET parse error: missing space at algorithm end");
+	    }
+
+	    String text = r.readUtf8AtomString();
+	    if ("NIL".equalsIgnoreCase(text)) {
+	        // Snippet is empty
+	        text = "";
+	    }
+	    this.text = text;
 	}
-	this.text = text;
-
-	if (!r.isNextNonSpace(')')) // eat the end ')'
-        throw new ParsingException(
-        "SNIPPET parse error: missing ``)'' at end");
     }
 
     /**
