@@ -56,6 +56,7 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -192,17 +193,15 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
             CalendarList calendars = googleCal.calendarList().list().execute();
 
             boolean found = false;
-            for (CalendarListEntry entry : calendars.getItems()) {
-
-                if (Strings.isEmpty(folderId) && entry.getPrimary()) {
+            for (Iterator<CalendarListEntry> it = calendars.getItems().iterator(); !found && it.hasNext();) {
+                CalendarListEntry entry = it.next();
+                if (Strings.isEmpty(folderId) && (null != entry.getPrimary() && entry.getPrimary().booleanValue())) {
                     internalConfiguration.put(GoogleCalendarConfigField.FOLDER, entry.getId());
                     internalConfiguration.put(GoogleCalendarConfigField.PRIMARY, Boolean.TRUE);
                     found = true;
-                    break;
                 } else if (entry.getId().equals(folderId)) {
                     internalConfiguration.put(GoogleCalendarConfigField.FOLDER, entry.getId());
                     found = true;
-                    break;
                 }
             }
 
