@@ -202,8 +202,6 @@ public abstract class AbstractReminderAction implements AJAXActionService {
     }
 
     protected void convertAlarmTrigger2Reminder(CalendarSession calendarSession, AlarmTrigger trigger, ReminderWriter reminderWriter, JSONArray jsonResponseArray) throws OXException, JSONException {
-        final JSONObject jsonReminderObj = new JSONObject(12);
-
         ReminderObject reminder = new ReminderObject();
         reminder.setDate(new Date(trigger.getTime()));
         EventID eventId = null;
@@ -213,7 +211,6 @@ public abstract class AbstractReminderAction implements AJAXActionService {
             eventId = new EventID(trigger.getFolder(), trigger.getEventId());
         }
         Event event = calendarSession.getCalendarService().getEvent(calendarSession, trigger.getFolder(), eventId);
-        List<Alarm> alarms = event.getAlarms();
         reminder.setLastModified(event.getLastModified());
         reminder.setFolder(Integer.valueOf(trigger.getFolder()));
         reminder.setModule(Types.APPOINTMENT);
@@ -229,13 +226,17 @@ public abstract class AbstractReminderAction implements AJAXActionService {
             reminder.setRecurrenceAppointment(false);
         }
 
-        for (Alarm alarm : alarms) {
-            if (alarm.getId() == trigger.getAlarm().intValue()) {
-                reminder.setDescription(alarm.getDescription());
-                break;
+        List<Alarm> alarms = event.getAlarms();
+        if (null != alarms) {
+            for (Alarm alarm : alarms) {
+                if (alarm.getId() == trigger.getAlarm().intValue()) {
+                    reminder.setDescription(alarm.getDescription());
+                    break;
+                }
             }
         }
 
+        JSONObject jsonReminderObj = new JSONObject(12);
         reminderWriter.writeObject(reminder, jsonReminderObj);
         jsonResponseArray.put(jsonReminderObj);
     }
