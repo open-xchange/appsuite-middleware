@@ -438,17 +438,13 @@ public class Multiple extends SessionServlet {
                 return state;
             }
             String moduleCandidate = module;
-            boolean handles = false;
-            do {
-                handles = dispatcher.handles(moduleCandidate);
-                if (false == handles) {
-                    int pos = moduleCandidate.lastIndexOf('/');
-                    if (pos <= 0) {
-                        break;
-                    }
+            boolean handles = dispatcher.handles(moduleCandidate);
+            if (false == handles) {
+                for (int pos; false == handles && (pos = moduleCandidate.lastIndexOf('/')) > 0;) {
                     moduleCandidate = moduleCandidate.substring(0, pos);
+                    handles = dispatcher.handles(moduleCandidate);
                 }
-            } while (false == handles);
+            }
             if (handles && MODULE_MAIL.equals(module)) {
                 if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
                     if (MailRequest.isMove(jsonObj)) {
