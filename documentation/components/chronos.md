@@ -15,6 +15,13 @@ There are some different modes for the start- and end-date of events. This affec
 
 A calendar date with no time component, i.e. only year, month and date are set. It is not possible to assign a concrete timezone to a date, so that dates do always appear in the timezone of the actual viewer. *All-day* events start- and end on a date. This characteristic is called *floating*, and needs to be handled appropriately whenever concrete periods of such *all-day* events need to be considered, e.g. during free/busy lookups or conflict checks.
 
+**Date**
+  - Used for *all-day* events
+  - Are *floating*, implicitly
+    - Example in iCal: ``DTSTART:19980118``
+    - In the database, the unix timestamp is stored, and the timezone is set to ``NULL``, additionally the ``allDay`` column is ``true``
+    - In the HTTP-API, only the ``value`` property is set, without time-fraction, e.g.: { "value":"19980118" }
+
 ### Date with Time
 
 A precise calendar date and time consisting of day, year, month, date, hour, minute, second. A datetime may be defined in three different forms, which are **local time** (no specific timezone), in **UTC**, or in **local time with timezone reference**. 
@@ -24,26 +31,69 @@ A precise calendar date and time consisting of day, year, month, date, hour, min
     - Represent the same year, month, day, hour, minute, second no matter in what time zone they are observed
     - Example in iCal: ``DTSTART:19980118T230000``
     - In the database, the unix timestamp is stored, and the timezone is set to ``NULL``
+    - In the HTTP-API, only the ``value`` property is set, e.g.: { "value":"19980118T230000" }
 
 2. **UTC** - UTC timezone
     - Easiest form, but not much useful for events
     - Example in iCal: ``DTSTART:19980118T230000Z``
     - In the database, the unix timestamp is stored, and the timezone is set to ``UTC``
+    - In the HTTP-API, the ``value`` property is set with a trailing ``Z`` as in RFC 5545, e.g.: { "value":"19980118T230000Z" }
 
 3. **Local time with Timezone reference** - specific timezone
     - Most common form for events
     - Example in iCal: ``DTSTART;TZID=America/New_York:19980119T020000``
     - In the database, the unix timestamp ans the timezone are stored
+    - In the HTTP-API, an additional ``tzid`` property is included, e.g.: { "value":"19980118T230000", "tzid":"America/New_York" }
 
 ### Usage
 
-Internally, througout the new Chronos stack, a DateTime object from the 3rd party library ``rfc5545-datetime`` is used, where dedicated support for the different modes are available. In the database, we have separat columns for the actual value of the start- and end-date of an event, the associated timezones and the *all-day* flag. 
+Internally, throughout the new Chronos stack, a DateTime object from the 3rd party library ``rfc5545-datetime`` is used, where dedicated support for the different modes are available. In the database, we have separate columns for the actual value of the start- and end-date of an event, the associated timezones and the *all-day* flag. 
+
+In the HTTP-API, the start- and end-date properties of events are serialized within a JSON object, which is based on the definitions in RFC 5545, as follows:
+```js
+DateTimeData {
+  value (string, optional): A date-time value without timezone information as specified in rfc 5545 chapter 3.3.5. E.g. "20170708T220000" ,
+  tzid (string, optional): A timezone identifier. E.g. "America/New_York"
+}  
+```
+
+### References / further reading
+- https://tools.ietf.org/html/rfc5545
+- https://github.com/dmfs/rfc5545-datetime
+- https://devguide.calconnect.org/Handling-Dates-and-Times/
+- https://tools.ietf.org/html/rfc4791#section-7.3
+
+
+## Timezones
+
+Timezones play an important role in calendaring and scheduling, as they allow to define an instant of time in a certain geopolitical region, relative to the *Coordinated Universal Time* (UTC). Especially when scheduling events with attendees that are located in different timezones, it is important to derive the same point of time of the event in each timezone, based on the underlying timezone definitions.   
+
+### Internal Handling
+
+Whenever events whose start- and enddate are decorated with a specific timezone identifier, the concrete instant of time is evaluated dynamically based on the corresponding timezone information from the Java runtime environment. This instant of time is then used for all sorts of operations with the start- and endtime, e.g. scheduling, recurrence calcualtions, free/busy lookups, sorting and so on.
+
+The matching timezone is looked up based on the *timezone identifier*, which is usually a string in the form "continent/city" (for example "America/New_York"), as defined in the in the Olson Timezone Database, which is the most common internationally agreed standard for timezones. Therefore, it is required that all used timezone identfiers are available in the server, which is normally the case if the Java runtime environment is updated regularly. 
+
+### Parsing
+
+Not all clients are using the same set of timezone definitions, and especially clients that do not use timezones from the common Olson database may be problematic as an internally known timezone needs to be selected so that it can be processed by the server. The most prominent example are clients from Windows, which often rely on a Windows-internal set of timezone definitions that use different identifiers. 
+
+In order to also accept non-Olson timezones, such unknwon timezones are attempted to be mapped in the following, best-effort way:
+- If an unknown timezone is parsed during an update operation, and the parsed timezone has the same rules as the timezone of the originally set timezone, fall back to the original timezone
+- If an unknown timezone is parsed, and the parsed timezone has the same rules as the timezone of the calendar user, fall back to the timezone of the calendar user
+- If an unknown timezone is parsed, and the parsed timezone has the same rules as the timezone of the current session's user, fall back to the timezone of the session user
+- If an unknown timezone is parsed, and a known mapping from the parsed Windows timezone identifier to Olson exists, use the mapped Olson timezone
+- If an unknown timezone is parsed, and at least one known timezone with the same rules exists, use the timezone whose identifier is most similar (Levenshtein distance) to the parsed one
+- Use the calendar user timezone, otherwise
 
 
 ### References / further reading
 - https://tools.ietf.org/html/rfc5545
-- https://devguide-calconnect.rhcloud.com/Handling-Dates-and-Times
-- https://tools.ietf.org/html/rfc4791#section-7.3
+- https://devguide.calconnect.org/Time-Zones/Time-Zones/
+- http://www.twinsun.com/tz/tz-link.htm
+- http://www.oracle.com/technetwork/java/javase/timezones-137583.html
+- com.openexchange.chronos.impl.Utils#selectTimeZone
+- http://unicode.org/repos/cldr/trunk/common/supplemental/windowsZones.xml
 
 
 ## Relation of Organizer / Principal / Folder-Owner / Creator
