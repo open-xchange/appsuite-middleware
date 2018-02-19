@@ -70,20 +70,20 @@ Timezones play an important role in calendaring and scheduling, as they allow to
 
 ### Internal Handling
 
-Whenever events whose start- and enddate are decorated with a specific timezone identifier, the concrete instant of time is evaluated dynamically based on the corresponding timezone information from the Java runtime environment. This instant of time is then used for all sorts of operations with the start- and endtime, e.g. scheduling, recurrence calcualtions, free/busy lookups, sorting and so on.
+Whenever events whose start- and enddate are decorated with a specific timezone identifier, the concrete instant of time is evaluated dynamically based on the corresponding timezone information from the Java runtime environment. This instant of time is then used for all sorts of operations with the start- and endtime, e.g. scheduling, recurrence calculations, free/busy lookups, sorting and so on.
 
-The matching timezone is looked up based on the *timezone identifier*, which is usually a string in the form "continent/city" (for example "America/New_York"), as defined in the in the Olson Timezone Database, which is the most common internationally agreed standard for timezones. Therefore, it is required that all used timezone identfiers are available in the server, which is normally the case if the Java runtime environment is updated regularly. 
+The matching timezone is looked up based on the *timezone identifier*, which is usually a string in the form "continent/city" (for example "America/New_York"), as defined in the in the Olson Timezone Database, which is the most common internationally agreed standard for timezones. Therefore, it is required that all used timezone identifiers are available in the server, which is normally the case if the Java runtime environment is updated regularly. 
 
 ### Parsing
 
 Not all clients are using the same set of timezone definitions, and especially clients that do not use timezones from the common Olson database may be problematic as an internally known timezone needs to be selected so that it can be processed by the server. The most prominent example are clients from Windows, which often rely on a Windows-internal set of timezone definitions that use different identifiers. 
 
-In order to also accept non-Olson timezones, such unknwon timezones are attempted to be mapped in the following, best-effort way:
+In order to also accept non-Olson timezones, such unknown timezones are attempted to be mapped in the following, best-effort way:
 - If an unknown timezone is parsed during an update operation, and the parsed timezone has the same rules as the timezone of the originally set timezone, fall back to the original timezone
 - If an unknown timezone is parsed, and the parsed timezone has the same rules as the timezone of the calendar user, fall back to the timezone of the calendar user
 - If an unknown timezone is parsed, and the parsed timezone has the same rules as the timezone of the current session's user, fall back to the timezone of the session user
 - If an unknown timezone is parsed, and a known mapping from the parsed Windows timezone identifier to Olson exists, use the mapped Olson timezone
-- If an unknown timezone is parsed, and at least one known timezone with the same rules exists, use the timezone whose identifier is most similar (Levenshtein distance) to the parsed one
+- If an unknown timezone is parsed, and at least one known timezone with the same rules exists, use the timezone whose identifier is most similar (*Levenshtein distance*) to the parsed one
 - Use the calendar user timezone, otherwise
 
 
@@ -172,7 +172,7 @@ In order to convert between the legacy properties for organizer/principal and th
 
 As invited attendees may delete a meeting from their personal calendar if they do not want to attend ("decline, and remove me from attendee list"), they may also do so for specific occurrences of a recurring event series. From the organizer's and the other attendee's point of view, this leads to a new change exception event with an updated list of attendees (with this deleting attendee being no longer listed there). However, for the attendee who has deleted a specific occurrence of the series, this rather means the creation of a new delete exception in the event series. 
 
-According to the RFC 6638, in such a scenario the attendee effectively gets a different set of delete exception dates (EXDATE property in iCal), while the organizer and the other attendees see this exception date as overridden instance (change exception): 
+According to the RFC 6638, in such a scenario the attendee effectively gets a different set of delete exception dates (``EXDATE`` property in iCal), while the organizer and the other attendees see this exception date as overridden instance (change exception): 
 
 > "As another example, an "Attendee" could be excluded from one instance of a recurring event.  In that case, the organizer scheduling object resource will include an overridden instance with an "ATTENDEE" list that does not include the "Attendee" being excluded.  Any scheduling messages delivered to the "Attendee" will not specify the overridden instance but rather will include an "EXDATE" property in the "master" component that defines the recurrence set."  
 
@@ -186,7 +186,7 @@ While appropriate handling has originally been in place as incoming/outgoing "pa
 
 ## Classification / Private flag
 
-The legacy *private* flag (``pflag`` in database) is used to hide sensitive details from appointments to other users. Participants of the appointment may always see all details of such appointments, while other users who are able to access such appointments based to their permissions (e.g. in shared folders) will only have a restricted view on them. This basically includes the start- and end-time, identifying properties such as the UID, and the appointment's *shown-as* value. Instead of the appointment title, usually "Private" is shown instead.
+The legacy *private* flag (``pflag`` in database) is used to hide sensitive details from appointments to other users. Participants of the appointment may always see all details of such appointments, while other users who are able to access such appointments based to their permissions (e.g. in shared folders) will only have a restricted view on them. This basically includes the start- and end-time, identifying properties such as the ``UID``, and the appointment's *shown-as* value. Instead of the appointment title, usually "Private" is shown instead.
 
 In iCalendar, this relates to the classification property of an event, with the possible values ``PUBLIC`` (default), ``PRIVATE`` and ``CONFIDENTIAL``. While documentation about the exact meanings of ``PRIVATE`` and ``CONFIDENTIAL`` are quite rare, the legacy *private* flag best matches the semantics of ``CONFIDENTIAL``, i.e. only start- and end-times of the events are visible when being read by non-participating users. So, the legacy *private* flag will be converted to the classification ``CONFIDENTIAL``; vice-versa, both ``PRIVATE`` and ``CONFIDENTIAL`` will make the *private* flag ``true``. Consequently, the parameter ``showPrivate`` of the legacy HTTP API is applied to ``CONFIDENTIAL``ly marked events.  
 
@@ -463,12 +463,50 @@ Furthermore, since also simple, not group-scheduled appointments were stored wit
 
 However, based on RFC 5545, this is handling was **wrong** (the CalDAV layer already tried to work around this difference with some patches to remove this implicit attendee during export, and re-apply it during import again).   
 
-### Chronos: No implicit Participant 
+### Chronos: No implicit Participant (possible)
 
-In the new Chronos stack, we're going to be standards-compliant here, i.e. we'll no longer add the current calendar user as attendee and organizer implicitly in case no further attendees are defined. 
+While not necessarly needed, for now events are still stored using the calendar user as implicit participant, so that compatibility can be guaranteed for the legacy data structure and for existing clients. For CalDAV, the same workarounds as described above are still in place. 
+
+Eventually, once no backwards compatibility is needed anymore, this quirk will be removed, i.e. we'll no longer add the current calendar user as attendee and organizer implicitly in case no further attendees are defined. 
 
 ### References / further reading
 - https://bugs.horde.org/ticket/10697
+- com.openexchange.chronos.impl.Utils#isEnforceDefaultAttendee
+
+
+## Event Flags
+
+For displaying events in the user interface, or to enable/disable appropriate actions for events, clients typically need to query multiple properties of events from the server. This includes the obvious properties like summary, start- or enddate, but also further properties to determine if the calendar user is the organizer of the event or an attendee, or information about the user's own participation status. 
+
+Previously, a client needed to fetch virtually all available properties when loading events from the server, and then performed multiple implicit checks dynamically, e.g. to decide whether the background is drawn "striped" or not, or if events can be "dragged" around in the grid. However, this caused some significant amount of data to be transferred between server and client, and also required some evaluations in the client which are rather in the calendar server's domain, especially towards the handling of different roles within group-scheduled events.
+
+Therefore, a new, virtual *read-only* property for events was introduced: event *flags*.
+
+Via this property, events will get decorated with different aspects that are relevant for the client, e.g. "has attachments", "is recurring", "has alarm(s)", "is organizer", and so on. In particular, the following event flags are supported: 
+- ``attachment``: The event contains at least one attachment. 
+- ``alarms``: The calendar user has at least one alarm associated with the event.
+- ``scheduled``: Event is a *group-scheduled* meeting with an organizer.
+- ``organizer``: The calendar user is the *organizer* of the meeting. 
+- ``attendee``: The calendar user is *attendee* of the meeting.
+- ``private``: Event is classified *private*, so is invisible for others. 
+- ``confidential``: Event is classified as *confidential*, so only start and end time are visible for others.
+- ``transparent``: Event is *transparent* for the calendar user, i.e. invisible to free/busy time searches.
+- ``event_tentative``: Indicates that the event's overall status is *tentative*.
+- ``event_confirmed``: Indicates that the event's overall status is *definite*.
+- ``event_cancelled``: Indicates that the event's overall status is *canceled*.
+- ``needs_action``: The calendar user's participation status is *needs action*. 
+- ``accepted``: The calendar user's participation status is *accepted*.
+- ``declined``: The calendar user's participation status is *declined*.
+- ``tentative``: The calendar user's participation status is *tentative*.
+- ``delegated``: The calendar user's participation status is *delegated*.
+- ``series``: The event represents the *master* of a recurring event series, or an expanded (regular) occurrence of a series. 
+- ``overridden``: The event represents an exception / overridden instance of a recurring event series.
+- ``first_occurrence``: The event represents the *first* occurrence of a recurring event series.
+- ``last_occurrence``: The event represents the *last* occurrence of a recurring event series.
+
+### References / further reading
+- com.openexchange.chronos.EventFlag
+- com.openexchange.chronos.common.CalendarUtils#getFlags
 
 
 ## Migration of legacy data
@@ -540,18 +578,18 @@ The following list gives an overview about the necessary preparations before per
 
 Now, the calendar data migration can be triggered on a specific schema by executing the ``forceupdatetask`` commandline utility, passing ``com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask`` as argument for the task name. While the task runs, the progress can be traced by ``tail``ing the logfile ``/var/log/open-xchange/open-xchange-upgrade.log.0`` (the actual name may vary based on the configured logger). Afterwards, the generated upgrade log can be reviewed for possible data inconsistencies, and the elapsed time for the migration per context or for a whole schema should be noted down to allow a forecast of the runtime when performing the migration of the productive system.
 
-The execution of the update task is repeatable using the ``forceupdatetask`` commandline utility, as the calendar data in the legacy tables is always preserved, and any previously migrated data in the destination tables is purged implicitly in case there are remnants of previous migrations. This allows to repeat the update task in the same schema within different scenarios, such as changed mysql configuration parameters. 
+The execution of the update task is repeatable using the ``forceupdatetask`` commandline utility, as the calendar data in the legacy tables is always preserved, and any previously migrated data in the destination tables is purged implicitly in case there are remnants of previous migrations. This allows to repeat the update task in the same schema within different scenarios, such as changed MySQL configuration parameters. 
 
 #### Performing the Migration
 
 As stated above, the calendar data migration might take some time on larger installations, so it should be tested, planned and scheduled accordingly. As most other update tasks, the migration will operate in *blocking* mode, which means that all contexts of a schema will be disabled while during the upgrade, i.e. client requests cannot be served temporarily. 
 
-Afterwards, when the migration of calendar data is finished successfully, the calendar stack will automatically switch into a special mode where any changes that are persisted in the new tables are also *replayed* to the legacy tables. This is done to still provide a downgrade option to the previous version of the groupware server in case such a disaster recovery should ever be required. Additionally, this ensures that during a *rolling upgrade* scenario, where all groupware nodes are updated one after each other, up-to-date calendar data can also be read from nodes that are still running the previous version of the server. However, write access to calendar data from not yet upgraded groupware nodes is actively prevented, which ensure that no stale data is produced in the legacy database tables during the upgrade phase. Doing so, this *read-only* mode will only be effective on those middleware nodes of the cluster that have not been upgraded, so it is recommended to quickly roll out the updated packaes on all middleware nodes of the cluster once the data migration has been performed.
+Afterwards, when the migration of calendar data is finished successfully, the calendar stack will automatically switch into a special mode where any changes that are persisted in the new tables are also *replayed* to the legacy tables. This is done to still provide a downgrade option to the previous version of the groupware server in case such a disaster recovery should ever be required. Additionally, this ensures that during a *rolling upgrade* scenario, where all groupware nodes are updated one after each other, up-to-date calendar data can also be read from nodes that are still running the previous version of the server. However, write access to calendar data from not yet upgraded groupware nodes is actively prevented, which ensure that no stale data is produced in the legacy database tables during the upgrade phase. Doing so, this *read-only* mode will only be effective on those middleware nodes of the cluster that have not been upgraded, so it is recommended to quickly roll out the updated packages on all middleware nodes of the cluster once the data migration has been performed.
 
 The fact that users served via not upgraded middleware nodes not having "writable" access to their calendar data once their database schmema has been upgraded, should also be taken into account if it is planned to roll out the database changes manually beforehand, prior performing the package upgrade of the middleware nodes. Therefore, it should be desired to keep the timespan between migrating the calendar data and upgrading all middleware nodes in the cluster as small as possible, to mitigate the inconveniences of the potential *read-only* phase.
 
 With a future upgrade, the storage is then switched into a "normal" operation mode again, along with purging the no longer needed legacy database tables. In case the migration task fails unexpectedly, the legacy data will still be used for both reading and writing, so that the calendaring system is still in a working state, with a reduced functionality. A subsequent migration attempt can then be performed using the ``runupdate`` commandline utility after the issues that led to the failed migration have been resolved.    
-In case the migration task finishes successfully, but other circumstances force a disaster recovery in form of a downgrade of the installation to the previous version, downgraded nodes will still not be able to perform *write* operations on the legacy tables. To get out of this mode, it's necessary to unlist the successful execution of ``com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask`` manually from the system. Upon the next upgrade of the server to the new version, the migration will then be executed again.     
+In case the migration task finishes successfully, but other circumstances force a disaster recovery in form of a downgrade of the installation to the previous version, downgraded nodes will still not be able to perform *write* operations on the legacy tables. To get out of this mode, it's necessary to unlist the successful execution of ``com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask`` manually from the system. This would require the manual deletion of the corresponding entry in the database (``DELETE FROM updateTask WHERE taskName='com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask';`` in all groupware schemas).  Upon the next upgrade of the server to the new version, the migration will then be executed again.
 
 ### Malformed Data
 
@@ -614,6 +652,33 @@ For backwards compatibility, the new ``timestamp`` property is used to drive the
 - https://tools.ietf.org/html/rfc5545#section-3.8.7
 - http://oxpedia.org/index.php?title=HTTP_API#Date_and_time
 - https://bugzilla.mozilla.org/show_bug.cgi?id=303663#c2
+
+
+## Allowed Attendee Changes
+
+Previously, only the user's permissions in the underlying folder were considered when checking if an event can be updated or not. For meetings with multiple attendees that usually appear in each of the attendee's default calendar folders, this meant that every internal user that attends a meeting was able to edit the event. 
+
+However, iCalendar standards require to consider different *roles* here - mainly depending on the calendar user being the organizer of an event or not. While the organizer can perform any changes to the event, the other attendees are quite limited regarding the allowed changes (see RFC 6638, section 3.2.2.1): 
+
+> "Attendees" are allowed to make some changes to a scheduling object resource, though key properties such as start time, end time, location, and summary are typically under the control of the "Organizer".
+
+In order to comply with the standards, the new calendaring stack introduces appropriate restrictions in case the user is not the organizer. Effectively, the permitted changes then boil down to modifications of the user's personal alarms and his own participation status. Additionally, the attendee is still allowed to remove himself from an event (beyond declining it). Those changes can also be performed on a single instance of a recurring event series (which may indirectly cause new change and/or delete exceptions for the series).
+
+When acting on behalf of another user (i.e. the action is performed within a shared calendar folder), always this folder owner is considered when determining if the event is updated as organizer or attendee.
+
+### HTTP API
+
+In case a client attempts to modify an event in a not allowed way, an appropriate exception is thrown (code ``CAL-4038``). To aid the differentiation between attendee- and organizer-scheduling object resources, the event's flags contain additional hints (flags **attendee** and **organizer**) which can be evaluated appropriately, in addition to the permissions of the folder the events is located in.
+
+Additionally, to aid the typical "reply" of an attendee to a meeting request, a new, dedicated action **updateAttendee** has been introduced that allows to adjust the calendar user's *own* attendee property, as well as to apply his set of alarms for the event.
+
+### CalDAV
+
+In case a client attempts to modify an event using the CalDAV interface in a not allowed way, the request is answered with the ``CALDAV:allowed-attendee-scheduling-object-change`` precondition error. Besides the per-user properties defined in RFC 6638, there are no further exceptions. However, if a client attempts to store a non-standard *X*-property in the iCalendar resource, no error is thrown and the extended property is dropped silently (as clients actually do it, e.g. a custom ``X-APPLE-TRAVEL-ADVISORY-BEHAVIOR`` or ``X-LIC-ERROR``).
+
+### References / further reading
+- https://tools.ietf.org/html/rfc6638#section-3.2.2
+- com.openexchange.chronos.impl.performer.AbstractUpdatePerformer#requireWritePermissions
 
 
 
