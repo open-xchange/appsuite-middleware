@@ -65,7 +65,7 @@ public class SNIPPET implements Item {
 	r.skipSpaces();
 
 	byte b = r.peekByte();
-	if (b != '(') {
+	if (b == '(') {
 	    // Expect: ``SNIPPET (FUZZY "Some text")''
 	    r.readByte();
 	    algorithm = r.readString(' ');

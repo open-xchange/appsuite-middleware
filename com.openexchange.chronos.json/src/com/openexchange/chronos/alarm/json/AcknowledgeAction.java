@@ -77,6 +77,7 @@ public class AcknowledgeAction extends AbstractChronosAlarmAction {
 
     /**
      * Initializes a new {@link AcknowledgeAction}.
+     * 
      * @param services
      */
     protected AcknowledgeAction(ServiceLookup services) {
@@ -90,13 +91,15 @@ public class AcknowledgeAction extends AbstractChronosAlarmAction {
 
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
-
         Date now = new Date();
         Integer alarmId = (Integer) parseAlarmParameter(requestData, AlarmParameters.PARAMETER_ALARM_ID, true);
         EventID eventID = parseIdParameter(requestData);
         Event event = calendarAccess.getEvent(eventID);
         List<Alarm> alarms = event.getAlarms();
-        for(Alarm alarm: alarms){
+        if (null == alarms) {
+            return new AJAXRequestResult();
+        }
+        for (Alarm alarm : alarms) {
             if (alarm.getId() == alarmId) {
                 alarm.setAcknowledged(now);
                 break;
@@ -106,6 +109,5 @@ public class AcknowledgeAction extends AbstractChronosAlarmAction {
         CalendarResult updateAlarms = calendarAccess.updateAlarms(eventID, alarms, event.getTimestamp());
         return new AJAXRequestResult(updateAlarms, CalendarResultConverter.INPUT_FORMAT);
     }
-
 
 }
