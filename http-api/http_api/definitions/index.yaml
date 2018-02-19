@@ -701,4 +701,4 @@ CancelJobResponse:
   $ref: ./jobqueue/CancelJobResponse.yaml
 # Module: OpenId
 InitResponse:
-  $ref: ./openid/InitRequest.yaml
+  $ref: ./openid/InitResponse.yaml
