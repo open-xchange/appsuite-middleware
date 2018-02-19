@@ -438,9 +438,11 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
                     }
                 }
             } catch (OXException e) {
-                //TODO: persist exception in account data
-                e = withUniqueIDs(e, account.getAccountId());
-                LOG.warn("Error getting visible folders from calendar account {}: {}", I(account.getAccountId()), e.getMessage(), e);
+                // TODO: persist exception in account data
+                if (false == CalendarExceptionCodes.MISSING_CAPABILITY.equals(e)) {
+                    e = withUniqueIDs(e, account.getAccountId());
+                    LOG.warn("Error getting visible folders from calendar account {}: {}", I(account.getAccountId()), e.getMessage(), e);
+                }
                 continue;
             }
         }
