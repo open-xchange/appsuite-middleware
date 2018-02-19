@@ -276,13 +276,26 @@ Therefore, some information might currently get lost when converting a recurrenc
 
 ## Reset of Participation Status
 
-Whenever an existing event with attendees is *rescheduled*, each attendee's participation status is reset to ``NEEDS-INFO``. A reschedule occurs, when any ``DTSTART``, ``DTEND``, ``DURATION``, ``RRULE``, ``RDATE``, or ``EXDATE`` property changes such that existing recurrence instances are impacted by the changes (RFC 6638, 3.2.8).
+Whenever an existing event with attendees is *rescheduled*, each attendee's participation status is reset to ``NEEDS-INFO``. A reschedule occurs, when any ``DTSTART``, ``DTEND``, ``DURATION``, ``RRULE``, ``RDATE``, or ``EXDATE`` property changes such that existing recurrence instances are impacted by the changes (RFC 6638, 3.2.8) - i.e., whenever the period of an event changes. 
+
+### Internal Handling
 
 Internally, these kind of checks are performed along with each event update is checked. Optionally, the standard allows to behave similarly in case of other changes, e.g. a changed event location, however, currently only time changes are considered.  
 
+In contrast to the rather strict definition in the standard, the following, slightly adjusted rules are applied when determining if the attendee's participation status will be resetted or not:
+
+- For series events, reset if there are 'new' occurrences (caused by a modified or extended rule)
+- For series events, reset if there are 'new' occurrences (caused by the reinstatement of previous delete exceptions)
+- Reset if updated start is before the original start
+- Reset if updated end is after the original end
+- Don't reset otherwise
+
+Doing so, the parstats are not resetted whenever the event's effective timeframe is reduced, e.g. the event is re-scheduled to start half an hour later, or end a couple of minutes earlier.
+
+
 ### References / further reading
 - https://tools.ietf.org/html/rfc6638#section-3.2.8
-- com.openexchange.chronos.impl.performer.UpdatePerformer.needsParticipationStatusReset
+- com.openexchange.chronos.impl.performer.EventUpdateProcessor#needsParticipationStatusReset
 
 
 ## Reset of Change Exceptions
@@ -291,10 +304,51 @@ When an event series is updated, there are situations where all previously creat
 
 In the Chronos stack, a slightly enhanced approach is used so that not necessarily all previous change- and delete-exceptions are lost along with an updated recurrence rule. Now, whenever the recurrence rule is changed, the implementation checks if there are existing exceptions whose ``RECURRENCE-ID`` would still be matched by the recurrence set of the updated rule. If so, the change- or delete-exception is kept, otherwise it is still removed. In other words, if the original start time of an existing exception would still be a occurrence of the new recurrence rule, then it can be preserved. For example, any exceptions prior an updated ``UNTIL`` or ``COUNT`` part survive the update. Or, when changing a previously ``DAILY`` rule to only occur on *working days*, any previous exceptions on those days are kept.      
 
+Additionally, it is now possible to apply a changed recurrence rule to a specific and all future occurrences of the series, which is handled by splitting the event series into two parts - see below for more details.
+
 ### References / further reading
 - com.openexchange.calendar.api.CalendarCollection.detectTimeChange
 - com.openexchange.calendar.CalendarOperation.checkPatternChange
 - com.openexchange.calendar.CalendarMySQL.deleteAllRecurringExceptions
+
+
+## Smart update of Event Series
+
+There are cases where changes to an event series should be performed for one recurrence instance on to the future. For example, when a new member is added for a regular team meeting, or, if the location of an event changes. In order to support these use cases, the server supports splitting event series into two parts, as well as propagating series changes to existing change exceptions.
+
+### Series Split
+
+Splitting an existing event series into two parts is the basis to support use cases where changes to an event series should be applied from a specific occurrence on to the future. The logic to split event series is based on a preliminary specification of the Apple Calendar Server (see links below). Such a split is performed at a specific *split point* which is typically the recurrence identifier of the occurrence that is considered for the update. 
+
+The split is actually performed by creating a new, detached event series for the part prior the split point, and shifting the date of the first occurrence of the existing series to the split point. Existing overridden instances and any per-attendee data is preserved in both resulting event series, additionally, the series are linked via the ``RELATED-TO`` property. 
+
+Technically, the following steps are performed when an event series is splitted:
+1. A new series event representing the 'detached' part prior to the split time is created, based on the original series master
+2. The recurrence rule of the detached series is adjusted to have a fixed ``UNTIL`` one second or day prior the split point
+3. The recurrence rule, start- and end-date for the existing event series are modified to begin on or after the split point
+4. Existing delete and change exception dates are distributed between both series (prior / on or after the split time)
+5. Existing overridden occurrences are assigned to the new detached event series, if prior split time
+6. Both series are decorated with the same, newly generated ``RELATED-TO`` property 
+
+Afterwards, typically the new event series is adjusted in a second step, so that a client effectively can perform an update to an event series that should be applied to a specific and all future occurrences.
+
+### Propagate changes to Exceptions
+
+As described above, when dealing with recurring events, it is often necessary to apply a change from one occurrence on into the future (e.g., add a new attendee part way through the series of meetings).
+
+Previously, existing change exceptions are not touched at all when the series master event is modified. In the calendar implementation, we integrated some smart detection if a change to the recurring master event could also be applied to existing change excpetions, e.g. after a new attendee is added, or if the event location changes. As the web client does not have all change exceptions handy, the logic to 'propagate' the changes is implemented in the middleware.
+
+To avoid possible ambiguities, only certain changes considered, where the change can also be applied in some or all change exceptions intuitively. In particular, the following cases are taken into account:
+- For all *simple* changed event fields, it is checked if the modified property is equal in the original series master event and in the change exception. Simple event fields are (preliminary): ``CLASSIFICATION``, ``TRANSP``, ``SUMMARY``, ``LOCATION``, ``DESCRIPTION``, ``CATEGORIES``, ``COLOR``, ``URL``, ``GEO``, ``TRANSP``, ``STATUS``. If not, leave the property in the change exception as-is (i.e. do not propagate this change). If yes, also apply the change in the change exception.
+- Newly added attendees are also added in existing change exception events, unless they're not already attending there.
+- Removed attendees are also removed from change exceptions, in case they previously attended there, too.
+- For changes to an event's start- and/or enddate, the same change is only propagated if both properties are equal to the original value in the change exception, i.e. the change exception's timeslot is still matching the recurrence.
+
+
+### References / further reading
+- https://raw.githubusercontent.com/apple/ccs-calendarserver/master/doc/Extensions/caldav-recursplit.txt
+- com.openexchange.chronos.impl.performer.EventUpdateProcessor#propagateToChangeExceptions
+- com.openexchange.chronos.impl.performer#SplitPerformer
 
 
 ## External Calendar Users
