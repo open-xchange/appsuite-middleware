@@ -66,7 +66,7 @@ import com.openexchange.session.Session;
 public class MailAuthenticityJSlobEntry implements JSlobEntry {
 
     private static final String NAME = "authenticity";
-    private static final String KEY = JSlobKeys.MAIL + "/features";
+    private static final String KEY = JSlobKeys.MAIL + "//features";
     private final ServiceLookup services;
 
     /**

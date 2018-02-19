@@ -161,26 +161,6 @@ public abstract class DefaultJsonMapper<O, E extends Enum<E>> extends DefaultMap
 		this.serialize(object, to, fields, timeZone, null);
 	}
 
-//	@Override
-//	public JSONArray serialize(final List<O> objects, final E[] fields) throws JSONException, OXException {
-//		return this.serialize(objects, fields, null);
-//	}
-//
-//	@Override
-//	public JSONArray serialize(final List<O> objects, final E[] fields, String timeZoneID) throws JSONException, OXException {
-//		return this.serialize(objects, fields, timeZoneID, null);
-//	}
-//
-//	@Override
-//	public JSONArray serialize(List<O> objects, E[] fields, String timeZoneID, Session session) throws JSONException, OXException {
-//		final JSONArray jsonArray = new JSONArray();
-//		TimeZone timeZone = null != timeZoneID ? getTimeZone(timeZoneID) : null;
-//		for (final O object : objects) {
-//			jsonArray.put(this.serialize(object, fields, timeZone, session));
-//		}
-//		return jsonArray;
-//	}
-
 	@Override
 	public JSONArray serialize(List<O> objects, E[] fields, String timeZoneID, Session session) throws JSONException, OXException {
 		return this.serialize(objects, fields, null != timeZoneID ? getTimeZone(timeZoneID) : null, session);
