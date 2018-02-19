@@ -65,6 +65,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -271,6 +272,16 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
                 });
             }
             eventsResults.putAll(collectEventsResults(completionService, relativeFolderIdsPerAccount.size()));
+        }
+        if (1 < eventsResults.size()) {
+            /*
+             * return a sorted list of results per folder (same order as requested)
+             */
+            LinkedHashMap<String, EventsResult> sortedResults = new LinkedHashMap<String, EventsResult>(eventsResults.size());
+            for (String folderId : folderIds) {
+                sortedResults.put(folderId, eventsResults.get(folderId));
+            }
+            eventsResults = sortedResults;
         }
         return eventsResults;
     }
