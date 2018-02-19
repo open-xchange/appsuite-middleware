@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.metrics.jmx;
+package com.openexchange.metrics.dropwizard.jmx;
 
 import javax.management.NotCompliantMBeanException;
 import com.codahale.metrics.Counter;
@@ -58,11 +58,11 @@ import com.codahale.metrics.Metric;
 import com.codahale.metrics.RatioGauge;
 import com.codahale.metrics.Timer;
 import com.openexchange.metrics.MetricMetadata;
-import com.openexchange.metrics.jmx.impl.CounterMBeanImpl;
-import com.openexchange.metrics.jmx.impl.GaugeMBeanImpl;
-import com.openexchange.metrics.jmx.impl.HistogramMBeanImpl;
-import com.openexchange.metrics.jmx.impl.MeterMBeanImpl;
-import com.openexchange.metrics.jmx.impl.TimerMBeanImpl;
+import com.openexchange.metrics.jmx.CounterMBean;
+import com.openexchange.metrics.jmx.GaugeMBean;
+import com.openexchange.metrics.jmx.HistogramMBean;
+import com.openexchange.metrics.jmx.MeterMBean;
+import com.openexchange.metrics.jmx.TimerMBean;
 
 /**
  * {@link MetricMBeanFactory}

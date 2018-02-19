@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.metrics.jmx.impl;
+package com.openexchange.metrics.dropwizard.jmx;
 
 import javax.management.NotCompliantMBeanException;
 import com.openexchange.management.AnnotatedStandardMBean;

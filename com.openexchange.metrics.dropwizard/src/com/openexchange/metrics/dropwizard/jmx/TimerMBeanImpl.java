@@ -47,162 +47,157 @@
  *
  */
 
-package com.openexchange.metrics.jmx.impl;
+package com.openexchange.metrics.dropwizard.jmx;
 
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 import javax.management.NotCompliantMBeanException;
-import com.codahale.metrics.Histogram;
-import com.openexchange.metrics.jmx.HistogramMBean;
+import com.codahale.metrics.Timer;
+import com.openexchange.metrics.jmx.TimerMBean;
 
 /**
- * {@link HistogramMBeanImpl}
+ * {@link TimerMBeanImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class HistogramMBeanImpl extends AbstractMetricMBean implements HistogramMBean {
+public class TimerMBeanImpl extends MeterMBeanImpl implements TimerMBean {
 
-    private static final String DESCRIPTION = "Hitstogram MBean";
-    private final Histogram histogram;
+    private static final String DESCRIPTION = "Timer MBean";
+    private final Timer timer;
+    private final double durationFactor;
+    private final String durationUnit;
 
     /**
-     * Initialises a new {@link HistogramMBeanImpl}.
-     * 
-     * @param description
-     * @param mbeanInterface
+     * Initialises a new {@link TimerMBeanImpl}.
+     *
      * @throws NotCompliantMBeanException
      */
-    public HistogramMBeanImpl(Histogram histogram) throws NotCompliantMBeanException {
-        super(DESCRIPTION, HistogramMBean.class);
-        this.histogram = histogram;
+    public TimerMBeanImpl(Timer timer, TimeUnit timeUnit) throws NotCompliantMBeanException {
+        super(DESCRIPTION, TimerMBean.class, timer, "events", timeUnit);
+        this.timer = timer;
+        this.durationFactor = 1.0 / TimeUnit.MILLISECONDS.toNanos(1); // TODO
+        this.durationUnit = TimeUnit.MILLISECONDS.toString().toLowerCase(Locale.US); // TODO
     }
 
     /*
      * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.HistogramMBean#getCount()
+     *
+     * @see com.openexchange.metrics.jmx.TimerMBean#getMin()
      */
     @Override
-    public long getCount() {
-        return histogram.getCount();
+    public double getMin() {
+        return timer.getSnapshot().getMin() * durationFactor;
     }
 
     /*
      * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.HistogramMBean#getMin()
+     *
+     * @see com.openexchange.metrics.jmx.TimerMBean#getMax()
      */
     @Override
-    public long getMin() {
-        return histogram.getSnapshot().getMin();
+    public double getMax() {
+        return timer.getSnapshot().getMax() * durationFactor;
     }
 
     /*
      * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.HistogramMBean#getMax()
-     */
-    @Override
-    public long getMax() {
-        return histogram.getSnapshot().getMax();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.HistogramMBean#getMean()
+     *
+     * @see com.openexchange.metrics.jmx.TimerMBean#getMean()
      */
     @Override
     public double getMean() {
-        return histogram.getSnapshot().getMean();
+        return timer.getSnapshot().getMean() * durationFactor;
     }
 
     /*
      * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.HistogramMBean#getStdDev()
+     *
+     * @see com.openexchange.metrics.jmx.TimerMBean#getStdDev()
      */
     @Override
     public double getStdDev() {
-        return histogram.getSnapshot().getStdDev();
+        return timer.getSnapshot().getStdDev() * durationFactor;
     }
 
     /*
      * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.HistogramMBean#get50thPercentile()
+     *
+     * @see com.openexchange.metrics.jmx.TimerMBean#get50thPercentile()
      */
     @Override
     public double get50thPercentile() {
-        return histogram.getSnapshot().getMedian();
+        return timer.getSnapshot().getMedian() * durationFactor;
     }
 
     /*
      * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.HistogramMBean#get75thPercentile()
+     *
+     * @see com.openexchange.metrics.jmx.TimerMBean#get75thPercentile()
      */
     @Override
     public double get75thPercentile() {
-        return histogram.getSnapshot().get75thPercentile();
+        return timer.getSnapshot().get75thPercentile() * durationFactor;
     }
 
     /*
      * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.HistogramMBean#get95thPercentile()
+     *
+     * @see com.openexchange.metrics.jmx.TimerMBean#get95thPercentile()
      */
     @Override
     public double get95thPercentile() {
-        return histogram.getSnapshot().get95thPercentile();
+        return timer.getSnapshot().get95thPercentile() * durationFactor;
     }
 
     /*
      * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.HistogramMBean#get98thPercentile()
+     *
+     * @see com.openexchange.metrics.jmx.TimerMBean#get98thPercentile()
      */
     @Override
     public double get98thPercentile() {
-        return histogram.getSnapshot().get98thPercentile();
+        return timer.getSnapshot().get98thPercentile() * durationFactor;
     }
 
     /*
      * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.HistogramMBean#get99thPercentile()
+     *
+     * @see com.openexchange.metrics.jmx.TimerMBean#get99thPercentile()
      */
     @Override
     public double get99thPercentile() {
-        return histogram.getSnapshot().get99thPercentile();
+        return timer.getSnapshot().get99thPercentile() * durationFactor;
     }
 
     /*
      * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.HistogramMBean#get999thPercentile()
+     *
+     * @see com.openexchange.metrics.jmx.TimerMBean#get999thPercentile()
      */
     @Override
     public double get999thPercentile() {
-        return histogram.getSnapshot().get999thPercentile();
+        return timer.getSnapshot().get999thPercentile() * durationFactor;
     }
 
     /*
      * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.HistogramMBean#values()
+     *
+     * @see com.openexchange.metrics.jmx.TimerMBean#values()
      */
     @Override
     public long[] values() {
-        return histogram.getSnapshot().getValues();
+        return timer.getSnapshot().getValues();
     }
 
     /*
      * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.HistogramMBean#getSnapshotSize()
+     *
+     * @see com.openexchange.metrics.jmx.TimerMBean#getDurationUnit()
      */
     @Override
-    public long getSnapshotSize() {
-        return histogram.getSnapshot().size();
+    public String getDurationUnit() {
+        return durationUnit;
     }
+
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,69 +49,37 @@
 
 package com.openexchange.metrics;
 
-import java.util.function.Supplier;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.metrics.descriptors.MeterDescriptor;
-import com.openexchange.metrics.types.Counter;
-import com.openexchange.metrics.types.Gauge;
-import com.openexchange.metrics.types.Histogram;
 import com.openexchange.metrics.types.Meter;
-import com.openexchange.metrics.types.Timer;
-import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.metrics.types.Metric;
 
 /**
- * {@link MetricService}
+ * {@link AbstractMetricService}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@SingletonService
-public interface MetricService {
+public abstract class AbstractMetricService implements MetricService {
+
+    private final ConcurrentMap<String, Metric> metrics;
 
     /**
-     * Gets an existing {@link Histogram} for the given name or creates and
-     * remembers a new one if it doesn't exist yet.
-     *
-     * @param group The metric group
-     * @param name The metric name
-     * @return the metric instance
+     * Initialises a new {@link AbstractMetricService}.
      */
-    Histogram getHistogram(String group, String name);
+    public AbstractMetricService() {
+        super();
+        metrics = new ConcurrentHashMap<>();
+    }
 
-    /**
-     * Gets an existing {@link Timer} for the given name or creates and
-     * remembers a new one if it doesn't exist yet.
-     *
-     * @param group The metric group
-     * @param name The metric name
-     * @return the metric instance
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.MetricService#meter(com.openexchange.metrics.descriptors.MeterDescriptor)
      */
-    Timer timer(String group, String name);
-
-    /**
-     * Gets an existing {@link Counter} for the given name or creates and
-     * remembers a new one if it doesn't exist yet.
-     *
-     * @param group The metric group
-     * @param name The metric name
-     * @return the metric instance
-     */
-    Counter getCounter(String group, String name);
-
-    /**
-     * Gets an existing {@link Gauge} for the given name with the specified {@link Supplier}
-     * or creates and remembers a new one if it doesn't exist yet.
-     *
-     * @param group The metric group
-     * @param name The metric name
-     * @return the metric instance
-     */
-    <T> Gauge<T> getGauge(String group, String name, Supplier<T> metricSupplier);
-
-    /**
-     * Gets an existing {@link Meter} for the specified {@link MeterDescriptor} or creates and
-     * remembers a new one if it doesn't exist yet.
-     *
-     * @param descriptior The {@link MeterDescriptor}
-     * @return the metric instance
-     */
-    Meter meter(MeterDescriptor descriptor);
+    @Override
+    public Meter meter(MeterDescriptor descriptor) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

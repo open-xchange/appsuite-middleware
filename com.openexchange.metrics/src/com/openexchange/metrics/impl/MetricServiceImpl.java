@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.metrics.impl;
 
 import java.util.Collections;
@@ -56,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import org.slf4j.Logger;
@@ -71,13 +73,13 @@ import com.codahale.metrics.MetricRegistryListener;
 import com.codahale.metrics.Timer;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
-import com.openexchange.metrics.MeterDescriptor;
 import com.openexchange.metrics.MetricMetadata;
 import com.openexchange.metrics.MetricService;
 import com.openexchange.metrics.MetricType;
+import com.openexchange.metrics.descriptors.MeterDescriptor;
+import com.openexchange.metrics.dropwizard.jmx.MetricMBeanFactory;
 import com.openexchange.metrics.impl.dropwizard.MeterImpl;
 import com.openexchange.metrics.jmx.MetricMBean;
-import com.openexchange.metrics.jmx.MetricMBeanFactory;
 
 /**
  * {@link MetricServiceImpl}
@@ -119,13 +121,28 @@ public class MetricServiceImpl implements MetricService {
         return registry.gauge(MetricRegistry.name(group, name), supplier);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.MetricService#getGauge(java.lang.String, java.lang.String, java.util.function.Supplier)
+     */
+    @Override
+    public Gauge<?> getGauge(String group, String name, Supplier<MetricSupplier<Gauge>> metricSupplier) {
+        return registry.gauge(MetricRegistry.name(group, name), metricSupplier.get());
+    }
+
+    @SuppressWarnings("rawtypes")
+    public Gauge getGauge2(String group, String name, Supplier<Integer> s) {
+        return registry.gauge(MetricRegistry.name(group, name), () -> () -> s.get());
+    }
+
     @Override
     public Meter meter(String group, String name) {
         return registry.meter(MetricRegistry.name(group, name));
     }
 
     @Override
-    public com.openexchange.metrics.Meter meter(MeterDescriptor descriptor) {
+    public com.openexchange.metrics.types.Meter meter(MeterDescriptor descriptor) {
         Meter delegate = registry.meter(MetricRegistry.name(descriptor.getGroup(), descriptor.getName()));
         return new MeterImpl(delegate);
     }
@@ -158,6 +175,11 @@ public class MetricServiceImpl implements MetricService {
         private final Map<MetricType, BiFunction<Metric, MetricMetadata, MetricMBean>> mbeanCreators;
         private final List<ObjectName> registeredNames;
 
+        /**
+         * Initialises a new {@link MBeanRegisterer}.
+         * 
+         * @param managementService
+         */
         public JmxRegisterer(ManagementService managementService) {
             super();
             this.managementService = managementService;
@@ -174,51 +196,101 @@ public class MetricServiceImpl implements MetricService {
             registeredNames = Collections.synchronizedList(new LinkedList<>());
         }
 
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.codahale.metrics.MetricRegistryListener#onGaugeAdded(java.lang.String, com.codahale.metrics.Gauge)
+         */
         @Override
         public void onGaugeAdded(String name, Gauge<?> gauge) {
             registerMBean(MetricType.GAUGE, name, gauge);
         }
 
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.codahale.metrics.MetricRegistryListener#onGaugeRemoved(java.lang.String)
+         */
         @Override
         public void onGaugeRemoved(String name) {
             unregisterMBean(MetricType.GAUGE, name);
         }
 
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.codahale.metrics.MetricRegistryListener#onCounterAdded(java.lang.String, com.codahale.metrics.Counter)
+         */
         @Override
         public void onCounterAdded(String name, Counter counter) {
             registerMBean(MetricType.COUNTER, name, counter);
         }
 
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.codahale.metrics.MetricRegistryListener#onCounterRemoved(java.lang.String)
+         */
         @Override
         public void onCounterRemoved(String name) {
             unregisterMBean(MetricType.COUNTER, name);
         }
 
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.codahale.metrics.MetricRegistryListener#onHistogramAdded(java.lang.String, com.codahale.metrics.Histogram)
+         */
         @Override
         public void onHistogramAdded(String name, Histogram histogram) {
             registerMBean(MetricType.HISTOGRAM, name, histogram);
         }
 
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.codahale.metrics.MetricRegistryListener#onHistogramRemoved(java.lang.String)
+         */
         @Override
         public void onHistogramRemoved(String name) {
             unregisterMBean(MetricType.HISTOGRAM, name);
         }
 
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.codahale.metrics.MetricRegistryListener#onMeterAdded(java.lang.String, com.codahale.metrics.Meter)
+         */
         @Override
         public void onMeterAdded(String name, Meter meter) {
             registerMBean(MetricType.METER, name, meter);
         }
 
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.codahale.metrics.MetricRegistryListener#onMeterRemoved(java.lang.String)
+         */
         @Override
         public void onMeterRemoved(String name) {
             unregisterMBean(MetricType.METER, name);
         }
 
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.codahale.metrics.MetricRegistryListener#onTimerAdded(java.lang.String, com.codahale.metrics.Timer)
+         */
         @Override
         public void onTimerAdded(String name, Timer timer) {
             registerMBean(MetricType.TIMER, name, timer);
         }
 
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.codahale.metrics.MetricRegistryListener#onTimerRemoved(java.lang.String)
+         */
         @Override
         public void onTimerRemoved(String name) {
             unregisterMBean(MetricType.TIMER, name);
@@ -296,7 +368,5 @@ public class MetricServiceImpl implements MetricService {
 
             return ObjectName.getInstance(DOMAIN_NAME, properties);
         }
-
     }
-
 }

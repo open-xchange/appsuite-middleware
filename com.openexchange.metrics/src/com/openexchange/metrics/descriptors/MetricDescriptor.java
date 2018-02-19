@@ -1,4 +1,4 @@
-package com.openexchange.metrics;
+package com.openexchange.metrics.descriptors;
 
 
 public abstract class MetricDescriptor {

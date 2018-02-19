@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,35 +47,87 @@
  *
  */
 
-package com.openexchange.metrics.types;
+package com.openexchange.metrics.dropwizard.impl;
 
-import java.util.concurrent.atomic.AtomicLong;
-import com.codahale.metrics.Gauge;
+import java.util.function.Supplier;
+import com.codahale.metrics.MetricRegistry;
+import com.openexchange.metrics.MetricService;
+import com.openexchange.metrics.descriptors.MeterDescriptor;
+import com.openexchange.metrics.dropwizard.types.DropwizardMeter;
+import com.openexchange.metrics.types.Counter;
+import com.openexchange.metrics.types.Gauge;
+import com.openexchange.metrics.types.Histogram;
+import com.openexchange.metrics.types.Meter;
+import com.openexchange.metrics.types.Timer;
 
 /**
- * {@link AtomicLongGauge}
+ * {@link DropwizardMetricService}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class AtomicLongGauge implements Gauge<AtomicLong> {
+public class DropwizardMetricService implements MetricService {
 
-    private final AtomicLong value;
+    private final MetricRegistry registry;
 
     /**
-     * Initialises a new {@link AtomicLongGauge}.
+     * Initialises a new {@link DropwizardMetricService}.
      */
-    public AtomicLongGauge() {
+    public DropwizardMetricService() {
         super();
-        value = new AtomicLong();
+        registry = new MetricRegistry();
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.codahale.metrics.Gauge#getValue()
+     * @see com.openexchange.metrics.MetricService#getHistogram(java.lang.String, java.lang.String)
      */
     @Override
-    public AtomicLong getValue() {
-        return value;
+    public Histogram getHistogram(String group, String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.MetricService#timer(java.lang.String, java.lang.String)
+     */
+    @Override
+    public Timer timer(String group, String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.MetricService#getCounter(java.lang.String, java.lang.String)
+     */
+    @Override
+    public Counter getCounter(String group, String name) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.MetricService#getGauge(java.lang.String, java.lang.String, java.util.function.Supplier)
+     */
+    @Override
+    public <T> Gauge<T> getGauge(String group, String name, Supplier<T> metricSupplier) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.MetricService#meter(com.openexchange.metrics.descriptors.MeterDescriptor)
+     */
+    @Override
+    public Meter meter(MeterDescriptor descriptor) {
+        return new DropwizardMeter(registry.meter(MetricRegistry.name(descriptor.getGroup(), descriptor.getName())));
     }
 }

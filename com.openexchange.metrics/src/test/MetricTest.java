@@ -1,9 +1,9 @@
 package test;
 
 import java.util.concurrent.TimeUnit;
-import com.openexchange.metrics.Meter;
-import com.openexchange.metrics.MeterDescriptor;
+import com.openexchange.metrics.descriptors.MeterDescriptor;
 import com.openexchange.metrics.impl.MetricServiceImpl;
+import com.openexchange.metrics.types.Meter;
 
 public class MetricTest {
 

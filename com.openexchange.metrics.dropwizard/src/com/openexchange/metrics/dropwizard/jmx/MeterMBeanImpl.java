@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.metrics.jmx.impl;
+package com.openexchange.metrics.dropwizard.jmx;
 
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;

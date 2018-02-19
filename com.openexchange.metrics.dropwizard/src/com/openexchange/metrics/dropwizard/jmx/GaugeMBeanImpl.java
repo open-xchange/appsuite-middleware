@@ -47,41 +47,42 @@
  *
  */
 
-package com.openexchange.metrics.jmx.impl;
+package com.openexchange.metrics.dropwizard.jmx;
 
 import javax.management.NotCompliantMBeanException;
-import com.codahale.metrics.Counter;
-import com.openexchange.metrics.jmx.CounterMBean;
+import com.codahale.metrics.Gauge;
+import com.openexchange.metrics.jmx.GaugeMBean;
 
 /**
- * {@link CounterMBeanImpl}
+ * {@link GaugeMBeanImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CounterMBeanImpl extends AbstractMetricMBean implements CounterMBean {
+public class GaugeMBeanImpl extends AbstractMetricMBean implements GaugeMBean {
 
-    private static final String DESCRIPTION = "Counter MBean";
-    private final Counter counter;
+    private static final String DESCRIPTION = "Gauge MBean";
+    private final Gauge<?> gauge;
 
     /**
-     * Initialises a new {@link CounterMBeanImpl}.
+     * Initialises a new {@link GaugeMBeanImpl}.
      * 
      * @param description
      * @param mbeanInterface
      * @throws NotCompliantMBeanException
      */
-    public CounterMBeanImpl(Counter counter) throws NotCompliantMBeanException {
-        super(DESCRIPTION, CounterMBean.class);
-        this.counter = counter;
+    public GaugeMBeanImpl(Gauge<?> gauge) throws NotCompliantMBeanException {
+        super(DESCRIPTION, GaugeMBean.class);
+        this.gauge = gauge;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.metrics.jmx.CounterMBean#getCount()
+     * @see com.openexchange.metrics.jmx.GaugeMBean#getValue()
      */
     @Override
-    public long getCount() {
-        return counter.getCount();
+    public Object getValue() {
+        return gauge.getValue();
     }
+
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,35 +47,46 @@
  *
  */
 
-package com.openexchange.metrics.types;
+package com.openexchange.metrics.dropwizard.types;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import com.codahale.metrics.Gauge;
+import com.openexchange.metrics.types.Meter;
 
 /**
- * {@link AtomicIntegerGauge}
+ * {@link DropwizardMeter}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class AtomicIntegerGauge implements Gauge<AtomicInteger> {
+public class DropwizardMeter implements Meter {
 
-    private final AtomicInteger value;
+    private final com.codahale.metrics.Meter delegate;
 
     /**
-     * Initialises a new {@link AtomicIntegerGauge}.
+     * Initialises a new {@link DropwizardMeter}.
+     * 
+     * @param meter The delegate {@link com.codahale.metrics.Meter}
      */
-    public AtomicIntegerGauge() {
+    public DropwizardMeter(com.codahale.metrics.Meter meter) {
         super();
-        value = new AtomicInteger();
+        this.delegate = meter;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.codahale.metrics.Gauge#getValue()
+     * @see com.openexchange.metrics.types.Meter#mark()
      */
     @Override
-    public AtomicInteger getValue() {
-        return value;
+    public void mark() {
+        delegate.mark();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.types.Meter#mark(long)
+     */
+    @Override
+    public void mark(long n) {
+        delegate.mark(n);
     }
 }
