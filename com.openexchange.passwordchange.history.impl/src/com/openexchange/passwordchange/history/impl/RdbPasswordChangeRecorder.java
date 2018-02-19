@@ -67,9 +67,9 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.passwordchange.history.PasswordChangeRecorderException;
 import com.openexchange.passwordchange.history.PasswordChangeInfo;
 import com.openexchange.passwordchange.history.PasswordChangeRecorder;
+import com.openexchange.passwordchange.history.PasswordChangeRecorderException;
 import com.openexchange.passwordchange.history.SortField;
 import com.openexchange.passwordchange.history.SortOrder;
 import com.openexchange.server.ServiceExceptionCode;
@@ -169,31 +169,7 @@ public class RdbPasswordChangeRecorder implements PasswordChangeRecorder {
         DatabaseService dbService = getService(DatabaseService.class);
         ConfigViewFactory cascade = getService(ConfigViewFactory.class);
 
-        // Get writable connection
-        Connection con = dbService.getWritable(contextID);
-        PreparedStatement stmt = null;
-        try {
-
-            // Write info
-            stmt = con.prepareStatement(INSERT_DATA);
-            stmt.setInt(1, contextID);
-            stmt.setInt(2, userID);
-            stmt.setString(3, info.getClient());
-            if (null == info.getIP()) {
-                stmt.setNull(4, Types.VARCHAR);
-            } else {
-                stmt.setString(4, info.getIP());
-            }
-            stmt.setLong(5, System.currentTimeMillis());
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw PasswordChangeRecorderException.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(stmt);
-            dbService.backWritable(contextID, con);
-        }
-
-        // Clean up data, too
+        // Get limit for the user and check if the password change needs to be saved
         ConfigView view = cascade.getView(userID, contextID);
         ComposedConfigProperty<Integer> property = view.property(PasswordChangeRecorderProperties.LIMIT.getFQPropertyName(), Integer.class);
         Integer limit;
@@ -206,6 +182,32 @@ public class RdbPasswordChangeRecorder implements PasswordChangeRecorder {
             limit = PasswordChangeRecorderProperties.LIMIT.getDefaultValue(Integer.class);
         }
 
+        if (0 < limit.intValue()) {
+            // Get writable connection
+            Connection con = dbService.getWritable(contextID);
+            PreparedStatement stmt = null;
+            try {
+
+                // Write info
+                stmt = con.prepareStatement(INSERT_DATA);
+                stmt.setInt(1, contextID);
+                stmt.setInt(2, userID);
+                stmt.setString(3, info.getClient());
+                if (null == info.getIP()) {
+                    stmt.setNull(4, Types.VARCHAR);
+                } else {
+                    stmt.setString(4, info.getIP());
+                }
+                stmt.setLong(5, System.currentTimeMillis());
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                throw PasswordChangeRecorderException.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                Databases.closeSQLStuff(stmt);
+                dbService.backWritable(contextID, con);
+            }
+        }
+        // Clean up data, too
         try {
             clear(userID, contextID, limit.intValue());
         } catch (Exception e) {
