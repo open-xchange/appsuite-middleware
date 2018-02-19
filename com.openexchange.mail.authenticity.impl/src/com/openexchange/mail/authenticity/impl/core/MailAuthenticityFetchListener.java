@@ -276,6 +276,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
             Future<Void> future = threadPool.submit(new MailAuthenticityTask(partition, handler, session));
             submittedTasks.add(new FutureAndMail(future, partition));
         }
+        partitions = null; // Help GC
 
         try {
             for (FutureAndMail submitted : submittedTasks) {
