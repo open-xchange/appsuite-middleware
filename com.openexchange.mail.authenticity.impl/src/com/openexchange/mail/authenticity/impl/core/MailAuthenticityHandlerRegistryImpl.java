@@ -106,8 +106,7 @@ public class MailAuthenticityHandlerRegistryImpl implements MailAuthenticityHand
                     return ConfigAndHandler.NOT_ENABLED;
                 }
 
-                // Check threshold date and look-up up appropriate handler
-                long dateThreshold = leanConfigService.getLongProperty(userId, contextId, MailAuthenticityProperty.THRESHOLD);
+                // Look-up up appropriate handler
                 MailAuthenticityHandler highestRankedHandler = null;
                 for (MailAuthenticityHandler handler : handlers) {
                     // First, check ranking, then if enabled for session-associated user
@@ -115,6 +114,13 @@ public class MailAuthenticityHandlerRegistryImpl implements MailAuthenticityHand
                         highestRankedHandler = handler;
                     }
                 }
+                if (null == highestRankedHandler) {
+                    // No suitable handler available
+                    return ConfigAndHandler.NOT_ENABLED;
+                }
+
+                // Check threshold date
+                long dateThreshold = leanConfigService.getLongProperty(userId, contextId, MailAuthenticityProperty.THRESHOLD);
                 return new ConfigAndHandler(dateThreshold, ThresholdAwareAuthenticityHandler.wrapIfApplicable(highestRankedHandler, dateThreshold));
             }
         };

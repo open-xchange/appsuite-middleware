@@ -77,7 +77,7 @@ public class ThresholdAwareAuthenticityHandler implements MailAuthenticityHandle
      * @return
      */
     public static MailAuthenticityHandler wrapIfApplicable(MailAuthenticityHandler authenticityHandler, long threshold) {
-        return threshold <= 0 ? authenticityHandler : new ThresholdAwareAuthenticityHandler(authenticityHandler, threshold);
+        return null == authenticityHandler ? null : (threshold <= 0 ? authenticityHandler : new ThresholdAwareAuthenticityHandler(authenticityHandler, threshold));
     }
 
     // --------------------------------------------------------------------------------------------------------------------------
