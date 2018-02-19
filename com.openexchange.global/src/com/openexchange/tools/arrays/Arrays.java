@@ -149,16 +149,16 @@ public final class Arrays {
     }
 
     /**
-     * Returns consecutive subarrays for an array,
-     * each of the same size (the final array may be smaller). For example,
-     * partitioning an array containing {@code [a, b, c, d, e]} with a partition
-     * size of 3 yields {@code [[a, b, c], [d, e]]} -- an outer list containing
-     * two inner array of three and two elements, all in the original order.
+     * Generates consecutive subarrays for an array,each of the same size (the final array may be smaller).
+     * <p>
+     * For example, partitioning an array containing {@code [a, b, c, d, e]} with a partition
+     * size of 3 yields<br>{@code [[a, b, c], [d, e]]} -- an outer list containing two inner array
+     * of three and two elements, all in the original order.
      *
-     * @param array the array to return consecutive subarrays of
-     * @param size the desired size of each subarray (the last may be smaller)
-     * @return a list of consecutive subarrays
-     * @throws IllegalArgumentException if {@code partitionSize} is nonpositive
+     * @param array The array to return consecutive subarrays of
+     * @param size The desired size of each subarray (the last may be smaller)
+     * @return A list of consecutive subarrays
+     * @throws IllegalArgumentException If {@code size} is non-positive
      */
     public static <T> List<T[]> partition(T[] array, int size) {
         checkNotNull(array);
