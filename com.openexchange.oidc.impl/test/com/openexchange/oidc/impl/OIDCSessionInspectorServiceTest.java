@@ -118,7 +118,7 @@ public class OIDCSessionInspectorServiceTest {
         MockitoAnnotations.initMocks(this);
         Mockito.when(this.mockedBackend.getBackendConfig()).thenReturn(this.mockedBackendConfig);
         Mockito.when(this.mockedOidcBackends.getAllRegisteredBackends()).thenReturn(this.mockedBackendList);
-        this.inspector = PowerMockito.spy(new OIDCSessionInspectorService(this.mockedBackendList));
+        this.inspector = PowerMockito.spy(new OIDCSessionInspectorService(this.mockedOidcBackends));
     }
 
     @Test
@@ -131,7 +131,8 @@ public class OIDCSessionInspectorServiceTest {
     @SuppressWarnings("unchecked")
     @Test
     public void onSessionHit_NoBackendTrackedTest() throws Exception {
-        SessionInspectorService emptyInspector = new OIDCSessionInspectorService(Collections.<OIDCBackend>emptyList());
+        Mockito.when(this.mockedOidcBackends.getAllRegisteredBackends()).thenReturn(Collections.<OIDCBackend>emptyList());
+        SessionInspectorService emptyInspector = new OIDCSessionInspectorService(this.mockedOidcBackends);
         Mockito.when(this.mockedSession.getParameter(OIDCTools.BACKEND_PATH)).thenReturn("backendPath");
         Mockito.when(this.mockedBundleContext.getService(Matchers.any(ServiceReference.class))).thenReturn("wrongPath");
         try {

@@ -120,7 +120,7 @@ public class OIDCActivator extends HousekeepingActivator{
         if (config.isEnabled().booleanValue()) {
             logger.info("Starting core OpenID Connect support... ");
             getOIDCBackends(this);
-            registerService(SessionInspectorService.class, new OIDCSessionInspectorService(oidcBackendRegistry.getAllRegisteredBackends()), null);
+            registerService(SessionInspectorService.class, new OIDCSessionInspectorService(oidcBackendRegistry), null);
             registerService(CustomPortableFactory.class, new PortableAuthenticationRequestFactory(), null);
             registerService(CustomPortableFactory.class, new PortableLogoutRequestFactory(), null);
         } else {

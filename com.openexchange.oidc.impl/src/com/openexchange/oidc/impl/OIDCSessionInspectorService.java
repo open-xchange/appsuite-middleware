@@ -1,11 +1,11 @@
 package com.openexchange.oidc.impl;
 
-import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.oidc.OIDCBackend;
 import com.openexchange.oidc.OIDCExceptionCode;
+import com.openexchange.oidc.osgi.OIDCBackendRegistry;
 import com.openexchange.oidc.tools.OIDCTools;
 import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
@@ -22,11 +22,11 @@ import com.openexchange.session.inspector.SessionInspectorService;
  */
 public class OIDCSessionInspectorService implements SessionInspectorService{
 
-    private final List<OIDCBackend> oidcBackends;
+    private final OIDCBackendRegistry oidcBackends;
 
-    public OIDCSessionInspectorService(List<OIDCBackend> oidcBackends) {
+    public OIDCSessionInspectorService(OIDCBackendRegistry oidcBackendRegistry) {
         super();
-        this.oidcBackends = oidcBackends;
+        this.oidcBackends = oidcBackendRegistry;
     }
 
     @Override
@@ -49,7 +49,7 @@ public class OIDCSessionInspectorService implements SessionInspectorService{
             return null;
         }
 
-        for (OIDCBackend backend : this.oidcBackends) {
+        for (OIDCBackend backend : this.oidcBackends.getAllRegisteredBackends()) {
             if (backend.getPath().equals(backendPath)) {
                 return backend;
             }
