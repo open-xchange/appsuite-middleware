@@ -50,6 +50,9 @@
 package com.openexchange.data.conversion.ical.ical4j.osgi;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
@@ -74,6 +77,8 @@ import com.openexchange.user.UserService;
  */
 public class Activator extends HousekeepingActivator {
 
+    private static final String ICAL_UPDATE_TIMEZONES = "com.openexchange.ical.updateTimezones";
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[]{ConfigurationService.class};
@@ -86,9 +91,22 @@ public class Activator extends HousekeepingActivator {
         Participants.userResolver = userResolver;
         CreatedBy.userResolver = userResolver;
 
+        Reloadable reloadable = new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                String updateTimezones = configService.getProperty(ICAL_UPDATE_TIMEZONES, "true");
+                System.setProperty("net.fortuna.ical4j.timezone.update.enabled", updateTimezones);
+            }
+
+            @Override
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties(ICAL_UPDATE_TIMEZONES);
+            }
+        };
         ConfigurationService configurationService = getService(ConfigurationService.class);
-        String updateTimezones = configurationService.getProperty("com.openexchange.ical.updateTimezones", "true");
-        System.setProperty("net.fortuna.ical4j.timezone.update.enabled", updateTimezones);
+        reloadable.reloadConfiguration(configurationService);
+        registerService(Reloadable.class, reloadable);
 
         final OXResourceResolver resourceResolver = new OXResourceResolver();
         track(ResourceService.class, new ResourceServiceTrackerCustomizer(context, resourceResolver));
