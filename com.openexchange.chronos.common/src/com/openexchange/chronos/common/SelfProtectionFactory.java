@@ -74,9 +74,9 @@ public class SelfProtectionFactory {
 
     static final org.slf4j.Logger LOG = LoggerFactory.getLogger(SelfProtectionFactory.class);
 
-    private static final String PROPERTY_EVENT_LIMIT = "com.openexchange.chronos.maxEventResults";
-    private static final String PROPERTY_ATTENDEE_LIMIT = "com.openexchange.chronos.maxAttendeesPerEvent";
-    private static final String PROPERTY_ALARM_LIMIT = "com.openexchange.chronos.maxAlarmsPerEvent";
+    private static final String PROPERTY_EVENT_LIMIT = "com.openexchange.calendar.maxEventResults";
+    private static final String PROPERTY_ATTENDEE_LIMIT = "com.openexchange.calendar.maxAttendeesPerEvent";
+    private static final String PROPERTY_ALARM_LIMIT = "com.openexchange.calendar.maxAlarmsPerEvent";
 
     /**
      * Initializes a new {@link SelfProtectionFactory}.
