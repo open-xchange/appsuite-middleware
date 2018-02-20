@@ -89,6 +89,8 @@ public class RdbSnippetTables {
             " id INT4 unsigned NOT NULL," +
             " referenceId VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
             " fileName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL," +
+            " mimeType VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL," +
+            " disposition VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL," +
             " PRIMARY KEY (cid, user, id, referenceId(64))" +
             ") ENGINE=InnoDB";
     }

@@ -435,7 +435,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
              * Load attachments
              */
             if (supportsAttachments) {
-                stmt = con.prepareStatement("SELECT referenceId, fileName FROM snippetAttachment WHERE cid=? AND user=? AND id=?");
+                stmt = con.prepareStatement("SELECT referenceId, fileName, mimeType, disposition FROM snippetAttachment WHERE cid=? AND user=? AND id=?");
                 pos = 0;
                 stmt.setInt(++pos, contextId);
                 stmt.setInt(++pos, userId);
@@ -447,10 +447,20 @@ public final class RdbSnippetManagement implements SnippetManagement {
                         final String referenceId = rs.getString(1);
                         if (!rs.wasNull()) {
                             String filename = rs.getString(2);
+                            String mimeType = rs.getString(3);
+                            String disposition = rs.getString(4);
                             final DefaultAttachment attachment = new DefaultAttachment();
                             attachment.setId(referenceId);
-                            attachment.setContentType(MimeType2ExtMap.getContentType(filename));
-                            attachment.setContentDisposition("attachment; filename=\"" + filename + "\"");
+                            attachment.setContentType(null != mimeType ? mimeType : (null != filename ? MimeType2ExtMap.getContentType(filename) : "application/octet-stream"));
+                            if (null == disposition) {
+                                disposition = "attachment";
+                                if (null != filename) {
+                                    disposition += "; filename=\"" + filename + "\"";
+                                }
+                            } else if (null != filename && disposition.indexOf("filename=") < 0) {
+                                disposition += "; filename=\"" + filename + "\"";
+                            }
+                            attachment.setContentDisposition(disposition);
                             attachment.setStreamProvider(new BlobStreamProvider(referenceId, contextId));
                             attachments.add(attachment);
 
@@ -806,7 +816,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                     closeSQLStuff(stmt);
                     stmt = null;
 
-                    stmt = con.prepareStatement("INSERT INTO snippetAttachment (cid, user, id, referenceId, fileName) VALUES (?, ?, ?, ?, ?)");
+                    stmt = con.prepareStatement("INSERT INTO snippetAttachment (cid, user, id, referenceId, fileName, mimeType, disposition) VALUES (?, ?, ?, ?, ?, ?, ?)");
                     stmt.setInt(1, contextId);
                     stmt.setInt(2, userId);
                     stmt.setInt(3, id);
@@ -816,6 +826,18 @@ public final class RdbSnippetManagement implements SnippetManagement {
                         stmt.setNull(5, Types.VARCHAR);
                     } else {
                         stmt.setString(5, fileName);
+                    }
+                    String mimeType = attachment.getContentType();
+                    if (null == mimeType) {
+                        stmt.setNull(6, Types.VARCHAR);
+                    } else {
+                        stmt.setString(6, mimeType);
+                    }
+                    String disposition = attachment.getContentDisposition();
+                    if (null == disposition) {
+                        stmt.setNull(7, Types.VARCHAR);
+                    } else {
+                        stmt.setString(7, disposition);
                     }
                     stmt.executeUpdate();
                     closeSQLStuff(stmt);
