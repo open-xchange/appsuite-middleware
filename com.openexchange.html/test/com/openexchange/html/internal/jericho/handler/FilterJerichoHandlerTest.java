@@ -53,7 +53,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Set;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,7 +61,6 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.cglib.core.ReflectUtils;
 import org.mockito.internal.util.reflection.Whitebox;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -70,10 +68,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.internal.jericho.handler.FilterJerichoHandler.CellPadding;
 import com.openexchange.test.mock.MockUtils;
-import net.htmlparser.jericho.Source;
 import net.htmlparser.jericho.StartTag;
-import net.htmlparser.jericho.StartTagType;
-import net.htmlparser.jericho.Tag;
 
 /**
  * {@link FilterJerichoHandlerTest}
