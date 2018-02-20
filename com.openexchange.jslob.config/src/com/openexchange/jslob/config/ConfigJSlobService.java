@@ -50,6 +50,7 @@
 package com.openexchange.jslob.config;
 
 import static com.openexchange.ajax.tools.JSONCoercion.coerceToJSON;
+import static com.openexchange.java.Strings.isEmpty;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -137,6 +138,7 @@ public final class ConfigJSlobService implements JSlobService {
     private final ServiceLookup services;
     private final AtomicReference<ConcurrentMap<String, Map<String, AttributedProperty>>> preferenceItemsReference;
     private final AtomicReference<ConcurrentMap<String, ConfigTreeEquivalent>> configTreeEquivalentsReference;
+    private final ConcurrentMap<String, ConfigTreeEquivalent> registeredConfigTreeEquivalents;
     private final JSlobEntryRegistry jSlobEntryRegistry;
     private final Map<String, SharedJSlobService> sharedJSlobs;
 
@@ -151,6 +153,7 @@ public final class ConfigJSlobService implements JSlobService {
         this.jSlobEntryRegistry = jSlobEntryRegistry;
         preferenceItemsReference = new AtomicReference<ConcurrentMap<String,Map<String,AttributedProperty>>>();
         configTreeEquivalentsReference = new AtomicReference<ConcurrentMap<String,ConfigTreeEquivalent>>();
+        registeredConfigTreeEquivalents = new ConcurrentHashMap<String, ConfigTreeEquivalent>(32, 0.9f, 1);
         initPreferenceItems();
         // Initialize core name mapping
         final ConfigurationService service = services.getService(ConfigurationService.class);
@@ -166,14 +169,26 @@ public final class ConfigJSlobService implements JSlobService {
      * @throws OXException If initialization fails
      */
     protected synchronized void initConfigTree(final ConfigurationService service) throws OXException {
+        ConcurrentMap<String, ConfigTreeEquivalent> configTreeEquivalents = new ConcurrentHashMap<String, ConfigTreeEquivalent>(48, 0.9f, 1);
+
+        // Add configured config-tree equivalents (if any)
         File file = service.getFileByName("paths.perfMap");
-        if (null == file) {
-            configTreeEquivalentsReference.set(new ConcurrentHashMap<String, ConfigTreeEquivalent>(2, 0.9f, 1));
-        } else {
-            ConcurrentMap<String, ConfigTreeEquivalent> configTreeEquivalents = new ConcurrentHashMap<String, ConfigTreeEquivalent>(48, 0.9f, 1);
+        if (null != file) {
             readPerfMap(file, configTreeEquivalents);
-            configTreeEquivalentsReference.set(configTreeEquivalents);
         }
+
+        // Add registered config-tree equivalents
+        for (Map.Entry<String, ConfigTreeEquivalent> equivEntry : registeredConfigTreeEquivalents.entrySet()) {
+            String jslobName = equivEntry.getKey();
+            ConfigTreeEquivalent equiv = configTreeEquivalents.get(jslobName);
+            if (null == equiv) {
+                configTreeEquivalents.put(jslobName, equivEntry.getValue());
+            } else {
+                equiv.mergeWith(equivEntry.getValue());
+            }
+        }
+
+        configTreeEquivalentsReference.set(configTreeEquivalents);
     }
 
     /**
@@ -191,10 +206,10 @@ public final class ConfigJSlobService implements JSlobService {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), Charsets.ISO_8859_1));
             for (String line = reader.readLine(); null != line; line = reader.readLine()) {
                 line = line.trim();
-                if (!com.openexchange.java.Strings.isEmpty(line) && '#' != line.charAt(0)) {
-                    final int pos = line.indexOf('>');
+                if ((false == isEmpty(line)) && ('#' != line.charAt(0))) {
+                    int pos = line.indexOf('>');
                     if (pos > 0) {
-                        final String configTreePath = line.substring(0, pos).trim();
+                        String configTreePath = line.substring(0, pos).trim();
                         String jslobPath = line.substring(pos + 1).trim();
 
                         String jslobName;
@@ -231,18 +246,18 @@ public final class ConfigJSlobService implements JSlobService {
     /**
      * Adds specified config tree to jslob path mapping (if not already contained).
      *
-     * @param configTreePath The config tree path
-     * @param jslobPath The associated jslob path
+     * @param configTreePath The config tree path; e.g. <code>"modules/mymodule/mysetting"</code>
+     * @param jslobPath The associated jslob path; e.g. <code>"io.ox/mymodule//mysetting"</code>
      */
     public void addConfigTreeEquivalent(final String configTreePath, final String jslobPath) {
-        if (com.openexchange.java.Strings.isEmpty(configTreePath) || com.openexchange.java.Strings.isEmpty(jslobPath)) {
+        if (isEmpty(configTreePath) || isEmpty(jslobPath)) {
             return;
         }
 
         String path = jslobPath.trim();
         String jslobName;
         {
-            final int pathSep = path.indexOf("//");
+            int pathSep = path.indexOf("//");
             if (pathSep < 0) {
                 jslobName = CORE;
             } else {
@@ -250,31 +265,39 @@ public final class ConfigJSlobService implements JSlobService {
                 path = path.substring(pathSep + 2);
             }
         }
+        String confTreePath = configTreePath.trim();
 
-        ConcurrentMap<String, ConfigTreeEquivalent> configTreeEquivalents = configTreeEquivalentsReference.get();
+        // Add to currently active config-tree equivalents
+        addConfigTreeEquivalentToMap(jslobName, path, confTreePath, configTreeEquivalentsReference.get());
+
+        // Add to registered config-tree equivalents
+        addConfigTreeEquivalentToMap(jslobName, path, confTreePath, registeredConfigTreeEquivalents);
+
+        LOG.debug("Added config-tree equivalent to JSlob: {} > {}", confTreePath, jslobPath);
+    }
+
+    private static void addConfigTreeEquivalentToMap(String jslobName, String path, String configTreePath, ConcurrentMap<String, ConfigTreeEquivalent> configTreeEquivalents) {
         ConfigTreeEquivalent equiv = configTreeEquivalents.get(jslobName);
         if (equiv == null) {
-            final ConfigTreeEquivalent newEquiv = new ConfigTreeEquivalent();
+            ConfigTreeEquivalent newEquiv = new ConfigTreeEquivalent();
             equiv = configTreeEquivalents.putIfAbsent(jslobName, newEquiv);
             if (null == equiv) {
                 equiv = newEquiv;
             }
         }
 
-        String confTreePath = configTreePath.trim();
-        equiv.config2lob.put(confTreePath, path);
-        equiv.lob2config.put(path, confTreePath);
-        LOG.info("Added config-tree equivalent to JSlob: {} > {}", confTreePath, jslobPath);
+        equiv.config2lob.put(configTreePath, path);
+        equiv.lob2config.put(path, configTreePath);
     }
 
     /**
-     * Removes specified config tree to jslob path mapping
+     * Removes specified config tree from jslob path mapping
      *
      * @param configTreePath The config tree path
      * @param jslobPath The associated jslob path
      */
     public void removeConfigTreeEquivalent(final String configTreePath, final String jslobPath) {
-        if (com.openexchange.java.Strings.isEmpty(configTreePath) || com.openexchange.java.Strings.isEmpty(jslobPath)) {
+        if (isEmpty(configTreePath) || isEmpty(jslobPath)) {
             return;
         }
         String path = jslobPath.trim();
@@ -288,13 +311,22 @@ public final class ConfigJSlobService implements JSlobService {
                 path = path.substring(pathSep + 2);
             }
         }
+        String confTreePath = configTreePath.trim();
 
-        ConcurrentMap<String, ConfigTreeEquivalent> configTreeEquivalents = configTreeEquivalentsReference.get();
+        // Remove from registered config-tree equivalents
+        removeConfigTreeEquivalentFromMap(jslobName, path, confTreePath, registeredConfigTreeEquivalents);
+
+        // Remove from currently active config-tree equivalents
+        removeConfigTreeEquivalentFromMap(jslobName, path, confTreePath, configTreeEquivalentsReference.get());
+
+        LOG.debug("Removed config-tree equivalent from JSlob: {} > {}", confTreePath, jslobPath);
+    }
+
+    private static void removeConfigTreeEquivalentFromMap(String jslobName, String path, String configTreePath, ConcurrentMap<String, ConfigTreeEquivalent> configTreeEquivalents) {
         ConfigTreeEquivalent equiv = configTreeEquivalents.get(jslobName);
         if (equiv != null) {
-            equiv.config2lob.remove(configTreePath.trim());
+            equiv.config2lob.remove(configTreePath);
             equiv.lob2config.remove(path);
-            LOG.info("Removed config-tree equivalent from JSlob: {} > {}", configTreePath, jslobPath);
         }
     }
 
