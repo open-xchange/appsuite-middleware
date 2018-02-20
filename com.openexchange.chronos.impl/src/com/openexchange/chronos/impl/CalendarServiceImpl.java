@@ -546,7 +546,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     void dropCurrentEntry(Iterator<AlarmTrigger> iterator, String id, String reason) {
-        LOG.info("Dropped alarm trigger for alarm with id {}. Reason: {}", id, reason);
+        LOG.debug("Dropped alarm trigger for alarm with id {}. Reason: {}", id, reason);
         iterator.remove();
     }
 
