@@ -164,11 +164,11 @@ public class CalendarUtils {
     };
 
     /** A collection of fields that are always included when querying events from the storage */
-    private static final List<EventField> DEFAULT_FIELDS = Arrays.asList(
+    private static final Set<EventField> DEFAULT_FIELDS = Collections.unmodifiableSet(EnumSet.copyOf(Arrays.asList(
         EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, EventField.TIMESTAMP, EventField.CREATED_BY,
         EventField.CALENDAR_USER, EventField.CLASSIFICATION, EventField.START_DATE, EventField.END_DATE, EventField.RECURRENCE_RULE,
         EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.ORGANIZER
-    );
+    )));
 
     /** A collection of fields that need to be queried to construct the special event flags field properly afterwards */
     private static final List<EventField> FLAG_FIELDS = Arrays.asList(
@@ -1818,6 +1818,26 @@ public class CalendarUtils {
             fields.addAll(FLAG_FIELDS);
         }
         return fields.toArray(new EventField[fields.size()]);
+    }
+
+    /**
+     * Gets a value indicating whether the supplied array of event fields contains no further fields than defined in the implicitly
+     * queried {@link #DEFAULT_FIELDS}.
+     *
+     * @param requestedFields The requested fields, or <code>null</code> if all event fields were requested
+     * @return <code>true</code> if only default fields were queried, <code>false</code>, otherwise
+     * @see #DEFAULT_FIELDS
+     */
+    public static boolean containsOnlyDefaultFields(EventField[] requestedFields) {
+        if (null == requestedFields) {
+            return false;
+        }
+        for (EventField eventField : requestedFields) {
+            if (false == DEFAULT_FIELDS.contains(eventField)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

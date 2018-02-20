@@ -55,6 +55,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.config.lean.DefaultProperty;
@@ -127,6 +128,19 @@ public class SelfProtectionFactory {
          */
         public void checkEventCollection(Collection<?> collection) throws OXException {
             if (collection.size() > eventLimit) {
+                throw CalendarExceptionCodes.TOO_MANY_EVENT_RESULTS.create();
+            }
+        }
+
+        /**
+         * Checks if a {@link Collection} of events contains too many events
+         *
+         * @param collection A collections of {@link Event} objects or similar (e.g. EventIds)
+         * @param requestedFields The requested fields, or <code>null</code> if all event fields were requested
+         * @throws OXException if the collection contains too many {@link Event}s
+         */
+        public void checkEventCollection(Collection<?> collection, EventField[] requestedFields) throws OXException {
+            if (null != collection && collection.size() > eventLimit && false == CalendarUtils.containsOnlyDefaultFields(requestedFields)) {
                 throw CalendarExceptionCodes.TOO_MANY_EVENT_RESULTS.create();
             }
         }
