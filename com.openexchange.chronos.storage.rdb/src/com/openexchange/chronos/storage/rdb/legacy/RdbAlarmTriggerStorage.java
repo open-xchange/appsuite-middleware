@@ -499,7 +499,9 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                         RecurrenceData data = eventStorage.selectRecurrenceData(connection, targetId, false);
                         if (null != data) {
                             RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(data, calendar.getTime(), null);
-                            trigger.setRecurrenceId(iterator.next());
+                            if (iterator.hasNext()) {
+                                trigger.setRecurrenceId(iterator.next());
+                            }
                         }
                     }
 
