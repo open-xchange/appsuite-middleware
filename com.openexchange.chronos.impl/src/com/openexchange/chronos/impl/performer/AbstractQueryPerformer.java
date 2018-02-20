@@ -79,8 +79,10 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.SelfProtectionFactory;
 import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
 import com.openexchange.chronos.impl.CalendarFolder;
+import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.impl.osgi.Services;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchOptions;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -221,6 +223,7 @@ public abstract class AbstractQueryPerformer {
      * @return The processed events
      */
     protected List<Event> postProcess(List<Event> events, CalendarFolder inFolder, boolean includeClassified, EventField[] fields, EventFlagsGenerator flagsGenerator) throws OXException {
+        EventField[] requestedFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
         List<Event> processedEvents = new ArrayList<Event>(events.size());
         int calendarUserId = getCalendarUserId(inFolder);
         for (Event event : events) {
@@ -241,7 +244,7 @@ public abstract class AbstractQueryPerformer {
             } else {
                 processedEvents.add(event);
             }
-            getSelfProtection().checkEventCollection(processedEvents);
+            Check.resultSizeNotExceeded(getSelfProtection(), processedEvents, requestedFields);
         }
         return sortEvents(processedEvents);
     }
@@ -264,6 +267,7 @@ public abstract class AbstractQueryPerformer {
      * @return The processed events
      */
     protected List<Event> postProcess(List<Event> events, int forUser, boolean includePrivate, EventField[] fields) throws OXException {
+        EventField[] requestedFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
         List<Event> processedEvents = new ArrayList<Event>(events.size());
         for (Event event : events) {
             if (isExcluded(event, session, includePrivate)) {
@@ -283,7 +287,7 @@ public abstract class AbstractQueryPerformer {
             } else {
                 processedEvents.add(event);
             }
-            getSelfProtection().checkEventCollection(processedEvents);
+            Check.resultSizeNotExceeded(getSelfProtection(), processedEvents, requestedFields);
         }
         return sortEvents(processedEvents);
     }

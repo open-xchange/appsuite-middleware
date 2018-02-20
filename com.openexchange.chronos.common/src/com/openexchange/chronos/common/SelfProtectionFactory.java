@@ -140,7 +140,7 @@ public class SelfProtectionFactory {
          * @throws OXException if the collection contains too many {@link Event}s
          */
         public void checkEventCollection(Collection<?> collection, EventField[] requestedFields) throws OXException {
-            if (null != collection && collection.size() > eventLimit && false == CalendarUtils.containsOnlyDefaultFields(requestedFields)) {
+            if (null != collection && collection.size() > eventLimit && false == CalendarUtils.containsOnlyIdentifyingFields(requestedFields)) {
                 throw CalendarExceptionCodes.TOO_MANY_EVENT_RESULTS.create();
             }
         }

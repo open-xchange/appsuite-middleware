@@ -170,6 +170,12 @@ public class CalendarUtils {
         EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES, EventField.ORGANIZER
     )));
 
+    /** A collection of identifying meta fields */
+    private static final Set<EventField> IDENTIFYING_FIELDS = Collections.unmodifiableSet(EnumSet.copyOf(Arrays.asList(
+        EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID, EventField.UID, EventField.FILENAME,
+        EventField.TIMESTAMP, EventField.CREATED, EventField.LAST_MODIFIED, EventField.CREATED_BY
+    )));
+
     /** A collection of fields that need to be queried to construct the special event flags field properly afterwards */
     private static final List<EventField> FLAG_FIELDS = Arrays.asList(
         EventField.ID, EventField.SERIES_ID, EventField.FOLDER_ID, EventField.RECURRENCE_ID,  EventField.STATUS, EventField.TRANSP,
@@ -1821,19 +1827,19 @@ public class CalendarUtils {
     }
 
     /**
-     * Gets a value indicating whether the supplied array of event fields contains no further fields than defined in the implicitly
-     * queried {@link #DEFAULT_FIELDS}.
+     * Gets a value indicating whether the supplied array of event fields contains no other than identifying meta fields, in which case
+     * some self-protection checks can possibly be relaxed to allow larger result lists in responses to clients.
      *
      * @param requestedFields The requested fields, or <code>null</code> if all event fields were requested
-     * @return <code>true</code> if only default fields were queried, <code>false</code>, otherwise
-     * @see #DEFAULT_FIELDS
+     * @return <code>true</code> if only identifying meta fields were queried, <code>false</code>, otherwise
+     * @see #IDENTIFYING_FIELDS
      */
-    public static boolean containsOnlyDefaultFields(EventField[] requestedFields) {
+    public static boolean containsOnlyIdentifyingFields(EventField[] requestedFields) {
         if (null == requestedFields) {
             return false;
         }
         for (EventField eventField : requestedFields) {
-            if (false == DEFAULT_FIELDS.contains(eventField)) {
+            if (false == IDENTIFYING_FIELDS.contains(eventField)) {
                 return false;
             }
         }
