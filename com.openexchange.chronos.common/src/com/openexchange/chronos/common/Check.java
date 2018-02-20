@@ -51,6 +51,7 @@ package com.openexchange.chronos.common;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.SearchStrings.lengthWithoutWildcards;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -68,6 +69,7 @@ import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.SelfProtectionFactory.SelfProtection;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EventID;
@@ -440,6 +442,22 @@ public class Check {
             }
         }
         return patterns;
+    }
+
+    /**
+     * Checks that the size of an event collection does not exceed the maximum allowed size.
+     *
+     * @param selfProtection A reference to the self protection helper
+     * @param events The collection of events to check
+     * @param requestedFields The requested fields, or <code>null</code> if all event fields were requested
+     * @return The passed collection, after the size was checked
+     */
+    public static <T extends Collection<Event>> T resultSizeNotExceeded(SelfProtection selfProtection, T events, EventField[] requestedFields) throws OXException {
+        if (null == events) {
+            return null;
+        }
+        selfProtection.checkEventCollection(events, requestedFields);
+        return events;
     }
 
 }

@@ -114,6 +114,8 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
 
     private final AlarmStorage alarmStorage;
 
+    private final RdbEventStorage eventStorage;
+
     /**
      * Initializes a new {@link RdbAlarmTriggerStorage}.
      *
@@ -123,11 +125,12 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
      * @param txPolicy The transaction policy
      * @throws OXException
      */
-    public RdbAlarmTriggerStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy, AlarmStorage alarmStorage) throws OXException {
+    public RdbAlarmTriggerStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy, AlarmStorage alarmStorage, RdbEventStorage eventStorage) throws OXException {
         super(context, dbProvider, txPolicy);
         this.entityResolver = entityResolver;
         this.recurrenceService = Services.getService(RecurrenceService.class, true);
         this.alarmStorage = alarmStorage;
+        this.eventStorage = eventStorage;
     }
 
     @Override
@@ -461,12 +464,13 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         return null;
     }
 
-    private static List<AlarmTrigger> selectTriggers(Connection connection, int contextID, int userID, Date until) throws SQLException, OXException {
+    private List<AlarmTrigger> selectTriggers(Connection connection, int contextID, int userID, Date until) throws SQLException, OXException {
         List<AlarmTrigger> triggers = new ArrayList<AlarmTrigger>();
         String sql = new StringBuilder()
-            .append("SELECT object_id,target_id,alarm,folder FROM reminder WHERE cid=? AND userid=?")
+            .append("SELECT object_id,target_id,alarm,folder,recurrence FROM reminder WHERE cid=? AND userid=?")
             .append(null != until ? " AND alarm<?" : "").append("AND module=?")
         .toString();
+        RecurrenceService recurrenceService = Services.getService(RecurrenceService.class);
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
@@ -482,9 +486,25 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                     trigger.setUserId(I(userID));
                     trigger.setPushed(Boolean.FALSE);
                     trigger.setAlarm(I(resultSet.getInt("object_id")));
-                    trigger.setEventId(String.valueOf(resultSet.getInt("target_id")));
+                    int targetId = resultSet.getInt("target_id");
+                    trigger.setEventId(String.valueOf(targetId));
                     trigger.setFolder(resultSet.getString("folder"));
                     trigger.setTime(L(resultSet.getTimestamp("alarm").getTime()));
+
+                    if(resultSet.getInt("recurrence")>0) {
+                        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                        calendar.setTime(new Date(trigger.getTime()));
+                        calendar.add(Calendar.MINUTE, -1);
+
+                        RecurrenceData data = eventStorage.selectRecurrenceData(connection, targetId, false);
+                        if (null != data) {
+                            RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(data, calendar.getTime(), null);
+                            if (iterator.hasNext()) {
+                                trigger.setRecurrenceId(iterator.next());
+                            }
+                        }
+                    }
+
                     triggers.add(trigger);
                 }
             }

@@ -57,21 +57,44 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.session.Session;
 
 /**
- * {@link ThresholdAwareAuthenticityHandler} - A simple authenticity handler, which only delegates if date threshold is fulfilled.
+ * {@link ThresholdAwareAuthenticityHandler} - A simple authenticity handler, which only delegates if date threshold is satisfied;
+ * that is message's received date is not <code>null</code> and equal to/greater than date threshold.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
 public class ThresholdAwareAuthenticityHandler implements MailAuthenticityHandler {
 
+    /**
+     * Wraps the specified authenticity handler by a threshold-aware one in case a valid date threshold is given;
+     * otherwise the handler is returned as-is. If wrapped, then calls are only delegated to the authenticity handler
+     * if date threshold is satisfied<b>*</b>.
+     * <p>
+     * <i>*) Message's received date is not <code>null</code> and equal to/greater than date threshold</i>
+     *
+     * @param authenticityHandler The authenticity handler to delegate to (if date threshold is satisfied)
+     * @param threshold The date threshold to consider; the number of milliseconds since January 1, 1970, 00:00:00 GMT
+     * @return
+     */
+    public static MailAuthenticityHandler wrapIfApplicable(MailAuthenticityHandler authenticityHandler, long threshold) {
+        return null == authenticityHandler ? null : (threshold <= 0 ? authenticityHandler : new ThresholdAwareAuthenticityHandler(authenticityHandler, threshold));
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------
+
     private final MailAuthenticityHandler authenticityHandler;
     private final long threshold;
 
     /**
      * Initializes a new {@link ThresholdAwareAuthenticityHandler}.
+     *
+     * @throws IllegalArgumentException If specified threshold is less than or equal to <code>0</code> (zero)
      */
-    public ThresholdAwareAuthenticityHandler(MailAuthenticityHandler authenticityHandler, long threshold) {
+    private ThresholdAwareAuthenticityHandler(MailAuthenticityHandler authenticityHandler, long threshold) {
         super();
+        if (threshold <= 0) {
+            throw new IllegalArgumentException("threshold must not be less than or equal to 0 (zero)");
+        }
         this.authenticityHandler = authenticityHandler;
         this.threshold = threshold;
     }
@@ -121,7 +144,7 @@ public class ThresholdAwareAuthenticityHandler implements MailAuthenticityHandle
      * @return <code>true</code> if the message should be handled; <code>false</code> otherwise
      */
     private boolean shouldHandle(MailMessage mailMessage) {
-        return (threshold <= 0 || mailMessage.getReceivedDate() == null || mailMessage.getReceivedDate().getTime() >= threshold);
+        return (mailMessage.getReceivedDate() == null || mailMessage.getReceivedDate().getTime() >= threshold);
     }
 
 }

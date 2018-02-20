@@ -61,6 +61,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
+import com.openexchange.resource.ResourceService;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -79,8 +80,8 @@ public class EventsPerFolderResultConverter extends EventResultConverter {
      *
      * @param contactService A reference to the contact service
      */
-    public EventsPerFolderResultConverter(ContactService contactService) {
-        super(contactService);
+    public EventsPerFolderResultConverter(ContactService contactService, ResourceService resourceService) {
+        super(contactService, resourceService);
     }
 
     @Override

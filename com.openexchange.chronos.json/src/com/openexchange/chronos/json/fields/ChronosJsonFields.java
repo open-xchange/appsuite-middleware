@@ -273,6 +273,10 @@ public class ChronosJsonFields {
          * The contact of the attendee.
          */
         public static final String CONTACT = "contact";
+        /**
+         * The resource of the attendee.
+         */
+        public static final String RESOURCE = "resource";
 
     }
 

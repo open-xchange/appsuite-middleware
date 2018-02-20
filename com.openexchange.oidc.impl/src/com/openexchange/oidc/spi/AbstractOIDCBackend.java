@@ -98,7 +98,6 @@ import com.nimbusds.openid.connect.sdk.claims.IDTokenClaimsSet;
 import com.nimbusds.openid.connect.sdk.validators.IDTokenValidator;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
-import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestImpl;
 import com.openexchange.ajax.login.LoginTools;
@@ -373,7 +372,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
             URI tokenEndpoint = OIDCTools.getURIFromPath(this.getBackendConfig().getOpTokenEndpoint());
 
             TokenRequest request = new TokenRequest(tokenEndpoint, clientAuth, refreshTokenGrant);
-            HTTPRequest httpRequest = request.toHTTPRequest();
+            HTTPRequest httpRequest = getHttpRequest(request.toHTTPRequest());
             LOG.trace("Build TokenRequest to get tokens from OP: {} {}", httpRequest.getURL().toString(), httpRequest.getQuery());
             TokenResponse response = null;
             response = TokenResponse.parse(httpRequest.send());
