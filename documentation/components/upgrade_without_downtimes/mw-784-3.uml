@@ -2,22 +2,22 @@
 rectangle "Main Load Balancer"
 rectangle "Secondary Load Balancer"
 
-node "Node A: 7.6.3"
-node "Node B: 7.6.3"
-node "Node C: 7.6.3"
-node "Node D: 7.6.3"
-node "Node E: 7.10"
+node "Node A: 7.10.0"
+node "Node B: 7.10.0"
+node "Node C: 7.10.0"
+node "Node D: 7.10.0"
+node "Node E: x.y.z"
 
-[Main Load Balancer] --> [Node A: 7.6.3]
-[Main Load Balancer] --> [Node B: 7.6.3]
-[Main Load Balancer] --> [Node C: 7.6.3]
-[Main Load Balancer] --> [Node D: 7.6.3]
-[Secondary Load Balancer] --> [Node E: 7.10]
+[Main Load Balancer] --> [Node A: 7.10.0]
+[Main Load Balancer] --> [Node B: 7.10.0]
+[Main Load Balancer] --> [Node C: 7.10.0]
+[Main Load Balancer] --> [Node D: 7.10.0]
+[Secondary Load Balancer] --> [Node E: x.y.z]
 
-[Node A: 7.6.3] --> [Secondary Load Balancer]
-[Node B: 7.6.3] --> [Secondary Load Balancer]
-[Node C: 7.6.3] --> [Secondary Load Balancer]
-[Node D: 7.6.3] --> [Secondary Load Balancer]
+[Node A: 7.10.0] --> [Secondary Load Balancer]
+[Node B: 7.10.0] --> [Secondary Load Balancer]
+[Node C: 7.10.0] --> [Secondary Load Balancer]
+[Node D: 7.10.0] --> [Secondary Load Balancer]
 
 
 @enduml

@@ -1,18 +1,18 @@
-# Upgrading from an older version without downtimes
+# Upgrading from 7.10.0 without downtimes
 
-Starting with 7.10.0, it is possible to upgrade directly from 7.6.3 without having any downtimes. This guide is mainly focused on sites with multiple OX nodes and multiple database schemata hosting thousands if not millions of contexts; sites which cannot afford or do not want to have any downtimes during an upgrade phase from older versions. Note that it is only possible to upgrade from 7.6.3 to 7.10.0 and from 7.10.0 to any of its successors. Also note that in this document the words "upgrade" and "update" will be used interchangeably.
+Starting with 7.10.0, it is possible to upgrade directly to to any of its successor future releases without having any downtimes. This guide is mainly focused on sites with multiple OX nodes and multiple database schemata hosting thousands, if not millions, of contexts; sites which cannot afford or do not want to have any downtimes during an upgrade phase. Note that in this document the words "*upgrade*" / "*update*" as well as "*server*" / "*node*" will be used interchangeably.
 
 ## How it Works
 
 If you have upgraded at least once, you are already familiar with the process. You may also be aware that during an upgrade the OX database is also upgraded (via [update tasks](http://oxpedia.org/wiki/index.php?title=UpdateTasks)). During the OX database upgrade phase, all contexts that are accommodated in the database schema that is being upgraded, are unavailable, i.e. disabled, until the update tasks are finished, meaning that there will be downtimes for the users that are hosted in those contexts. In case there are a lot of major, minor and patch releases between the old and the new version, it is possible that there will be a lot of update tasks accumulated and need to be executed; something that will definitely result in downtimes for an extended period of time. Furthermore, it is also possible that the database schema between the versions might have changed drastically and a multi-version cluster will not work correctly, at least not without the extra component and extra configuration we describe in this article.
 
-To overcome this situation and minimise the downtimes, we have come up with the idea of upgrading one database schema at a time, while keeping the rest of the schemata intact and subsequently the cluster with the old version operational. In order to have no downtimes on the cluster and simulate the multi-version support, an extra component is needed, that is a secondary load balancer. The use of that component and its place in the architecture is explained below. Also, starting with 7.10 a new property was introduced for the migration/upgrade purpose. That property was back-ported only to 7.6.3 to make the upgrade possible. The value of that new property is a URL which points to the secondary load balancer.
+To overcome this situation and minimise the downtimes, we have come up with the idea of upgrading one database schema at a time, while keeping the rest of the schemata intact and subsequently the cluster with the old version operational. In order to have no downtimes on the cluster and simulate the multi-version support, an extra component is needed, that is a secondary load balancer. The use of that component and its place in the architecture is explained below. Also, starting with 7.10.0 a new property was introduced for the migration/upgrade purpose. The value of that new property is a URL which points to the secondary load balancer. With that being said please note that we do **NOT** support multi-version setups and operations.
 
-In a nutshell, the upgrade process consists out of the following steps. The initial step is to set the value of the migration property to all nodes with the old version in the cluster. The purpose of that URL is to redirect users to the correct node (see [Q & A](#Q-&-A) section). Then, one node is taken out of the main load balancer and upgraded as [usual](http://oxpedia.org/wiki/index.php?title=Running_a_cluster#Updating_a_Cluster). After that, the first database schema is manually disabled and the update tasks or the new version are executed on that particular schema. And here's where the second LB comes into play. Instead of registering/activating the upgraded node back to the main LB, it is registered to the second one. Now, consider the case where a user is landed on a node with the old version after the context for that user was already upgraded to the new version. The node with the old version won't be able to resolve the context and this is where the migration URL kicks in. No black magic is involved here. If the context exists, then the middleware will resolve it's server identifier and will redirect the user to the node(s) that is/are managed by the second load balancer.
+Now, in a nutshell, the upgrade process consists out of the following steps. The initial step is to set the value of the migration property to all nodes with the old version in the cluster. The purpose of that URL is to redirect users to the correct node (see [Q & A](#Q-&-A) section). Then, one node is taken out of the main load balancer and upgraded as [usual](http://oxpedia.org/wiki/index.php?title=Running_a_cluster#Updating_a_Cluster). After that, the first database schema is manually disabled and the update tasks of the new version are executed on that particular schema. And here's where the second LB comes into play. Instead of registering/activating the upgraded node back to the main LB, it is registered to the second one. Now, consider the case where a user is landed on a node with the old version after the context for that user was already upgraded to the new version. The node with the old version won't be able to resolve the context and this is where the migration URL kicks in. No black magic is involved here. If the context exists, then the middleware will resolve its server identifier and will redirect the user to the node(s) that is/are managed by the second load balancer.
 
 ## The Setup
 
-In this guide a simple setup will be used with a load balancer in front of the entire cluster running with the old version, a load balancer between the first load balancer and the nodes that will be upgraded to the newer version, five OX Middleware Nodes and one MySQL database node. For the purpose of this guide it is  assumed that all OX Middleware nodes are running the latest 7.6.3 version and that they will be upgraded to 7.10.0. As stated at the beginning, the same process can be used to upgrade from 7.10.0 to any successor version.
+In this guide a simple setup will be used with a load balancer in front of the entire cluster running with the old version, a load balancer between the first load balancer and the nodes that will be upgraded to the newer version, five OX Middleware Nodes and one MySQL database node. For the purpose of this guide it is  assumed that all OX Middleware nodes are running the latest 7.10.0 version and that they will be upgraded to a future release, say x.y.z.
 
 The image below illustrates the example setup.
 
@@ -28,18 +28,17 @@ Now, without further ado let's dive in to the process of upgrade.
 
 ### Step 0
 
-Edit the `server.properties` in all 7.6.3 nodes and set the `com.openexchange.server.migrationRedirectURL` property to point to the second balancer, e.g. `http://1.2.3.4` and reload the configuration.
+Edit the `server.properties` in all 7.10.0 nodes and set the `com.openexchange.server.migrationRedirectURL` property to point to the second balancer, e.g. `http://1.2.3.4` and reload the configuration.
 
 ### Step 1
 
-Remove the OX node that is to be upgraded from the main load balancer according to the load balancer vendor's documentation. The secondary load balancers configuration can be similar to the main one's. It is basically a clone that is simply being used for redirecting users to the correct upgraded node (as discussed earlier).
+Remove the OX node that is to be upgraded from the main load balancer (you can find instructions on how to do that in  the documentation of your load balancer's vendor). The secondary load balancer's configuration can be similar with the main one. It is basicaly a clone that is simply being used for redirecting users to the correct upgraded node (as discussed earlier).
 
 ### Step 2
-Since 7.10.0, the middleware has a Java 8 dependency. Therefore, Java 8 needs to be installed on the system before upgrading to 7.10. In case you are running a Debian system and you are still in version 7.x (Wheezy), you will have to perform a dist-upgrade to 8.x (Jessie). Consult your OS's manuals on how to upgrade your system to a major version properly, as well on how to install Java 8. This falls outside the scope of this guide.
 
-Now that everything is set (distribution upgrade and/or Java 8 installation), you can perform the upgrade to 7.10.0 according to the [install](http://oxpedia.org/wiki/index.php?title=AppSuite:Main_Page_AppSuite#quickinstall)/[update](http://oxpedia.org/wiki/index.php?title=AppSuite:UpdatingOXPackages) documentation.
+Now that everything is set, you can perform the upgrade to the future release x.y.z according to the [install](http://oxpedia.org/wiki/index.php?title=AppSuite:Main_Page_AppSuite#quickinstall)/[update](http://oxpedia.org/wiki/index.php?title=AppSuite:UpdatingOXPackages) documentation.
 
-Please note that the 7.10.0 node will have to be [configured](http://oxpedia.org/wiki/index.php?title=AppSuite:Running_a_cluster#Configuration) to form a new Hazelcast cluster as 7.6.3 and 7.10.0 are not compatible.
+To avoid any Hazelcast incompatibility issues that future releases might have with their predecessors, make sure that you have [configured](http://oxpedia.org/wiki/index.php?title=AppSuite:Running_a_cluster#Configuration) both versions, 7.10.0 and it's future successor to form different Hazelcast clusters.
 
 After completing step 2 the setup will look as follows:
 
@@ -47,19 +46,19 @@ After completing step 2 the setup will look as follows:
 
 ### Step 3 
 
-From a working 7.6.3 node register the newly upgraded 7.10.0 node.
+From a working 7.10.0 node register the newly upgraded x.y.z node.
 
 ```bash
-registerserver -A oxadminmaster -P secret -n oxserver-710
+registerserver -A oxadminmaster -P secret -n oxserver-xyz
 ```
 
-Make a note of the new server identifier as it will be used later on to point all contexts that reside with in the schema that is going to be upgraded to the new 7.10.0 node. Also ensure that the name of the newly registered 7.10.0 server is set via the `SERVER_NAME` property in the `system.properties`.
+Make a note of the new server identifier as it will be used later on to point all contexts that reside with in the schema that is going to be upgraded to the new x.y.z node. Also ensure that the name of the newly registered x.y.z server is set via the `SERVER_NAME` property in the `system.properties`.
 
 ### Step 4
 
-From a working 7.6.3 node disable the schema that is to be updated.
+From a working 7.10.0 node disable the schema that is to be updated.
 
-To find out which schemata are available in the installation you can use the `listdatabaseschema` command line tool from the newly upgraded 7.10.0 node:
+To find out which schemata are available in the installation you can use the `listdatabaseschema` command line tool:
 
 ```bash
 listdatabaseschema -A oxadminmaster -P secret
@@ -75,7 +74,7 @@ By disabling the schema, all contexts that reside within it are also disabled an
 
 ### Step 5
 
-Point all contexts, that reside with in the candidate schema that is to be updated, to the 7.10.0 node by using the command line tool ```changeserver``` from a 7.10.0 node:
+Point all contexts, that reside with in the candidate schema that is to be updated, to the x.y.z node by using the command line tool ```changeserver``` (also from a working 7.10.0 node):
 
 ```bash
 changeserver -A oxadminmaster -P secret -s 8 -m oxdatabase_5
@@ -86,7 +85,7 @@ This ensures that the context to server resolve works as expected.
 
 ### Step 6
 
-Now, the update can begin. On the 7.10.0 node, execute the `runupdate` command line tool to trigger the [update](https://oxpedia.org/wiki/index.php?title=UpdateTasks) on the schema. 
+Now, the update can begin. On the x.y.z node, execute the `runupdate` command line tool to trigger the [update](https://oxpedia.org/wiki/index.php?title=UpdateTasks) on the schema. 
 
 ```bash
 runupdate -n oxdatabase_5
@@ -105,7 +104,7 @@ enableschema -A oxadminmaster -P secret -m oxdatabase_5
 
 Before re-activating the node, ensure that you removed the `com.openexchange.server.migrationRedirectURL` from the `server.properties` file.
 
-Now, the node can be added to the secondary load balancer. Follow the instructions on your load balancer vendor's documentation.
+Now, the upgraded node can be added to the secondary load balancer. Follow the instructions in the documentation of your load balancer's vendor.
 
 After the completion of the final steps, the setup will look like this:
 
@@ -113,13 +112,13 @@ After the completion of the final steps, the setup will look like this:
 
 The database node is removed from the illustration for the sake of clarity. It is always implied that all nodes are connected to the same OX database.
 
-Note that the redirection to the second load balancer will only happen if a user is landed on a 7.6.3 node and the context was already migrated to a 7.10.0 node.
+Note that the redirection to the second load balancer will only happen if a user is landed on a 7.10.0 node and the context was already migrated to an x.y.z node.
 
 ### Post Process
 
-After the first node was successfully upgraded and the first schema updated, you can proceed with the rest of the nodes and schemata; step 3 can be skipped for the rest of the nodes as it is only required to be performed once. During the process always ensure that you remove the 7.6.3 nodes from the main balancer BEFORE the upgrade starts, and add them only to the secondary balancer AFTER the upgrade is successful and the node is up and running.
+After the first node was successfully upgraded and the first schema updated, you can proceed with the rest of the nodes and schemata; step 3 can be skipped for the rest of the nodes as it is only required to be performed once. During the process always ensure that you remove the 7.10.0 nodes from the main balancer BEFORE the upgrade starts, and add them only to the secondary balancer AFTER the upgrade is successful and the node is up and running.
 
-After the entire process ends, you can add all your 7.10.0 nodes to the main balancer and get rid of the secondary and the setup will look like this:
+After the entire process ends, you can add all your x.y.z nodes to the main balancer and get rid of the secondary and the setup will look like this:
 
 ![Initial Setup](mw-784-4.svg)
 
@@ -130,7 +129,7 @@ Also note, that since 7.10.0, we provide the `upgradeschemata` command line tool
 For example:
 
 ```bash
-upgradeschemata -A oxadminmaster -P secret -n oxserver-710
+upgradeschemata -A oxadminmaster -P secret -n oxserver-xyz
 ```
 If a server with that name is already registered, then a warning will be displayed indicating that and prompting the administrator to either `abort` or `continue` with the upgrade operation.
 
@@ -143,36 +142,36 @@ WARNING: The specified server is already registered with id '6'.
 The command line tool also provides the `-f` flag to force the continuation of upgrading all schemata (or as many as possible) even if one or more update tasks in one or more schemata fail. If the flag is absent, then as soon as one schema upgrade fails, the command line tool aborts the operation.
 
 ```bash
-upgradeschemata -A oxadminmaster -P secret -n oxserver-710 -f
+upgradeschemata -A oxadminmaster -P secret -n oxserver-xyz -f
 ```
 
 To continue the operation and skip the failed schema, the `-m` flag can be used. If present, then the upgrade continues from where it left of and by skipping the specified schema.
 
 ```bash
-upgradeschemata -A oxadminmaster -P secret -n oxserver-710 -f -m oxdatabase_81
+upgradeschemata -A oxadminmaster -P secret -n oxserver-xyz -f -m oxdatabase_81
 ```
 If certain schemata need to be skipped, then the `-k` flag can be used. It defines a comma separated list of the names of the schemata that are to be skipped from the upgrades.
 
 ```bash
-upgradeschemata -A oxadminmaster -P secret -n oxserver-710 -k oxdatabase_81,oxdatabase_44,oxdatabase_51
+upgradeschemata -A oxadminmaster -P secret -n oxserver-xyz -k oxdatabase_81,oxdatabase_44,oxdatabase_51
 ```
 
 The flags `-m`, `-k` and `-f` can be combined. In that case it would mean that the upgrade phase will continue even if the updates fail in some schemata, it will start from the specified schema and skip all schemata that are in the list.
 
 ```bash
-upgradeschemata -A oxadminmaster -P secret -n oxserver-710 -f -m oxdatabase_3 -k oxdatabase_81,oxdatabase_44,oxdatabase_51
+upgradeschemata -A oxadminmaster -P secret -n oxserver-xyz -f -m oxdatabase_3 -k oxdatabase_81,oxdatabase_44,oxdatabase_51
 ```
 
 ## Q & A
 
-**Q**: What happens if a user is landed on a 7.6.3 node after the context was moved to the 7.10.0 server?
+**Q**: What happens if a user is landed on a 7.10.0 node after the context was moved to the x.y.z server?
 
-**A**: That node won't be able to resolve the context with the 7.6.3 node. It will then try to locate the server that is responsible for this context. If found, the request will be redirected to that server/cluster. This is what the second load balancer is for.
+**A**: That node won't be able to resolve the context with the 7.10.0 node. It will then try to locate the server that is responsible for this context. If found, the request will be redirected to that server/cluster. This is what the second load balancer is for.
 
-**Q**: Is it possible for a user, that the context she resides in was not upgraded to 7.10.0 yet, to land on a 7.10.0 node, and if yes what happens then?
+**Q**: Is it possible for a user, that the context she resides in was not upgraded to x.y.z yet, to land on an x.y.z node, and if yes what happens then?
 
-**A**: No. The 7.10.0 nodes will always be available through the main load balancer (i.e. through the main site's address), unless the user does know the address of the secondary load balancer. For example, the main site is available through www.mysite.com and the secondary (the 7.10.0 cluster) through www710.mysite.com. If any user that her context is still in 7.6.3 tries to log in to the www710.mysite.com, then login will fail with a '`CTX-0012`' exception which indicates that the context the user is trying to login is located in another server. No redirect will happen in this case, since it may result in an endless loop.
+**A**: No. The x.y.z nodes will always be available through the main load balancer (i.e. through the main site's address), unless the user does know the address of the secondary load balancer. For example, the main site is available through www.mysite.com and the secondary (the x.y.z cluster) through wwwXYZ.mysite.com. If any user that her context is still in 7.10.0 tries to log in to the wwwXYZ.mysite.com, then login will fail with a 'CTX-0012' exception which indicates that the context the user is trying to login is located in another server. No redirect will happen in this case, since it may result in an endless loop.
 
 **Q**: Can I upgrade from 7.8.x versions directly to 7.10.0 and later using this guide?
 
-**A**: No. 7.6.3 was a special case. But starting from 7.10.0 it is possible to do so for any successor version.
+**A**: No. It is only possible to upgrade from 7.10.0 to any successor version.
