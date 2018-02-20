@@ -574,6 +574,9 @@ public final class FilterJerichoHandler implements JerichoHandler {
             return;
         }
         isCss = true;
+        if (depth > 0) {
+            depth++;
+        }
         addStartTag(startTag, false, htmlMap.get(startTag.getName()));
     }
 
