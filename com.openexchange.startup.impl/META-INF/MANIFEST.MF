@@ -9,6 +9,7 @@ Import-Package: com.openexchange.database.migration,
  com.openexchange.java,
  com.openexchange.osgi,
  com.openexchange.startup,
+ com.openexchange.version,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j

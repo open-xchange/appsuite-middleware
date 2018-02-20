@@ -61,6 +61,7 @@ import com.openexchange.database.migration.DBMigrationMonitorService;
 import com.openexchange.java.Strings;
 import com.openexchange.startup.SignalStartedService;
 import com.openexchange.startup.StaticSignalStartedService;
+import com.openexchange.version.Version;
 
 /**
  *
@@ -101,7 +102,7 @@ public class DBMigrationMonitorTracker implements ServiceTrackerCustomizer<DBMig
                 @Override
                 public void run() {
                     try {
-                        boolean dbUpdateInProgress = !migrationMonitor.getScheduledFiles().isEmpty();;
+                        boolean dbUpdateInProgress = !migrationMonitor.getScheduledFiles().isEmpty();
                         if (dbUpdateInProgress) {
                             int countLoops = 0;
                             long waitNanos = TimeUnit.SECONDS.toNanos(1L); // 1 second
@@ -123,8 +124,9 @@ public class DBMigrationMonitorTracker implements ServiceTrackerCustomizer<DBMig
                     StaticSignalStartedService singleton = StaticSignalStartedService.getInstance();
                     serviceRegistrationRef.set(context.registerService(SignalStartedService.class, singleton, null));
 
+                    String sep = Strings.getLineSeparator();
                     if (StaticSignalStartedService.State.OK == singleton.getState()) {
-                        LOG.info("Open-Xchange Server initialized. The server should be up and running...");
+                        LOG.info("{}{}\tOpen-Xchange Server v{} initialized. The server should be up and running...{}", sep, sep, Version.getInstance().getVersionString(), sep);
                     } else {
                         String message = singleton.getStateInfo(StaticSignalStartedService.INFO_MESSAGE);
                         if (null == message) {
@@ -132,7 +134,6 @@ public class DBMigrationMonitorTracker implements ServiceTrackerCustomizer<DBMig
                             message = null == error ? null : error.getMessage();
                         }
 
-                        String sep = Strings.getLineSeparator();
                         if (null == message) {
                             LOG.error("{}\tFailed to initialize Open-Xchange Server!{}", sep, sep);
                         } else {
