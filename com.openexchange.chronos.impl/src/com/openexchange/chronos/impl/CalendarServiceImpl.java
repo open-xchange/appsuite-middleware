@@ -530,7 +530,7 @@ public class CalendarServiceImpl implements CalendarService {
                             dropCurrentEntry(iterator, String.valueOf(trigger.getAlarm()), "Folder or event not visible.");
                             continue;
                         }
-                        if(!CalendarUtils.isAttendee(loadEvent, session.getUserId())) {
+                        if (!(loadEvent.getAttendees() == null && loadEvent.getOrganizer() != null && loadEvent.getOrganizer().getEntity() == session.getUserId()) && !CalendarUtils.isAttendee(loadEvent, session.getUserId())) {
                             dropCurrentEntry(iterator, String.valueOf(trigger.getAlarm()), "User is not an attendee.");
                             continue;
                         }
@@ -546,7 +546,7 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     void dropCurrentEntry(Iterator<AlarmTrigger> iterator, String id, String reason) {
-        LOG.debug("Dropped alarm trigger for alarm with id {}. Reason: {}", id, reason);
+        LOG.info("Dropped alarm trigger for alarm with id {}. Reason: {}", id, reason);
         iterator.remove();
     }
 
