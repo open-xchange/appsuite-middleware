@@ -60,7 +60,7 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public final class OAuthScopeDescription implements LocalizableStrings {
 
-    public static final String READ_ONLY = "Read all your events.";
+    public static final String READ_ONLY = "Read all your appointments.";
 
-    public static final String WRITABLE = "Create, modify and delete events.";
+    public static final String WRITABLE = "Create, modify and delete appointments.";
 }

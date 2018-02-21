@@ -64,19 +64,19 @@ import com.openexchange.exception.OXExceptionFactory;
 public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
-     * The event %s couldn't be deleted: %s
+     * The appointment %s couldn't be deleted: %s
      */
-    ERROR_DELETING_EVENT("The event %s couldn't be deleted: %s", CalendarExceptionMessages.ERROR_DELETING_EVENT_MSG, Category.CATEGORY_ERROR, 1),
+    ERROR_DELETING_EVENT("The appointment %s couldn't be deleted: %s", CalendarExceptionMessages.ERROR_DELETING_EVENT_MSG, Category.CATEGORY_ERROR, 1),
 
     /**
-     * Multiple event couldn't be deleted.
+     * Multiple appointments couldn't be deleted.
      */
-    ERROR_DELETING_EVENTS("Multiple events couldn't be deleted.", CalendarExceptionMessages.ERROR_DELETING_EVENTS_MSG, Category.CATEGORY_ERROR, 2),
+    ERROR_DELETING_EVENTS("Multiple appointments couldn't be deleted.", CalendarExceptionMessages.ERROR_DELETING_EVENTS_MSG, Category.CATEGORY_ERROR, 2),
 
     /**
-     * Unable to add alarms: %s
+     * Unable to add reminders: %s
      */
-    UNABLE_TO_ADD_ALARMS("Unable to add alarms: %s", CalendarExceptionMessages.UNABLE_TO_ADD_ALARMS_MSG, Category.CATEGORY_ERROR, 3),
+    UNABLE_TO_ADD_ALARMS("Unable to add reminders: %s", CalendarExceptionMessages.UNABLE_TO_ADD_ALARMS_MSG, Category.CATEGORY_ERROR, 3),
     /**
      * The content-id '%1$s' refers to a non-existing attachment in the body part.
      */
