@@ -91,4 +91,20 @@ public class StandardAuthenticationResultsValidatorTest extends AbstractTestMail
         assertStatus(MailAuthenticityStatus.PASS, result.getStatus());
     }
 
+    @Test
+    public void testCorrectOverallResult2() throws Exception {
+        AuthenticationResultsValidator validator = StandardAuthenticationResultsValidator.getInstance();
+
+        List<String> authHeaders = Arrays.asList(
+            "open-xchange.com; spf=none (mailfrom) smtp.mailfrom=barfoo.org (client-ip=168.135.221.145; helo=hydra.barfoo.org; envelope-from=opensuse-buildservice+bounces-25693-marcus.klein=open-xchange.com@barfoo.org; receiver=<UNKNOWN>)",
+            "open-xchange.com; dmarc=none (p=none dis=none) header.from=foo.de"
+        );
+        List<AllowedAuthServId> allowedAuthServIds = AllowedAuthServId.allowedAuthServIdsFor("open-xchange.com");
+        InternetAddress from = new QuotedInternetAddress("Alice <alice@foo.de>");
+
+
+        MailAuthenticityResult result = validator.parseHeaders(authHeaders, from, allowedAuthServIds, null);
+        assertStatus(MailAuthenticityStatus.NEUTRAL, result.getStatus());
+    }
+
 }
