@@ -60,7 +60,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
-import java.util.regex.Pattern;
 import javax.mail.internet.InternetAddress;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -616,8 +615,6 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         return adr.substring(index + 1);
     }
 
-    private static final Pattern SPLIT = Pattern.compile(" ");
-
     /**
      * Determines whether the specified authServId is valid
      *
@@ -629,18 +626,20 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             LOGGER.warn("The authserv-id is missing from the 'Authentication-Results'");
             return false;
         }
-        final String[] split = SPLIT.split(authServId, 0);
 
         // Cleanse the optional version
-        authServId = split.length == 0 ? authServId : split[0];
+        {
+            String[] tokens = Strings.splitBy(authServId, ' ', true);
+            authServId = tokens.length == 0 ? authServId : tokens[0];
+        }
 
-        // Regex and wildcard checks...
-        for (final AllowedAuthServId allowedAuthServId : allowedAuthServIds) {
+        // Regex and wild-card checks...
+        for (AllowedAuthServId allowedAuthServId : allowedAuthServIds) {
             if (allowedAuthServId.allows(authServId)) {
                 return true;
             }
         }
-        LOGGER.debug("The authserv-id '{}' is not in the allowed authserv ids list (see server property '{}'). Server misconfiguration?", authServId, MailAuthenticityProperty.AUTHSERV_ID);
+        LOGGER.debug("The authserv-id '{}' is not in the list of allowed authserv ids (see server property '{}'). Server misconfiguration?", authServId, MailAuthenticityProperty.AUTHSERV_ID);
         return false;
     }
 

@@ -60,10 +60,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableList;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
 /**
@@ -73,6 +75,9 @@ import com.openexchange.java.Strings;
  * @since v7.10.0
  */
 public class AllowedAuthServId {
+
+    /** The logger constant */
+    static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AllowedAuthServId.class);
 
     /** The special instance accepting all AuthServ-Ids */
     public static final AllowedAuthServId ALL_ALLOWED = new AllowedAuthServId("*", new Checker() {
@@ -88,9 +93,9 @@ public class AllowedAuthServId {
      *
      * @param allowdAuthServIds The allowed authserv-ids
      * @return The immutable listing of allowed authserv-ids
-     * @throws IllegalArgumentException If one of given topic identifiers is invalid
+     * @throws OXException If one of given topic identifiers is invalid
      */
-    public static List<AllowedAuthServId> allowedAuthServIdsFor(String... allowdAuthServIds) {
+    public static List<AllowedAuthServId> allowedAuthServIdsFor(String... allowdAuthServIds) throws OXException {
         if (null == allowdAuthServIds) {
             return null;
         }
@@ -107,9 +112,9 @@ public class AllowedAuthServId {
      *
      * @param allowdAuthServIds The allowed authserv-ids
      * @return The immutable listing of allowed authserv-ids
-     * @throws IllegalArgumentException If one of given topic identifiers is invalid
+     * @throws OXException If one of given topic identifiers is invalid
      */
-    public static List<AllowedAuthServId> allowedAuthServIdsFor(Collection<String> allowdAuthServIds) {
+    public static List<AllowedAuthServId> allowedAuthServIdsFor(Collection<String> allowdAuthServIds) throws OXException {
         if (null == allowdAuthServIds) {
             return null;
         }
@@ -187,7 +192,13 @@ public class AllowedAuthServId {
                 if (null == builder) {
                     builder = ImmutableList.builder();
                 }
-                builder.add(new AllowedAuthServId(wildcard, RegExChecker.instanceFor(wildcard)));
+                RegExChecker regExChecker = RegExChecker.instanceFor(wildcard);
+                if (null != regExChecker) {
+                    builder.add(new AllowedAuthServId(wildcard, regExChecker));
+                } else {
+                    LOGGER.error("Invalid wild-card pattern: {}", wildcard);
+                    throw MailAuthenticityExceptionCodes.INVALID_PROPERTY.create(MailAuthenticityProperty.AUTHSERV_ID.getFQPropertyName());
+                }
             }
         }
         return null == builder ? Collections.<AllowedAuthServId> emptyList() : builder.build();
@@ -272,10 +283,15 @@ public class AllowedAuthServId {
         static RegExChecker instanceFor(String wildcardExpression) {
             RegExChecker checker = instances.get(wildcardExpression);
             if (null == checker) {
-                RegExChecker newchecker = new RegExChecker(wildcardExpression);
-                checker = instances.putIfAbsent(wildcardExpression, newchecker);
-                if (null == checker) {
-                    checker = newchecker;
+                try {
+                    RegExChecker newchecker = new RegExChecker(wildcardExpression);
+                    checker = instances.putIfAbsent(wildcardExpression, newchecker);
+                    if (null == checker) {
+                        checker = newchecker;
+                    }
+                } catch (PatternSyntaxException e) {
+                    // Invalid regex pattern
+                    return null;
                 }
             }
             return checker;
@@ -283,20 +299,28 @@ public class AllowedAuthServId {
 
         // ----------------------------------------------------------------------
 
-        final Pattern pattern;
-        /**
-         * The regex result time-and-size-based eviction cache (24h, 10.000 elements)
-         */
+        /** The time-and-size-based eviction cache (24h, 10.000 elements) for regex results */
         private final LoadingCache<String, Boolean> cache;
 
-        private RegExChecker(String wildcardExpression) {
+        /**
+         * Initializes a new {@link RegExChecker}.
+         *
+         * @param wildcardExpression The wild-card expression
+         * @throws PatternSyntaxException If wild-card expression is invalid
+         */
+        private RegExChecker(final String wildcardExpression) {
             super();
-            this.pattern = Pattern.compile(Strings.wildcardToRegex(wildcardExpression));
+            final Pattern pattern = Pattern.compile(Strings.wildcardToRegex(wildcardExpression));
             cache = CacheBuilder.newBuilder().expireAfterAccess(24, TimeUnit.HOURS).maximumSize(10000).build(new CacheLoader<String, Boolean>() {
 
                 @Override
                 public Boolean load(String authServId) {
-                    return Boolean.valueOf(pattern.matcher(authServId).matches());
+                    try {
+                        return Boolean.valueOf(pattern.matcher(authServId).matches());
+                    } catch (StackOverflowError x) {
+                        LOGGER.warn("Failed to match authserv-id \"{}\" against pattern \"{}\"", authServId, wildcardExpression, x);
+                        return Boolean.FALSE;
+                    }
                 }
             });
         }
