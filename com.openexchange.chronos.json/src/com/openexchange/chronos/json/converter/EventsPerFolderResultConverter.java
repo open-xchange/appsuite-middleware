@@ -51,8 +51,10 @@ package com.openexchange.chronos.json.converter;
 
 import java.util.Map;
 import java.util.Set;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
@@ -79,6 +81,7 @@ public class EventsPerFolderResultConverter extends EventResultConverter {
      * Initializes a new {@link EventsPerFolderResultConverter}.
      *
      * @param contactService A reference to the contact service
+     * @param resourceService A reference to the resource service
      */
     public EventsPerFolderResultConverter(ContactService contactService, ResourceService resourceService) {
         super(contactService, resourceService);
@@ -117,23 +120,24 @@ public class EventsPerFolderResultConverter extends EventResultConverter {
         result.setResultObject(resultObject, getOutputFormat());
     }
 
-    private JSONObject convertEventsResults(Map<String, EventsResult> eventsResults, String timeZoneID, Session session, Set<EventField> requestedFields, boolean extendedEntities) throws OXException {
+    private JSONValue convertEventsResults(Map<String, EventsResult> eventsResults, String timeZoneID, Session session, Set<EventField> requestedFields, boolean extendedEntities) throws OXException {
         if (null == eventsResults) {
             return null;
         }
-        JSONObject jsonObject = new JSONObject(eventsResults.size());
+        JSONArray jsonArray = new JSONArray(eventsResults.size());
         for (Map.Entry<String, EventsResult> entry : eventsResults.entrySet()) {
-            jsonObject.putSafe(entry.getKey(), convertEventsResult(entry.getValue(), timeZoneID, session, requestedFields, extendedEntities));
+            jsonArray.put(convertEventsResult(entry.getKey(), entry.getValue(), timeZoneID, session, requestedFields, extendedEntities));
         }
-        return jsonObject;
+        return jsonArray;
     }
 
-    private JSONObject convertEventsResult(EventsResult eventsResult, String timeZoneID, Session session, Set<EventField> requestedFields, boolean extendedEntities) throws OXException {
+    private JSONObject convertEventsResult(String folderId, EventsResult eventsResult, String timeZoneID, Session session, Set<EventField> requestedFields, boolean extendedEntities) throws OXException {
         if (null == eventsResult) {
             return null;
         }
         JSONObject jsonObject = new JSONObject(3);
         try {
+            jsonObject.put("folder", folderId);
             if (null != eventsResult.getError()) {
                 ResponseWriter.addException(jsonObject, eventsResult.getError());
             } else {
