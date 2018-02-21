@@ -8,7 +8,7 @@ Homepage: http://www.open-xchange.com
 
 Package: open-xchange-core
 Architecture: all
-Depends: ${misc:Depends}, open-xchange-osgi (>= @OXVERSION@), open-xchange-xerces (>= @OXVERSION@), open-xchange-system
+Depends: ${misc:Depends}, open-xchange-osgi (>= @OXVERSION@), open-xchange-xerces (>= @OXVERSION@), open-xchange-system (>= @OXVERSION@)
 Pre-Depends: dpkg (>= 1.15.7.2)
 Breaks: open-xchange-oauth (<< 7.8.3), open-xchange-freebusy (<< 7.10.0)
 Replaces: open-xchange-oauth (<< 7.8.3), open-xchange-freebusy (<< 7.10.0)
