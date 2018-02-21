@@ -82,8 +82,8 @@ public interface BasicSyncAware extends SyncAware {
     UpdatesResult getUpdatedEvents(long updatedSince) throws OXException;
 
     /**
-     * Gets the sequence number, which is the highest last-modification timestamp of the account itself and its
-     * contents. Distinct object access permissions (e.g. <i>read own</i>) are not considered.
+     * Gets the sequence number, which is the highest highest timestamp of all contained items. Distinct object access
+     * permissions (e.g. <i>read own</i>) are not considered.
      *
      * @return The sequence number
      */

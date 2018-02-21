@@ -59,6 +59,7 @@ import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMa
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.withUniqueID;
 import static com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling.withUniqueIDs;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.ArrayList;
@@ -409,6 +410,38 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         } catch (OXException e) {
             throw withUniqueIDs(e, account.getAccountId());
         }
+    }
+
+    @Override
+    public Map<String, Long> getSequenceNumbers(List<String> folderIds) throws OXException {
+        Map<CalendarAccount, List<String>> foldersPerAccount = getRelativeFolderIdsPerAccount(folderIds);
+        if (foldersPerAccount.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<String, Long> sequenceNumbers = new HashMap<String, Long>(folderIds.size());
+        for (Map.Entry<CalendarAccount, List<String>> entry : foldersPerAccount.entrySet()) {
+            CalendarAccount account = entry.getKey();
+            try {
+                CalendarAccess access = getAccess(account.getAccountId(), SyncAware.class);
+                if (FolderSyncAware.class.isInstance(access)) {
+                    for (String folderId : entry.getValue()) {
+                        long sequenceNumber = ((FolderSyncAware) access).getSequenceNumber(folderId);
+                        sequenceNumbers.put(getUniqueFolderId(account.getAccountId(), folderId), L(sequenceNumber));
+                    }
+                } else if (BasicSyncAware.class.isInstance(access)) {
+                    for (String folderId : entry.getValue()) {
+                        Check.folderMatches(folderId, BasicCalendarAccess.FOLDER_ID);
+                        long sequenceNumber = ((BasicSyncAware) access).getSequenceNumber();
+                        sequenceNumbers.put(getUniqueFolderId(account.getAccountId(), folderId), L(sequenceNumber));
+                    }
+                } else {
+                    throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
+                }
+            } catch (OXException e) {
+                throw withUniqueIDs(e, account.getAccountId());
+            }
+        }
+        return sequenceNumbers;
     }
 
     @Override
