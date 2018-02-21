@@ -49,9 +49,9 @@
 
 package com.openexchange.mail.authenticity.impl.core;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -271,24 +271,27 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
 
         Session session = mailAccess.getSession();
         List<MailMessage[]> partitions = com.openexchange.tools.arrays.Arrays.partition(mails, 100);
-        List<FutureAndMail> submittedTasks = new ArrayList<>(partitions.size());
+        Map<Future<Void>, MailMessage[]> submittedTasks = new LinkedHashMap<Future<Void>, MailMessage[]>(partitions.size());
         for (MailMessage[] partition : partitions) {
             Future<Void> future = threadPool.submit(new MailAuthenticityTask(partition, handler, session));
-            submittedTasks.add(new FutureAndMail(future, partition));
+            submittedTasks.put(future, partition);
         }
         partitions = null; // Help GC
 
         try {
-            for (FutureAndMail submitted : submittedTasks) {
+            for (Map.Entry<Future<Void>, MailMessage[]> submitted : submittedTasks.entrySet()) {
+                Future<Void> future = submitted.getKey();
                 try {
-                    submitted.future.get(2, TimeUnit.SECONDS);
+                    future.get(2, TimeUnit.SECONDS);
                 } catch (ExecutionException e) {
-                    LOGGER.warn("Error while verifying mail authenticity for mails \"{}\" in folder {}", submitted.getMailIds(), submitted.getMailFolder(), e.getCause());
-                    submitted.markAsNeutral();
+                    MailMessage[] associatedMails = submitted.getValue();
+                    LOGGER.warn("Error while verifying mail authenticity for mails \"{}\" in folder {}", getMailIds(associatedMails), getMailFolder(associatedMails), e.getCause());
+                    markAsNeutral(associatedMails);
                 } catch (TimeoutException e) {
-                    submitted.future.cancel(true);
-                    LOGGER.warn("Timeout while verifying mail authenticity for mails \"{}\" in folder {}", submitted.getMailIds(), submitted.getMailFolder());
-                    submitted.markAsNeutral();
+                    MailMessage[] associatedMails = submitted.getValue();
+                    future.cancel(true);
+                    LOGGER.warn("Timeout while verifying mail authenticity for mails \"{}\" in folder {}", getMailIds(associatedMails), getMailFolder(associatedMails));
+                    markAsNeutral(associatedMails);
                 }
             }
         } catch (InterruptedException e) {
@@ -311,6 +314,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         if (false == isApplicableFor(mail, mailAccess)) {
             // Not applicable
             mail.setAuthenticityResult(MailAuthenticityResult.NOT_ANALYZED_RESULT);
+            return mail;
         }
 
         Future<Void> future = threadPool.submit(new MailAuthenticityTask(mail, handler, session));
@@ -389,42 +393,30 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         }
     }
 
-    private static class FutureAndMail {
-
-        final Future<Void> future;
-        final MailMessage[] mails;
-
-        FutureAndMail(Future<Void> future, MailMessage[] mails) {
-            super();
-            this.future = future;
-            this.mails = mails;
-        }
-
-        String getMailIds() {
-            StringBuilder sb = new StringBuilder(mails.length << 2);
-            boolean first = true;
-            for (MailMessage mail : mails) {
-                if (null != mail) {
-                    if (first) {
-                        first = false;
-                    } else {
-                        sb.append(", ");
-                    }
-                    sb.append(mail.getMailId());
+    private String getMailIds(MailMessage[] mails) {
+        StringBuilder sb = new StringBuilder(mails.length << 2);
+        boolean first = true;
+        for (MailMessage mail : mails) {
+            if (null != mail) {
+                if (first) {
+                    first = false;
+                } else {
+                    sb.append(", ");
                 }
+                sb.append(mail.getMailId());
             }
-            return sb.toString();
         }
+        return sb.toString();
+    }
 
-        String getMailFolder() {
-            return mails[0].getFolder();
-        }
+    private String getMailFolder(MailMessage[] mails) {
+        return mails[0].getFolder();
+    }
 
-        void markAsNeutral() {
-            for (MailMessage mail : mails) {
-                if (null != mail) {
-                    mail.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
-                }
+    private void markAsNeutral(MailMessage[] mails) {
+        for (MailMessage mail : mails) {
+            if (null != mail) {
+                mail.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
             }
         }
     }
