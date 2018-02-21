@@ -360,36 +360,55 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
 
         @Override
         public Void call() {
-            Thread t = Thread.currentThread();
             // int unifiedINBOXAccountId = getUnifiedINBOXAccountId(session);
-            for (int i = mails.length; false == t.isInterrupted() && i-- > 0;) {
-                MailMessage mail = mails[i];
+            // Handle first mail
+            {
+                MailMessage mail = mails[0];
                 if (null != mail) {
-                    int accId = mail.getAccountId();
-                    /*-
-                    if (mail instanceof Delegatized) {
-                        int undelegatedAccountId = ((Delegatized) mail).getUndelegatedAccountId();
-                        if (undelegatedAccountId >= 0) {
-                            accId = undelegatedAccountId;
+                    verifyAuthenticityFrom(mail);
+                }
+            }
+
+            // Handle rest while paying respect to processing thread's interrupted status
+            if (mails.length > 1) {
+                Thread t = Thread.currentThread();
+                for (int i = 1, length = mails.length; i < length; i++) {
+                    MailMessage mail = mails[i];
+                    if (null != mail) {
+                        if (t.isInterrupted()) {
+                            // Processing thread was interrupted
+                            return null;
                         }
-                    }
-                    */
-                    if (accId == MailAccount.DEFAULT_ID /* || accId == unifiedINBOXAccountId */) {
-                        // Verify mail authenticity...
-                        try {
-                            handler.handle(session, mail);
-                        } catch (Exception e) {
-                            // Verifying mail authenticity failed
-                            LOGGER.warn("Error while verifying mail authenticity for mail \"{}\" in folder {}", mail.getMailId(), mail.getFolder(), e.getCause());
-                            mail.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
-                        }
-                    } else {
-                        // Not located in primary account
-                        mail.setAuthenticityResult(MailAuthenticityResult.NOT_ANALYZED_RESULT);
+                        verifyAuthenticityFrom(mail);
                     }
                 }
             }
             return null;
+        }
+
+        private void verifyAuthenticityFrom(MailMessage mail) {
+            int accId = mail.getAccountId();
+            /*-
+            if (mail instanceof Delegatized) {
+                int undelegatedAccountId = ((Delegatized) mail).getUndelegatedAccountId();
+                if (undelegatedAccountId >= 0) {
+                    accId = undelegatedAccountId;
+                }
+            }
+            */
+            if (accId == MailAccount.DEFAULT_ID /* || accId == unifiedINBOXAccountId */) {
+                // Verify mail authenticity...
+                try {
+                    handler.handle(session, mail);
+                } catch (Exception e) {
+                    // Verifying mail authenticity failed
+                    LOGGER.warn("Error while verifying mail authenticity for mail \"{}\" in folder {}", mail.getMailId(), mail.getFolder(), e.getCause());
+                    mail.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
+                }
+            } else {
+                // Not located in primary account
+                mail.setAuthenticityResult(MailAuthenticityResult.NOT_ANALYZED_RESULT);
+            }
         }
     }
 
