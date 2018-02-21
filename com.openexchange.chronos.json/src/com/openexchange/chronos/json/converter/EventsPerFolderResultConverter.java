@@ -61,9 +61,8 @@ import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.EventsResult;
-import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
-import com.openexchange.resource.ResourceService;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -80,11 +79,10 @@ public class EventsPerFolderResultConverter extends EventResultConverter {
     /**
      * Initializes a new {@link EventsPerFolderResultConverter}.
      *
-     * @param contactService A reference to the contact service
-     * @param resourceService A reference to the resource service
+     * @param services A service lookup reference
      */
-    public EventsPerFolderResultConverter(ContactService contactService, ResourceService resourceService) {
-        super(contactService, resourceService);
+    public EventsPerFolderResultConverter(ServiceLookup services) {
+        super(services);
     }
 
     @Override
