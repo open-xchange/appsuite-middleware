@@ -129,7 +129,7 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
     }
 
     @Override
-    public MailAuthenticityResult parseHeaders(List<String> authenticationHeaders, InternetAddress from, List<AllowedAuthServId> allowedAuthServIds, Session session) throws OXException {
+    public MailAuthenticityResult parseHeaders(List<String> authenticationHeaders, InternetAddress from, List<AllowedAuthServId> allowedAuthServIds, Session notNeeded) throws OXException {
         MailAuthenticityResult overallResult = new MailAuthenticityResult(MailAuthenticityStatus.NEUTRAL);
         List<MailAuthenticityMechanismResult> results = new ArrayList<>();
         List<Map<String, String>> unconsideredResults = new ArrayList<>();
@@ -511,7 +511,9 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
             case NONE:
             case NEUTRAL:
                 // Handle as neutral or fail, depending on the domain match
-                overallResult.setStatus(bestOfSPF.isDomainMatch() ? MailAuthenticityStatus.NEUTRAL : MailAuthenticityStatus.FAIL);
+                if (dkimFailed) {
+                    overallResult.setStatus(bestOfSPF.isDomainMatch() ? MailAuthenticityStatus.NEUTRAL : MailAuthenticityStatus.FAIL);
+                }
                 break;
             case PASS:
                 // Pass
