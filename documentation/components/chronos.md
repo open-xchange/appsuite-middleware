@@ -445,8 +445,8 @@ Have a look at the property documentation page on http://documentation.open-xcha
 
 #### Google Calendar
 
-...
-
+The google calendar provider provides the possibility to subscribe to the primary calendar of a google account. The only requirement is a working google oauth account with the 'calendar_ro' scope.
+To reduce the amount of data transported from google to the the middleware the google provider uses the incremental update feature of the google calendar. After the initial synchronization the google provider only requests the changes from the google server. This allows the use of a shorter refresh interval and therefore leads to more up-to-date data.
 
 ### ...
 
