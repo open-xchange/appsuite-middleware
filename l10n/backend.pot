@@ -93,6 +93,7 @@ msgstr ""
 #. - Read all your appointments.
 #. - ...
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/OAuthScopeDescription.java:58
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/oauth/OAuthScopeDescription.java:63
 msgid "Read all your appointments."
 msgstr ""
 
@@ -100,6 +101,7 @@ msgstr ""
 #. - Create, modify and delete appointments.
 #. - ...
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/OAuthScopeDescription.java:63
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/oauth/OAuthScopeDescription.java:65
 msgid "Create, modify and delete appointments."
 msgstr ""
 
@@ -914,14 +916,6 @@ msgstr ""
 #.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/exception/CalendarExceptionMessages.java:81
 msgid "The metadata of the attachment '%1$s' does not have a content-id."
-msgstr ""
-
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/oauth/OAuthScopeDescription.java:63
-msgid "Read all your events."
-msgstr ""
-
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/oauth/OAuthScopeDescription.java:65
-msgid "Create, modify and delete events."
 msgstr ""
 
 #. *
