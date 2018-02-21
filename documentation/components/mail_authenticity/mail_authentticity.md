@@ -28,7 +28,7 @@ The Email Authentication is actually a collection of different authentication me
  
 ### SPF (Sender Policy Framework)
 
-The way SPF works is as follows. The domain owner publishes  a DNS record listing all servers that are allowed to send out emails fro that domain. Additionally it may contain a policy on how to deal with illegitimate senders. Those policies are: NEUTRAL, SOFTFAIL and FAIL.
+The way `SPF` works is as follows. The domain owner publishes  a DNS record listing all servers that are allowed to send out emails fro that domain. Additionally it may contain a policy on how to deal with illegitimate senders. Those policies are: NEUTRAL, SOFTFAIL and FAIL.
 
 The SPF relies only on the `Return-Path` header and usually that's one of the reasons that mail forwarding often breaks, i.e. mailing lists that don't rewrite the `Return-Path` header might not be able to deliver emails for SPF-secured sender domains.
 
@@ -199,7 +199,7 @@ The entire decision algorithm is summed up in the following table:
 <span style="color: yellow">neutral</span> | <span style="color: green">pass</span>     | <span style="color: green">Yes</span>           | <span style="color: green">pass</span>
 <span style="color: yellow">neutral</span> | <span style="color: green">pass</span>     | <span style="color: red">No</span>              | <span style="color: yellow">neutral</span>
 <span style="color: yellow">neutral</span> | <span style="color: yellow">neutral</span> | <span style="color: green">Yes</span>           | <span style="color: yellow">neutral</span>
-<span style="color: yellow">neutral</span> | <span style="color: yellow">neutral</span> | <span style="color: red">No</span>              | <span style="color: red">fail</span>
+<span style="color: yellow">neutral</span> | <span style="color: yellow">neutral</span> | <span style="color: red">No</span>              | <span style="color: yellow">neutral</span>
 <span style="color: yellow">neutral</span> | <span style="color: red">fail</span>       | <span style="color: green">Yes</span>           | <span style="color: yellow">neutral</span>
 <span style="color: yellow">neutral</span> | <span style="color: red"> fail </span>     | <span style="color: red">No</span>              | <span style="color: red">fail</span>
 <span style="color: red">fail</span>       | <span style="color: green">pass</span>     | <span style="color: green">Yes</span>           | <span style="color: red">fail</span>
