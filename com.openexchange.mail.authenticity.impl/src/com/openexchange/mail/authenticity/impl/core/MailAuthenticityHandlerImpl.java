@@ -358,14 +358,14 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     /**
      * <p>Determine the overall result from the extracted results. The overall result
      * will be determined by checking the results of DMARC, DKIM and SPF (in that order).</p>
-     * 
+     *
      * <p>If multiple results of a specific mechanism are present, then the best result
      * will be picked for that particular mechanism (according to their natural
      * {@link Enum} ordering) and the rest results of that mechanism will be discarded.</p>
-     * 
+     *
      * <p>If the DMARC mechanism result is 'PASS' then the overall status is marked as 'PASS' or
      * if is 'FAIL' then the overall status is marked as 'FAIL, and no further action is performed.</p>
-     * 
+     *
      * <p>If the DMARC mechanism is other than 'PASS' or 'FAIL' then DKIM and SPF are checked and
      * the overall status is determined in respect to their results.</p>
      *
@@ -454,10 +454,10 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * <p>Check the DKIM best of result and set the overall status.</p>
-     * 
+     *
      * <p>If the DKIM status is either 'PERMFAIL' or 'FAIL' then the DKIM mechanism is
      * considered to have failed, thus the overall status is set accordingly to 'FAIL'.</p>
-     * 
+     *
      * <p>If the DKIM status is set to 'PASS', then the overall status will be set to
      * either 'PASS' or 'NEUTRAL' depending on whether there is a domain match ('PASS'
      * in case of a domain match).</p>
@@ -488,14 +488,14 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * <p>Check the SPF best of result and set the overall status.</p>
-     * 
+     *
      * <p>If the SPF status is either 'PERMERROR' or 'FAIL' then the SPF mechanism is
      * considered to have failed, thus the overall status is set accordingly to 'FAIL'.</p>
-     * 
+     *
      * <p>If the SPF status is either 'SOFTFAIL', or 'TEMPERROR', or 'NONE', or 'NEUTRAL'
      * then the overall status is set to either 'NEUTRAL' or 'FAIL' depending on whether
      * there is a domain match ('NEUTRAL' in case of a domain match).</p>
-     * 
+     *
      * <p>On the other hand, if the SPF status is set to 'PASS' then the overall status
      * is set to either 'NEUTRAL' or 'FAIL' depending on whether DKIM failed and there is
      * a domain match ('NEUTRAL' in case of a domain match), or to either 'PASS' or 'NEUTRAL'
@@ -602,7 +602,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
 
     /**
      * Extracts the domain from the specified internet address
-     * 
+     *
      * @param adr The address as string
      * @return The domain of the sender
      * @throws IllegalArgumentException if the address is either empty or <code>null</code
@@ -640,7 +640,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
                 return true;
             }
         }
-        LOGGER.warn("The authserv-id '{}' is not in the allowed authserv ids list (see server property '{}'). Server misconfiguration?", authServId, MailAuthenticityProperty.AUTHSERV_ID);
+        LOGGER.debug("The authserv-id '{}' is not in the allowed authserv ids list (see server property '{}'). Server misconfiguration?", authServId, MailAuthenticityProperty.AUTHSERV_ID);
         return false;
     }
 
