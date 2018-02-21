@@ -126,6 +126,7 @@ public class AllowedAuthServId {
 
         Set<String> wildcards = null;
         Set<String> prefixes = null;
+        Set<String> prefixesWithExpectedLength = null;
         Set<String> exacts = null;
         for (String allowdAuthServId : allowdAuthServIds) {
             allowdAuthServId = allowdAuthServId.trim();
@@ -133,8 +134,29 @@ public class AllowedAuthServId {
                 if ("*".equals(allowdAuthServId)) {
                     return Collections.singletonList(ALL_ALLOWED);
                 }
-                if (allowdAuthServId.indexOf('?') >= 0 || allowdAuthServId.indexOf('*') >= 0) {
-                    if (allowdAuthServId.indexOf('?') < 0 && allowdAuthServId.indexOf('*') == allowdAuthServId.length() - 1) {
+                int indexOfQuestionMark = allowdAuthServId.indexOf('?');
+                int indexOfStar = allowdAuthServId.indexOf('*');
+                if (indexOfQuestionMark >= 0 || indexOfStar >= 0) {
+                    if (indexOfStar < 0 && indexOfQuestionMark == allowdAuthServId.length() - 1) {
+                        // Ends with "?"
+                        if (null == prefixesWithExpectedLength) {
+                            prefixesWithExpectedLength = new LinkedHashSet<>(size);
+                        }
+                        String prefixToAdd = allowdAuthServId.substring(0, allowdAuthServId.length() - 1);
+                        boolean add = true;
+                        if (null != prefixes) {
+                            for (Iterator<String> iter = prefixes.iterator(); add && iter.hasNext();) {
+                                String existentPrefix = iter.next();
+                                if (prefixToAdd.startsWith(existentPrefix)) {
+                                    // A more generic one already exists
+                                    add = false;
+                                }
+                            }
+                        }
+                        if (add) {
+                            prefixesWithExpectedLength.add(prefixToAdd);
+                        }
+                    } else if (indexOfQuestionMark < 0 && indexOfStar == allowdAuthServId.length() - 1) {
                         // Ends with "*"
                         if (null == prefixes) {
                             prefixes = new LinkedHashSet<>(size);
@@ -149,6 +171,15 @@ public class AllowedAuthServId {
                             } else if (existentPrefix.startsWith(prefixToAdd)) {
                                 // A more generic one is about to be added
                                 iter.remove();
+                            }
+                        }
+                        if (null != prefixesWithExpectedLength) {
+                            for (Iterator<String> iter = prefixesWithExpectedLength.iterator(); add && iter.hasNext();) {
+                                String existentPrefix = iter.next();
+                                if (existentPrefix.startsWith(prefixToAdd)) {
+                                    // A more generic one is about to be added
+                                    iter.remove();
+                                }
                             }
                         }
                         if (add) {
@@ -184,7 +215,15 @@ public class AllowedAuthServId {
                 if (null == builder) {
                     builder = ImmutableList.builder();
                 }
-                builder.add(new AllowedAuthServId(prefix, new StartsWithChecker(prefix)));
+                builder.add(new AllowedAuthServId(prefix + "*", new StartsWithChecker(prefix)));
+            }
+        }
+        if (null != prefixesWithExpectedLength) {
+            for (String prefix : prefixesWithExpectedLength) {
+                if (null == builder) {
+                    builder = ImmutableList.builder();
+                }
+                builder.add(new AllowedAuthServId(prefix + "?", new StartsWithExpectedLengthChecker(prefix)));
             }
         }
         if (null != wildcards) {
@@ -273,6 +312,23 @@ public class AllowedAuthServId {
         @Override
         public boolean allows(String authServId) {
             return authServId.startsWith(prefix);
+        }
+    }
+
+    private static final class StartsWithExpectedLengthChecker implements Checker {
+
+        private final String prefix;
+        private final int expectedLength;
+
+        StartsWithExpectedLengthChecker(String prefix) {
+            super();
+            this.prefix = prefix;
+            expectedLength = prefix.length() + 1;
+        }
+
+        @Override
+        public boolean allows(String authServId) {
+            return authServId.length() == expectedLength && authServId.startsWith(prefix);
         }
     }
 
