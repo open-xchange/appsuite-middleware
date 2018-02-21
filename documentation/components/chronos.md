@@ -448,7 +448,13 @@ Have a look at the property documentation page on http://documentation.open-xcha
 The google calendar provider provides the possibility to subscribe to the primary calendar of a google account. The only requirement is a working google oauth account with the 'calendar_ro' scope.
 To reduce the amount of data transported from google to the the middleware the google provider uses the incremental update feature of the google calendar. After the initial synchronization the google provider only requests the changes from the google server. This allows the use of a shorter refresh interval and therefore leads to more up-to-date data.
 
-### ...
+### Birthdays Calendar
+
+The Birthdays Calendar is a calendar that automatically populates with the known birthdays of everyone in a user's address books. A corresponding calendar account is added by default for each user once that has the ``contacts`` module permission. However, this can be disabled beforehand or afterwards by removing the ``calendar_birthdays`` capability via config-cascade.
+
+The calendar works by providing a yearly event series for each contact that has a set birthday property. The calendar data is always created on the fly dynamically by querying the contact storage, i.e. no additional event data is actually stored. However, it is still possible to add alarms for birthday events, which are then stored within the usual calendar storage. 
+
+Since the underlying calendar account is automatically provisioned, it cannot be deleted by the user - though the folder may still be unsubscribed to hide it from the user interface. 
 
 
 ## Group-scheduled Events
