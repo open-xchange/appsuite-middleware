@@ -105,17 +105,18 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
     /**
      * Performs the attendee update in an event.
      *
-     * @param objectId The identifier of the event to update the attendee in
+     * @param eventId The identifier of the event to update the attendee in
      * @param recurrenceId The recurrence identifier of the occurrence to update, or <code>null</code> if no specific occurrence is targeted
      * @param attendee The attendee data to update
      * @param clientTimestamp The client timestamp to catch concurrent modifications, or <code>null</code> to skip checks
      * @return The result
      */
-    public InternalCalendarResult perform(String objectId, RecurrenceId recurrenceId, Attendee attendee, Long clientTimestamp) throws OXException {
+    public InternalCalendarResult perform(String eventId, RecurrenceId recurrenceId, Attendee attendee, Long clientTimestamp) throws OXException {
         /*
-         * load original event data & check current session user's permissions
+         * load original event data & check permissions
          */
-        Event originalEvent = loadEventData(objectId);
+        Event originalEvent = loadEventData(eventId);
+        Check.eventIsVisible(folder, originalEvent);
         Check.eventIsInFolder(originalEvent, folder);
         requireWritePermissions(originalEvent, attendee);
         if (null != clientTimestamp) {
@@ -133,6 +134,9 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
         if (needsConflictCheck(originalEvent, originalAttendee, attendee)) {
             Check.noConflicts(storage, session, originalEvent, Collections.singletonList(resolvedAttendee));
         }
+        /*
+         * perform update & return result
+         */
         if (null == recurrenceId) {
             updateAttendee(originalEvent, originalAttendee, attendee);
         } else {
