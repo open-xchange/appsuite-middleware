@@ -441,7 +441,7 @@ Have a look at the property documentation page on http://documentation.open-xcha
 
 #### SchedJoules
 
-...
+The SchedJoules calendar provider provides the ability to subscribe public calendars from the SchedJoules servers. The fetched data is cached locally in memory of each middleware node to save bandwidth and speed up the request processing. The SchedJoules API uses an ``Authorization`` header with an API key which is configured on the middleware side and is being transmitted on every request the middleware node is firing towards the SchedJoules servers.
 
 #### Google Calendar
 
