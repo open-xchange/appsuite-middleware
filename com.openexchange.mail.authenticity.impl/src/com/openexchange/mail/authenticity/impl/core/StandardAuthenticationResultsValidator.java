@@ -368,6 +368,7 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
 
         // The DMARC status was NEUTRAL or none existing, check for DKIM
         boolean dkimFailed = dkimFailed(overallResult, bestOfDKIM);
+
         // Continue with SPF
         checkSPF(overallResult, bestOfSPF, dkimFailed);
     }
@@ -519,7 +520,7 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
                 // Pass
                 if (dkimFailed) {
                     overallResult.setStatus(bestOfSPF.isDomainMatch() ? MailAuthenticityStatus.NEUTRAL : MailAuthenticityStatus.FAIL);
-                } else {
+                } else if (MailAuthenticityStatus.PASS != overallResult.getStatus()) {
                     overallResult.setStatus(bestOfSPF.isDomainMatch() ? MailAuthenticityStatus.PASS : MailAuthenticityStatus.NEUTRAL);
                 }
                 break;
