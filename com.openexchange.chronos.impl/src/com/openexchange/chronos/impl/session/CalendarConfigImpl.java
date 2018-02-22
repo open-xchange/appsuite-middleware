@@ -169,11 +169,6 @@ public class CalendarConfigImpl implements CalendarConfig {
         return getConfigValue("com.openexchange.chronos.skipExternalAttendeeURIChecks", Boolean.class, Boolean.FALSE).booleanValue();
     }
 
-    @Override
-    public boolean isRestrictAllowedAttendeeChanges() {
-        return getConfigValue("com.openexchange.chronos.restrictAllowedAttendeeChanges", Boolean.class, Boolean.TRUE).booleanValue();
-    }
-
     private CalendarUserSettings getUserSettings(int userId) {
         if (null != optSession) {
             return new CalendarUserSettings(optSession, userId, services);
