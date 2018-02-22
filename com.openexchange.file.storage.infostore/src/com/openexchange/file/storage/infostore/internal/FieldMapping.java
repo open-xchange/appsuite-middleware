@@ -50,9 +50,13 @@
 package com.openexchange.file.storage.infostore.internal;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.groupware.infostore.InfostoreFacade;
@@ -96,6 +100,8 @@ public class FieldMapping {
         field2metadata.put(File.Field.OBJECT_PERMISSIONS, Metadata.OBJECT_PERMISSIONS_LITERAL);
         field2metadata.put(File.Field.SHAREABLE, Metadata.SHAREABLE_LITERAL);
         field2metadata.put(File.Field.ORIGIN, Metadata.ORIGIN_LITERAL);
+        field2metadata.put(File.Field.CAPTURE_DATE, Metadata.CAPTURE_DATE_LITERAL);
+//        field2metadata.put(File.Field.GPS, Metadata.GPS_LITERAL);
     }
 
     public static Metadata getMatching(File.Field field) {
@@ -119,18 +125,9 @@ public class FieldMapping {
         for (int i = 0; i < source.length; i++) {
             Metadata metadata = source[i];
             if (null == metadata) {
-                if (null == tmp) {
-                    tmp = new ArrayList<>(source.length);
-                    if (i > 0) {
-                        for (int j = 0; j < i; j++) {
-                            tmp.add(metadata);
-                        }
-                    }
-                }
-            } else {
-                if (null != tmp) {
-                    tmp.add(metadata);
-                }
+                tmp = Lists.newArrayList(
+                    Iterables.filter(Arrays.asList(source), Predicates.notNull()));
+                break;
             }
         }
         return null == tmp ? source : tmp.toArray(new Metadata[tmp.size()]);
