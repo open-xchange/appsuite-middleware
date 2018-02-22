@@ -3015,11 +3015,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     private MailPath autosaveDraft(ComposedMailMessage draftMail, int accountId) throws OXException {
         initConnection(isTransportOnly(accountId) ? MailAccount.DEFAULT_ID : accountId);
-
-        // Until MessageStorage fully implemented for Guard, autosave is simply save draft for Guard
-        if (draftMail.getSecuritySettings() != null && draftMail.getSecuritySettings().isEncrypt()) {
-            return saveDraft(draftMail, false, accountId);
-        }
         String draftFullname = mailAccess.getFolderStorage().getDraftsFolder();
         /*
          * Auto-save draft
@@ -3062,6 +3057,16 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             String uid;
             {
                 MailMessage filledMail = MimeMessageConverter.fillComposedMailMessage(draftMail);
+                /*
+                 * Encrypt the draft
+                 */
+                if (draftMail.getSecuritySettings() != null && draftMail.getSecuritySettings().anythingSet()) {
+                    EncryptedMailService encryptor = Services.getServiceLookup().getOptionalService(EncryptedMailService.class);
+                    if (encryptor != null) {
+                        filledMail = encryptor.encryptAutosaveDraftEmail(filledMail, session, draftMail.getSecuritySettings());
+                    }
+                }
+
                 filledMail.setFlag(MailMessage.FLAG_DRAFT, true);
                 if (!filledMail.containsSentDate()) {
                     filledMail.setSentDate(new Date());
