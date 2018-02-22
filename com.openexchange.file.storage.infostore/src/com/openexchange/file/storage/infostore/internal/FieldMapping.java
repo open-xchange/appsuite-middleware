@@ -100,8 +100,6 @@ public class FieldMapping {
         field2metadata.put(File.Field.OBJECT_PERMISSIONS, Metadata.OBJECT_PERMISSIONS_LITERAL);
         field2metadata.put(File.Field.SHAREABLE, Metadata.SHAREABLE_LITERAL);
         field2metadata.put(File.Field.ORIGIN, Metadata.ORIGIN_LITERAL);
-        field2metadata.put(File.Field.CAPTURE_DATE, Metadata.CAPTURE_DATE_LITERAL);
-//        field2metadata.put(File.Field.GPS, Metadata.GPS_LITERAL);
     }
 
     public static Metadata getMatching(File.Field field) {
