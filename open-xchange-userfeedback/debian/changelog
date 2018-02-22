@@ -1,3 +1,9 @@
+open-xchange-userfeedback (7.8.4-23) stable; urgency=medium
+
+  * Build for patch 2018-02-26 (4583)
+
+ -- Martin Schneider <martin.schneider@open-xchange.com>  Thu, 22 Feb 2018 15:41:35 +0100
+
 open-xchange-userfeedback (7.8.4-22) stable; urgency=medium
 
   * Build for patch 2018-02-05 (4555)
