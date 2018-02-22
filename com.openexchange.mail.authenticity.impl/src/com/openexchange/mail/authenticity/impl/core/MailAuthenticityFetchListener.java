@@ -51,6 +51,7 @@ package com.openexchange.mail.authenticity.impl.core;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -60,6 +61,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailAttributation;
@@ -223,7 +225,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
 
         MailFields fields = null == fetchArguments.getFields() ? new MailFields() : new MailFields(fetchArguments.getFields());
         fields.add(MailField.ID);
-        fields.add(MailField.FOLDER_ID);
+        fields.add(MailField.FOLDER_ID); // For folder verification
         fields.add(MailField.RECEIVED_DATE); // For date threshold
         fields.add(MailField.ACCOUNT_NAME); // For account verification
         Set<String> headerNames = null == fetchArguments.getHeaderNames() ? null : new LinkedHashSet<>(Arrays.asList(fetchArguments.getHeaderNames()));
@@ -270,10 +272,11 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         }
 
         Session session = mailAccess.getSession();
+        FolderChecker folderChecker = new DenyIfContainedFolderChecker(mailAccess.getFolderStorage().getDraftsFolder(), mailAccess.getFolderStorage().getSentFolder());
         List<MailMessage[]> partitions = com.openexchange.tools.arrays.Arrays.partition(mails, 100);
         Map<Future<Void>, MailMessage[]> submittedTasks = new LinkedHashMap<Future<Void>, MailMessage[]>(partitions.size());
         for (MailMessage[] partition : partitions) {
-            Future<Void> future = threadPool.submit(new MailAuthenticityTask(partition, handler, session));
+            Future<Void> future = threadPool.submit(new MailAuthenticityTask(partition, handler, session, folderChecker));
             submittedTasks.put(future, partition);
         }
         partitions = null; // Help GC
@@ -317,7 +320,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
             return mail;
         }
 
-        Future<Void> future = threadPool.submit(new MailAuthenticityTask(mail, handler, session));
+        Future<Void> future = threadPool.submit(new MailAuthenticityTask(mail, handler, session, ALWAYS_ACCEPT_FOLDER_CHECKER));
         try {
             future.get(1, TimeUnit.SECONDS);
         } catch (ExecutionException e) {
@@ -343,19 +346,18 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         private final MailMessage[] mails;
         private final MailAuthenticityHandler handler;
         private final Session session;
+        private final FolderChecker folderChecker;
 
-        MailAuthenticityTask(MailMessage mail, MailAuthenticityHandler handler, Session session) {
-            super();
-            this.mails = new MailMessage[] { mail };
-            this.handler = handler;
-            this.session = session;
+        MailAuthenticityTask(MailMessage mail, MailAuthenticityHandler handler, Session session, FolderChecker folderChecker) {
+            this(new MailMessage[] { mail }, handler, session, folderChecker);
         }
 
-        MailAuthenticityTask(MailMessage[] mails, MailAuthenticityHandler handler, Session session) {
+        MailAuthenticityTask(MailMessage[] mails, MailAuthenticityHandler handler, Session session, FolderChecker folderChecker) {
             super();
             this.mails = mails;
             this.handler = handler;
             this.session = session;
+            this.folderChecker = folderChecker;
         }
 
         @Override
@@ -387,6 +389,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         }
 
         private void verifyAuthenticityFrom(MailMessage mail) {
+            // Check account
             int accId = mail.getAccountId();
             /*-
             if (mail instanceof Delegatized) {
@@ -396,7 +399,10 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
                 }
             }
             */
-            if (accId == MailAccount.DEFAULT_ID /* || accId == unifiedINBOXAccountId */) {
+            if ((accId != MailAccount.DEFAULT_ID /* && accId != unifiedINBOXAccountId */) || (false == folderChecker.isFolderAcceptedFrom(mail))) {
+                // Not located in primary account or located in a denied folder
+                mail.setAuthenticityResult(MailAuthenticityResult.NOT_ANALYZED_RESULT);
+            } else {
                 // Verify mail authenticity...
                 try {
                     handler.handle(session, mail);
@@ -405,10 +411,36 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
                     LOGGER.warn("Error while verifying mail authenticity for mail \"{}\" in folder {}", mail.getMailId(), mail.getFolder(), e.getCause());
                     mail.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
                 }
-            } else {
-                // Not located in primary account
-                mail.setAuthenticityResult(MailAuthenticityResult.NOT_ANALYZED_RESULT);
             }
+        }
+    }
+
+    private static interface FolderChecker {
+
+        boolean isFolderAcceptedFrom(MailMessage mail);
+    }
+
+    private static final FolderChecker ALWAYS_ACCEPT_FOLDER_CHECKER = new FolderChecker() {
+
+        @Override
+        public boolean isFolderAcceptedFrom(MailMessage mail) {
+            return true;
+        }
+    };
+
+    private static class DenyIfContainedFolderChecker implements FolderChecker {
+
+        private final Set<String> foldersToDeny;
+
+        DenyIfContainedFolderChecker(String... foldersToDeny) {
+            super();
+            this.foldersToDeny = null == foldersToDeny || foldersToDeny.length <= 0 ? Collections.emptySet() : ImmutableSet.copyOf(foldersToDeny);
+        }
+
+        @Override
+        public boolean isFolderAcceptedFrom(MailMessage mail) {
+            String folder = mail.getFolder();
+            return folder == null || !foldersToDeny.contains(folder);
         }
     }
 
