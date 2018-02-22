@@ -81,7 +81,7 @@ public enum SchedJoulesProperty implements Property {
 
     private final String fqn;
     private final Object defaultValue;
-    private static final String PREFIX = "com.openexchange.chronos.schedjoules.";
+    private static final String PREFIX = "com.openexchange.calendar.schedjoules.";
 
     /**
      * Initialises a new {@link UserFeedbackMailProperty}.
