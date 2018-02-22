@@ -22,7 +22,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 %endif
 Version:        @OXVERSION@
-%define        ox_release 23
+%define        ox_release 22
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -108,8 +108,6 @@ fi
 %dir /opt/open-xchange/etc/
 
 %changelog
-* Mon Feb 19 2018 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2018-02-26 (4583)
 * Mon Jan 29 2018 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2018-02-05 (4555)
 * Mon Jan 15 2018 Marcus Klein <marcus.klein@open-xchange.com>
