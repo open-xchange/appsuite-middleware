@@ -50,6 +50,8 @@
 package com.openexchange.mail.service;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.dataobjects.SecuritySettings;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.session.Session;
 
@@ -63,9 +65,21 @@ public interface EncryptedMailService {
 
     /**
      * Encrypts a draft message before saving to the draft folder
+     *
      * @param draft
      * @return a ComposedMailMessage containing the encrypted message
      * @throws OXException
      */
-    public ComposedMailMessage encryptDraftEmail (ComposedMailMessage draft, Session session, String cryptoAuthentication) throws OXException;
+    public ComposedMailMessage encryptDraftEmail(ComposedMailMessage draft, Session session, String cryptoAuthentication) throws OXException;
+
+    /**
+     * Encrypts a {@link MailMessage} for autosave a draft
+     *
+     * @param message The message to encrypt
+     * @param session The session The session of the user
+     * @param securitySettings The settings used for encryption/signing
+     * @return The encrypted {@link MailMessage}
+     * @throws OXException
+     */
+    public MailMessage encryptAutosaveDraftEmail(MailMessage message, Session session, SecuritySettings securitySettings) throws OXException;
 }
