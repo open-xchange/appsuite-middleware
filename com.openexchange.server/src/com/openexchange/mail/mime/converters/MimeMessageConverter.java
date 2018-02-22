@@ -2486,32 +2486,6 @@ public final class MimeMessageConverter {
         HeaderCollection headers = null;
         try {
             headers = new HeaderCollection(128);
-            /*-
-             *
-            if (false && (part instanceof IMAPMessage)) {
-                final ContentHandler handler = new HeaderContentHandler(headers);
-                final MimeConfig config = new MimeConfig();
-                config.setMaxLineLen(-1);
-                config.setMaxHeaderLen(-1);
-                config.setMaxHeaderCount(-1);
-                final MimeStreamParser parser = new MimeStreamParser(config);
-                parser.setContentHandler(handler);
-                try {
-                    ByteArrayOutputStream out = new HeaderOutputStream();
-                    part.writeTo(out);
-                    final ByteArrayInputStream in = new UnsynchronizedByteArrayInputStream(out.toByteArray());
-                    out = null;
-                    parser.parse(in);
-                } catch (final IOException e1) {
-                    LOG.warn("Unable to parse headers. Assuming no headers...", e1);
-                    headers = new HeaderCollection(0);
-                } catch (final MimeException e1) {
-                    if (!HeaderContentHandler.END_HEADER_EXCEPTION.equals(e1)) {
-                        throw new MessagingException(e1.getMessage(), e1);
-                    }
-                }
-            } else {
-             */
             for (final Enumeration<Header> e = part.getAllHeaders(); e.hasMoreElements();) {
                 final Header h = e.nextElement();
                 final String value = h.getValue();
