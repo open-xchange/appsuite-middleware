@@ -92,6 +92,7 @@ Bundle-Activator: com.openexchange.oauth.dropbox.osgi.DropboxOAuthActivator
 Bundle-ClassPath: .,
  lib/dropbox-core-sdk-3.0.3.jar
 Export-Package: com.dropbox.core,
+ com.dropbox.core.http,
  com.dropbox.core.v2,
  com.dropbox.core.v2.auth,
  com.dropbox.core.v2.files,
