@@ -47,72 +47,22 @@
  *
  */
 
-package com.openexchange.drive.json.action;
+package com.openexchange.file.storage;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.json.internal.DefaultDriveSession;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- *
- * {@link DeleteFromTrashAction}
+ * {@link OriginAwareFileStorageFolder}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class DeleteFromTrashAction extends AbstractDriveAction {
+public interface OriginAwareFileStorageFolder extends FileStorageFolder {
 
-    @Override
-    public AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
-
-        Object data = requestData.getData();
-        if (data == null) {
-            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
-        }
-        if (!(data instanceof JSONObject)) {
-            throw AjaxExceptionCodes.ILLEGAL_REQUEST_BODY.create();
-        }
-
-        JSONObject body = (JSONObject) data;
-
-        List<String> files = new ArrayList<>();
-        List<String> folders = new ArrayList<>();
-        try {
-            if (body.has("files")) {
-                JSONArray filesArray = body.getJSONArray("files");
-                for (Object o : filesArray) {
-                    if (!(o instanceof String)) {
-                        throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
-                    }
-                    files.add((String) o);
-                }
-            }
-
-            if (body.has("directories")) {
-                JSONArray foldersArray = body.getJSONArray("directories");
-                for (Object o : foldersArray) {
-                    if (!(o instanceof String)) {
-                        throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
-                    }
-                    folders.add((String) o);
-                }
-            }
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
-        }
-
-        getDriveService().getUtility().removeFromTrash(session, files, folders);
-
-        // Load trash contents again
-        JSONObject result = getDriveService().getUtility().getTrashContent(session);
-        return new AJAXRequestResult(result == null ? JSONObject.EMPTY_OBJECT : result, "json");
-    }
+    /**
+     * Returns the origin folder path of the folder in case it is trashed.
+     *
+     * @return The origin folder path or null
+     */
+    public FolderPath getOrigin();
 
 }

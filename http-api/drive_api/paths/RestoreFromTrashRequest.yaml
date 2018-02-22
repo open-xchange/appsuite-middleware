@@ -22,4 +22,4 @@
         description: |
           Returns the files and folders and their new paths.
         schema:
-          $ref: "#/definitions/RestoreFromTrashResponse"
+          $ref: "#/definitions/TrashFolderResponse"

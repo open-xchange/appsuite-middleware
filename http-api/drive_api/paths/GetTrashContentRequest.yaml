@@ -1,4 +1,4 @@
-/drive?action=getTrashContent:
+/drive?action=trashContents:
   get:
     operationId: getTrashContent
     tags:
