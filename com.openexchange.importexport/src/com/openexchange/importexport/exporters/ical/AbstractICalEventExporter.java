@@ -51,10 +51,12 @@ package com.openexchange.importexport.exporters.ical;
 
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
@@ -62,6 +64,7 @@ import com.openexchange.chronos.service.EventID;
 import com.openexchange.exception.OXException;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Streams;
+import com.openexchange.session.Session;
 
 /**
  * {@link AbstractICalEventExporter}
@@ -95,19 +98,20 @@ public abstract class AbstractICalEventExporter extends AbstractICalExporter {
      *
      * @param eventList The event list to export
      * @param optOut The output stream
+     * @param session The session
      * @return ThresholdFileHolder The file holder
      * @throws OXException if the export fails
      */
-    protected ThresholdFileHolder exportChronosEvents(List<Event> eventList, OutputStream optOut) throws OXException {
+    protected ThresholdFileHolder exportChronosEvents(List<Event> eventList, OutputStream optOut, Session session) throws OXException {
         ICalService iCalService = ImportExportServices.getICalService();
         ICalParameters iCalParameters = iCalService.initParameters();
         CalendarExport calendarExport = iCalService.exportICal(iCalParameters);
         for (Event event : eventList) {
-            if(event == null) {
+            if (event == null) {
                 // Skip not existing events
                 continue;
             }
-            calendarExport.add(event);
+            calendarExport.add(stripAttendeesAndOrganizer(event, session));
         }
         if (null != optOut) {
             calendarExport.writeVCalendar(optOut);
@@ -126,4 +130,24 @@ public abstract class AbstractICalEventExporter extends AbstractICalExporter {
         }
     }
 
+    /**
+     * Strips all other attendees from the event <b>if</b> the current user is an attendee.
+     * In case the user don't participate in the event neither attendees nor organizer will be set.
+     * 
+     * @param event The event
+     * @param session The session
+     * @return The stripped {@link Event}
+     */
+    private Event stripAttendeesAndOrganizer(Event event, Session session) {
+        // Change for bug 57282
+        if (CalendarUtils.isAttendee(event, session.getUserId())) {
+            if (event.getAttendees().size() > 1) {
+                event.setAttendees(Collections.singletonList(CalendarUtils.find(event.getAttendees(), session.getUserId())));
+            }
+        } else {
+            event.removeAttendees();
+            event.removeOrganizer();
+        }
+        return event;
+    }
 }
