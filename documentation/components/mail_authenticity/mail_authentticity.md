@@ -183,13 +183,13 @@ When all evaluation and parsing of the single mechanisms is done, the overall st
 
 If the `DMARC` status is `fail` then the overall result of the message is set to `fail`. If the `DMARC` status is `pass` and there is a domain match then the overall status is set to `pass`. If `DMARC` is not present or its status is set to other than `pass` and there is no domain match, then the `DKIM` mechanism is checked. 
 
-If the `DKIM` status is `pass` and there is a domain match, then the overall status is set to `pass`, or to `neutral` if there is no domain match. If the `DKIM` status is other than `pass` or `fail`, then that status is set as the overall status.
+If the `DKIM` status is `pass` and there is a domain match, then the overall status is set to `pass`, or to `neutral` if there is no domain match. If the `DKIM` status is other than `pass` or `fail`, then that status is converted to their respective overall status.
 
 Last, the `SPF` status is evaluated. Always depending on whether there is a domain match, the overall status is set to `pass` if the `SPF` status is also set to `pass`. Otherwise, it will be set to `neutral` or `fail` depending on whether the `DKIM` mechanism failed previously. An overal status of `neutral` or `fail` is also set when the status of `SPF` is neutral and there is or isn't a domain match respectively.
 
 The entire decision algorithm is summed up in the following table:
 
- SPF                                       | DKIM                                       | Domain Match                                    | Result                                      
+ SPF                                       | DKIM                                       | Domain Match                                    | Result
 -------------------------------------------|--------------------------------------------|:-----------------------------------------------:|---------------------------------------------
 <span style="color: green">pass</span>     | <span style="color: green">pass</span>     | <span style="color: green">Yes</span>           | <span style="color: green">pass</span>
 <span style="color: green">pass</span>     | <span style="color: green">pass</span>     | <span style="color: red">No</span>              | <span style="color: yellow">neutral</span>
