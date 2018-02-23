@@ -226,9 +226,9 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
     @Override
     public void deleteAccount(Session session, int id, long clientTimestamp, CalendarParameters parameters) throws OXException {
         /*
-         * get & check stored calendar account
+         * get & check stored calendar account (directly from storage to circumvent access restrictions and still allow removal)
          */
-        CalendarAccount storedAccount = getAccount(session, id, parameters);
+        CalendarAccount storedAccount = initAccountStorage(session.getContextId(), parameters).loadAccount(session.getUserId(), id);
         if (null == storedAccount) {
             throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(id);
         }
@@ -364,14 +364,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
     }
     @Override
     public List<CalendarAccount> getAccounts(int contextId, int userId, String providerId) throws OXException {
-        List<CalendarAccount> result = new ArrayList<>();
-        List<CalendarAccount> allAccounts = initAccountStorage(contextId, null).loadAccounts(userId);
-        for(CalendarAccount acc: allAccounts) {
-            if(providerId.equals(acc.getProviderId())){
-                result.add(acc);
-            }
-        }
-        return result;
+        return findAll(initAccountStorage(contextId, null).loadAccounts(userId), providerId);
     }
 
     @Override
