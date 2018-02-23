@@ -54,8 +54,8 @@ import com.codahale.metrics.MetricRegistry;
 import com.openexchange.metrics.MetricService;
 import com.openexchange.metrics.descriptors.MeterDescriptor;
 import com.openexchange.metrics.dropwizard.types.DropwizardCounter;
-import com.openexchange.metrics.dropwizard.types.DropwizardHistogram;
 import com.openexchange.metrics.dropwizard.types.DropwizardGauge;
+import com.openexchange.metrics.dropwizard.types.DropwizardHistogram;
 import com.openexchange.metrics.dropwizard.types.DropwizardMeter;
 import com.openexchange.metrics.dropwizard.types.DropwizardTimer;
 import com.openexchange.metrics.types.Counter;
@@ -119,7 +119,7 @@ public class DropwizardMetricService implements MetricService {
      */
     @Override
     public <T> Gauge<T> getGauge(String group, String name, Supplier<T> metricSupplier) {
-        return new DropwizardGauge(registry.gauge(MetricRegistry.name(group, name), metricSupplier));
+        return (Gauge<T>) new DropwizardGauge(registry.gauge(MetricRegistry.name(group, name), () -> () -> metricSupplier.get()));
     }
 
     /*
