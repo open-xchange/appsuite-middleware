@@ -67,14 +67,14 @@ import com.openexchange.metrics.types.Timer;
  */
 public class S3FileStorageRequestMetricCollector extends RequestMetricCollector {
 
-    private final MetricService metrics;
+    private final MetricService metricService;
 
     /**
      * Initialises a new {@link S3FileStorageRequestMetricCollector}.
      */
     public S3FileStorageRequestMetricCollector(MetricService metrics) {
         super();
-        this.metrics = metrics;
+        this.metricService = metrics;
     }
 
     /*
@@ -104,13 +104,13 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
             if (timeTakenMillisIfKnown == null) {
                 return;
             }
-
+            
             long longValue = timeTakenMillisIfKnown.longValue();
             Field predefined = (Field) type;
             switch (predefined) {
                 case ClientExecuteTime:
                     String methodName = request.getHttpMethod().name();
-                    Timer timer = this.metrics.getTimer("s3", "RequestTimes." + methodName);
+                    Timer timer = metricService.getTimer("s3", "RequestTimes." + methodName);
                     timer.update(longValue, TimeUnit.MILLISECONDS);
                 default:
                     break;
