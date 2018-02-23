@@ -6,6 +6,7 @@ Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.codahale.metrics,
+ com.openexchange.exception,
  com.openexchange.management,
  com.openexchange.metrics,
  com.openexchange.metrics.descriptors,
