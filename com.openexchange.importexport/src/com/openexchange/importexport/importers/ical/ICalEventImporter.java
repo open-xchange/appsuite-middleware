@@ -291,6 +291,7 @@ public class ICalEventImporter extends AbstractICalImporter {
                 parameters.set(CalendarParameters.UID_CONFLICT_STRATEGY, UIDConflictStrategy.REASSIGN);
             }
         }
+        parameters.set(CalendarSession.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
         return parameters;
     }
 
