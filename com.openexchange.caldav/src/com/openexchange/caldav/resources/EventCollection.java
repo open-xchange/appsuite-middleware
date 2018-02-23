@@ -267,7 +267,7 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
     @Override
     public List<WebdavResource> filter(Filter filter) throws WebdavProtocolException {
         List<Object> arguments = new ArrayList<Object>(2);
-        if (false == FilterAnalyzer.VEVENT_RANGE_QUERY_ANALYZER.match(filter, arguments) && 
+        if (false == FilterAnalyzer.VEVENT_RANGE_QUERY_ANALYZER.match(filter, arguments) &&
             false == FilterAnalyzer.VTODO_RANGE_QUERY_ANALYZER.match(filter, arguments)) {
             throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "supported-filter", getUrl(), HttpServletResponse.SC_FORBIDDEN);
         }
@@ -375,7 +375,9 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
 
             @Override
             protected UpdatesResult perform(IDBasedCalendarAccess access) throws OXException {
+                EventField[] fields = { EventField.ID, EventField.UID, EventField.FILENAME, EventField.TIMESTAMP, EventField.CREATED, EventField.LAST_MODIFIED, EventField.SERIES_ID, EventField.RECURRENCE_ID };
                 access.set(CalendarParameters.PARAMETER_FIELDS, BASIC_FIELDS);
+                access.set(CalendarParameters.PARAMETER_FIELDS, fields);
                 return access.getUpdatedEventsInFolder(folderID, since.getTime());
             }
         }.execute(factory.getSession());

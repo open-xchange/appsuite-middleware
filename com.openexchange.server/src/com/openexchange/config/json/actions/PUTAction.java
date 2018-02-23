@@ -207,7 +207,14 @@ public final class PUTAction extends AbstractConfigAction {
                     } else if (JSONObject.class.isInstance(value)) {
                         sanitizeJsonSetting(setting);
                     } else {
-                        setting.setSingleValue(value.toString());
+                        try {
+                            // Change for bug 56912: Try to interpret setting as JSON
+                            JSONObject json = new JSONObject(value.toString());
+                            setting.setSingleValue(json);
+                            sanitizeJsonSetting(setting);
+                        } catch (JSONException e) {
+                            setting.setSingleValue(value.toString());
+                        }
                     }
                 }
                 storage.save(setting);

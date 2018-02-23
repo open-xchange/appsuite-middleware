@@ -65,3 +65,11 @@ properties:
       image1_url:
         type: string
         description: The url to the image of the attendee. 
+  resource:
+    type: object
+    title: resource
+    description: |
+     In case the parameter 'extendedEntities' is set to 'true' and the entity is a resource
+     then this field contains the data of this resource.
+    properties:
+      $ref: ../resources/ResourceDataRaw.yaml

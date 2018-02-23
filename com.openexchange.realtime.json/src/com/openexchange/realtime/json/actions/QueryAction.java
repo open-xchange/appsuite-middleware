@@ -128,7 +128,7 @@ public class QueryAction extends RTAction {
     private static final String CARESULT_ANSWER = "answer";
     private static final String CARESULT_DONE = "done";
     private static final String CARESULT_EXCEPTION = "exception";
-    
+
     protected final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(QueryAction.class);
     private final ServiceLookup services;
     private final StanzaSequenceGate gate;
@@ -162,14 +162,15 @@ public class QueryAction extends RTAction {
         StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(id, session, (JSONObject) request.requireData());
 
         Stanza stanza = stanzaBuilder.build();
-        
+
         HttpServletRequest servletRequest = request.optHttpServletRequest();
 		if (servletRequest != null) {
 	        HttpSession httpSession = servletRequest.getSession();
 			String jsessionid = httpSession.getId();
 			stanza.setChannelAttribute("JSESSIONID", jsessionid);
+			stanza.setChannelAttribute("SESSION", session.getSessionID());
 		}
-        
+
         if (stanza.traceEnabled()) {
             stanza.trace("received in backend");
         }
@@ -192,9 +193,9 @@ public class QueryAction extends RTAction {
         try {
             LOG.debug("{}: Got lock", Thread.currentThread());
             final Condition handled = sendLock.newCondition();
-            
-            
-            
+
+
+
             if(gate.handle(stanza, stanza.getTo(), new CustomGateAction() {
 
                 @Override
@@ -255,7 +256,7 @@ public class QueryAction extends RTAction {
             Throwable cause = (Throwable) customActionResults.get(CARESULT_EXCEPTION);
             /*
              * If the answer contains an exception that isn't a specific RealtimeException we have to wrap it into generic server error so
-             * the client gets something that he knows to handle 
+             * the client gets something that he knows to handle
              */
             RealtimeException noResultException = null;
             if(cause != null) {

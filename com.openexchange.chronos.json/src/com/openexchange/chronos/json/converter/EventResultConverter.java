@@ -83,11 +83,15 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tools.mappings.json.JsonMapping;
 import com.openexchange.java.util.TimeZones;
+import com.openexchange.resource.Resource;
+import com.openexchange.resource.ResourceService;
+import com.openexchange.resource.json.ResourceWriter;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 /**
  * {@link EventResultConverter}
  *
@@ -99,14 +103,16 @@ public class EventResultConverter implements ResultConverter {
     private static final Logger LOG = LoggerFactory.getLogger(EventResultConverter.class);
     public static final String INPUT_FORMAT = "event";
     private final ContactService contactService;
+    private final ResourceService resourceService;
 
 
     /**
      * Initializes a new {@link EventResultConverter}.
      */
-    public EventResultConverter(ContactService contactService) {
+    public EventResultConverter(ContactService contactService, ResourceService resourceService) {
         super();
         this.contactService = contactService;
+        this.resourceService = resourceService;
     }
 
     @Override
@@ -167,14 +173,23 @@ public class EventResultConverter implements ResultConverter {
         try {
             JSONObject result = EventMapper.getInstance().serialize(event, fields.toArray(new EventField[fields.size()]), timeZoneID, session);
             Map<Integer, JSONObject> contactsToLoad = new HashMap<Integer, JSONObject>();
+
             if(extendedEntities && result.has(ChronosJsonFields.ATTENDEES)) {
                 JSONArray jsonArray = result.getJSONArray(ChronosJsonFields.ATTENDEES);
                 Iterator<Object> iterator = jsonArray.iterator();
+                ServerSession serverSession = ServerSessionAdapter.valueOf(session);
                 while(iterator.hasNext()) {
                     JSONObject attendee = (JSONObject) iterator.next();
 
                     if(attendee.has(ChronosJsonFields.Attendee.ENTITY) && attendee.getString(ChronosJsonFields.Attendee.CU_TYPE).equals(CalendarUserType.INDIVIDUAL.getValue())) {
                         contactsToLoad.put(I(attendee.getInt(ChronosJsonFields.Attendee.ENTITY)), attendee);
+                    }
+
+                    if(attendee.has(ChronosJsonFields.Attendee.ENTITY) && attendee.getString(ChronosJsonFields.Attendee.CU_TYPE).equals(CalendarUserType.RESOURCE.getValue())) {
+                        Resource resource = resourceService.getResource(I(attendee.getInt(ChronosJsonFields.Attendee.ENTITY)), serverSession.getContext());
+                        if(resource != null) {
+                            attendee.put(ChronosJsonFields.Attendee.RESOURCE, ResourceWriter.writeResource(resource));
+                        }
                     }
                 }
             }

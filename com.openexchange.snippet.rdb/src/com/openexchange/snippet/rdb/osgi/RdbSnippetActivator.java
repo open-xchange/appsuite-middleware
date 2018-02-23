@@ -71,6 +71,7 @@ import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.rdb.RdbSnippetFilestoreLocationUpdater;
 import com.openexchange.snippet.rdb.RdbSnippetService;
 import com.openexchange.snippet.rdb.Services;
+import com.openexchange.snippet.rdb.groupware.RdbSnippetAddAttachmentMimeTypeAndDisposition;
 import com.openexchange.snippet.rdb.groupware.RdbSnippetAttachmentBinaryCreateTableTask;
 import com.openexchange.snippet.rdb.groupware.RdbSnippetCreateTableTask;
 import com.openexchange.snippet.rdb.groupware.RdbSnippetDeleteListener;
@@ -109,7 +110,7 @@ public class RdbSnippetActivator extends HousekeepingActivator {
              */
             RdbSnippetCreateTableTask createTableTask = new RdbSnippetCreateTableTask();
             RdbSnippetAttachmentBinaryCreateTableTask binaryCreateTableTask = new RdbSnippetAttachmentBinaryCreateTableTask();
-            registerService(UpdateTaskProviderService.class.getName(), new DefaultUpdateTaskProviderService(createTableTask, new RdbSnippetFixAttachmentPrimaryKey(), binaryCreateTableTask));
+            registerService(UpdateTaskProviderService.class.getName(), new DefaultUpdateTaskProviderService(createTableTask, new RdbSnippetFixAttachmentPrimaryKey(), binaryCreateTableTask, new RdbSnippetAddAttachmentMimeTypeAndDisposition()));
             registerService(CreateTableService.class, createTableTask);
             registerService(CreateTableService.class, binaryCreateTableTask);
             registerService(DeleteListener.class, new RdbSnippetDeleteListener());

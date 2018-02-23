@@ -49,6 +49,7 @@
 
 package com.openexchange.html.internal.jericho.handler;
 
+import static org.junit.Assert.assertTrue;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -56,13 +57,18 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.internal.util.reflection.Whitebox;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.internal.jericho.handler.FilterJerichoHandler.CellPadding;
 import com.openexchange.test.mock.MockUtils;
+import net.htmlparser.jericho.StartTag;
 
 /**
  * {@link FilterJerichoHandlerTest}
@@ -71,18 +77,21 @@ import com.openexchange.test.mock.MockUtils;
  * @since 7.6.1
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ HtmlServiceImpl.class })
+@PrepareForTest({ HtmlServiceImpl.class, StartTag.class, FilterJerichoHandler.class })
 public class FilterJerichoHandlerTest {
 
     @Mock
     private HtmlServiceImpl htmlServiceImpl;
 
     private FilterJerichoHandler filterJerichoHandler;
-
+    
+    private FilterJerichoHandler spyOnHandler;
+    
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         filterJerichoHandler = new FilterJerichoHandler(100000, htmlServiceImpl);
+        spyOnHandler = PowerMockito.spy(filterJerichoHandler);
     }
 
      @Test
@@ -199,5 +208,36 @@ public class FilterJerichoHandlerTest {
         Assert.assertEquals(1, tablePaddings.size());
         Assert.assertEquals(null, tablePaddings.getFirst().cellPadding);
         Assert.assertEquals(1, map.size());
+    }
+     
+    @Test
+    public void testMarkCssStart_DepthCalculatedCorrectly() throws Exception {
+        PowerMockito.doNothing().when(spyOnHandler, PowerMockito.method(FilterJerichoHandler.class, "addStartTag", StartTag.class, boolean.class, Map.class)).withArguments(Matchers.any(StartTag.class), Matchers.anyBoolean(), Matchers.anyMap());
+        Whitebox.setInternalState(spyOnHandler, "depth", 1);
+        StartTag startTag = PowerMockito.mock(StartTag.class);
+        spyOnHandler.markCssStart(startTag);
+        int depth = (int) Whitebox.getInternalState(spyOnHandler, "depth");
+        assertTrue("depth attribute is not 2", depth == 2);
+    }
+    
+    @Test
+    public void testMarkCssStart_SkiplevelBiggerZeroToReturn() throws Exception {
+        Whitebox.setInternalState(spyOnHandler, "skipLevel", 1);
+        StartTag startTag = PowerMockito.mock(StartTag.class);
+        spyOnHandler.markCssStart(startTag);
+        int skipLevel = (int) Whitebox.getInternalState(spyOnHandler, "skipLevel");
+        assertTrue("skipLevel attribute is not 2", skipLevel == 2);
+        PowerMockito.verifyPrivate(spyOnHandler, Mockito.times(0)).invoke("addStartTag", Matchers.any(StartTag.class), Matchers.anyBoolean(), Matchers.anyMap());
+    }
+    
+    @Test
+    public void testMarkCssStart_StartTagAddedAndCssSet() throws Exception {
+        PowerMockito.doNothing().when(spyOnHandler, PowerMockito.method(FilterJerichoHandler.class, "addStartTag", StartTag.class, boolean.class, Map.class)).withArguments(Matchers.any(StartTag.class), Matchers.anyBoolean(), Matchers.anyMap());
+        StartTag startTag = PowerMockito.mock(StartTag.class);
+        Mockito.when(startTag.getName()).thenReturn("style");
+        spyOnHandler.markCssStart(startTag);
+        boolean isCss = (boolean) Whitebox.getInternalState(spyOnHandler, "isCss");
+        assertTrue("CSS flag not set", isCss);
+        PowerMockito.verifyPrivate(spyOnHandler, Mockito.times(1)).invoke("addStartTag", Matchers.any(StartTag.class), Matchers.anyBoolean(), Matchers.anyMap());
     }
 }

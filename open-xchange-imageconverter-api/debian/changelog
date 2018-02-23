@@ -1,3 +1,9 @@
+open-xchange-imageconverter-api (7.10.0-3) stable; urgency=medium
+
+  * Third preview of 7.10.0 release
+
+ -- Kai Ahrens <kai.ahrens@open-xchange.com>  Tue, 20 Feb 2018 16:17:08 +0100
+
 open-xchange-imageconverter-api (7.10.0-2) stable; urgency=medium
 
   * Second preview for 7.10.0 release

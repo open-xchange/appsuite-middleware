@@ -401,8 +401,6 @@ public class Multiple extends SessionServlet {
         }
     }
 
-    private static final Pattern SPLIT = Pattern.compile("/");
-
     private static final String HOSTNAME = MultipleHandler.HOSTNAME;
     private static final String ROUTE = MultipleHandler.ROUTE;
     private static final String REMOTE_ADDRESS = MultipleHandler.REMOTE_ADDRESS;
@@ -439,17 +437,15 @@ public class Multiple extends SessionServlet {
                 jsonWriter.endObject();
                 return state;
             }
-            final StringBuilder moduleCandidate = new StringBuilder(32);
-            boolean handles = false;
-            for (final String component : SPLIT.split(module, 0)) {
-                moduleCandidate.append(component);
-                handles = dispatcher.handles(moduleCandidate.toString());
-                if (handles) {
-                    break;
+            String moduleCandidate = module;
+            boolean handles = dispatcher.handles(moduleCandidate);
+            if (false == handles) {
+                for (int pos; false == handles && (pos = moduleCandidate.lastIndexOf('/')) > 0;) {
+                    moduleCandidate = moduleCandidate.substring(0, pos);
+                    handles = dispatcher.handles(moduleCandidate);
                 }
-                moduleCandidate.append('/');
             }
-            if (MODULE_MAIL.equals(module)) {
+            if (handles && MODULE_MAIL.equals(module)) {
                 if (action.equalsIgnoreCase(AJAXServlet.ACTION_UPDATE)) {
                     if (MailRequest.isMove(jsonObj)) {
                         handles = false;

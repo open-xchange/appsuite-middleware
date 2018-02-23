@@ -72,8 +72,8 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.CalendarFolderProperty;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
-import com.openexchange.chronos.provider.basic.BasicCalendarProvider;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarProvider;
 import com.openexchange.chronos.provider.google.access.GoogleCalendarAccess;
 import com.openexchange.chronos.provider.google.access.GoogleOAuthAccess;
 import com.openexchange.chronos.provider.google.osgi.Services;
@@ -94,7 +94,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class GoogleCalendarProvider implements BasicCalendarProvider {
+public class GoogleCalendarProvider extends BasicCachingCalendarProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(GoogleCalendarProvider.class);
 
@@ -132,26 +132,6 @@ public class GoogleCalendarProvider implements BasicCalendarProvider {
         } catch (JSONException e) {
             throw CalendarExceptionCodes.INVALID_CONFIGURATION.create(userConfig);
         }
-    }
-
-    @Override
-    public void onAccountCreated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        // nothing to do
-    }
-
-    @Override
-    public void onAccountUpdated(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        // nothing to do
-    }
-
-    @Override
-    public void onAccountDeleted(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        // nothing to do
-    }
-
-    @Override
-    public void onAccountDeleted(Context context, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        // nothing to do
     }
 
     @Override
@@ -226,7 +206,26 @@ public class GoogleCalendarProvider implements BasicCalendarProvider {
     }
 
     @Override
-    public JSONObject configureAccount(Session session, CalendarSettings settings, CalendarParameters parameters) throws OXException {
+    public BasicCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        return new GoogleCalendarAccess(services, session, account, parameters, true);
+    }
+
+    @Override
+    public boolean isAvailable(Session session) {
+        OAuthServiceMetaDataRegistry service = Services.getService(OAuthServiceMetaDataRegistry.class);
+        if (service == null) {
+            return false;
+        }
+        try {
+            OAuthServiceMetaData metaData = service.getService(KnownApi.GOOGLE.getFullName(), session.getUserId(), session.getContextId());
+            return metaData == null ? false : metaData.isEnabled(session.getUserId(), session.getContextId());
+        } catch (OXException e) {
+            return false;
+        }
+    }
+
+    @Override
+    protected JSONObject configureAccountOpt(Session session, CalendarSettings settings, CalendarParameters parameters) throws OXException {
         JSONObject userConfig = settings.getConfig();
         int accountId = checkConfig(userConfig);
 
@@ -264,9 +263,10 @@ public class GoogleCalendarProvider implements BasicCalendarProvider {
     }
 
     @Override
-    public JSONObject reconfigureAccount(Session session, CalendarAccount calendarAccount, CalendarSettings settings, CalendarParameters parameters) throws OXException {
-        JSONObject userConfig = settings.getConfig();
-        int accountId = checkConfig(userConfig);
+    protected JSONObject reconfigureAccountOpt(Session session, CalendarAccount account, CalendarSettings settings, CalendarParameters parameters) throws OXException {
+        JSONObject config = account.getInternalConfiguration();
+        JSONObject updated = new JSONObject(config);
+        int accountId = checkConfig(config);
 
         final OAuthService oAuthService = services.getOptionalService(OAuthService.class);
         if (null == oAuthService) {
@@ -276,45 +276,64 @@ public class GoogleCalendarProvider implements BasicCalendarProvider {
         // Check existing google account
         oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
 
-        JSONObject result = new JSONObject();
         try {
-            result.put(GoogleCalendarConfigField.OAUTH_ID, accountId);
-            if (userConfig.hasAndNotNull(GoogleCalendarConfigField.FOLDER)) {
-                result.put(GoogleCalendarConfigField.FOLDER, userConfig.getString(GoogleCalendarConfigField.FOLDER));
+            updated.put(GoogleCalendarConfigField.OAUTH_ID, accountId);
+            if (config.hasAndNotNull(GoogleCalendarConfigField.FOLDER)) {
+                updated.put(GoogleCalendarConfigField.FOLDER, config.getString(GoogleCalendarConfigField.FOLDER));
             }
 
-            if (userConfig.hasAndNotNull(GoogleCalendarConfigField.COLOR)) {
-                result.put(GoogleCalendarConfigField.COLOR, userConfig.getString(GoogleCalendarConfigField.COLOR));
+            Object colorValue = optPropertyValue(settings.getExtendedProperties(), COLOR_LITERAL);
+            if (colorValue != null) {
+                updated.put(GoogleCalendarConfigField.COLOR, colorValue);
             }
 
-            if (userConfig.hasAndNotNull(GoogleCalendarConfigField.DESCRIPTION)) {
-                result.put(GoogleCalendarConfigField.DESCRIPTION, userConfig.getString(GoogleCalendarConfigField.DESCRIPTION));
+            if (config.hasAndNotNull(GoogleCalendarConfigField.DESCRIPTION)) {
+                updated.put(GoogleCalendarConfigField.DESCRIPTION, config.getString(GoogleCalendarConfigField.DESCRIPTION));
             }
         } catch (JSONException e) {
             // never happens
             LOG.debug("{}", e.getMessage(), e);
         }
-        if (result.isEqualTo(calendarAccount.getInternalConfiguration())) {
+        if (updated.isEqualTo(config)) {
             return null;
         }
-        return result;
+        return updated;
     }
 
     @Override
-    public BasicCalendarAccess connect(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
-        return new GoogleCalendarAccess(services, session, account, parameters, true);
+    protected void onAccountCreatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // Nothing to do
     }
 
     @Override
-    public boolean isAvailable(Session session) {
-        OAuthServiceMetaDataRegistry service = Services.getService(OAuthServiceMetaDataRegistry.class);
-        if (service == null) {
-            return false;
+    protected void onAccountUpdatedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // Nothing to do
+    }
+
+    @Override
+    protected void onAccountDeletedOpt(Session session, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // Nothing to do
+    }
+
+    @Override
+    protected void onAccountDeletedOpt(Context context, CalendarAccount account, CalendarParameters parameters) throws OXException {
+        // Nothing to do
+    }
+
+    @Override
+    public boolean triggerCacheInvalidation(Session session, JSONObject originUserConfiguration, JSONObject newUserConfiguration) throws OXException {
+        boolean result = checkConfig(newUserConfiguration) != checkConfig(originUserConfiguration);
+        if (result) {
+            return result;
         }
         try {
-            OAuthServiceMetaData metaData = service.getService(KnownApi.GOOGLE.getFullName(), session.getUserId(), session.getContextId());
-            return metaData == null ? false : metaData.isEnabled(session.getUserId(), session.getContextId());
-        } catch (OXException e) {
+            if (newUserConfiguration.hasAndNotNull(GoogleCalendarConfigField.FOLDER) && originUserConfiguration.hasAndNotNull(GoogleCalendarConfigField.FOLDER)) {
+                return !newUserConfiguration.get(GoogleCalendarConfigField.FOLDER).equals(originUserConfiguration.get(GoogleCalendarConfigField.FOLDER));
+            } else {
+                return newUserConfiguration.get(GoogleCalendarConfigField.FOLDER) != null;
+            }
+        } catch (JSONException e) {
+            LOG.debug("Error while comparing configured folder names: " + e.getMessage());
             return false;
         }
     }

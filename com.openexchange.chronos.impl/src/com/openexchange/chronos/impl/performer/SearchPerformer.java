@@ -74,6 +74,7 @@ import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.impl.CalendarFolder;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Utils;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SearchOptions;
@@ -128,6 +129,7 @@ public class SearchPerformer extends AbstractQueryPerformer {
      */
     public List<Event> perform(String[] folderIDs, List<SearchFilter> filters, List<String> queries) throws OXException {
         Check.minimumSearchPatternLength(queries, minimumSearchPatternLength);
+        EventField[] requestedFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
         List<CalendarFolder> folders = getFolders(folderIDs);
         EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
         SearchOptions sortOptions = new SearchOptions(session);
@@ -143,7 +145,7 @@ public class SearchPerformer extends AbstractQueryPerformer {
                     events.addAll(postProcess(Collections.singletonList(copiedEvent), folder, false, fields));
                 }
             }
-            getSelfProtection().checkEventCollection(events);
+            Check.resultSizeNotExceeded(getSelfProtection(), events, requestedFields);
         }
         return sortEvents(events);
     }

@@ -55,6 +55,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.config.lean.DefaultProperty;
@@ -73,9 +74,9 @@ public class SelfProtectionFactory {
 
     static final org.slf4j.Logger LOG = LoggerFactory.getLogger(SelfProtectionFactory.class);
 
-    private static final String PROPERTY_EVENT_LIMIT = "com.openexchange.chronos.maxEventResults";
-    private static final String PROPERTY_ATTENDEE_LIMIT = "com.openexchange.chronos.maxAttendeesPerEvent";
-    private static final String PROPERTY_ALARM_LIMIT = "com.openexchange.chronos.maxAlarmsPerEvent";
+    private static final String PROPERTY_EVENT_LIMIT = "com.openexchange.calendar.maxEventResults";
+    private static final String PROPERTY_ATTENDEE_LIMIT = "com.openexchange.calendar.maxAttendeesPerEvent";
+    private static final String PROPERTY_ALARM_LIMIT = "com.openexchange.calendar.maxAlarmsPerEvent";
 
     /**
      * Initializes a new {@link SelfProtectionFactory}.
@@ -127,6 +128,19 @@ public class SelfProtectionFactory {
          */
         public void checkEventCollection(Collection<?> collection) throws OXException {
             if (collection.size() > eventLimit) {
+                throw CalendarExceptionCodes.TOO_MANY_EVENT_RESULTS.create();
+            }
+        }
+
+        /**
+         * Checks if a {@link Collection} of events contains too many events
+         *
+         * @param collection A collections of {@link Event} objects or similar (e.g. EventIds)
+         * @param requestedFields The requested fields, or <code>null</code> if all event fields were requested
+         * @throws OXException if the collection contains too many {@link Event}s
+         */
+        public void checkEventCollection(Collection<?> collection, EventField[] requestedFields) throws OXException {
+            if (null != collection && collection.size() > eventLimit && false == CalendarUtils.containsOnlyIdentifyingFields(requestedFields)) {
                 throw CalendarExceptionCodes.TOO_MANY_EVENT_RESULTS.create();
             }
         }

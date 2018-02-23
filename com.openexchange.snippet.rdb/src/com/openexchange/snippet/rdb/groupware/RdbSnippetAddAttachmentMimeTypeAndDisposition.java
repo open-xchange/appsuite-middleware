@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,74 +47,68 @@
  *
  */
 
-package com.openexchange.ipcheck.countrycode.osgi;
+package com.openexchange.snippet.rdb.groupware;
 
-import javax.management.ObjectName;
-import com.openexchange.ajax.ipcheck.spi.IPChecker;
-import com.openexchange.geolocation.GeoLocationService;
-import com.openexchange.ipcheck.countrycode.CountryCodeIpChecker;
-import com.openexchange.ipcheck.countrycode.mbean.IPCheckMBean;
-import com.openexchange.ipcheck.countrycode.mbean.IPCheckMBeanImpl;
-import com.openexchange.ipcheck.countrycode.mbean.IPCheckMetricCollector;
-import com.openexchange.management.ManagementService;
-import com.openexchange.metrics.MetricService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.timer.TimerService;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.database.Databases;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link CountryCodeIpCheckerActivator}
+ * {@link RdbSnippetAddAttachmentMimeTypeAndDisposition}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.4
  */
-public class CountryCodeIpCheckerActivator extends HousekeepingActivator {
-
-    private IPCheckMBeanImpl metricsMBean;
+public class RdbSnippetAddAttachmentMimeTypeAndDisposition extends UpdateTaskAdapter {
 
     /**
-     * Initializes a new {@link CountryCodeIpCheckerActivator}.
+     * Initializes a new {@link RdbSnippetAddAttachmentMimeTypeAndDisposition}.
      */
-    public CountryCodeIpCheckerActivator() {
+    public RdbSnippetAddAttachmentMimeTypeAndDisposition() {
         super();
     }
 
     @Override
-    protected boolean stopOnServiceUnavailability() {
-        return true;
-    }
+    public void perform(PerformParameters params) throws OXException {
+        Connection con = params.getConnection();
+        boolean rollback = false;
+        try {
+            boolean mimeTypeExists = Tools.columnExists(con, "snippetAttachment", "mimeType");
+            boolean dispositionExists = Tools.columnExists(con, "snippetAttachment", "disposition");
+            if (mimeTypeExists && dispositionExists) {
+                return;
+            }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { GeoLocationService.class, ManagementService.class, TimerService.class, MetricService.class };
-    }
+            Databases.startTransaction(con);
+            rollback = true;
 
-    @Override
-    protected void startBundle() throws Exception {
-        CountryCodeIpChecker service = new CountryCodeIpChecker(getService(GeoLocationService.class), new IPCheckMetricCollector(getService(MetricService.class)));
-        registerService(IPChecker.class, service);
+            Column columnMimeType = new Column("mimeType", "VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL");
+            Column columnDisposition = new Column("disposition", "VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL");
+            Tools.checkAndAddColumns(con, "snippetAttachment", columnMimeType, columnDisposition);
 
-        ObjectName objectName = new ObjectName(IPCheckMBean.NAME);
-
-        metricsMBean = new IPCheckMBeanImpl(this, service);
-        ManagementService managementService = getService(ManagementService.class);
-        managementService.registerMBean(objectName, metricsMBean);
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
-     */
-    @Override
-    protected void stopBundle() throws Exception {
-        unregisterService(IPChecker.class);
-
-        if (metricsMBean != null) {
-            metricsMBean.stop();
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                DBUtils.rollback(con);
+            }
+            DBUtils.autocommit(con);
         }
-        ObjectName objectName = new ObjectName(IPCheckMBean.NAME);
-        ManagementService managementService = getService(ManagementService.class);
-        managementService.unregisterMBean(objectName);
-        super.stopBundle();
     }
+
+    @Override
+    public String[] getDependencies() {
+        return new String[] { RdbSnippetFixAttachmentPrimaryKey.class.getName() };
+    }
+
 }

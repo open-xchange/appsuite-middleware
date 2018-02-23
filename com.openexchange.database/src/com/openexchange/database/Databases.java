@@ -110,7 +110,7 @@ public final class Databases {
             try {
                 closeable.close();
             } catch (Exception e) {
-                LOG.error("", e);
+                LOG.error("Failed to close {}", closeable.getClass().getName(), e);
             }
         }
     }
@@ -138,7 +138,7 @@ public final class Databases {
             try {
                 result.close();
             } catch (SQLException e) {
-                LOG.error("", e);
+                LOG.error("Failed to close result-set", e);
             }
         }
     }
@@ -166,7 +166,7 @@ public final class Databases {
             try {
                 stmt.close();
             } catch (SQLException e) {
-                LOG.error("", e);
+                LOG.error("Failed to close statement", e);
             }
         }
     }
@@ -263,7 +263,7 @@ public final class Databases {
         try {
             con.rollback();
         } catch (SQLException e) {
-            LOG.error("", e);
+            LOG.error("Failed to perform a roll-back.", e);
         }
     }
 
@@ -279,7 +279,7 @@ public final class Databases {
         try {
             con.setAutoCommit(true);
         } catch (SQLException e) {
-            LOG.error("", e);
+            LOG.error("Failed to set auto-commit mode", e);
         }
     }
 

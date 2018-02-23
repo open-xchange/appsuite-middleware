@@ -92,6 +92,7 @@ import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.resource.ResourceService;
 
 /**
  * {@link ChronosJsonActivator}
@@ -104,7 +105,7 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
-            IDBasedCalendarAccessFactory.class, CalendarUtilities.class, CalendarService.class, LeanConfigurationService.class, CalendarAccountService.class, ConversionService.class, ITipActionPerformerFactoryService.class, ContactService.class
+            IDBasedCalendarAccessFactory.class, CalendarUtilities.class, CalendarService.class, LeanConfigurationService.class, CalendarAccountService.class, ConversionService.class, ITipActionPerformerFactoryService.class, ContactService.class, ResourceService.class
         };
     }
 
@@ -150,16 +151,17 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
             });
 
             ContactService contactService = getServiceSafe(ContactService.class);
+            ResourceService resourceService = getServiceSafe(ResourceService.class);
 
             /*
              * register result converters
              */
             registerService(ResultConverter.class, new FreeBusyConverter());
-            registerService(ResultConverter.class, new EventResultConverter(contactService));
-            registerService(ResultConverter.class, new EventsPerFolderResultConverter(contactService));
+            registerService(ResultConverter.class, new EventResultConverter(contactService, resourceService));
+            registerService(ResultConverter.class, new EventsPerFolderResultConverter(contactService, resourceService));
             registerService(ResultConverter.class, new EventConflictResultConverter());
-            registerService(ResultConverter.class, new CalendarResultConverter(contactService));
-            registerService(ResultConverter.class, new MultipleCalendarResultConverter(contactService));
+            registerService(ResultConverter.class, new CalendarResultConverter(contactService, resourceService));
+            registerService(ResultConverter.class, new MultipleCalendarResultConverter(contactService, resourceService));
             registerService(ResultConverter.class, new AlarmTriggerConverter());
             registerService(ResultConverter.class, new ITipAnalysisResultConverter());
             /*

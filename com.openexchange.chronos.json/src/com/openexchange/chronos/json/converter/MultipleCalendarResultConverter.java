@@ -72,6 +72,7 @@ import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
+import com.openexchange.resource.ResourceService;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -88,8 +89,8 @@ public class MultipleCalendarResultConverter extends CalendarResultConverter {
      *
      * @param contactService
      */
-    public MultipleCalendarResultConverter(ContactService contactService) {
-        super(contactService);
+    public MultipleCalendarResultConverter(ContactService contactService, ResourceService  resourceService) {
+        super(contactService, resourceService);
     }
 
     public static final String INPUT_FORMAT = "calendarResults";
