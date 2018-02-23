@@ -783,6 +783,14 @@ public class EventPatches {
                     }
                     patchedAlarms.add(alarm);
                 }
+                /*
+                 * finally remove default "ACKNOWLEDGED" properties from alarms for lightning (results in parse error in client)
+                 */
+                if (DAVUserAgent.THUNDERBIRD_LIGHTNING.equals(resource.getUserAgent())) {
+                    for (Alarm alarm : patchedAlarms) {
+                        alarm.removeAcknowledged();
+                    }
+                }
                 exportedEvent.setAlarms(patchedAlarms);
             }
             return exportedEvent;
