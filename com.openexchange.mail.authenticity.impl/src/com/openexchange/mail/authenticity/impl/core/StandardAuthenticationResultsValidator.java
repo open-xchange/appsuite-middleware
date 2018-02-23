@@ -109,7 +109,7 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
     /**
      * Initializes a new {@link StandardAuthenticationResultsValidator}.
      */
-    private StandardAuthenticationResultsValidator() {
+    protected StandardAuthenticationResultsValidator() {
         super();
         mailAuthComparator = new MailAuthenticityMechanismComparator();
         mechanismParsersRegistry = initialiseMechanismRegistry();
