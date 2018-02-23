@@ -122,7 +122,7 @@ As an example, the "Login Counter" interface (which is also used by the
 }
 ```
 
-A more detailed documentation on how to use the Jolokia interface can be found [here](http://www.jolokia.org/reference/html/protocol.html). Furthermore, [here] (http://www.jolokia.org/reference/html/protocol.html#serialization) you can find documentation of the list of datatypes that can be passed as arguments and received in return values.
+A more detailed documentation on how to use the Jolokia interface can be found [here](http://www.jolokia.org/reference/html/protocol.html). Furthermore, [here](http://www.jolokia.org/reference/html/protocol.html#serialization) you can find documentation of the list of datatypes that can be passed as arguments and received in return values.
 
 More information about the parameters `p1`, `p2`, etc. can be found at the [source code](http://oxpedia.org/wiki/index.php?title=SourceCodeAccess).
 
