@@ -223,7 +223,7 @@ public class UserizedFileStorageFolder extends DefaultFileStorageFolder implemen
 
     @Override
     public FolderPath getOrigin() {
-        return FolderPath.parseFrom(folder.getOriginPath().toString());
+        return folder.getOriginPath() == null ? null : FolderPath.parseFrom(folder.getOriginPath().toString());
     }
 
 }
