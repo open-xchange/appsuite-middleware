@@ -106,7 +106,7 @@ public class MetricServiceImpl implements MetricService {
     }
 
     @Override
-    public Timer timer(String group, String name) {
+    public Timer getTimer(String group, String name) {
         return registry.timer(MetricRegistry.name(group, name));
     }
 
@@ -137,7 +137,7 @@ public class MetricServiceImpl implements MetricService {
     }
 
     @Override
-    public Meter meter(String group, String name) {
+    public Meter getMeter(String group, String name) {
         return registry.meter(MetricRegistry.name(group, name));
     }
 
@@ -186,7 +186,7 @@ public class MetricServiceImpl implements MetricService {
 
             Map<MetricType, BiFunction<Metric, MetricMetadata, MetricMBean>> c = new HashMap<>();
             c.put(MetricType.COUNTER, (metric, metricMetadata) -> MetricMBeanFactory.counter(metric));
-            c.put(MetricType.TIMER, (metric, metricMetadata) -> MetricMBeanFactory.timer(metric, metricMetadata));
+            c.put(MetricType.TIMER, (metric, metricMetadata) -> MetricMBeanFactory.getTimer(metric, metricMetadata));
             c.put(MetricType.METER, (metric, metricMetadata) -> MetricMBeanFactory.meter(metric, metricMetadata));
             c.put(MetricType.HISTOGRAM, (metric, metricMetadata) -> MetricMBeanFactory.histogram(metric));
             c.put(MetricType.GAUGE, (metric, metricMetadata) -> MetricMBeanFactory.gauge(metric));

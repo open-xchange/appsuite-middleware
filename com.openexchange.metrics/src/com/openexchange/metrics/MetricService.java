@@ -84,7 +84,7 @@ public interface MetricService {
      * @param name The metric name
      * @return the metric instance
      */
-    Timer timer(String group, String name);
+    Timer getTimer(String group, String name);
 
     /**
      * Gets an existing {@link Counter} for the given name or creates and

@@ -57,8 +57,8 @@ import com.amazonaws.metrics.RequestMetricCollector;
 import com.amazonaws.util.AWSRequestMetrics;
 import com.amazonaws.util.AWSRequestMetrics.Field;
 import com.amazonaws.util.TimingInfo;
-import com.codahale.metrics.Timer;
 import com.openexchange.metrics.MetricService;
+import com.openexchange.metrics.types.Timer;
 
 /**
  * {@link S3FileStorageRequestMetricCollector}
@@ -101,17 +101,19 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
             AWSRequestMetrics metrics = request.getAWSRequestMetrics();
             TimingInfo timingInfo = metrics.getTimingInfo();
             Double timeTakenMillisIfKnown = timingInfo.getTimeTakenMillisIfKnown();
-            if (timeTakenMillisIfKnown != null) {
-                long longValue = timeTakenMillisIfKnown.longValue();
-                Field predefined = (Field) type;
-                switch (predefined) {
-                    case ClientExecuteTime:
-                        String methodName = request.getHttpMethod().name();
-                        Timer timer = this.metrics.timer("s3", "RequestTimes." + methodName);
-                        timer.update(longValue, TimeUnit.MILLISECONDS);
-                    default:
-                        break;
-                }
+            if (timeTakenMillisIfKnown == null) {
+                return;
+            }
+
+            long longValue = timeTakenMillisIfKnown.longValue();
+            Field predefined = (Field) type;
+            switch (predefined) {
+                case ClientExecuteTime:
+                    String methodName = request.getHttpMethod().name();
+                    Timer timer = this.metrics.getTimer("s3", "RequestTimes." + methodName);
+                    timer.update(longValue, TimeUnit.MILLISECONDS);
+                default:
+                    break;
             }
         }
     }

@@ -52,18 +52,18 @@ package com.openexchange.metrics.dropwizard.types;
 import com.openexchange.metrics.types.Gauge;
 
 /**
- * {@link DropwizardLongGauge}
+ * {@link DropwizardGauge}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DropwizardLongGauge implements Gauge<Long> {
+public class DropwizardGauge implements Gauge<Object> {
 
-    private com.codahale.metrics.Gauge<Long> delegate;
+    private com.codahale.metrics.Gauge<Object> delegate;
 
     /**
-     * Initialises a new {@link DropwizardLongGauge}.
+     * Initialises a new {@link DropwizardGauge}.
      */
-    public DropwizardLongGauge(com.codahale.metrics.Gauge<Long> gauge) {
+    public DropwizardGauge(com.codahale.metrics.Gauge<Object> gauge) {
         super();
         this.delegate = gauge;
     }
@@ -74,7 +74,7 @@ public class DropwizardLongGauge implements Gauge<Long> {
      * @see com.openexchange.metrics.types.Gauge#getValue()
      */
     @Override
-    public Long getValue() {
+    public Object getValue() {
         return delegate.getValue();
     }
 }

@@ -53,7 +53,11 @@ import java.util.function.Supplier;
 import com.codahale.metrics.MetricRegistry;
 import com.openexchange.metrics.MetricService;
 import com.openexchange.metrics.descriptors.MeterDescriptor;
+import com.openexchange.metrics.dropwizard.types.DropwizardCounter;
+import com.openexchange.metrics.dropwizard.types.DropwizardHistogram;
+import com.openexchange.metrics.dropwizard.types.DropwizardGauge;
 import com.openexchange.metrics.dropwizard.types.DropwizardMeter;
+import com.openexchange.metrics.dropwizard.types.DropwizardTimer;
 import com.openexchange.metrics.types.Counter;
 import com.openexchange.metrics.types.Gauge;
 import com.openexchange.metrics.types.Histogram;
@@ -65,6 +69,7 @@ import com.openexchange.metrics.types.Timer;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
+// FIXME: Create a new delegate everytime? Maybe cache?
 public class DropwizardMetricService implements MetricService {
 
     private final MetricRegistry registry;
@@ -84,8 +89,7 @@ public class DropwizardMetricService implements MetricService {
      */
     @Override
     public Histogram getHistogram(String group, String name) {
-        // TODO Auto-generated method stub
-        return null;
+        return new DropwizardHistogram(registry.histogram(MetricRegistry.name(group, name)));
     }
 
     /*
@@ -94,9 +98,8 @@ public class DropwizardMetricService implements MetricService {
      * @see com.openexchange.metrics.MetricService#timer(java.lang.String, java.lang.String)
      */
     @Override
-    public Timer timer(String group, String name) {
-        // TODO Auto-generated method stub
-        return null;
+    public Timer getTimer(String group, String name) {
+        return new DropwizardTimer(registry.timer(MetricRegistry.name(group, name)));
     }
 
     /*
@@ -106,8 +109,7 @@ public class DropwizardMetricService implements MetricService {
      */
     @Override
     public Counter getCounter(String group, String name) {
-        // TODO Auto-generated method stub
-        return null;
+        return new DropwizardCounter(registry.counter(MetricRegistry.name(group, name)));
     }
 
     /*
@@ -117,8 +119,7 @@ public class DropwizardMetricService implements MetricService {
      */
     @Override
     public <T> Gauge<T> getGauge(String group, String name, Supplier<T> metricSupplier) {
-        // TODO Auto-generated method stub
-        return null;
+        return new DropwizardGauge(registry.gauge(MetricRegistry.name(group, name), metricSupplier));
     }
 
     /*
@@ -128,7 +129,6 @@ public class DropwizardMetricService implements MetricService {
      */
     @Override
     public Meter meter(MeterDescriptor descriptor) {
-        // FIXME: Create a new delegate everytime? Maybe cache?
         return new DropwizardMeter(registry.meter(MetricRegistry.name(descriptor.getGroup(), descriptor.getName())));
     }
 }

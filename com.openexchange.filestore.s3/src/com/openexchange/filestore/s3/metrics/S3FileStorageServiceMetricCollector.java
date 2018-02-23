@@ -54,8 +54,8 @@ import com.amazonaws.metrics.ServiceLatencyProvider;
 import com.amazonaws.metrics.ServiceMetricCollector;
 import com.amazonaws.metrics.ThroughputMetricType;
 import com.amazonaws.services.s3.metrics.S3ServiceMetric;
-import com.codahale.metrics.Meter;
 import com.openexchange.metrics.MetricService;
+import com.openexchange.metrics.types.Meter;
 
 /**
  * {@link S3FileStorageServiceMetricCollector}
@@ -88,7 +88,8 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
         } else if (throughputMetricType == S3ServiceMetric.S3UploadThroughput) {
             name = "UploadThroughput";
         }
-        Meter meter = metrics.meter("s3", name);
+        
+        Meter meter = metrics.getMeter("s3", name);
         int bytes = provider.getByteCount();
         meter.mark(Integer.toUnsignedLong(bytes));
     }
