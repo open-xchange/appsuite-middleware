@@ -128,6 +128,7 @@ public class DropwizardMetricService implements MetricService {
      */
     @Override
     public Meter meter(MeterDescriptor descriptor) {
+        // FIXME: Create a new delegate everytime? Maybe cache?
         return new DropwizardMeter(registry.meter(MetricRegistry.name(descriptor.getGroup(), descriptor.getName())));
     }
 }

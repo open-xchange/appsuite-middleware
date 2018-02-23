@@ -75,8 +75,8 @@ public class MeterMBeanImpl extends AbstractMetricMBean implements MeterMBean {
     public MeterMBeanImpl(Metered meter, String rateItem, TimeUnit rateUnit) throws NotCompliantMBeanException {
         super(DESCRIPTION, MeterMBean.class);
         this.meter = meter;
-        this.rateFactor = TimeUnit.SECONDS.toSeconds(1); // TODO
-        this.rateUnit = rateItem + "/" + calculateRateUnit(TimeUnit.SECONDS); // TODO
+        this.rateFactor = rateUnit.toSeconds(1);
+        this.rateUnit = rateItem + "/" + calculateRateUnit(rateUnit);
     }
 
     /**
@@ -87,8 +87,8 @@ public class MeterMBeanImpl extends AbstractMetricMBean implements MeterMBean {
     protected MeterMBeanImpl(String description, Class<?> mbeanInterface, Metered meter, String rateItem, TimeUnit rateUnit) throws NotCompliantMBeanException {
         super(description, mbeanInterface);
         this.meter = meter;
-        this.rateFactor = TimeUnit.SECONDS.toSeconds(1); // TODO
-        this.rateUnit = rateItem + "/" + calculateRateUnit(TimeUnit.SECONDS); // TODO
+        this.rateFactor = rateUnit.toSeconds(1);
+        this.rateUnit = rateItem + "/" + calculateRateUnit(rateUnit);
     }
 
     /**
