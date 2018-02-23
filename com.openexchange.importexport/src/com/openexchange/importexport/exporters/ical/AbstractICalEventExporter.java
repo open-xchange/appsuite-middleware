@@ -144,6 +144,8 @@ public abstract class AbstractICalEventExporter extends AbstractICalExporter {
             if (event.getAttendees().size() > 1) {
                 event.setAttendees(Collections.singletonList(CalendarUtils.find(event.getAttendees(), session.getUserId())));
             }
+        } else if (CalendarUtils.isOrganizer(event, session.getUserId())) {
+            event.removeAttendees();
         } else {
             event.removeAttendees();
             event.removeOrganizer();
