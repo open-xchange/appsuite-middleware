@@ -76,8 +76,13 @@ public enum SchedJoulesProperty implements Property {
      * The scheme used to contact the SchedJoules API.
      * Defaults to 'https'
      */
-    scheme("https");
-
+    scheme("https"),
+    /**
+     * Defines a comma separated blacklist for itemIds of SchedJoules calendars and pages that should be hidden from
+     * the end user.
+     * Default: empty
+     */
+    itemBlacklist;
 
     private final String fqn;
     private final Object defaultValue;
