@@ -49,7 +49,6 @@
 
 package com.openexchange.caldav;
 
-import static com.openexchange.chronos.common.AlarmUtils.addExtendedProperty;
 import static com.openexchange.chronos.common.CalendarUtils.addExtendedProperty;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
@@ -730,17 +729,12 @@ public class EventPatches {
                 for (Alarm exportedAlarm : exportedAlarms) {
                     Alarm alarm = exportedAlarm;
                     /*
-                     * also supply the acknowledged date via X-MOZ-LASTACK
+                     * also supply the acknowledged date via X-MOZ-LASTACK, both in alarm and parent event component
                      */
                     if (null != exportedAlarm.getAcknowledged()) {
                         ExtendedProperty mozLastAckProperty = new ExtendedProperty("X-MOZ-LASTACK", Tools.formatAsUTC(exportedAlarm.getAcknowledged()));
-                        addExtendedProperty(exportedAlarm, mozLastAckProperty, true);
-                        /*
-                         * also store X-MOZ-LASTACK in parent component for recurring events
-                         */
-                        if (isSeriesMaster(exportedEvent)) {
-                            addExtendedProperty(exportedEvent, mozLastAckProperty);
-                        }
+                        alarm.setExtendedProperties(addExtendedProperty(alarm.getExtendedProperties(), mozLastAckProperty, true));
+                        exportedEvent.setExtendedProperties(addExtendedProperty(exportedEvent.getExtendedProperties(), mozLastAckProperty, true));
                     }
                     Alarm snoozedAlarm = AlarmUtils.getSnoozedAlarm(alarm, exportedAlarms);
                     if (null != snoozedAlarm) {

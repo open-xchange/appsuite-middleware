@@ -1524,6 +1524,24 @@ public class CalendarUtils {
     }
 
     /**
+     * Adds an extended property to an extended properties container, optionally initializing a new one automatically.
+     *
+     * @param extendedProperties The extended properties container to add the property to, or <code>null</code> to initialize a new one
+     * @param extendedProperty The extended property to add
+     * @param removeExisting <code>true</code> to remove any existing extended property with the same name, <code>false</code>, otherwise
+     * @return The adjusted extended properties container, or a new extended properties instance as needed
+     */
+    public static ExtendedProperties addExtendedProperty(ExtendedProperties extendedProperties, ExtendedProperty extendedProperty, boolean removeExisting) {
+        if (null == extendedProperties) {
+            extendedProperties = new ExtendedProperties();
+        } else if (removeExisting) {
+            extendedProperties.removeAll(extendedProperty.getName());
+        }
+        extendedProperties.add(extendedProperty);
+        return extendedProperties;
+    }
+
+    /**
      * Optionally gets (the first) extended property of a specific name of a calendar.
      *
      * @param calendar The calendar to get the extended property from
