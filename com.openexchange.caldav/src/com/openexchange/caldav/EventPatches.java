@@ -50,6 +50,7 @@
 package com.openexchange.caldav;
 
 import static com.openexchange.chronos.common.AlarmUtils.addExtendedProperty;
+import static com.openexchange.chronos.common.CalendarUtils.addExtendedProperty;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
@@ -804,15 +805,8 @@ public class EventPatches {
          * @return The patched event
          */
         private static Event removeImplicitAttendee(EventResource resource, Event exportedEvent) {
-            List<Attendee> attendees = exportedEvent.getAttendees();
-            try {
-                if (null != attendees && 1 == attendees.size() && resource.getParent().getCalendarUser().getId() == attendees.get(0).getEntity() &&
-                    false == PublicType.getInstance().equals(resource.getParent().getFolder().getType())) {
-                    exportedEvent.removeAttendees();
-                    exportedEvent.removeOrganizer();
-                }
-            } catch (OXException e) {
-                LOG.warn("Error removing implicit event attendee", e);
+            if (false == PublicType.getInstance().equals(resource.getParent().getFolder().getType())) {
+                CalendarUtils.removeImplicitAttendee(exportedEvent);
             }
             return exportedEvent;
         }

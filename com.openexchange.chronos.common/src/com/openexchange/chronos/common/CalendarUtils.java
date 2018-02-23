@@ -1426,6 +1426,24 @@ public class CalendarUtils {
     }
 
     /**
+     * Removes the implicitly added attendee for pseudo-<i>group-scheduled</i> events, along with any organizer information, in case there
+     * are no additional attendees present in the event.
+     * <p/>
+     * This effectively makes the event to not appear as <i>meeting</i> in clients, as well as allowing modifications on it.
+     *
+     * @param event The event to adjust
+     * @return <code>true</code> if the event was pseudo-group-scheduled and the attendee and organizer were removed, <code>false</code> otherwise
+     */
+    public static boolean removeImplicitAttendee(Event event) {
+        if (isPseudoGroupScheduled(event)) {
+            event.removeAttendees();
+            event.removeOrganizer();
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Gets a value indicating whether an event represents an <i>attendee scheduling object resource</i> or not, i.e. a group-scheduled
      * event the calendar user attends, organized by a different entity.
      *
