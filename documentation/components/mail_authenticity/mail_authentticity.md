@@ -48,6 +48,8 @@ foobar.com.       300     IN      MX      20 mx2.foobar.com.
 
 ```
 
+The `TXT` record indicates that an `SPF` entry has been added for the mail servers `mx1.foobar.com` and `mx2.foobar.com` and the authorised domains that are allowed to send e-mail from those servers are `foobar.org` and `foobar.net`. More information about the syntax of the `TXT` record regarding the `SPF` can be found [here](https://www.digitalocean.com/community/tutorials/how-to-use-an-spf-record-to-prevent-spoofing-improve-e-mail-reliability) and in the [RFC-7208, Section 3](https://tools.ietf.org/html/rfc7208#section-3).
+
 Now, when an e-mail is being send from a person within that domain a special header is attached to the e-mail that is the `Received-SPF`:
 
 ```mail
@@ -87,6 +89,7 @@ foobar.com.       298     IN      NS      dns1.somedns.com.
 [...]
 
 ```
+The `TXT` record indicates that a RSA-encrypted `DKIM` signature has been added for the domain foobar.com with the specified public key which is BASE64-Encoded. More information about the DNS entry for `DKIM` can be found in the [RFC-6376, Section 7.5](https://tools.ietf.org/html/rfc6376#section-7.5).
 
 When an e-mail is being sent from a domain that has DKIM signature enabled, then the respecive header will appear on the mail message indicating that.
 
@@ -124,6 +127,7 @@ _dmarc.foobar.com. 600    IN      TXT     "v=DMARC1;p=none;rua=mailto:dmarc-repo
 [...]
 
 ```
+The `TXT` record indicates that a `DMARC` entry has been added for the `foobar.com` domain, with policy `none`. It is also configured that reports will be sent to the spceified e-mail address. More information about the syntaxt of a `DMARC` DNS record can be found in [RFC-7489, Section 6.1](https://tools.ietf.org/html/rfc7489#section-6.1).
 
 The results of DMARC are attached to a special e-mail header `Authentication-Results` ([RFC-7601](https://tools.ietf.org/html/rfc7601)) and are applied by the inbound MTA after validation and policy enforcement. Then MUAs that support that header, interpret it and act accordingly by notifying the user.
 
