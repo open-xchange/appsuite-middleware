@@ -28,7 +28,7 @@ The Email Authentication is actually a collection of different authentication me
  
 ### SPF (Sender Policy Framework)
 
-The way `SPF` works is as follows. The domain owner publishes  a DNS record listing all servers that are allowed to send out emails fro that domain. Additionally it may contain a policy on how to deal with illegitimate senders. Those policies are: NEUTRAL, SOFTFAIL and FAIL.
+The way `SPF` works is as follows. The domain owner publishes a DNS record listing all servers that are allowed to send out emails from that domain. Additionally it may contain a policy on how to deal with illegitimate senders. Those policies are: NEUTRAL, SOFTFAIL and FAIL.
 
 The SPF relies only on the `Return-Path` header and usually that's one of the reasons that mail forwarding often breaks, i.e. mailing lists that don't rewrite the `Return-Path` header might not be able to deliver emails for SPF-secured sender domains.
 
@@ -48,7 +48,7 @@ foobar.com.       300     IN      MX      20 mx2.foobar.com.
 
 ```
 
-Now, when an e-mail is being send from a person within that domain a special header is attached to the e-mail that is the`Received-SPF`:
+Now, when an e-mail is being send from a person within that domain a special header is attached to the e-mail that is the `Received-SPF`:
 
 ```mail
 Delivered-To: alice@aliceland.com
@@ -68,9 +68,9 @@ In this case bob from the domain `foobar.com` sent an e-mail to alice in the `al
 
 The DKIM on the other hand instead of verifying the origin of the mail, it deploys digital signatures to guarantee that the portions of the message were not altered, forged or faked along the way. Much like the sealing wax sigils in the old ages but in digital form ;-)
 
-The domain owner publishes a DNS record containing a public key to verify digital signatures. All outgoing e-mails from that domain are then signed with the according private key. The signature that is used to sign those message usually consists out of the hashed body and the `From` header. Other headers can be used  as well. This way if the signed parts of the message are somewhat altered then the digital signature won't be valid anymore, hence the DKIM authentication will fail.
+The domain owner publishes a DNS record containing a public key to verify digital signatures. All outgoing e-mails from that domain are then signed with the according private key. The signature that is used to sign those message usually consists out of the hashed body and the `From` header. Other headers can be used as well. This way if the signed parts of the message are somewhat altered then the digital signature won't be valid anymore, hence the DKIM authentication will fail.
 
-The digital signatures are added as `DKIM-Signature` headers to the e-mail. Every time an e-mail passes through an MTA, that MTA can apply a valid signature in the name of any domain. As long as the intermediate relays do not change any of the signed parts of the message then the DKIM signature(s) remain valid.
+The digital signatures are added as `DKIM-Signature` headers to the e-mail. Every time an e-mail passes through a MTA, that MTA can apply a valid signature in the name of any domain. As long as the intermediate relays do not change any of the signed parts of the message then the DKIM signature(s) remain valid.
 
 In order to check whether a domain has a DKIM signature the `dig` command can be used:
 
@@ -107,7 +107,7 @@ The signature can be verified at any hop by retrieving the public key from the D
 
 ### DMARC (Domain-based Message Authentication, Reporting, and Conformance)
 
-The DMARC is built on top of SPF and DKIM and unifies both mechanisms. The domain owner publishes a policy denoting whether she is using SPF and/or DKIM and how e-mail receivers should deal with validation failures. Possible policies are: `none`, `quarantine` and `reject`. In addition an e-mail address is published where aggregated reports about successul validations and failures shall be sent to. This policy is publised as a DNS record.
+The DMARC is built on top of SPF and DKIM and unifies both mechanisms. The domain owner publishes a policy denoting whether she is using SPF and/or DKIM and how e-mail receivers should deal with validation failures. Possible policies are: `none`, `quarantine` and `reject`. In addition an e-mail address is published where aggregated reports about successul validations and failures shall be sent to. This policy is published as a DNS record.
 
 Receivers extract the domain part from the `From` headers, fetch the DMARC policies and perform SPF and/or DKIM checks based on that, adhering to the failure policies.
 
@@ -144,15 +144,15 @@ Now, let's see how all the pieces of the puzzle fit together. This is illustrate
 
 The Alice is the domain owner of the `example.com` domain and she publishes the DNS records for the authentication mechanisms she has enabled for her mail servers. The mail servers of her domain are also configured for using those authentication mechanisms.
 
-A user sends an e-mail to Bob at `bob@acme.org` from the `example.com` domain. That e-mail is sent via the `example.com` submission host in Alice's domain. The e-mail then is being transfered to the relay host in the same domain and the DKIM signature is calculated for that e-mail message. The message arrives at the `acme.org` mail exchange server. The `acme.org` mail exchange server it then fetches the DMARC, DKIM and SPF records from the DNS server and begins processing the e-mail, that is checking for viruses, checking for the DMARC policy of the "From" domain (`p=....` part in the DNS record), it then verifies the SPF and enforces the SPC and DMARC policy (if applicable), verifies the DKIM signature (and again enforces the DMARC policy) and in the end adds the results in the `Authentication-Results` header of the e-mail. The message then it is being stored in the `acme.org`'s mail store.
+A user sends an e-mail to Bob at `bob@acme.org` from the `example.com` domain. That e-mail is sent via the `example.com` submission host in Alice's domain. The e-mail then is being transfered to the relay host in the same domain and the DKIM signature is calculated for that e-mail message. The message arrives at the `acme.org` mail exchange server. The `acme.org` mail exchange server then fetches the DMARC, DKIM and SPF records from the DNS server and begins processing the e-mail, that is checking for viruses, checking for the DMARC policy of the "From" domain (`p=....` part in the DNS record), it then verifies the SPF and enforces the SPC and DMARC policy (if applicable), verifies the DKIM signature (and again enforces the DMARC policy) and in the end adds the results in the `Authentication-Results` header of the e-mail. The message is then being stored in the `acme.org`'s mail store.
 
-Bob checks his e-mail messages via the MUA (in this case the OX AppSuite). The header is being analysed by the OX middleware, an overal status is set, the UI then highlights the authentication status for that mesage and finally is being displayed to Bob. Bob opens the e-mail, interprets the authentication status and decides his further actions regarding that message.
+Bob checks his e-mail messages via the MUA (in this case the OX AppSuite). The header is being analysed by the OX middleware, an overal status is set and the UI highlights the authentication status for that mesage to Bob. Bob opens the e-mail, interprets the authentication status and decides his further actions regarding that message.
 
-Worthing noting is that between the `example.com` mail relay server and the `acme.org` mail exchange server there might be also some more mail relay hops, some might have DKIM enabled, some SPF, some none at all. The in-between mail hops may or may not apply further mail authentication mechanisms. Everytime a mail authentication mechansim is applied, a new header in the e-mail will reflect that.
+It is worth noting that between the `example.com` mail relay server and the `acme.org` mail exchange server there might be also some more mail relay hops, some might have DKIM enabled, some SPF, some none at all. The in-between mail hops may or may not apply further mail authentication mechanisms. Everytime a mail authentication mechansim is applied, a new header in the e-mail will reflect that.
   
 ## Header Analysis
 
-As explained before, all the authentication mechanism results are collected and summarised in the `Authentication-Results` header. An e-mail may contain none, one or more such headers. The OX middleware relies on those headers to determine whether an e-mail is safe or not.
+As explained before, all the authentication mechanism results are collected and summarised in the `Authentication-Results` header. An e-mail may contain none, one or more of such headers. The OX middleware relies on those headers to determine whether an e-mail is safe or not.
 
 ### Header Structure
 
@@ -166,11 +166,11 @@ Authentication-Results: mx.aliceland.com;
 	dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=foobar.com
 ```
 
-There are different statuses for each mechanism defined in their respective RFCs, but in general there are only three that are relevant for the end user, whether the mechanism: a) passed the validation, b) whether it failed, c) whether an error occurred. The OX middleware takes into consideration all different statuses and based on a decision matrix it marks each e-mail with an overall status of either `pass`, `fail`, or `neutral`. The OX middleware also assigns the `not-analyzed` status but the purpose of that is explained in a later section.
+There are different statuses for each mechanism defined in their respective RFCs, but in general there are only three that are relevant for the end user, whether the mechanism: a) passed the validation, b) failed it or c) an error occurred. The OX middleware takes into consideration all different statuses and based on a decision matrix it marks each e-mail with an overall status of either `pass`, `fail`, or `neutral`. The OX middleware also assigns the `not-analyzed` status but the purpose of that is explained in a later section.
 
 ### Header Evaluation
 
-First things first, the existence of the `Authentication-Results` header(s) is checked. If no such header exists, then the message is marked as `neutral`. In case there are multiple `Authentcation-Results` headers then all of them are evaluated (top to bottom).
+First things first, the existence of the `Authentication-Results` header(s) is checked. If no such header exists, then the message is marked as `neutral`. In case there are multiple `Authentication-Results` headers then all of them are evaluated (top to bottom).
 
 Then the existence and validation of the `authserv-id` takes place. It is possible to configure the middleware in a way that only certain `authserv-id`s are considered as safe for a specific setup. In the [Configuration](#Configuration) section it is described how to configure that setting. If the `authserv-id` string is missing from the `Authentication-Results` header, then that header is being completely ignored from the evaluation. If it's the only `Authentication-Results` header in the message, then that message will be marked as `neutral`, otherwise the algorithm will process the next header.
 
@@ -182,7 +182,7 @@ When all evaluation and parsing of the single mechanisms is done, the overall st
 
 If the `DMARC` status is `fail` then the overall result of the message is set to `fail`. If the `DMARC` status is `pass` and there is a domain match then the overall status is set to `pass`. If `DMARC` is not present or its status is set to other than `pass` and there is no domain match, then the `DKIM` mechanism is checked. 
 
-If the `DKIM` status is `pass` and there is a domain match, then the overall status is set to `pass`, or to `neutral` if there is no domain match. If the `DKIM` status is other than `pass` or `fail`, then that status is set as the overall status.
+If the `DKIM` status is `pass` and there is a domain match, then the overall status is set to `pass`, or to `neutral` if there is no domain match. If the `DKIM` status is `fail` or if it is other than `pass`, then that status is set as the overall status.
 
 Last, the `SPF` status is evaluated. Always depending on whether there is a domain match, the overall status is set to `pass` if the `SPF` status is also set to `pass`. Otherwise, it will be set to `neutral` or `fail` depending on whether the `DKIM` mechanism failed previously. An overal status of `neutral` or `fail` is also set when the status of `SPF` is neutral and there is or isn't a domain match respectively.
 
@@ -210,7 +210,7 @@ The entire decision algorithm is summed up in the following table:
 <span style="color: red">fail</span>       | <span style="color: red"> fail </span>     | <span style="color: red">No</span>              | <span style="color: red">fail</span>
 
 
-Please note that the headers of messages in the "Drafts" or "Sent" folder are not analysed. Furthermore, only messages that existing within the primary account of a user are evaluated.
+Please note that the headers of messages in the "Drafts" or "Sent" folder are not analysed. Furthermore, only messages of the primary account of a user are evaluated.
 
 ## API Enhancements
 
@@ -235,9 +235,9 @@ Documentation for the required properties of the feature can be found [here](htt
 
 ### How to enable
 
-In general the feature can be enabled with the property `com.openexchange.mail.authenticity.enabled` which by default is set to `false`
+In general the feature can be enabled with the property `com.openexchange.mail.authenticity.enabled` which by default is set to `false`.
 
-Once enabled on the middleware, a boolean JSlob entry under `io.ox/mail//features/authenticity` should be visibile on the JSON layer. It's existance can be verified with a simple `GET` call over the jslob module, e.g.
+Once enabled a boolean JSlob entry under `io.ox/mail//features/authenticity` indicates that to the client. It's existance can be verified with a simple `GET` call over the jslob module, e.g.
 ```
 GET http://{{server}}/appsuite/api/jslob?action=get&id=io.ox/mail&session={{session}}
 ```
@@ -254,9 +254,9 @@ It is possible to whitelist mail servers with a specific `authserv-id` (as descr
 
 It is also possible to configure the middleware in a way that highlights authenticated e-mails from certain trusted mail addresses. It can be configured per-tenant and per e-mail address.
 
-The property `com.openexchange.mail.authenticity.trusted.tenants` defines a comma separated list of tenants. If this property is absent then the following properties will be valid for all tenants.
+The property `com.openexchange.mail.authenticity.trusted.tenants` defines a comma separated list of tenants. All further properties contain an optional [tenant] part which must use one tenant defined by this property.
 
-The property `com.openexchange.mail.authenticity.trusted.[tenant].config` specifies a comma separated list of trusted mail address configurations. Each configuration consists of a trusted mail address and an optional imageId separated by a colon (address[:imageId]). The use of the `imageId` will be explained later. The mail address allows wildcards like * (any string) or ? (any character). The `[tenant]` part of the property can be used to explicitly define different image and fall-back images for the different tenants.
+The property `com.openexchange.mail.authenticity.trusted.[tenant].config` specifies a comma separated list of trusted mail address configurations. Each configuration consists of a trusted mail address and an optional imageId separated by a colon (address[:imageId]). The use of the `imageId` will be explained later. The mail address allows wildcards like * (any string) or ? (any character). The optional `[tenant]` part of the property can be used to explicitly define different image and fall-back images for the different tenants.
 
 The property `com.openexchange.mail.authenticity.trusted.[tenant.]image.[imageId]` defines for each tenant a set of images that can be configured and is to be shown by clients for trusted mail addresses.
 
