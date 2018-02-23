@@ -448,6 +448,8 @@ The SchedJoules calendar provider provides the ability to subscribe public calen
 The google calendar provider provides the possibility to subscribe to the primary calendar of a google account. The only requirement is a working google oauth account with the 'calendar_ro' scope.
 To reduce the amount of data transported from google to the the middleware the google provider uses the incremental update feature of the google calendar. After the initial synchronization the google provider only requests the changes from the google server. This allows the use of a shorter refresh interval and therefore leads to more up-to-date data.
 
+Please also note that old google subscription are migrated and removed afterwards. So they are lost in case of a downgrade.
+
 ### Birthdays Calendar
 
 The Birthdays Calendar is a calendar that automatically populates with the known birthdays of everyone in a user's address books. A corresponding calendar account is added by default for each user once that has the ``contacts`` module permission. However, this can be disabled beforehand or afterwards by removing the ``calendar_birthdays`` capability via config-cascade.
