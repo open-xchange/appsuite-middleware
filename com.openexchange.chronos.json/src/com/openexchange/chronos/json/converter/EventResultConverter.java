@@ -51,6 +51,7 @@ package com.openexchange.chronos.json.converter;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.osgi.Tools.requireService;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -86,6 +87,7 @@ import com.openexchange.java.util.TimeZones;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.json.ResourceWriter;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -100,19 +102,22 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class EventResultConverter implements ResultConverter {
 
-    private static final Logger LOG = LoggerFactory.getLogger(EventResultConverter.class);
     public static final String INPUT_FORMAT = "event";
-    private final ContactService contactService;
-    private final ResourceService resourceService;
 
+    private static final ContactField CONTACT_FIELDS_TO_LOAD[] = { ContactField.SUR_NAME, ContactField.GIVEN_NAME, ContactField.TITLE, ContactField.DISPLAY_NAME, ContactField.IMAGE1_URL, ContactField.IMAGE1, ContactField.INTERNAL_USERID };
+    private static final ContactField CONTACT_FIELDS_TO_SHOW[] = { ContactField.SUR_NAME, ContactField.GIVEN_NAME, ContactField.TITLE, ContactField.DISPLAY_NAME, ContactField.IMAGE1_URL, ContactField.IMAGE1 };
+    private static final Logger LOG = LoggerFactory.getLogger(EventResultConverter.class);
+
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link EventResultConverter}.
+     *
+     * @param services A service lookup reference
      */
-    public EventResultConverter(ContactService contactService, ResourceService resourceService) {
+    public EventResultConverter(ServiceLookup services) {
         super();
-        this.contactService = contactService;
-        this.resourceService = resourceService;
+        this.services = services;
     }
 
     @Override
@@ -153,9 +158,6 @@ public class EventResultConverter implements ResultConverter {
         result.setResultObject(resultObject, getOutputFormat());
     }
 
-    private static final ContactField CONTACT_FIELDS_TO_LOAD[] = { ContactField.SUR_NAME, ContactField.GIVEN_NAME, ContactField.TITLE, ContactField.DISPLAY_NAME, ContactField.IMAGE1_URL, ContactField.IMAGE1, ContactField.INTERNAL_USERID };
-    private static final ContactField CONTACT_FIELDS_TO_SHOW[] = { ContactField.SUR_NAME, ContactField.GIVEN_NAME, ContactField.TITLE, ContactField.DISPLAY_NAME, ContactField.IMAGE1_URL, ContactField.IMAGE1 };
-
     protected JSONObject convertEvent(Event event, String timeZoneID, Session session, Set<EventField> requestedFields, boolean extendedEntities) throws OXException {
         if (null == event) {
             return null;
@@ -186,9 +188,11 @@ public class EventResultConverter implements ResultConverter {
                     }
 
                     if(attendee.has(ChronosJsonFields.Attendee.ENTITY) && attendee.getString(ChronosJsonFields.Attendee.CU_TYPE).equals(CalendarUserType.RESOURCE.getValue())) {
-                        Resource resource = resourceService.getResource(I(attendee.getInt(ChronosJsonFields.Attendee.ENTITY)), serverSession.getContext());
-                        if(resource != null) {
+                        try {
+                            Resource resource = requireService(ResourceService.class, services).getResource(I(attendee.getInt(ChronosJsonFields.Attendee.ENTITY)), serverSession.getContext());
                             attendee.put(ChronosJsonFields.Attendee.RESOURCE, ResourceWriter.writeResource(resource));
+                        } catch (OXException e) {
+                            LOG.warn("Error getting underlying resource for attendee {}", attendee, e);
                         }
                     }
                 }
@@ -197,7 +201,7 @@ public class EventResultConverter implements ResultConverter {
             if (0 < contactsToLoad.size()) {
                 SearchIterator<Contact> users = null;
                 try {
-                    users = contactService.getUsers(session, I2i(contactsToLoad.keySet()), CONTACT_FIELDS_TO_LOAD);
+                    users = requireService(ContactService.class, services).getUsers(session, I2i(contactsToLoad.keySet()), CONTACT_FIELDS_TO_LOAD);
                     while (users.hasNext()) {
                         Contact con = users.next();
                         JSONObject attendee = contactsToLoad.get(I(con.getInternalUserId()));
@@ -207,6 +211,8 @@ public class EventResultConverter implements ResultConverter {
                         }
                         attendee.put(ChronosJsonFields.Attendee.CONTACT, serialize(con, CalendarUtils.optTimeZone(timeZoneID, TimeZones.UTC), session));
                     }
+                } catch (OXException e) {
+                    LOG.warn("Error resolving contacts for internal user attendees", e);
                 } finally {
                     SearchIterators.close(users);
                 }

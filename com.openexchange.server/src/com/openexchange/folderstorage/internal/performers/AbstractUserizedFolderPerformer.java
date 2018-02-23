@@ -692,7 +692,6 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
          * check added guest permissions
          */
         if (comparedPermissions.hasAddedGuests()) {
-            Permission addedAnonymousPermission = null;
             List<Integer> addedGuests = comparedPermissions.getAddedGuests();
             for (Integer guestID : addedGuests) {
                 /*
@@ -701,22 +700,14 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                 GuestInfo guestInfo = comparedPermissions.getGuestInfo(guestID);
                 Permission guestPermission = comparedPermissions.getAddedGuestPermission(guestID);
                 checkGuestPermission(session, folder, guestPermission, guestInfo);
-                if (isAnonymous(guestInfo)) {
-                    /*
-                     * allow only one anonymous permission
-                     */
-                    if (null == addedAnonymousPermission) {
-                        addedAnonymousPermission = guestPermission;
-                    } else {
-                        throw invalidPermissions(folder, guestPermission);
-                    }
-                }
             }
+
             /*
              * check for an already existing anonymous permission if a new one should be added
              */
-            if (null != addedAnonymousPermission && containsOriginalAnonymousPermission(comparedPermissions)) {
-                throw invalidPermissions(folder, addedAnonymousPermission);
+            Permission invalidPermission = containsOriginalAnonymousPermission(comparedPermissions);
+            if (invalidPermission != null) {
+                throw invalidPermissions(folder, invalidPermission);
             }
         }
         /*
@@ -736,18 +727,12 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
          * check new guest permissions
          */
         if (comparedPermissions.hasNewGuests()) {
-            GuestPermission newAnonymousPermission = null;
             for (GuestPermission guestPermission : comparedPermissions.getNewGuestPermissions()) {
                 if (guestPermission.getRecipient().getType() == RecipientType.ANONYMOUS) {
                     /*
                      * allow only one anonymous permission with "read-only" permission bits
                      */
                     checkIsLinkPermission(folder, guestPermission);
-                    if (null == newAnonymousPermission) {
-                        newAnonymousPermission = guestPermission;
-                    } else {
-                        throw invalidPermissions(folder, guestPermission);
-                    }
                 } else if (isReadOnlySharing(folder)) {
                     /*
                      * allow only "read-only" permissions for invited guests in non-infostore folders
@@ -758,8 +743,9 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             /*
              * check for an already existing anonymous permission if a new one should be added
              */
-            if (null != newAnonymousPermission && containsOriginalAnonymousPermission(comparedPermissions)) {
-                throw invalidPermissions(folder, newAnonymousPermission);
+            Permission invalidPermission = containsOriginalAnonymousPermission(comparedPermissions);
+            if (invalidPermission!=null ) {
+                throw invalidPermissions(folder, invalidPermission);
             }
         }
     }
@@ -771,19 +757,19 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param comparedPermissions The compared permissions to check
      * @return <code>true</code> if there's an "anonymous" entity in the original permissions, <code>false</code>, otherwise
      */
-    private static boolean containsOriginalAnonymousPermission(ComparedFolderPermissions comparedPermissions) throws OXException {
+    private static Permission containsOriginalAnonymousPermission(ComparedFolderPermissions comparedPermissions) throws OXException {
         Collection<Permission> originalPermissions = comparedPermissions.getOriginalPermissions();
         if (null != originalPermissions && 0 < originalPermissions.size()) {
             for (Permission originalPermission : originalPermissions) {
                 if (false == originalPermission.isGroup() && !comparedPermissions.isSystemPermission(originalPermission) && originalPermission.getType() == FolderPermissionType.NORMAL) {
                     GuestInfo guestInfo = comparedPermissions.getGuestInfo(originalPermission.getEntity());
                     if (null != guestInfo && isAnonymous(guestInfo)) {
-                        return true;
+                        return originalPermission;
                     }
                 }
             }
         }
-        return false;
+        return null;
     }
 
     /**

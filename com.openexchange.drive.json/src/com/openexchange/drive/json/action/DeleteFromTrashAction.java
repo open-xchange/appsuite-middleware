@@ -95,8 +95,8 @@ public class DeleteFromTrashAction extends AbstractDriveAction {
                 }
             }
 
-            if (body.has("folders")) {
-                JSONArray foldersArray = body.getJSONArray("folders");
+            if (body.has("directories")) {
+                JSONArray foldersArray = body.getJSONArray("directories");
                 for (Object o : foldersArray) {
                     if (!(o instanceof String)) {
                         throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
@@ -109,7 +109,10 @@ public class DeleteFromTrashAction extends AbstractDriveAction {
         }
 
         getDriveService().getUtility().removeFromTrash(session, files, folders);
-        return new AJAXRequestResult(JSONObject.EMPTY_OBJECT, "json");
+
+        // Load trash contents again
+        JSONObject result = getDriveService().getUtility().getTrashContent(session);
+        return new AJAXRequestResult(result == null ? JSONObject.EMPTY_OBJECT : result, "json");
     }
 
 }

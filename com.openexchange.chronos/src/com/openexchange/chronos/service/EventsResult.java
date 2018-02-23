@@ -61,8 +61,18 @@ import com.openexchange.exception.OXException;
  */
 public interface EventsResult extends TimestampedResult {
 
+    /**
+     * Gets the resulting event list.
+     *
+     * @return The events, or <code>null</code> if there are none
+     */
     List<Event> getEvents();
 
+    /**
+     * Gets the (fatal) error that prevented the events being received successfully, or <code>null</code> if there is none
+     *
+     * @return The (fatal) error that prevented the events being received successfully, or <code>null</code> if there is none
+     */
     OXException getError();
 
 }

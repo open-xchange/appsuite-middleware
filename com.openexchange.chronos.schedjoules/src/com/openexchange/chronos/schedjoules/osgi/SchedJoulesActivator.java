@@ -52,6 +52,7 @@ package com.openexchange.chronos.schedjoules.osgi;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.schedjoules.SchedJoulesService;
 import com.openexchange.chronos.schedjoules.impl.SchedJoulesServiceImpl;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.TimerService;
@@ -88,7 +89,10 @@ public class SchedJoulesActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
-        registerService(SchedJoulesService.class, new SchedJoulesServiceImpl());
+
+        SchedJoulesService service = new SchedJoulesServiceImpl();
+        registerService(SchedJoulesService.class, service);
+        registerService(Reloadable.class, (Reloadable) service);
     }
 
     /*

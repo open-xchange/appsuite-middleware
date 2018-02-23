@@ -49,7 +49,7 @@
 
 package com.openexchange.caldav;
 
-import static com.openexchange.chronos.common.AlarmUtils.addExtendedProperty;
+import static com.openexchange.chronos.common.CalendarUtils.addExtendedProperty;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
@@ -729,17 +729,12 @@ public class EventPatches {
                 for (Alarm exportedAlarm : exportedAlarms) {
                     Alarm alarm = exportedAlarm;
                     /*
-                     * also supply the acknowledged date via X-MOZ-LASTACK
+                     * also supply the acknowledged date via X-MOZ-LASTACK, both in alarm and parent event component
                      */
                     if (null != exportedAlarm.getAcknowledged()) {
                         ExtendedProperty mozLastAckProperty = new ExtendedProperty("X-MOZ-LASTACK", Tools.formatAsUTC(exportedAlarm.getAcknowledged()));
-                        addExtendedProperty(exportedAlarm, mozLastAckProperty, true);
-                        /*
-                         * also store X-MOZ-LASTACK in parent component for recurring events
-                         */
-                        if (isSeriesMaster(exportedEvent)) {
-                            addExtendedProperty(exportedEvent, mozLastAckProperty);
-                        }
+                        alarm.setExtendedProperties(addExtendedProperty(alarm.getExtendedProperties(), mozLastAckProperty, true));
+                        exportedEvent.setExtendedProperties(addExtendedProperty(exportedEvent.getExtendedProperties(), mozLastAckProperty, true));
                     }
                     Alarm snoozedAlarm = AlarmUtils.getSnoozedAlarm(alarm, exportedAlarms);
                     if (null != snoozedAlarm) {
@@ -788,6 +783,14 @@ public class EventPatches {
                     }
                     patchedAlarms.add(alarm);
                 }
+                /*
+                 * finally remove default "ACKNOWLEDGED" properties from alarms for lightning (results in parse error in client)
+                 */
+                if (DAVUserAgent.THUNDERBIRD_LIGHTNING.equals(resource.getUserAgent())) {
+                    for (Alarm alarm : patchedAlarms) {
+                        alarm.removeAcknowledged();
+                    }
+                }
                 exportedEvent.setAlarms(patchedAlarms);
             }
             return exportedEvent;
@@ -804,15 +807,8 @@ public class EventPatches {
          * @return The patched event
          */
         private static Event removeImplicitAttendee(EventResource resource, Event exportedEvent) {
-            List<Attendee> attendees = exportedEvent.getAttendees();
-            try {
-                if (null != attendees && 1 == attendees.size() && resource.getParent().getCalendarUser().getId() == attendees.get(0).getEntity() &&
-                    false == PublicType.getInstance().equals(resource.getParent().getFolder().getType())) {
-                    exportedEvent.removeAttendees();
-                    exportedEvent.removeOrganizer();
-                }
-            } catch (OXException e) {
-                LOG.warn("Error removing implicit event attendee", e);
+            if (false == PublicType.getInstance().equals(resource.getParent().getFolder().getType())) {
+                CalendarUtils.removeImplicitAttendee(exportedEvent);
             }
             return exportedEvent;
         }

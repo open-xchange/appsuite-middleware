@@ -74,16 +74,16 @@ public class ICalCompositeEventExporter extends AbstractICalEventExporter {
 
     @Override
     protected ThresholdFileHolder exportFolderData(ServerSession session, OutputStream out) throws OXException {
-        return exportChronosEvents(getCalendarAccess(session).getEventsInFolder(getFolderId()), out);
+        return exportChronosEvents(getCalendarAccess(session).getEventsInFolder(getFolderId()), out, session);
     }
 
     @Override
     protected ThresholdFileHolder exportBatchData(ServerSession session, OutputStream out) throws OXException {
         List<EventID> eventIds = convertBatchDataToEventIds();
         if(eventIds.size() == 1) {
-            return exportChronosEvents(Collections.singletonList(getCalendarAccess(session).getEvent(eventIds.get(0))), out);
+            return exportChronosEvents(Collections.singletonList(getCalendarAccess(session).getEvent(eventIds.get(0))), out, session);
         } else {
-            return exportChronosEvents(getCalendarAccess(session).getEvents(eventIds), out);
+            return exportChronosEvents(getCalendarAccess(session).getEvents(eventIds), out, session);
         }
     }
 

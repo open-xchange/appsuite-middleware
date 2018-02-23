@@ -441,14 +441,20 @@ Have a look at the property documentation page on http://documentation.open-xcha
 
 #### SchedJoules
 
-...
+The SchedJoules calendar provider provides the ability to subscribe public calendars from the SchedJoules servers. The fetched data is cached locally in memory of each middleware node to save bandwidth and speed up the request processing. The SchedJoules API uses an ``Authorization`` header with an API key which is configured on the middleware side and is being transmitted on every request the middleware node is firing towards the SchedJoules servers.
 
 #### Google Calendar
 
-...
+The google calendar provider provides the possibility to subscribe to the primary calendar of a google account. The only requirement is a working google oauth account with the 'calendar_ro' scope.
+To reduce the amount of data transported from google to the the middleware the google provider uses the incremental update feature of the google calendar. After the initial synchronization the google provider only requests the changes from the google server. This allows the use of a shorter refresh interval and therefore leads to more up-to-date data.
 
+### Birthdays Calendar
 
-### ...
+The Birthdays Calendar is a calendar that automatically populates with the known birthdays of everyone in a user's address books. A corresponding calendar account is added by default for each user once that has the ``contacts`` module permission. However, this can be disabled beforehand or afterwards by removing the ``calendar_birthdays`` capability via config-cascade.
+
+The calendar works by providing a yearly event series for each contact that has a set birthday property. The calendar data is always created on the fly dynamically by querying the contact storage, i.e. no additional event data is actually stored. However, it is still possible to add alarms for birthday events, which are then stored within the usual calendar storage. 
+
+Since the underlying calendar account is automatically provisioned, it cannot be deleted by the user - though the folder may still be unsubscribed to hide it from the user interface. 
 
 
 ## Group-scheduled Events
@@ -668,17 +674,50 @@ When acting on behalf of another user (i.e. the action is performed within a sha
 
 ### HTTP API
 
-In case a client attempts to modify an event in a not allowed way, an appropriate exception is thrown (code ``CAL-4038``). To aid the differentiation between attendee- and organizer-scheduling object resources, the event's flags contain additional hints (flags **attendee** and **organizer**) which can be evaluated appropriately, in addition to the permissions of the folder the events is located in.
+In case a client attempts to modify a group-scheduled event in a not allowed way, an appropriate exception is thrown (code ``CAL-4038``). To aid the differentiation between attendee- and organizer-scheduling object resources, the event's flags contain additional hints (flags ``scheduled``, ``attendee`` and ``organizer``) which can be evaluated appropriately, in addition to the permissions of the folder the events is located in.
 
-Additionally, to aid the typical "reply" of an attendee to a meeting request, a new, dedicated action **updateAttendee** has been introduced that allows to adjust the calendar user's *own* attendee property, as well as to apply his set of alarms for the event.
+Additionally, to aid the typical *reply* of an attendee to a meeting request, a new, dedicated action ``updateAttendee`` has been introduced that allows to adjust the calendar user's *own* attendee property, as well as to apply his set of alarms for the event.
 
 ### CalDAV
 
-In case a client attempts to modify an event using the CalDAV interface in a not allowed way, the request is answered with the ``CALDAV:allowed-attendee-scheduling-object-change`` precondition error. Besides the per-user properties defined in RFC 6638, there are no further exceptions. However, if a client attempts to store a non-standard *X*-property in the iCalendar resource, no error is thrown and the extended property is dropped silently (as clients actually do it, e.g. a custom ``X-APPLE-TRAVEL-ADVISORY-BEHAVIOR`` or ``X-LIC-ERROR``).
+In case a client attempts to modify a group-scheduled event using the CalDAV interface in a not allowed way, the request is answered with the ``CALDAV:allowed-attendee-scheduling-object-change`` precondition error. Besides the per-user properties defined in RFC 6638, there are no further exceptions. However, if a client attempts to store a non-standard *X*-property in the iCalendar resource, no error is thrown and the extended property is dropped silently (as clients actually do it, e.g. a custom ``X-APPLE-TRAVEL-ADVISORY-BEHAVIOR`` or ``X-LIC-ERROR``).
 
 ### References / further reading
 - https://tools.ietf.org/html/rfc6638#section-3.2.2
 - com.openexchange.chronos.impl.performer.AbstractUpdatePerformer#requireWritePermissions
 
+
+## Permissions
+
+When interacting with the calendar and scheduling subsystem, three different permission concepts need to be considered. On the one hand, the user's effective permissions in the folder (that represents the actual view on the event data) is taken into account, just like one is used to from other groupware modules. On the other hand, the user's *role* within a certain group-scheduled event affects the possible actions, i.e. if a user is also an attendee or the organizer of the event. The latter aspect basically introduces an additional layer of object permissions for events. On top of that, the classification of an event may be used to restrict access to certain properties of an event for other users. 
+
+### Permissions by Role
+
+As stated above, within *group-scheduled* events with multiple attendees, a calendar user can have certain roles - i.e. the user is *organizer* of the event, or he is an *attendee*. For events that are located in personal calendar folders (*shared* or *private*), these are actually the only possibilities. In *public* calendar folders, the user might also be neither organizer, nor attendee.
+
+Considering the role, a user that is attendee or organizer of a group-scheduled event is able to read event data. Also, an attendee is always allowed to modify his own attendee property (especially his participation status), as well as he has control over his own alarms. Additionally, he may still delete himself from the attendee list. However, whenever event data should be manipulated in way beyond the allowed attendee changes (see above), the calendar user needs to be the organizer of the event.
+
+The access rights that are implicitly given by the user's role in an event are always valid, even if the event is statically located in a calendar folder that is not visible for the user. For example, the API allows to create an event in a *public* calendar folder and invite attendees that do not have access to this folder. Interaction with such events would still be possible (e.g. by using the corresponding links from the invitation mail, by looking up the events via search, or by querying virtual event collections for the user ("all my events").
+
+Note that the *role* is always interpreted for the actual calendar user based on the folder that represents the current view on an event, which means that this calendar user may be different from the current session user in case of a *shared* calendar folder, while the calendar user equals the current session user in *private* and *public* folders. See chapter "Relation of Organizer / Principal / Folder-Owner / Creator" for further details. 
+
+### Folder Permissions
+
+For calendar folders, the same set of permissions can be applied as for folders in other groupware modules, i.e. users and groups can be added to the permission lists; each entity with an individual set of folder-/read-/write- and delete-permission. the effective folder permission of a specific user is the calculated maximum permission (based on the users own and/or any group entity permissions that are defined). 
+
+In the calendar module, the folder permissions are primarily considered for *create* operations, since modifications and deletions of group-scheduled events are rather restricted based on the calendar user's particular role in the event once it has been created, see above. Additionally, in *shared* folders, where a user acts on behalf the calendar owner, the folder permissions determine which actions are allowed for the proxy user (besides of the restrictions based on the calendar user's role). 
+
+### Permissions by Classification
+
+The classification may be used to restrict access to the event as such, or to specific properties of an event, to other users that do not participate in the event as attendee. So, even if an event would be visible within a *shared* folder of the calendar user for other users, depending on the event's classification, it would be either invisible (for a ``PRIVATE`` classification), or only the event's period would appear (for a ``CONFIDENTIAL`` classification).
+
+More details about the possible event classifications are described in chapter "Classification / Private flag" above.    
+
+### HTTP API
+
+Clients that need to be aware of which actions are actually possible by a certain calendar user for a group-scheduled event in a specific folder should consider the appropriate event flags ``scheduled``, ``organizer`` and ``attendee``, along with the effective permissions of the current session user in the underlying folder. Then, the following rules apply:
+- New events can be created in case the folder permissions include at least *create own* objects.
+- Whenever data should be manipulated in a way beyond the allowed attendee changes (see above), the calendar user needs to be the organizer of the event, hence the ``organizer`` flag would have to be present. Additionally, the folder permissions need to allow *write object* permissions for the event in question (i.e. either *write all* or *write own* objects).
+- Whenever attendee-related data such as the participation status or the user's personal alarms should be modified, the calendar user needs to be an attendee of the event, hence the ``attendee`` flag would have to be present. No additional folder permissions are required.
 
 

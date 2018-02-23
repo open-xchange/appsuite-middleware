@@ -358,6 +358,15 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
     List<Event> resolveResource(String folderId, String resourceName) throws OXException;
 
     /**
+     * Gets the sequence numbers of one or more calendar folders, which is the highest highest timestamp of all contained items. Distinct
+     * object access permissions (e.g. <i>read own</i>) are not considered.
+     *
+     * @param folderIds The identifiers of the folders to get the sequence numbers for
+     * @return The sequence numbers, mapped to their corresponding folder identifier
+     */
+    Map<String, Long> getSequenceNumbers(List<String> folderIds) throws OXException;
+
+    /**
      * Gets a specific event.
      * <p/>
      * The following calendar parameters are evaluated:

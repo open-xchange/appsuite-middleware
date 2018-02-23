@@ -58,13 +58,16 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ImportedCalendar;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.UIDConflictStrategy;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.TruncationInfo;
@@ -111,6 +114,10 @@ public class ICalEventImporter extends AbstractICalImporter {
             }
             return null;
         }
+
+        // Workaround for bug 57282:
+        strippAttendeesAndOrganizer(importedCalendar);
+
         /*
          * store imported events & track corresponding results
          */
@@ -284,7 +291,31 @@ public class ICalEventImporter extends AbstractICalImporter {
                 parameters.set(CalendarParameters.UID_CONFLICT_STRATEGY, UIDConflictStrategy.REASSIGN);
             }
         }
+        parameters.set(CalendarSession.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
         return parameters;
     }
 
+    /**
+     * Strips all attendees and the original organizer from all events in the given calendar.
+     * 
+     * @param calendar The calendar to strip the calendar users from
+     * @throws OXException In case calendar user for the session user can't be created
+     */
+    private void strippAttendeesAndOrganizer(ImportedCalendar calendar) throws OXException {
+        EntityResolver entityResolver = ImportExportServices.getCalendarUtilities().getEntityResolver(getSession().getContextId());
+        int userId = getSession().getUserId();
+        for (Event event : calendar.getEvents()) {
+            event.removeAttendees();
+            event.removeOrganizer();
+
+            // Add user as attendee
+            Attendee attendee = new Attendee();
+            attendee.setEntity(userId);
+            event.setAttendees(Collections.singletonList(entityResolver.applyEntityData(attendee)));
+
+            // Make user organizer
+            Organizer organizer = new Organizer();
+            event.setOrganizer(entityResolver.applyEntityData(organizer, userId));
+        }
+    }
 }

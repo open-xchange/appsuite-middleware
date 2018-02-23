@@ -496,6 +496,42 @@ public class AlarmUtils extends CalendarUtils {
         return null;
     }
 
+
+    /**
+     * Calculates the next date-time for a specific alarm trigger associated with an event series and returns the corresponding event occurrence.
+     * <p/>
+     * The trigger is calculated for the <i>next</i> occurrence after a certain start date, which may be supplied directly via the
+     * <code>startDate</code> argument, or is either the last acknowledged date of the alarm or the current server time.
+     *
+     * @param seriesMaster The series master event the alarm is associated with
+     * @param alarm The alarm
+     * @param startDate The start date marking the lower (inclusive) limit for the actual event occurrence to begin, or <code>null</code>
+     *            to select automatically
+     * @param timeZone The timezone to consider if the event has <i>floating</i> dates
+     * @param recurrenceService A reference to the recurrence service
+     * @return The event occurrence, or <code>null</code> if there is no next trigger time
+     */
+    public static Event getNextTriggerEvent(Event seriesMaster, Alarm alarm, Date startDate, TimeZone timeZone, RecurrenceService recurrenceService) throws OXException {
+        if (null == startDate) {
+            startDate = null != alarm.getAcknowledged() ? alarm.getAcknowledged() : new Date();
+        }
+        Iterator<Event> iterator = recurrenceService.iterateEventOccurrences(seriesMaster, startDate, null);
+        while (iterator.hasNext()) {
+            Event occurrence = iterator.next();
+            if (occurrence.getStartDate().getTimestamp() < startDate.getTime()) {
+                continue;
+            }
+            Date triggerTime = getTriggerTime(alarm.getTrigger(), occurrence, timeZone);
+            if (null == triggerTime) {
+                return null;
+            }
+            if (null == alarm.getAcknowledged() || alarm.getAcknowledged().before(triggerTime)) {
+                return occurrence;
+            }
+        }
+        return null;
+    }
+
     /**
      * Gets the actual date-time of an event a trigger relates to, i.e. either the event's start- or end-date.
      *

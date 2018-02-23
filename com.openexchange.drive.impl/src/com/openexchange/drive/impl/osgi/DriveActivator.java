@@ -84,6 +84,7 @@ import com.openexchange.drive.impl.management.version.BrandedDriveVersionService
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.folderstorage.FolderService;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
@@ -117,7 +118,7 @@ public class DriveActivator extends HousekeepingActivator {
         return new Class<?>[] { IDBasedFileAccessFactory.class, ManagedFileManagement.class, DatabaseService.class, CapabilityService.class,
             IDBasedFolderAccessFactory.class, EventAdmin.class, ConfigurationService.class, ThreadPoolService.class, TimerService.class,
             UserService.class, GroupService.class, ModuleSupport.class, ShareService.class, ContextService.class, ShareNotificationService.class,
-            ContactService.class, ContactUserStorage.class, ConfigViewFactory.class
+            ContactService.class, ContactUserStorage.class, ConfigViewFactory.class, FolderService.class
         };
     }
 

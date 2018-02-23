@@ -406,7 +406,7 @@ public final class TaskLogic {
 
     /**
      * Verifies that the priority of tasks is only in the allowed range.
-     * 
+     *
      * @param task task that priority should be tested.
      * @throws OXException if task contains an invalid priority value.
      */
@@ -839,6 +839,22 @@ public final class TaskLogic {
      * @throws OXException if an exception occurs.
      */
     public static void removeTask(final Session session, final Context ctx, final Connection con, final int folderId, final int taskId, final StorageType type) throws OXException {
+        removeTask(session, ctx, con, folderId, taskId, type, true);
+    }
+
+    /**
+     * Removes a task object completely.
+     *
+     * @param session Session (for event handling)
+     * @param ctx Context.
+     * @param con writable database connection.
+     * @param folderId unique identifier of the folder through that the task is accessed.
+     * @param taskId unique identifier of the task to remove.
+     * @param type storage type of the task (only {@link StorageType#ACTIVE} or {@link StorageType#DELETED}).
+     * @param notify Whether participants should be notified or not
+     * @throws OXException if an exception occurs.
+     */
+    public static void removeTask(final Session session, final Context ctx, final Connection con, final int folderId, final int taskId, final StorageType type, final boolean notify) throws OXException {
         // Load the task.
         final Task task = storage.selectTask(ctx, con, taskId, type);
         task.setParentFolderID(folderId);
@@ -861,7 +877,7 @@ public final class TaskLogic {
         foldStor.deleteFolder(ctx, con, taskId, folders, type);
         storage.delete(ctx, con, taskId, task.getLastModified(), type);
         Reminder.deleteReminder(ctx, con, task);
-        if (ACTIVE == type) {
+        if (ACTIVE == type && notify) {
             informDelete(session, task);
         }
     }

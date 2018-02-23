@@ -149,19 +149,15 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
                     return capabilities.contains(Permission.CALENDAR.getCapabilityName());
                 }
             });
-
-            ContactService contactService = getServiceSafe(ContactService.class);
-            ResourceService resourceService = getServiceSafe(ResourceService.class);
-
             /*
              * register result converters
              */
             registerService(ResultConverter.class, new FreeBusyConverter());
-            registerService(ResultConverter.class, new EventResultConverter(contactService, resourceService));
-            registerService(ResultConverter.class, new EventsPerFolderResultConverter(contactService, resourceService));
+            registerService(ResultConverter.class, new EventResultConverter(this));
+            registerService(ResultConverter.class, new EventsPerFolderResultConverter(this));
             registerService(ResultConverter.class, new EventConflictResultConverter());
-            registerService(ResultConverter.class, new CalendarResultConverter(contactService, resourceService));
-            registerService(ResultConverter.class, new MultipleCalendarResultConverter(contactService, resourceService));
+            registerService(ResultConverter.class, new CalendarResultConverter(this));
+            registerService(ResultConverter.class, new MultipleCalendarResultConverter(this));
             registerService(ResultConverter.class, new AlarmTriggerConverter());
             registerService(ResultConverter.class, new ITipAnalysisResultConverter());
             /*

@@ -49,47 +49,27 @@
 
 package com.openexchange.mail.authenticity.impl.core;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiFunction;
-import java.util.regex.Pattern;
 import javax.mail.internet.InternetAddress;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.InterruptibleCharSequence;
-import com.openexchange.java.InterruptibleCharSequence.InterruptedRuntimeException;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.authenticity.AllowedAuthServId;
-import com.openexchange.mail.authenticity.MailAuthenticityAttribute;
 import com.openexchange.mail.authenticity.MailAuthenticityExceptionCodes;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityProperty;
-import com.openexchange.mail.authenticity.MailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
 import com.openexchange.mail.authenticity.impl.core.metrics.MailAuthenticityMetricLogger;
-import com.openexchange.mail.authenticity.impl.core.parsers.DKIMMailAuthenticityMechanismParser;
-import com.openexchange.mail.authenticity.impl.core.parsers.DMARCMailAuthenticityMechanismParser;
-import com.openexchange.mail.authenticity.impl.core.parsers.SPFMailAuthenticityMechanismParser;
 import com.openexchange.mail.authenticity.impl.trusted.TrustedMailService;
 import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMechanism;
-import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
-import com.openexchange.mail.authenticity.mechanism.dkim.DKIMResult;
-import com.openexchange.mail.authenticity.mechanism.dmarc.DMARCResult;
-import com.openexchange.mail.authenticity.mechanism.spf.SPFResult;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.HeaderCollection;
@@ -123,10 +103,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     private final int ranking;
     private final ServiceLookup services;
     private final TrustedMailService trustedMailService;
-    private final Comparator<String> mailAuthComparator;
     private final Collection<MailField> requiredMailFields;
     private final Cache<UserAndContext, List<AllowedAuthServId>> authServIdsCache;
-    private final Map<DefaultMailAuthenticityMechanism, BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult>> mechanismParsersRegistry;
 
     /**
      * Initializes a new {@link MailAuthenticityHandlerImpl} with ranking of <code>0</code> (zero).
@@ -148,24 +126,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         this.services = services;
         this.trustedMailService = trustedMailService;
         this.ranking = ranking;
-        mailAuthComparator = new MailAuthenticityMechanismComparator();
         authServIdsCache = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
         requiredMailFields = ImmutableList.of(MailField.FROM);
-        mechanismParsersRegistry = initialiseMechanismRegistry();
-    }
-
-    /**
-     * Initialise the mechanism registry
-     *
-     * @return An {@link ImmutableMap} with the mechanism implementations
-     */
-    private ImmutableMap<DefaultMailAuthenticityMechanism, BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult>> initialiseMechanismRegistry() {
-        final ImmutableMap.Builder<DefaultMailAuthenticityMechanism, BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult>> mechanismParsersRegistry = ImmutableMap.builder();
-        mechanismParsersRegistry.put(DefaultMailAuthenticityMechanism.DMARC, new DMARCMailAuthenticityMechanismParser());
-        mechanismParsersRegistry.put(DefaultMailAuthenticityMechanism.DKIM, new DKIMMailAuthenticityMechanismParser());
-        mechanismParsersRegistry.put(DefaultMailAuthenticityMechanism.SPF, new SPFMailAuthenticityMechanismParser());
-
-        return mechanismParsersRegistry.build();
     }
 
     /**
@@ -175,11 +137,15 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         authServIdsCache.invalidateAll();
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Gets the parser/validator to use.
      *
-     * @see com.openexchange.mail.authenticity.MailAuthenticityHandler#handle(com.openexchange.session.Session, com.openexchange.mail.dataobjects.MailMessage)
+     * @return The parser/validator instance
      */
+    protected AuthenticationResultsValidator getValidator() {
+        return StandardAuthenticationResultsValidator.getInstance();
+    }
+
     @Override
     public void handle(final Session session, final MailMessage mailMessage) {
         if (mailMessage.containsAuthenticityResult()) {
@@ -207,7 +173,8 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         List<String> headers = Arrays.asList(authHeaders);
         MailAuthenticityResult authenticityResult = MailAuthenticityResult.NOT_ANALYZED_RESULT;
         try {
-            authenticityResult = parseHeaders(headers, from[0], session);
+            AuthenticationResultsValidator validator = getValidator();
+            authenticityResult = validator.parseHeaders(headers, from[0], getAllowedAuthServIds(session), session);
         } catch (Exception e) {
             LOGGER.error("An error occurred during parsing the 'Authentication-Results' header: {}", e.getMessage(), e);
         }
@@ -260,422 +227,6 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     }
 
     ///////////////////////////////////// HELPERS ///////////////////////////////////////
-
-    /**
-     * Performs the parsing magic of the specified <code>Authentication-Results</code> headers and <code>From</code> header and
-     * returns the overall {@link MailAuthenticityResult}
-     *
-     * @param authenticationHeaders The <code>Authentication-Results</code> headers
-     * @param fromHeader The <code>From</code> header
-     * @param session The groupware {@link Session}
-     * @return The overall {@link MailAuthenticityResult}
-     * @throws OXException if the allowed authserv-ids cannot be retrieved from the configuration or any other parsing error occurs
-     */
-    private MailAuthenticityResult parseHeaders(final List<String> authenticationHeaders, final InternetAddress from, final Session session) throws OXException {
-        final List<AllowedAuthServId> allowedAuthServIds = getAllowedAuthServIds(session);
-
-        final MailAuthenticityResult overallResult = new MailAuthenticityResult(MailAuthenticityStatus.NEUTRAL);
-        final List<MailAuthenticityMechanismResult> results = new ArrayList<>();
-        final List<Map<String, String>> unconsideredResults = new ArrayList<>();
-
-        try {
-            final Thread currentThread = Thread.currentThread();
-            for (Iterator<String> authHeaderIterator = authenticationHeaders.iterator(); !currentThread.isInterrupted() && authHeaderIterator.hasNext();) {
-                final String authenticationHeader = authHeaderIterator.next();
-                List<String> elements = StringUtil.splitElements(InterruptibleCharSequence.valueOf(authenticationHeader));
-
-                // The first property of the header MUST always be the domain (i.e. the authserv-id)
-                // See https://tools.ietf.org/html/rfc7601 for the formal definition
-                final String authServId = elements.get(0);
-                if (!isAuthServIdValid(authServId, allowedAuthServIds)) {
-                    // Not a configured authserver-id, ignore
-                    continue;
-                }
-                // Remove the authserv-id
-                elements = elements.subList(1, elements.size());
-
-                // Extract the domain from the 'From' header
-                try {
-                    overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, extractDomain(from));
-                    overallResult.addAttribute(MailAuthenticityResultKey.TRUSTED_SENDER, from.getAddress());
-                } catch (final IllegalArgumentException e) {
-                    // Malformed 'From' header, return with 'Not Analyzed' result
-                    LOGGER.debug("An error occurred while trying to extract a valid domain from the 'From' header", e);
-                    overallResult.setStatus(MailAuthenticityStatus.NOT_ANALYZED);
-                    return overallResult;
-                }
-
-                parseMechanisms(elements, results, unconsideredResults, overallResult, currentThread);
-            }
-        } catch (InterruptedRuntimeException e) {
-            // Keep interrupted state
-            Thread.currentThread().interrupt();
-            throw MailExceptionCode.INTERRUPT_ERROR.create();
-        }
-
-        determineOverallResult(overallResult, results);
-
-        overallResult.addAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, results);
-        overallResult.addAttribute(MailAuthenticityResultKey.UNCONSIDERED_AUTH_MECH_RESULTS, unconsideredResults);
-
-        return overallResult;
-    }
-
-    /**
-     * Parses the mechanisms (known and unknown) and adds the results to their respective {@link List}s
-     *
-     * @param elements A {@link List} with the elements of a single <code>Authentication-Results</code> header.
-     * @param results A {@link List} with the results of the known mechanisms
-     * @param unconsideredResults A {@link List} with the unconsidered results
-     * @param overallResult The overall {@link MailAuthenticityResult}
-     * @param currentThread The current thread
-     */
-    private void parseMechanisms(List<String> elements, List<MailAuthenticityMechanismResult> results, List<Map<String, String>> unconsideredResults, MailAuthenticityResult overallResult, Thread currentThread) {
-        Collections.sort(elements, mailAuthComparator);
-        for (Iterator<String> iterator = elements.iterator(); !currentThread.isInterrupted() && iterator.hasNext();) {
-            String element = iterator.next();
-            if (Strings.isEmpty(element)) {
-                continue;
-            }
-            final Map<String, String> attributes = StringUtil.parseMap(InterruptibleCharSequence.valueOf(element));
-
-            final DefaultMailAuthenticityMechanism mechanism = DefaultMailAuthenticityMechanism.extractMechanism(attributes);
-            if (mechanism == null) {
-                // Unknown or not parsable mechanism
-                unconsideredResults.add(parseUnknownMechs(element));
-                continue;
-            }
-            final BiFunction<Map<String, String>, MailAuthenticityResult, MailAuthenticityMechanismResult> mechanismParser = mechanismParsersRegistry.get(mechanism);
-            if (mechanismParser == null) {
-                // Not a valid mechanism, skip but add to the overall result
-                unconsideredResults.add(parseUnknownMechs(element));
-                continue;
-            }
-            results.add(mechanismParser.apply(attributes, overallResult));
-        }
-    }
-
-    /**
-     * <p>Determine the overall result from the extracted results. The overall result
-     * will be determined by checking the results of DMARC, DKIM and SPF (in that order).</p>
-     * 
-     * <p>If multiple results of a specific mechanism are present, then the best result
-     * will be picked for that particular mechanism (according to their natural
-     * {@link Enum} ordering) and the rest results of that mechanism will be discarded.</p>
-     * 
-     * <p>If the DMARC mechanism result is 'PASS' then the overall status is marked as 'PASS' or
-     * if is 'FAIL' then the overall status is marked as 'FAIL, and no further action is performed.</p>
-     * 
-     * <p>If the DMARC mechanism is other than 'PASS' or 'FAIL' then DKIM and SPF are checked and
-     * the overall status is determined in respect to their results.</p>
-     *
-     * @param overallResult The overall {@link MailAuthenticityResult}
-     * @param results A {@link List} with the results of the known mechanisms
-     */
-    private void determineOverallResult(final MailAuthenticityResult overallResult, final List<MailAuthenticityMechanismResult> results) {
-        // Separate results
-        SeparatedResults separatedResults = separateAndClearResults(results);
-
-        // Pick the best results for all mechanisms
-        MailAuthenticityMechanismResult bestOfDMARC = pickBestResult(separatedResults.getDmarcResults());
-        MailAuthenticityMechanismResult bestOfDKIM = pickBestResult(separatedResults.getDkimResults());
-        MailAuthenticityMechanismResult bestOfSPF = pickBestResult(separatedResults.getSpfResults());
-        separatedResults = null; // Might help GC
-
-        // Re-add best ones to results
-        if (bestOfDMARC != null) {
-            results.add(bestOfDMARC);
-        }
-        if (bestOfDKIM != null) {
-            results.add(bestOfDKIM);
-        }
-        if (bestOfSPF != null) {
-            results.add(bestOfSPF);
-        }
-
-        if (bestOfDMARC != null) {
-            // If DMARC passes we set the overall status to PASS
-            if (DMARCResult.PASS.equals(bestOfDMARC.getResult()) && bestOfDMARC.isDomainMatch()) {
-                overallResult.setStatus(MailAuthenticityStatus.PASS);
-                return;
-            } else if (DMARCResult.FAIL.equals(bestOfDMARC.getResult())) {
-                overallResult.setStatus(MailAuthenticityStatus.FAIL);
-                return;
-            }
-        }
-
-        // The DMARC status was NEUTRAL or none existing, check for DKIM
-        boolean dkimFailed = dkimFailed(overallResult, bestOfDKIM);
-        // Continue with SPF
-        checkSPF(overallResult, bestOfSPF, dkimFailed);
-    }
-
-    /**
-     * Separates the results into different containers according to their type
-     *
-     * @param results All the {@link MailAuthenticityMechanismResult}s
-     * @return The results separated by SPF, DKIM and DMARC
-     */
-    private SeparatedResults separateAndClearResults(final List<MailAuthenticityMechanismResult> results) {
-        // Declare containers for SPF, DKIM and DMARC
-        List<MailAuthenticityMechanismResult> spfResults = null;
-        List<MailAuthenticityMechanismResult> dkimResults = null;
-        List<MailAuthenticityMechanismResult> dmarcResults = null;
-
-        for (final MailAuthenticityMechanismResult result : results) {
-            final DefaultMailAuthenticityMechanism mechanism = (DefaultMailAuthenticityMechanism) result.getMechanism();
-            switch (mechanism) {
-                case DMARC:
-                    if (null == dmarcResults) {
-                        dmarcResults = new ArrayList<>();
-                    }
-                    dmarcResults.add(result);
-                    break;
-                case DKIM:
-                    if (null == dkimResults) {
-                        dkimResults = new ArrayList<>();
-                    }
-                    dkimResults.add(result);
-                    break;
-                case SPF:
-                    if (null == spfResults) {
-                        spfResults = new ArrayList<>();
-                    }
-                    spfResults.add(result);
-                    break;
-            }
-        }
-
-        // Remove everything from the initial list
-        results.clear();
-
-        return new SeparatedResults(spfResults, dkimResults, dmarcResults);
-    }
-
-    /**
-     * <p>Check the DKIM best of result and set the overall status.</p>
-     * 
-     * <p>If the DKIM status is either 'PERMFAIL' or 'FAIL' then the DKIM mechanism is
-     * considered to have failed, thus the overall status is set accordingly to 'FAIL'.</p>
-     * 
-     * <p>If the DKIM status is set to 'PASS', then the overall status will be set to
-     * either 'PASS' or 'NEUTRAL' depending on whether there is a domain match ('PASS'
-     * in case of a domain match).</p>
-     *
-     * @param overallResult The overall {@link MailAuthenticityResult}
-     * @param bestOfDKIM The best of DKIM {@link MailAuthenticityMechanismResult}
-     * @return <code>true</code> if DKIM failed, <code>false</code> otherwise
-     */
-    private boolean dkimFailed(final MailAuthenticityResult overallResult, MailAuthenticityMechanismResult bestOfDKIM) {
-        if (bestOfDKIM == null) {
-            return false;
-        }
-        boolean dkimFailed = false;
-        final DKIMResult dkimResult = (DKIMResult) bestOfDKIM.getResult();
-        switch (dkimResult) {
-            case PERMFAIL:
-            case FAIL:
-                dkimFailed = true;
-                break;
-            case PASS:
-                overallResult.setStatus(bestOfDKIM.isDomainMatch() ? MailAuthenticityStatus.PASS : MailAuthenticityStatus.NEUTRAL);
-                break;
-            default:
-                overallResult.setStatus(bestOfDKIM.getResult().convert());
-        }
-        return dkimFailed;
-    }
-
-    /**
-     * <p>Check the SPF best of result and set the overall status.</p>
-     * 
-     * <p>If the SPF status is either 'PERMERROR' or 'FAIL' then the SPF mechanism is
-     * considered to have failed, thus the overall status is set accordingly to 'FAIL'.</p>
-     * 
-     * <p>If the SPF status is either 'SOFTFAIL', or 'TEMPERROR', or 'NONE', or 'NEUTRAL'
-     * then the overall status is set to either 'NEUTRAL' or 'FAIL' depending on whether
-     * there is a domain match ('NEUTRAL' in case of a domain match).</p>
-     * 
-     * <p>On the other hand, if the SPF status is set to 'PASS' then the overall status
-     * is set to either 'NEUTRAL' or 'FAIL' depending on whether DKIM failed and there is
-     * a domain match ('NEUTRAL' in case of a domain match), or to either 'PASS' or 'NEUTRAL'
-     * if DKIM passed and there is a domain match ('PASS' in case of a domain match).</p>
-     *
-     * @param overallResult The overall {@link MailAuthenticityResult}
-     * @param bestOfSPF The best of SPF {@link MailAuthenticityMechanismResult}
-     * @param dkimFailed the status of DKIM
-     */
-    private void checkSPF(final MailAuthenticityResult overallResult, MailAuthenticityMechanismResult bestOfSPF, boolean dkimFailed) {
-        if (bestOfSPF == null) {
-            return;
-        }
-        final SPFResult spfResult = (SPFResult) bestOfSPF.getResult();
-        switch (spfResult) {
-            case SOFTFAIL:
-            case TEMPERROR:
-            case NONE:
-            case NEUTRAL:
-                // Handle as neutral or fail, depending on the domain match
-                overallResult.setStatus(bestOfSPF.isDomainMatch() ? MailAuthenticityStatus.NEUTRAL : MailAuthenticityStatus.FAIL);
-                break;
-            case PASS:
-                // Pass
-                if (dkimFailed) {
-                    overallResult.setStatus(bestOfSPF.isDomainMatch() ? MailAuthenticityStatus.NEUTRAL : MailAuthenticityStatus.FAIL);
-                } else {
-                    overallResult.setStatus(bestOfSPF.isDomainMatch() ? MailAuthenticityStatus.PASS : MailAuthenticityStatus.NEUTRAL);
-                }
-                break;
-            case PERMERROR:
-            case FAIL:
-                // Handle as fail
-                overallResult.setStatus(MailAuthenticityStatus.FAIL);
-                break;
-            case POLICY:
-            default:
-                // Override
-                overallResult.setStatus(bestOfSPF.getResult().convert());
-        }
-    }
-
-    /**
-     * Picks the best {@link MailAuthenticityMechanismResult} from the specified {@link List} of results.
-     *
-     * @param results The {@link List} with the {@link MailAuthenticityMechanismResult}s
-     * @return The best {@link MailAuthenticityMechanismResult} according to their natural ordering,
-     *         or <code>null</code> if the {@link List} is empty, or the first (and only) element
-     *         if the {@link List} is a singleton
-     */
-    private MailAuthenticityMechanismResult pickBestResult(List<MailAuthenticityMechanismResult> results) {
-        int size = results.size();
-        if (size == 0) {
-            return null;
-        }
-        if (size == 1) {
-            return results.get(0);
-        }
-
-        MailAuthenticityMechanismResult bestResult = null;
-        for (MailAuthenticityMechanismResult result : results) {
-            if (null == bestResult) {
-                bestResult = result;
-            } else {
-                if (result.getResult().getCode() < bestResult.getResult().getCode()) {
-                    bestResult = result;
-                } else if (result.getResult().getCode() == bestResult.getResult().getCode() && result.isDomainMatch()) {
-                    bestResult = result;
-                }
-            }
-        }
-
-        return bestResult;
-    }
-
-    /**
-     * Parses the unknown mechanism's attributes and returns those as a {@link Map}
-     *
-     * @param element The element to parse
-     * @return A {@link Map} with the parsed attributes of the unknown mechanism
-     */
-    private Map<String, String> parseUnknownMechs(final String element) {
-        final List<MailAuthenticityAttribute> attributes = StringUtil.parseList(InterruptibleCharSequence.valueOf(element));
-        final Map<String, String> unknownResults = new HashMap<>();
-        // First element is always the mechanism
-        final MailAuthenticityAttribute mechanism = attributes.get(0);
-        unknownResults.put("mechanism", mechanism.getKey());
-        unknownResults.put("result", extractOutcome(mechanism.getValue()));
-
-        for (int index = 1; index < attributes.size(); index++) {
-            final MailAuthenticityAttribute attribute = attributes.get(index);
-            unknownResults.put(attribute.getKey(), attribute.getValue());
-        }
-
-        if (!unknownResults.containsKey("reason")) {
-            final String reason = extractComment(mechanism.getValue());
-            if (!Strings.isEmpty(reason)) {
-                unknownResults.put("reason", reason);
-            }
-        }
-
-        return unknownResults;
-    }
-
-    /**
-     * Extracts the domain from the specified internet address
-     * 
-     * @param adr The address as string
-     * @return The domain of the sender
-     * @throws IllegalArgumentException if the address is either empty or <code>null</code
-     */
-    private String extractDomain(final InternetAddress address) {
-        if (address == null) {
-            throw new IllegalArgumentException("The address can be neither empty nor null");
-        }
-        final String adr = address.getAddress();
-        final int index = adr.indexOf('@');
-        return adr.substring(index + 1);
-    }
-
-    private static final Pattern SPLIT = Pattern.compile(" ");
-
-    /**
-     * Determines whether the specified authServId is valid
-     *
-     * @param authServId The authserv-id to check
-     * @return <code>true</code> if the string is valid; <code>false</code> otherwise
-     */
-    private boolean isAuthServIdValid(String authServId, final List<AllowedAuthServId> allowedAuthServIds) {
-        if (Strings.isEmpty(authServId)) {
-            LOGGER.warn("The authserv-id is missing from the 'Authentication-Results'");
-            return false;
-        }
-        final String[] split = SPLIT.split(authServId, 0);
-
-        // Cleanse the optional version
-        authServId = split.length == 0 ? authServId : split[0];
-
-        // Regex and wildcard checks...
-        for (final AllowedAuthServId allowedAuthServId : allowedAuthServIds) {
-            if (allowedAuthServId.allows(authServId)) {
-                return true;
-            }
-        }
-        LOGGER.warn("The authserv-id '{}' is not in the allowed authserv ids list (see server property '{}'). Server misconfiguration?", authServId, MailAuthenticityProperty.AUTHSERV_ID);
-        return false;
-    }
-
-    /**
-     * Extracts the outcome of the specified value.
-     *
-     * @param value the value to extract the outcome from
-     * @return The extracted outcome
-     */
-    private String extractOutcome(final String value) {
-        final int index = value.indexOf(' ');
-        return (index < 0) ? value : value.substring(0, index);
-    }
-
-    /**
-     * Extracts an optional comment that may reside within parentheses
-     *
-     * @param value The value to extract the comment form
-     * @return The optional extracted comment; <code>null</code> if no comment was found
-     */
-    private String extractComment(String value) {
-        final int beginIndex = value.indexOf('(');
-        if (beginIndex < 0) {
-            return null;
-        }
-        final int endIndex = value.indexOf(')');
-        if (endIndex < 0) {
-            return null;
-        }
-        if (beginIndex >= endIndex) {
-            return null;
-        }
-        value = Strings.unquote(value);
-        return value.substring(beginIndex + 1, endIndex);
-    }
 
     /**
      * Gets the allowed authserv-ids for session-associated user.
@@ -736,98 +287,6 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             return;
         }
         metricLogger.log(mailId, authHeaders, overallResult);
-    }
-
-    ///////////////////////////////// HELPER CLASSES /////////////////////////////////
-
-    /**
-     * {@link MailAuthenticityMechanismComparator} - Compares the {@link DefaultMailAuthenticityMechanism}s
-     * according to their ordinal value
-     *
-     * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
-     */
-    private static class MailAuthenticityMechanismComparator implements Comparator<String> {
-
-        /**
-         * Initializes a new {@link MailAuthenticityHandlerImpl.MailAuthenticityMechanismComparator}.
-         */
-        MailAuthenticityMechanismComparator() {
-            super();
-        }
-
-        @Override
-        public int compare(final String o1, final String o2) {
-            final String[] s1 = o1.split("=");
-            final String[] s2 = o2.split("=");
-            DefaultMailAuthenticityMechanism mam1 = null;
-            DefaultMailAuthenticityMechanism mam2 = null;
-            if (s1.length > 0) {
-                mam1 = DefaultMailAuthenticityMechanism.parse(s1[0]);
-            }
-            if (s2.length > 0) {
-                mam2 = DefaultMailAuthenticityMechanism.parse(s2[0]);
-            }
-            if (mam1 != null && mam2 != null) {
-                return mam1.compareTo(mam2);
-            }
-            if (mam1 == null && mam2 == null) {
-                return 0;
-            } else if (mam1 == null) {
-                return 1;
-            } else if (mam2 == null) {
-                return -1;
-            }
-            return 0;
-        }
-    }
-
-    /** Simple helper class to wrap containers for SPF, DKIM and DMARC results */
-    private static class SeparatedResults {
-
-        private final List<MailAuthenticityMechanismResult> spfResults;
-        private final List<MailAuthenticityMechanismResult> dkimResults;
-        private final List<MailAuthenticityMechanismResult> dmarcResults;
-
-        /**
-         * Initializes a new {@link SeparatedResults}.
-         *
-         * @param spfResults The container for SPF results
-         * @param dkimResults The container for DKIM results
-         * @param dmarcResults The container for DMARC results
-         */
-        SeparatedResults(List<MailAuthenticityMechanismResult> spfResults, List<MailAuthenticityMechanismResult> dkimResults, List<MailAuthenticityMechanismResult> dmarcResults) {
-            super();
-            this.spfResults = null == spfResults ? Collections.emptyList() : spfResults;
-            this.dkimResults = null == dkimResults ? Collections.emptyList() : dkimResults;
-            this.dmarcResults = null == dmarcResults ? Collections.emptyList() : dmarcResults;
-        }
-
-        /**
-         * Gets the SPF results
-         *
-         * @return The SPF results
-         */
-        List<MailAuthenticityMechanismResult> getSpfResults() {
-            return spfResults;
-        }
-
-        /**
-         * Gets the DKIM results
-         *
-         * @return The DKIM results
-         */
-        List<MailAuthenticityMechanismResult> getDkimResults() {
-            return dkimResults;
-        }
-
-        /**
-         * Gets the DMAR results
-         *
-         * @return The DMAR results
-         */
-        List<MailAuthenticityMechanismResult> getDmarcResults() {
-            return dmarcResults;
-        }
     }
 
 }

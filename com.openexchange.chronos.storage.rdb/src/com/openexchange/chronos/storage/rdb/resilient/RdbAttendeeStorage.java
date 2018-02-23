@@ -56,27 +56,18 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.storage.AttendeeStorage;
-import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.chronos.storage.rdb.CalendarStorageWarnings;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import net.jodah.failsafe.Failsafe;
-import net.jodah.failsafe.RetryPolicy;
 
 /**
- * {@link CalendarStorage}
+ * {@link RdbAttendeeStorage}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class RdbAttendeeStorage extends CalendarStorageWarnings implements AttendeeStorage {
-
-    private static final int MAX_RETRIES = 5;
+public class RdbAttendeeStorage extends RdbResilientStorage implements AttendeeStorage {
 
     private final AttendeeStorage delegate;
-    private final ServiceLookup services;
-    private final boolean handleTruncations;
-    private final boolean handleIncorrectStrings;
 
     /**
      * Initializes a new {@link RdbAttendeeStorage}.
@@ -87,11 +78,8 @@ public class RdbAttendeeStorage extends CalendarStorageWarnings implements Atten
      * @param handleIncorrectStrings <code>true</code> to automatically handle incorrect string warnings, <code>false</code>, otherwise
      */
     public RdbAttendeeStorage(ServiceLookup services, AttendeeStorage delegate, boolean handleTruncations, boolean handleIncorrectStrings) {
-        super();
-        this.services = services;
+        super(services, handleTruncations, handleIncorrectStrings);
         this.delegate = delegate;
-        this.handleIncorrectStrings = handleIncorrectStrings;
-        this.handleTruncations = handleTruncations;
     }
 
     @Override
@@ -141,58 +129,37 @@ public class RdbAttendeeStorage extends CalendarStorageWarnings implements Atten
 
     @Override
     public void insertAttendees(String eventId, List<Attendee> attendees) throws OXException {
-        Failsafe
-            .with(new RetryPolicy().withMaxRetries(MAX_RETRIES).retryOn(f -> handle(eventId, attendees, f)))
-            .run(() -> delegate.insertAttendees(eventId, attendees))
-        ;
+        runWithRetries(() -> delegate.insertAttendees(eventId, attendees), f -> handle(eventId, attendees, f));
     }
 
     @Override
     public void insertAttendees(Map<String, List<Attendee>> attendeesByEventId) throws OXException {
-        Failsafe
-            .with(new RetryPolicy().withMaxRetries(MAX_RETRIES).retryOn(f -> handle(attendeesByEventId, f)))
-            .run(() -> delegate.insertAttendees(attendeesByEventId))
-        ;
+        runWithRetries(() -> delegate.insertAttendees(attendeesByEventId), f -> handle(attendeesByEventId, f));
     }
 
     @Override
     public void updateAttendees(String eventId, List<Attendee> attendees) throws OXException {
-        Failsafe
-            .with(new RetryPolicy().withMaxRetries(MAX_RETRIES).retryOn(f -> handle(eventId, attendees, f)))
-            .run(() -> delegate.updateAttendees(eventId, attendees))
-        ;
+        runWithRetries(() -> delegate.updateAttendees(eventId, attendees), f -> handle(eventId, attendees, f));
     }
 
     @Override
     public void updateAttendee(String eventId, Attendee attendee) throws OXException {
-        Failsafe
-            .with(new RetryPolicy().withMaxRetries(MAX_RETRIES).retryOn(f -> handle(eventId, Collections.singletonList(attendee), f)))
-            .run(() -> delegate.updateAttendee(eventId, attendee))
-        ;
+        runWithRetries(() -> delegate.updateAttendee(eventId, attendee), f -> handle(eventId, Collections.singletonList(attendee), f));
     }
 
     @Override
     public void insertAttendeeTombstone(String eventId, Attendee attendee) throws OXException {
-        Failsafe
-            .with(new RetryPolicy().withMaxRetries(MAX_RETRIES).retryOn(f -> handle(eventId, Collections.singletonList(attendee), f)))
-            .run(() -> delegate.insertAttendeeTombstone(eventId, attendee))
-        ;
+        runWithRetries(() -> delegate.insertAttendeeTombstone(eventId, attendee), f -> handle(eventId, Collections.singletonList(attendee), f));
     }
 
     @Override
     public void insertAttendeeTombstones(String eventId, List<Attendee> attendees) throws OXException {
-        Failsafe
-            .with(new RetryPolicy().withMaxRetries(MAX_RETRIES).retryOn(f -> handle(eventId, attendees, f)))
-            .run(() -> delegate.insertAttendeeTombstones(eventId, attendees))
-        ;
+        runWithRetries(() -> delegate.insertAttendeeTombstones(eventId, attendees), f -> handle(eventId, attendees, f));
     }
 
     @Override
     public void insertAttendeeTombstones(Map<String, List<Attendee>> attendeesByEventId) throws OXException {
-        Failsafe
-            .with(new RetryPolicy().withMaxRetries(MAX_RETRIES).retryOn(f -> handle(attendeesByEventId, f)))
-            .run(() -> delegate.insertAttendeeTombstones(attendeesByEventId))
-        ;
+        runWithRetries(() -> delegate.insertAttendeeTombstones(attendeesByEventId), f -> handle(attendeesByEventId, f));
     }
 
     /**

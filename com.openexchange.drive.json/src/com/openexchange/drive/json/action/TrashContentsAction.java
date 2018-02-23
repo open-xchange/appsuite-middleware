@@ -57,12 +57,12 @@ import com.openexchange.exception.OXException;
 
 /**
  *
- * {@link GetTrashContentAction}
+ * {@link TrashContentsAction}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class GetTrashContentAction extends AbstractDriveAction {
+public class TrashContentsAction extends AbstractDriveAction {
 
     @Override
     public AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {

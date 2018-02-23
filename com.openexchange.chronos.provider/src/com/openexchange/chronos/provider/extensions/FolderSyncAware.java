@@ -83,8 +83,8 @@ public interface FolderSyncAware extends SyncAware {
     UpdatesResult getUpdatedEventsInFolder(String folderId, long updatedSince) throws OXException;
 
     /**
-     * Gets the sequence number of a calendar folder, which is the highest last-modification timestamp of the folder itself and his
-     * contents. Distinct object access permissions (e.g. <i>read own</i>) are not considered.
+     * Gets the sequence number of a calendar folder, which is the highest timestamp of all contained items. Distinct object access
+     * permissions (e.g. <i>read own</i>) are not considered.
      *
      * @param folderId The identifier of the folder to get the sequence number for
      * @return The sequence number

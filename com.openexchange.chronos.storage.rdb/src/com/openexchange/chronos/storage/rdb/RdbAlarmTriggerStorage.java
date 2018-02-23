@@ -66,16 +66,11 @@ import com.openexchange.chronos.AlarmTrigger;
 import com.openexchange.chronos.AlarmTriggerField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.DefaultRecurrenceData;
-import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.EntityResolver;
-import com.openexchange.chronos.service.RecurrenceData;
-import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.AlarmTriggerStorage;
@@ -276,18 +271,6 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
 
     @Override
     public void insertTriggers(Event event, Map<Integer, List<Alarm>> alarmsPerUserId) throws OXException {
-        RecurrenceId recurrenceId = null;
-        if (event.containsRecurrenceRule() && event.getRecurrenceRule() != null && event.getRecurrenceId() == null && event.getId().equals(event.getSeriesId())) {
-
-            RecurrenceData data = new DefaultRecurrenceData(event);
-            RecurrenceIterator<RecurrenceId> iterateRecurrenceIds = recurrenceService.iterateRecurrenceIds(data, new Date(), null);
-            if(!iterateRecurrenceIds.hasNext()){
-                // Nothing to do for this event
-                return;
-            }
-            recurrenceId = new DefaultRecurrenceId(iterateRecurrenceIds.next().getValue());
-
-        }
         for (Integer userId : alarmsPerUserId.keySet()) {
 
             List<Alarm> alarms = alarmsPerUserId.get(userId);
@@ -297,7 +280,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             }
 
             for (Alarm alarm : alarms) {
-                AlarmTrigger trigger = prepareTrigger(userId, alarm, event, recurrenceId);
+                AlarmTrigger trigger = prepareTrigger(userId, alarm, event);
                 if(trigger==null){
                     // Skip invalid and past alarm triggers
                     continue;
@@ -597,18 +580,6 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                 if (alarmsPerAttendee == null) {
                     continue;
                 }
-                RecurrenceId recurrenceId = null;
-                if (event.containsRecurrenceRule() && event.getRecurrenceRule() != null && event.getRecurrenceId() == null && event.getId().equals(event.getSeriesId())) {
-
-                    RecurrenceData data = new DefaultRecurrenceData(event);
-                    RecurrenceIterator<RecurrenceId> iterateRecurrenceIds = recurrenceService.iterateRecurrenceIds(data, new Date(), null);
-                    if (!iterateRecurrenceIds.hasNext()) {
-                        // Nothing to do for this event
-                        continue;
-                    }
-                    recurrenceId = new DefaultRecurrenceId(iterateRecurrenceIds.next().getValue());
-
-                }
 
                 for (Integer userId : alarmsPerAttendee.keySet()) {
 
@@ -619,7 +590,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                     }
                     for (Alarm alarm : alarms) {
 
-                        AlarmTrigger trigger = prepareTrigger(userId, alarm, event, recurrenceId);
+                        AlarmTrigger trigger = prepareTrigger(userId, alarm, event);
                         if (trigger == null) {
                             // Skip past and invalid triggers
                             continue;
@@ -643,11 +614,10 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
      * @param userId The user id
      * @param alarm The corresponding alarm
      * @param event The corresponding event
-     * @param recurrenceId The optional recurrence id
      * @return The prepared {@link AlarmTrigger} or null in case the alarm is in the past or is invalid
      * @throws OXException
      */
-    private AlarmTrigger prepareTrigger(Integer userId, Alarm alarm, Event event, RecurrenceId recurrenceId) throws OXException {
+    private AlarmTrigger prepareTrigger(Integer userId, Alarm alarm, Event event) throws OXException {
         AlarmTrigger trigger = new AlarmTrigger();
         trigger.setUserId(userId);
         trigger.setAction(alarm.getAction().getValue());
@@ -664,12 +634,13 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         }
 
         if (event.containsRecurrenceRule() && event.getRecurrenceRule() != null && event.getRecurrenceId() == null && event.getId().equals(event.getSeriesId())) {
-            Date triggerTime = AlarmUtils.getNextTriggerTime(event, alarm, new Date(), tz, recurrenceService);
+            Event nextTriggerEvent = AlarmUtils.getNextTriggerEvent(event, alarm, new Date(), tz, recurrenceService);
+            Date triggerTime = nextTriggerEvent == null ? null : AlarmUtils.getTriggerTime(alarm.getTrigger(), nextTriggerEvent, tz);
             if(triggerTime == null || triggerTime.before(new Date())){
                 return null;
             }
             addRelatedDate(alarm, event, trigger);
-            trigger.setRecurrenceId(recurrenceId);
+            trigger.setRecurrenceId(nextTriggerEvent.getRecurrenceId());
             trigger.setTime(triggerTime.getTime());
         } else {
             Date triggerTime = AlarmUtils.getTriggerTime(alarm.getTrigger(), event, tz);

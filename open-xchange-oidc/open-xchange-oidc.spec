@@ -51,7 +51,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
+%config(noreplace) /opt/open-xchange/etc/hazelcast/oidcAuthInfos.properties
+%config(noreplace) /opt/open-xchange/etc/hazelcast/oidcLogoutInfos.properties
 
 %changelog
 * Mon Jan 15 2018 Vitali Sjablow <vitali.sjablow@open-xchange.com>

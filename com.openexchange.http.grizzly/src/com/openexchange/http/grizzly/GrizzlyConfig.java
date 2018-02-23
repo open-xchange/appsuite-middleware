@@ -49,8 +49,10 @@
 
 package com.openexchange.http.grizzly;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.List;
+import java.util.TimeZone;
 import com.google.common.collect.ImmutableList;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
@@ -83,6 +85,7 @@ public class GrizzlyConfig {
         private int httpPort = 8009;
         private int httpsPort = 8010;
         private boolean isJMXEnabled = false;
+        private GrizzlyAccessLogConfig accessLogConfig = GrizzlyAccessLogConfig.NOT_ENABLED_CONFIG;
         private boolean isWebsocketsEnabled = false;
         private boolean isCometEnabled = false;
         private int maxRequestParameters = 1000;
@@ -196,6 +199,66 @@ public class GrizzlyConfig {
 
             this.supportHierachicalLookupOnNotFound = configService.getBoolProperty("com.openexchange.http.grizzly.supportHierachicalLookupOnNotFound", false);
 
+            // access log
+            {
+                boolean accessLogEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasAccessLogEnabled", false);
+                if (accessLogEnabled) {
+                    String tmp = configService.getProperty("com.openexchange.http.grizzly.accesslog.file");
+                    if (Strings.isEmpty(tmp)) {
+                        LOG.warn("Missing file for access log. Please set property \"{}\" accordingly. Access log will be disabled!", "com.openexchange.http.grizzly.accesslog.file");
+                        this.accessLogConfig = GrizzlyAccessLogConfig.NOT_ENABLED_CONFIG;
+                    } else {
+                        GrizzlyAccessLogConfig.Builder accessLogConfigBuilder = GrizzlyAccessLogConfig.builder(new File(tmp.trim()));
+
+                        {
+                            tmp = configService.getProperty("com.openexchange.http.grizzly.accesslog.format", "combined").trim();
+                            GrizzlyAccessLogConfig.Format format = GrizzlyAccessLogConfig.Format.formatFor(tmp);
+                            if (null == format) {
+                                format = GrizzlyAccessLogConfig.Format.COMBINED;
+                                LOG.warn("Invalid or unknow format for access log: {}. Using {} as fall-back instead", tmp, format.getId());
+                            }
+                            accessLogConfigBuilder.withFormat(format);
+                        }
+
+                        {
+                            tmp = configService.getProperty("com.openexchange.http.grizzly.accesslog.rotate", "none").trim();
+                            GrizzlyAccessLogConfig.RotatePolicy rotatePolicy = GrizzlyAccessLogConfig.RotatePolicy.rotatePolicyFor(tmp);
+                            if (null == rotatePolicy) {
+                                rotatePolicy = GrizzlyAccessLogConfig.RotatePolicy.NONE;
+                                LOG.warn("Invalid or unknow rotate policy for access log: {}. Using {} as fall-back instead", tmp, rotatePolicy.getId());
+                            }
+                            accessLogConfigBuilder.withRotatePolicy(rotatePolicy);
+                        }
+
+                        {
+                            tmp = configService.getProperty("com.openexchange.http.grizzly.accesslog.synchronous", "false").trim();
+                            boolean synchronous = Boolean.parseBoolean(tmp);
+                            accessLogConfigBuilder.withSynchronous(synchronous);
+                        }
+
+                        {
+                            tmp = configService.getProperty("com.openexchange.http.grizzly.accesslog.statusThreshold", "0").trim();
+                            try {
+                                int statusThreshol = Integer.parseInt(tmp);
+                                accessLogConfigBuilder.withStatusThreshold(statusThreshol);
+                            } catch (NumberFormatException e) {
+                                LOG.warn("Invalid value for property \"{}\". Using no status threshold.", "com.openexchange.http.grizzly.accesslog.statusThreshold");
+                            }
+                        }
+
+                        {
+                            tmp = configService.getProperty("com.openexchange.http.grizzly.accesslog.timezone", "UTC").trim();
+                            TimeZone timeZone = TimeZone.getTimeZone(tmp);
+                            accessLogConfigBuilder.withTimeZone(timeZone);
+                        }
+
+                        this.accessLogConfig = accessLogConfigBuilder.build();
+                    }
+                } else {
+                    this.accessLogConfig = GrizzlyAccessLogConfig.NOT_ENABLED_CONFIG;
+                }
+            }
+
             return this;
         }
 
@@ -216,6 +279,11 @@ public class GrizzlyConfig {
 
         public Builder setJMXEnabled(boolean isJMXEnabled) {
             this.isJMXEnabled = isJMXEnabled;
+            return this;
+        }
+
+        public Builder setAccessLogConfig(GrizzlyAccessLogConfig accessLogConfig) {
+            this.accessLogConfig = accessLogConfig;
             return this;
         }
 
@@ -395,7 +463,7 @@ public class GrizzlyConfig {
         }
 
         public GrizzlyConfig build() {
-            return new GrizzlyConfig(httpHost, httpPort, httpsPort, isJMXEnabled, isWebsocketsEnabled, isCometEnabled, maxRequestParameters, backendRoute, isAbsoluteRedirect, shutdownFast, awaitShutDownSeconds, maxHttpHeaderSize, isSslEnabled, keystorePath, keystorePassword, sessionExpiryCheckInterval, maxNumberOfConcurrentRequests, checkTrackingIdInRequestParameters, cookieMaxAge, cookieMaxInactivityInterval, isForceHttps, isCookieHttpOnly, contentSecurityPolicy, defaultEncoding, isConsiderXForwards, knownProxies, forHeader, protocolHeader, httpsProtoValue, httpProtoPort, httpsProtoPort, echoHeader, robotsMetaTag, maxBodySize, maxNumberOfHttpSessions, isSessionAutologin, enabledCiphers, wsTimeoutMillis, supportHierachicalLookupOnNotFound);
+            return new GrizzlyConfig(httpHost, httpPort, httpsPort, isJMXEnabled, accessLogConfig, isWebsocketsEnabled, isCometEnabled, maxRequestParameters, backendRoute, isAbsoluteRedirect, shutdownFast, awaitShutDownSeconds, maxHttpHeaderSize, isSslEnabled, keystorePath, keystorePassword, sessionExpiryCheckInterval, maxNumberOfConcurrentRequests, checkTrackingIdInRequestParameters, cookieMaxAge, cookieMaxInactivityInterval, isForceHttps, isCookieHttpOnly, contentSecurityPolicy, defaultEncoding, isConsiderXForwards, knownProxies, forHeader, protocolHeader, httpsProtoValue, httpProtoPort, httpsProtoPort, echoHeader, robotsMetaTag, maxBodySize, maxNumberOfHttpSessions, isSessionAutologin, enabledCiphers, wsTimeoutMillis, supportHierachicalLookupOnNotFound);
         }
     }
 
@@ -412,8 +480,11 @@ public class GrizzlyConfig {
     /** The default port for the https network listener. */
     private final int httpsPort;
 
-    /** Enable grizzly monitoring via JMX? */
+    /** Enable Grizzly monitoring via JMX? */
     private final boolean isJMXEnabled;
+
+    /** Enable Grizzly access.log configuration */
+    private final GrizzlyAccessLogConfig accessLogConfig;
 
     /** Enable Bi-directional, full-duplex communications channels over a single TCP connection. */
     private final boolean isWebsocketsEnabled;
@@ -526,12 +597,13 @@ public class GrizzlyConfig {
     /** Checks if hierarchical look-up of "parent" servlets should be supported. */
     private final boolean supportHierachicalLookupOnNotFound;
 
-    GrizzlyConfig(String httpHost, int httpPort, int httpsPort, boolean isJMXEnabled, boolean isWebsocketsEnabled, boolean isCometEnabled, int maxRequestParameters, String backendRoute, boolean isAbsoluteRedirect, boolean shutdownFast, int awaitShutDownSeconds, int maxHttpHeaderSize, boolean isSslEnabled, String keystorePath, String keystorePassword, int sessionExpiryCheckInterval, int maxNumberOfConcurrentRequests, boolean checkTrackingIdInRequestParameters, int cookieMaxAge, int cookieMaxInactivityInterval, boolean isForceHttps, boolean isCookieHttpOnly, String contentSecurityPolicy, String defaultEncoding, boolean isConsiderXForwards, List<IPRange> knownProxies, String forHeader, String protocolHeader, String httpsProtoValue, int httpProtoPort, int httpsProtoPort, String echoHeader, String robotsMetaTag, int maxBodySize, int maxNumberOfHttpSessions, boolean isSessionAutologin, List<String> enabledCiphers, long wsTimeoutMillis, boolean supportHierachicalLookupOnNotFound) {
+    GrizzlyConfig(String httpHost, int httpPort, int httpsPort, boolean isJMXEnabled, GrizzlyAccessLogConfig accessLogConfig, boolean isWebsocketsEnabled, boolean isCometEnabled, int maxRequestParameters, String backendRoute, boolean isAbsoluteRedirect, boolean shutdownFast, int awaitShutDownSeconds, int maxHttpHeaderSize, boolean isSslEnabled, String keystorePath, String keystorePassword, int sessionExpiryCheckInterval, int maxNumberOfConcurrentRequests, boolean checkTrackingIdInRequestParameters, int cookieMaxAge, int cookieMaxInactivityInterval, boolean isForceHttps, boolean isCookieHttpOnly, String contentSecurityPolicy, String defaultEncoding, boolean isConsiderXForwards, List<IPRange> knownProxies, String forHeader, String protocolHeader, String httpsProtoValue, int httpProtoPort, int httpsProtoPort, String echoHeader, String robotsMetaTag, int maxBodySize, int maxNumberOfHttpSessions, boolean isSessionAutologin, List<String> enabledCiphers, long wsTimeoutMillis, boolean supportHierachicalLookupOnNotFound) {
         super();
         this.httpHost = httpHost;
         this.httpPort = httpPort;
         this.httpsPort = httpsPort;
         this.isJMXEnabled = isJMXEnabled;
+        this.accessLogConfig = null == accessLogConfig ? GrizzlyAccessLogConfig.NOT_ENABLED_CONFIG : accessLogConfig;
         this.isWebsocketsEnabled = isWebsocketsEnabled;
         this.isCometEnabled = isCometEnabled;
         this.maxRequestParameters = maxRequestParameters;
@@ -630,6 +702,15 @@ public class GrizzlyConfig {
      */
     public boolean isJMXEnabled() {
         return isJMXEnabled;
+    }
+
+    /**
+     * Gets the Grizzly access.log configuration
+     *
+     * @return The access.log configuration
+     */
+    public GrizzlyAccessLogConfig getAccessLogConfig() {
+        return accessLogConfig;
     }
 
     /**

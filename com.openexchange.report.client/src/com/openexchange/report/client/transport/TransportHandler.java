@@ -134,7 +134,7 @@ public class TransportHandler {
      * Try to send the report to the saved REPORT_SERVER_URL over https, if the given parameter is set. If
      * https fails, try it with http. If that fails, save the report to hard-drive and save location
      * to logfile.
-     * 
+     *
      * @param isHttps
      * @param reportConfiguration
      * @param report
@@ -166,6 +166,7 @@ public class TransportHandler {
         httpURLConnection.setReadTimeout(2500);
         httpURLConnection.setUseCaches(false);
         httpURLConnection.setDoOutput(true);
+        httpURLConnection.setChunkedStreamingMode(65536); // This enforces 'sun.net.www.protocol.http.HttpURLConnection' to use a "streaming" output stream; otherwise outgoing data is stored into a ByteArrayOutputStream (likely causing an OOME; see Bug 57260)
         httpURLConnection.setDoInput(true);
         httpURLConnection.setRequestMethod("POST");
         httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
@@ -193,16 +194,18 @@ public class TransportHandler {
                 System.out.println("Trying to send without ssl.");
                 sendReport(false, reportConfiguration, metadata);
                 return;
-            } else
+            } else {
                 saveReportToHardDrive(metadata);
+            }
         }
 
         if (httpURLConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
             System.err.println("Report sending failure, unable to send via http...");
-            if (isHttps)
+            if (isHttps) {
                 sendReport(false, reportConfiguration, metadata);
-            else
+            } else {
                 saveReportToHardDrive(metadata);
+            }
             throw new MalformedURLException("Problem contacting report server: " + httpURLConnection.getResponseCode());
         }
         final BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
@@ -254,7 +257,7 @@ public class TransportHandler {
 
     /**
      * Save the given report to hard-drive and print the location into the logfile.
-     * 
+     *
      * @param report
      * @throws IOException
      * @throws JSONException

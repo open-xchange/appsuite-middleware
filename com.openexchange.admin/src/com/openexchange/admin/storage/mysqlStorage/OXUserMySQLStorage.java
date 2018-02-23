@@ -3097,15 +3097,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.executeUpdate();
                 stmt.close();
 
-                /*-
-                 *
-                try {
-                    ClientAdminThread.cache.reinitAccessCombinations();
-                } catch (Exception e) {
-                    log.error("", e);
-                }
-                 *
-                 */
                 // JCS
                 {
                     CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);

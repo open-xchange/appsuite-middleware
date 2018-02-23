@@ -50,9 +50,13 @@
 package com.openexchange.file.storage.infostore.internal;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.groupware.infostore.InfostoreFacade;
@@ -119,18 +123,9 @@ public class FieldMapping {
         for (int i = 0; i < source.length; i++) {
             Metadata metadata = source[i];
             if (null == metadata) {
-                if (null == tmp) {
-                    tmp = new ArrayList<>(source.length);
-                    if (i > 0) {
-                        for (int j = 0; j < i; j++) {
-                            tmp.add(metadata);
-                        }
-                    }
-                }
-            } else {
-                if (null != tmp) {
-                    tmp.add(metadata);
-                }
+                tmp = Lists.newArrayList(
+                    Iterables.filter(Arrays.asList(source), Predicates.notNull()));
+                break;
             }
         }
         return null == tmp ? source : tmp.toArray(new Metadata[tmp.size()]);
