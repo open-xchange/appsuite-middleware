@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link DefaultCalendarFolder}
@@ -69,6 +70,7 @@ public class DefaultCalendarFolder implements CalendarFolder {
     private List<CalendarPermission> permissions;
     private ExtendedProperties extendedProperties;
     private EnumSet<CalendarCapability> supportedCapabilites;
+    private OXException accountError;
 
     /**
      * Initializes a new {@link DefaultCalendarFolder}.
@@ -167,6 +169,15 @@ public class DefaultCalendarFolder implements CalendarFolder {
 
     public void setSupportedCapabilites(EnumSet<CalendarCapability> supportedCapabilites) {
         this.supportedCapabilites = supportedCapabilites;
+    }
+
+    @Override
+    public OXException getAccountError() {
+        return accountError;
+    }
+
+    public void setAccountError(OXException accountError) {
+        this.accountError = accountError;
     }
 
     @Override

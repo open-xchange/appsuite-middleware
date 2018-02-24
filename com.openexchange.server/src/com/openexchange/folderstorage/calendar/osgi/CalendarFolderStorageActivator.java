@@ -58,6 +58,7 @@ import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactor
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.calendar.CalendarAccountErrorField;
 import com.openexchange.folderstorage.calendar.CalendarConfigField;
 import com.openexchange.folderstorage.calendar.CalendarFolderStorage;
 import com.openexchange.folderstorage.calendar.CalendarProviderField;
@@ -123,6 +124,7 @@ public final class CalendarFolderStorageActivator extends HousekeepingActivator 
         registerService(FolderField.class, ExtendedPropertiesField.getInstance());
         registerService(FolderField.class, CalendarProviderField.getInstance());
         registerService(FolderField.class, CalendarConfigField.getInstance());
+        registerService(FolderField.class, CalendarAccountErrorField.getInstance());
     }
 
     @Override

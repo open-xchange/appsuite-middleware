@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,83 +47,61 @@
  *
  */
 
-package com.openexchange.chronos.provider.composition.impl.idmangling;
+package com.openexchange.folderstorage.calendar;
 
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.List;
-import com.openexchange.chronos.ExtendedProperties;
-import com.openexchange.chronos.provider.CalendarCapability;
-import com.openexchange.chronos.provider.CalendarFolder;
-import com.openexchange.chronos.provider.CalendarPermission;
+import org.json.JSONObject;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderField;
+import com.openexchange.folderstorage.FolderProperty;
 
 /**
- * {@link IDManglingFolder}
+ * {@link CalendarAccountErrorField}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class IDManglingFolder implements CalendarFolder {
+public class CalendarAccountErrorField extends FolderField {
 
-    protected final String newId;
-    protected final CalendarFolder delegate;
+
+    /** The column identifier of the field as used in the HTTP API */
+    private static final int COLUMN_ID = 3204;
+
+    /** The column name of the field as used in the HTTP API */
+    private static final String COLUMN_NAME = "com.openexchange.calendar.accountError";
+
+    private static final long serialVersionUID = 2379727517007236596L;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarAccountErrorField.class);
+    private static final CalendarAccountErrorField INSTANCE = new CalendarAccountErrorField();
 
     /**
-     * Initializes a new {@link IDManglingGroupwareFolder}.
+     * Gets the calendar account error field instance.
      *
-     * @param delegate The event delegate
-     * @param newId The new identifier to hide the delegate's one
+     * @return The instance
      */
-    public IDManglingFolder(CalendarFolder delegate, String newId) {
-        super();
-        this.delegate = delegate;
-        this.newId = newId;
+    public static CalendarAccountErrorField getInstance() {
+        return INSTANCE;
+    }
+
+    /**
+     * Initializes a new {@link CalendarAccountErrorField}.
+     */
+    private CalendarAccountErrorField() {
+        super(COLUMN_ID, COLUMN_NAME, null);
     }
 
     @Override
-    public String getId() {
-        return newId;
-    }
-
-    @Override
-    public String getName() {
-        return delegate.getName();
-    }
-
-    @Override
-    public boolean isSubscribed() {
-        return delegate.isSubscribed();
-    }
-
-    @Override
-    public Date getLastModified() {
-        return delegate.getLastModified();
-    }
-
-    @Override
-    public List<CalendarPermission> getPermissions() {
-        return delegate.getPermissions();
-    }
-
-    @Override
-    public ExtendedProperties getExtendedProperties() {
-        return delegate.getExtendedProperties();
-    }
-
-    @Override
-    public EnumSet<CalendarCapability> getSupportedCapabilites() {
-        return delegate.getSupportedCapabilites();
-    }
-
-    @Override
-    public OXException getAccountError() {
-        return delegate.getAccountError();
-    }
-
-    @Override
-    public String toString() {
-        return "IDManglingFolder [newId=" + newId + ", delegate=" + delegate + "]";
+    public Object write(FolderProperty property) {
+        if (null != property) {
+            try {
+                JSONObject jsonObject = new JSONObject();
+                ResponseWriter.addException(jsonObject, (OXException) property.getValue());
+                return jsonObject;
+            } catch (Exception e) {
+                LOG.warn("Error writing calendar account error \"{}\": {}", property.getValue(), e.getMessage(), e);
+            }
+        }
+        return getDefaultValue();
     }
 
 }

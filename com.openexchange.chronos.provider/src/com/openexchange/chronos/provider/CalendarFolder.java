@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link CalendarFolder}
@@ -112,5 +113,12 @@ public interface CalendarFolder {
      * @return The supported calendar capabilities, or an empty set if no extended functionality is available
      */
     EnumSet<CalendarCapability> getSupportedCapabilites();
+
+    /**
+     * Gets a possible error in the underlying calendar account that prevents this calendar folder from operating normally.
+     *
+     * @return The account error, or <code>null</code> if there is none
+     */
+    OXException getAccountError();
 
 }
