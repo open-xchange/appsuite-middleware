@@ -462,6 +462,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         for (CalendarAccount account : getAccounts()) {
             if (false == hasCapability(account.getProviderId())) {
                 warnings.add(CalendarExceptionCodes.MISSING_CAPABILITY.create(CalendarProviders.getCapabilityName(account.getProviderId())));
+                continue;
             }
             try {
                 CalendarAccess access = getAccess(account);
