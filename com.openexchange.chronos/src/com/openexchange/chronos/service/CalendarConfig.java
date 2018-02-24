@@ -127,14 +127,6 @@ public interface CalendarConfig {
     int getRecurrenceCalculationLimit();
 
     /**
-     * Gets a value indicating whether <i>old</i> event series can be ignored when fetching events from the storage or not, i.e. series
-     * where the recurrence calculation limit kicks in prior the actually requested timeframe.
-     *
-     * @return <code>true</code> if old event series can be ignored, <code>false</code>, otherwise
-     */
-    boolean isIgnoreSeriesPastCalculationLimit();
-
-    /**
      * Gets the configured maximum number of conflicts between two recurring event series.
      *
      * @return The maximum conflicts per recurrence

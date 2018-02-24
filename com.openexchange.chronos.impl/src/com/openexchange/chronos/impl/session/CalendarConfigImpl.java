@@ -145,11 +145,6 @@ public class CalendarConfigImpl implements CalendarConfig {
     }
 
     @Override
-    public boolean isIgnoreSeriesPastCalculationLimit() {
-        return getConfigValue("com.openexchange.chronos.ignoreSeriesPastCalculationLimit", Boolean.class, Boolean.FALSE).booleanValue();
-    }
-
-    @Override
     public int getMaxConflictsPerRecurrence() {
         return getConfigValue("com.openexchange.chronos.maxConflictsPerRecurrence", Integer.class, I(5)).intValue();
     }
