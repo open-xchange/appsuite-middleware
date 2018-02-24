@@ -58,7 +58,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.json.JSONObject;
@@ -303,7 +302,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         /*
          * get accounts from storage
          */
-        List<CalendarAccount> accounts = filterInaccessible(session, getAccounts(session.getContextId(), session.getUserId()));
+        List<CalendarAccount> accounts = getAccounts(session.getContextId(), session.getUserId());
         /*
          * check for pending provisioning tasks
          */
@@ -531,27 +530,6 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
                 throw CalendarExceptionCodes.MAX_ACCOUNTS_EXCEEDED.create(provider.getId(), I(maxAccounts), I(numAccounts));
             }
         }
-    }
-
-    private List<CalendarAccount> filterInaccessible(Session session, List<CalendarAccount> accounts) throws OXException {
-        if (null != accounts && 0 < accounts.size()) {
-            CalendarProviderRegistry providerRegistry = getProviderRegistry();
-            for (Iterator<CalendarAccount> iterator = accounts.iterator(); iterator.hasNext();) {
-                CalendarAccount account = iterator.next();
-                CalendarProvider provider = providerRegistry.getCalendarProvider(account.getProviderId());
-                if (null == provider) {
-                    LoggerFactory.getLogger(CalendarAccountServiceImpl.class).info("Provider '{}' not available, skipping account {}.", account.getProviderId(), account);
-                    iterator.remove();
-                    continue;
-                }
-                if (false == hasCapability(provider, session)) {
-                    LoggerFactory.getLogger(CalendarAccountServiceImpl.class).info("Missing capability for provider '{}', skipping account {}.", account.getProviderId(), account);
-                    iterator.remove();
-                    continue;
-                }
-            }
-        }
-        return accounts;
     }
 
     private CalendarProvider requireCapability(CalendarProvider provider, Session session) throws OXException {
