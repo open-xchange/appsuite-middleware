@@ -162,6 +162,18 @@ public class MetricDescriptor {
         this.unit = unit;
     }
 
+    /**
+     * Initialises a new {@link MetricBuilder}
+     * 
+     * @param group The group
+     * @param name The metric's name
+     * @param metricType metric's type
+     * @return the new {@link MetricBuilder}
+     */
+    public static MetricBuilder newBuilder(String group, String name, MetricType metricType) {
+        return new MetricBuilder(group, name, metricType);
+    }
+
     /////////////////////////////// Builder /////////////////////////////////
 
     /**
@@ -170,7 +182,7 @@ public class MetricDescriptor {
      *
      * @param <T> The {@link MetricDescriptor} type
      */
-    static class MetricBuilder {
+    public static class MetricBuilder {
 
         protected static final String MISSING_FIELD = "A %s must be set!";
 
