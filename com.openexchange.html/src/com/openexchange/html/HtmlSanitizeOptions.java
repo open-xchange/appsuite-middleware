@@ -78,6 +78,7 @@ public class HtmlSanitizeOptions {
         private int maxContentSize;
         private boolean suppressLinks;
         private boolean replaceBodyWithDiv;
+        private boolean prettyPrint;
         private Session session;
 
         Builder() {
@@ -90,7 +91,9 @@ public class HtmlSanitizeOptions {
             suppressLinks = false;
             replaceBodyWithDiv = false;
             session = null;
+            prettyPrint = true;
         }
+
 
         /** Sets the session */
         public Builder setSession(Session session) {
@@ -139,9 +142,15 @@ public class HtmlSanitizeOptions {
             return this;
         }
 
+        /** Set whether to 'pretty-print' the html or not */
+        public Builder setPrettyPrint(boolean prettyPrint) {
+            this.prettyPrint = prettyPrint;
+            return this;
+        }
+
         /** Builds the instance from this builder's arguments */
         public HtmlSanitizeOptions build() {
-            return new HtmlSanitizeOptions(session, optConfigName, dropExternalImages, modified, cssPrefix, maxContentSize, suppressLinks, replaceBodyWithDiv);
+            return new HtmlSanitizeOptions(session, optConfigName, dropExternalImages, modified, cssPrefix, maxContentSize, suppressLinks, replaceBodyWithDiv, prettyPrint);
         }
     }
 
@@ -154,9 +163,10 @@ public class HtmlSanitizeOptions {
     private final int maxContentSize;
     private final boolean suppressLinks;
     private final boolean replaceBodyWithDiv;
+    private final boolean prettyPrint;
     private final Session session;
 
-    HtmlSanitizeOptions(Session session, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize, boolean suppressLinks, boolean replaceBodyWithDiv) {
+    HtmlSanitizeOptions(Session session, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix, int maxContentSize, boolean suppressLinks, boolean replaceBodyWithDiv, boolean prettyPrint) {
         super();
         this.session = session;
         this.optConfigName = optConfigName;
@@ -166,6 +176,7 @@ public class HtmlSanitizeOptions {
         this.maxContentSize = maxContentSize;
         this.suppressLinks = suppressLinks;
         this.replaceBodyWithDiv = replaceBodyWithDiv;
+        this.prettyPrint = prettyPrint;
     }
 
     /**
@@ -238,6 +249,15 @@ public class HtmlSanitizeOptions {
      */
     public boolean isReplaceBodyWithDiv() {
         return replaceBodyWithDiv;
+    }
+
+    /**
+     * Checks whether to 'pretty-print' the html or not
+     * 
+     * @return <code>true</code> to pretty-print, otherwise <code>false</code>
+     */
+    public boolean isPrettyPrint() {
+        return prettyPrint;
     }
 
 }
