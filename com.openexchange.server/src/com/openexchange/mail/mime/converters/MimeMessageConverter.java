@@ -574,7 +574,9 @@ public final class MimeMessageConverter {
      * @param contentType The message's Content-Type
      * @return The appropriate multipart
      * @throws OXException If content cannot be presented as a multipart
+     * @deprecated Use {@link MimeMessageUtility} instead
      */
+    @Deprecated
     public static Multipart multipartFor(final MimeMessage message, final ContentType contentType) throws OXException {
         return multipartFor(message, contentType, true);
     }
@@ -613,7 +615,9 @@ public final class MimeMessageConverter {
      * @param part The part
      * @return The parsed Content-Type
      * @throws OXException If parsing fails
+     * @deprecated Use {@link MimeMessageUtility} instead
      */
+    @Deprecated
     public static ContentType getContentType(final Part part) throws OXException {
         try {
             final String[] tmp = part.getHeader(CONTENT_TYPE);
@@ -2369,7 +2373,9 @@ public final class MimeMessageConverter {
      *
      * @param flags The flags bit mask
      * @return The corresponding instance of {@link Flags}
+     * @deprecated Use {@link MimeMessageUtility} instead
      */
+    @Deprecated
     public static Flags convertMailFlags(int flags) {
         final Flags flagsObj = new Flags();
         if ((flags & MailMessage.FLAG_ANSWERED) > 0) {
@@ -2587,7 +2593,9 @@ public final class MimeMessageConverter {
      *
      * @param messageSrc The message source
      * @return The parsed headers as a {@link HeaderCollection collection}.
+     * @Deprecated Use {@link MimeMessageUtility} instead
      */
+    @Deprecated
     public static HeaderCollection loadHeaders(final String messageSrc) {
         /*
          * Determine position of double line break
