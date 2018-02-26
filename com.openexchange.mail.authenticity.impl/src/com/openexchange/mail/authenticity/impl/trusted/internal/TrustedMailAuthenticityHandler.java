@@ -195,7 +195,7 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
                     }
                     Map<String, String> images = configurationService.getProperties((name, value) -> name.startsWith("com.openexchange.mail.authenticity.trusted." + tenant + ".image."));
 
-                    List<TrustedMail> trustedMailList = new ArrayList<>();
+                    List<TrustedMail> trustedMailList = new ArrayList<>(mailAddresses.length);
                     for (String mailAddress : mailAddresses) {
                         TrustedMail trustedMail = getTrustedMail(mailAddress, images, fallbackImage, tenant);
                         if(trustedMail == null) {
