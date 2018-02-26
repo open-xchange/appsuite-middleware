@@ -578,35 +578,7 @@ public final class MimeMessageConverter {
      */
     @Deprecated
     public static Multipart multipartFor(final MimeMessage message, final ContentType contentType) throws OXException {
-        return multipartFor(message, contentType, true);
-    }
-
-    private static Multipart multipartFor(final MimeMessage message, final ContentType contentType, final boolean reparse) throws OXException {
-        try {
-            return multipartFor(message.getContent(), contentType);
-        } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
-            }
-            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        } catch (final javax.mail.internet.ParseException e) {
-            if (!reparse) {
-                throw MimeMailException.handleMessagingException(e);
-            }
-            // Sanitize parameterized headers
-            try {
-                final String sContentType = message.getHeader(CONTENT_TYPE, null);
-                message.setHeader(CONTENT_TYPE, new ContentType(sContentType).toString(true));
-                MimeMessageConverter.saveChanges(message);
-            } catch (final Exception x) {
-                // Content-Type cannot be sanitized
-                org.slf4j.LoggerFactory.getLogger(MimeFilter.class).debug("Content-Type cannot be sanitized.", x);
-                throw MimeMailException.handleMessagingException(e);
-            }
-            return multipartFor(message, contentType, false);
-        } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e);
-        }
+        return MimeMessageUtility.multipartFor(message, contentType);
     }
 
     /**
@@ -619,12 +591,7 @@ public final class MimeMessageConverter {
      */
     @Deprecated
     public static ContentType getContentType(final Part part) throws OXException {
-        try {
-            final String[] tmp = part.getHeader(CONTENT_TYPE);
-            return (tmp != null) && (tmp.length > 0) ? new ContentType(tmp[0]) : new ContentType(MimeTypes.MIME_DEFAULT);
-        } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e);
-        }
+        return MimeMessageUtility.getContentType(part);
     }
 
     /**
@@ -2377,38 +2344,7 @@ public final class MimeMessageConverter {
      */
     @Deprecated
     public static Flags convertMailFlags(int flags) {
-        final Flags flagsObj = new Flags();
-        if ((flags & MailMessage.FLAG_ANSWERED) > 0) {
-            flagsObj.add(Flags.Flag.ANSWERED);
-        }
-        if ((flags & MailMessage.FLAG_DELETED) > 0) {
-            flagsObj.add(Flags.Flag.DELETED);
-        }
-        if ((flags & MailMessage.FLAG_DRAFT) > 0) {
-            flagsObj.add(Flags.Flag.DRAFT);
-        }
-        if ((flags & MailMessage.FLAG_FLAGGED) > 0) {
-            flagsObj.add(Flags.Flag.FLAGGED);
-        }
-        if ((flags & MailMessage.FLAG_RECENT) > 0) {
-            flagsObj.add(Flags.Flag.RECENT);
-        }
-        if ((flags & MailMessage.FLAG_SEEN) > 0) {
-            flagsObj.add(Flags.Flag.SEEN);
-        }
-        if ((flags & MailMessage.FLAG_USER) > 0) {
-            flagsObj.add(Flags.Flag.USER);
-        }
-        if ((flags & MailMessage.FLAG_SPAM) > 0) {
-            flagsObj.add(MailMessage.USER_SPAM);
-        }
-        if ((flags & MailMessage.FLAG_FORWARDED) > 0) {
-            flagsObj.add(MailMessage.USER_FORWARDED);
-        }
-        if ((flags & MailMessage.FLAG_READ_ACK) > 0) {
-            flagsObj.add(MailMessage.USER_READ_ACK);
-        }
-        return flagsObj;
+        return MimeMessageUtility.convertMailFlags(flags);
     }
 
     private static int estimateSize(final InputStream in, final String tansferEnc) throws IOException {
@@ -2597,41 +2533,7 @@ public final class MimeMessageConverter {
      */
     @Deprecated
     public static HeaderCollection loadHeaders(final String messageSrc) {
-        /*
-         * Determine position of double line break
-         */
-        final int len = messageSrc.length();
-        int i;
-        NextRead: for (i = 0; i < len; ++i) {
-            char c = messageSrc.charAt(i);
-            final int prevPos = i;
-            int count = 0;
-            while ((c == '\r') || (c == '\n')) {
-                if ((c == '\n') && (++count >= 2)) {
-                    i = prevPos;
-                    break NextRead;
-                }
-                if (++i >= len) {
-                    i = prevPos;
-                    break NextRead;
-                }
-                c = messageSrc.charAt(i);
-            }
-        }
-        /*
-         * Parse single headers
-         */
-        final Matcher m = PATTERN_PARSE_HEADER.matcher(unfold(messageSrc.substring(0, i)));
-        final HeaderCollection headers = new HeaderCollection();
-        while (m.find()) {
-            final String value = m.group(2);
-            if (value == null || isEmpty(value)) {
-                headers.addHeader(m.group(1), STR_EMPTY);
-            } else {
-                headers.addHeader(m.group(1), value);
-            }
-        }
-        return headers;
+        return MimeMessageUtility.loadHeaders(messageSrc);
     }
 
     private static boolean isEmpty(final String value) {
