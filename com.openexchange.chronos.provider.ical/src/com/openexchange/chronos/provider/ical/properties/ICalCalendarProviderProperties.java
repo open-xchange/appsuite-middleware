@@ -105,7 +105,7 @@ public enum ICalCalendarProviderProperties implements Property {
     ;
 
     private static final String EMPTY = "";
-    private static final String PREFIX = "com.openexchange.chronos.provider.ical.";
+    private static final String PREFIX = "com.openexchange.calendar.ical.";
     private final String fqn;
     private final Object defaultValue;
 
