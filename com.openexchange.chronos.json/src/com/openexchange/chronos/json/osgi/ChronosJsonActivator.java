@@ -72,8 +72,10 @@ import com.openexchange.chronos.json.converter.EventsPerFolderResultConverter;
 import com.openexchange.chronos.json.converter.FreeBusyConverter;
 import com.openexchange.chronos.json.converter.MultipleCalendarResultConverter;
 import com.openexchange.chronos.json.converter.handler.EventFieldDataHandler;
+import com.openexchange.chronos.json.converter.handler.Json2OXExceptionDataHandler;
 import com.openexchange.chronos.json.converter.handler.Json2ObjectDataHandler;
 import com.openexchange.chronos.json.converter.handler.Json2XPropertiesDataHandler;
+import com.openexchange.chronos.json.converter.handler.OXException2JsonDataHandler;
 import com.openexchange.chronos.json.converter.handler.Object2JsonDataHandler;
 import com.openexchange.chronos.json.converter.handler.XProperties2JsonDataHandler;
 import com.openexchange.chronos.json.converter.mapper.AlarmMapper;
@@ -175,6 +177,8 @@ public class ChronosJsonActivator extends AJAXModuleActivator {
                 AvailableMapper.getInstance(), Available.class, Available[].class), singletonDictionary("identifier", DataHandlers.AVAILABLE2JSON));
             registerService(DataHandler.class, new XProperties2JsonDataHandler(), singletonDictionary("identifier", DataHandlers.XPROPERTIES2JSON));
             registerService(DataHandler.class, new Json2XPropertiesDataHandler(), singletonDictionary("identifier", DataHandlers.JSON2XPROPERTIES));
+            registerService(DataHandler.class, new OXException2JsonDataHandler(), singletonDictionary("identifier", DataHandlers.OXEXCEPTION2JSON));
+            registerService(DataHandler.class, new Json2OXExceptionDataHandler(), singletonDictionary("identifier", DataHandlers.JSON2OXEXCEPTION));
             registerService(DataHandler.class, new EventFieldDataHandler(), singletonDictionary("identifier", DataHandlers.STRING_ARRAY_TO_EVENT_FIELDS));
 
         } catch (Exception e) {

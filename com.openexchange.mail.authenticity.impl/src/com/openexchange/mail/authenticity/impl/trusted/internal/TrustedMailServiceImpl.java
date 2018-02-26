@@ -79,23 +79,14 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.session.Session;
 
 /**
- * {@link TrustedMailAuthenticityHandler}
+ * {@link TrustedMailServiceImpl}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class TrustedMailAuthenticityHandler implements ForcedReloadable, TrustedMailService {
+public class TrustedMailServiceImpl implements ForcedReloadable, TrustedMailService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TrustedMailAuthenticityHandler.class);
-
-    /*
-     * Property keys
-     */
-    private static final String PREFIX = "com.openexchange.mail.authenticity.trusted.";
-    private static final String TENANT = "tenants";
-    private static final String CONFIG = ".config";
-    private static final String IMAGE = ".image.";
-    private static final String FALLBACK_IMAGE = ".fallbackImage";
+    private static final Logger LOG = LoggerFactory.getLogger(TrustedMailServiceImpl.class);
 
     private static final String TRUSTED_MAIL_NAME = "TrustedMail";
 
@@ -131,11 +122,11 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
     private final List<TrustedMail> fallbackTenant;
 
     /**
-     * Initializes a new {@link TrustedMailAuthenticityHandler}.
+     * Initializes a new {@link TrustedMailServiceImpl}.
      *
      * @throws OXException
      */
-    public TrustedMailAuthenticityHandler(ConfigurationService configurationService) throws OXException {
+    public TrustedMailServiceImpl(ConfigurationService configurationService) throws OXException {
         super();
         this.trustedMailAddressesPerTenant = new ConcurrentHashMap<>();
         this.fallbackTenant = new CopyOnWriteArrayList<>();
@@ -144,6 +135,10 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
 
     @Override
     public void handle(Session session, MailMessage mailMessage) {
+        if (null == mailMessage) {
+            return;
+        }
+
         String tenant = (String) session.getParameter(Session.PARAM_HOST_NAME);
         if (tenant == null) {
             LOG.warn("Missing host name session parameter. Unable to verify mail.");
@@ -152,7 +147,7 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
 
         MailAuthenticityResult authenticityResult = mailMessage.getAuthenticityResult();
 
-        if(authenticityResult == null) {
+        if (authenticityResult == null) {
             LOG.warn("Unable to verify trusted domain without authentication result.");
             return;
         }
@@ -190,25 +185,25 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
     }
 
     private void init(ConfigurationService configurationService) throws OXException {
-        String commaSeparatedListOfTenants = configurationService.getProperty(PREFIX + TENANT, "");
+        String commaSeparatedListOfTenants = configurationService.getProperty("com.openexchange.mail.authenticity.trusted.tenants", "");
         if (Strings.isNotEmpty(commaSeparatedListOfTenants)) {
             String[] tenants = Strings.splitByCommaNotInQuotes(commaSeparatedListOfTenants);
             for (String tenant : tenants) {
-                String commaSeparatedListOfMailAddresses = configurationService.getProperty(PREFIX + tenant + CONFIG);
+                String commaSeparatedListOfMailAddresses = configurationService.getProperty("com.openexchange.mail.authenticity.trusted." + tenant + ".config");
                 if (Strings.isNotEmpty(commaSeparatedListOfMailAddresses)) {
                     String[] mailAddresses = Strings.splitByCommaNotInQuotes(commaSeparatedListOfMailAddresses);
-                    String fallbackImageStr = configurationService.getProperty(PREFIX + tenant + FALLBACK_IMAGE);
+                    String fallbackImageStr = configurationService.getProperty("com.openexchange.mail.authenticity.trusted." + tenant + ".fallbackImage");
                     Icon fallbackImage = null;
                     if (Strings.isNotEmpty(fallbackImageStr)) {
                         fallbackImage = getIcon(fallbackImageStr, tenant);
                     }
-                    Map<String, String> images = configurationService.getProperties((name, value) -> name.startsWith(PREFIX + tenant + IMAGE));
+                    Map<String, String> images = configurationService.getProperties((name, value) -> name.startsWith("com.openexchange.mail.authenticity.trusted." + tenant + ".image."));
 
-                    List<TrustedMail> trustedMailList = new ArrayList<>();
+                    List<TrustedMail> trustedMailList = new ArrayList<>(mailAddresses.length);
                     for (String mailAddress : mailAddresses) {
                         TrustedMail trustedMail = getTrustedMail(mailAddress, images, fallbackImage, tenant);
-                        if(trustedMail == null) {
-                            throw MailAuthenticityExceptionCodes.INVALID_PROPERTY.create(PREFIX + tenant + CONFIG);
+                        if (trustedMail == null) {
+                            throw MailAuthenticityExceptionCodes.INVALID_PROPERTY.create("com.openexchange.mail.authenticity.trusted." + tenant + ".config");
                         }
                         trustedMailList.add(trustedMail);
                     }
@@ -218,16 +213,16 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
         }
 
         // Add single tenant / fall-back configuration
-        String commaSeparatedListOfMailAddresses = configurationService.getProperty(PREFIX + CONFIG.substring(1));
+        String commaSeparatedListOfMailAddresses = configurationService.getProperty("com.openexchange.mail.authenticity.trusted.config");
         if (Strings.isNotEmpty(commaSeparatedListOfMailAddresses)) {
             String[] mailAddresses = Strings.splitByCommaNotInQuotes(commaSeparatedListOfMailAddresses);
-            String fallbackImageStr = configurationService.getProperty(PREFIX + FALLBACK_IMAGE.substring(1));
+            String fallbackImageStr = configurationService.getProperty("com.openexchange.mail.authenticity.trusted.fallbackImage");
             Icon fallbackImage = null;
             if (Strings.isNotEmpty(fallbackImageStr)) {
                 fallbackImage = getIcon(fallbackImageStr, (String) null);
             }
 
-            Map<String, String> images = configurationService.getProperties((name, value) -> name.startsWith(PREFIX + IMAGE.substring(1)));
+            Map<String, String> images = configurationService.getProperties((name, value) -> name.startsWith("com.openexchange.mail.authenticity.trusted.image."));
 
             for (String mailAddress : mailAddresses) {
                 fallbackTenant.add(getTrustedMail(mailAddress, images, fallbackImage, null));
@@ -244,24 +239,18 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
      * @return the {@link TrustedMail} or null in case the mail address configuration is invalid
      */
     private TrustedMail getTrustedMail(String mailAddress, Map<String, String> images, Icon fallbackImage, String tenant) {
-        if (mailAddress.indexOf(":") > 0) {
-            String[] trustedMailConfig = Strings.splitByColon(mailAddress);
-            if (trustedMailConfig.length != 2) {
-                return null;
-            }
-            String image = null;
-            if (tenant == null) {
-                image = images.get(PREFIX + IMAGE.substring(1) + trustedMailConfig[1]);
-            } else {
-                image = images.get(PREFIX + tenant + IMAGE + trustedMailConfig[1]);
-            }
-            if (image != null) {
-                return new TrustedMail(trustedMailConfig[0], getIcon(image, tenant));
-            } else {
-                return new TrustedMail(trustedMailConfig[0], fallbackImage);
-            }
+        if (mailAddress.indexOf(':') <= 0) {
+            return new TrustedMail(mailAddress, fallbackImage);
         }
-        return new TrustedMail(mailAddress, fallbackImage);
+
+        String[] trustedMailConfig = Strings.splitByColon(mailAddress);
+        if (trustedMailConfig.length != 2) {
+            return null;
+        }
+
+        String imageKey = (tenant == null ? "com.openexchange.mail.authenticity.trusted.image." : "com.openexchange.mail.authenticity.trusted." + tenant + ".image.") + trustedMailConfig[1];
+        String image = images.get(imageKey);
+        return new TrustedMail(trustedMailConfig[0], null == image ? fallbackImage : getIcon(image, tenant));
     }
 
     private Icon getIcon(String image, String tenant) {

@@ -919,6 +919,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         DefaultCalendarFolder folder = new DefaultCalendarFolder();
         folder.setId(BasicCalendarAccess.FOLDER_ID);
         CalendarSettings settings = calendarAccess.getSettings();
+        folder.setAccountError(settings.getError());
         folder.setExtendedProperties(settings.getExtendedProperties());
         folder.setName(settings.getName());
         folder.setLastModified(settings.getLastModified());
@@ -927,7 +928,9 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             CalendarPermission.READ_FOLDER, CalendarPermission.READ_ALL_OBJECTS, CalendarPermission.NO_PERMISSIONS,
             CalendarPermission.NO_PERMISSIONS, false == autoProvisioned, false, 0)));
         folder.setSupportedCapabilites(CalendarCapability.getCapabilities(calendarAccess.getClass()));
-        folder.setAccountError(accountError);
+        if (null != accountError) {
+            folder.setAccountError(accountError); // prefer passed account error if assigned
+        }
         return folder;
     }
 
@@ -935,6 +938,9 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         CalendarSettings settings = new CalendarSettings();
         if (null != calendarFolder.getExtendedProperties()) {
             settings.setExtendedProperties(calendarFolder.getExtendedProperties());
+        }
+        if (null != calendarFolder.getAccountError()) {
+            settings.setError(calendarFolder.getAccountError());
         }
         if (null != calendarFolder.getName()) {
             settings.setName(calendarFolder.getName());

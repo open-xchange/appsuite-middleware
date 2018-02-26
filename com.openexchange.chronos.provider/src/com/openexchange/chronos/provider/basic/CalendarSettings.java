@@ -52,6 +52,7 @@ package com.openexchange.chronos.provider.basic;
 import java.util.Date;
 import org.json.JSONObject;
 import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link CalendarSettings}
@@ -71,6 +72,8 @@ public class CalendarSettings {
     private boolean containsConfig;
     private boolean unsubscribed;
     private boolean containsSubscribed;
+    private OXException error;
+    private boolean containsError;
 
     /**
      * Initializes a new {@link CalendarSettings}.
@@ -259,9 +262,45 @@ public class CalendarSettings {
         containsSubscribed = false;
     }
 
+    /**
+     * Gets the stored error of the calendar.
+     *
+     * @return The stored error, or <code>null</code> if there is none
+     */
+    public OXException getError() {
+        return error;
+    }
+
+    /**
+     * Sets the stored error of the calendar.
+     *
+     * @param value The error to set
+     */
+    public void setError(OXException value) {
+        error = value;
+        containsError = true;
+    }
+
+    /**
+     * Gets a value indicating whether the stored error of the calendar within this settings object has been set or not.
+     *
+     * @return <code>true</code> if the stored error is set, <code>false</code>, otherwise
+     */
+    public boolean containsError() {
+        return containsError;
+    }
+
+    /**
+     * Removes the previously set stored error of the calendar within this settings object.
+     */
+    public void removeError() {
+        error = null;
+        containsError = false;
+    }
+
     @Override
     public String toString() {
-        return "CalendarSettings [name=" + name + ", lastModified=" + lastModified + ", extendedProperties=" + extendedProperties + ", config=" + config + ", unsubscribed=" + unsubscribed + "]";
+        return "CalendarSettings [name=" + name + ", lastModified=" + lastModified + ", extendedProperties=" + extendedProperties + ", config=" + config + ", unsubscribed=" + unsubscribed + ", error=" + error + "]";
     }
 
 }

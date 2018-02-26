@@ -49,11 +49,15 @@
 
 package com.openexchange.folderstorage.calendar;
 
-import org.json.JSONObject;
-import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.exception.OXException;
+import com.openexchange.chronos.common.DataHandlers;
+import com.openexchange.conversion.ConversionResult;
+import com.openexchange.conversion.ConversionService;
+import com.openexchange.conversion.DataArguments;
+import com.openexchange.conversion.DataHandler;
+import com.openexchange.conversion.SimpleData;
 import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.FolderProperty;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link CalendarAccountErrorField}
@@ -91,14 +95,26 @@ public class CalendarAccountErrorField extends FolderField {
     }
 
     @Override
+    public FolderProperty parse(Object value) {
+        try {
+            DataHandler dataHandler = ServerServiceRegistry.getServize(ConversionService.class).getDataHandler(DataHandlers.JSON2OXEXCEPTION);
+            ConversionResult result = dataHandler.processData(new SimpleData<Object>(value), new DataArguments(), null);
+            return new FolderProperty(getName(), result.getData());
+        } catch (Exception e) {
+            LOG.warn("Error parsing ox exception from \"{}\": {}", value, e.getMessage(), e);
+        }
+        return null;
+    }
+
+    @Override
     public Object write(FolderProperty property) {
         if (null != property) {
             try {
-                JSONObject jsonObject = new JSONObject();
-                ResponseWriter.addException(jsonObject, (OXException) property.getValue());
-                return jsonObject;
+                DataHandler dataHandler = ServerServiceRegistry.getServize(ConversionService.class).getDataHandler(DataHandlers.OXEXCEPTION2JSON);
+                ConversionResult result = dataHandler.processData(new SimpleData<Object>(property.getValue()), new DataArguments(), null);
+                return result.getData();
             } catch (Exception e) {
-                LOG.warn("Error writing calendar account error \"{}\": {}", property.getValue(), e.getMessage(), e);
+                LOG.warn("Error writing ox exception \"{}\": {}", property.getValue(), e.getMessage(), e);
             }
         }
         return getDefaultValue();
