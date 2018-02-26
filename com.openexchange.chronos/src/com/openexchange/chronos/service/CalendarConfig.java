@@ -127,14 +127,6 @@ public interface CalendarConfig {
     int getRecurrenceCalculationLimit();
 
     /**
-     * Gets a value indicating whether <i>old</i> event series can be ignored when fetching events from the storage or not, i.e. series
-     * where the recurrence calculation limit kicks in prior the actually requested timeframe.
-     *
-     * @return <code>true</code> if old event series can be ignored, <code>false</code>, otherwise
-     */
-    boolean isIgnoreSeriesPastCalculationLimit();
-
-    /**
      * Gets the configured maximum number of conflicts between two recurring event series.
      *
      * @return The maximum conflicts per recurrence
@@ -161,14 +153,5 @@ public interface CalendarConfig {
      * @return <code>true</code> if the URI checks are disabled, <code>false</code>, otherwise
      */
     boolean isSkipExternalAttendeeURIChecks();
-
-    /**
-     * Gets a value indicating whether attendee changes should be restricted according to
-     * <a href="https://tools.ietf.org/html/rfc6638#section-3.2.2.1">RFC 6638, section 3.2.2.1</a> or not, which effectively restricts
-     * any changes to the calendar scheduling resource to be performed by the organizer only.
-     *
-     * @return <code>true</code> if allowed attendee changes should be restricted, <code>false</code>, otherwise
-     */
-    boolean isRestrictAllowedAttendeeChanges();
 
 }

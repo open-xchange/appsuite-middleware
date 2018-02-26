@@ -49,9 +49,10 @@
 
 package com.openexchange.mail.authenticity.impl.core;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +61,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailAttributation;
@@ -223,7 +225,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
 
         MailFields fields = null == fetchArguments.getFields() ? new MailFields() : new MailFields(fetchArguments.getFields());
         fields.add(MailField.ID);
-        fields.add(MailField.FOLDER_ID);
+        fields.add(MailField.FOLDER_ID); // For folder verification
         fields.add(MailField.RECEIVED_DATE); // For date threshold
         fields.add(MailField.ACCOUNT_NAME); // For account verification
         Set<String> headerNames = null == fetchArguments.getHeaderNames() ? null : new LinkedHashSet<>(Arrays.asList(fetchArguments.getHeaderNames()));
@@ -270,25 +272,29 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         }
 
         Session session = mailAccess.getSession();
+        FolderChecker folderChecker = new DenyIfContainedFolderChecker(mailAccess.getFolderStorage().getDraftsFolder(), mailAccess.getFolderStorage().getSentFolder());
         List<MailMessage[]> partitions = com.openexchange.tools.arrays.Arrays.partition(mails, 100);
-        List<FutureAndMail> submittedTasks = new ArrayList<>(partitions.size());
+        Map<Future<Void>, MailMessage[]> submittedTasks = new LinkedHashMap<Future<Void>, MailMessage[]>(partitions.size());
         for (MailMessage[] partition : partitions) {
-            Future<Void> future = threadPool.submit(new MailAuthenticityTask(partition, handler, session));
-            submittedTasks.add(new FutureAndMail(future, partition));
+            Future<Void> future = threadPool.submit(new MailAuthenticityTask(partition, handler, session, folderChecker));
+            submittedTasks.put(future, partition);
         }
         partitions = null; // Help GC
 
         try {
-            for (FutureAndMail submitted : submittedTasks) {
+            for (Map.Entry<Future<Void>, MailMessage[]> submitted : submittedTasks.entrySet()) {
+                Future<Void> future = submitted.getKey();
                 try {
-                    submitted.future.get(2, TimeUnit.SECONDS);
+                    future.get(2, TimeUnit.SECONDS);
                 } catch (ExecutionException e) {
-                    LOGGER.warn("Error while verifying mail authenticity for mails \"{}\" in folder {}", submitted.getMailIds(), submitted.getMailFolder(), e.getCause());
-                    submitted.markAsNeutral();
+                    MailMessage[] associatedMails = submitted.getValue();
+                    LOGGER.warn("Error while verifying mail authenticity for mails \"{}\" in folder {}", getMailIds(associatedMails), getMailFolder(associatedMails), e.getCause());
+                    markAsNeutral(associatedMails);
                 } catch (TimeoutException e) {
-                    submitted.future.cancel(true);
-                    LOGGER.warn("Timeout while verifying mail authenticity for mails \"{}\" in folder {}", submitted.getMailIds(), submitted.getMailFolder());
-                    submitted.markAsNeutral();
+                    MailMessage[] associatedMails = submitted.getValue();
+                    future.cancel(true);
+                    LOGGER.warn("Timeout while verifying mail authenticity for mails \"{}\" in folder {}", getMailIds(associatedMails), getMailFolder(associatedMails));
+                    markAsNeutral(associatedMails);
                 }
             }
         } catch (InterruptedException e) {
@@ -311,9 +317,10 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         if (false == isApplicableFor(mail, mailAccess)) {
             // Not applicable
             mail.setAuthenticityResult(MailAuthenticityResult.NOT_ANALYZED_RESULT);
+            return mail;
         }
 
-        Future<Void> future = threadPool.submit(new MailAuthenticityTask(mail, handler, session));
+        Future<Void> future = threadPool.submit(new MailAuthenticityTask(mail, handler, session, ALWAYS_ACCEPT_FOLDER_CHECKER));
         try {
             future.get(1, TimeUnit.SECONDS);
         } catch (ExecutionException e) {
@@ -339,92 +346,128 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         private final MailMessage[] mails;
         private final MailAuthenticityHandler handler;
         private final Session session;
+        private final FolderChecker folderChecker;
 
-        MailAuthenticityTask(MailMessage mail, MailAuthenticityHandler handler, Session session) {
-            super();
-            this.mails = new MailMessage[] { mail };
-            this.handler = handler;
-            this.session = session;
+        MailAuthenticityTask(MailMessage mail, MailAuthenticityHandler handler, Session session, FolderChecker folderChecker) {
+            this(new MailMessage[] { mail }, handler, session, folderChecker);
         }
 
-        MailAuthenticityTask(MailMessage[] mails, MailAuthenticityHandler handler, Session session) {
+        MailAuthenticityTask(MailMessage[] mails, MailAuthenticityHandler handler, Session session, FolderChecker folderChecker) {
             super();
             this.mails = mails;
             this.handler = handler;
             this.session = session;
+            this.folderChecker = folderChecker;
         }
 
         @Override
         public Void call() {
-            Thread t = Thread.currentThread();
             // int unifiedINBOXAccountId = getUnifiedINBOXAccountId(session);
-            for (int i = mails.length; false == t.isInterrupted() && i-- > 0;) {
-                MailMessage mail = mails[i];
+            // Handle first mail
+            {
+                MailMessage mail = mails[0];
                 if (null != mail) {
-                    int accId = mail.getAccountId();
-                    /*-
-                    if (mail instanceof Delegatized) {
-                        int undelegatedAccountId = ((Delegatized) mail).getUndelegatedAccountId();
-                        if (undelegatedAccountId >= 0) {
-                            accId = undelegatedAccountId;
+                    verifyAuthenticityFrom(mail);
+                }
+            }
+
+            // Handle rest while paying respect to processing thread's interrupted status
+            if (mails.length > 1) {
+                Thread t = Thread.currentThread();
+                for (int i = 1, length = mails.length; i < length; i++) {
+                    MailMessage mail = mails[i];
+                    if (null != mail) {
+                        if (t.isInterrupted()) {
+                            // Processing thread was interrupted
+                            return null;
                         }
-                    }
-                    */
-                    if (accId == MailAccount.DEFAULT_ID /* || accId == unifiedINBOXAccountId */) {
-                        // Verify mail authenticity...
-                        try {
-                            handler.handle(session, mail);
-                        } catch (Exception e) {
-                            // Verifying mail authenticity failed
-                            LOGGER.warn("Error while verifying mail authenticity for mail \"{}\" in folder {}", mail.getMailId(), mail.getFolder(), e.getCause());
-                            mail.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
-                        }
-                    } else {
-                        // Not located in primary account
-                        mail.setAuthenticityResult(MailAuthenticityResult.NOT_ANALYZED_RESULT);
+                        verifyAuthenticityFrom(mail);
                     }
                 }
             }
             return null;
         }
-    }
 
-    private static class FutureAndMail {
-
-        final Future<Void> future;
-        final MailMessage[] mails;
-
-        FutureAndMail(Future<Void> future, MailMessage[] mails) {
-            super();
-            this.future = future;
-            this.mails = mails;
-        }
-
-        String getMailIds() {
-            StringBuilder sb = new StringBuilder(mails.length << 2);
-            boolean first = true;
-            for (MailMessage mail : mails) {
-                if (null != mail) {
-                    if (first) {
-                        first = false;
-                    } else {
-                        sb.append(", ");
-                    }
-                    sb.append(mail.getMailId());
+        private void verifyAuthenticityFrom(MailMessage mail) {
+            // Check account
+            int accId = mail.getAccountId();
+            /*-
+            if (mail instanceof Delegatized) {
+                int undelegatedAccountId = ((Delegatized) mail).getUndelegatedAccountId();
+                if (undelegatedAccountId >= 0) {
+                    accId = undelegatedAccountId;
                 }
             }
-            return sb.toString();
-        }
-
-        String getMailFolder() {
-            return mails[0].getFolder();
-        }
-
-        void markAsNeutral() {
-            for (MailMessage mail : mails) {
-                if (null != mail) {
+            */
+            if ((accId != MailAccount.DEFAULT_ID /* && accId != unifiedINBOXAccountId */) || (false == folderChecker.isFolderAcceptedFrom(mail))) {
+                // Not located in primary account or located in a denied folder
+                mail.setAuthenticityResult(MailAuthenticityResult.NOT_ANALYZED_RESULT);
+            } else {
+                // Verify mail authenticity...
+                try {
+                    handler.handle(session, mail);
+                } catch (Exception e) {
+                    // Verifying mail authenticity failed
+                    LOGGER.warn("Error while verifying mail authenticity for mail \"{}\" in folder {}", mail.getMailId(), mail.getFolder(), e.getCause());
                     mail.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
                 }
+            }
+        }
+    }
+
+    private static interface FolderChecker {
+
+        boolean isFolderAcceptedFrom(MailMessage mail);
+    }
+
+    private static final FolderChecker ALWAYS_ACCEPT_FOLDER_CHECKER = new FolderChecker() {
+
+        @Override
+        public boolean isFolderAcceptedFrom(MailMessage mail) {
+            return true;
+        }
+    };
+
+    private static class DenyIfContainedFolderChecker implements FolderChecker {
+
+        private final Set<String> foldersToDeny;
+
+        DenyIfContainedFolderChecker(String... foldersToDeny) {
+            super();
+            this.foldersToDeny = null == foldersToDeny || foldersToDeny.length <= 0 ? Collections.emptySet() : ImmutableSet.copyOf(foldersToDeny);
+        }
+
+        @Override
+        public boolean isFolderAcceptedFrom(MailMessage mail) {
+            String folder = mail.getFolder();
+            return folder == null || !foldersToDeny.contains(folder);
+        }
+    }
+
+    private String getMailIds(MailMessage[] mails) {
+        StringBuilder sb = new StringBuilder(mails.length << 2);
+        boolean first = true;
+        for (MailMessage mail : mails) {
+            if (null != mail) {
+                if (first) {
+                    first = false;
+                } else {
+                    sb.append(", ");
+                }
+                sb.append(mail.getMailId());
+            }
+        }
+        return sb.toString();
+    }
+
+    private String getMailFolder(MailMessage[] mails) {
+        return mails[0].getFolder();
+    }
+
+    private void markAsNeutral(MailMessage[] mails) {
+        for (MailMessage mail : mails) {
+            if (null != mail) {
+                mail.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
             }
         }
     }

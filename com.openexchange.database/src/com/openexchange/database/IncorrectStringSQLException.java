@@ -65,18 +65,18 @@ public class IncorrectStringSQLException extends SQLException {
 
     private static final long serialVersionUID = 2713082500383087281L;
 
-    private static final Pattern PATTERN_ERROR_MESSAGE = Pattern.compile(Pattern.quote("Incorrect string value:") + " *" + "'([^']+)'" + " for column " + "'([^']+)'" + " at row " + "([0-9]+)");
+    private static final Pattern PATTERN_ERROR_MESSAGE = Pattern.compile("(?:Data truncation: )?" + Pattern.quote("Incorrect string value:") + " *" + "'([^']+)'" + " for column " + "'([^']+)'" + " at row " + "([0-9]+)");
 
     /** The (vendor) error code <code>1366</code> that signals an attempt to pass an incorrect string to database */
-    public static final int ERROR_CODE = 1366;
+    public static final int ERROR_CODE = com.mysql.jdbc.MysqlErrorNumbers.ER_TRUNCATED_WRONG_VALUE_FOR_FIELD;
 
     public static final char UNKNOWN = '\ufffd';
 
     /**
-     * Attempts to yield an appropriate {@code UnsupportedCharacterSQLException} instance for specified SQL exception.
+     * Attempts to yield an appropriate {@code IncorrectStringSQLException} instance for specified SQL exception.
      *
      * @param e The SQL exception
-     * @return The appropriate {@code UnsupportedCharacterSQLException} instance or <code>null</code>
+     * @return The appropriate {@code IncorrectStringSQLException} instance or <code>null</code>
      */
     public static IncorrectStringSQLException instanceFor(SQLException e) {
         if (null == e) {
@@ -102,7 +102,7 @@ public class IncorrectStringSQLException extends SQLException {
                 end = st + 4;
                 buf.write(Integer.parseInt(ic.substring(st + 2, end), 16));
                 st = end;
-                
+
             }
             incorrect = new String(buf.toByteArray(), Charsets.UTF_8);
             int posUnknown = incorrect.indexOf(UNKNOWN);

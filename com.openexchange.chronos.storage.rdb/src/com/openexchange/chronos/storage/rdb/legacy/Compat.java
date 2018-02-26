@@ -50,8 +50,6 @@
 package com.openexchange.chronos.storage.rdb.legacy;
 
 import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
-import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
-import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.compat.Appointment2Event.getRecurrenceData;
 import static com.openexchange.chronos.compat.Appointment2Event.getRecurrenceID;
 import static com.openexchange.chronos.compat.Event2Appointment.asInt;
@@ -110,10 +108,10 @@ public class Compat {
      * @return The (possibly adjusted) event reference
      */
     public static Event adjustAfterLoad(RdbEventStorage eventStorage, Connection connection, Event event) throws OXException, SQLException {
+        /*
+         * take over 'all-day' character & timezone from start date
+         */
         if (event.containsEndDate() && null != event.getEndDate() && null != event.getStartDate()) {
-            /*
-             * take over 'all-day' character & timezone from start date
-             */
             if (event.getStartDate().isAllDay()) {
                 event.setEndDate(event.getEndDate().toAllDay());
             } else if (null != event.getStartDate().getTimeZone()) {
@@ -122,18 +120,13 @@ public class Compat {
                 event.setEndDate(new DateTime(null, event.getEndDate().getTimestamp()));
             }
         }
-        if (isSeriesMaster(event)) {
+        /*
+         * adjust recurrence-related properties for series master and exceptions
+         */
+        if (null != event.getId() && event.getId().equals(event.getSeriesId())) {
             event = adjustRecurrenceForMasterAfterLoad(eventStorage, event);
-        } else if (isSeriesException(event)) {
+        } else if (null != event.getSeriesId() && false == event.getSeriesId().equals(event.getId())) {
             event = adjustRecurrenceForExceptionAfterLoad(eventStorage, connection, event);
-        } else if (null != event.getId() && event.getId().equals(event.getSeriesId())) {
-            /*
-             * ensure to remove recurrence remnants for events that used to be a series, but are no longer
-             */
-            event.removeSeriesId();
-            event.removeRecurrenceId();
-            event.removeChangeExceptionDates();
-            event.removeDeleteExceptionDates();
         }
         /*
          * enhance organizer with static properties
@@ -262,6 +255,7 @@ public class Compat {
              * apply recurrence rule & transform legacy "recurrence date positions" for exceptions to recurrence ids
              */
             event.setRecurrenceRule(recurrenceData.getRecurrenceRule());
+            event.removeRecurrenceId();
             if (event.containsDeleteExceptionDates() && null != event.getDeleteExceptionDates()) {
                 event.setDeleteExceptionDates(getRecurrenceIDs(eventStorage, event.getId(), recurrenceData, getDates(event.getDeleteExceptionDates()), EventField.DELETE_EXCEPTION_DATES));
             }

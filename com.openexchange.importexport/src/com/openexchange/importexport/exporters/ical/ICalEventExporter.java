@@ -75,14 +75,14 @@ public class ICalEventExporter extends AbstractICalEventExporter {
     protected ThresholdFileHolder exportFolderData(ServerSession session, OutputStream out) throws OXException {
         CalendarService calendarService = ImportExportServices.getCalendarService();
         CalendarSession calendarSession = calendarService.init(session);
-        return exportChronosEvents(calendarService.getEventsInFolder(calendarSession, getFolderId()), out);
+        return exportChronosEvents(calendarService.getEventsInFolder(calendarSession, getFolderId()), out, session);
     }
 
     @Override
     protected ThresholdFileHolder exportBatchData(ServerSession session, OutputStream out) throws OXException {
         CalendarService calendarService = ImportExportServices.getCalendarService();
         CalendarSession calendarSession = calendarService.init(session);
-        return exportChronosEvents(calendarService.getEvents(calendarSession, convertBatchDataToEventIds()), out);
+        return exportChronosEvents(calendarService.getEvents(calendarSession, convertBatchDataToEventIds()), out, session);
     }
 
 }

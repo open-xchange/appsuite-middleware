@@ -60,6 +60,8 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.file.storage.FolderPath;
+import com.openexchange.file.storage.OriginAwareFileStorageFolder;
 import com.openexchange.file.storage.TypeAware;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
@@ -79,7 +81,7 @@ import com.openexchange.i18n.LocaleTools;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class UserizedFileStorageFolder extends DefaultFileStorageFolder implements TypeAware {
+public class UserizedFileStorageFolder extends DefaultFileStorageFolder implements TypeAware, OriginAwareFileStorageFolder {
 
     private final UserizedFolder folder;
     private FileStorageFolderType type;
@@ -217,6 +219,11 @@ public class UserizedFileStorageFolder extends DefaultFileStorageFolder implemen
             return FileStorageFolderType.TEMPLATES_FOLDER;
         }
         return FileStorageFolderType.NONE;
+    }
+
+    @Override
+    public FolderPath getOrigin() {
+        return folder.getOriginPath() == null ? null : FolderPath.parseFrom(folder.getOriginPath().toString());
     }
 
 }

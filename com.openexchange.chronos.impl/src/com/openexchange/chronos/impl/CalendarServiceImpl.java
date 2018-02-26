@@ -390,7 +390,8 @@ public class CalendarServiceImpl implements CalendarService {
 
             @Override
             protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new UpdateAttendeePerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), eventID.getRecurrenceID(), attendee, Long.valueOf(clientTimestamp));
+                return new UpdateAttendeePerformer(storage, session, getFolder(session, eventID.getFolderID(), false))
+                    .perform(eventID.getObjectID(), eventID.getRecurrenceID(), attendee, Long.valueOf(clientTimestamp));
 
             }
         }.executeUpdate();
@@ -497,7 +498,7 @@ public class CalendarServiceImpl implements CalendarService {
             /*
              * notify handlers & return userized result
              */
-            List<ImportResult> importResults = new ArrayList<ImportResult>(results.size());
+            List<ImportResult> importResults = new ArrayList<>(results.size());
             for (InternalImportResult result : results) {
                 importResults.add(result.getImportResult());
                 notifyHandlers(result.getCalendarEvent(session));
@@ -556,7 +557,7 @@ public class CalendarServiceImpl implements CalendarService {
 
             @Override
             protected IFileHolder execute(CalendarSession session, CalendarStorage storage) throws OXException {
-                return new GetAttachmentPerformer(session, storage).performGetAttachment(eventID.getObjectID(), eventID.getFolderID(), managedId);
+                return new GetAttachmentPerformer(session, storage).performGetAttachment(eventID.getFolderID(), eventID.getObjectID(), managedId);
             }
         }.executeQuery();
     }

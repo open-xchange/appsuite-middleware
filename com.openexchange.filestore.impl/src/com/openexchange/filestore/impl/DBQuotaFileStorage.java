@@ -85,6 +85,7 @@ import com.openexchange.filestore.impl.osgi.Services;
 import com.openexchange.filestore.unified.KnownContributor;
 import com.openexchange.filestore.unified.UnifiedQuotaService;
 import com.openexchange.filestore.unified.UsageResult;
+import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.osgi.ServiceListings;
 
@@ -171,13 +172,14 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             return 0;
         }
 
-        if (ownerInfo.getOwnerId() <= 0) {
+        int ownerId = ownerInfo.getOwnerId();
+        if (ownerId <= 0) {
             LOGGER.debug("Not considering another quota backend service for file storage '{}' since not user-associated, but context-associated ({}).", uri, Integer.valueOf(contextId));
             return 0;
         }
 
-        LOGGER.debug("Considering another quota backend service for file storage '{}' of user {} in context {}.", uri, Integer.valueOf(ownerInfo.getOwnerId()), Integer.valueOf(contextId));
-        return ownerInfo.getOwnerId();
+        LOGGER.debug("Considering another quota backend service for file storage '{}' of user {} in context {}.", uri, Integer.valueOf(ownerId), Integer.valueOf(contextId));
+        return ownerId;
     }
 
     private DatabaseService getDatabaseService() throws OXException {
@@ -196,7 +198,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             return null;
         }
 
-        if (false == isUnifiedQuotaEnabledFor(userId, contextId)) {
+        if (false == checkIfUnifiedQuotaIsEnabledFor(userId, contextId)) {
             LOGGER.debug("Unified Quota is not enabled for user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId));
             return null;
         }
@@ -212,6 +214,18 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
 
         LOGGER.debug("No Unified Quota service applicable for file storage '{}' of user {} in context {}.", uri, Integer.valueOf(userId), Integer.valueOf(contextId));
         return null;
+    }
+
+    private boolean checkIfUnifiedQuotaIsEnabledFor(int userId, int contextId) throws OXException {
+        try {
+            return isUnifiedQuotaEnabledFor(userId, contextId);
+        } catch (OXException e) {
+            if (UserConfigurationCodes.NOT_FOUND.equals(e)) {
+                // Such a user does not (yet) exist. Thus Unified Quota cannot be enabled.
+                return false;
+            }
+            throw e;
+        }
     }
 
     @Override

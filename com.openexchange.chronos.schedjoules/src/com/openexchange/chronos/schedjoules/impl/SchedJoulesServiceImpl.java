@@ -50,7 +50,10 @@
 package com.openexchange.chronos.schedjoules.impl;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -75,15 +78,22 @@ import com.openexchange.chronos.schedjoules.impl.cache.SchedJoulesCachedItemKey;
 import com.openexchange.chronos.schedjoules.impl.cache.loader.SchedJoulesCountriesCacheLoader;
 import com.openexchange.chronos.schedjoules.impl.cache.loader.SchedJoulesLanguagesCacheLoader;
 import com.openexchange.chronos.schedjoules.impl.cache.loader.SchedJoulesPageCacheLoader;
+import com.openexchange.chronos.schedjoules.osgi.Services;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
+import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Autoboxing;
+import com.openexchange.java.Strings;
 
 /**
  * {@link SchedJoulesServiceImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class SchedJoulesServiceImpl implements SchedJoulesService {
+public class SchedJoulesServiceImpl implements SchedJoulesService, Reloadable {
 
     private static final int LANGUAGES_ID = -1;
 
@@ -113,12 +123,53 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
     private final Cache<String, Integer> rootItemIdCache = CacheBuilder.newBuilder().maximumSize(1000).expireAfterAccess(24, TimeUnit.HOURS).build();
 
     /**
+     * Black listed itemids
+     */
+    private List<Integer> blacklistedItems;
+
+    /**
      * Initialises a new {@link SchedJoulesServiceImpl}.
      *
      * @throws OXException if the {@link SchedJoulesAPI} cannot be initialised
      */
     public SchedJoulesServiceImpl() throws OXException {
         super();
+        initialiseBlackListedItems();
+    }
+
+    /**
+     * Initialises the black-listed items {@link List}
+     */
+    private void initialiseBlackListedItems() {
+        LeanConfigurationService leanConfig = Services.getService(LeanConfigurationService.class);
+        String property = leanConfig.getProperty(SchedJoulesProperty.itemBlacklist);
+        if (Strings.isEmpty(property)) {
+            blacklistedItems = Collections.emptyList();
+            return;
+        }
+        String[] split = Strings.splitByComma(property);
+        List<Integer> l = new ArrayList<>(split.length);
+        for (String s : split) {
+            try {
+                l.add(Integer.parseInt(s));
+            } catch (NumberFormatException e) {
+                LOG.debug("The black-listed item id '{}' is not an integer. Ignoring", s, e);
+            }
+        }
+        blacklistedItems = Collections.unmodifiableList(l);
+        invalidateCaches();
+    }
+
+    /**
+     * Invalidates the pages and root cache
+     */
+    private void invalidateCaches() {
+        pagesCache.asMap().entrySet().stream().filter(predicate -> false == blacklistedItems.contains(predicate.getKey().getItemId())).forEach(entry -> {
+            if (entry.getValue().getItemData().isObject()) {
+                removeBlackListedItems(entry.getValue().getItemData().toObject());
+            }
+        });
+        rootItemIdCache.asMap().entrySet().stream().filter(predicate -> false == blacklistedItems.contains(predicate.getValue().intValue()));
     }
 
     /*
@@ -172,6 +223,9 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      */
     @Override
     public SchedJoulesResult getPage(int contextId, int pageId, String locale, Set<SchedJoulesPageField> filteredFields) throws OXException {
+        if (blacklistedItems.contains(pageId)) {
+            throw SchedJoulesAPIExceptionCodes.PAGE_NOT_FOUND.create();
+        }
         try {
             JSONObject content = (JSONObject) pagesCache.get(new SchedJoulesCachedItemKey(contextId, pageId, locale)).getItemData();
             filterContent(content, SchedJoulesPageField.toSring(filteredFields));
@@ -229,6 +283,11 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
         return apiCache.getAPI(contextId).calendar().getCalendar(url, etag, lastModified);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.chronos.schedjoules.SchedJoulesService#isAvailable(int)
+     */
     @Override
     public boolean isAvailable(int contextId) {
         try {
@@ -246,6 +305,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
      * Filters the specified {@link JSONObject}
      *
      * @param content the {@link JSONObject} to filter
+     * @param filteredFields the fields to remove
      * @return the filtered {@link JSONObject}
      * @throws OXException if a JSON error is occurred
      */
@@ -253,9 +313,9 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
         if (filteredFields == null || filteredFields.isEmpty()) {
             return content;
         }
-
         try {
             long startTime = System.currentTimeMillis();
+            removeBlackListedItems(content);
             filterJSONObject(content, filteredFields);
             LOG.trace("Filtered content in {} msec.", System.currentTimeMillis() - startTime);
             return content;
@@ -265,7 +325,40 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
     }
 
     /**
-     * Filters the specified {@link JSONObject} and removes the 'url' field
+     * Removes any black-listed items from the content
+     * 
+     * @param content The content from which to remove the black-listed items
+     */
+    private void removeBlackListedItems(JSONObject content) {
+        JSONArray pageSections = content.optJSONArray(SchedJoulesPageField.PAGE_SECTIONS.getFieldName());
+        if (pageSections == null || pageSections.isEmpty()) {
+            return;
+        }
+
+        Iterator<Object> iterator = pageSections.iterator();
+        while (iterator.hasNext()) {
+            JSONObject obj = (JSONObject) iterator.next();
+            JSONArray items = obj.optJSONArray(SchedJoulesPageField.ITEMS.getFieldName());
+            if (items == null || items.isEmpty()) {
+                continue;
+            }
+            Iterator<Object> itemsIterator = items.iterator();
+            while (itemsIterator.hasNext()) {
+                JSONObject next = (JSONObject) itemsIterator.next();
+                JSONObject item = next.optJSONObject(SchedJoulesPageField.ITEM.getFieldName());
+                if (item == null || item.isEmpty()) {
+                    continue;
+                }
+                int itemId = item.optInt(SchedJoulesPageField.ITEM_ID.getFieldName());
+                if (blacklistedItems.contains(itemId)) {
+                    itemsIterator.remove();
+                }
+            }
+        }
+    }
+
+    /**
+     * Filters the specified {@link JSONObject} and removes the specified fields
      *
      * @param content the {@link JSONObject} to filter
      * @return the filtered {@link JSONObject}
@@ -324,5 +417,25 @@ public class SchedJoulesServiceImpl implements SchedJoulesService {
             return (OXException) e.getCause();
         }
         return SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
+     */
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        initialiseBlackListedItems();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.Reloadable#getInterests()
+     */
+    @Override
+    public Interests getInterests() {
+        return DefaultInterests.builder().propertiesOfInterest(SchedJoulesProperty.itemBlacklist.getFQPropertyName()).build();
     }
 }

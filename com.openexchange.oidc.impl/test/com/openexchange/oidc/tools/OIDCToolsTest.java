@@ -269,7 +269,6 @@ public class OIDCToolsTest {
 
     @Test
     public void getUIWebPath_FromLoginConfigTest() {
-//        LoginConfiguration mockedLoginConfig = Mockito.mock(LoginConfiguration.class);
         Mockito.when(mockedBackendConfig.getUIWebpath()).thenReturn("");
         Mockito.when(mockedLoginConfig.getUiWebPath()).thenReturn(UI_WEBPATH);
         String result = OIDCTools.getUIWebPath(mockedLoginConfig, mockedBackendConfig);

@@ -64,6 +64,8 @@ import com.openexchange.chronos.provider.DefaultCalendarPermission;
 import com.openexchange.chronos.provider.groupware.DefaultGroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarFolder;
 import com.openexchange.chronos.provider.groupware.GroupwareFolderType;
+import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.calendar.CalendarAccountErrorField;
 import com.openexchange.folderstorage.calendar.CalendarConfigField;
 import com.openexchange.folderstorage.calendar.CalendarFolderStorage;
 import com.openexchange.folderstorage.calendar.CalendarProviderField;
@@ -85,6 +87,7 @@ public class CalendarFolderConverter {
     public static final FolderField EXTENDED_PROPERTIES_FIELD = ExtendedPropertiesField.getInstance();
     public static final FolderField CALENDAR_CONFIG_FIELD = CalendarConfigField.getInstance();
     public static final FolderField CALENDAR_PROVIDER_FIELD = CalendarProviderField.getInstance();
+    public static final FolderField CALENDAR_ACCOUNT_ERROR_FIELD = CalendarAccountErrorField.getInstance();
 
     /**
      * Converts a calendar folder into a folder storage compatible folder.
@@ -101,7 +104,12 @@ public class CalendarFolderConverter {
         ParameterizedFolder folder = new CalendarStorageFolder(treeId, contentType);
         folder.setAccountID(getQualifiedAccountID(providerId, accountId));
         folder.setID(calendarFolder.getId());
-        folder.setName(calendarFolder.getName());
+        // TODO: should be drawn by client
+        if (null != calendarFolder.getAccountError()) {
+            folder.setName("\u26a0\ufe0f " + calendarFolder.getName());
+        } else {
+            folder.setName(calendarFolder.getName());
+        }
         folder.setPermissions(getStoragePermissions(calendarFolder.getPermissions()));
         folder.setSubscribed(calendarFolder.isSubscribed());
         folder.setSubfolderIDs(new String[0]);
@@ -109,6 +117,7 @@ public class CalendarFolderConverter {
         folder.setProperty(EXTENDED_PROPERTIES_FIELD, calendarFolder.getExtendedProperties());
         folder.setProperty(CALENDAR_PROVIDER_FIELD, providerId);
         folder.setProperty(CALENDAR_CONFIG_FIELD, userConfig);
+        folder.setProperty(CALENDAR_ACCOUNT_ERROR_FIELD, calendarFolder.getAccountError());
         folder.setSupportedCapabilities(getCapabilityNames(calendarFolder.getSupportedCapabilites()));
         if (GroupwareCalendarFolder.class.isInstance(calendarFolder)) {
             GroupwareCalendarFolder groupwareCalendarFolder = (GroupwareCalendarFolder) calendarFolder;
@@ -217,6 +226,7 @@ public class CalendarFolderConverter {
         calendarFolder.setParentId(folder.getParentID());
         calendarFolder.setPermissions(getCalendarPermissions(folder.getPermissions()));
         calendarFolder.setExtendedProperties(optExtendedProperties(folder));
+        calendarFolder.setAccountError(optAccountError(folder));
         calendarFolder.setSupportedCapabilites(getCapabilities(folder.getSupportedCapabilities()));
         calendarFolder.setSubscribed(folder.isSubscribed());
         return calendarFolder;
@@ -224,6 +234,10 @@ public class CalendarFolderConverter {
 
     public static ExtendedProperties optExtendedProperties(Folder folder) {
         return optPropertyValue(folder, EXTENDED_PROPERTIES_FIELD, ExtendedProperties.class, null);
+    }
+
+    public static OXException optAccountError(Folder folder) {
+        return optPropertyValue(folder, CALENDAR_ACCOUNT_ERROR_FIELD, OXException.class, null);
     }
 
     public static String optCalendarProvider(Folder folder) {

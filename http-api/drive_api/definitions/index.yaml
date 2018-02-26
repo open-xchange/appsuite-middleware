@@ -102,7 +102,3 @@ TrashFolderResponse:
   $ref: ./TrashFolderResponse.yaml
 TrashTargetsBody:
   $ref: ./TrashTargetsBody.yaml
-RestoreFromTrashResponse:
-  $ref: ./RestoreFromTrashResponse.yaml
-RestoreFromTrashData:
-  $ref: ./RestoreFromTrashData.yaml

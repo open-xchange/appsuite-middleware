@@ -52,17 +52,13 @@ package com.openexchange.drive.json.action;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.RestoreContent;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -94,11 +90,14 @@ public class RestoreFromTrashAction extends AbstractDriveAction {
                 files = parseArrayToList(body, "files");
             }
 
-            if (body.has("folders")) {
-                folders = parseArrayToList(body, "folders");
+            if (body.has("directories")) {
+                folders = parseArrayToList(body, "directories");
             }
-            RestoreContent content = getDriveService().getUtility().restoreFromTrash(session, files, folders);
-            return new AJAXRequestResult(toJSON(content, session.getServerSession().getUser().getLocale()), "json");
+            getDriveService().getUtility().restoreFromTrash(session, files, folders);
+
+            // Load trash contents again
+            JSONObject result = getDriveService().getUtility().getTrashContent(session);
+            return new AJAXRequestResult(result == null ? JSONObject.EMPTY_OBJECT : result, "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
         }
@@ -123,67 +122,6 @@ public class RestoreFromTrashAction extends AbstractDriveAction {
             result.add((String) o);
         }
         return result;
-    }
-
-    /**
-     * Transforms a {@link RestoreContent} to json
-     *
-     * @param content The {@link RestoreContent}
-     * @param locale The locale to use
-     * @return the {@link JSONObject}
-     * @throws JSONException
-     */
-    private JSONObject toJSON(RestoreContent content, Locale locale) throws JSONException {
-        if (content == null) {
-            return JSONObject.EMPTY_OBJECT;
-        }
-
-        Map<String, FileStorageFolder[]> restoredFolders = content.getRestoredFolders();
-        Map<String, FileStorageFolder[]> restoredFiles = content.getRestoredFiles();
-        if (restoredFiles == null && restoredFolders == null) {
-            return JSONObject.EMPTY_OBJECT;
-        }
-
-        JSONObject result = new JSONObject(4);
-        if (restoredFiles != null) {
-            JSONArray restoredJSON = parseMapToArray(locale, restoredFiles);
-            result.put("files", restoredJSON);
-        }
-
-        if (restoredFolders != null) {
-            JSONArray restoredFoldersJSON = parseMapToArray(locale, restoredFolders);
-            result.put("folders", restoredFoldersJSON);
-        }
-
-        return result;
-    }
-
-    /**
-     * Transforms a {@link Map} to a {@link JSONArray}
-     * 
-     * @param locale The locale to use
-     * @param restoredContent The map
-     * @return The {@link JSONArray}
-     * @throws JSONException
-     */
-    private JSONArray parseMapToArray(Locale locale, Map<String, FileStorageFolder[]> restoredContent) throws JSONException {
-        JSONArray restoredJSON = new JSONArray(restoredContent.size());
-        for (Map.Entry<String, FileStorageFolder[]> restoredObject : restoredContent.entrySet()) {
-            JSONObject restored = new JSONObject(2);
-            restored.put("name", restoredObject.getKey());
-
-            FileStorageFolder[] path = restoredObject.getValue();
-            JSONArray jPath = new JSONArray(path.length);
-            for (FileStorageFolder folder : path) {
-                JSONObject jPathEntry = new JSONObject(2);
-                jPathEntry.put("id", folder.getId());
-                jPathEntry.put("title", folder.getLocalizedName(locale));
-                jPath.put(jPathEntry);
-            }
-            restored.put("path", jPath);
-            restoredJSON.put(restored);
-        }
-        return restoredJSON;
     }
 
 }

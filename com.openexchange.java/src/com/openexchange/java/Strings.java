@@ -69,6 +69,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import com.openexchange.java.util.Tools;
 
 /**
  * {@link Strings} - A library for performing operations that create Strings
@@ -1580,6 +1581,46 @@ public class Strings {
             sb.deleteCharAt(sb.length() - 1);
         }
         return sb.toString();
+    }
+
+    /**
+     * Parses a positive <code>int</code> value from passed {@link String} instance.
+     *
+     * @param s The string to parse
+     * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
+     */
+    public static final int parseUnsignedInt(String s) {
+        return Tools.getUnsignedInteger(s);
+    }
+
+    /**
+     * Parses a positive <code>int</code> value from passed {@link String} instance.
+     *
+     * @param s The string to parse
+     * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
+     */
+    public static final int getUnsignedInt(String s) {
+        return Tools.getUnsignedInteger(s);
+    }
+
+    /**
+     * Parses a positive <code>long</code> value from passed {@link String} instance.
+     *
+     * @param s The string to parse
+     * @return The parsed positive <code>long</code> value or <code>-1</code> if parsing failed
+     */
+    public static final long parseUnsignedLong(String s) {
+        return Tools.getUnsignedLong(s);
+    }
+
+    /**
+     * Parses a positive <code>long</code> value from passed {@link String} instance.
+     *
+     * @param s The string to parse
+     * @return The parsed positive <code>long</code> value or <code>-1</code> if parsing failed
+     */
+    public static final long getUnsignedLong(String s) {
+        return Tools.getUnsignedLong(s);
     }
 
 }

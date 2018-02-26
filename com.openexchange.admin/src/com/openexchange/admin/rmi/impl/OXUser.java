@@ -1930,23 +1930,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
         }
 
-        /*-
-         *
-        if (this.prop.getUserProp(AdminProperties.User.CREATE_HOMEDIRECTORY, false)) {
-            for(final User usr : users) {
-                // homedirectory
-                String homedir = this.prop.getUserProp(AdminProperties.User.HOME_DIR_ROOT, "/home");
-                homedir += "/" + usr.getName();
-                // FIXME: if(! tool.isContextAdmin(ctx, usr.getId()) ) {} ??
-                try {
-                    FileUtils.deleteDirectory(new File(homedir));
-                } catch (final IOException e) {
-                    log.error("Could not delete homedir for user: {}", usr);
-                }
-            }
-        }
-        */
-
         oxu.delete(ctx, users, destUser);
         for (final User user : users) {
             try {

@@ -22,4 +22,4 @@
         description: |
           If the operation is successfull, an empty response is returned.
         schema:
-          $ref: "#/definitions/CommonResponse"
+          $ref: "#/definitions/TrashFolderResponse"

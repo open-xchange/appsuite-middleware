@@ -49,8 +49,12 @@
 
 package com.openexchange.file.storage.dropbox.access;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.DbxRequestConfig;
+import com.dropbox.core.http.HttpRequestor;
+import com.dropbox.core.http.StandardHttpRequestor;
 import com.dropbox.core.v2.DbxClientV2;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -94,8 +98,8 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
         try {
             final OAuthAccount oauthAccount = oAuthService.getAccount(getAccountId(), getSession(), getSession().getUserId(), getSession().getContextId());
             verifyAccount(oauthAccount, OXScope.drive);
-
-            DbxRequestConfig config = new DbxRequestConfig(DropboxConfiguration.getInstance().getProductName());
+            HttpRequestor httpRequestor = new DropboxStandardHttpRequestor();
+            DbxRequestConfig config = new DbxRequestConfig(DropboxConfiguration.getInstance().getProductName(), null, httpRequestor);
             String accessToken = oauthAccount.getToken();
             DbxClientV2 dbxClient = new DbxClientV2(config, accessToken);
             OAuthClient<DbxClientV2> oAuthClient = new OAuthClient<DbxClientV2>(dbxClient, accessToken);
@@ -145,4 +149,23 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
             throw FileStorageExceptionCodes.MISSING_CONFIG.create(DropboxConstants.ID, fsAccount.getId());
         }
     }
+
+    // ----------------------------------------------------------------------------------------------------------
+
+    private static class DropboxStandardHttpRequestor extends StandardHttpRequestor {
+
+        /**
+         * Initializes a new {@link DropboxOAuth2Access.DropboxStandardHttpRequestor}.
+         */
+        DropboxStandardHttpRequestor() {
+            super(Config.DEFAULT_INSTANCE);
+        }
+
+        @Override
+        protected void configure(HttpURLConnection conn) throws IOException {
+            super.configure(conn);
+            conn.setChunkedStreamingMode(65536);
+        }
+    }
+
 }

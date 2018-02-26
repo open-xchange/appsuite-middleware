@@ -96,6 +96,7 @@ public class CancelPerformer extends AbstractActionPerformer {
             // TODO: appointment.setNotification(true);
             if (change.getType() == ITipChange.Type.CREATE_DELETE_EXCEPTION) {
                 event = change.getCurrentEvent();
+                event.setRecurrenceId(change.getDeletedEvent().getRecurrenceId());
             }
             deleted.add(event);
             util.deleteEvent(event, session, new Date(Long.MAX_VALUE));

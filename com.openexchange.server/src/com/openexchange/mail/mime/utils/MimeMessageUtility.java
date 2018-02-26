@@ -3258,10 +3258,7 @@ public final class MimeMessageUtility {
      */
     public static String getSubject(final Message message) throws MessagingException {
         final String[] valueArr = message.getHeader(MessageHeaders.HDR_SUBJECT);
-        if (null == valueArr || valueArr.length == 0) {
-            return null;
-        }
-        return decodeEnvelopeSubject(valueArr[0]);
+        return decodeSubject(valueArr);
     }
 
     /**
@@ -3277,6 +3274,10 @@ public final class MimeMessageUtility {
      */
     public static String getSubject(final MailMessage message) {
         final String[] valueArr = message.getHeader(MessageHeaders.HDR_SUBJECT);
+        return decodeSubject(valueArr);
+    }
+
+    private static String decodeSubject(final String[] valueArr) {
         if (null == valueArr || valueArr.length == 0) {
             return null;
         }
@@ -3414,24 +3415,7 @@ public final class MimeMessageUtility {
      */
     public static InternetAddress[] getAddressHeader(final String name, final Message message) throws MessagingException {
         final String[] addressArray = message.getHeader(name);
-        if (null == addressArray || addressArray.length == 0) {
-            return null;
-        }
-        final String addresses;
-        if (addressArray.length > 1) {
-            final StringBuilder sb = new StringBuilder(addressArray[0]);
-            for (int i = 1; i < addressArray.length; i++) {
-                sb.append(',').append(addressArray[i]);
-            }
-            addresses = sb.toString();
-        } else {
-            addresses = addressArray[0];
-        }
-        try {
-            return QuotedInternetAddress.parseHeader(addresses, true);
-        } catch (final AddressException e) {
-            return getAddressHeaderNonStrict(addresses, addressArray);
-        }
+        return getAddresses(addressArray);
     }
 
     /**
@@ -3446,6 +3430,10 @@ public final class MimeMessageUtility {
      */
     public static InternetAddress[] getAddressHeader(final String name, final MailMessage message) {
         final String[] addressArray = message.getHeader(name);
+        return getAddresses(addressArray);
+    }
+
+    private static InternetAddress[] getAddresses(final String[] addressArray) {
         if (null == addressArray || addressArray.length == 0) {
             return null;
         }
@@ -3518,19 +3506,8 @@ public final class MimeMessageUtility {
      * @return The sent Date
      */
     public static Date getSentDate(final MailPart part) {
-        final String s = part.getHeader("Date", null);
-        if (s != null) {
-            try {
-                final MailDateFormat mailDateFormat = getDefaultMailDateFormat();
-                synchronized (mailDateFormat) {
-                    return mailDateFormat.parse(s);
-                }
-            } catch (final java.text.ParseException pex) {
-                return null;
-            }
-        }
-
-        return null;
+        final String dateString = part.getHeader("Date", null);
+        return parseDate(dateString);
     }
 
     /**
@@ -3542,19 +3519,22 @@ public final class MimeMessageUtility {
      * @throws MessagingException If sent date cannot be returned
      */
     public static Date getSentDate(MimeMessage mimeMessage) throws MessagingException {
-        String s = mimeMessage.getHeader("Date", null);
-        if (s != null) {
+        String dateString = mimeMessage.getHeader("Date", null);
+        return parseDate(dateString);
+    }
+    
+    private static Date parseDate(String dateString ) {
+        Date result = null;
+        if (dateString != null) {
             try {
                 MailDateFormat mailDateFormat = getDefaultMailDateFormat();
                 synchronized (mailDateFormat) {
-                    return mailDateFormat.parse(s);
+                    result =  mailDateFormat.parse(dateString);
                 }
             } catch (java.text.ParseException pex) {
-                return null;
             }
         }
-
-        return null;
+        return result;
     }
 
     /**
@@ -3621,7 +3601,7 @@ public final class MimeMessageUtility {
      * @return The appropriate multipart
      * @throws OXException If content cannot be presented as a multipart
      */
-    public static Multipart multipartFor(final Object content, final ContentType contentType) throws OXException {
+    private static Multipart multipartFor(final Object content, final ContentType contentType) throws OXException {
         if (null == content) {
             return null;
         }

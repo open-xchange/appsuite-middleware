@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.authenticity.test;
 
+import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 /**
@@ -56,7 +57,18 @@ import org.junit.runners.Suite;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@Suite.SuiteClasses({ TestMailAuthenticityHandler.class, TestMailAuthenticityStatusMatrix.class })
-public final class MailAuthenticityTestSuite {
+@RunWith(Suite.class)
+@Suite.SuiteClasses({
+    TestMailAuthenticityHandler.class,
+    TestMailAuthenticityStatusMatrix.class,
+    StandardAuthenticationResultsValidatorTest.class
+})
+public class MailAuthenticityTestSuite {
 
+    /**
+     * Initializes a new {@link MailAuthenticityTestSuite}.
+     */
+    public MailAuthenticityTestSuite() {
+        super();
+    }
 }

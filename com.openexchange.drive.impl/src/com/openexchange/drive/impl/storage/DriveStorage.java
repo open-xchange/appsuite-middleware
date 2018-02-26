@@ -1250,7 +1250,7 @@ public class DriveStorage {
 
     /**
      * Delete all given files and folders from trash folder.
-     * 
+     *
      * @param files All filenames to delete
      * @param folders  All folders, that should be deleted
      * @throws OXException If no trash folder is available <br>
@@ -1281,7 +1281,7 @@ public class DriveStorage {
     /**
      * Delete all {@link File}s from storage, if their filenames are also contained in the given
      * files {@link List}.
-     * 
+     *
      * @param files A {@link List} of all relevant filenames
      * @param documents All relevant {@link File}s
      * @throws OXException If removal of a file fails <br>
@@ -1289,28 +1289,43 @@ public class DriveStorage {
      */
     private void deleteAllFiles(List<String> files, SearchIterator<File> documents) throws OXException {
         List<String> fileIdsToDelete = new ArrayList<>(files.size());
+        StringBuilder StringBuilder = session.isTraceEnabled() ? new StringBuilder() : null;
         do {
             File file = documents.next();
             if (files.contains(file.getFileName())) {
                 fileIdsToDelete.add(file.getId());
+                if (null != StringBuilder) {
+                    StringBuilder.append(' ').append(combine(getPath(file.getFolderId()), file.getFileName()));
+                }
             }
         } while (documents.hasNext());
-        
+
+        if (null != StringBuilder) {
+            session.trace(this.toString() + "rm -rf " + StringBuilder.toString());
+        }
+
         getFileAccess().removeDocument(fileIdsToDelete, FileStorageFileAccess.DISTANT_FUTURE);
     }
 
     /**
      * Deletes all folders, which are contained in both given parameters.
-     * 
+     *
      * @param folders List of all folders
      * @param subfolders {@link FileStorageFolder} array of all subfolders
      * @throws OXException If the folder, can not be deleted
      */
     private void deleteAllFolders(List<String> folders, FileStorageFolder[] subfolders) throws OXException {
         List<String> folderIdsToDelete = loadAllFolderIds(folders, subfolders);
-        for (String id : folderIdsToDelete) {
+        for (String folder : folderIdsToDelete) {
             try {
-                getFolderAccess().deleteFolder(id, true);
+                if (session.isTraceEnabled()) {
+                    String path = knownFolders.getPath(folder);
+                    if (null == path) {
+                        path = resolveToRoot(folder);
+                    }
+                    session.trace(this.toString() + "rmdir -rf " + path);
+                }
+                getFolderAccess().deleteFolder(folder, true);
             } catch (OXException ex) {
                 if (OXFolderExceptionCode.isNotFound(ex)) {
                     continue;
@@ -1321,18 +1336,17 @@ public class DriveStorage {
     }
 
     /**
-     * Load all folder ids from subfolders into a list, if folders contains the
-     * subfolder name.
-     * 
-     * @param folders the list of all olders
-     * @param subfolders array of subfolders as {@link FileStorageFolder}s
+     * Filters the folders by name
+     *
+     * @param folderNames the list of folder names
+     * @param folders array of folders as {@link FileStorageFolder}s
      * @return a list of folder ids
      */
-    private List<String> loadAllFolderIds(List<String> folders, FileStorageFolder[] subfolders) {
-        List<String> folderIdsToDelete = new ArrayList<>(folders.size());
-        for (int x = 0; x < subfolders.length; x++) {
-            if (folders.contains(subfolders[x].getName())) {
-                folderIdsToDelete.add(subfolders[x].getId());
+    private List<String> loadAllFolderIds(List<String> folderNames, FileStorageFolder[] folders) {
+        List<String> folderIdsToDelete = new ArrayList<>(folderNames.size());
+        for (int x = 0; x < folders.length; x++) {
+            if (folderNames.contains(folders[x].getName())) {
+                folderIdsToDelete.add(folders[x].getId());
             }
         }
         return folderIdsToDelete;
@@ -1340,7 +1354,7 @@ public class DriveStorage {
 
     /**
      * Restores the given files and folders from trash, if a trash folder exists.
-     * 
+     *
      * @param files, list of all folder names to restore
      * @param folders, list of all file names to restore
      * @return null: if no trash folder exists and if files and folders are empty. <br>
@@ -1364,6 +1378,15 @@ public class DriveStorage {
             if (subfolders != null && subfolders.length > 0) {
                 List<String> folderIdsToRestore = loadAllFolderIds(folders, subfolders);
                 folderRestoreResult = getFolderAccess().restoreFolderFromTrash(folderIdsToRestore, rootId);
+                if (session.isTraceEnabled()) {
+                    for (String id : folderIdsToRestore) {
+                        String path = knownFolders.getPath(id);
+                        if (null == path) {
+                            path = resolveToRoot(id);
+                        }
+                        session.trace(this.toString() + "mv " + path + " " + folderRestoreResult.get(id));
+                    }
+                }
             }
         }
 
@@ -1380,7 +1403,7 @@ public class DriveStorage {
     /**
      * Restores the given documents in the given directory, identified by the rootId. If the documents
      * name is not contained in the files list, it will not be restored.
-     * 
+     *
      * @param files {@link List} of all files
      * @param rootId The destination folder id
      * @param documents The {@link File}s to restore
@@ -1397,15 +1420,29 @@ public class DriveStorage {
 
         fileRestoreResult = new HashMap<>(fileIdsToRestore.size());
         for (Map.Entry<FileID, FileStorageFolder[]> restoreEntry : restore.entrySet()) {
-            fileRestoreResult.put(ID2FileMapping.get(restoreEntry.getKey().toUniqueID()).getFileName(), restoreEntry.getValue());
+            File file = ID2FileMapping.get(restoreEntry.getKey().toUniqueID());
+            fileRestoreResult.put(file.getFileName(), restoreEntry.getValue());
+
+            if (session.isTraceEnabled()) {
+                String newPath = null;
+                for (FileStorageFolder folder : restoreEntry.getValue()) {
+                    if (newPath == null) {
+                        newPath = folder.getName();
+                    } else {
+                        newPath = combine(newPath, folder.getName());
+                    }
+                }
+                session.trace(this.toString() + "mv " + combine(getPath(file.getFolderId()), file.getFileName()) + " " + combine(newPath, file.getFileName()));
+            }
         }
+
         return fileRestoreResult;
     }
 
     /**
      * Maps all filenames to a {@link File} from docuemnts, if the filename is contained
-     * in the given files {@link List}. 
-     * 
+     * in the given files {@link List}.
+     *
      * @param files All relevant filenames
      * @param documents All relevant {@link File}s
      * @return A {@link Map} of all filenames to the corresponding {@link File}s

@@ -1426,6 +1426,24 @@ public class CalendarUtils {
     }
 
     /**
+     * Removes the implicitly added attendee for pseudo-<i>group-scheduled</i> events, along with any organizer information, in case there
+     * are no additional attendees present in the event.
+     * <p/>
+     * This effectively makes the event to not appear as <i>meeting</i> in clients, as well as allowing modifications on it.
+     *
+     * @param event The event to adjust
+     * @return <code>true</code> if the event was pseudo-group-scheduled and the attendee and organizer were removed, <code>false</code> otherwise
+     */
+    public static boolean removeImplicitAttendee(Event event) {
+        if (isPseudoGroupScheduled(event)) {
+            event.removeAttendees();
+            event.removeOrganizer();
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Gets a value indicating whether an event represents an <i>attendee scheduling object resource</i> or not, i.e. a group-scheduled
      * event the calendar user attends, organized by a different entity.
      *
@@ -1503,6 +1521,24 @@ public class CalendarUtils {
             event.setExtendedProperties(extendedProperties);
         }
         extendedProperties.add(extendedProperty);
+    }
+
+    /**
+     * Adds an extended property to an extended properties container, optionally initializing a new one automatically.
+     *
+     * @param extendedProperties The extended properties container to add the property to, or <code>null</code> to initialize a new one
+     * @param extendedProperty The extended property to add
+     * @param removeExisting <code>true</code> to remove any existing extended property with the same name, <code>false</code>, otherwise
+     * @return The adjusted extended properties container, or a new extended properties instance as needed
+     */
+    public static ExtendedProperties addExtendedProperty(ExtendedProperties extendedProperties, ExtendedProperty extendedProperty, boolean removeExisting) {
+        if (null == extendedProperties) {
+            extendedProperties = new ExtendedProperties();
+        } else if (removeExisting) {
+            extendedProperties.removeAll(extendedProperty.getName());
+        }
+        extendedProperties.add(extendedProperty);
+        return extendedProperties;
     }
 
     /**

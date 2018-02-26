@@ -207,7 +207,7 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
 
     @Override
     public void deleteEvent(final Event event, final CalendarSession session, final Date clientLastModified) throws OXException {
-        session.getCalendarService().deleteEvent(session, new EventID(event.getFolderId(), event.getId()), clientLastModified.getTime());
+        session.getCalendarService().deleteEvent(session, new EventID(event.getFolderId(), event.getId(), event.getRecurrenceId()), clientLastModified.getTime());
     }
 
     @Override

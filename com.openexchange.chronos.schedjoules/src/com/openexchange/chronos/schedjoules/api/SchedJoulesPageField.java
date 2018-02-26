@@ -58,7 +58,11 @@ import java.util.Set;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum SchedJoulesPageField {
-    URL("url");
+    URL("url"),
+    PAGE_SECTIONS("page_sections"),
+    ITEM("item"),
+    ITEMS("items"),
+    ITEM_ID("item_id");
 
     private final String fieldName;
 
