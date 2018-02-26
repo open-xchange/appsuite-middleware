@@ -51,6 +51,7 @@ package com.openexchange.metrics.dropwizard.impl;
 
 import java.util.function.Supplier;
 import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.MetricRegistryListener;
 import com.openexchange.metrics.MetricService;
 import com.openexchange.metrics.descriptors.MeterDescriptor;
 import com.openexchange.metrics.dropwizard.types.DropwizardCounter;
@@ -80,6 +81,10 @@ public class DropwizardMetricService implements MetricService {
     public DropwizardMetricService() {
         super();
         registry = new MetricRegistry();
+    }
+    
+    public void addListener(MetricRegistryListener listener) {
+        registry.addListener(listener);
     }
 
     /*

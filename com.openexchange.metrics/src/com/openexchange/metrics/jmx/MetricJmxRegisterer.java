@@ -73,11 +73,4 @@ public interface MetricJmxRegisterer {
      * @param meterDescriptor The {@link MeterDescriptor}
      */
     void onMeterRemoved(MeterDescriptor meterDescriptor);
-
-    /**
-     * Called when a {@link Meter} is removed from the registry.
-     * 
-     * @param name The name of the {@link Meter}
-     */
-    void onMeterRemoved(String name);
 }

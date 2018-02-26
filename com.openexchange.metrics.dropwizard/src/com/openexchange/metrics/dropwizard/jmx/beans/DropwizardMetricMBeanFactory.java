@@ -49,6 +49,7 @@
 
 package com.openexchange.metrics.dropwizard.jmx.beans;
 
+import java.util.concurrent.TimeUnit;
 import javax.management.NotCompliantMBeanException;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
@@ -105,7 +106,7 @@ public class DropwizardMetricMBeanFactory implements MetricMBeanFactory {
     public TimerMBean timer(Metric timer, MetricDescriptor metricDescriptor) {
         checkInstance(timer, DropwizardTimer.class);
         try {
-            return new TimerMBeanImpl((DropwizardTimer) timer, metricMetadata.getMetricTimeUnit());
+            return new TimerMBeanImpl((DropwizardTimer) timer, "events", TimeUnit.SECONDS); //TODO: pass the metric descriptor time unit
         } catch (NotCompliantMBeanException e) {
             throw new IllegalArgumentException("The TimerMBean is not a compliant MBean");
         }

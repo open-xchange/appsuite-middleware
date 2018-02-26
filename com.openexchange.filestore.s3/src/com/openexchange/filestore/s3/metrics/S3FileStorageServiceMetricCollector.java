@@ -55,6 +55,7 @@ import com.amazonaws.metrics.ServiceMetricCollector;
 import com.amazonaws.metrics.ThroughputMetricType;
 import com.amazonaws.services.s3.metrics.S3ServiceMetric;
 import com.openexchange.metrics.MetricService;
+import com.openexchange.metrics.MetricType;
 import com.openexchange.metrics.descriptors.MeterDescriptor;
 import com.openexchange.metrics.types.Meter;
 
@@ -65,14 +66,14 @@ import com.openexchange.metrics.types.Meter;
  */
 public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector {
 
-    private MetricService metrics;
+    private MetricService metricService;
 
     /**
      * Initialises a new {@link S3FileStorageServiceMetricCollector}.
      */
-    public S3FileStorageServiceMetricCollector(MetricService metrics) {
+    public S3FileStorageServiceMetricCollector(MetricService metricService) {
         super();
-        this.metrics = metrics;
+        this.metricService = metricService;
     }
 
     /*
@@ -89,8 +90,8 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
         } else if (throughputMetricType == S3ServiceMetric.S3UploadThroughput) {
             name = "UploadThroughput";
         }
-        MeterDescriptor meterDescriptor = MeterDescriptor.newBuilder("s3", name).build();
-        Meter meter = metrics.meter(meterDescriptor);
+        MeterDescriptor meterDescriptor = MeterDescriptor.newBuilder("s3", name, MetricType.METER).build();
+        Meter meter = metricService.meter(meterDescriptor);
         int bytes = provider.getByteCount();
         meter.mark(Integer.toUnsignedLong(bytes));
     }

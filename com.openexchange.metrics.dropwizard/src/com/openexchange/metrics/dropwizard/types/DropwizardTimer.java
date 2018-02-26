@@ -69,7 +69,6 @@ public class DropwizardTimer implements Timer {
      * Initialises a new {@link DropwizardTimer}.
      */
     public DropwizardTimer(com.codahale.metrics.Timer timer) {
-        super();
         this.delegate = timer;
     }
 

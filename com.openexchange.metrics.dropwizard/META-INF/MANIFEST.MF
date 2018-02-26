@@ -11,4 +11,8 @@ Import-Package: com.codahale.metrics,
  com.openexchange.metrics,
  com.openexchange.metrics.descriptors,
  com.openexchange.metrics.jmx,
- com.openexchange.metrics.types
+ com.openexchange.metrics.types,
+ com.openexchange.osgi,
+ javax.management,
+ org.osgi.framework
+Bundle-Activator: com.openexchange.metrics.dropwizard.osgi.MetricActivator

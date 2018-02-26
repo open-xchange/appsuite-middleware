@@ -60,23 +60,37 @@ import com.openexchange.metrics.jmx.TimerMBean;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class TimerMBeanImpl extends MeterMBeanImpl implements TimerMBean {
+public class TimerMBeanImpl extends AbstractMetricMBean implements TimerMBean {
 
     private static final String DESCRIPTION = "Timer MBean";
     private final DropwizardTimer timer;
     private final double durationFactor;
     private final String durationUnit;
+    private final double rateFactor;
+    private final String rateUnit;
 
     /**
      * Initialises a new {@link TimerMBeanImpl}.
      *
      * @throws NotCompliantMBeanException
      */
-    public TimerMBeanImpl(DropwizardTimer timer, TimeUnit timeUnit) throws NotCompliantMBeanException {
-        super(DESCRIPTION, TimerMBean.class, timer, "events", timeUnit);
+    public TimerMBeanImpl(DropwizardTimer timer, String rateItem, TimeUnit rateUnit) throws NotCompliantMBeanException {
+        super(DESCRIPTION, TimerMBean.class);
         this.timer = timer;
+        this.rateUnit = rateItem + "/" + calculateRateUnit(rateUnit);
+        this.rateFactor = rateUnit.toSeconds(1);
         this.durationFactor = 1.0 / TimeUnit.MILLISECONDS.toNanos(1); // TODO
         this.durationUnit = TimeUnit.MILLISECONDS.toString().toLowerCase(Locale.US); // TODO
+    }
+
+    /**
+     *
+     * @param unit
+     * @return
+     */
+    private String calculateRateUnit(TimeUnit unit) {
+        final String s = unit.toString().toLowerCase(Locale.US);
+        return s.substring(0, s.length() - 1);
     }
 
     /*
@@ -182,6 +196,56 @@ public class TimerMBeanImpl extends MeterMBeanImpl implements TimerMBean {
     /*
      * (non-Javadoc)
      *
+     * @see com.openexchange.metrics.jmx.TimerMBean#getCount()
+     */
+    @Override
+    public long getCount() {
+        return timer.getCount();
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.metrics.jmx.TimerMBean#getMeanRate()
+     */
+    @Override
+    public double getMeanRate() {
+        return timer.getMeanRate() * rateFactor;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.metrics.jmx.TimerMBean#getOneMinuteRate()
+     */
+    @Override
+    public double getOneMinuteRate() {
+        return timer.getOneMinuteRate() * rateFactor;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.metrics.jmx.TimerMBean#getFiveMinuteRate()
+     */
+    @Override
+    public double getFiveMinuteRate() {
+        return timer.getFiveMinuteRate() * rateFactor;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * @see com.openexchange.metrics.jmx.TimerMBean#getFifteenMinuteRate()
+     */
+    @Override
+    public double getFifteenMinuteRate() {
+        return timer.getFifteenMinuteRate() * rateFactor;
+    }
+
+    /*
+     * (non-Javadoc)
+     *
      * @see com.openexchange.metrics.jmx.TimerMBean#values()
      */
     @Override
@@ -197,6 +261,16 @@ public class TimerMBeanImpl extends MeterMBeanImpl implements TimerMBean {
     @Override
     public String getDurationUnit() {
         return durationUnit;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.jmx.MeterMBean#getRateUnit()
+     */
+    @Override
+    public String getRateUnit() {
+        return rateUnit;
     }
 
 }

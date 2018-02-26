@@ -72,9 +72,9 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
     /**
      * Initialises a new {@link S3FileStorageRequestMetricCollector}.
      */
-    public S3FileStorageRequestMetricCollector(MetricService metrics) {
+    public S3FileStorageRequestMetricCollector(MetricService metricService) {
         super();
-        this.metricService = metrics;
+        this.metricService = metricService;
     }
 
     /*

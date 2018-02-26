@@ -49,12 +49,117 @@
 
 package com.openexchange.metrics.dropwizard.jmx.beans;
 
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Histogram;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.MetricRegistryListener;
+import com.codahale.metrics.Timer;
+import com.openexchange.management.ManagementService;
+import com.openexchange.metrics.jmx.AbstractMetricJmxRegisterer;
+import com.openexchange.metrics.jmx.MetricMBeanFactory;
 
 /**
  * {@link DropwizardMetricJmxRegisterer}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DropwizardMetricJmxRegisterer {
+public class DropwizardMetricJmxRegisterer extends AbstractMetricJmxRegisterer implements MetricRegistryListener {
 
+    /**
+     * Initialises a new {@link DropwizardMetricJmxRegisterer}.
+     * @param managementService
+     * @param mbeanFactory
+     */
+    public DropwizardMetricJmxRegisterer(ManagementService managementService, MetricMBeanFactory mbeanFactory) {
+        super(managementService, mbeanFactory);
+    }
+
+    /* (non-Javadoc)
+     * @see com.codahale.metrics.MetricRegistryListener#onGaugeAdded(java.lang.String, com.codahale.metrics.Gauge)
+     */
+    @Override
+    public void onGaugeAdded(String name, Gauge<?> gauge) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see com.codahale.metrics.MetricRegistryListener#onGaugeRemoved(java.lang.String)
+     */
+    @Override
+    public void onGaugeRemoved(String name) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see com.codahale.metrics.MetricRegistryListener#onCounterAdded(java.lang.String, com.codahale.metrics.Counter)
+     */
+    @Override
+    public void onCounterAdded(String name, Counter counter) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see com.codahale.metrics.MetricRegistryListener#onCounterRemoved(java.lang.String)
+     */
+    @Override
+    public void onCounterRemoved(String name) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see com.codahale.metrics.MetricRegistryListener#onHistogramAdded(java.lang.String, com.codahale.metrics.Histogram)
+     */
+    @Override
+    public void onHistogramAdded(String name, Histogram histogram) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see com.codahale.metrics.MetricRegistryListener#onHistogramRemoved(java.lang.String)
+     */
+    @Override
+    public void onHistogramRemoved(String name) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see com.codahale.metrics.MetricRegistryListener#onMeterAdded(java.lang.String, com.codahale.metrics.Meter)
+     */
+    @Override
+    public void onMeterAdded(String name, Meter meter) {
+        // TODO Auto-generated method stub
+    }
+
+    /* (non-Javadoc)
+     * @see com.codahale.metrics.MetricRegistryListener#onMeterRemoved(java.lang.String)
+     */
+    @Override
+    public void onMeterRemoved(String name) {
+        // TODO Auto-generated method stub
+    }
+
+    /* (non-Javadoc)
+     * @see com.codahale.metrics.MetricRegistryListener#onTimerAdded(java.lang.String, com.codahale.metrics.Timer)
+     */
+    @Override
+    public void onTimerAdded(String name, Timer timer) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see com.codahale.metrics.MetricRegistryListener#onTimerRemoved(java.lang.String)
+     */
+    @Override
+    public void onTimerRemoved(String name) {
+        // TODO Auto-generated method stub
+        
+    }
 }

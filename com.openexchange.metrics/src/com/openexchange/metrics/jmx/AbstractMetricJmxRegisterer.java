@@ -125,6 +125,16 @@ public abstract class AbstractMetricJmxRegisterer implements MetricJmxRegisterer
         unregisterMBean(meterDescriptor);
     }
 
+    public void unregisterAll() {
+        for (ObjectName name : registeredNames) {
+            try {
+                managementService.unregisterMBean(name);
+            } catch (OXException e) {
+                LOG.warn("Unable to unregister MBean for metric {}", name, e);
+            }
+        }
+    }
+
     /**
      * Creates and registers an MBean for the specified {@link Metric} under the specified component name
      *
@@ -134,7 +144,7 @@ public abstract class AbstractMetricJmxRegisterer implements MetricJmxRegisterer
      * @param metricMetadata The {@link MetricMetadata} of the {@link Metric}
      * @throws OXException if the MBean for the specified {@link Metric} cannot be registered
      */
-    private void registerMBean(Metric metric, MetricDescriptor metricDescriptor) {
+    protected void registerMBean(Metric metric, MetricDescriptor metricDescriptor) {
         BiFunction<Metric, MetricDescriptor, MetricMBean> registerer = mbeanCreators.get(metricDescriptor.getMetricType());
         if (registerer == null) {
             LOG.warn("No metric type mbean registerer for '{}' was found.", metricDescriptor.getMetricType());
@@ -157,7 +167,7 @@ public abstract class AbstractMetricJmxRegisterer implements MetricJmxRegisterer
      * @param metricMetadata The {@link MetricMetadata} of the {@link Metric}
      * @throws OXException if the MBean for the specified {@link Metric} cannot be unregistered
      */
-    private void unregisterMBean(MetricDescriptor metricDescriptor) {
+    protected void unregisterMBean(MetricDescriptor metricDescriptor) {
         try {
             managementService.unregisterMBean(getObjectName(metricDescriptor));
         } catch (MalformedObjectNameException | OXException e) {

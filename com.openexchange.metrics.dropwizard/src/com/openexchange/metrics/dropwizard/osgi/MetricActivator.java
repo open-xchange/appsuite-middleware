@@ -47,12 +47,14 @@
  *
  */
 
-package com.openexchange.metrics.osgi;
+package com.openexchange.metrics.dropwizard.osgi;
 
 import org.osgi.framework.ServiceReference;
 import com.openexchange.management.ManagementService;
 import com.openexchange.metrics.MetricService;
-import com.openexchange.metrics.impl.MetricServiceImpl;
+import com.openexchange.metrics.dropwizard.impl.DropwizardMetricService;
+import com.openexchange.metrics.dropwizard.jmx.beans.DropwizardMetricJmxRegisterer;
+import com.openexchange.metrics.dropwizard.jmx.beans.DropwizardMetricMBeanFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 
@@ -77,7 +79,7 @@ public class MetricActivator extends HousekeepingActivator {
      */
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { };
+        return new Class<?>[] {};
     }
 
     /*
@@ -87,17 +89,22 @@ public class MetricActivator extends HousekeepingActivator {
      */
     @Override
     protected void startBundle() throws Exception {
-        final MetricServiceImpl metricService = new MetricServiceImpl();
-        registerService(MetricService.class, metricService);
+        DropwizardMetricService dropwizardService = new DropwizardMetricService();
+        registerService(MetricService.class, dropwizardService);
         track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
+
+            private DropwizardMetricJmxRegisterer dropwizardMetricJmxRegisterer;
+
             @Override
             public void added(ServiceReference<ManagementService> ref, ManagementService service) {
-                metricService.setManagementService(service);
+                dropwizardService.addListener(new DropwizardMetricJmxRegisterer(service, new DropwizardMetricMBeanFactory()));
+                
             }
 
             @Override
             public void removed(ServiceReference<ManagementService> ref, ManagementService service) {
-                metricService.unsetManagementService(service);
+                dropwizardMetricJmxRegisterer.unregisterAll();
+                dropwizardMetricJmxRegisterer = null;
             }
         });
         openTrackers();
