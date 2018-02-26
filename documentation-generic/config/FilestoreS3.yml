@@ -190,3 +190,14 @@ properties:
       file: filestore-s3.properties
       packageName: open-xchange-filestore-s3
       tags: ["Filestore"]
+
+    - key: com.openexchange.filestore.s3.metricCollection
+      description: Enables metric collection for the S3 storage
+      defaultValue: false
+      version: 7.10.0
+      reloadable: false
+      configcascadeAware: false
+      related:
+      file: filestore-s3.properties
+      packageName: open-xchange-filestore-s3
+      tags: ["Filestore", "Metrics"]
