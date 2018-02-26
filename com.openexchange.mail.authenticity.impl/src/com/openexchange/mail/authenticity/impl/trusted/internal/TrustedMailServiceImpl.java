@@ -79,14 +79,14 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.session.Session;
 
 /**
- * {@link TrustedMailAuthenticityHandler}
+ * {@link TrustedMailServiceImpl}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class TrustedMailAuthenticityHandler implements ForcedReloadable, TrustedMailService {
+public class TrustedMailServiceImpl implements ForcedReloadable, TrustedMailService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(TrustedMailAuthenticityHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TrustedMailServiceImpl.class);
 
     private static final String TRUSTED_MAIL_NAME = "TrustedMail";
 
@@ -122,11 +122,11 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
     private final List<TrustedMail> fallbackTenant;
 
     /**
-     * Initializes a new {@link TrustedMailAuthenticityHandler}.
+     * Initializes a new {@link TrustedMailServiceImpl}.
      *
      * @throws OXException
      */
-    public TrustedMailAuthenticityHandler(ConfigurationService configurationService) throws OXException {
+    public TrustedMailServiceImpl(ConfigurationService configurationService) throws OXException {
         super();
         this.trustedMailAddressesPerTenant = new ConcurrentHashMap<>();
         this.fallbackTenant = new CopyOnWriteArrayList<>();
@@ -147,7 +147,7 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
 
         MailAuthenticityResult authenticityResult = mailMessage.getAuthenticityResult();
 
-        if(authenticityResult == null) {
+        if (authenticityResult == null) {
             LOG.warn("Unable to verify trusted domain without authentication result.");
             return;
         }
@@ -202,7 +202,7 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
                     List<TrustedMail> trustedMailList = new ArrayList<>(mailAddresses.length);
                     for (String mailAddress : mailAddresses) {
                         TrustedMail trustedMail = getTrustedMail(mailAddress, images, fallbackImage, tenant);
-                        if(trustedMail == null) {
+                        if (trustedMail == null) {
                             throw MailAuthenticityExceptionCodes.INVALID_PROPERTY.create("com.openexchange.mail.authenticity.trusted." + tenant + ".config");
                         }
                         trustedMailList.add(trustedMail);
@@ -239,24 +239,18 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
      * @return the {@link TrustedMail} or null in case the mail address configuration is invalid
      */
     private TrustedMail getTrustedMail(String mailAddress, Map<String, String> images, Icon fallbackImage, String tenant) {
-        if (mailAddress.indexOf(":") > 0) {
-            String[] trustedMailConfig = Strings.splitByColon(mailAddress);
-            if (trustedMailConfig.length != 2) {
-                return null;
-            }
-            String image = null;
-            if (tenant == null) {
-                image = images.get("com.openexchange.mail.authenticity.trusted." + ".image.".substring(1) + trustedMailConfig[1]);
-            } else {
-                image = images.get("com.openexchange.mail.authenticity.trusted." + tenant + ".image." + trustedMailConfig[1]);
-            }
-            if (image != null) {
-                return new TrustedMail(trustedMailConfig[0], getIcon(image, tenant));
-            } else {
-                return new TrustedMail(trustedMailConfig[0], fallbackImage);
-            }
+        if (mailAddress.indexOf(':') <= 0) {
+            return new TrustedMail(mailAddress, fallbackImage);
         }
-        return new TrustedMail(mailAddress, fallbackImage);
+
+        String[] trustedMailConfig = Strings.splitByColon(mailAddress);
+        if (trustedMailConfig.length != 2) {
+            return null;
+        }
+
+        String imageKey = (tenant == null ? "com.openexchange.mail.authenticity.trusted.image." : "com.openexchange.mail.authenticity.trusted." + tenant + ".image.") + trustedMailConfig[1];
+        String image = images.get(imageKey);
+        return new TrustedMail(trustedMailConfig[0], null == image ? fallbackImage : getIcon(image, tenant));
     }
 
     private Icon getIcon(String image, String tenant) {
