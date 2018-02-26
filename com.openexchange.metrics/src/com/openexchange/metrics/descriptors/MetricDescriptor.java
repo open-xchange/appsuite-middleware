@@ -49,16 +49,19 @@
 
 package com.openexchange.metrics.descriptors;
 
+import com.openexchange.metrics.MetricType;
+
 /**
  * 
  * {@link MetricDescriptor}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-abstract class MetricDescriptor {
+public abstract class MetricDescriptor {
 
     private String group;
     private String name;
+    private MetricType metricType;
 
     /**
      * Initialises a new {@link MetricDescriptor}.
@@ -103,6 +106,24 @@ abstract class MetricDescriptor {
         this.name = name;
     }
 
+    /**
+     * Gets the metricType
+     *
+     * @return The metricType
+     */
+    public MetricType getMetricType() {
+        return metricType;
+    }
+
+    /**
+     * Sets the metricType
+     *
+     * @param metricType The metricType to set
+     */
+    public void setMetricType(MetricType metricType) {
+        this.metricType = metricType;
+    }
+
     /////////////////////////////// Builder /////////////////////////////////
 
     /**
@@ -117,17 +138,20 @@ abstract class MetricDescriptor {
 
         protected final String group;
         protected final String name;
+        protected final MetricType metricType;
 
         /**
          * Initialises a new {@link AbstractBuilder}.
          * 
          * @param group The group for the metric
          * @param name The name for the metric
+         * @param metricType The {@link MetricType}
          */
-        public AbstractBuilder(final String group, final String name) {
+        public AbstractBuilder(final String group, final String name, MetricType metricType) {
             super();
             this.group = group;
             this.name = name;
+            this.metricType = metricType;
         }
 
         /**

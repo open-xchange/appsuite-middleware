@@ -50,6 +50,7 @@
 package com.openexchange.metrics.descriptors;
 
 import java.util.concurrent.TimeUnit;
+import com.openexchange.metrics.MetricType;
 import com.openexchange.metrics.types.Meter;
 
 /**
@@ -105,7 +106,7 @@ public class MeterDescriptor extends MetricDescriptor {
     public void setUnit(String unit) {
         this.unit = unit;
     }
-    
+
     /////////////////////////////// Builder /////////////////////////////////
 
     /**
@@ -116,8 +117,8 @@ public class MeterDescriptor extends MetricDescriptor {
      * @param name The name of the descriptor
      * @return The {@link Builder}
      */
-    public static Builder newBuilder(String group, String name) {
-        return new Builder(group, name);
+    public static Builder newBuilder(String group, String name, MetricType metricType) {
+        return new Builder(group, name, metricType);
     }
 
     /**
@@ -134,8 +135,8 @@ public class MeterDescriptor extends MetricDescriptor {
          * @param group The group or domain this metric is valid for
          * @param name The name of the metric
          */
-        public Builder(String group, String name) {
-            super(group, name);
+        public Builder(String group, String name, MetricType metricType) {
+            super(group, name, metricType);
         }
 
         /**

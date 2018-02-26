@@ -69,7 +69,7 @@ import com.openexchange.metrics.types.Timer;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-// FIXME: Create a new delegate everytime? Maybe cache?
+// FIXME: Create a new delegate every time? Maybe cache?
 public class DropwizardMetricService implements MetricService {
 
     private final MetricRegistry registry;
