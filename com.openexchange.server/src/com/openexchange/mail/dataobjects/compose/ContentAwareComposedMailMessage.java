@@ -229,14 +229,14 @@ public class ContentAwareComposedMailMessage extends ComposedMailMessage impleme
         // Nope
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mail.dataobjects.MailPart#prepareForCaching()
-     */
     @Override
     public void prepareForCaching() {
-        // TODO Auto-generated method stub
+        // Nothing to do
+    }
 
+    @Override
+    public void cleanUp() {
+        // Nothing to clean
     }
 
 }
