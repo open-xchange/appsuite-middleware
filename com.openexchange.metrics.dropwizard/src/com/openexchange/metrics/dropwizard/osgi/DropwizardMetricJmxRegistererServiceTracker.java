@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.management.ManagementService;
 import com.openexchange.metrics.dropwizard.impl.DropwizardMetricService;
-import com.openexchange.metrics.dropwizard.jmx.DropwizardMetricJmxRegisterer;
+import com.openexchange.metrics.dropwizard.jmx.DropwizardMetricServiceListener;
 import com.openexchange.metrics.dropwizard.jmx.DropwizardMetricMBeanFactory;
 import com.openexchange.osgi.SimpleRegistryListener;
 
@@ -65,7 +65,7 @@ import com.openexchange.osgi.SimpleRegistryListener;
 public class DropwizardMetricJmxRegistererServiceTracker implements SimpleRegistryListener<ManagementService> {
 
     private DropwizardMetricService dropwizardMetricService;
-    private final AtomicReference<DropwizardMetricJmxRegisterer> listener;
+    private final AtomicReference<DropwizardMetricServiceListener> listener;
 
     /**
      * Initialises a new {@link DropwizardMetricJmxRegistererServiceTracker}.
@@ -73,7 +73,7 @@ public class DropwizardMetricJmxRegistererServiceTracker implements SimpleRegist
     public DropwizardMetricJmxRegistererServiceTracker(DropwizardMetricService dropwizardMetricService) {
         super();
         this.dropwizardMetricService = dropwizardMetricService;
-        listener = new AtomicReference<DropwizardMetricJmxRegisterer>();
+        listener = new AtomicReference<DropwizardMetricServiceListener>();
     }
 
     /*
@@ -83,7 +83,7 @@ public class DropwizardMetricJmxRegistererServiceTracker implements SimpleRegist
      */
     @Override
     public void added(ServiceReference<ManagementService> ref, ManagementService service) {
-        if (listener.compareAndSet(null, new DropwizardMetricJmxRegisterer(service, new DropwizardMetricMBeanFactory()))) {
+        if (listener.compareAndSet(null, new DropwizardMetricServiceListener(service, new DropwizardMetricMBeanFactory()))) {
             dropwizardMetricService.addListener(listener.get());
         }
     }
@@ -95,7 +95,7 @@ public class DropwizardMetricJmxRegistererServiceTracker implements SimpleRegist
      */
     @Override
     public void removed(ServiceReference<ManagementService> ref, ManagementService service) {
-        DropwizardMetricJmxRegisterer registerer = listener.get();
+        DropwizardMetricServiceListener registerer = listener.get();
         if (registerer == null) {
             return;
         }

@@ -73,13 +73,13 @@ import com.openexchange.metrics.types.Metric;
 import com.openexchange.metrics.types.Timer;
 
 /**
- * {@link AbstractMetricJmxRegisterer}
+ * {@link AbstractMetricServiceListener}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class AbstractMetricJmxRegisterer {
+public abstract class AbstractMetricServiceListener implements MetricServiceListener {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractMetricJmxRegisterer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractMetricServiceListener.class);
 
     private static final String DOMAIN_NAME = "com.openexchange.metrics";
 
@@ -88,11 +88,11 @@ public abstract class AbstractMetricJmxRegisterer {
     private final List<ObjectName> registeredNames;
 
     /**
-     * Initialises a new {@link AbstractMetricJmxRegisterer}.
+     * Initialises a new {@link AbstractMetricServiceListener}.
      * 
      * @param managementService The {@link ManagementService}
      */
-    public AbstractMetricJmxRegisterer(ManagementService managementService, MetricMBeanFactory mbeanFactory) {
+    public AbstractMetricServiceListener(ManagementService managementService, MetricMBeanFactory mbeanFactory) {
         super();
         this.managementService = managementService;
 

@@ -49,17 +49,23 @@
 
 package com.openexchange.metrics.dropwizard.impl;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.MetricRegistryListener;
 import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.MetricService;
+import com.openexchange.metrics.MetricType;
 import com.openexchange.metrics.dropwizard.types.DropwizardCounter;
 import com.openexchange.metrics.dropwizard.types.DropwizardGauge;
 import com.openexchange.metrics.dropwizard.types.DropwizardHistogram;
 import com.openexchange.metrics.dropwizard.types.DropwizardMeter;
 import com.openexchange.metrics.dropwizard.types.DropwizardTimer;
+import com.openexchange.metrics.jmx.MetricServiceListener;
 import com.openexchange.metrics.types.Counter;
 import com.openexchange.metrics.types.Gauge;
 import com.openexchange.metrics.types.Histogram;
@@ -76,6 +82,8 @@ import com.openexchange.metrics.types.Timer;
 public class DropwizardMetricService implements MetricService {
 
     private final ConcurrentMap<String, Metric> metrics;
+    private final Map<MetricType, Function<MetricDescriptor, Metric>> registerers;
+    private final List<MetricServiceListener> listeners;
 
     private final MetricRegistry registry;
 
@@ -86,14 +94,34 @@ public class DropwizardMetricService implements MetricService {
         super();
         registry = new MetricRegistry();
         metrics = new ConcurrentHashMap<>();
+        listeners = new ArrayList<>();
+        registerers = new HashMap<>();
+        registerers.put(MetricType.METER, (metricDescriptor) -> new DropwizardMeter(registry.meter(MetricRegistry.name(metricDescriptor.getGroup(), metricDescriptor.getName()))));
+        registerers.put(MetricType.TIMER, (metricDescriptor) -> new DropwizardTimer(registry.timer(MetricRegistry.name(metricDescriptor.getGroup(), metricDescriptor.getName()))));
+        registerers.put(MetricType.COUNTER, (metricDescriptor) -> new DropwizardCounter(registry.counter(MetricRegistry.name(metricDescriptor.getGroup(), metricDescriptor.getName()))));
+        registerers.put(MetricType.HISTOGRAM, (metricDescriptor) -> new DropwizardHistogram(registry.histogram(MetricRegistry.name(metricDescriptor.getGroup(), metricDescriptor.getName()))));
+        registerers.put(MetricType.GAUGE, (metricDescriptor) -> new DropwizardGauge(registry.gauge(MetricRegistry.name(metricDescriptor.getGroup(), metricDescriptor.getName()), () -> () -> metricDescriptor.getMetricSupplier().get())));
     }
 
-    public void addListener(MetricRegistryListener listener) {
-        registry.addListener(listener);
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.MetricService#addListener(com.openexchange.metrics.jmx.MetricServiceListener)
+     */
+    @Override
+    public void addListener(MetricServiceListener listener) {
+        listeners.add(listener);
+        //TODO: notify already registered metrics
     }
 
-    public void removeListener(MetricRegistryListener listener) {
-        registry.removeListener(listener);
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.MetricService#removeListener(com.openexchange.metrics.jmx.MetricServiceListener)
+     */
+    @Override
+    public void removeListener(MetricServiceListener listener) {
+        listeners.remove(listener);
     }
 
     /*
@@ -103,7 +131,7 @@ public class DropwizardMetricService implements MetricService {
      */
     @Override
     public Histogram getHistogram(MetricDescriptor descriptor) {
-        return new DropwizardHistogram(registry.histogram(MetricRegistry.name(descriptor.getGroup(), descriptor.getName())));
+        return (Histogram) registerOrGet(descriptor);
     }
 
     /*
@@ -113,7 +141,7 @@ public class DropwizardMetricService implements MetricService {
      */
     @Override
     public Timer getTimer(MetricDescriptor descriptor) {
-        return new DropwizardTimer(registry.timer(MetricRegistry.name(descriptor.getGroup(), descriptor.getName())));
+        return (Timer) registerOrGet(descriptor);
     }
 
     /*
@@ -123,7 +151,7 @@ public class DropwizardMetricService implements MetricService {
      */
     @Override
     public Counter getCounter(MetricDescriptor descriptor) {
-        return new DropwizardCounter(registry.counter(MetricRegistry.name(descriptor.getGroup(), descriptor.getName())));
+        return (Counter) registerOrGet(descriptor);
     }
 
     /*
@@ -133,7 +161,7 @@ public class DropwizardMetricService implements MetricService {
      */
     @Override
     public <T> Gauge<T> getGauge(MetricDescriptor descriptor) {
-        return (Gauge<T>) new DropwizardGauge(registry.gauge(MetricRegistry.name(descriptor.getGroup(), descriptor.getName()), () -> () -> descriptor.getMetricSupplier().get()));
+        return (Gauge<T>) registerOrGet(descriptor);
     }
 
     /*
@@ -143,17 +171,26 @@ public class DropwizardMetricService implements MetricService {
      */
     @Override
     public Meter getMeter(MetricDescriptor descriptor) {
+        return (Meter) registerOrGet(descriptor);
+    }
+
+    /**
+     * 
+     * @param descriptor
+     * @return
+     */
+    private Metric registerOrGet(MetricDescriptor descriptor) {
         String key = descriptor.getGroup() + "." + descriptor.getName();
         Metric metric = metrics.get(key);
-        if (metric == null) {
-            DropwizardMeter dropwizardMeter = new DropwizardMeter(registry.meter(MetricRegistry.name(descriptor.getGroup(), descriptor.getName())));
-            Metric raced = metrics.putIfAbsent(key, dropwizardMeter);
-            if (raced == null) {
-                return dropwizardMeter;
-            }
-            return (Meter) raced;
+        if (metric != null) {
+            return metric;
         }
 
-        return (Meter) metric;
+        Metric dropwizardMetric = registerers.get(descriptor.getMetricType()).apply(descriptor);
+        Metric raced = metrics.putIfAbsent(key, dropwizardMetric);
+        if (raced == null) {
+            return dropwizardMetric;
+        }
+        return raced;
     }
 }

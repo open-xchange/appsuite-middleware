@@ -57,7 +57,9 @@ import com.amazonaws.metrics.RequestMetricCollector;
 import com.amazonaws.util.AWSRequestMetrics;
 import com.amazonaws.util.AWSRequestMetrics.Field;
 import com.amazonaws.util.TimingInfo;
+import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.MetricService;
+import com.openexchange.metrics.MetricType;
 import com.openexchange.metrics.types.Timer;
 
 /**
@@ -104,13 +106,14 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
             if (timeTakenMillisIfKnown == null) {
                 return;
             }
-            
+
             long longValue = timeTakenMillisIfKnown.longValue();
             Field predefined = (Field) type;
             switch (predefined) {
                 case ClientExecuteTime:
                     String methodName = request.getHttpMethod().name();
-                    Timer timer = metricService.getTimer("s3", "RequestTimes." + methodName);
+                    MetricDescriptor metricDescriptor = MetricDescriptor.newBuilder("s3", "RequestTimes." + methodName, MetricType.TIMER).build();
+                    Timer timer = metricService.getTimer(metricDescriptor);
                     timer.update(longValue, TimeUnit.MILLISECONDS);
                 default:
                     break;

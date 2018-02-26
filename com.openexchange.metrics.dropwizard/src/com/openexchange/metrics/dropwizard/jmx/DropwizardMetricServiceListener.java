@@ -49,118 +49,136 @@
 
 package com.openexchange.metrics.dropwizard.jmx;
 
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.MetricRegistryListener;
-import com.codahale.metrics.Timer;
 import com.openexchange.management.ManagementService;
-import com.openexchange.metrics.jmx.AbstractMetricJmxRegisterer;
+import com.openexchange.metrics.MetricDescriptor;
+import com.openexchange.metrics.jmx.AbstractMetricServiceListener;
 import com.openexchange.metrics.jmx.MetricMBeanFactory;
 
 /**
- * {@link DropwizardMetricJmxRegisterer}
+ * {@link DropwizardMetricServiceListener}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DropwizardMetricJmxRegisterer extends AbstractMetricJmxRegisterer implements MetricRegistryListener {
+public class DropwizardMetricServiceListener extends AbstractMetricServiceListener {
 
     /**
-     * Initialises a new {@link DropwizardMetricJmxRegisterer}.
+     * Initialises a new {@link DropwizardMetricServiceListener}.
+     * 
      * @param managementService
      * @param mbeanFactory
      */
-    public DropwizardMetricJmxRegisterer(ManagementService managementService, MetricMBeanFactory mbeanFactory) {
+    public DropwizardMetricServiceListener(ManagementService managementService, MetricMBeanFactory mbeanFactory) {
         super(managementService, mbeanFactory);
     }
 
-    /* (non-Javadoc)
-     * @see com.codahale.metrics.MetricRegistryListener#onGaugeAdded(java.lang.String, com.codahale.metrics.Gauge)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.jmx.MetricServiceListener#onGaugeAdded(com.openexchange.metrics.MetricDescriptor, com.openexchange.metrics.types.Gauge)
      */
     @Override
-    public void onGaugeAdded(String name, Gauge<?> gauge) {
+    public void onGaugeAdded(MetricDescriptor descriptor, com.openexchange.metrics.types.Gauge<?> gauge) {
         // TODO Auto-generated method stub
-        
+
     }
 
-    /* (non-Javadoc)
-     * @see com.codahale.metrics.MetricRegistryListener#onGaugeRemoved(java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.jmx.MetricServiceListener#onGaugeRemoved(java.lang.String)
      */
     @Override
     public void onGaugeRemoved(String name) {
         // TODO Auto-generated method stub
-        
+
     }
 
-    /* (non-Javadoc)
-     * @see com.codahale.metrics.MetricRegistryListener#onCounterAdded(java.lang.String, com.codahale.metrics.Counter)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.jmx.MetricServiceListener#onCounterAdded(com.openexchange.metrics.MetricDescriptor, com.openexchange.metrics.types.Counter)
      */
     @Override
-    public void onCounterAdded(String name, Counter counter) {
+    public void onCounterAdded(MetricDescriptor descriptor, com.openexchange.metrics.types.Counter counter) {
         // TODO Auto-generated method stub
-        
+
     }
 
-    /* (non-Javadoc)
-     * @see com.codahale.metrics.MetricRegistryListener#onCounterRemoved(java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.jmx.MetricServiceListener#onCounterRemoved(java.lang.String)
      */
     @Override
     public void onCounterRemoved(String name) {
         // TODO Auto-generated method stub
-        
+
     }
 
-    /* (non-Javadoc)
-     * @see com.codahale.metrics.MetricRegistryListener#onHistogramAdded(java.lang.String, com.codahale.metrics.Histogram)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.jmx.MetricServiceListener#onHistogramAdded(com.openexchange.metrics.MetricDescriptor, com.openexchange.metrics.types.Histogram)
      */
     @Override
-    public void onHistogramAdded(String name, Histogram histogram) {
+    public void onHistogramAdded(MetricDescriptor descriptor, com.openexchange.metrics.types.Histogram histogram) {
         // TODO Auto-generated method stub
-        
+
     }
 
-    /* (non-Javadoc)
-     * @see com.codahale.metrics.MetricRegistryListener#onHistogramRemoved(java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.jmx.MetricServiceListener#onHistogramRemoved(java.lang.String)
      */
     @Override
     public void onHistogramRemoved(String name) {
         // TODO Auto-generated method stub
-        
+
     }
 
-    /* (non-Javadoc)
-     * @see com.codahale.metrics.MetricRegistryListener#onMeterAdded(java.lang.String, com.codahale.metrics.Meter)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.jmx.MetricServiceListener#onMeterAdded(com.openexchange.metrics.MetricDescriptor, com.openexchange.metrics.types.Meter)
      */
     @Override
-    public void onMeterAdded(String name, Meter meter) {
+    public void onMeterAdded(MetricDescriptor descriptor, com.openexchange.metrics.types.Meter meter) {
         // TODO Auto-generated method stub
-        
+
     }
 
-    /* (non-Javadoc)
-     * @see com.codahale.metrics.MetricRegistryListener#onMeterRemoved(java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.jmx.MetricServiceListener#onMeterRemoved(java.lang.String)
      */
     @Override
     public void onMeterRemoved(String name) {
         // TODO Auto-generated method stub
+
     }
 
-    /* (non-Javadoc)
-     * @see com.codahale.metrics.MetricRegistryListener#onTimerAdded(java.lang.String, com.codahale.metrics.Timer)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.jmx.MetricServiceListener#onTimerAdded(com.openexchange.metrics.MetricDescriptor, com.openexchange.metrics.types.Timer)
      */
     @Override
-    public void onTimerAdded(String name, Timer timer) {
+    public void onTimerAdded(MetricDescriptor descriptor, com.openexchange.metrics.types.Timer timer) {
         // TODO Auto-generated method stub
-        
+
     }
 
-    /* (non-Javadoc)
-     * @see com.codahale.metrics.MetricRegistryListener#onTimerRemoved(java.lang.String)
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.jmx.MetricServiceListener#onTimerRemoved(java.lang.String)
      */
     @Override
     public void onTimerRemoved(String name) {
         // TODO Auto-generated method stub
-        
+
     }
+
 }

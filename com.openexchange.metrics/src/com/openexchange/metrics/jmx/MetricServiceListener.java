@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,85 +47,94 @@
  *
  */
 
-package com.openexchange.metrics;
+package com.openexchange.metrics.jmx;
 
-import java.util.function.Supplier;
-import com.openexchange.metrics.jmx.MetricServiceListener;
+import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.types.Counter;
 import com.openexchange.metrics.types.Gauge;
 import com.openexchange.metrics.types.Histogram;
 import com.openexchange.metrics.types.Meter;
 import com.openexchange.metrics.types.Timer;
-import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link MetricService}
+ * {@link MetricServiceListener}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-@SingletonService
-public interface MetricService {
+public interface MetricServiceListener {
 
     /**
-     * Gets an existing {@link Histogram} for the specified {@link MetricDescriptor} or creates and
-     * remembers a new one if it doesn't exist yet.
+     * Called when a {@link Gauge} is added to the registry.
      *
-     * @param descriptior The {@link MetricDescriptor}
-     * @return the metric instance
+     * @param descriptor The {@link Gauge}'s descriptor
+     * @param gauge the gauge
      */
-    Histogram getHistogram(MetricDescriptor descriptor);
+    void onGaugeAdded(MetricDescriptor descriptor, Gauge<?> gauge);
 
     /**
-     * Gets an existing {@link Timer} for the specified {@link MetricDescriptor} or creates and
-     * remembers a new one if it doesn't exist yet.
+     * Called when a {@link Gauge} is removed from the registry.
      *
-     * @param descriptior The {@link MetricDescriptor}
-     * @return the metric instance
+     * @param name the gauge's name
      */
-    Timer getTimer(MetricDescriptor descriptor);
+    void onGaugeRemoved(String name);
 
     /**
-     * Gets an existing {@link Counter} for the specified {@link MetricDescriptor} or creates and
-     * remembers a new one if it doesn't exist yet.
+     * Called when a {@link Counter} is added to the registry.
      *
-     * @param descriptior The {@link MetricDescriptor}
-     * @return the metric instance
+     * @param descriptor The {@link Counter}'s descriptor
+     * @param counter the counter
      */
-    Counter getCounter(MetricDescriptor descriptor);
+    void onCounterAdded(MetricDescriptor descriptor, Counter counter);
 
     /**
-     * Gets an existing {@link Gauge} for the specified {@link MetricDescriptor} with the specified {@link Supplier}
-     * or creates and remembers a new one if it doesn't exist yet.
+     * Called when a {@link Counter} is removed from the registry.
      *
-     * @param descriptior The {@link MetricDescriptor}
-     * @return the metric instance
+     * @param name the counter's name
      */
-    <T> Gauge<T> getGauge(MetricDescriptor descriptor);
+    void onCounterRemoved(String name);
 
     /**
-     * Gets an existing {@link Meter} for the specified {@link MetricDescriptor} or creates and
-     * remembers a new one if it doesn't exist yet.
+     * Called when a {@link Histogram} is added to the registry.
      *
-     * @param descriptior The {@link MetricDescriptor}
-     * @return the metric instance
+     * @param descriptor The {@link Histogram}'s descriptor
+     * @param histogram the histogram
      */
-    Meter getMeter(MetricDescriptor descriptor);
+    void onHistogramAdded(MetricDescriptor descriptor, Histogram histogram);
 
     /**
-     * Adds a {@link MetricServiceListener} to a collection of listeners that will be notified on
-     * metric creation. Listeners will be notified in the order in which they are added.
-     * <p/>
-     * <b>N.B.:</b> The listener will be notified of all existing metrics when it first registers.
+     * Called when a {@link Histogram} is removed from the registry.
      *
-     * @param listener the listener that will be notified
+     * @param name the histogram's name
      */
-    void addListener(MetricServiceListener listener);
+    void onHistogramRemoved(String name);
 
     /**
-     * Removes a {@link MetricServiceListener} from this registry's collection of listeners.
+     * Called when a {@link Meter} is added to the registry.
      *
-     * @param listener the listener that will be removed
+     * @param descriptor The {@link Meter}'s descriptor
+     * @param meter the meter
      */
-    void removeListener(MetricServiceListener listener);
+    void onMeterAdded(MetricDescriptor descriptor, Meter meter);
+
+    /**
+     * Called when a {@link Meter} is removed from the registry.
+     *
+     * @param name the meter's name
+     */
+    void onMeterRemoved(String name);
+
+    /**
+     * Called when a {@link Timer} is added to the registry.
+     *
+     * @param descriptor The {@link Timer}'s descriptor
+     * @param timer the timer
+     */
+    void onTimerAdded(MetricDescriptor descriptor, Timer timer);
+
+    /**
+     * Called when a {@link Timer} is removed from the registry.
+     *
+     * @param name the timer's name
+     */
+    void onTimerRemoved(String name);
 }
