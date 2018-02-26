@@ -112,5 +112,5 @@ public interface MetricService {
      * @param descriptior The {@link MetricDescriptor}
      * @return the metric instance
      */
-    Meter meter(MetricDescriptor descriptor);
+    Meter getMeter(MetricDescriptor descriptor);
 }

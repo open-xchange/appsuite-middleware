@@ -50,6 +50,7 @@
 package com.openexchange.metrics;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 /**
  * 
@@ -61,9 +62,10 @@ public class MetricDescriptor {
 
     private String group;
     private String name;
+    private String unit;
     private MetricType metricType;
     private TimeUnit rate;
-    private String unit;
+    private Supplier<?> metricSupplier;
 
     /**
      * Initialises a new {@link MetricDescriptor}.
@@ -163,6 +165,24 @@ public class MetricDescriptor {
     }
 
     /**
+     * Gets the metric {@link Supplier} or <code>null</code> if none is specified
+     *
+     * @return The metric {@link Supplier} or <code>null</code> if none is specified
+     */
+    public Supplier<?> getMetricSupplier() {
+        return metricSupplier;
+    }
+
+    /**
+     * Sets the metricSupplier
+     *
+     * @param metricSupplier The metricSupplier to set
+     */
+    public void setMetricSupplier(Supplier<?> metricSupplier) {
+        this.metricSupplier = metricSupplier;
+    }
+
+    /**
      * Initialises a new {@link MetricBuilder}
      * 
      * @param group The group
@@ -177,7 +197,6 @@ public class MetricDescriptor {
     /////////////////////////////// Builder /////////////////////////////////
 
     /**
-     * 
      * {@link AbstractBuilder}
      *
      * @param <T> The {@link MetricDescriptor} type
@@ -191,6 +210,7 @@ public class MetricDescriptor {
         protected final MetricType metricType;
         private TimeUnit rate = TimeUnit.SECONDS;
         private String unit = "events";
+        private Supplier<?> supplier;
 
         /**
          * Initialises a new {@link AbstractBuilder}.
@@ -204,6 +224,39 @@ public class MetricDescriptor {
             this.group = group;
             this.name = name;
             this.metricType = metricType;
+        }
+
+        /**
+         * Set the {@link TimeUnit} rate
+         * 
+         * @param rate The {@link TimeUnit} rate to set
+         * @return the {@link MetricBuilder} for chained calls
+         */
+        public MetricBuilder withRate(TimeUnit rate) {
+            this.rate = rate;
+            return this;
+        }
+
+        /**
+         * Set the unit
+         * 
+         * @param unit The unit to set
+         * @return the {@link MetricBuilder} for chained calls
+         */
+        public MetricBuilder withUnit(String unit) {
+            this.unit = unit;
+            return this;
+        }
+
+        /**
+         * Set the {@link Supplier}
+         * 
+         * @param supplier The {@link Supplier} to set
+         * @return the {@link MetricBuilder} for chained calls
+         */
+        public MetricBuilder withMetricSupplier(Supplier<?> supplier) {
+            this.supplier = supplier;
+            return this;
         }
 
         /**
@@ -247,6 +300,7 @@ public class MetricDescriptor {
         protected void fill(MetricDescriptor descriptor) {
             descriptor.setRate(rate);
             descriptor.setUnit(unit);
+            descriptor.setMetricSupplier(supplier);
         }
 
         /**

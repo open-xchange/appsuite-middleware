@@ -91,7 +91,7 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
             name = "UploadThroughput";
         }
         MetricDescriptor metricDescriptor = MetricDescriptor.newBuilder("s3", name, MetricType.METER).build();
-        Meter meter = metricService.meter(metricDescriptor);
+        Meter meter = metricService.getMeter(metricDescriptor);
         int bytes = provider.getByteCount();
         meter.mark(Integer.toUnsignedLong(bytes));
     }

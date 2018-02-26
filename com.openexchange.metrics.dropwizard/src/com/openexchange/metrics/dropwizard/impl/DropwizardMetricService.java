@@ -49,6 +49,8 @@
 
 package com.openexchange.metrics.dropwizard.impl;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.MetricRegistryListener;
@@ -63,6 +65,7 @@ import com.openexchange.metrics.types.Counter;
 import com.openexchange.metrics.types.Gauge;
 import com.openexchange.metrics.types.Histogram;
 import com.openexchange.metrics.types.Meter;
+import com.openexchange.metrics.types.Metric;
 import com.openexchange.metrics.types.Timer;
 
 /**
@@ -73,6 +76,8 @@ import com.openexchange.metrics.types.Timer;
 // FIXME: Create a new delegate every time? Maybe cache?
 public class DropwizardMetricService implements MetricService {
 
+    private final ConcurrentMap<String, Metric> metrics;
+
     private final MetricRegistry registry;
 
     /**
@@ -81,6 +86,7 @@ public class DropwizardMetricService implements MetricService {
     public DropwizardMetricService() {
         super();
         registry = new MetricRegistry();
+        metrics = new ConcurrentHashMap<>();
     }
 
     public void addListener(MetricRegistryListener listener) {
@@ -137,7 +143,18 @@ public class DropwizardMetricService implements MetricService {
      * @see com.openexchange.metrics.MetricService#meter(com.openexchange.metrics.MetricDescriptor)
      */
     @Override
-    public Meter meter(MetricDescriptor descriptor) {
-        return new DropwizardMeter(registry.meter(MetricRegistry.name(descriptor.getGroup(), descriptor.getName())));
+    public Meter getMeter(MetricDescriptor descriptor) {
+        String key = descriptor.getGroup() + "." + descriptor.getName();
+        Metric metric = metrics.get(key);
+        if (metric == null) {
+            DropwizardMeter dropwizardMeter = new DropwizardMeter(registry.meter(MetricRegistry.name(descriptor.getGroup(), descriptor.getName())));
+            Metric raced = metrics.putIfAbsent(key, dropwizardMeter);
+            if (raced == null) {
+                return dropwizardMeter;
+            }
+            return (Meter) raced;
+        }
+        
+        return (Meter) metric;
     }
 }

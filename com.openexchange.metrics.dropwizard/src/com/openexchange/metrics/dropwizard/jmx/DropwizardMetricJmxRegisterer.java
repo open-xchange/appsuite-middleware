@@ -135,6 +135,7 @@ public class DropwizardMetricJmxRegisterer extends AbstractMetricJmxRegisterer i
     @Override
     public void onMeterAdded(String name, Meter meter) {
         // TODO Auto-generated method stub
+        
     }
 
     /* (non-Javadoc)
