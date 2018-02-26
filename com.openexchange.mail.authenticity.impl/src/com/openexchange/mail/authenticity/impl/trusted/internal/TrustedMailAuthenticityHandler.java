@@ -135,6 +135,10 @@ public class TrustedMailAuthenticityHandler implements ForcedReloadable, Trusted
 
     @Override
     public void handle(Session session, MailMessage mailMessage) {
+        if (null == mailMessage) {
+            return;
+        }
+
         String tenant = (String) session.getParameter(Session.PARAM_HOST_NAME);
         if (tenant == null) {
             LOG.warn("Missing host name session parameter. Unable to verify mail.");
