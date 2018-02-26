@@ -47,77 +47,61 @@
  *
  */
 
-package com.openexchange.folderstorage.calendar;
+package com.openexchange.chronos.json.converter.handler;
 
-import com.openexchange.chronos.common.DataHandlers;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.parser.ResponseParser;
 import com.openexchange.conversion.ConversionResult;
-import com.openexchange.conversion.ConversionService;
+import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
+import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataHandler;
-import com.openexchange.conversion.SimpleData;
-import com.openexchange.folderstorage.FolderField;
-import com.openexchange.folderstorage.FolderProperty;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link CalendarAccountErrorField}
+ * {@link Json2OXExceptionDataHandler}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class CalendarAccountErrorField extends FolderField {
-
-
-    /** The column identifier of the field as used in the HTTP API */
-    private static final int COLUMN_ID = 3204;
-
-    /** The column name of the field as used in the HTTP API */
-    private static final String COLUMN_NAME = "com.openexchange.calendar.accountError";
-
-    private static final long serialVersionUID = 2379727517007236596L;
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarAccountErrorField.class);
-    private static final CalendarAccountErrorField INSTANCE = new CalendarAccountErrorField();
+public class Json2OXExceptionDataHandler implements DataHandler {
 
     /**
-     * Gets the calendar account error field instance.
-     *
-     * @return The instance
+     * Initializes a new {@link Json2OXExceptionDataHandler}.
      */
-    public static CalendarAccountErrorField getInstance() {
-        return INSTANCE;
-    }
-
-    /**
-     * Initializes a new {@link CalendarAccountErrorField}.
-     */
-    private CalendarAccountErrorField() {
-        super(COLUMN_ID, COLUMN_NAME, null);
+    public Json2OXExceptionDataHandler() {
+        super();
     }
 
     @Override
-    public FolderProperty parse(Object value) {
+    public String[] getRequiredArguments() {
+        return new String[0];
+    }
+
+    @Override
+    public Class<?>[] getTypes() {
+        return new Class<?>[] { JSONObject.class };
+    }
+
+    @Override
+    public ConversionResult processData(Data<? extends Object> data, DataArguments dataArguments, Session session) throws OXException {
+        ConversionResult result = new ConversionResult();
+        Object sourceData = data.getData();
         try {
-            DataHandler dataHandler = ServerServiceRegistry.getServize(ConversionService.class).getDataHandler(DataHandlers.JSON2OXEXCEPTION);
-            ConversionResult result = dataHandler.processData(new SimpleData<Object>(value), new DataArguments(), null);
-            return new FolderProperty(getName(), result.getData());
-        } catch (Exception e) {
-            LOG.warn("Error parsing ox exception from \"{}\": {}", value, e.getMessage(), e);
-        }
-        return null;
-    }
-
-    @Override
-    public Object write(FolderProperty property) {
-        if (null != property) {
-            try {
-                DataHandler dataHandler = ServerServiceRegistry.getServize(ConversionService.class).getDataHandler(DataHandlers.OXEXCEPTION2JSON);
-                ConversionResult result = dataHandler.processData(new SimpleData<Object>(property.getValue()), new DataArguments(), null);
-                return result.getData();
-            } catch (Exception e) {
-                LOG.warn("Error writing ox exception \"{}\": {}", property.getValue(), e.getMessage(), e);
+            if (null == sourceData) {
+                result.setData(null);
+            } else if (JSONObject.class.isInstance(sourceData)) {
+                result.setData(ResponseParser.parseException((JSONObject) sourceData));
+            } else {
+                throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(sourceData.getClass().toString());
             }
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
-        return getDefaultValue();
+        return result;
     }
 
 }

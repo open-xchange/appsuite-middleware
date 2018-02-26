@@ -54,6 +54,7 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Available;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link DataHandlers}
@@ -72,6 +73,12 @@ public enum DataHandlers {
 
     /** The identifier of the data handler to convert from an {@link Alarm} to its JSON representation. */
     public static final String ALARM2JSON = "com.openexchange.chronos.alarm2json";
+
+    /** The identifier of the data handler to convert from an ox exception's JSON representation to {@link OXException}s. */
+    public static final String JSON2OXEXCEPTION = "com.openexchange.chronos.json2oxexception";
+
+    /** The identifier of the data handler to convert from an {@link OXException} to its JSON representation. */
+    public static final String OXEXCEPTION2JSON = "com.openexchange.chronos.oxexception2json";
 
     /** The identifier of the data handler to convert from an available's JSON representation to {@link Available}s. */
     public static final String JSON2AVAILABLE = "com.openexchange.chronos.json2available";

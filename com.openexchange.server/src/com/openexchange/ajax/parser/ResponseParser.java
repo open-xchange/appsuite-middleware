@@ -113,6 +113,24 @@ public final class ResponseParser {
         if (json.has(ResponseFields.TIMESTAMP)) {
             response.setTimestamp(new Date(json.getLong(ResponseFields.TIMESTAMP)));
         }
+        OXException exception = parseException(json);
+        if (null != exception) {
+            if (null != exception.getCategories() && 0 < exception.getCategories().size() && Category.CATEGORY_WARNING.equals(exception.getCategories().get(0))) {
+                response.addWarning(exception);
+            } else {
+                response.setException(exception);
+            }
+        }
+    }
+
+    /**
+     * Parses an {@link OXException} from the common error fields ( {@link ResponseFields#ERROR}, {@link ResponseFields#ERROR_CODE}, ...)
+     * in the supplied JSON object.
+     *
+     * @param json The json object to parse the exception from
+     * @return The parsed exception, or <code>null</code> if none was parsed
+     */
+    public static OXException parseException(JSONObject json) throws JSONException {
         final String message = json.optString(ResponseFields.ERROR, null);
         final String code = json.optString(ResponseFields.ERROR_CODE, null);
         if (message != null || code != null) {
@@ -129,11 +147,11 @@ public final class ResponseParser {
                 }
                 OXException.sortCategories(categories);
             } else {
-            	if (jsonCategories != null) {
+                if (jsonCategories != null) {
                     categories = Collections.singletonList(Categories.getKnownCategoryByName(jsonCategories.toString()));
-            	} else {
-            		categories = Arrays.asList(Category.CATEGORY_ERROR);
-            	}
+                } else {
+                    categories = Arrays.asList(Category.CATEGORY_ERROR);
+                }
             }
             final Object[] args = parseErrorMessageArgs(json.optJSONArray(ResponseFields.ERROR_PARAMS));
             final String logMessage = json.optString(ResponseFields.ERROR_DESC);
@@ -149,11 +167,6 @@ public final class ResponseParser {
             for (final Category cat : categories) {
                 exception.addCategory(cat);
             }
-            if (Category.CATEGORY_WARNING.equals(category)) {
-                response.addWarning(exception);
-            } else {
-                response.setException(exception);
-            }
             if (json.has(ResponseFields.ERROR_ID)) {
                 exception.setExceptionId(json.getString(ResponseFields.ERROR_ID));
             }
@@ -163,7 +176,9 @@ public final class ResponseParser {
                 final JSONArray jStack = json.getJSONArray(ResponseFields.ERROR_STACK);
                 parseStackTrace(exception, jStack);
             }
+            return exception;
         }
+        return null;
     }
 
     private static void parseStackTrace(final OXException exception, final JSONArray jStack) {
