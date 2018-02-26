@@ -189,8 +189,45 @@ public class DropwizardMetricService implements MetricService {
         Metric dropwizardMetric = registerers.get(descriptor.getMetricType()).apply(descriptor);
         Metric raced = metrics.putIfAbsent(key, dropwizardMetric);
         if (raced == null) {
+            notifyListeners(descriptor, dropwizardMetric);
             return dropwizardMetric;
         }
         return raced;
+    }
+
+    /**
+     * Notifies all listeners about the specified added {@link Metric}
+     * 
+     * @param descriptor The {@link MetricDescriptor}
+     * @param dropwizardMetric The added {@link Metric}
+     */
+    private void notifyListeners(MetricDescriptor descriptor, Metric dropwizardMetric) {
+        for (MetricServiceListener listener : listeners) {
+            notifyListenerOfAddedMetric(listener, dropwizardMetric, descriptor);
+        }
+    }
+
+    /**
+     * Notifies the specified listener about the specified added {@link Metric}
+     * 
+     * @param listener The listener to notify
+     * @param metric The {@link Metric}
+     * @param descriptor The {@link MetricDescriptor}
+     */
+    private void notifyListenerOfAddedMetric(MetricServiceListener listener, Metric metric, MetricDescriptor descriptor) {
+        //FIXME: Solve with functional interface
+        if (metric instanceof Gauge) {
+            listener.onGaugeAdded(descriptor, (Gauge<?>) metric);
+        } else if (metric instanceof Counter) {
+            listener.onCounterAdded(descriptor, (Counter) metric);
+        } else if (metric instanceof Histogram) {
+            listener.onHistogramAdded(descriptor, (Histogram) metric);
+        } else if (metric instanceof Meter) {
+            listener.onMeterAdded(descriptor, (Meter) metric);
+        } else if (metric instanceof Timer) {
+            listener.onTimerAdded(descriptor, (Timer) metric);
+        } else {
+            throw new IllegalArgumentException("Unknown metric type: " + metric.getClass());
+        }
     }
 }
