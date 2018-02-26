@@ -87,7 +87,7 @@ public class MetricActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         DropwizardMetricService dropwizardService = new DropwizardMetricService();
         registerService(MetricService.class, dropwizardService);
-        track(ManagementService.class, new DropwizardMetricJmxRegistererServiceTracker(dropwizardService));
+        track(ManagementService.class, new DropwizardMetricServiceListenerServiceTracker(dropwizardService));
         openTrackers();
     }
 

@@ -58,19 +58,19 @@ import com.openexchange.metrics.dropwizard.jmx.DropwizardMetricMBeanFactory;
 import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
- * {@link DropwizardMetricJmxRegistererServiceTracker}
+ * {@link DropwizardMetricServiceListenerServiceTracker}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DropwizardMetricJmxRegistererServiceTracker implements SimpleRegistryListener<ManagementService> {
+public class DropwizardMetricServiceListenerServiceTracker implements SimpleRegistryListener<ManagementService> {
 
     private DropwizardMetricService dropwizardMetricService;
     private final AtomicReference<DropwizardMetricServiceListener> listener;
 
     /**
-     * Initialises a new {@link DropwizardMetricJmxRegistererServiceTracker}.
+     * Initialises a new {@link DropwizardMetricServiceListenerServiceTracker}.
      */
-    public DropwizardMetricJmxRegistererServiceTracker(DropwizardMetricService dropwizardMetricService) {
+    public DropwizardMetricServiceListenerServiceTracker(DropwizardMetricService dropwizardMetricService) {
         super();
         this.dropwizardMetricService = dropwizardMetricService;
         listener = new AtomicReference<DropwizardMetricServiceListener>();
