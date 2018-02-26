@@ -50,8 +50,6 @@
 package com.openexchange.metrics.dropwizard.jmx;
 
 import javax.management.NotCompliantMBeanException;
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.Histogram;
 import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.dropwizard.jmx.beans.CounterMBeanImpl;
 import com.openexchange.metrics.dropwizard.jmx.beans.GaugeMBeanImpl;
@@ -63,13 +61,18 @@ import com.openexchange.metrics.dropwizard.types.DropwizardGauge;
 import com.openexchange.metrics.dropwizard.types.DropwizardHistogram;
 import com.openexchange.metrics.dropwizard.types.DropwizardMeter;
 import com.openexchange.metrics.dropwizard.types.DropwizardTimer;
-import com.openexchange.metrics.jmx.CounterMBean;
-import com.openexchange.metrics.jmx.GaugeMBean;
-import com.openexchange.metrics.jmx.HistogramMBean;
-import com.openexchange.metrics.jmx.MeterMBean;
 import com.openexchange.metrics.jmx.MetricMBeanFactory;
-import com.openexchange.metrics.jmx.TimerMBean;
+import com.openexchange.metrics.jmx.beans.CounterMBean;
+import com.openexchange.metrics.jmx.beans.GaugeMBean;
+import com.openexchange.metrics.jmx.beans.HistogramMBean;
+import com.openexchange.metrics.jmx.beans.MeterMBean;
+import com.openexchange.metrics.jmx.beans.TimerMBean;
+import com.openexchange.metrics.types.Counter;
+import com.openexchange.metrics.types.Gauge;
+import com.openexchange.metrics.types.Histogram;
+import com.openexchange.metrics.types.Meter;
 import com.openexchange.metrics.types.Metric;
+import com.openexchange.metrics.types.Timer;
 
 /**
  * {@link DropwizardMetricMBeanFactory}
@@ -91,7 +94,7 @@ public class DropwizardMetricMBeanFactory implements MetricMBeanFactory {
      * @see com.openexchange.metrics.jmx.MetricMBeanFactory#counter(com.openexchange.metrics.types.Metric)
      */
     @Override
-    public CounterMBean counter(Metric counter) {
+    public CounterMBean counter(Counter counter) {
         checkInstance(counter, DropwizardCounter.class);
         try {
             return new CounterMBeanImpl((DropwizardCounter) counter);
@@ -106,7 +109,7 @@ public class DropwizardMetricMBeanFactory implements MetricMBeanFactory {
      * @see com.openexchange.metrics.jmx.MetricMBeanFactory#timer(com.openexchange.metrics.types.Metric, com.openexchange.metrics.descriptors.MetricDescriptor)
      */
     @Override
-    public TimerMBean timer(Metric timer, MetricDescriptor metricDescriptor) {
+    public TimerMBean timer(Timer timer, MetricDescriptor metricDescriptor) {
         checkInstance(timer, DropwizardTimer.class);
         try {
             return new TimerMBeanImpl((DropwizardTimer) timer, metricDescriptor.getUnit(), metricDescriptor.getRate()); //TODO: pass the metric descriptor time unit
@@ -121,7 +124,7 @@ public class DropwizardMetricMBeanFactory implements MetricMBeanFactory {
      * @see com.openexchange.metrics.jmx.MetricMBeanFactory#meter(com.openexchange.metrics.types.Metric, com.openexchange.metrics.descriptors.MetricDescriptor)
      */
     @Override
-    public MeterMBean meter(Metric meter, MetricDescriptor metricDescriptor) {
+    public MeterMBean meter(Meter meter, MetricDescriptor metricDescriptor) {
         checkInstance(meter, DropwizardMeter.class);
         try {
             return new MeterMBeanImpl((DropwizardMeter) meter, metricDescriptor.getUnit(), metricDescriptor.getRate());
@@ -136,8 +139,8 @@ public class DropwizardMetricMBeanFactory implements MetricMBeanFactory {
      * @see com.openexchange.metrics.jmx.MetricMBeanFactory#histogram(com.openexchange.metrics.types.Metric)
      */
     @Override
-    public HistogramMBean histogram(Metric histogram) {
-        checkInstance(histogram, Histogram.class);
+    public HistogramMBean histogram(Histogram histogram) {
+        checkInstance(histogram, DropwizardHistogram.class);
         try {
             return new HistogramMBeanImpl((DropwizardHistogram) histogram);
         } catch (NotCompliantMBeanException e) {
@@ -151,7 +154,7 @@ public class DropwizardMetricMBeanFactory implements MetricMBeanFactory {
      * @see com.openexchange.metrics.jmx.MetricMBeanFactory#gauge(com.openexchange.metrics.types.Metric)
      */
     @Override
-    public GaugeMBean gauge(Metric gauge) {
+    public GaugeMBean gauge(Gauge<?> gauge) {
         if (!(gauge instanceof Gauge)) {
             throw new IllegalArgumentException("Invalid metric specified for 'Gauge' mbean: '" + gauge.getClass() + "'");
         }

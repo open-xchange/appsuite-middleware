@@ -51,7 +51,7 @@ package com.openexchange.metrics.dropwizard.jmx.beans;
 
 import javax.management.NotCompliantMBeanException;
 import com.openexchange.metrics.dropwizard.types.DropwizardHistogram;
-import com.openexchange.metrics.jmx.HistogramMBean;
+import com.openexchange.metrics.jmx.beans.HistogramMBean;
 
 /**
  * {@link HistogramMBeanImpl}

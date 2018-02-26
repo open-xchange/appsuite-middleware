@@ -51,7 +51,7 @@ package com.openexchange.metrics.dropwizard.jmx.beans;
 
 import javax.management.NotCompliantMBeanException;
 import com.openexchange.metrics.dropwizard.types.DropwizardCounter;
-import com.openexchange.metrics.jmx.CounterMBean;
+import com.openexchange.metrics.jmx.beans.CounterMBean;
 
 /**
  * {@link CounterMBeanImpl}

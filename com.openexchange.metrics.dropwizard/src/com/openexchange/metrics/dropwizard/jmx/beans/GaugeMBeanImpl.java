@@ -51,7 +51,7 @@ package com.openexchange.metrics.dropwizard.jmx.beans;
 
 import javax.management.NotCompliantMBeanException;
 import com.openexchange.metrics.dropwizard.types.DropwizardGauge;
-import com.openexchange.metrics.jmx.GaugeMBean;
+import com.openexchange.metrics.jmx.beans.GaugeMBean;
 
 /**
  * {@link GaugeMBeanImpl}

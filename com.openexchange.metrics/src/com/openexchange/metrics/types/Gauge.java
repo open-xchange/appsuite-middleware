@@ -54,7 +54,7 @@ package com.openexchange.metrics.types;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface Gauge<T> {
+public interface Gauge<T> extends Metric {
 
     /**
      * Returns the metric's current value.

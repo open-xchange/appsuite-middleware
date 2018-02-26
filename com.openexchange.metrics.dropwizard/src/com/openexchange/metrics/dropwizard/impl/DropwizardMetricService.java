@@ -51,7 +51,6 @@ package com.openexchange.metrics.dropwizard.impl;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.Supplier;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.MetricRegistryListener;
 import com.openexchange.metrics.MetricDescriptor;
@@ -103,8 +102,8 @@ public class DropwizardMetricService implements MetricService {
      * @see com.openexchange.metrics.MetricService#getHistogram(java.lang.String, java.lang.String)
      */
     @Override
-    public Histogram getHistogram(String group, String name) {
-        return new DropwizardHistogram(registry.histogram(MetricRegistry.name(group, name)));
+    public Histogram getHistogram(MetricDescriptor descriptor) {
+        return new DropwizardHistogram(registry.histogram(MetricRegistry.name(descriptor.getGroup(), descriptor.getName())));
     }
 
     /*
@@ -113,8 +112,8 @@ public class DropwizardMetricService implements MetricService {
      * @see com.openexchange.metrics.MetricService#timer(java.lang.String, java.lang.String)
      */
     @Override
-    public Timer getTimer(String group, String name) {
-        return new DropwizardTimer(registry.timer(MetricRegistry.name(group, name)));
+    public Timer getTimer(MetricDescriptor descriptor) {
+        return new DropwizardTimer(registry.timer(MetricRegistry.name(descriptor.getGroup(), descriptor.getName())));
     }
 
     /*
@@ -123,8 +122,8 @@ public class DropwizardMetricService implements MetricService {
      * @see com.openexchange.metrics.MetricService#getCounter(java.lang.String, java.lang.String)
      */
     @Override
-    public Counter getCounter(String group, String name) {
-        return new DropwizardCounter(registry.counter(MetricRegistry.name(group, name)));
+    public Counter getCounter(MetricDescriptor descriptor) {
+        return new DropwizardCounter(registry.counter(MetricRegistry.name(descriptor.getGroup(), descriptor.getName())));
     }
 
     /*
@@ -133,8 +132,8 @@ public class DropwizardMetricService implements MetricService {
      * @see com.openexchange.metrics.MetricService#getGauge(java.lang.String, java.lang.String, java.util.function.Supplier)
      */
     @Override
-    public <T> Gauge<T> getGauge(String group, String name, Supplier<T> metricSupplier) {
-        return (Gauge<T>) new DropwizardGauge(registry.gauge(MetricRegistry.name(group, name), () -> () -> metricSupplier.get()));
+    public <T> Gauge<T> getGauge(MetricDescriptor descriptor) {
+        return (Gauge<T>) new DropwizardGauge(registry.gauge(MetricRegistry.name(descriptor.getGroup(), descriptor.getName()), () -> () -> descriptor.getMetricSupplier().get()));
     }
 
     /*
@@ -154,7 +153,7 @@ public class DropwizardMetricService implements MetricService {
             }
             return (Meter) raced;
         }
-        
+
         return (Meter) metric;
     }
 }

@@ -50,22 +50,63 @@
 package com.openexchange.metrics.jmx;
 
 import com.openexchange.metrics.MetricDescriptor;
-import com.openexchange.metrics.types.Metric;
+import com.openexchange.metrics.jmx.beans.CounterMBean;
+import com.openexchange.metrics.jmx.beans.GaugeMBean;
+import com.openexchange.metrics.jmx.beans.HistogramMBean;
+import com.openexchange.metrics.jmx.beans.MeterMBean;
+import com.openexchange.metrics.jmx.beans.TimerMBean;
+import com.openexchange.metrics.types.Counter;
+import com.openexchange.metrics.types.Gauge;
+import com.openexchange.metrics.types.Histogram;
+import com.openexchange.metrics.types.Meter;
+import com.openexchange.metrics.types.Timer;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link MetricMBeanFactory}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
+@SingletonService
 public interface MetricMBeanFactory {
 
-    CounterMBean counter(Metric counter);
+    /**
+     * Creates a new {@link CounterMBean} from the specified {@link Counter} metric
+     * 
+     * @param counter The {@link Counter} from which to create the mbean
+     * @return The {@link CounterMBean}
+     */
+    CounterMBean counter(Counter counter);
 
-    TimerMBean timer(Metric timer, MetricDescriptor metricDescriptor);
+    /**
+     * Creates a new {@link TimerMBean} from the specified {@link Timer} metric
+     * 
+     * @param counter The {@link Timer} from which to create the mbean
+     * @return The {@link TimerMBean}
+     */
+    TimerMBean timer(Timer timer, MetricDescriptor metricDescriptor);
 
-    MeterMBean meter(Metric meter, MetricDescriptor metricDescriptor);
+    /**
+     * Creates a new {@link MeterMBean} from the specified {@link Meter} metric
+     * 
+     * @param counter The {@link Meter} from which to create the mbean
+     * @return The {@link MeterMBean}
+     */
+    MeterMBean meter(Meter meter, MetricDescriptor metricDescriptor);
 
-    HistogramMBean histogram(Metric histogram);
+    /**
+     * Creates a new {@link HistogramMBean} from the specified {@link Histogram} metric
+     * 
+     * @param counter The {@link Histogram} from which to create the mbean
+     * @return The {@link HistogramMBean}
+     */
+    HistogramMBean histogram(Histogram histogram);
 
-    GaugeMBean gauge(Metric gauge);
+    /**
+     * Creates a new {@link GaugeMBean} from the specified {@link Gauge} metric
+     * 
+     * @param counter The {@link Gauge} from which to create the mbean
+     * @return The {@link GaugeMBean}
+     */
+    GaugeMBean gauge(Gauge<?> gauge);
 }

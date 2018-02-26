@@ -60,50 +60,47 @@ import com.openexchange.osgi.annotation.SingletonService;
 /**
  * {@link MetricService}
  *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
 @SingletonService
 public interface MetricService {
 
     /**
-     * Gets an existing {@link Histogram} for the given name or creates and
+     * Gets an existing {@link Histogram} for the specified {@link MetricDescriptor} or creates and
      * remembers a new one if it doesn't exist yet.
      *
-     * @param group The metric group
-     * @param name The metric name
+     * @param descriptior The {@link MetricDescriptor}
      * @return the metric instance
      */
-    Histogram getHistogram(String group, String name);
+    Histogram getHistogram(MetricDescriptor descriptor);
 
     /**
-     * Gets an existing {@link Timer} for the given name or creates and
+     * Gets an existing {@link Timer} for the specified {@link MetricDescriptor} or creates and
      * remembers a new one if it doesn't exist yet.
      *
-     * @param group The metric group
-     * @param name The metric name
+     * @param descriptior The {@link MetricDescriptor}
      * @return the metric instance
      */
-    Timer getTimer(String group, String name);
+    Timer getTimer(MetricDescriptor descriptor);
 
     /**
-     * Gets an existing {@link Counter} for the given name or creates and
+     * Gets an existing {@link Counter} for the specified {@link MetricDescriptor} or creates and
      * remembers a new one if it doesn't exist yet.
      *
-     * @param group The metric group
-     * @param name The metric name
+     * @param descriptior The {@link MetricDescriptor}
      * @return the metric instance
      */
-    Counter getCounter(String group, String name);
+    Counter getCounter(MetricDescriptor descriptor);
 
     /**
-     * Gets an existing {@link Gauge} for the given name with the specified {@link Supplier}
+     * Gets an existing {@link Gauge} for the specified {@link MetricDescriptor} with the specified {@link Supplier}
      * or creates and remembers a new one if it doesn't exist yet.
      *
-     * @param group The metric group
-     * @param name The metric name
+     * @param descriptior The {@link MetricDescriptor}
      * @return the metric instance
      */
-    <T> Gauge<T> getGauge(String group, String name, Supplier<T> metricSupplier);
+    <T> Gauge<T> getGauge(MetricDescriptor descriptor);
 
     /**
      * Gets an existing {@link Meter} for the specified {@link MetricDescriptor} or creates and

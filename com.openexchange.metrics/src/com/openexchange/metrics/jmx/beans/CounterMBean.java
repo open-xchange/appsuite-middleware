@@ -47,23 +47,23 @@
  *
  */
 
-package com.openexchange.metrics.jmx;
+package com.openexchange.metrics.jmx.beans;
 
-import com.codahale.metrics.Gauge;
+import com.codahale.metrics.Counter;
 import com.openexchange.management.MBeanMethodAnnotation;
 
 /**
- * {@link GaugeMBean}
+ * {@link CounterMBean}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface GaugeMBean extends MetricMBean {
+public interface CounterMBean extends MetricMBean {
 
     /**
-     * Returns the value of the {@link Gauge}
+     * Returns the current number of the {@link Counter}
      * 
-     * @return the value of the {@link Gauge}
+     * @return The current number of the {@link Counter}
      */
-    @MBeanMethodAnnotation(description = "Returns the value of the gague", parameterDescriptions = { "" }, parameters = { "" })
-    Object getValue();
+    @MBeanMethodAnnotation(description = "Returns the current number of the counter", parameterDescriptions = { "" }, parameters = { "" })
+    long getCount();
 }

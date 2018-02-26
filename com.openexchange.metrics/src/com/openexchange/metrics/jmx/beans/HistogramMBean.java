@@ -47,17 +47,25 @@
  *
  */
 
-package com.openexchange.metrics.jmx;
+package com.openexchange.metrics.jmx.beans;
 
-import com.codahale.metrics.Meter;
+import com.codahale.metrics.Histogram;
 import com.openexchange.management.MBeanMethodAnnotation;
 
 /**
- * {@link TimerMBean}
+ * {@link HistogramMBean}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface TimerMBean extends MetricMBean {
+public interface HistogramMBean extends MetricMBean {
+
+    /**
+     * Returns the number of values recorded.
+     *
+     * @return the number of values recorded
+     */
+    @MBeanMethodAnnotation(description = "Returns the number of values recorded", parameterDescriptions = { "" }, parameters = { "" })
+    long getCount();
 
     /**
      * Returns the lowest value in the snapshot.
@@ -65,7 +73,7 @@ public interface TimerMBean extends MetricMBean {
      * @return the lowest value
      */
     @MBeanMethodAnnotation(description = "Returns the lowest value in the snapshot.", parameterDescriptions = { "" }, parameters = { "" })
-    double getMin();
+    long getMin();
 
     /**
      * Returns the highest value in the snapshot.
@@ -73,7 +81,7 @@ public interface TimerMBean extends MetricMBean {
      * @return the highest value
      */
     @MBeanMethodAnnotation(description = "Returns the highest value in the snapshot.", parameterDescriptions = { "" }, parameters = { "" })
-    double getMax();
+    long getMax();
 
     /**
      * Returns the arithmetic mean of the values in the snapshot.
@@ -140,81 +148,18 @@ public interface TimerMBean extends MetricMBean {
     double get999thPercentile();
 
     /**
-     * Returns the entire set of values in the snapshot.
+     * Returns the entire set of values in the snapshot of the {@link Histogram}
      *
      * @return the entire set of values
      */
-    @MBeanMethodAnnotation(description = "Returns the entire set of values in the snapshot.", parameterDescriptions = { "" }, parameters = { "" })
+    @MBeanMethodAnnotation(description = "Returns the entire set of values in the snapshot of the histogram", parameterDescriptions = { "" }, parameters = { "" })
     long[] values();
 
     /**
-     * Returns the sampling unit
+     * Returns the number of values in the snapshot.
      *
-     * @return the sampling unit
+     * @return the number of values
      */
-    @MBeanMethodAnnotation(description = "Returns the sampling unit.", parameterDescriptions = { "" }, parameters = { "" })
-    String getDurationUnit();
-    
-    /**
-     * Returns the number of events which have been marked.
-     *
-     * @return the number of events which have been marked
-     */
-    @MBeanMethodAnnotation(description = "Returns the number of events which have been marked.", parameterDescriptions = { "" }, parameters = { "" })
-    long getCount();
-
-    /**
-     * Returns the mean rate at which events have occurred since the meter was created.
-     *
-     * @return the mean rate at which events have occurred since the meter was created
-     */
-    @MBeanMethodAnnotation(description = "Returns the mean rate at which events have occurred since the meter was created.", parameterDescriptions = { "" }, parameters = { "" })
-    double getMeanRate();
-
-    /**
-     * Returns the one-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
-     * <p/>
-     * This rate has the same exponential decay factor as the one-minute load average in the
-     * <code>top</code> Unix command.
-     *
-     * @return the one-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
-     */
-    @MBeanMethodAnnotation(description = "Returns the one-minute exponentially-weighted moving average rate at which events have occurred since the meter was created. This rate has the same exponential decay factor as the one-minute load average in the top Unix command.", parameterDescriptions = { "" }, parameters = { "" })
-    double getOneMinuteRate();
-
-    /**
-     * Returns the five-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
-     * <p/>
-     * This rate has the same exponential decay factor as the five-minute load average in the
-     * <code>top</code> Unix command.
-     *
-     * @return the five-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
-     */
-    @MBeanMethodAnnotation(description = "Returns the five-minute exponentially-weighted moving average rate at which events have occurred since the meter was created. This rate has the same exponential decay factor as the five-minute load average in the top Unix command.", parameterDescriptions = { "" }, parameters = { "" })
-    double getFiveMinuteRate();
-
-    /**
-     * Returns the fifteen-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
-     * <p/>
-     * This rate has the same exponential decay factor as the fifteen-minute load average in the
-     * {@code top} Unix command.
-     *
-     * @return the fifteen-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
-     */
-    @MBeanMethodAnnotation(description = "Returns the fifteen-minute exponentially-weighted moving average rate at which events have occurred since the meter was created. This rate has the same exponential decay factor as the fifteen-minute load average in the top Unix command.", parameterDescriptions = { "" }, parameters = { "" })
-    double getFifteenMinuteRate();
-
-    /**
-     * Returns the rate unit of the {@link Meter}
-     * 
-     * @return the rate unit of the {@link Meter}
-     */
-    @MBeanMethodAnnotation(description = "Returns the rate unit of the meter", parameterDescriptions = { "" }, parameters = { "" })
-    String getRateUnit();
+    @MBeanMethodAnnotation(description = "Returns the number of values in the snapshot.", parameterDescriptions = { "" }, parameters = { "" })
+    long getSnapshotSize();
 }

@@ -53,7 +53,7 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import javax.management.NotCompliantMBeanException;
 import com.openexchange.metrics.dropwizard.types.DropwizardTimer;
-import com.openexchange.metrics.jmx.TimerMBean;
+import com.openexchange.metrics.jmx.beans.TimerMBean;
 
 /**
  * {@link TimerMBeanImpl}

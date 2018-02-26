@@ -47,30 +47,14 @@
  *
  */
 
-package com.openexchange.metrics.jmx;
+package com.openexchange.metrics.jmx.beans;
 
-import com.openexchange.metrics.MetricDescriptor;
-import com.openexchange.metrics.types.Meter;
 
 /**
- * {@link MetricJmxRegisterer}
+ * {@link MetricMBean}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface MetricJmxRegisterer {
-
-    /**
-     * Called when a {@link Meter} is added to the registry.
-     * 
-     * @param metricDescriptor The {@link MetricDescriptor}
-     * @param meter The {@link Meter}
-     */
-    void onMeterAdded(MetricDescriptor metricDescriptor, Meter meter);
-
-    /**
-     * Called when a {@link Meter} is removed from the registry.
-     * 
-     * @param metricDescriptor The {@link MetricDescriptor}
-     */
-    void onMeterRemoved(MetricDescriptor metricDescriptor);
+public interface MetricMBean {
+    // marker interface
 }

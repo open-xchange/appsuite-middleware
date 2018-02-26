@@ -198,8 +198,6 @@ public class MetricDescriptor {
 
     /**
      * {@link AbstractBuilder}
-     *
-     * @param <T> The {@link MetricDescriptor} type
      */
     public static class MetricBuilder {
 

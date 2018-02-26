@@ -64,15 +64,20 @@ import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.MetricType;
+import com.openexchange.metrics.jmx.beans.MetricMBean;
+import com.openexchange.metrics.types.Counter;
+import com.openexchange.metrics.types.Gauge;
+import com.openexchange.metrics.types.Histogram;
 import com.openexchange.metrics.types.Meter;
 import com.openexchange.metrics.types.Metric;
+import com.openexchange.metrics.types.Timer;
 
 /**
  * {@link AbstractMetricJmxRegisterer}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class AbstractMetricJmxRegisterer implements MetricJmxRegisterer {
+public abstract class AbstractMetricJmxRegisterer {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractMetricJmxRegisterer.class);
 
@@ -92,35 +97,15 @@ public abstract class AbstractMetricJmxRegisterer implements MetricJmxRegisterer
         this.managementService = managementService;
 
         Map<MetricType, BiFunction<Metric, MetricDescriptor, MetricMBean>> c = new HashMap<>();
-        c.put(MetricType.COUNTER, (metric, metricDescriptor) -> mbeanFactory.counter(metric));
-        c.put(MetricType.TIMER, (metric, metricDescriptor) -> mbeanFactory.timer(metric, metricDescriptor));
-        c.put(MetricType.METER, (metric, metricDescriptor) -> mbeanFactory.meter(metric, metricDescriptor));
-        c.put(MetricType.HISTOGRAM, (metric, metricDescriptor) -> mbeanFactory.histogram(metric));
-        c.put(MetricType.GAUGE, (metric, metricDescriptor) -> mbeanFactory.gauge(metric));
+        c.put(MetricType.COUNTER, (metric, metricDescriptor) -> mbeanFactory.counter((Counter) metric));
+        c.put(MetricType.TIMER, (metric, metricDescriptor) -> mbeanFactory.timer((Timer) metric, metricDescriptor));
+        c.put(MetricType.METER, (metric, metricDescriptor) -> mbeanFactory.meter((Meter) metric, metricDescriptor));
+        c.put(MetricType.HISTOGRAM, (metric, metricDescriptor) -> mbeanFactory.histogram((Histogram) metric));
+        c.put(MetricType.GAUGE, (metric, metricDescriptor) -> mbeanFactory.gauge((Gauge<?>) metric));
         //c.put(MetricType.RATIO_GAUGE, (metric, metricDescriptor) -> mbeanFactory.ratioGauge(metric));
         mbeanCreators = Collections.unmodifiableMap(c);
 
         registeredNames = Collections.synchronizedList(new LinkedList<>());
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.MetricJmxRegisterer#onMeterAdded(com.openexchange.metrics.MetricDescriptor, com.openexchange.metrics.types.Meter)
-     */
-    @Override
-    public void onMeterAdded(MetricDescriptor meterDescriptor, Meter meter) {
-        registerMBean(meter, meterDescriptor);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.MetricJmxRegisterer#onMeterRemoved(com.openexchange.metrics.MetricDescriptor)
-     */
-    @Override
-    public void onMeterRemoved(MetricDescriptor meterDescriptor) {
-        unregisterMBean(meterDescriptor);
     }
 
     /**
