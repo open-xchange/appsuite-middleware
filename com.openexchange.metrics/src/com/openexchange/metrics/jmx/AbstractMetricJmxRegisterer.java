@@ -62,7 +62,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
-import com.openexchange.metrics.MetricMetadata;
 import com.openexchange.metrics.MetricType;
 import com.openexchange.metrics.descriptors.MeterDescriptor;
 import com.openexchange.metrics.descriptors.MetricDescriptor;
