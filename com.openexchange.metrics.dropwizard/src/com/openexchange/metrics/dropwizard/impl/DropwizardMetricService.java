@@ -82,9 +82,13 @@ public class DropwizardMetricService implements MetricService {
         super();
         registry = new MetricRegistry();
     }
-    
+
     public void addListener(MetricRegistryListener listener) {
         registry.addListener(listener);
+    }
+
+    public void removeListener(MetricRegistryListener listener) {
+        registry.removeListener(listener);
     }
 
     /*

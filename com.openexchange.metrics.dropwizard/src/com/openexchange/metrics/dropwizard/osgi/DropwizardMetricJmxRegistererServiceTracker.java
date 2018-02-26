@@ -47,39 +47,59 @@
  *
  */
 
-package com.openexchange.metrics;
+package com.openexchange.metrics.dropwizard.osgi;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import com.openexchange.metrics.descriptors.MeterDescriptor;
-import com.openexchange.metrics.types.Meter;
-import com.openexchange.metrics.types.Metric;
+import java.util.concurrent.atomic.AtomicReference;
+import org.osgi.framework.ServiceReference;
+import com.openexchange.management.ManagementService;
+import com.openexchange.metrics.dropwizard.impl.DropwizardMetricService;
+import com.openexchange.metrics.dropwizard.jmx.beans.DropwizardMetricJmxRegisterer;
+import com.openexchange.metrics.dropwizard.jmx.beans.DropwizardMetricMBeanFactory;
+import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
- * {@link AbstractMetricService}
+ * {@link DropwizardMetricJmxRegistererServiceTracker}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class AbstractMetricService implements MetricService {
+public class DropwizardMetricJmxRegistererServiceTracker implements SimpleRegistryListener<ManagementService> {
 
-    private final ConcurrentMap<String, Metric> metrics;
+    private DropwizardMetricService dropwizardMetricService;
+    private final AtomicReference<DropwizardMetricJmxRegisterer> listener;
 
     /**
-     * Initialises a new {@link AbstractMetricService}.
+     * Initialises a new {@link DropwizardMetricJmxRegistererServiceTracker}.
      */
-    public AbstractMetricService() {
+    public DropwizardMetricJmxRegistererServiceTracker(DropwizardMetricService dropwizardMetricService) {
         super();
-        metrics = new ConcurrentHashMap<>();
+        this.dropwizardMetricService = dropwizardMetricService;
+        listener = new AtomicReference<DropwizardMetricJmxRegisterer>();
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.metrics.MetricService#meter(com.openexchange.metrics.descriptors.MeterDescriptor)
+     * @see com.openexchange.osgi.SimpleRegistryListener#added(org.osgi.framework.ServiceReference, java.lang.Object)
      */
     @Override
-    public Meter meter(MeterDescriptor descriptor) {
-        // TODO Auto-generated method stub
-        return null;
+    public void added(ServiceReference<ManagementService> ref, ManagementService service) {
+        if (listener.compareAndSet(null, new DropwizardMetricJmxRegisterer(service, new DropwizardMetricMBeanFactory()))) {
+            dropwizardMetricService.addListener(listener.get());
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.osgi.SimpleRegistryListener#removed(org.osgi.framework.ServiceReference, java.lang.Object)
+     */
+    @Override
+    public void removed(ServiceReference<ManagementService> ref, ManagementService service) {
+        DropwizardMetricJmxRegisterer registerer = listener.get();
+        if (registerer == null) {
+            return;
+        }
+        registerer.unregisterAll();
+        dropwizardMetricService.removeListener(registerer);
     }
 }

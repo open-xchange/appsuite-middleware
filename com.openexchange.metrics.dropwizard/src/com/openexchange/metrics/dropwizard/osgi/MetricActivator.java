@@ -49,14 +49,10 @@
 
 package com.openexchange.metrics.dropwizard.osgi;
 
-import org.osgi.framework.ServiceReference;
 import com.openexchange.management.ManagementService;
 import com.openexchange.metrics.MetricService;
 import com.openexchange.metrics.dropwizard.impl.DropwizardMetricService;
-import com.openexchange.metrics.dropwizard.jmx.beans.DropwizardMetricJmxRegisterer;
-import com.openexchange.metrics.dropwizard.jmx.beans.DropwizardMetricMBeanFactory;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
  * {@link MetricActivator}
@@ -91,22 +87,7 @@ public class MetricActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         DropwizardMetricService dropwizardService = new DropwizardMetricService();
         registerService(MetricService.class, dropwizardService);
-        track(ManagementService.class, new SimpleRegistryListener<ManagementService>() {
-
-            private DropwizardMetricJmxRegisterer dropwizardMetricJmxRegisterer;
-
-            @Override
-            public void added(ServiceReference<ManagementService> ref, ManagementService service) {
-                dropwizardService.addListener(new DropwizardMetricJmxRegisterer(service, new DropwizardMetricMBeanFactory()));
-                
-            }
-
-            @Override
-            public void removed(ServiceReference<ManagementService> ref, ManagementService service) {
-                dropwizardMetricJmxRegisterer.unregisterAll();
-                dropwizardMetricJmxRegisterer = null;
-            }
-        });
+        track(ManagementService.class, new DropwizardMetricJmxRegistererServiceTracker(dropwizardService));
         openTrackers();
     }
 
@@ -117,6 +98,7 @@ public class MetricActivator extends HousekeepingActivator {
      */
     @Override
     protected void stopBundle() throws Exception {
+        unregisterService(MetricService.class);
         super.stopBundle();
     }
 }
