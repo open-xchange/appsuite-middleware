@@ -49,6 +49,7 @@
 
 package com.openexchange.metrics.dropwizard.types;
 
+import com.codahale.metrics.Snapshot;
 import com.openexchange.metrics.types.Histogram;
 
 /**
@@ -96,5 +97,14 @@ public class DropwizardHistogram implements Histogram {
     @Override
     public long getCount() {
         return delegate.getCount();
+    }
+
+    /**
+     * Returns a snapshot of the values.
+     * 
+     * @return a snapshot of the values.
+     */
+    public Snapshot getSnapshot() {
+        return delegate.getSnapshot();
     }
 }

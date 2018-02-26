@@ -47,12 +47,12 @@
  *
  */
 
-package com.openexchange.metrics.dropwizard.jmx;
+package com.openexchange.metrics.dropwizard.jmx.beans;
 
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import javax.management.NotCompliantMBeanException;
-import com.codahale.metrics.Timer;
+import com.openexchange.metrics.dropwizard.types.DropwizardTimer;
 import com.openexchange.metrics.jmx.TimerMBean;
 
 /**
@@ -63,7 +63,7 @@ import com.openexchange.metrics.jmx.TimerMBean;
 public class TimerMBeanImpl extends MeterMBeanImpl implements TimerMBean {
 
     private static final String DESCRIPTION = "Timer MBean";
-    private final Timer timer;
+    private final DropwizardTimer timer;
     private final double durationFactor;
     private final String durationUnit;
 
@@ -72,7 +72,7 @@ public class TimerMBeanImpl extends MeterMBeanImpl implements TimerMBean {
      *
      * @throws NotCompliantMBeanException
      */
-    public TimerMBeanImpl(Timer timer, TimeUnit timeUnit) throws NotCompliantMBeanException {
+    public TimerMBeanImpl(DropwizardTimer timer, TimeUnit timeUnit) throws NotCompliantMBeanException {
         super(DESCRIPTION, TimerMBean.class, timer, "events", timeUnit);
         this.timer = timer;
         this.durationFactor = 1.0 / TimeUnit.MILLISECONDS.toNanos(1); // TODO
@@ -198,6 +198,5 @@ public class TimerMBeanImpl extends MeterMBeanImpl implements TimerMBean {
     public String getDurationUnit() {
         return durationUnit;
     }
-
 
 }

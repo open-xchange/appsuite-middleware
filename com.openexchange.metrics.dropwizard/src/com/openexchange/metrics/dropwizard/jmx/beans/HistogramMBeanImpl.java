@@ -47,10 +47,10 @@
  *
  */
 
-package com.openexchange.metrics.dropwizard.jmx;
+package com.openexchange.metrics.dropwizard.jmx.beans;
 
 import javax.management.NotCompliantMBeanException;
-import com.codahale.metrics.Histogram;
+import com.openexchange.metrics.dropwizard.types.DropwizardHistogram;
 import com.openexchange.metrics.jmx.HistogramMBean;
 
 /**
@@ -61,7 +61,7 @@ import com.openexchange.metrics.jmx.HistogramMBean;
 public class HistogramMBeanImpl extends AbstractMetricMBean implements HistogramMBean {
 
     private static final String DESCRIPTION = "Hitstogram MBean";
-    private final Histogram histogram;
+    private final DropwizardHistogram histogram;
 
     /**
      * Initialises a new {@link HistogramMBeanImpl}.
@@ -70,7 +70,7 @@ public class HistogramMBeanImpl extends AbstractMetricMBean implements Histogram
      * @param mbeanInterface
      * @throws NotCompliantMBeanException
      */
-    public HistogramMBeanImpl(Histogram histogram) throws NotCompliantMBeanException {
+    public HistogramMBeanImpl(DropwizardHistogram histogram) throws NotCompliantMBeanException {
         super(DESCRIPTION, HistogramMBean.class);
         this.histogram = histogram;
     }

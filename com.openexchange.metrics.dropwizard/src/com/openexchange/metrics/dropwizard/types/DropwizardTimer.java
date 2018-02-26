@@ -52,6 +52,7 @@ package com.openexchange.metrics.dropwizard.types;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+import com.codahale.metrics.Snapshot;
 import com.openexchange.exception.OXException;
 import com.openexchange.metrics.types.Timer;
 
@@ -165,5 +166,14 @@ public class DropwizardTimer implements Timer {
     @Override
     public double getOneMinuteRate() {
         return delegate.getOneMinuteRate();
+    }
+
+    /**
+     * Returns a snapshot of the values.
+     * 
+     * @return a snapshot of the values.
+     */
+    public Snapshot getSnapshot() {
+        return delegate.getSnapshot();
     }
 }

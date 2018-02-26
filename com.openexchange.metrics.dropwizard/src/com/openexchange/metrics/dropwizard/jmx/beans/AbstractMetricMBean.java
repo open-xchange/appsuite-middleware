@@ -47,41 +47,26 @@
  *
  */
 
-package com.openexchange.metrics.dropwizard.jmx;
+package com.openexchange.metrics.dropwizard.jmx.beans;
 
 import javax.management.NotCompliantMBeanException;
-import com.codahale.metrics.Counter;
-import com.openexchange.metrics.jmx.CounterMBean;
+import com.openexchange.management.AnnotatedStandardMBean;
 
 /**
- * {@link CounterMBeanImpl}
+ * {@link AbstractMetricMBean}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class CounterMBeanImpl extends AbstractMetricMBean implements CounterMBean {
-
-    private static final String DESCRIPTION = "Counter MBean";
-    private final Counter counter;
+abstract class AbstractMetricMBean extends AnnotatedStandardMBean {
 
     /**
-     * Initialises a new {@link CounterMBeanImpl}.
+     * Initialises a new {@link AbstractMetricMBean}.
      * 
      * @param description
      * @param mbeanInterface
      * @throws NotCompliantMBeanException
      */
-    public CounterMBeanImpl(Counter counter) throws NotCompliantMBeanException {
-        super(DESCRIPTION, CounterMBean.class);
-        this.counter = counter;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.CounterMBean#getCount()
-     */
-    @Override
-    public long getCount() {
-        return counter.getCount();
+    public AbstractMetricMBean(String description, Class<?> mbeanInterface) throws NotCompliantMBeanException {
+        super(description, mbeanInterface);
     }
 }

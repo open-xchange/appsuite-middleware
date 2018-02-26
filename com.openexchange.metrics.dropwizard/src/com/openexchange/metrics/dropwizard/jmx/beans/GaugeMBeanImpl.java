@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,65 +47,42 @@
  *
  */
 
-package com.openexchange.metrics.types;
+package com.openexchange.metrics.dropwizard.jmx.beans;
+
+import javax.management.NotCompliantMBeanException;
+import com.openexchange.metrics.dropwizard.types.DropwizardGauge;
+import com.openexchange.metrics.jmx.GaugeMBean;
 
 /**
- * <p>{@link Meter} measures the rate at which a set of events occur.</p>
- * 
+ * {@link GaugeMBeanImpl}
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface Meter extends Metric {
+public class GaugeMBeanImpl extends AbstractMetricMBean implements GaugeMBean {
+
+    private static final String DESCRIPTION = "Gauge MBean";
+    private final DropwizardGauge gauge;
 
     /**
-     * Mark the occurrence of an event.
-     */
-    void mark();
-
-    /**
-     * Mark the occurrence of a given number of events.
-     *
-     * @param n the number of events
-     */
-    void mark(long n);
-
-    /**
-     * Returns the number of events which have been marked.
-     *
-     * @return the number of events which have been marked
-     */
-    long getCount();
-
-    /**
-     * Returns the one-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
+     * Initialises a new {@link GaugeMBeanImpl}.
      * 
-     * @return the one-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
+     * @param description
+     * @param mbeanInterface
+     * @throws NotCompliantMBeanException
      */
-    double getOneMinuteRate();
+    public GaugeMBeanImpl(DropwizardGauge gauge) throws NotCompliantMBeanException {
+        super(DESCRIPTION, GaugeMBean.class);
+        this.gauge = gauge;
+    }
 
-    /**
-     * Returns the five-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
-     *
-     * @return the five-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.jmx.GaugeMBean#getValue()
      */
-    double getFiveMinuteRate();
+    @Override
+    public Object getValue() {
+        return gauge.getValue();
+    }
 
-    /**
-     * Returns the fifteen-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
-     *
-     * @return the fifteen-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
-     */
-    double getFifteenMinuteRate();
-
-    /**
-     * Returns the mean rate at which events have occurred since the meter was created.
-     *
-     * @return the mean rate at which events have occurred since the meter was created
-     */
-    double getMeanRate();
 }

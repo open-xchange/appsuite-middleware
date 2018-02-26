@@ -47,12 +47,12 @@
  *
  */
 
-package com.openexchange.metrics.dropwizard.jmx;
+package com.openexchange.metrics.dropwizard.jmx.beans;
 
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import javax.management.NotCompliantMBeanException;
-import com.codahale.metrics.Metered;
+import com.openexchange.metrics.dropwizard.types.DropwizardMeter;
 import com.openexchange.metrics.jmx.MeterMBean;
 
 /**
@@ -65,14 +65,14 @@ public class MeterMBeanImpl extends AbstractMetricMBean implements MeterMBean {
     private static final String DESCRIPTION = "Meter MBean";
     private final double rateFactor;
     private final String rateUnit;
-    private final Metered meter;
+    private final DropwizardMeter meter;
 
     /**
      * Initialises a new {@link MeterMBeanImpl}.
      *
      * @throws NotCompliantMBeanException
      */
-    public MeterMBeanImpl(Metered meter, String rateItem, TimeUnit rateUnit) throws NotCompliantMBeanException {
+    public MeterMBeanImpl(DropwizardMeter meter, String rateItem, TimeUnit rateUnit) throws NotCompliantMBeanException {
         super(DESCRIPTION, MeterMBean.class);
         this.meter = meter;
         this.rateFactor = rateUnit.toSeconds(1);
@@ -84,7 +84,7 @@ public class MeterMBeanImpl extends AbstractMetricMBean implements MeterMBean {
      *
      * @throws NotCompliantMBeanException
      */
-    protected MeterMBeanImpl(String description, Class<?> mbeanInterface, Metered meter, String rateItem, TimeUnit rateUnit) throws NotCompliantMBeanException {
+    protected MeterMBeanImpl(String description, Class<?> mbeanInterface, DropwizardMeter meter, String rateItem, TimeUnit rateUnit) throws NotCompliantMBeanException {
         super(description, mbeanInterface);
         this.meter = meter;
         this.rateFactor = rateUnit.toSeconds(1);
@@ -160,5 +160,4 @@ public class MeterMBeanImpl extends AbstractMetricMBean implements MeterMBean {
     public String getRateUnit() {
         return rateUnit;
     }
-
 }

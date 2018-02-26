@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,26 +47,14 @@
  *
  */
 
-package com.openexchange.metrics.dropwizard.jmx;
+package com.openexchange.metrics.dropwizard.jmx.beans;
 
-import javax.management.NotCompliantMBeanException;
-import com.openexchange.management.AnnotatedStandardMBean;
 
 /**
- * {@link AbstractMetricMBean}
+ * {@link DropwizardMetricJmxRegisterer}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-abstract class AbstractMetricMBean extends AnnotatedStandardMBean {
+public class DropwizardMetricJmxRegisterer {
 
-    /**
-     * Initialises a new {@link AbstractMetricMBean}.
-     * 
-     * @param description
-     * @param mbeanInterface
-     * @throws NotCompliantMBeanException
-     */
-    public AbstractMetricMBean(String description, Class<?> mbeanInterface) throws NotCompliantMBeanException {
-        super(description, mbeanInterface);
-    }
 }
