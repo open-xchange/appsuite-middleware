@@ -66,6 +66,8 @@ import java.util.Set;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.AutoProvisioningCalendarProvider;
 import com.openexchange.chronos.provider.CalendarAccess;
@@ -73,6 +75,7 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.CalendarProvider;
 import com.openexchange.chronos.provider.CalendarProviderRegistry;
+import com.openexchange.chronos.provider.CalendarProviders;
 import com.openexchange.chronos.provider.FreeBusyProvider;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling;
@@ -407,7 +410,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
      * <p/>
      * {@link IDMangling#ROOT_FOLDER_IDS} are passed as-is implicitly, mapped to the default account.
      *
-     * @param uniqueFolderIds The unique composite folder identifiers, e.g. <code>cal://4/35</code>
+     * @param folderIds The unique composite folder identifiers, e.g. <code>cal://4/35</code>
      * @param errorsPerFolderId A map to track possible errors that occurred while retrieving the accounts
      * @return The relative folder identifiers, mapped to their associated calendar account
      */
@@ -450,9 +453,24 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
      * @return The calendar account
      */
     protected CalendarAccount getAccount(int accountId) throws OXException {
+        return getAccount(accountId, false);
+    }
+
+    /**
+     * Gets a specific calendar account.
+     *
+     * @param accountId The identifier of the account to get
+     * @param checkCapbilities <code>true</code> to check the current session user's capabilities for the underlying calendar provider,
+     *            <code>false</code>, otherwise
+     * @return The calendar account
+     */
+    protected CalendarAccount getAccount(int accountId, boolean checkCapbilities) throws OXException {
         CalendarAccount account = optAccount(accountId);
         if (null == account) {
             throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(I(accountId));
+        }
+        if (checkCapbilities) {
+            requireCapability(account.getProviderId());
         }
         return account;
     }
@@ -475,6 +493,30 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
      */
     protected CalendarAccount optAccount(int accountId) throws OXException {
         return requireService(CalendarAccountService.class, services).getAccount(session, accountId, this);
+    }
+
+    /**
+     * Checks that the current session's user has the required capability for a specific calendar provider.
+     *
+     * @param providerId The identifier of the calendar provider to check the capabilities for
+     * @throws OXException {@link CalendarExceptionCodes#MISSING_CAPABILITY}
+     */
+    protected void requireCapability(String providerId) throws OXException {
+        if (false == hasCapability(providerId)) {
+            throw CalendarExceptionCodes.MISSING_CAPABILITY.create(CalendarProviders.getCapabilityName(providerId));
+        }
+    }
+
+    /**
+     * Gets a value indicating whether the current session's user has the required capability for a specific calendar provider or not.
+     *
+     * @param providerId The identifier of the calendar provider to check the capabilities for
+     * @return <code>true</code> if the user has the required capability, <code>false</code>, otherwise
+     */
+    protected boolean hasCapability(String providerId) throws OXException {
+        String capabilityName = CalendarProviders.getCapabilityName(providerId);
+        CapabilitySet capabilities = requireService(CapabilityService.class, services).getCapabilities(session);
+        return capabilities.contains(capabilityName);
     }
 
     /**

@@ -2099,15 +2099,31 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                         stmt.setLong(pos++, contextId);
                         stmt.setLong(pos++, mailAccount.getId());
                         stmt.setLong(pos++, userId);
-                        setOptionalString(stmt, pos++, mailAccount.getName());
-                        stmt.setString(pos++, transportURL);
-                        if (null == mailAccount.getTransportLogin()) {
-                            stmt.setString(pos++, "");
-                        } else {
-                            stmt.setString(pos++, mailAccount.getTransportLogin());
+                        {
+                            String name = mailAccount.getName();
+                            if (Strings.isEmpty(name)) {
+                                if (null == storageVersion) {
+                                    storageVersion = getMailAccount(mailAccount.getId(), userId, contextId, con);
+                                }
+                                setOptionalString(stmt, pos++, storageVersion.getName());
+                            } else {
+                                setOptionalString(stmt, pos++, name);
+                            }
                         }
+                        stmt.setString(pos++, transportURL);
+                        setOptionalString(stmt, pos++, mailAccount.getTransportLogin());
                         setOptionalString(stmt, pos++, encryptedTransportPassword);
-                        setOptionalString(stmt, pos++, mailAccount.getPrimaryAddress());
+                        {
+                            String primaryAddress = mailAccount.getPrimaryAddress();
+                            if (Strings.isEmpty(primaryAddress)) {
+                                if (null == storageVersion) {
+                                    storageVersion = getMailAccount(mailAccount.getId(), userId, contextId, con);
+                                }
+                                setOptionalString(stmt, pos++, storageVersion.getPrimaryAddress());
+                            } else {
+                                setOptionalString(stmt, pos++, mailAccount.getPrimaryAddress());
+                            }
+                        }
                         stmt.setInt(pos++, 0); // default flag
                         String personal = mailAccount.getPersonal();
                         if (isEmpty(personal)) {
@@ -3779,7 +3795,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 // Exceeded...
                 boolean disabled = disableAccount(mailAccess, accountId, userId, contextId, con);
                 if (disabled) {
-                    if (null == optReason) {                        
+                    if (null == optReason) {
                         LOG.info("Disabled {} account {} ({}) of user {} in context {} due to exceeded failed auth count", mailAccess ? "mail" : "transport", accountId, failedAuthInfo.url, userId, contextId);
                     } else {
                         LOG.info("Disabled {} account {} ({}) of user {} in context {} due to exceeded failed auth count", mailAccess ? "mail" : "transport", accountId, failedAuthInfo.url, userId, contextId, optReason);

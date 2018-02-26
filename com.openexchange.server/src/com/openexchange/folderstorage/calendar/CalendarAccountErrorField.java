@@ -47,51 +47,61 @@
  *
  */
 
-package com.openexchange.messaging.twitter;
+package com.openexchange.folderstorage.calendar;
 
+import org.json.JSONObject;
+import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.util.Tools;
-import com.openexchange.messaging.MessagingContent;
-import com.openexchange.messaging.MessagingExceptionCodes;
-import com.openexchange.messaging.MessagingMessage;
+import com.openexchange.folderstorage.FolderField;
+import com.openexchange.folderstorage.FolderProperty;
 
 /**
- * {@link TwitterMessagingUtility}
+ * {@link CalendarAccountErrorField}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
  */
-public final class TwitterMessagingUtility {
+public class CalendarAccountErrorField extends FolderField {
+
+
+    /** The column identifier of the field as used in the HTTP API */
+    private static final int COLUMN_ID = 3204;
+
+    /** The column name of the field as used in the HTTP API */
+    private static final String COLUMN_NAME = "com.openexchange.calendar.accountError";
+
+    private static final long serialVersionUID = 2379727517007236596L;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalendarAccountErrorField.class);
+    private static final CalendarAccountErrorField INSTANCE = new CalendarAccountErrorField();
 
     /**
-     * Initializes a new {@link TwitterMessagingUtility}.
+     * Gets the calendar account error field instance.
+     *
+     * @return The instance
      */
-    private TwitterMessagingUtility() {
-        super();
+    public static CalendarAccountErrorField getInstance() {
+        return INSTANCE;
     }
 
     /**
-     * Checks specified message's content to be of given type.
-     *
-     * @param message The message
-     * @return The typed content
-     * @throws OXException If message's content is of given type
+     * Initializes a new {@link CalendarAccountErrorField}.
      */
-    public static <C extends MessagingContent> C checkContent(final Class<C> clazz, final MessagingMessage message) throws OXException {
-        final MessagingContent content = message.getContent();
-        if (!(clazz.isInstance(content))) {
-            throw MessagingExceptionCodes.UNKNOWN_MESSAGING_CONTENT.create(content.toString());
+    private CalendarAccountErrorField() {
+        super(COLUMN_ID, COLUMN_NAME, null);
+    }
+
+    @Override
+    public Object write(FolderProperty property) {
+        if (null != property) {
+            try {
+                JSONObject jsonObject = new JSONObject();
+                ResponseWriter.addException(jsonObject, (OXException) property.getValue());
+                return jsonObject;
+            } catch (Exception e) {
+                LOG.warn("Error writing calendar account error \"{}\": {}", property.getValue(), e.getMessage(), e);
+            }
         }
-        return clazz.cast(content);
-    }
-
-    /**
-     * Parses as an unsigned <code>long</code>.
-     *
-     * @param s The string to parse
-     * @return An unsigned <code>long</code> or <code>-1</code>.
-     */
-    public static long parseUnsignedLong(final String s) {
-        return Tools.getUnsignedLong(s);
+        return getDefaultValue();
     }
 
 }

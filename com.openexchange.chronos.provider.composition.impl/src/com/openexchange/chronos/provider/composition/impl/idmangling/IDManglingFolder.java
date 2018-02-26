@@ -56,6 +56,7 @@ import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.provider.CalendarCapability;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.CalendarPermission;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link IDManglingFolder}
@@ -113,6 +114,11 @@ public class IDManglingFolder implements CalendarFolder {
     @Override
     public EnumSet<CalendarCapability> getSupportedCapabilites() {
         return delegate.getSupportedCapabilites();
+    }
+
+    @Override
+    public OXException getAccountError() {
+        return delegate.getAccountError();
     }
 
     @Override
