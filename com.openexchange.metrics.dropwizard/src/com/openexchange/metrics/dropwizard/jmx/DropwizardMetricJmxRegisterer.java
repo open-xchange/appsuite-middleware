@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.metrics.dropwizard.jmx.beans;
+package com.openexchange.metrics.dropwizard.jmx;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;

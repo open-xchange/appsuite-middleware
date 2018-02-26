@@ -53,8 +53,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.ServiceReference;
 import com.openexchange.management.ManagementService;
 import com.openexchange.metrics.dropwizard.impl.DropwizardMetricService;
-import com.openexchange.metrics.dropwizard.jmx.beans.DropwizardMetricJmxRegisterer;
-import com.openexchange.metrics.dropwizard.jmx.beans.DropwizardMetricMBeanFactory;
+import com.openexchange.metrics.dropwizard.jmx.DropwizardMetricJmxRegisterer;
+import com.openexchange.metrics.dropwizard.jmx.DropwizardMetricMBeanFactory;
 import com.openexchange.osgi.SimpleRegistryListener;
 
 /**

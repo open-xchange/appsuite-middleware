@@ -47,12 +47,17 @@
  *
  */
 
-package com.openexchange.metrics.dropwizard.jmx.beans;
+package com.openexchange.metrics.dropwizard.jmx;
 
 import javax.management.NotCompliantMBeanException;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
 import com.openexchange.metrics.MetricDescriptor;
+import com.openexchange.metrics.dropwizard.jmx.beans.CounterMBeanImpl;
+import com.openexchange.metrics.dropwizard.jmx.beans.GaugeMBeanImpl;
+import com.openexchange.metrics.dropwizard.jmx.beans.HistogramMBeanImpl;
+import com.openexchange.metrics.dropwizard.jmx.beans.MeterMBeanImpl;
+import com.openexchange.metrics.dropwizard.jmx.beans.TimerMBeanImpl;
 import com.openexchange.metrics.dropwizard.types.DropwizardCounter;
 import com.openexchange.metrics.dropwizard.types.DropwizardGauge;
 import com.openexchange.metrics.dropwizard.types.DropwizardHistogram;
