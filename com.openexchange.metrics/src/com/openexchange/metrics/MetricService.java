@@ -50,7 +50,6 @@
 package com.openexchange.metrics;
 
 import java.util.function.Supplier;
-import com.openexchange.metrics.descriptors.MeterDescriptor;
 import com.openexchange.metrics.types.Counter;
 import com.openexchange.metrics.types.Gauge;
 import com.openexchange.metrics.types.Histogram;
@@ -107,11 +106,11 @@ public interface MetricService {
     <T> Gauge<T> getGauge(String group, String name, Supplier<T> metricSupplier);
 
     /**
-     * Gets an existing {@link Meter} for the specified {@link MeterDescriptor} or creates and
+     * Gets an existing {@link Meter} for the specified {@link MetricDescriptor} or creates and
      * remembers a new one if it doesn't exist yet.
      *
-     * @param descriptior The {@link MeterDescriptor}
+     * @param descriptior The {@link MetricDescriptor}
      * @return the metric instance
      */
-    Meter meter(MeterDescriptor descriptor);
+    Meter meter(MetricDescriptor descriptor);
 }

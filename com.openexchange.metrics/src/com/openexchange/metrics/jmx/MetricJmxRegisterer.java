@@ -49,7 +49,7 @@
 
 package com.openexchange.metrics.jmx;
 
-import com.openexchange.metrics.descriptors.MeterDescriptor;
+import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.types.Meter;
 
 /**
@@ -62,15 +62,15 @@ public interface MetricJmxRegisterer {
     /**
      * Called when a {@link Meter} is added to the registry.
      * 
-     * @param meterDescriptor The {@link MeterDescriptor}
+     * @param metricDescriptor The {@link MetricDescriptor}
      * @param meter The {@link Meter}
      */
-    void onMeterAdded(MeterDescriptor meterDescriptor, Meter meter);
+    void onMeterAdded(MetricDescriptor metricDescriptor, Meter meter);
 
     /**
      * Called when a {@link Meter} is removed from the registry.
      * 
-     * @param meterDescriptor The {@link MeterDescriptor}
+     * @param metricDescriptor The {@link MetricDescriptor}
      */
-    void onMeterRemoved(MeterDescriptor meterDescriptor);
+    void onMeterRemoved(MetricDescriptor metricDescriptor);
 }

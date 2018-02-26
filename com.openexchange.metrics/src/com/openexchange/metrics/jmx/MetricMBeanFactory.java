@@ -49,7 +49,7 @@
 
 package com.openexchange.metrics.jmx;
 
-import com.openexchange.metrics.descriptors.MetricDescriptor;
+import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.types.Metric;
 
 /**

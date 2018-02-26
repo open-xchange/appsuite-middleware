@@ -47,9 +47,9 @@
  *
  */
 
-package com.openexchange.metrics.descriptors;
+package com.openexchange.metrics;
 
-import com.openexchange.metrics.MetricType;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 
@@ -57,11 +57,13 @@ import com.openexchange.metrics.MetricType;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class MetricDescriptor {
+public class MetricDescriptor {
 
     private String group;
     private String name;
     private MetricType metricType;
+    private TimeUnit rate;
+    private String unit;
 
     /**
      * Initialises a new {@link MetricDescriptor}.
@@ -124,6 +126,42 @@ public abstract class MetricDescriptor {
         this.metricType = metricType;
     }
 
+    /**
+     * Gets the rate
+     * 
+     * @return the rate
+     */
+    public TimeUnit getRate() {
+        return rate;
+    }
+
+    /**
+     * Gets the unit
+     * 
+     * @return the unit
+     */
+    public String getUnit() {
+        return unit;
+    }
+
+    /**
+     * Sets the rate
+     * 
+     * @param rate to set
+     */
+    public void setRate(TimeUnit rate) {
+        this.rate = rate;
+    }
+
+    /**
+     * Sets the unit
+     * 
+     * @param unit to set
+     */
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
+
     /////////////////////////////// Builder /////////////////////////////////
 
     /**
@@ -132,13 +170,15 @@ public abstract class MetricDescriptor {
      *
      * @param <T> The {@link MetricDescriptor} type
      */
-    static abstract class AbstractBuilder<T extends MetricDescriptor> {
+    static class MetricBuilder {
 
         protected static final String MISSING_FIELD = "A %s must be set!";
 
         protected final String group;
         protected final String name;
         protected final MetricType metricType;
+        private TimeUnit rate = TimeUnit.SECONDS;
+        private String unit = "events";
 
         /**
          * Initialises a new {@link AbstractBuilder}.
@@ -147,7 +187,7 @@ public abstract class MetricDescriptor {
          * @param name The name for the metric
          * @param metricType The {@link MetricType}
          */
-        public AbstractBuilder(final String group, final String name, MetricType metricType) {
+        public MetricBuilder(final String group, final String name, MetricType metricType) {
             super();
             this.group = group;
             this.name = name;
@@ -159,10 +199,10 @@ public abstract class MetricDescriptor {
          * 
          * @return the {@link MetricDescriptor}
          */
-        public T build() {
+        public MetricDescriptor build() {
             checkNotNull(group, "group");
             checkNotNull(name, "name");
-            T descriptor = prepare();
+            MetricDescriptor descriptor = prepare();
             fill(descriptor);
             return descriptor;
         }
@@ -170,21 +210,32 @@ public abstract class MetricDescriptor {
         /**
          * Performs a preliminary check of the descriptor's values
          */
-        protected abstract void check();
+        protected void check() {
+            checkNotNull(rate, "rate");
+            checkNotNull(unit, "unit");
+        }
 
         /**
          * Prepares the {@link MetricDescriptor}
          * 
          * @return The prepared {@link MetricDescriptor} as type {@link T}
          */
-        protected abstract T prepare();
+        protected MetricDescriptor prepare() {
+            MetricDescriptor descriptor = new MetricDescriptor();
+            descriptor.setGroup(group);
+            descriptor.setName(name);
+            return descriptor;
+        }
 
         /**
          * Fills values of the specified descriptor
          * 
          * @param descriptor The descriptor of which the values shall be filled
          */
-        protected abstract void fill(T descriptor);
+        protected void fill(MetricDescriptor descriptor) {
+            descriptor.setRate(rate);
+            descriptor.setUnit(unit);
+        }
 
         /**
          * Check for <code>null</code> reference

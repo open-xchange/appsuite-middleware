@@ -62,9 +62,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
+import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.MetricType;
-import com.openexchange.metrics.descriptors.MeterDescriptor;
-import com.openexchange.metrics.descriptors.MetricDescriptor;
 import com.openexchange.metrics.types.Meter;
 import com.openexchange.metrics.types.Metric;
 
@@ -107,23 +106,26 @@ public abstract class AbstractMetricJmxRegisterer implements MetricJmxRegisterer
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.metrics.jmx.MetricJmxRegisterer#onMeterAdded(com.openexchange.metrics.descriptors.MeterDescriptor, com.openexchange.metrics.types.Meter)
+     * @see com.openexchange.metrics.jmx.MetricJmxRegisterer#onMeterAdded(com.openexchange.metrics.MetricDescriptor, com.openexchange.metrics.types.Meter)
      */
     @Override
-    public void onMeterAdded(MeterDescriptor meterDescriptor, Meter meter) {
+    public void onMeterAdded(MetricDescriptor meterDescriptor, Meter meter) {
         registerMBean(meter, meterDescriptor);
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.metrics.jmx.MetricJmxRegisterer#onMeterRemoved(com.openexchange.metrics.descriptors.MeterDescriptor)
+     * @see com.openexchange.metrics.jmx.MetricJmxRegisterer#onMeterRemoved(com.openexchange.metrics.MetricDescriptor)
      */
     @Override
-    public void onMeterRemoved(MeterDescriptor meterDescriptor) {
+    public void onMeterRemoved(MetricDescriptor meterDescriptor) {
         unregisterMBean(meterDescriptor);
     }
 
+    /**
+     * Unregisters all mbeans
+     */
     public void unregisterAll() {
         for (ObjectName name : registeredNames) {
             try {

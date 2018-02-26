@@ -49,12 +49,10 @@
 
 package com.openexchange.metrics.dropwizard.jmx.beans;
 
-import java.util.concurrent.TimeUnit;
 import javax.management.NotCompliantMBeanException;
 import com.codahale.metrics.Gauge;
 import com.codahale.metrics.Histogram;
-import com.openexchange.metrics.descriptors.MeterDescriptor;
-import com.openexchange.metrics.descriptors.MetricDescriptor;
+import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.dropwizard.types.DropwizardCounter;
 import com.openexchange.metrics.dropwizard.types.DropwizardGauge;
 import com.openexchange.metrics.dropwizard.types.DropwizardHistogram;
@@ -106,7 +104,7 @@ public class DropwizardMetricMBeanFactory implements MetricMBeanFactory {
     public TimerMBean timer(Metric timer, MetricDescriptor metricDescriptor) {
         checkInstance(timer, DropwizardTimer.class);
         try {
-            return new TimerMBeanImpl((DropwizardTimer) timer, "events", TimeUnit.SECONDS); //TODO: pass the metric descriptor time unit
+            return new TimerMBeanImpl((DropwizardTimer) timer, metricDescriptor.getUnit(), metricDescriptor.getRate()); //TODO: pass the metric descriptor time unit
         } catch (NotCompliantMBeanException e) {
             throw new IllegalArgumentException("The TimerMBean is not a compliant MBean");
         }
@@ -120,9 +118,8 @@ public class DropwizardMetricMBeanFactory implements MetricMBeanFactory {
     @Override
     public MeterMBean meter(Metric meter, MetricDescriptor metricDescriptor) {
         checkInstance(meter, DropwizardMeter.class);
-        MeterDescriptor meterDescriptor = (MeterDescriptor) metricDescriptor;
         try {
-            return new MeterMBeanImpl((DropwizardMeter) meter, meterDescriptor.getUnit(), meterDescriptor.getRate());
+            return new MeterMBeanImpl((DropwizardMeter) meter, metricDescriptor.getUnit(), metricDescriptor.getRate());
         } catch (NotCompliantMBeanException e) {
             throw new IllegalArgumentException("The MeterMBean is not a compliant MBean");
         }
