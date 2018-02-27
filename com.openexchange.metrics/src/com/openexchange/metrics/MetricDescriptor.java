@@ -299,6 +299,7 @@ public class MetricDescriptor {
             descriptor.setRate(rate);
             descriptor.setUnit(unit);
             descriptor.setMetricSupplier(supplier);
+            descriptor.setMetricType(metricType);
         }
 
         /**
