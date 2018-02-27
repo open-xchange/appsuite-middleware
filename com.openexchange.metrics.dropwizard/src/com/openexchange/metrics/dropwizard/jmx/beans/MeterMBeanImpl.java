@@ -71,6 +71,7 @@ public class MeterMBeanImpl extends AbstractMetricMBean implements MeterMBean {
 
     /**
      * Initialises a new {@link MeterMBeanImpl}.
+     * 
      * @param metricDescriptor TODO
      *
      * @throws NotCompliantMBeanException
@@ -81,18 +82,6 @@ public class MeterMBeanImpl extends AbstractMetricMBean implements MeterMBean {
         this.rateFactor = metricDescriptor.getRate().toSeconds(1);
         this.rateUnit = metricDescriptor.getUnit() + "/" + calculateRateUnit(metricDescriptor.getRate());
     }
-
-    /**
-     * Initialises a new {@link MeterMBeanImpl}.
-     *
-     * @throws NotCompliantMBeanException
-     */
-//    protected MeterMBeanImpl(String description, Class<?> mbeanInterface, DropwizardMeter meter, String rateItem, TimeUnit rateUnit) throws NotCompliantMBeanException {
-//        super(description, mbeanInterface);
-//        this.meter = meter;
-//        this.rateFactor = rateUnit.toSeconds(1);
-//        this.rateUnit = rateItem + "/" + calculateRateUnit(rateUnit);
-//    }
 
     /**
      *
