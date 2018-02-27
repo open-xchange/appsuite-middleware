@@ -943,7 +943,7 @@ public class DefaultShareService implements ShareService {
             } else {
                 dstTarget = moduleSupport.adjustTarget(target, session, members[0]);
             }
-            return new InternalGroupShareInfo(context.getContextId(), group, target, dstTarget, false);
+            return new InternalGroupShareInfo(context.getContextId(), group, target, dstTarget, true);
         }
         /*
          * prepare guest or internal user shares for other recipient types
@@ -952,7 +952,7 @@ public class DefaultShareService implements ShareService {
         User targetUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient, target);
         ShareTarget dstTarget = moduleSupport.adjustTarget(target, session, targetUser.getId());
         if (false == targetUser.isGuest()) {
-            return new InternalUserShareInfo(context.getContextId(), targetUser, target, dstTarget, false);
+            return new InternalUserShareInfo(context.getContextId(), targetUser, target, dstTarget, true);
         }
         /*
          * (re-)adjust persisted link permission association for anonymous guests if required
@@ -964,7 +964,7 @@ public class DefaultShareService implements ShareService {
                 ShareTool.targetToJSON(realTarget).toString(), targetUser.getId(), context, false);
         }
         ShareTargetPath targetPath = moduleSupport.getPath(target, session);
-        return new DefaultShareInfo(services, context.getContextId(), targetUser, target, dstTarget, targetPath, false);
+        return new DefaultShareInfo(services, context.getContextId(), targetUser, target, dstTarget, targetPath, true);
     }
 
     /**
@@ -1202,7 +1202,8 @@ public class DefaultShareService implements ShareService {
             /*
              * apply new permission entity for this target
              */
-            TargetPermission targetPermission = new TargetPermission(shareInfo.getGuest().getGuestID(), false, recipient.getBits());
+            TargetPermission targetPermission = new SubfolderAwareTargetPermission(shareInfo.getGuest().getGuestID(), false, recipient.getBits(), FolderPermissionType.LEGATOR.getTypeNumber(), null);
+
             targetProxy.applyPermissions(Collections.singletonList(targetPermission));
             /*
              * run target update, commit transaction & return created share link info

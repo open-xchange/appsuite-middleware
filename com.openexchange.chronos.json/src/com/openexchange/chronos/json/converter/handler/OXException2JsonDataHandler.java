@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2017-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,71 +47,63 @@
  *
  */
 
-package com.openexchange.mail.authenticity;
+package com.openexchange.chronos.json.converter.handler;
 
-import com.openexchange.config.lean.Property;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.conversion.ConversionResult;
+import com.openexchange.conversion.Data;
+import com.openexchange.conversion.DataArguments;
+import com.openexchange.conversion.DataExceptionCodes;
+import com.openexchange.conversion.DataHandler;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link MailAuthenticityProperty} - Properties for mail authenticity validation.
+ * {@link OXException2JsonDataHandler}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
  */
-public enum MailAuthenticityProperty implements Property {
-    /**
-     * Defines whether the mail authenticity core feature is enabled
-     * <p>
-     * Defaults to <code>false</code>
-     */
-    ENABLED("enabled", Boolean.FALSE),
-    /**
-     * Defines the date after which the e-mails will be analyzed
-     * <p>
-     * Defaults to 0
-     */
-    THRESHOLD("threshold", Long.valueOf(0)),
-    /**
-     * Defines the MANDATORY <code>authserv-id</code>. It can contain a single arbitrary string
-     * or a comma separated list of arbitrary strings
-     * <p>
-     * Default is empty.
-     *
-     * @see <a href="https://tools.ietf.org/html/rfc7601#section-2.2">RFC-7601, Section 2.2</a>
-     */
-    AUTHSERV_ID("authServId", ""),
-    /**
-     * Defines whether metrics of the core handler will be logged for future assertion purposes.
-     * Disabled by default.
-     */
-    LOG_METRICS("logMetrics", Boolean.FALSE);
-
-    private final Object defaultValue;
-    private final String fqn;
+public class OXException2JsonDataHandler implements DataHandler {
 
     /**
-     * Initializes a new {@link MailAuthenticityProperty}.
+     * Initializes a new {@link OXException2JsonDataHandler}.
      */
-    private MailAuthenticityProperty(String suffix, Object defaultValue) {
-        this.defaultValue = defaultValue;
-        fqn = "com.openexchange.mail.authenticity." + suffix;
+    public OXException2JsonDataHandler() {
+        super();
     }
 
-    /**
-     * Gets the fully qualified name for the property
-     *
-     * @return the fully qualified name for the property
-     */
     @Override
-    public String getFQPropertyName() {
-        return fqn;
+    public String[] getRequiredArguments() {
+        return new String[0];
     }
 
-    /**
-     * Gets the default value of this property
-     *
-     * @return the default value of this property
-     */
     @Override
-    public Object getDefaultValue() {
-        return defaultValue;
+    public Class<?>[] getTypes() {
+        return new Class<?>[] { OXException.class };
     }
+
+    @Override
+    public ConversionResult processData(Data<? extends Object> data, DataArguments dataArguments, Session session) throws OXException {
+        ConversionResult result = new ConversionResult();
+        Object sourceData = data.getData();
+        try {
+            if (null == sourceData) {
+                result.setData(null);
+            } else if (OXException.class.isInstance(sourceData)) {
+                JSONObject jsonObject = new JSONObject();
+                ResponseWriter.addException(jsonObject, (OXException) sourceData);
+                result.setData(jsonObject);
+            } else {
+                throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(sourceData.getClass().toString());
+            }
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+        return result;
+    }
+
 }

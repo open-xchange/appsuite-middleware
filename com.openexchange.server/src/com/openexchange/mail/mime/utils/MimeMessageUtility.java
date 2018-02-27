@@ -1729,10 +1729,6 @@ public final class MimeMessageUtility {
         return sb.toString();
     }
 
-    // private static final Pattern PAT_QUOTED = Pattern.compile("(^\")([^\"]+?)(\"$)");
-
-    // private static final Pattern PAT_QUOTABLE_CHAR = Pattern.compile("[.,:;<>\"]");
-
     private final static String RFC822 = "()<>@,;:\\\".[]";
 
     /**

@@ -71,7 +71,7 @@ import com.openexchange.mail.authenticity.impl.core.MailAuthenticityHandlerRegis
 import com.openexchange.mail.authenticity.impl.core.MailAuthenticityJSlobEntry;
 import com.openexchange.mail.authenticity.impl.core.metrics.MailAuthenticityMetricFileLogger;
 import com.openexchange.mail.authenticity.impl.core.metrics.MailAuthenticityMetricLogger;
-import com.openexchange.mail.authenticity.impl.trusted.internal.TrustedMailAuthenticityHandler;
+import com.openexchange.mail.authenticity.impl.trusted.internal.TrustedMailServiceImpl;
 import com.openexchange.mail.authenticity.impl.trusted.internal.TrustedMailDataSource;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -119,7 +119,7 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
         openTrackers();
 
         ConfigurationService configurationService = getService(ConfigurationService.class);
-        TrustedMailAuthenticityHandler authenticationHandler = new TrustedMailAuthenticityHandler(configurationService);
+        TrustedMailServiceImpl authenticationHandler = new TrustedMailServiceImpl(configurationService);
         registerService(ForcedReloadable.class, authenticationHandler);
 
         final MailAuthenticityHandlerImpl handlerImpl = new MailAuthenticityHandlerImpl(authenticationHandler, this);

@@ -163,9 +163,10 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
         List<Permission> filtered = new ArrayList<>(added.size());
         for (Permission add : added) {
             if(add.getType() == FolderPermissionType.LEGATOR) {
-                add.setPermissionLegator(folder.getParentID());
-                add.setType(FolderPermissionType.INHERITED);
-                filtered.add(add);
+                Permission clone = (Permission) add.clone();
+                clone.setPermissionLegator(folder.getParentID());
+                clone.setType(FolderPermissionType.INHERITED);
+                filtered.add(clone);
             }
         }
 

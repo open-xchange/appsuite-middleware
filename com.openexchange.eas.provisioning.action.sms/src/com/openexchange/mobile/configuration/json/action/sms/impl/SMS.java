@@ -133,7 +133,7 @@ public class SMS {
 	private String senderrormessage = null;
 
 
-	public Map send() throws MalformedURLException, XmlRpcException {
+    public Map<?, ?> send() throws MalformedURLException, XmlRpcException {
 
 		// setup xml rpc client config
 		final XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
@@ -144,19 +144,19 @@ public class SMS {
 		client.setConfig(config);
 
 		// Identify our client to API call
-		Vector params = new Vector();
+        Vector<Hashtable<String, Object>> params = new Vector<>();
 
-		Hashtable table = new Hashtable();
+        Hashtable<String, Object> table = new Hashtable<>();
 		table.put("ClientName", "OX PROVISIONING SMS CLIENT");
 		table.put("ClientVersion", "1.0");
 		table.put("ClientVendor", "Open-Xchange");
 
 		params.addElement(table);
 
-		Map result = null;
+        Map<?, ?> result = null;
 		try {
 			// execute test call
-			result = (Map) client.execute("samurai.ClientIdentify", params);
+            result = (Map<?, ?>) client.execute("samurai.ClientIdentify", params);
 			// System.err.println(result);
 		} catch (final Exception e) {
 			 wassendingsuccessfull = false;
@@ -164,15 +164,15 @@ public class SMS {
 			 LOG.error("API error occured while executing samurai.ClientIdentify",e);
 		}
 
-		params = new Vector();
+        params = new Vector<>();
 		result = null;
 
 		// generate remote uri for sms as recipient
-		final Vector remoteUris = new Vector();
+        final Vector<String> remoteUris = new Vector<String>();
 		remoteUris.add("sip:" + this.getSMSNumber() + "@sipgate.net");
 
 		// fill up data for rpc call
-		table = new Hashtable();
+        table = new Hashtable<>();
 		table.put("RemoteUri", remoteUris);
 		table.put("TOS", "text");
 		table.put("Content", this.getText());
@@ -181,7 +181,7 @@ public class SMS {
 		result = null;
 		try {
 			// execute SMS sending......
-			result = (Map) client.execute("samurai.SessionInitiateMulti",params);
+            result = (Map<?, ?>) client.execute("samurai.SessionInitiateMulti", params);
 		} catch (final Exception e) {
 			wassendingsuccessfull = false;
 			this.senderrormessage = e.getMessage();
