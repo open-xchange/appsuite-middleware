@@ -74,9 +74,10 @@ public interface MetricMBeanFactory {
      * Creates a new {@link CounterMBean} from the specified {@link Counter} metric
      * 
      * @param counter The {@link Counter} from which to create the mbean
+     * @param metricDescriptor TODO
      * @return The {@link CounterMBean}
      */
-    CounterMBean counter(Counter counter);
+    CounterMBean counter(Counter counter, MetricDescriptor metricDescriptor);
 
     /**
      * Creates a new {@link TimerMBean} from the specified {@link Timer} metric
@@ -96,17 +97,19 @@ public interface MetricMBeanFactory {
 
     /**
      * Creates a new {@link HistogramMBean} from the specified {@link Histogram} metric
-     * 
+     * @param metricDescriptor TODO
      * @param counter The {@link Histogram} from which to create the mbean
+     * 
      * @return The {@link HistogramMBean}
      */
-    HistogramMBean histogram(Histogram histogram);
+    HistogramMBean histogram(Histogram histogram, MetricDescriptor metricDescriptor);
 
     /**
      * Creates a new {@link GaugeMBean} from the specified {@link Gauge} metric
-     * 
+     * @param metricDescriptor TODO
      * @param counter The {@link Gauge} from which to create the mbean
+     * 
      * @return The {@link GaugeMBean}
      */
-    GaugeMBean gauge(Gauge<?> gauge);
+    GaugeMBean gauge(Gauge<?> gauge, MetricDescriptor metricDescriptor);
 }

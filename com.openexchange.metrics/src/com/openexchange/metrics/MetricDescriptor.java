@@ -67,6 +67,7 @@ public class MetricDescriptor {
     private TimeUnit rate;
     private Supplier<?> metricSupplier;
     private String fullName;
+    private String description;
 
     /**
      * Initialises a new {@link MetricDescriptor}.
@@ -138,6 +139,15 @@ public class MetricDescriptor {
         return fullName;
     }
 
+    /**
+     * Gets the description
+     *
+     * @return The description
+     */
+    public String getDescription() {
+        return description;
+    }
+
     ////////////////////////////// SETTERS //////////////////////////////
 
     /**
@@ -204,6 +214,15 @@ public class MetricDescriptor {
     }
 
     /**
+     * Sets the description
+     *
+     * @param description The description to set
+     */
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    /**
      * Initialises a new {@link MetricBuilder}
      * 
      * @param group The group
@@ -230,6 +249,7 @@ public class MetricDescriptor {
         private TimeUnit rate = TimeUnit.SECONDS;
         private String unit = "events";
         private Supplier<?> supplier;
+        private String description;
 
         /**
          * Initialises a new {@link AbstractBuilder}.
@@ -279,6 +299,17 @@ public class MetricDescriptor {
         }
 
         /**
+         * Sets the description
+         * 
+         * @param description the description to set
+         * @return the {@link MetricBuilder} for chained calls
+         */
+        public MetricBuilder withDescription(String description) {
+            this.description = description;
+            return this;
+        }
+
+        /**
          * Builds and returns the {@link MetricDescriptor}
          * 
          * @return the {@link MetricDescriptor}
@@ -322,6 +353,7 @@ public class MetricDescriptor {
             descriptor.setMetricSupplier(supplier);
             descriptor.setMetricType(metricType);
             descriptor.setFQN(group + "." + name);
+            descriptor.setDescription(description);
         }
 
         /**

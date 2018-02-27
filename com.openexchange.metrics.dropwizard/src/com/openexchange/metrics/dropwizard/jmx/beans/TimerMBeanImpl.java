@@ -52,7 +52,9 @@ package com.openexchange.metrics.dropwizard.jmx.beans;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import javax.management.NotCompliantMBeanException;
+import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.dropwizard.types.DropwizardTimer;
+import com.openexchange.metrics.jmx.beans.AbstractMetricMBean;
 import com.openexchange.metrics.jmx.beans.TimerMBean;
 
 /**
@@ -71,14 +73,16 @@ public class TimerMBeanImpl extends AbstractMetricMBean implements TimerMBean {
 
     /**
      * Initialises a new {@link TimerMBeanImpl}.
+     * 
+     * @param metricDescriptor TODO
      *
      * @throws NotCompliantMBeanException
      */
-    public TimerMBeanImpl(DropwizardTimer timer, String rateItem, TimeUnit rateUnit) throws NotCompliantMBeanException {
-        super(DESCRIPTION, TimerMBean.class);
+    public TimerMBeanImpl(DropwizardTimer timer, MetricDescriptor metricDescriptor) throws NotCompliantMBeanException {
+        super(DESCRIPTION, TimerMBean.class, metricDescriptor);
         this.timer = timer;
-        this.rateUnit = rateItem + "/" + calculateRateUnit(rateUnit);
-        this.rateFactor = rateUnit.toSeconds(1);
+        this.rateUnit = metricDescriptor.getUnit() + "/" + calculateRateUnit(metricDescriptor.getRate());
+        this.rateFactor = metricDescriptor.getRate().toSeconds(1);
         this.durationFactor = 1.0 / TimeUnit.MILLISECONDS.toNanos(1); // TODO
         this.durationUnit = TimeUnit.MILLISECONDS.toString().toLowerCase(Locale.US); // TODO
     }

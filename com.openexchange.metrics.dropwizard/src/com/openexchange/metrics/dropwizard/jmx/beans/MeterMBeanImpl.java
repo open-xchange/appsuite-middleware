@@ -52,7 +52,9 @@ package com.openexchange.metrics.dropwizard.jmx.beans;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import javax.management.NotCompliantMBeanException;
+import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.dropwizard.types.DropwizardMeter;
+import com.openexchange.metrics.jmx.beans.AbstractMetricMBean;
 import com.openexchange.metrics.jmx.beans.MeterMBean;
 
 /**
@@ -69,14 +71,15 @@ public class MeterMBeanImpl extends AbstractMetricMBean implements MeterMBean {
 
     /**
      * Initialises a new {@link MeterMBeanImpl}.
+     * @param metricDescriptor TODO
      *
      * @throws NotCompliantMBeanException
      */
-    public MeterMBeanImpl(DropwizardMeter meter, String rateItem, TimeUnit rateUnit) throws NotCompliantMBeanException {
-        super(DESCRIPTION, MeterMBean.class);
+    public MeterMBeanImpl(DropwizardMeter meter, MetricDescriptor metricDescriptor) throws NotCompliantMBeanException {
+        super(DESCRIPTION, MeterMBean.class, metricDescriptor);
         this.meter = meter;
-        this.rateFactor = rateUnit.toSeconds(1);
-        this.rateUnit = rateItem + "/" + calculateRateUnit(rateUnit);
+        this.rateFactor = metricDescriptor.getRate().toSeconds(1);
+        this.rateUnit = metricDescriptor.getUnit() + "/" + calculateRateUnit(metricDescriptor.getRate());
     }
 
     /**
@@ -84,12 +87,12 @@ public class MeterMBeanImpl extends AbstractMetricMBean implements MeterMBean {
      *
      * @throws NotCompliantMBeanException
      */
-    protected MeterMBeanImpl(String description, Class<?> mbeanInterface, DropwizardMeter meter, String rateItem, TimeUnit rateUnit) throws NotCompliantMBeanException {
-        super(description, mbeanInterface);
-        this.meter = meter;
-        this.rateFactor = rateUnit.toSeconds(1);
-        this.rateUnit = rateItem + "/" + calculateRateUnit(rateUnit);
-    }
+//    protected MeterMBeanImpl(String description, Class<?> mbeanInterface, DropwizardMeter meter, String rateItem, TimeUnit rateUnit) throws NotCompliantMBeanException {
+//        super(description, mbeanInterface);
+//        this.meter = meter;
+//        this.rateFactor = rateUnit.toSeconds(1);
+//        this.rateUnit = rateItem + "/" + calculateRateUnit(rateUnit);
+//    }
 
     /**
      *

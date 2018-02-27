@@ -50,7 +50,9 @@
 package com.openexchange.metrics.dropwizard.jmx.beans;
 
 import javax.management.NotCompliantMBeanException;
+import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.dropwizard.types.DropwizardCounter;
+import com.openexchange.metrics.jmx.beans.AbstractMetricMBean;
 import com.openexchange.metrics.jmx.beans.CounterMBean;
 
 /**
@@ -66,12 +68,14 @@ public class CounterMBeanImpl extends AbstractMetricMBean implements CounterMBea
     /**
      * Initialises a new {@link CounterMBeanImpl}.
      * 
+     * @param metricDescriptor TODO
      * @param description
      * @param mbeanInterface
+     * 
      * @throws NotCompliantMBeanException
      */
-    public CounterMBeanImpl(DropwizardCounter counter) throws NotCompliantMBeanException {
-        super(DESCRIPTION, CounterMBean.class);
+    public CounterMBeanImpl(DropwizardCounter counter, MetricDescriptor metricDescriptor) throws NotCompliantMBeanException {
+        super(DESCRIPTION, CounterMBean.class, metricDescriptor);
         this.counter = counter;
     }
 

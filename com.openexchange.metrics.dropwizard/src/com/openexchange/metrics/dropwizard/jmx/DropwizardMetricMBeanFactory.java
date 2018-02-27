@@ -94,10 +94,10 @@ public class DropwizardMetricMBeanFactory implements MetricMBeanFactory {
      * @see com.openexchange.metrics.jmx.MetricMBeanFactory#counter(com.openexchange.metrics.types.Metric)
      */
     @Override
-    public CounterMBean counter(Counter counter) {
+    public CounterMBean counter(Counter counter, MetricDescriptor metricDescriptor) {
         checkInstance(counter, DropwizardCounter.class);
         try {
-            return new CounterMBeanImpl((DropwizardCounter) counter);
+            return new CounterMBeanImpl((DropwizardCounter) counter, metricDescriptor);
         } catch (NotCompliantMBeanException e) {
             throw new IllegalArgumentException("The CounterMBean is not a compliant MBean");
         }
@@ -112,7 +112,7 @@ public class DropwizardMetricMBeanFactory implements MetricMBeanFactory {
     public TimerMBean timer(Timer timer, MetricDescriptor metricDescriptor) {
         checkInstance(timer, DropwizardTimer.class);
         try {
-            return new TimerMBeanImpl((DropwizardTimer) timer, metricDescriptor.getUnit(), metricDescriptor.getRate()); //TODO: pass the metric descriptor time unit
+            return new TimerMBeanImpl((DropwizardTimer) timer, metricDescriptor); //TODO: pass the metric descriptor time unit
         } catch (NotCompliantMBeanException e) {
             throw new IllegalArgumentException("The TimerMBean is not a compliant MBean");
         }
@@ -127,7 +127,7 @@ public class DropwizardMetricMBeanFactory implements MetricMBeanFactory {
     public MeterMBean meter(Meter meter, MetricDescriptor metricDescriptor) {
         checkInstance(meter, DropwizardMeter.class);
         try {
-            return new MeterMBeanImpl((DropwizardMeter) meter, metricDescriptor.getUnit(), metricDescriptor.getRate());
+            return new MeterMBeanImpl((DropwizardMeter) meter, metricDescriptor);
         } catch (NotCompliantMBeanException e) {
             throw new IllegalArgumentException("The MeterMBean is not a compliant MBean");
         }
@@ -139,10 +139,10 @@ public class DropwizardMetricMBeanFactory implements MetricMBeanFactory {
      * @see com.openexchange.metrics.jmx.MetricMBeanFactory#histogram(com.openexchange.metrics.types.Metric)
      */
     @Override
-    public HistogramMBean histogram(Histogram histogram) {
+    public HistogramMBean histogram(Histogram histogram, MetricDescriptor metricDescriptor) {
         checkInstance(histogram, DropwizardHistogram.class);
         try {
-            return new HistogramMBeanImpl((DropwizardHistogram) histogram);
+            return new HistogramMBeanImpl((DropwizardHistogram) histogram, metricDescriptor);
         } catch (NotCompliantMBeanException e) {
             throw new IllegalArgumentException("The HistogramMBean is not a compliant MBean");
         }
@@ -154,13 +154,13 @@ public class DropwizardMetricMBeanFactory implements MetricMBeanFactory {
      * @see com.openexchange.metrics.jmx.MetricMBeanFactory#gauge(com.openexchange.metrics.types.Metric)
      */
     @Override
-    public GaugeMBean gauge(Gauge<?> gauge) {
+    public GaugeMBean gauge(Gauge<?> gauge, MetricDescriptor metricDescriptor) {
         if (!(gauge instanceof Gauge)) {
             throw new IllegalArgumentException("Invalid metric specified for 'Gauge' mbean: '" + gauge.getClass() + "'");
         }
         //checkInstance(metric, Gauge.class);
         try {
-            return new GaugeMBeanImpl((DropwizardGauge) gauge);
+            return new GaugeMBeanImpl((DropwizardGauge) gauge, metricDescriptor);
         } catch (NotCompliantMBeanException e) {
             throw new IllegalArgumentException("The GaugeMBean is not a compliant MBean");
         }

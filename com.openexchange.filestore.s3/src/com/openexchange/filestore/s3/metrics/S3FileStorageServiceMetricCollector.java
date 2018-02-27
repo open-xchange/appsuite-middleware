@@ -90,7 +90,7 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
         } else if (throughputMetricType == S3ServiceMetric.S3UploadThroughput) {
             name = "UploadThroughput";
         }
-        MetricDescriptor metricDescriptor = MetricDescriptor.newBuilder("s3", name, MetricType.METER).build();
+        MetricDescriptor metricDescriptor = MetricDescriptor.newBuilder("s3", name, MetricType.METER).withUnit("bytes").withDescription("The throughput in bytes/sec").build();
         Meter meter = metricService.getMeter(metricDescriptor);
         int bytes = provider.getByteCount();
         meter.mark(Integer.toUnsignedLong(bytes));

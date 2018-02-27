@@ -98,11 +98,11 @@ public abstract class AbstractMetricServiceListener implements MetricServiceList
         this.managementService = managementService;
 
         Map<MetricType, BiFunction<Metric, MetricDescriptor, MetricMBean>> c = new HashMap<>();
-        c.put(MetricType.COUNTER, (metric, metricDescriptor) -> mbeanFactory.counter((Counter) metric));
+        c.put(MetricType.COUNTER, (metric, metricDescriptor) -> mbeanFactory.counter((Counter) metric, metricDescriptor));
         c.put(MetricType.TIMER, (metric, metricDescriptor) -> mbeanFactory.timer((Timer) metric, metricDescriptor));
         c.put(MetricType.METER, (metric, metricDescriptor) -> mbeanFactory.meter((Meter) metric, metricDescriptor));
-        c.put(MetricType.HISTOGRAM, (metric, metricDescriptor) -> mbeanFactory.histogram((Histogram) metric));
-        c.put(MetricType.GAUGE, (metric, metricDescriptor) -> mbeanFactory.gauge((Gauge<?>) metric));
+        c.put(MetricType.HISTOGRAM, (metric, metricDescriptor) -> mbeanFactory.histogram((Histogram) metric, metricDescriptor));
+        c.put(MetricType.GAUGE, (metric, metricDescriptor) -> mbeanFactory.gauge((Gauge<?>) metric, metricDescriptor));
         //c.put(MetricType.RATIO_GAUGE, (metric, metricDescriptor) -> mbeanFactory.ratioGauge(metric));
         mbeanCreators = Collections.unmodifiableMap(c);
 

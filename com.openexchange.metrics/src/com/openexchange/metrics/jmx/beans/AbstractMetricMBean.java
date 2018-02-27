@@ -47,17 +47,20 @@
  *
  */
 
-package com.openexchange.metrics.dropwizard.jmx.beans;
+package com.openexchange.metrics.jmx.beans;
 
 import javax.management.NotCompliantMBeanException;
 import com.openexchange.management.AnnotatedStandardMBean;
+import com.openexchange.metrics.MetricDescriptor;
 
 /**
  * {@link AbstractMetricMBean}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-abstract class AbstractMetricMBean extends AnnotatedStandardMBean {
+public abstract class AbstractMetricMBean extends AnnotatedStandardMBean implements MetricMBean {
+
+    private final MetricDescriptor metricDescriptor;
 
     /**
      * Initialises a new {@link AbstractMetricMBean}.
@@ -66,7 +69,8 @@ abstract class AbstractMetricMBean extends AnnotatedStandardMBean {
      * @param mbeanInterface
      * @throws NotCompliantMBeanException
      */
-    public AbstractMetricMBean(String description, Class<?> mbeanInterface) throws NotCompliantMBeanException {
+    public AbstractMetricMBean(String description, Class<?> mbeanInterface, MetricDescriptor metricDescriptor) throws NotCompliantMBeanException {
         super(description, mbeanInterface);
+        this.metricDescriptor = metricDescriptor;
     }
 }
