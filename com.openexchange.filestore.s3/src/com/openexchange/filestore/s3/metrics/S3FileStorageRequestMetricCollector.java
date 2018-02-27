@@ -112,7 +112,7 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
             switch (predefined) {
                 case ClientExecuteTime:
                     String methodName = request.getHttpMethod().name();
-                    MetricDescriptor metricDescriptor = MetricDescriptor.newBuilder("s3", "RequestTimes." + methodName, MetricType.TIMER).build();
+                    MetricDescriptor metricDescriptor = MetricDescriptor.newBuilder("s3", "RequestTimes." + methodName, MetricType.TIMER).withDescription("The execution time of requests measured in events/sec").build();
                     Timer timer = metricService.getTimer(metricDescriptor);
                     timer.update(longValue, TimeUnit.MILLISECONDS);
                 default:
