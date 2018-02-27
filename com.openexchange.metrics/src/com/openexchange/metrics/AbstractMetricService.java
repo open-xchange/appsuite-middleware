@@ -50,12 +50,15 @@
 package com.openexchange.metrics;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.metrics.jmx.MetricServiceListener;
 import com.openexchange.metrics.types.Counter;
 import com.openexchange.metrics.types.Gauge;
@@ -71,8 +74,11 @@ import com.openexchange.metrics.types.Timer;
  */
 public abstract class AbstractMetricService implements MetricService {
 
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractMetricService.class);
+
     private final ConcurrentMap<String, Metric> metrics;
     private final Map<MetricType, Function<MetricDescriptor, Metric>> registerers;
+    private final Map<MetricType, MetricServiceListenerNotifier> listenerNotifiers;
     private final List<MetricServiceListener> listeners;
 
     /**
@@ -83,6 +89,15 @@ public abstract class AbstractMetricService implements MetricService {
         metrics = new ConcurrentHashMap<>();
         registerers = new HashMap<>();
         listeners = new ArrayList<>();
+
+        Map<MetricType, MetricServiceListenerNotifier> l = new HashMap<>();
+        l.put(MetricType.COUNTER, (listener, metric, descriptor) -> listener.onCounterAdded(descriptor, (Counter) metric));
+        l.put(MetricType.GAUGE, (listener, metric, descriptor) -> listener.onGaugeAdded(descriptor, (Gauge) metric));
+        l.put(MetricType.HISTOGRAM, (listener, metric, descriptor) -> listener.onHistogramAdded(descriptor, (Histogram) metric));
+        l.put(MetricType.METER, (listener, metric, descriptor) -> listener.onMeterAdded(descriptor, (Meter) metric));
+        l.put(MetricType.TIMER, (listener, metric, descriptor) -> listener.onTimerAdded(descriptor, (Timer) metric));
+
+        listenerNotifiers = Collections.unmodifiableMap(l);
     }
 
     /**
@@ -163,19 +178,11 @@ public abstract class AbstractMetricService implements MetricService {
      * @param descriptor The {@link MetricDescriptor}
      */
     private void notifyListenerOfAddedMetric(MetricServiceListener listener, Metric metric, MetricDescriptor descriptor) {
-        //FIXME: Solve with functional interface
-        if (metric instanceof Gauge) {
-            listener.onGaugeAdded(descriptor, (Gauge<?>) metric);
-        } else if (metric instanceof Counter) {
-            listener.onCounterAdded(descriptor, (Counter) metric);
-        } else if (metric instanceof Histogram) {
-            listener.onHistogramAdded(descriptor, (Histogram) metric);
-        } else if (metric instanceof Meter) {
-            listener.onMeterAdded(descriptor, (Meter) metric);
-        } else if (metric instanceof Timer) {
-            listener.onTimerAdded(descriptor, (Timer) metric);
-        } else {
-            throw new IllegalArgumentException("Unknown metric type: " + metric.getClass());
+        MetricServiceListenerNotifier notifier = listenerNotifiers.get(descriptor.getMetricType());
+        if (notifier == null) {
+            LOG.debug("No listener notifier found for metric type '{}'", descriptor.getMetricType());
+            return;
         }
+        notifier.notify(listener, metric, descriptor);
     }
 }
