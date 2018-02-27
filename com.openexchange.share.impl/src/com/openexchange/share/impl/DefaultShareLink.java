@@ -115,11 +115,8 @@ public class DefaultShareLink implements ShareLink {
     }
 
     @Override
-    public Boolean isIncludeSubfolders() {
-        if(delegate instanceof SubfolderAwareShareInfo) {
-            return ((SubfolderAwareShareInfo) delegate).isIncludeSubfolders();
-        }
-        return false;
+    public boolean isIncludeSubfolders() {
+        return delegate instanceof SubfolderAwareShareInfo ? ((SubfolderAwareShareInfo) delegate).isIncludeSubfolders() : false;
     }
 
 }

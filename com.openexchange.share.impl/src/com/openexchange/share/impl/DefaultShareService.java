@@ -400,7 +400,7 @@ public class DefaultShareService implements ShareService {
             }
 
             boolean folderPermissionUpdate = false;
-            if (shareInfo.getTarget().getModule() == FolderObject.INFOSTORE && shareInfo.isIncludeSubfolders() != linkUpdate.isIncludeSubfolders()) {
+            if (shareInfo.isIncludeSubfolders() != linkUpdate.isIncludeSubfolders() && shareInfo.getTarget().getModule() == FolderObject.INFOSTORE) {
                 TargetPermission targetPermission = new SubfolderAwareTargetPermission(shareInfo.getGuest().getGuestID(), false, LINK_PERMISSION_BITS, FolderPermissionType.LEGATOR.getTypeNumber(), null);
                 if (shareInfo.isIncludeSubfolders()) {
                     // Remove permission in case includeSubfolders is changed from 'true' to 'false' so handed down permissions get removed as well
