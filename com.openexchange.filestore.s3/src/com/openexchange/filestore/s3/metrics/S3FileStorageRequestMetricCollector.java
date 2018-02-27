@@ -49,6 +49,8 @@
 
 package com.openexchange.filestore.s3.metrics;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import com.amazonaws.Request;
 import com.amazonaws.Response;
@@ -70,6 +72,7 @@ import com.openexchange.metrics.types.Timer;
 public class S3FileStorageRequestMetricCollector extends RequestMetricCollector {
 
     private final MetricService metricService;
+    private final ConcurrentMap<String, MetricDescriptor> metricDescriptors;
 
     /**
      * Initialises a new {@link S3FileStorageRequestMetricCollector}.
@@ -77,6 +80,7 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
     public S3FileStorageRequestMetricCollector(MetricService metricService) {
         super();
         this.metricService = metricService;
+        metricDescriptors = new ConcurrentHashMap<>(8);
     }
 
     /*
@@ -111,13 +115,32 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
             Field predefined = (Field) type;
             switch (predefined) {
                 case ClientExecuteTime:
-                    String methodName = request.getHttpMethod().name();
-                    MetricDescriptor metricDescriptor = MetricDescriptor.newBuilder("s3", "RequestTimes." + methodName, MetricType.TIMER).withDescription("The execution time of requests measured in events/sec").build();
+                    MetricDescriptor metricDescriptor = getMetricDescriptor(request.getHttpMethod().name());
                     Timer timer = metricService.getTimer(metricDescriptor);
                     timer.update(longValue, TimeUnit.MILLISECONDS);
                 default:
                     break;
             }
         }
+    }
+
+    /**
+     * Retrieves the metric decriptor for the specified HTTP method
+     * 
+     * @param methodName the method name
+     * @return The {@link MetricDescriptor} for the specified HTTP method
+     */
+    private MetricDescriptor getMetricDescriptor(String methodName) {
+        MetricDescriptor metricDescriptor = metricDescriptors.get(methodName);
+        if (metricDescriptor != null) {
+            return metricDescriptor;
+        }
+
+        metricDescriptor = MetricDescriptor.newBuilder("s3", "RequestTimes." + methodName, MetricType.TIMER).withDescription("The execution time of " + methodName + " requests measured in events/sec").build();
+        MetricDescriptor raced = metricDescriptors.putIfAbsent(methodName, metricDescriptor);
+        if (raced == null) {
+            return metricDescriptor;
+        }
+        return raced;
     }
 }

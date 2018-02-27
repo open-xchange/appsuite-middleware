@@ -49,6 +49,7 @@
 
 package com.openexchange.filestore.s3.metrics;
 
+import com.amazonaws.metrics.MetricCollector;
 import com.amazonaws.metrics.RequestMetricCollector;
 import com.amazonaws.metrics.ServiceMetricCollector;
 import com.openexchange.config.lean.LeanConfigurationService;
@@ -61,14 +62,13 @@ import com.openexchange.metrics.MetricService;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class S3FileStorageMetricCollector extends com.amazonaws.metrics.MetricCollector {
+public class S3FileStorageMetricCollector extends MetricCollector {
 
     private boolean started;
     private final MetricService metrics;
     private final LeanConfigurationService config;
     private RequestMetricCollector s3FileStorageRequestMetricCollector;
     private ServiceMetricCollector s3FileStorageServiceMetricCollector;
-
 
     /**
      * Initialises a new {@link S3FileStorageMetricCollector}.
@@ -89,14 +89,15 @@ public class S3FileStorageMetricCollector extends com.amazonaws.metrics.MetricCo
      */
     @Override
     public synchronized boolean start() {
-        if (!started) {
-            s3FileStorageRequestMetricCollector = new S3FileStorageRequestMetricCollector(metrics);
-            s3FileStorageServiceMetricCollector = new S3FileStorageServiceMetricCollector(metrics);
-            started = true;
-            return true;
+        if (started) {
+            return false;
         }
 
-        return false;
+        // Not started? Initliase the request and service metric collectors
+        s3FileStorageRequestMetricCollector = new S3FileStorageRequestMetricCollector(metrics);
+        s3FileStorageServiceMetricCollector = new S3FileStorageServiceMetricCollector(metrics);
+        started = true;
+        return true;
     }
 
     /*
@@ -106,14 +107,15 @@ public class S3FileStorageMetricCollector extends com.amazonaws.metrics.MetricCo
      */
     @Override
     public synchronized boolean stop() {
-        if (started) {
-            s3FileStorageRequestMetricCollector = RequestMetricCollector.NONE;
-            s3FileStorageServiceMetricCollector = ServiceMetricCollector.NONE;
-            started = false;
-            return true;
+        if (false == started) {
+            return false;
         }
 
-        return false;
+        // Was started? Replace the request and service metric collectors
+        s3FileStorageRequestMetricCollector = RequestMetricCollector.NONE;
+        s3FileStorageServiceMetricCollector = ServiceMetricCollector.NONE;
+        started = false;
+        return true;
     }
 
     /*
