@@ -217,7 +217,7 @@ public interface Session {
      * @type <code>java.lang.String</code>
      */
     public static final String PARAM_OAUTH_REFRESH_TOKEN = "__session.oauth.refresh".intern();
-    
+
     /**
      * The parameter that holds when the Oauth token expires.
      *
@@ -234,11 +234,15 @@ public interface Session {
 
     /**
      * The parameter for optional user agent associated with a session.
+     *
+     * @type <code>java.lang.String</code>
      */
     public static final String PARAM_USER_AGENT = "__session.useragent".intern();
 
     /**
      * The parameter for optional login time associated with a session
+     *
+     * @type <code>java.lang.Long</code>
      */
     public static final String PARAM_LOGIN_TIME = "__session.logintime".intern();
 
@@ -248,6 +252,8 @@ public interface Session {
      * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
      * <b>Note</b>: This parameter is not spread through cluster
      * </div>
+     *
+     * @type <code>java.lang.Long</code>
      */
     public static final String PARAM_LOCAL_LAST_ACTIVE = "__session.locallastactive".intern();
 

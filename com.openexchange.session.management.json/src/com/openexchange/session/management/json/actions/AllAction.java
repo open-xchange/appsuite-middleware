@@ -90,12 +90,10 @@ public class AllAction implements AJAXActionService {
         if (null == service) {
             throw ServiceExceptionCode.absentService(SessionManagementService.class);
         }
+
         Locale locale = session.getUser().getLocale();
-        String unknownLocation = SessionManagementStrings.UNKNOWN_LOCATION;
-        StringHelper helper = StringHelper.valueOf(locale);
-        if (null != helper) {
-            unknownLocation = helper.getString(SessionManagementStrings.UNKNOWN_LOCATION);
-        }
+        String unknownLocation = StringHelper.valueOf(locale).getString(SessionManagementStrings.UNKNOWN_LOCATION);
+
         Collection<ManagedSession> sessions = service.getSessionsForUser(session);
         JSONArray browsers = new JSONArray();
         JSONArray oxapps = new JSONArray();
@@ -104,7 +102,7 @@ public class AllAction implements AJAXActionService {
         JSONArray result = new JSONArray();
         try {
             for (ManagedSession s : sessions) {
-                JSONObject json = new JSONObject(7);
+                JSONObject json = new JSONObject(12);
                 json.put("sessionId", s.getSessionId());
                 json.put("ipAddress", s.getIpAddress());
                 json.put("client", s.getClient());
@@ -119,11 +117,7 @@ public class AllAction implements AJAXActionService {
                 }
                 long lastActive = s.getLastActive();
                 if (0 < lastActive) {
-                    if (lastActive > loginTime) {
-                        json.put("lastActive", lastActive);
-                    } else {
-                        json.put("lastActive", loginTime);
-                    }
+                    json.put("lastActive", lastActive > loginTime ? lastActive : loginTime);
                 }
                 JSONObject deviceInfo = getDeviceInfo(s, locale);
                 if (null != deviceInfo) {
@@ -164,36 +158,33 @@ public class AllAction implements AJAXActionService {
         return new AJAXRequestResult(result, "json");
     }
 
-    private JSONObject getDeviceInfo(ManagedSession session, Locale locale) {
-        JSONObject deviceInfo = new JSONObject(3);
-        try {
-            ClientInfoService service = services.getService(ClientInfoService.class);
-            if (null != service) {
-                ClientInfo info = service.getClientInfo(session.getSession());
-                if (null != info) {
-                    deviceInfo.put("displayName", info.getDisplayName(locale));
-                    JSONObject os = new JSONObject(2);
-                    os.put("name", info.getOSFamily());
-                    os.put("version", info.getOSVersion());
-                    deviceInfo.put("os", os);
-                    JSONObject client = new JSONObject(3);
-                    client.put("name", info.getClientName());
-                    client.put("version", info.getClientVersion());
-                    client.put("type", info.getType().getName());
-                    deviceInfo.put("client", client);
-                    return deviceInfo;
-                }
+    private JSONObject getDeviceInfo(ManagedSession session, Locale locale) throws JSONException {
+        ClientInfoService service = services.getService(ClientInfoService.class);
+        if (null != service) {
+            ClientInfo info = service.getClientInfo(session.getSession());
+            if (null != info) {
+                JSONObject jDeviceInfo = new JSONObject(3);
+                jDeviceInfo.put("displayName", info.getDisplayName(locale));
+                JSONObject jOS = new JSONObject(2);
+                jOS.put("name", info.getOSFamily());
+                jOS.put("version", info.getOSVersion());
+                jDeviceInfo.put("os", jOS);
+                JSONObject jClient = new JSONObject(3);
+                jClient.put("name", info.getClientName());
+                jClient.put("version", info.getClientVersion());
+                jClient.put("type", info.getType().getName());
+                jDeviceInfo.put("client", jClient);
+                return jDeviceInfo;
             }
-            StringHelper helper = StringHelper.valueOf(locale);
-            deviceInfo.put("displayName", helper.getString(SessionManagementStrings.UNKNOWN_DEVICE));
-            JSONObject client = new JSONObject(1);
-            client.put("type", "other");
-            deviceInfo.put("client", client);
-            return deviceInfo;
-        } catch (JSONException e) {
-            // will not happen
         }
-        return deviceInfo;
+
+        // Either missing service or no such ClientInfo instance for specified session
+        JSONObject jUnknownDeviceInfo = new JSONObject(3);
+        jUnknownDeviceInfo.put("displayName", StringHelper.valueOf(locale).getString(SessionManagementStrings.UNKNOWN_DEVICE));
+        JSONObject jClient = new JSONObject(1);
+        jClient.put("type", "other");
+        jUnknownDeviceInfo.put("client", jClient);
+        return jUnknownDeviceInfo;
     }
 
 }

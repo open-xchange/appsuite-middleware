@@ -49,6 +49,12 @@
 
 package com.openexchange.dav;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.openexchange.ajax.Client;
 import com.openexchange.clientinfo.ClientInfo;
 import com.openexchange.clientinfo.ClientInfoProvider;
@@ -65,14 +71,55 @@ import net.sf.uadetector.ReadableUserAgent;
  */
 public class DAVClientInfoProvider implements ClientInfoProvider {
 
-    private UserAgentParser userAgentParser;
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(DAVClientInfoProvider.class);
+
+    private final LoadingCache<String, DAVClientInfo> clientInfoCache;
 
     /**
      * Initializes a new {@link DAVClientInfoProvider}.
      */
-    public DAVClientInfoProvider(UserAgentParser userAgentParser) {
+    public DAVClientInfoProvider(final UserAgentParser userAgentParser) {
         super();
-        this.userAgentParser = userAgentParser;
+        CacheLoader<String, DAVClientInfo> loader = new CacheLoader<String, DAVClientInfo>() {
+
+            @Override
+            public DAVClientInfo load(String sUserAgent) throws Exception {
+                DAVUserAgent userAgent = DAVUserAgent.parse(sUserAgent);
+                ReadableUserAgent readableUserAgent = userAgentParser.parse(sUserAgent);
+                if (null == readableUserAgent) {
+                    // Unknown User-Agent
+                    return new DAVClientInfo(userAgent.getReadableName());
+                }
+
+                String osVersion = null;
+                String osFamily = null;
+                if (null != readableUserAgent.getOperatingSystem()) {
+                    osFamily = readableUserAgent.getOperatingSystem().getFamilyName();
+                    String osVersionMajor = readableUserAgent.getOperatingSystem().getVersionNumber().getMajor();
+                    String osVersionMinor = readableUserAgent.getOperatingSystem().getVersionNumber().getMinor();
+                    if (Strings.isNotEmpty(osVersionMajor)) {
+                        if (Strings.isNotEmpty(osVersionMinor)) {
+                            osVersion = new StringBuilder(osVersionMajor).append(".").append(osVersionMinor).toString();
+                        } else {
+                            osVersion = osVersionMajor;
+                        }
+                    }
+                }
+                String clientVersion = null;
+                String client = readableUserAgent.getName();
+                String clientVersionMajor = readableUserAgent.getVersionNumber().getMajor();
+                String clientVersionMinor = readableUserAgent.getVersionNumber().getMinor();
+                if (Strings.isNotEmpty(clientVersionMajor)) {
+                    if (Strings.isNotEmpty(clientVersionMinor)) {
+                        clientVersion = new StringBuilder(clientVersionMajor).append('.').append(clientVersionMinor).toString();
+                    } else {
+                        clientVersion = clientVersionMajor;
+                    }
+                }
+                return new DAVClientInfo(userAgent.getReadableName(), osFamily, osVersion, client, clientVersion);
+            }
+        };
+        clientInfoCache = CacheBuilder.newBuilder().initialCapacity(128).maximumSize(65536).expireAfterAccess(2, TimeUnit.HOURS).build(loader);
     }
 
     @Override
@@ -80,37 +127,19 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
         if (null == session) {
             return null;
         }
-        DAVUserAgent userAgent = getDAVUserAgent(session);
-        ReadableUserAgent readableUserAgent = userAgentParser.parse((String) session.getParameter(Session.PARAM_USER_AGENT));
-        if (null != readableUserAgent) {
-            String osVersion = null;
-            String osFamily = null;
-            if (null != readableUserAgent.getOperatingSystem()) {
-                osFamily = readableUserAgent.getOperatingSystem().getFamilyName();
-                String osVersionMajor = readableUserAgent.getOperatingSystem().getVersionNumber().getMajor();
-                String osVersionMinor = readableUserAgent.getOperatingSystem().getVersionNumber().getMinor();
-                if (Strings.isNotEmpty(osVersionMajor)) {
-                    if (Strings.isNotEmpty(osVersionMinor)) {
-                        osVersion = new StringBuilder(osVersionMajor).append(".").append(osVersionMinor).toString();
-                    } else {
-                        osVersion = osVersionMajor;
-                    }
-                }
-            }
-            String clientVersion = null;
-            String client = readableUserAgent.getName();
-            String clientVersionMajor = readableUserAgent.getVersionNumber().getMajor();
-            String clientVersionMinor = readableUserAgent.getVersionNumber().getMinor();
-            if (Strings.isNotEmpty(clientVersionMajor)) {
-                if (Strings.isNotEmpty(clientVersionMinor)) {
-                    clientVersion = new StringBuilder(clientVersionMajor).append(".").append(clientVersionMinor).toString();
-                } else {
-                    clientVersion = clientVersionMajor;
-                }
-            }
-            return new DAVClientInfo(userAgent.getReadableName(), osFamily, osVersion, client, clientVersion);
+
+        String sUserAgent = (String) session.getParameter(Session.PARAM_USER_AGENT);
+        if (Strings.isEmpty(sUserAgent)) {
+            // Unknown User-Agent
+            return new DAVClientInfo(DAVUserAgent.UNKNOWN.getReadableName());
         }
-        return new DAVClientInfo(userAgent.getReadableName());
+
+        try {
+            return clientInfoCache.get(sUserAgent);
+        } catch (ExecutionException e) {
+            LOG.error("Failed to determine client info for User-Agent {}", sUserAgent, e.getCause());
+            return new DAVClientInfo(DAVUserAgent.UNKNOWN.getReadableName());
+        }
     }
 
     @Override
@@ -126,14 +155,6 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
             return new DAVClientInfo(DAVUserAgent.GENERIC_CARDDAV.getReadableName());
         }
         return null;
-    }
-
-    private static DAVUserAgent getDAVUserAgent(Session session) {
-        Object userAgentParameter = session.getParameter(Session.PARAM_USER_AGENT);
-        if (null != userAgentParameter && String.class.isInstance(userAgentParameter)) {
-            return DAVUserAgent.parse((String) userAgentParameter);
-        }
-        return DAVUserAgent.UNKNOWN;
     }
 
 }

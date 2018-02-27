@@ -68,7 +68,7 @@ public class MailAppClientInfoProvider implements ClientInfoProvider {
 
     private final ServiceLookup services;
 
-    public MailAppClientInfoProvider(ServiceLookup services) {
+    public MailAppClientInfoProvider(final ServiceLookup services) {
         super();
         this.services = services;
     }
@@ -76,41 +76,45 @@ public class MailAppClientInfoProvider implements ClientInfoProvider {
     @Override
     public ClientInfo getClientInfo(Session session) {
         String clientId = session.getClient();
-        if (Strings.isNotEmpty(clientId)) {
-            UserAgentParser userAgentParser = services.getService(UserAgentParser.class);
-            if (null != userAgentParser)  {
-                ReadableUserAgent readableUserAgent = userAgentParser.parse((String) session.getParameter(Session.PARAM_USER_AGENT));
-                String platform = readableUserAgent.getOperatingSystem().getFamilyName();
-                String osVersionMajor = readableUserAgent.getOperatingSystem().getVersionNumber().getMajor();
-                String osVersionMinor = readableUserAgent.getOperatingSystem().getVersionNumber().getMinor();
-                String platformVersion = null;
-                if (Strings.isNotEmpty(osVersionMajor)) {
-                    if (Strings.isNotEmpty(osVersionMinor)) {
-                        platformVersion = new StringBuilder(osVersionMajor).append(".").append(osVersionMinor).toString();
-                    } else {
-                        platformVersion = osVersionMajor;
-                    }
-                }
-                if (clientId.startsWith("open-xchange-mobile-api-facade")) {
-                    return new MailAppClientInfo("OX Mail App (new)", null, platform, platformVersion);
-                } else if (clientId.equals("open-xchange-mailapp")) {
-                    return new MailAppClientInfo("OX Mail App (old)", null, platform, platformVersion);
-                }
+        if (Strings.isEmpty(clientId)) {
+            return null;
+        }
+
+        UserAgentParser userAgentParser = services.getService(UserAgentParser.class);
+        if (null == userAgentParser) {
+            return getClientInfo(clientId);
+        }
+
+        ReadableUserAgent readableUserAgent = userAgentParser.parse((String) session.getParameter(Session.PARAM_USER_AGENT));
+        String platform = readableUserAgent.getOperatingSystem().getFamilyName();
+        String osVersionMajor = readableUserAgent.getOperatingSystem().getVersionNumber().getMajor();
+        String osVersionMinor = readableUserAgent.getOperatingSystem().getVersionNumber().getMinor();
+        String platformVersion = null;
+        if (Strings.isNotEmpty(osVersionMajor)) {
+            if (Strings.isNotEmpty(osVersionMinor)) {
+                platformVersion = new StringBuilder(osVersionMajor).append('.').append(osVersionMinor).toString();
             } else {
-                return getClientInfo(clientId);
+                platformVersion = osVersionMajor;
             }
+        }
+        if (clientId.startsWith("open-xchange-mobile-api-facade")) {
+            return new MailAppClientInfo("OX Mail App (new)", null, platform, platformVersion);
+        } else if (clientId.equals("open-xchange-mailapp")) {
+            return new MailAppClientInfo("OX Mail App (old)", null, platform, platformVersion);
         }
         return null;
     }
 
     @Override
     public ClientInfo getClientInfo(String clientId) {
-        if (Strings.isNotEmpty(clientId)) {
-            if (clientId.startsWith("open-xchange-mobile-api-facade")) {
-                return new MailAppClientInfo("OX Mail App (new)");
-            } else if (clientId.equals("open-xchange-mailapp")) {
-                return new MailAppClientInfo("OX Mail App (old)");
-            }
+        if (Strings.isEmpty(clientId)) {
+            return null;
+        }
+
+        if (clientId.startsWith("open-xchange-mobile-api-facade")) {
+            return new MailAppClientInfo("OX Mail App (new)");
+        } else if (clientId.equals("open-xchange-mailapp")) {
+            return new MailAppClientInfo("OX Mail App (old)");
         }
         return null;
     }

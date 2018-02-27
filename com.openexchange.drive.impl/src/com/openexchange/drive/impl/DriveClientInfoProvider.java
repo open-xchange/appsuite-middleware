@@ -64,12 +64,16 @@ import com.openexchange.session.Session;
  */
 public class DriveClientInfoProvider implements ClientInfoProvider {
 
+    /**
+     * Initializes a new {@link DriveClientInfoProvider}.
+     */
+    public DriveClientInfoProvider() {
+        super();
+    }
+
     @Override
     public ClientInfo getClientInfo(Session session) {
-        if (null != session) {
-            return getClientInfo(session.getClient());
-        }
-        return null;
+        return null == session ? null : getClientInfo(session.getClient());
     }
 
     @Override

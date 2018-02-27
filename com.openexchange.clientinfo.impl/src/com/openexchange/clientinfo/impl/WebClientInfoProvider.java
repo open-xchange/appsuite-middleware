@@ -49,9 +49,12 @@
 
 package com.openexchange.clientinfo.impl;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.Client;
 import com.openexchange.clientinfo.ClientInfo;
 import com.openexchange.clientinfo.ClientInfoProvider;
@@ -73,11 +76,8 @@ import net.sf.uadetector.ReadableUserAgent;
  */
 public class WebClientInfoProvider implements ClientInfoProvider {
 
-    private final String APPSUITE = "OX App Suite";
-    private final String OX6 = "OX6 UI";
-    private final ServiceLookup services;
-
-    private final Map<String, String> osMapping;
+    private static final String CLIENT_APPSUITE = "OX App Suite";
+    private static final String CLIENT_OX6 = "OX6 UI";
 
     private static final String OS_FAMILY_WINDOWS  = "windows";
     private static final String OS_FAMILY_MACOS = "os x";
@@ -85,6 +85,9 @@ public class WebClientInfoProvider implements ClientInfoProvider {
     private static final String OS_FAMILY_ANDROID = "android";
     private static final String OS_FAMILY_IOS = "ios";
 
+    private final ServiceLookup services;
+    private final Map<String, String> osMapping;
+    private final Cache<Key, WebClientInfo> clientInfoCache;
 
     /**
      * Initializes a new {@link WebClientInfoProvider}.
@@ -94,22 +97,33 @@ public class WebClientInfoProvider implements ClientInfoProvider {
     public WebClientInfoProvider(ServiceLookup services) {
         super();
         this.services = services;
-        this.osMapping = this.createOSMapping();
-    }
-
-    private Map<String, String> createOSMapping() {
         Map<String, String> map = new HashMap<>();
         map.put("6.0", "Windows Vista");
         map.put("6.1", "Windows 7");
         map.put("6.2", "Windows 8");
         map.put("6.3", "Windows 8.1");
         map.put("10.0", "Windows 10");
-        return Collections.unmodifiableMap(map);
+        this.osMapping = ImmutableMap.copyOf(map);
+
+        clientInfoCache = CacheBuilder.newBuilder().initialCapacity(128).maximumSize(65536).expireAfterAccess(2, TimeUnit.HOURS).build();
     }
 
     @Override
     public ClientInfo getClientInfo(Session session) {
         if (null != session) {
+            // Get User-Agent from session
+            String userAgent = (String) session.getParameter(Session.PARAM_USER_AGENT);
+            if (Strings.isEmpty(userAgent)) {
+                return getClientInfo(session.getClient());
+            }
+
+            // Acquire needed service
+            UserAgentParser parser = services.getService(UserAgentParser.class);
+            if (null == parser) {
+                return getClientInfo(session.getClient());
+            }
+
+            // Determine client
             String client = "";
             if (Client.APPSUITE_UI.getClientId().equals(session.getClient())) {
                 ServerConfigService serverConfigService = services.getService(ServerConfigService.class);
@@ -119,94 +133,99 @@ public class WebClientInfoProvider implements ClientInfoProvider {
                         ServerConfig config = serverConfigService.getServerConfig(hostname, session);
                         client = config.getProductName();
                     } catch (OXException e) {
-                        client = APPSUITE;
+                        client = CLIENT_APPSUITE;
                     }
                 }
-            }
-            if (Client.OX6_UI.getClientId().equals(session.getClient())) {
-                client = OX6;
+            } else if (Client.OX6_UI.getClientId().equals(session.getClient())) {
+                client = CLIENT_OX6;
             }
             if (Strings.isEmpty(client)) {
                 return null;
             }
-            UserAgentParser parser = services.getService(UserAgentParser.class);
-            String userAgent = (String) session.getParameter(Session.PARAM_USER_AGENT);
-            if (null != parser && Strings.isNotEmpty(userAgent)) {
-                ReadableUserAgent info = parser.parse(userAgent);
-                OperatingSystem operatingSystem = info.getOperatingSystem();
-                String os = null;
-                String osVersion = null;
-                StringBuilder osReadableName = new StringBuilder();
-                if (null != operatingSystem) {
-                    os = operatingSystem.getFamilyName();
-                    if (Strings.isNotEmpty(os)) {
-                        os = os.toLowerCase();
-                    }
-                    String osVersionMajor = operatingSystem.getVersionNumber().getMajor();
-                    String osVersionMinor = operatingSystem.getVersionNumber().getMinor();
-                    switch (os) {
-                        case OS_FAMILY_WINDOWS:
-                            String mappedOs = osMapping.get(getVersionNumber(operatingSystem));
-                            if (Strings.isNotEmpty(mappedOs)) {
-                                osReadableName.append(mappedOs);
-                            } else {
-                                osReadableName.append("Windows").append(" ").append(osVersionMajor).append(".").append(osVersionMinor);
-                            }
-                            break;
-                        case OS_FAMILY_MACOS:
-                            try {
-                                int major = Integer.parseInt(osVersionMajor);
-                                int minor = Integer.parseInt(osVersionMinor);
-                                if (major >= 10 && minor >= 12) {
-                                    osReadableName.append("macOS ").append(osVersionMajor).append(".").append(osVersionMinor);
-                                }
-                            } catch (NumberFormatException e) {
-                                osReadableName.append("MacOS X");
-                            }
-                            break;
-                        case OS_FAMILY_ANDROID:
-                            osReadableName.append("Android ").append(osVersionMajor);
-                            if (Strings.isNotEmpty(osVersionMinor)) {
-                                osReadableName.append(".").append(osVersionMinor);
-                            }
-                            break;
-                        case OS_FAMILY_LINUX:
-                            osReadableName.append("Linux");
-                            break;
-                        case OS_FAMILY_IOS:
-                            osReadableName.append("iOS ").append(osVersionMajor);
-                            if (Strings.isNotEmpty(osVersionMinor)) {
-                                osReadableName.append(".").append(osVersionMinor);
-                            }
-                            break;
-                    }
-                    if (Strings.isNotEmpty(osVersionMajor)) {
-                        if (Strings.isNotEmpty(osVersionMinor)) {
-                            osVersion = new StringBuilder(osVersionMajor).append(".").append(osVersionMinor).toString();
-                        } else {
-                            osVersion = osVersionMajor;
-                        }
-                    }
-                }
 
-                String browser = info.getName();
-                String browserVersion = info.getVersionNumber().getMajor();
-                if ("Chrome".equals(browser)) {
-                    if (userAgent.contains("Edge")) { // MS Edge
-                        browser = "Edge";
-                        browserVersion = null;
-                    }
-                }
-                if ("Mozilla".equals(browser)) {
-                    if (userAgent.contains("Trident/7.0; rv:11.0")) { //MSIE 11
-                        browser = "Internet Explorer";
-                        browserVersion = "11";
-                    }
-                }
-
-                return new WebClientInfo(client, osReadableName.toString(), os, osVersion, browser, browserVersion);
+            // Check if still/already present in cache
+            Key key = new Key(userAgent, client);
+            WebClientInfo webClientInfo = clientInfoCache.getIfPresent(key);
+            if (null != webClientInfo) {
+                return webClientInfo;
             }
-            return getClientInfo(session.getClient());
+
+            // ... otherwise determine client info
+            ReadableUserAgent info = parser.parse(userAgent);
+            OperatingSystem operatingSystem = info.getOperatingSystem();
+            String os = null;
+            String osVersion = null;
+            StringBuilder osReadableName = new StringBuilder();
+            if (null != operatingSystem) {
+                os = operatingSystem.getFamilyName();
+                if (Strings.isNotEmpty(os)) {
+                    os = os.toLowerCase();
+                }
+                String osVersionMajor = operatingSystem.getVersionNumber().getMajor();
+                String osVersionMinor = operatingSystem.getVersionNumber().getMinor();
+                switch (os) {
+                    case OS_FAMILY_WINDOWS:
+                        String mappedOs = osMapping.get(getVersionNumber(operatingSystem));
+                        if (Strings.isNotEmpty(mappedOs)) {
+                            osReadableName.append(mappedOs);
+                        } else {
+                            osReadableName.append("Windows").append(" ").append(osVersionMajor).append(".").append(osVersionMinor);
+                        }
+                        break;
+                    case OS_FAMILY_MACOS:
+                        try {
+                            int major = Integer.parseInt(osVersionMajor);
+                            int minor = Integer.parseInt(osVersionMinor);
+                            if (major >= 10 && minor >= 12) {
+                                osReadableName.append("macOS ").append(osVersionMajor).append(".").append(osVersionMinor);
+                            }
+                        } catch (NumberFormatException e) {
+                            osReadableName.append("MacOS X");
+                        }
+                        break;
+                    case OS_FAMILY_ANDROID:
+                        osReadableName.append("Android ").append(osVersionMajor);
+                        if (Strings.isNotEmpty(osVersionMinor)) {
+                            osReadableName.append(".").append(osVersionMinor);
+                        }
+                        break;
+                    case OS_FAMILY_LINUX:
+                        osReadableName.append("Linux");
+                        break;
+                    case OS_FAMILY_IOS:
+                        osReadableName.append("iOS ").append(osVersionMajor);
+                        if (Strings.isNotEmpty(osVersionMinor)) {
+                            osReadableName.append(".").append(osVersionMinor);
+                        }
+                        break;
+                }
+                if (Strings.isNotEmpty(osVersionMajor)) {
+                    if (Strings.isNotEmpty(osVersionMinor)) {
+                        osVersion = new StringBuilder(osVersionMajor).append(".").append(osVersionMinor).toString();
+                    } else {
+                        osVersion = osVersionMajor;
+                    }
+                }
+            }
+
+            String browser = info.getName();
+            String browserVersion = info.getVersionNumber().getMajor();
+            if ("Chrome".equals(browser)) {
+                if (userAgent.contains("Edge")) { // MS Edge
+                    browser = "Edge";
+                    browserVersion = null;
+                }
+            }
+            if ("Mozilla".equals(browser)) {
+                if (userAgent.contains("Trident/7.0; rv:11.0")) { //MSIE 11
+                    browser = "Internet Explorer";
+                    browserVersion = "11";
+                }
+            }
+
+            webClientInfo = new WebClientInfo(client, osReadableName.toString(), os, osVersion, browser, browserVersion);
+            clientInfoCache.put(key, webClientInfo);
+            return webClientInfo;
         }
 
         return null;
@@ -216,9 +235,9 @@ public class WebClientInfoProvider implements ClientInfoProvider {
     public ClientInfo getClientInfo(String clientId) {
         String client = "";
         if (Client.APPSUITE_UI.getClientId().equals(clientId)) {
-            client = APPSUITE;
+            client = CLIENT_APPSUITE;
         } else if (Client.OX6_UI.getClientId().equals(clientId)) {
-            client = OX6;
+            client = CLIENT_OX6;
         } else {
             return null;
         }
@@ -229,6 +248,56 @@ public class WebClientInfoProvider implements ClientInfoProvider {
         StringBuilder sb = new StringBuilder();
         sb.append(operatingSystem.getVersionNumber().getMajor()).append(".").append(operatingSystem.getVersionNumber().getMinor());
         return sb.toString();
+    }
+
+    private static class Key {
+
+        private final String client;
+        private final String userAgent;
+
+        Key(String userAgent, String client) {
+            super();
+            this.userAgent = userAgent;
+            this.client = client;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((client == null) ? 0 : client.hashCode());
+            result = prime * result + ((userAgent == null) ? 0 : userAgent.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            Key other = (Key) obj;
+            if (client == null) {
+                if (other.client != null) {
+                    return false;
+                }
+            } else if (!client.equals(other.client)) {
+                return false;
+            }
+            if (userAgent == null) {
+                if (other.userAgent != null) {
+                    return false;
+                }
+            } else if (!userAgent.equals(other.userAgent)) {
+                return false;
+            }
+            return true;
+        }
     }
 
 }

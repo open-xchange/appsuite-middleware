@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.session.management.osgi;
+package com.openexchange.session.management.impl.osgi;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;

@@ -31,4 +31,4 @@ Import-Package: com.google.common.annotations,
  javax.servlet.http;version="4.0.0",
  org.osgi.framework,
  org.slf4j
-Bundle-Activator: com.openexchange.session.management.osgi.SessionManagementActivator
+Bundle-Activator: com.openexchange.session.management.impl.osgi.SessionManagementActivator
