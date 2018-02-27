@@ -507,7 +507,7 @@ public final class CSSMatcher {
         if (cssBld.indexOf("{") < 0) {
             return checkCSSElements(cssBld, styleMap, removeIfAbsent);
         }
-        final String css = dropComments(dropSpaces(dropCRLFs(cssBld)));
+        final String css = dropComments(replaceMultipleSpacesWithSpace(replaceCRLFsWithSpace(cssBld)));
         final int length = css.length();
         cssBld.setLength(0);
         final Stringer cssElemsBuffer = new StringBuilderStringer(new StringBuilder(length));
@@ -564,7 +564,7 @@ public final class CSSMatcher {
         return modified;
     }
 
-    private static String dropCRLFs(CharSequence s) {
+    private static String replaceCRLFsWithSpace(CharSequence s) {
         StringBuilder sb = null;
         for (int i = 0, length = s.length(), pos = -1; i < length; i++) {
             char ch = s.charAt(i);
@@ -591,7 +591,7 @@ public final class CSSMatcher {
         return null == sb ? s.toString() : sb.toString();
     }
 
-    private static String dropSpaces(CharSequence s) {
+    private static String replaceMultipleSpacesWithSpace(CharSequence s) {
         StringBuilder sb = null;
         for (int i = 0, length = s.length(), wspos = -1; i < length; i++) {
             char ch = s.charAt(i);
@@ -784,7 +784,7 @@ public final class CSSMatcher {
         if (cssBuilder.indexOf("{") < 0) {
             return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
         }
-        final String css = dropCRLFs(cssBuilder);
+        final String css = replaceCRLFsWithSpace(cssBuilder);
         try {
             final int cssLength = css.length();
             final Stringer cssElemsBuffer = new StringBuilderStringer(new StringBuilder(cssLength));
@@ -850,7 +850,7 @@ public final class CSSMatcher {
             if (cssBuilder.indexOf("{") < 0) {
                 return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
             }
-            final String css = dropCRLFs(cssBuilder);
+            final String css = replaceCRLFsWithSpace(cssBuilder);
             final Matcher m = PATTERN_STYLE_STARTING_BLOCK.matcher(InterruptibleCharSequence.valueOf(css));
             final MatcherReplacer mr = new MatcherReplacer(m, css);
             final Thread thread = Thread.currentThread();
