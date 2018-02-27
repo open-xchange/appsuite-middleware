@@ -56,7 +56,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.function.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.metrics.jmx.MetricServiceListener;
@@ -77,8 +76,9 @@ public abstract class AbstractMetricService implements MetricService {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractMetricService.class);
 
     private final ConcurrentMap<String, Metric> metrics;
-    private final Map<MetricType, Function<MetricDescriptor, Metric>> registerers;
-    private final Map<MetricType, MetricServiceListenerNotifier> listenerNotifiers;
+    private final Map<MetricType, MetricRegisterer> registerers;
+    private final Map<MetricType, MetricServiceListenerNotifier> listenerNotifiersOnAdd;
+    private final Map<MetricType, MetricServiceListenerNotifier> listenerNotifiersOnRemove;
     private final List<MetricServiceListener> listeners;
 
     /**
@@ -97,7 +97,16 @@ public abstract class AbstractMetricService implements MetricService {
         l.put(MetricType.METER, (listener, metric, descriptor) -> listener.onMeterAdded(descriptor, (Meter) metric));
         l.put(MetricType.TIMER, (listener, metric, descriptor) -> listener.onTimerAdded(descriptor, (Timer) metric));
 
-        listenerNotifiers = Collections.unmodifiableMap(l);
+        listenerNotifiersOnAdd = Collections.unmodifiableMap(l);
+
+        l = new HashMap<>();
+        l.put(MetricType.COUNTER, (listener, metric, descriptor) -> listener.onCounterRemoved(descriptor.getFullName()));
+        l.put(MetricType.GAUGE, (listener, metric, descriptor) -> listener.onGaugeRemoved(descriptor.getFullName()));
+        l.put(MetricType.HISTOGRAM, (listener, metric, descriptor) -> listener.onHistogramRemoved(descriptor.getFullName()));
+        l.put(MetricType.METER, (listener, metric, descriptor) -> listener.onMeterRemoved(descriptor.getFullName()));
+        l.put(MetricType.TIMER, (listener, metric, descriptor) -> listener.onTimerRemoved(descriptor.getFullName()));
+
+        listenerNotifiersOnRemove = Collections.unmodifiableMap(l);
     }
 
     /**
@@ -106,7 +115,7 @@ public abstract class AbstractMetricService implements MetricService {
      * @param metricType The {@link MetricType}
      * @param registerer The registerer
      */
-    protected void addRegisterer(MetricType metricType, Function<MetricDescriptor, Metric> registerer) {
+    protected void addRegisterer(MetricType metricType, MetricRegisterer registerer) {
         registerers.put(metricType, registerer);
     }
 
@@ -145,17 +154,30 @@ public abstract class AbstractMetricService implements MetricService {
             return metric;
         }
 
-        Function<MetricDescriptor, Metric> registerer = registerers.get(descriptor.getMetricType());
+        MetricRegisterer registerer = registerers.get(descriptor.getMetricType());
         if (registerer == null) {
             throw new IllegalArgumentException("There is no metric registerer for metric type '" + descriptor.getMetricType() + "'");
         }
-        Metric dropwizardMetric = registerer.apply(descriptor);
+        Metric dropwizardMetric = registerer.register(descriptor);
         Metric raced = metrics.putIfAbsent(key, dropwizardMetric);
         if (raced == null) {
             notifyListenersOnAdd(descriptor, dropwizardMetric);
             return dropwizardMetric;
         }
         return raced;
+    }
+
+    /**
+     * Remove the specified metric
+     * 
+     * @param metricDescriptor
+     */
+    protected void remove(MetricDescriptor metricDescriptor) {
+        String key = metricDescriptor.getFullName();
+        metrics.remove(key);
+        MetricRegisterer registerer = registerers.get(metricDescriptor.getMetricType());
+        registerer.unregister(metricDescriptor);
+        notifyListenersOnRemove(metricDescriptor);
     }
 
     /**
@@ -171,6 +193,18 @@ public abstract class AbstractMetricService implements MetricService {
     }
 
     /**
+     * Notifies all listeners about the specified removed {@link Metric}
+     * 
+     * @param descriptor The {@link MetricDescriptor}
+     * @param metric The added {@link Metric}
+     */
+    private void notifyListenersOnRemove(MetricDescriptor descriptor) {
+        for (MetricServiceListener listener : listeners) {
+            notifyListenerOfRemovedMetric(listener, descriptor);
+        }
+    }
+
+    /**
      * Notifies the specified listener about the specified added {@link Metric}
      * 
      * @param listener The listener to notify
@@ -178,11 +212,27 @@ public abstract class AbstractMetricService implements MetricService {
      * @param descriptor The {@link MetricDescriptor}
      */
     private void notifyListenerOfAddedMetric(MetricServiceListener listener, Metric metric, MetricDescriptor descriptor) {
-        MetricServiceListenerNotifier notifier = listenerNotifiers.get(descriptor.getMetricType());
+        MetricServiceListenerNotifier notifier = listenerNotifiersOnAdd.get(descriptor.getMetricType());
         if (notifier == null) {
             LOG.debug("No listener notifier found for metric type '{}'", descriptor.getMetricType());
             return;
         }
         notifier.notify(listener, metric, descriptor);
+    }
+
+    /**
+     * Notifies the specified listener about the specified removed {@link Metric}
+     * 
+     * @param listener The listener to notify
+     * @param metric The {@link Metric}
+     * @param descriptor The {@link MetricDescriptor}
+     */
+    private void notifyListenerOfRemovedMetric(MetricServiceListener listener, MetricDescriptor descriptor) {
+        MetricServiceListenerNotifier notifier = listenerNotifiersOnAdd.get(descriptor.getMetricType());
+        if (notifier == null) {
+            LOG.debug("No listener notifier found for metric type '{}'", descriptor.getMetricType());
+            return;
+        }
+        notifier.notify(listener, null, descriptor);
     }
 }

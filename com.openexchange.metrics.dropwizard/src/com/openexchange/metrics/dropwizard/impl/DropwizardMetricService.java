@@ -53,11 +53,11 @@ import com.codahale.metrics.MetricRegistry;
 import com.openexchange.metrics.AbstractMetricService;
 import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.MetricType;
-import com.openexchange.metrics.dropwizard.types.DropwizardCounter;
-import com.openexchange.metrics.dropwizard.types.DropwizardGauge;
-import com.openexchange.metrics.dropwizard.types.DropwizardHistogram;
-import com.openexchange.metrics.dropwizard.types.DropwizardMeter;
-import com.openexchange.metrics.dropwizard.types.DropwizardTimer;
+import com.openexchange.metrics.dropwizard.impl.registerers.CounterMetricRegisterer;
+import com.openexchange.metrics.dropwizard.impl.registerers.GaugeMetricRegisterer;
+import com.openexchange.metrics.dropwizard.impl.registerers.HistogramMetricRegisterer;
+import com.openexchange.metrics.dropwizard.impl.registerers.MeterMetricRegisterer;
+import com.openexchange.metrics.dropwizard.impl.registerers.TimerMetricRegisterer;
 import com.openexchange.metrics.types.Counter;
 import com.openexchange.metrics.types.Gauge;
 import com.openexchange.metrics.types.Histogram;
@@ -80,11 +80,11 @@ public class DropwizardMetricService extends AbstractMetricService {
         super();
         registry = new MetricRegistry();
 
-        addRegisterer(MetricType.METER, (metricDescriptor) -> new DropwizardMeter(registry.meter(MetricRegistry.name(metricDescriptor.getGroup(), metricDescriptor.getName()))));
-        addRegisterer(MetricType.TIMER, (metricDescriptor) -> new DropwizardTimer(registry.timer(MetricRegistry.name(metricDescriptor.getGroup(), metricDescriptor.getName()))));
-        addRegisterer(MetricType.COUNTER, (metricDescriptor) -> new DropwizardCounter(registry.counter(MetricRegistry.name(metricDescriptor.getGroup(), metricDescriptor.getName()))));
-        addRegisterer(MetricType.HISTOGRAM, (metricDescriptor) -> new DropwizardHistogram(registry.histogram(MetricRegistry.name(metricDescriptor.getGroup(), metricDescriptor.getName()))));
-        addRegisterer(MetricType.GAUGE, (metricDescriptor) -> new DropwizardGauge(registry.gauge(MetricRegistry.name(metricDescriptor.getGroup(), metricDescriptor.getName()), () -> () -> metricDescriptor.getMetricSupplier().get())));
+        addRegisterer(MetricType.METER, new MeterMetricRegisterer(registry));
+        addRegisterer(MetricType.TIMER, new TimerMetricRegisterer(registry));
+        addRegisterer(MetricType.COUNTER, new CounterMetricRegisterer(registry));
+        addRegisterer(MetricType.HISTOGRAM, new HistogramMetricRegisterer(registry));
+        addRegisterer(MetricType.GAUGE, new GaugeMetricRegisterer(registry));
     }
 
     /*
@@ -135,5 +135,15 @@ public class DropwizardMetricService extends AbstractMetricService {
     @Override
     public Meter getMeter(MetricDescriptor descriptor) {
         return (Meter) registerOrGet(descriptor);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.MetricService#removeMetric(com.openexchange.metrics.MetricDescriptor)
+     */
+    @Override
+    public void removeMetric(MetricDescriptor descriptor) {
+        remove(descriptor);
     }
 }

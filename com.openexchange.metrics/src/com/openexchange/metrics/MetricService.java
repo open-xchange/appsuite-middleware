@@ -55,6 +55,7 @@ import com.openexchange.metrics.types.Counter;
 import com.openexchange.metrics.types.Gauge;
 import com.openexchange.metrics.types.Histogram;
 import com.openexchange.metrics.types.Meter;
+import com.openexchange.metrics.types.Metric;
 import com.openexchange.metrics.types.Timer;
 import com.openexchange.osgi.annotation.SingletonService;
 
@@ -111,6 +112,13 @@ public interface MetricService {
      * @return the metric instance
      */
     Meter getMeter(MetricDescriptor descriptor);
+
+    /**
+     * Removes the {@link Metric} defined with the specified {@link MetricDescriptor}
+     * 
+     * @param descriptor The {@link MetricDescriptor}
+     */
+    void removeMetric(MetricDescriptor descriptor);
 
     /**
      * Adds a {@link MetricServiceListener} to a collection of listeners that will be notified on
