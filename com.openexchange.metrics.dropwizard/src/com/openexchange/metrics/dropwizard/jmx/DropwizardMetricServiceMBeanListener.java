@@ -60,19 +60,19 @@ import com.openexchange.metrics.types.Meter;
 import com.openexchange.metrics.types.Timer;
 
 /**
- * {@link DropwizardMetricServiceListener}
+ * {@link DropwizardMetricServiceMBeanListener}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DropwizardMetricServiceListener extends AbstractMetricServiceListener {
+public class DropwizardMetricServiceMBeanListener extends AbstractMetricServiceListener {
 
     /**
-     * Initialises a new {@link DropwizardMetricServiceListener}.
+     * Initialises a new {@link DropwizardMetricServiceMBeanListener}.
      * 
      * @param managementService
      * @param mbeanFactory
      */
-    public DropwizardMetricServiceListener(ManagementService managementService, MetricMBeanFactory mbeanFactory) {
+    public DropwizardMetricServiceMBeanListener(ManagementService managementService, MetricMBeanFactory mbeanFactory) {
         super(managementService, mbeanFactory);
     }
 
