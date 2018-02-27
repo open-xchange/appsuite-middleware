@@ -66,6 +66,7 @@ public class MetricDescriptor {
     private MetricType metricType;
     private TimeUnit rate;
     private Supplier<?> metricSupplier;
+    private String fullName;
 
     /**
      * Initialises a new {@link MetricDescriptor}.
@@ -93,39 +94,12 @@ public class MetricDescriptor {
     }
 
     /**
-     * Sets the group for this metric
-     * 
-     * @param group the group to set
-     */
-    public void setGroup(String group) {
-        this.group = group;
-    }
-
-    /**
-     * Sets the name for this metric
-     * 
-     * @param name the name to set
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
      * Gets the metricType
      *
      * @return The metricType
      */
     public MetricType getMetricType() {
         return metricType;
-    }
-
-    /**
-     * Sets the metricType
-     *
-     * @param metricType The metricType to set
-     */
-    public void setMetricType(MetricType metricType) {
-        this.metricType = metricType;
     }
 
     /**
@@ -147,24 +121,6 @@ public class MetricDescriptor {
     }
 
     /**
-     * Sets the rate
-     * 
-     * @param rate to set
-     */
-    public void setRate(TimeUnit rate) {
-        this.rate = rate;
-    }
-
-    /**
-     * Sets the unit
-     * 
-     * @param unit to set
-     */
-    public void setUnit(String unit) {
-        this.unit = unit;
-    }
-
-    /**
      * Gets the metric {@link Supplier} or <code>null</code> if none is specified
      *
      * @return The metric {@link Supplier} or <code>null</code> if none is specified
@@ -174,12 +130,77 @@ public class MetricDescriptor {
     }
 
     /**
+     * Returns the full name of the metric
+     * 
+     * @return The full name of the metric
+     */
+    public String getFullName() {
+        return fullName;
+    }
+
+    ////////////////////////////// SETTERS //////////////////////////////
+
+    /**
+     * Sets the rate
+     * 
+     * @param rate to set
+     */
+    void setRate(TimeUnit rate) {
+        this.rate = rate;
+    }
+
+    /**
+     * Sets the unit
+     * 
+     * @param unit to set
+     */
+    void setUnit(String unit) {
+        this.unit = unit;
+    }
+
+    /**
+     * Sets the group for this metric
+     * 
+     * @param group the group to set
+     */
+    void setGroup(String group) {
+        this.group = group;
+    }
+
+    /**
+     * Sets the name for this metric
+     * 
+     * @param name the name to set
+     */
+    void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * Sets the metricType
+     *
+     * @param metricType The metricType to set
+     */
+    void setMetricType(MetricType metricType) {
+        this.metricType = metricType;
+    }
+
+    /**
      * Sets the metricSupplier
      *
      * @param metricSupplier The metricSupplier to set
      */
-    public void setMetricSupplier(Supplier<?> metricSupplier) {
+    void setMetricSupplier(Supplier<?> metricSupplier) {
         this.metricSupplier = metricSupplier;
+    }
+
+    /**
+     * Sets the full qualified name of the metric
+     * 
+     * @param fqn The full qualified name of the metric
+     */
+    void setFQN(String fqn) {
+        this.fullName = fqn;
     }
 
     /**
@@ -300,6 +321,7 @@ public class MetricDescriptor {
             descriptor.setUnit(unit);
             descriptor.setMetricSupplier(supplier);
             descriptor.setMetricType(metricType);
+            descriptor.setFQN(group + "." + name);
         }
 
         /**

@@ -93,8 +93,7 @@ public class DropwizardMetricServiceListener extends AbstractMetricServiceListen
      */
     @Override
     public void onGaugeRemoved(String name) {
-        // TODO Auto-generated method stub
-
+        unregisterMBean(name);
     }
 
     /*
@@ -114,8 +113,7 @@ public class DropwizardMetricServiceListener extends AbstractMetricServiceListen
      */
     @Override
     public void onCounterRemoved(String name) {
-        // TODO Auto-generated method stub
-
+        unregisterMBean(name);
     }
 
     /*
@@ -135,8 +133,7 @@ public class DropwizardMetricServiceListener extends AbstractMetricServiceListen
      */
     @Override
     public void onHistogramRemoved(String name) {
-        // TODO Auto-generated method stub
-
+        unregisterMBean(name);
     }
 
     /*
@@ -156,8 +153,7 @@ public class DropwizardMetricServiceListener extends AbstractMetricServiceListen
      */
     @Override
     public void onMeterRemoved(String name) {
-        // TODO Auto-generated method stub
-
+        unregisterMBean(name);
     }
 
     /*
@@ -177,8 +173,6 @@ public class DropwizardMetricServiceListener extends AbstractMetricServiceListen
      */
     @Override
     public void onTimerRemoved(String name) {
-        // TODO Auto-generated method stub
-
+        unregisterMBean(name);
     }
-
 }

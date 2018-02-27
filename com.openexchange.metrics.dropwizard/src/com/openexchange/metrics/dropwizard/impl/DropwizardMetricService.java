@@ -49,28 +49,19 @@
 
 package com.openexchange.metrics.dropwizard.impl;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.function.Function;
 import com.codahale.metrics.MetricRegistry;
+import com.openexchange.metrics.AbstractMetricService;
 import com.openexchange.metrics.MetricDescriptor;
-import com.openexchange.metrics.MetricService;
 import com.openexchange.metrics.MetricType;
 import com.openexchange.metrics.dropwizard.types.DropwizardCounter;
 import com.openexchange.metrics.dropwizard.types.DropwizardGauge;
 import com.openexchange.metrics.dropwizard.types.DropwizardHistogram;
 import com.openexchange.metrics.dropwizard.types.DropwizardMeter;
 import com.openexchange.metrics.dropwizard.types.DropwizardTimer;
-import com.openexchange.metrics.jmx.MetricServiceListener;
 import com.openexchange.metrics.types.Counter;
 import com.openexchange.metrics.types.Gauge;
 import com.openexchange.metrics.types.Histogram;
 import com.openexchange.metrics.types.Meter;
-import com.openexchange.metrics.types.Metric;
 import com.openexchange.metrics.types.Timer;
 
 /**
@@ -78,12 +69,7 @@ import com.openexchange.metrics.types.Timer;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-// FIXME: Create a new delegate every time? Maybe cache?
-public class DropwizardMetricService implements MetricService {
-
-    private final ConcurrentMap<String, Metric> metrics;
-    private final Map<MetricType, Function<MetricDescriptor, Metric>> registerers;
-    private final List<MetricServiceListener> listeners;
+public class DropwizardMetricService extends AbstractMetricService {
 
     private final MetricRegistry registry;
 
@@ -93,35 +79,12 @@ public class DropwizardMetricService implements MetricService {
     public DropwizardMetricService() {
         super();
         registry = new MetricRegistry();
-        metrics = new ConcurrentHashMap<>();
-        listeners = new ArrayList<>();
-        registerers = new HashMap<>();
-        registerers.put(MetricType.METER, (metricDescriptor) -> new DropwizardMeter(registry.meter(MetricRegistry.name(metricDescriptor.getGroup(), metricDescriptor.getName()))));
-        registerers.put(MetricType.TIMER, (metricDescriptor) -> new DropwizardTimer(registry.timer(MetricRegistry.name(metricDescriptor.getGroup(), metricDescriptor.getName()))));
-        registerers.put(MetricType.COUNTER, (metricDescriptor) -> new DropwizardCounter(registry.counter(MetricRegistry.name(metricDescriptor.getGroup(), metricDescriptor.getName()))));
-        registerers.put(MetricType.HISTOGRAM, (metricDescriptor) -> new DropwizardHistogram(registry.histogram(MetricRegistry.name(metricDescriptor.getGroup(), metricDescriptor.getName()))));
-        registerers.put(MetricType.GAUGE, (metricDescriptor) -> new DropwizardGauge(registry.gauge(MetricRegistry.name(metricDescriptor.getGroup(), metricDescriptor.getName()), () -> () -> metricDescriptor.getMetricSupplier().get())));
-    }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.MetricService#addListener(com.openexchange.metrics.jmx.MetricServiceListener)
-     */
-    @Override
-    public void addListener(MetricServiceListener listener) {
-        listeners.add(listener);
-        //TODO: notify already registered metrics
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.MetricService#removeListener(com.openexchange.metrics.jmx.MetricServiceListener)
-     */
-    @Override
-    public void removeListener(MetricServiceListener listener) {
-        listeners.remove(listener);
+        addRegisterer(MetricType.METER, (metricDescriptor) -> new DropwizardMeter(registry.meter(MetricRegistry.name(metricDescriptor.getGroup(), metricDescriptor.getName()))));
+        addRegisterer(MetricType.TIMER, (metricDescriptor) -> new DropwizardTimer(registry.timer(MetricRegistry.name(metricDescriptor.getGroup(), metricDescriptor.getName()))));
+        addRegisterer(MetricType.COUNTER, (metricDescriptor) -> new DropwizardCounter(registry.counter(MetricRegistry.name(metricDescriptor.getGroup(), metricDescriptor.getName()))));
+        addRegisterer(MetricType.HISTOGRAM, (metricDescriptor) -> new DropwizardHistogram(registry.histogram(MetricRegistry.name(metricDescriptor.getGroup(), metricDescriptor.getName()))));
+        addRegisterer(MetricType.GAUGE, (metricDescriptor) -> new DropwizardGauge(registry.gauge(MetricRegistry.name(metricDescriptor.getGroup(), metricDescriptor.getName()), () -> () -> metricDescriptor.getMetricSupplier().get())));
     }
 
     /*
@@ -172,62 +135,5 @@ public class DropwizardMetricService implements MetricService {
     @Override
     public Meter getMeter(MetricDescriptor descriptor) {
         return (Meter) registerOrGet(descriptor);
-    }
-
-    /**
-     * 
-     * @param descriptor
-     * @return
-     */
-    private Metric registerOrGet(MetricDescriptor descriptor) {
-        String key = descriptor.getGroup() + "." + descriptor.getName();
-        Metric metric = metrics.get(key);
-        if (metric != null) {
-            return metric;
-        }
-
-        Metric dropwizardMetric = registerers.get(descriptor.getMetricType()).apply(descriptor);
-        Metric raced = metrics.putIfAbsent(key, dropwizardMetric);
-        if (raced == null) {
-            notifyListeners(descriptor, dropwizardMetric);
-            return dropwizardMetric;
-        }
-        return raced;
-    }
-
-    /**
-     * Notifies all listeners about the specified added {@link Metric}
-     * 
-     * @param descriptor The {@link MetricDescriptor}
-     * @param dropwizardMetric The added {@link Metric}
-     */
-    private void notifyListeners(MetricDescriptor descriptor, Metric dropwizardMetric) {
-        for (MetricServiceListener listener : listeners) {
-            notifyListenerOfAddedMetric(listener, dropwizardMetric, descriptor);
-        }
-    }
-
-    /**
-     * Notifies the specified listener about the specified added {@link Metric}
-     * 
-     * @param listener The listener to notify
-     * @param metric The {@link Metric}
-     * @param descriptor The {@link MetricDescriptor}
-     */
-    private void notifyListenerOfAddedMetric(MetricServiceListener listener, Metric metric, MetricDescriptor descriptor) {
-        //FIXME: Solve with functional interface
-        if (metric instanceof Gauge) {
-            listener.onGaugeAdded(descriptor, (Gauge<?>) metric);
-        } else if (metric instanceof Counter) {
-            listener.onCounterAdded(descriptor, (Counter) metric);
-        } else if (metric instanceof Histogram) {
-            listener.onHistogramAdded(descriptor, (Histogram) metric);
-        } else if (metric instanceof Meter) {
-            listener.onMeterAdded(descriptor, (Meter) metric);
-        } else if (metric instanceof Timer) {
-            listener.onTimerAdded(descriptor, (Timer) metric);
-        } else {
-            throw new IllegalArgumentException("Unknown metric type: " + metric.getClass());
-        }
     }
 }
