@@ -47,10 +47,10 @@
  *
  */
 
-package com.openexchange.chronos.itip.tools;
+package com.openexchange.chronos.itip.json;
 
 import com.openexchange.ajax.fields.AppointmentFields;
-import com.openexchange.groupware.container.Appointment;
+import com.openexchange.calendar.json.compat.Appointment;
 
 /**
  * {@link CalendarField}

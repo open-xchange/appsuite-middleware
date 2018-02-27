@@ -65,7 +65,6 @@ import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnnotation;
 import com.openexchange.chronos.itip.ITipChange;
-import com.openexchange.chronos.itip.tools.CalendarField;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
