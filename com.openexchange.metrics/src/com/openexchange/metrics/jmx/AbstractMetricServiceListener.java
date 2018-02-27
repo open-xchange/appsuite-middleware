@@ -171,14 +171,8 @@ public abstract class AbstractMetricServiceListener implements MetricServiceList
      */
     private ObjectName getObjectName(MetricDescriptor metricDescriptor) throws MalformedObjectNameException {
         Hashtable<String, String> properties = new Hashtable<>();
-        String name = metricDescriptor.getName();
-        int index = name.indexOf('.');
-        if (index > 0 && index < name.length() - 1) {
-            properties.put("type", name.substring(0, index));
-            properties.put("name", name.substring(index + 1));
-        } else {
-            properties.put("type", name);
-        }
+        properties.put("type", metricDescriptor.getGroup());
+        properties.put("name", metricDescriptor.getName());
 
         return ObjectName.getInstance(DOMAIN_NAME, properties);
     }
