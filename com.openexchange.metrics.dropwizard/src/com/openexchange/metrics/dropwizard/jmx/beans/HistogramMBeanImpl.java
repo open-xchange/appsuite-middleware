@@ -62,7 +62,6 @@ import com.openexchange.metrics.jmx.beans.HistogramMBean;
  */
 public class HistogramMBeanImpl extends AbstractMetricMBean implements HistogramMBean {
 
-    private static final String DESCRIPTION = "Hitstogram MBean";
     private final DropwizardHistogram histogram;
 
     /**
@@ -74,7 +73,7 @@ public class HistogramMBeanImpl extends AbstractMetricMBean implements Histogram
      * @throws NotCompliantMBeanException
      */
     public HistogramMBeanImpl(DropwizardHistogram histogram, MetricDescriptor metricDescriptor) throws NotCompliantMBeanException {
-        super(DESCRIPTION, HistogramMBean.class, metricDescriptor);
+        super(HistogramMBean.class, metricDescriptor);
         this.histogram = histogram;
     }
 

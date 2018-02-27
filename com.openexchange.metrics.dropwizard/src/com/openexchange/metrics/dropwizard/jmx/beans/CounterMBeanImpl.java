@@ -62,7 +62,6 @@ import com.openexchange.metrics.jmx.beans.CounterMBean;
  */
 public class CounterMBeanImpl extends AbstractMetricMBean implements CounterMBean {
 
-    private static final String DESCRIPTION = "Counter MBean";
     private final DropwizardCounter counter;
 
     /**
@@ -75,7 +74,7 @@ public class CounterMBeanImpl extends AbstractMetricMBean implements CounterMBea
      * @throws NotCompliantMBeanException
      */
     public CounterMBeanImpl(DropwizardCounter counter, MetricDescriptor metricDescriptor) throws NotCompliantMBeanException {
-        super(DESCRIPTION, CounterMBean.class, metricDescriptor);
+        super(CounterMBean.class, metricDescriptor);
         this.counter = counter;
     }
 

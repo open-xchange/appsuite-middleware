@@ -60,17 +60,14 @@ import com.openexchange.metrics.MetricDescriptor;
  */
 public abstract class AbstractMetricMBean extends AnnotatedStandardMBean implements MetricMBean {
 
-    private final MetricDescriptor metricDescriptor;
-
     /**
      * Initialises a new {@link AbstractMetricMBean}.
      * 
-     * @param description
      * @param mbeanInterface
+     * 
      * @throws NotCompliantMBeanException
      */
-    public AbstractMetricMBean(String description, Class<?> mbeanInterface, MetricDescriptor metricDescriptor) throws NotCompliantMBeanException {
-        super(description, mbeanInterface);
-        this.metricDescriptor = metricDescriptor;
+    public AbstractMetricMBean(Class<?> mbeanInterface, MetricDescriptor metricDescriptor) throws NotCompliantMBeanException {
+        super(metricDescriptor.getDescription(), mbeanInterface);
     }
 }

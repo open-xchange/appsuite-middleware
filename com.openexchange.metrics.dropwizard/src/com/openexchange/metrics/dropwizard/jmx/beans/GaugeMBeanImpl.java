@@ -62,7 +62,6 @@ import com.openexchange.metrics.jmx.beans.GaugeMBean;
  */
 public class GaugeMBeanImpl extends AbstractMetricMBean implements GaugeMBean {
 
-    private static final String DESCRIPTION = "Gauge MBean";
     private final DropwizardGauge gauge;
 
     /**
@@ -74,7 +73,7 @@ public class GaugeMBeanImpl extends AbstractMetricMBean implements GaugeMBean {
      * @throws NotCompliantMBeanException
      */
     public GaugeMBeanImpl(DropwizardGauge gauge, MetricDescriptor metricDescriptor) throws NotCompliantMBeanException {
-        super(DESCRIPTION, GaugeMBean.class, metricDescriptor);
+        super(GaugeMBean.class, metricDescriptor);
         this.gauge = gauge;
     }
 

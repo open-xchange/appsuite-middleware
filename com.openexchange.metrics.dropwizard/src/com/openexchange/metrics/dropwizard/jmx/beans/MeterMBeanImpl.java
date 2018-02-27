@@ -64,7 +64,6 @@ import com.openexchange.metrics.jmx.beans.MeterMBean;
  */
 public class MeterMBeanImpl extends AbstractMetricMBean implements MeterMBean {
 
-    private static final String DESCRIPTION = "Meter MBean";
     private final double rateFactor;
     private final String rateUnit;
     private final DropwizardMeter meter;
@@ -77,7 +76,7 @@ public class MeterMBeanImpl extends AbstractMetricMBean implements MeterMBean {
      * @throws NotCompliantMBeanException
      */
     public MeterMBeanImpl(DropwizardMeter meter, MetricDescriptor metricDescriptor) throws NotCompliantMBeanException {
-        super(DESCRIPTION, MeterMBean.class, metricDescriptor);
+        super(MeterMBean.class, metricDescriptor);
         this.meter = meter;
         this.rateFactor = metricDescriptor.getRate().toSeconds(1);
         this.rateUnit = metricDescriptor.getUnit() + "/" + calculateRateUnit(metricDescriptor.getRate());
