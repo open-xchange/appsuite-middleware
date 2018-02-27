@@ -56,7 +56,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.caldav.GroupwareCaldavFactory;
-import com.openexchange.caldav.Patches;
+import com.openexchange.caldav.TaskPatches;
 import com.openexchange.caldav.Tools;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
@@ -112,8 +112,8 @@ public class TaskResource extends CalDAVResource<Task> {
     protected void saveObject() throws OXException {
         Task originalTask = parent.load(object);
         checkForExplicitRemoves(originalTask, taskToSave);
-        Patches.Incoming.adjustTaskStatus(originalTask, taskToSave);
-        Patches.Incoming.adjustTaskStart(originalTask, taskToSave);
+        TaskPatches.Incoming.adjustTaskStatus(originalTask, taskToSave);
+        TaskPatches.Incoming.adjustTaskStart(originalTask, taskToSave);
         getTaskInterface().updateTaskObject(taskToSave, parentFolderID, object.getLastModified());
         handleAttachments(originalTask, taskToSave);
     }
