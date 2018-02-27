@@ -143,4 +143,10 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
         }
         return raced;
     }
+
+    void stop() {
+        for (MetricDescriptor metricDescriptor : metricDescriptors.values()) {
+            metricService.removeMetric(metricDescriptor);
+        }
+    }
 }

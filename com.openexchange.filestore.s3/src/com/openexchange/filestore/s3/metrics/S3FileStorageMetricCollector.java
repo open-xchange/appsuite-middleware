@@ -110,7 +110,8 @@ public class S3FileStorageMetricCollector extends MetricCollector {
         if (false == started) {
             return false;
         }
-
+        ((S3FileStorageRequestMetricCollector) s3FileStorageRequestMetricCollector).stop();
+        ((S3FileStorageServiceMetricCollector) s3FileStorageServiceMetricCollector).stop();
         // Was started? Replace the request and service metric collectors
         s3FileStorageRequestMetricCollector = RequestMetricCollector.NONE;
         s3FileStorageServiceMetricCollector = ServiceMetricCollector.NONE;

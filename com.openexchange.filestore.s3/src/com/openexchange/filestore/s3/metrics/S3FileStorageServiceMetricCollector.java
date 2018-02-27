@@ -105,4 +105,7 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
     public void collectLatency(final ServiceLatencyProvider provider) {
         // no-op
     }
+    
+    void stop() {
+    }
 }
