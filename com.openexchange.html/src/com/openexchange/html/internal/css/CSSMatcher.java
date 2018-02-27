@@ -350,12 +350,6 @@ public final class CSSMatcher {
     /** Matches a complete CSS block, but not appropriate for possible nested blocks */
     private static final Pattern PATTERN_STYLE_BLOCK = Pattern.compile("((?:\\*|#|\\.|[a-zA-Z])[^{]*?\\{)([^}/]+)\\}");
 
-    /** Matches a CR?LF plus indention */
-    protected static final Pattern CRLF = Pattern.compile("\r?\n( {2,})?");
-
-    /** Matches multiple white-spaces */
-    protected static final Pattern WS = Pattern.compile(" +");
-
     /**
      * Iterates over CSS contained in specified string argument and checks each found element/block against given style map
      *
@@ -513,7 +507,7 @@ public final class CSSMatcher {
         if (cssBld.indexOf("{") < 0) {
             return checkCSSElements(cssBld, styleMap, removeIfAbsent);
         }
-        final String css = dropComments(WS.matcher(CRLF.matcher(cssBld).replaceAll(" ")).replaceAll(" "));
+        final String css = dropComments(dropSpaces(dropCRLFs(cssBld)));
         final int length = css.length();
         cssBld.setLength(0);
         final Stringer cssElemsBuffer = new StringBuilderStringer(new StringBuilder(length));
@@ -570,9 +564,65 @@ public final class CSSMatcher {
         return modified;
     }
 
+    private static String dropCRLFs(CharSequence s) {
+        StringBuilder sb = null;
+        for (int i = 0, length = s.length(), pos = -1; i < length; i++) {
+            char ch = s.charAt(i);
+            if ('\r' == ch || '\n' == ch) {
+                if (pos < 0) {
+                    pos = i;
+                    if (null == sb) {
+                        sb = new StringBuilder(length);
+                        if (i > 0) {
+                            sb.append(s, 0, i);
+                        }
+                    }
+                    sb.append(' ');
+                }
+            } else {
+                if (pos >= 0) {
+                    pos = -1;
+                }
+                if (null != sb) {
+                    sb.append(ch);
+                }
+            }
+        }
+        return null == sb ? s.toString() : sb.toString();
+    }
+
+    private static String dropSpaces(CharSequence s) {
+        StringBuilder sb = null;
+        for (int i = 0, length = s.length(), wspos = -1; i < length; i++) {
+            char ch = s.charAt(i);
+            if (' ' == ch) {
+                if (wspos < 0) {
+                    wspos = i;
+                    if (null != sb) {
+                        sb.append(ch);
+                    }
+                } else {
+                    if (null == sb) {
+                        sb = new StringBuilder(length);
+                        if (i > 0) {
+                            sb.append(s, 0, wspos + 1);
+                        }
+                    }
+                }
+            } else {
+                if (wspos >= 0) {
+                    wspos = -1;
+                }
+                if (null != sb) {
+                    sb.append(ch);
+                }
+            }
+        }
+        return null == sb ? s.toString() : sb.toString();
+    }
+
     private static final Pattern SPLIT_LINES = Pattern.compile("\r?\n");
     private static final Pattern SPLIT_WORDS = Pattern.compile("\\s+");
-    private static final Pattern SPLIT_COMMA = Pattern.compile(",");
 
     static String prefixBlock(final String match, final String cssPrefix) {
         if (isEmpty(match) || HtmlServices.containsEventHandler(match)) {
@@ -631,7 +681,7 @@ public final class CSSMatcher {
             builder.append(line);
             return;
         }
-        final String[] splits = SPLIT_COMMA.split(line, 0);
+        final String[] splits = Strings.splitBy(line, ',', false);
         if (1 == splits.length) {
             handleWords(line, cssPrefix, builder, helper);
         } else {
@@ -734,7 +784,7 @@ public final class CSSMatcher {
         if (cssBuilder.indexOf("{") < 0) {
             return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
         }
-        final String css = CRLF.matcher(cssBuilder).replaceAll(" ");
+        final String css = dropCRLFs(cssBuilder);
         try {
             final int cssLength = css.length();
             final Stringer cssElemsBuffer = new StringBuilderStringer(new StringBuilder(cssLength));
@@ -800,7 +850,7 @@ public final class CSSMatcher {
             if (cssBuilder.indexOf("{") < 0) {
                 return checkCSSElements(cssBuilder, styleMap, removeIfAbsent);
             }
-            final String css = CRLF.matcher(cssBuilder.toString()).replaceAll(" ");
+            final String css = dropCRLFs(cssBuilder);
             final Matcher m = PATTERN_STYLE_STARTING_BLOCK.matcher(InterruptibleCharSequence.valueOf(css));
             final MatcherReplacer mr = new MatcherReplacer(m, css);
             final Thread thread = Thread.currentThread();
