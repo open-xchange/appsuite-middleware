@@ -147,12 +147,12 @@ public interface CalendarService {
      * </ul>
      *
      * @param session The calendar session
-     * @param folderIDs The identifiers of the folders to perform the search in, or <code>null</code> to search across all visible folders
+     * @param folderIds The identifiers of the folders to perform the search in, or <code>null</code> to search across all visible folders
      * @param filters A list of additional filters to be applied on the search, or <code>null</code> if not specified
      * @param queries The queries to search for, or <code>null</code> if not specified
-     * @return The found events, or an empty list if there are none
+     * @return The found events per folder
      */
-    List<Event> searchEvents(CalendarSession session, String[] folderIDs, List<SearchFilter> filters, List<String> queries) throws OXException;
+    Map<String, EventsResult> searchEvents(CalendarSession session, List<String> folderIds, List<SearchFilter> filters, List<String> queries) throws OXException;
 
     /**
      * Gets all change exceptions of a recurring event series.

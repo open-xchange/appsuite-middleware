@@ -63,7 +63,7 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.chronos.Event;
@@ -74,6 +74,7 @@ import com.openexchange.chronos.common.DefaultSearchFilter;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.RangeOption;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.SearchFilter;
@@ -218,20 +219,26 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
                 calendarAccess.set(CalendarParameters.PARAMETER_FIELDS, processData.getData());
             }
         }
-
-        List<Event> events = calendarAccess.searchEvents(folderIDs, filters, searchRequest.getQueries());
+        Map<String, EventsResult> eventsResults = calendarAccess.searchEvents(folderIDs, filters, searchRequest.getQueries());
         /*
          * select suitable occurrences for series events
          */
+        List<Event> events = new ArrayList<Event>();
         RangeOption searchRange = getSearchRange(filters);
-        for (ListIterator<Event> iterator = events.listIterator(); iterator.hasNext();) {
-            Event event = iterator.next();
-            if (isSeriesMaster(event)) {
-                event = getBestMatchingOccurrence(calendarAccess, event, searchRange);
-                if (null == event) {
-                    iterator.remove();
+        for (EventsResult eventsResult : eventsResults.values()) {
+            OXException error = eventsResult.getError();
+            if (null != eventsResult.getError()) {
+                warnings.add(error);
+                continue;
+            }
+            for (Event event : eventsResult.getEvents()) {
+                if (isSeriesMaster(event)) {
+                    event = getBestMatchingOccurrence(calendarAccess, event, searchRange);
+                    if (null != event) {
+                        events.add(event);
+                    }
                 } else {
-                    iterator.set(event);
+                    events.add(event);
                 }
             }
         }

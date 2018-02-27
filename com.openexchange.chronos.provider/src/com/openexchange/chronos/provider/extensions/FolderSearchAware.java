@@ -50,9 +50,10 @@
 package com.openexchange.chronos.provider.extensions;
 
 import java.util.List;
-import com.openexchange.chronos.Event;
+import java.util.Map;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.exception.OXException;
 
@@ -82,8 +83,8 @@ public interface FolderSearchAware extends SearchAware {
      * @param folderIds The identifiers of the folders to perform the search in, or <code>null</code> to search across all visible folders
      * @param filters A list of additional filters to be applied on the search, or <code>null</code> if not specified
      * @param queries The queries to search for, or <code>null</code> if not specified
-     * @return The found events, or an empty list if there are none
+     * @return The found events per folder
      */
-    List<Event> searchEvents(String[] folderIds, List<SearchFilter> filters, List<String> queries) throws OXException;
+    Map<String, EventsResult> searchEvents(List<String> folderIds, List<SearchFilter> filters, List<String> queries) throws OXException;
 
 }
