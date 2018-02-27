@@ -47,65 +47,14 @@
  *
  */
 
-package com.openexchange.metrics.types;
+package com.openexchange.metrics.jmx.beans;
+
 
 /**
- * <p>{@link Meter} measures the rate at which a set of events occur.</p>
- * 
+ * {@link MetricMBean}
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface Meter extends Metric {
-
-    /**
-     * Mark the occurrence of an event.
-     */
-    void mark();
-
-    /**
-     * Mark the occurrence of a given number of events.
-     *
-     * @param n the number of events
-     */
-    void mark(long n);
-
-    /**
-     * Returns the number of events which have been marked.
-     *
-     * @return the number of events which have been marked
-     */
-    long getCount();
-
-    /**
-     * Returns the one-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
-     * 
-     * @return the one-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
-     */
-    double getOneMinuteRate();
-
-    /**
-     * Returns the five-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
-     *
-     * @return the five-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
-     */
-    double getFiveMinuteRate();
-
-    /**
-     * Returns the fifteen-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
-     *
-     * @return the fifteen-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
-     */
-    double getFifteenMinuteRate();
-
-    /**
-     * Returns the mean rate at which events have occurred since the meter was created.
-     *
-     * @return the mean rate at which events have occurred since the meter was created
-     */
-    double getMeanRate();
+public interface MetricMBean {
+    // marker interface
 }

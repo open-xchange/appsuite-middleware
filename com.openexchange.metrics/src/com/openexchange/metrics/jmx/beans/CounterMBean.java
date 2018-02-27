@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,65 +47,23 @@
  *
  */
 
-package com.openexchange.metrics.types;
+package com.openexchange.metrics.jmx.beans;
+
+import com.codahale.metrics.Counter;
+import com.openexchange.management.MBeanMethodAnnotation;
 
 /**
- * <p>{@link Meter} measures the rate at which a set of events occur.</p>
- * 
+ * {@link CounterMBean}
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface Meter extends Metric {
+public interface CounterMBean extends MetricMBean {
 
     /**
-     * Mark the occurrence of an event.
-     */
-    void mark();
-
-    /**
-     * Mark the occurrence of a given number of events.
-     *
-     * @param n the number of events
-     */
-    void mark(long n);
-
-    /**
-     * Returns the number of events which have been marked.
-     *
-     * @return the number of events which have been marked
-     */
-    long getCount();
-
-    /**
-     * Returns the one-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
+     * Returns the current number of the {@link Counter}
      * 
-     * @return the one-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
+     * @return The current number of the {@link Counter}
      */
-    double getOneMinuteRate();
-
-    /**
-     * Returns the five-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
-     *
-     * @return the five-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
-     */
-    double getFiveMinuteRate();
-
-    /**
-     * Returns the fifteen-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
-     *
-     * @return the fifteen-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
-     */
-    double getFifteenMinuteRate();
-
-    /**
-     * Returns the mean rate at which events have occurred since the meter was created.
-     *
-     * @return the mean rate at which events have occurred since the meter was created
-     */
-    double getMeanRate();
+    @MBeanMethodAnnotation(description = "Returns the current number of the counter", parameterDescriptions = { "" }, parameters = { "" })
+    long getCount();
 }

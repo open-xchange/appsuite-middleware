@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,65 +47,34 @@
  *
  */
 
-package com.openexchange.metrics.types;
+package com.openexchange.metrics.dropwizard.types;
+
+import com.openexchange.metrics.types.Gauge;
 
 /**
- * <p>{@link Meter} measures the rate at which a set of events occur.</p>
- * 
+ * {@link DropwizardGauge}
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface Meter extends Metric {
+public class DropwizardGauge implements Gauge<Object> {
+
+    private com.codahale.metrics.Gauge<Object> delegate;
 
     /**
-     * Mark the occurrence of an event.
+     * Initialises a new {@link DropwizardGauge}.
      */
-    void mark();
+    public DropwizardGauge(com.codahale.metrics.Gauge<Object> gauge) {
+        super();
+        this.delegate = gauge;
+    }
 
-    /**
-     * Mark the occurrence of a given number of events.
-     *
-     * @param n the number of events
-     */
-    void mark(long n);
-
-    /**
-     * Returns the number of events which have been marked.
-     *
-     * @return the number of events which have been marked
-     */
-    long getCount();
-
-    /**
-     * Returns the one-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
+    /*
+     * (non-Javadoc)
      * 
-     * @return the one-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
+     * @see com.openexchange.metrics.types.Gauge#getValue()
      */
-    double getOneMinuteRate();
-
-    /**
-     * Returns the five-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
-     *
-     * @return the five-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
-     */
-    double getFiveMinuteRate();
-
-    /**
-     * Returns the fifteen-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
-     *
-     * @return the fifteen-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
-     */
-    double getFifteenMinuteRate();
-
-    /**
-     * Returns the mean rate at which events have occurred since the meter was created.
-     *
-     * @return the mean rate at which events have occurred since the meter was created
-     */
-    double getMeanRate();
+    @Override
+    public Object getValue() {
+        return delegate.getValue();
+    }
 }

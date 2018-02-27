@@ -47,65 +47,59 @@
  *
  */
 
-package com.openexchange.metrics.types;
+package com.openexchange.metrics.dropwizard.osgi;
+
+import java.util.concurrent.atomic.AtomicReference;
+import org.osgi.framework.ServiceReference;
+import com.openexchange.management.ManagementService;
+import com.openexchange.metrics.dropwizard.impl.DropwizardMetricService;
+import com.openexchange.metrics.dropwizard.jmx.DropwizardMetricServiceMBeanListener;
+import com.openexchange.metrics.dropwizard.jmx.DropwizardMetricMBeanFactory;
+import com.openexchange.osgi.SimpleRegistryListener;
 
 /**
- * <p>{@link Meter} measures the rate at which a set of events occur.</p>
- * 
+ * {@link DropwizardMetricServiceListenerServiceTracker}
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface Meter extends Metric {
+public class DropwizardMetricServiceListenerServiceTracker implements SimpleRegistryListener<ManagementService> {
+
+    private DropwizardMetricService dropwizardMetricService;
+    private final AtomicReference<DropwizardMetricServiceMBeanListener> listener;
 
     /**
-     * Mark the occurrence of an event.
+     * Initialises a new {@link DropwizardMetricServiceListenerServiceTracker}.
      */
-    void mark();
+    public DropwizardMetricServiceListenerServiceTracker(DropwizardMetricService dropwizardMetricService) {
+        super();
+        this.dropwizardMetricService = dropwizardMetricService;
+        listener = new AtomicReference<DropwizardMetricServiceMBeanListener>();
+    }
 
-    /**
-     * Mark the occurrence of a given number of events.
-     *
-     * @param n the number of events
-     */
-    void mark(long n);
-
-    /**
-     * Returns the number of events which have been marked.
-     *
-     * @return the number of events which have been marked
-     */
-    long getCount();
-
-    /**
-     * Returns the one-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
+    /*
+     * (non-Javadoc)
      * 
-     * @return the one-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
+     * @see com.openexchange.osgi.SimpleRegistryListener#added(org.osgi.framework.ServiceReference, java.lang.Object)
      */
-    double getOneMinuteRate();
+    @Override
+    public void added(ServiceReference<ManagementService> ref, ManagementService service) {
+        if (listener.compareAndSet(null, new DropwizardMetricServiceMBeanListener(service, new DropwizardMetricMBeanFactory()))) {
+            dropwizardMetricService.addListener(listener.get());
+        }
+    }
 
-    /**
-     * Returns the five-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
-     *
-     * @return the five-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.osgi.SimpleRegistryListener#removed(org.osgi.framework.ServiceReference, java.lang.Object)
      */
-    double getFiveMinuteRate();
-
-    /**
-     * Returns the fifteen-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
-     *
-     * @return the fifteen-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
-     */
-    double getFifteenMinuteRate();
-
-    /**
-     * Returns the mean rate at which events have occurred since the meter was created.
-     *
-     * @return the mean rate at which events have occurred since the meter was created
-     */
-    double getMeanRate();
+    @Override
+    public void removed(ServiceReference<ManagementService> ref, ManagementService service) {
+        DropwizardMetricServiceMBeanListener registerer = listener.get();
+        if (registerer == null) {
+            return;
+        }
+        registerer.unregisterAll();
+        dropwizardMetricService.removeListener(registerer);
+    }
 }

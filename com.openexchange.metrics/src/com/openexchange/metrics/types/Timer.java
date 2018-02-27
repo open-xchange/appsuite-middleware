@@ -59,7 +59,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface Timer {
+public interface Timer extends Metric {
 
     /**
      * Adds a recorded duration.

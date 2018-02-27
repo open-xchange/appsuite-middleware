@@ -49,145 +49,67 @@
 
 package com.openexchange.metrics.jmx;
 
-import javax.management.NotCompliantMBeanException;
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.Metric;
-import com.codahale.metrics.RatioGauge;
-import com.codahale.metrics.Timer;
-import com.openexchange.metrics.MetricMetadata;
-import com.openexchange.metrics.jmx.impl.CounterMBeanImpl;
-import com.openexchange.metrics.jmx.impl.GaugeMBeanImpl;
-import com.openexchange.metrics.jmx.impl.HistogramMBeanImpl;
-import com.openexchange.metrics.jmx.impl.MeterMBeanImpl;
-import com.openexchange.metrics.jmx.impl.TimerMBeanImpl;
+import com.openexchange.metrics.MetricDescriptor;
+import com.openexchange.metrics.jmx.beans.CounterMBean;
+import com.openexchange.metrics.jmx.beans.GaugeMBean;
+import com.openexchange.metrics.jmx.beans.HistogramMBean;
+import com.openexchange.metrics.jmx.beans.MeterMBean;
+import com.openexchange.metrics.jmx.beans.TimerMBean;
+import com.openexchange.metrics.types.Counter;
+import com.openexchange.metrics.types.Gauge;
+import com.openexchange.metrics.types.Histogram;
+import com.openexchange.metrics.types.Meter;
+import com.openexchange.metrics.types.Timer;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link MetricMBeanFactory}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class MetricMBeanFactory {
+@SingletonService
+public interface MetricMBeanFactory {
 
     /**
-     * Creates a new {@link CounterMBean} with the specified {@link Metric}
+     * Creates a new {@link CounterMBean} from the specified {@link Counter} metric
      * 
-     * @param metric The {@link Metric} of type {@link Counter} for the {@link CounterMBean}
-     * @return The newly created {@link CounterMBean}
-     * @throws IllegalArgumentException if an invalid type of {@link Metric} is supplied or if the
-     *             {@link CounterMBean} does not follow JMX design patterns for Management Interfaces
+     * @param counter The {@link Counter} from which to create the mbean
+     * @param metricDescriptor TODO
+     * @return The {@link CounterMBean}
      */
-    public static CounterMBean counter(Metric metric) {
-        checkInstance(metric, Counter.class);
-        try {
-            return new CounterMBeanImpl((Counter) metric);
-        } catch (NotCompliantMBeanException e) {
-            throw new IllegalArgumentException("The CounterMBean is not a compliant MBean");
-        }
-    }
+    CounterMBean counter(Counter counter, MetricDescriptor metricDescriptor);
 
     /**
-     * Creates a new {@link TimerMBean} with the specified {@link Metric}
+     * Creates a new {@link TimerMBean} from the specified {@link Timer} metric
      * 
-     * @param metric The {@link Metric} of type {@link Timer} for the {@link TimerMBean}
-     * @return The newly created {@link TimerMBean}
-     * @throws IllegalArgumentException if an invalid type of {@link Metric} is supplied or if the
-     *             {@link TimerMBean} does not follow JMX design patterns for Management Interfaces
+     * @param counter The {@link Timer} from which to create the mbean
+     * @return The {@link TimerMBean}
      */
-    public static TimerMBean timer(Metric metric, MetricMetadata metricMetadata) {
-        checkInstance(metric, Timer.class);
-        try {
-            return new TimerMBeanImpl((Timer) metric, metricMetadata.getMetricTimeUnit());
-        } catch (NotCompliantMBeanException e) {
-            throw new IllegalArgumentException("The TimerMBean is not a compliant MBean");
-        }
-    }
+    TimerMBean timer(Timer timer, MetricDescriptor metricDescriptor);
 
     /**
-     * Creates a new {@link MeterMBean} with the specified {@link Metric}
+     * Creates a new {@link MeterMBean} from the specified {@link Meter} metric
      * 
-     * @param metric The {@link Metric} of type {@link Meter} for the {@link MeterMBean}
-     * @return The newly created {@link MeterMBean}
-     * @throws IllegalArgumentException if an invalid type of {@link Metric} is supplied or if the
-     *             {@link MeterMBean} does not follow JMX design patterns for Management Interfaces
+     * @param counter The {@link Meter} from which to create the mbean
+     * @return The {@link MeterMBean}
      */
-    public static MeterMBean meter(Metric metric, MetricMetadata metricMetadata) {
-        checkInstance(metric, Meter.class);
-        try {
-            return new MeterMBeanImpl((Meter) metric, metricMetadata.getMetricRate(), metricMetadata.getMetricTimeUnit());
-        } catch (NotCompliantMBeanException e) {
-            throw new IllegalArgumentException("The MeterMBean is not a compliant MBean");
-        }
-    }
+    MeterMBean meter(Meter meter, MetricDescriptor metricDescriptor);
 
     /**
-     * Creates a new {@link HistogramMBean} with the specified {@link Metric}
+     * Creates a new {@link HistogramMBean} from the specified {@link Histogram} metric
+     * @param metricDescriptor TODO
+     * @param counter The {@link Histogram} from which to create the mbean
      * 
-     * @param metric The {@link Metric} of type {@link Histogram} for the {@link HistogramMBean}
-     * @return The newly created {@link HistogramMBean}
-     * @throws IllegalArgumentException if an invalid type of {@link Metric} is supplied or if the
-     *             {@link HistogramMBean} does not follow JMX design patterns for Management Interfaces
+     * @return The {@link HistogramMBean}
      */
-    public static HistogramMBean histogram(Metric metric) {
-        checkInstance(metric, Histogram.class);
-        try {
-            return new HistogramMBeanImpl((Histogram) metric);
-        } catch (NotCompliantMBeanException e) {
-            throw new IllegalArgumentException("The HistogramMBean is not a compliant MBean");
-        }
-    }
+    HistogramMBean histogram(Histogram histogram, MetricDescriptor metricDescriptor);
 
     /**
-     * Creates a new {@link GaugeMBean} with the specified {@link Metric}
+     * Creates a new {@link GaugeMBean} from the specified {@link Gauge} metric
+     * @param metricDescriptor TODO
+     * @param counter The {@link Gauge} from which to create the mbean
      * 
-     * @param metric The {@link Metric} of type {@link Gauge} for the {@link GaugeMBean}
-     * @return The newly created {@link GaugeMBean}
-     * @throws IllegalArgumentException if an invalid type of {@link Metric} is supplied or if the
-     *             {@link GaugeMBean} does not follow JMX design patterns for Management Interfaces
+     * @return The {@link GaugeMBean}
      */
-    public static GaugeMBean gauge(Metric metric) {
-        if (!(metric instanceof Gauge)) {
-            throw new IllegalArgumentException("Invalid metric specified for 'Gauge' mbean: '" + metric.getClass() + "'");
-        }
-        //checkInstance(metric, Gauge.class);
-        try {
-            return new GaugeMBeanImpl((Gauge<?>) metric);
-        } catch (NotCompliantMBeanException e) {
-            throw new IllegalArgumentException("The GaugeMBean is not a compliant MBean");
-        }
-    }
-    
-    /**
-     * Creates a new {@link GaugeMBean} with the specified {@link Metric}
-     * 
-     * @param metric The {@link Metric} of type {@link RatioGauge} for the {@link GaugeMBean}
-     * @return The newly created {@link GaugeMBean}
-     * @throws IllegalArgumentException if an invalid type of {@link Metric} is supplied or if the
-     *             {@link GaugeMBean} does not follow JMX design patterns for Management Interfaces
-     */
-    public static GaugeMBean ratioGauge(Metric metric) {
-        if (!(metric instanceof RatioGauge)) {
-            throw new IllegalArgumentException("Invalid metric specified for 'RatioGauge' mbean: '" + metric.getClass() + "'");
-        }
-        try {
-            return new GaugeMBeanImpl((Gauge<?>) metric);
-        } catch (NotCompliantMBeanException e) {
-            throw new IllegalArgumentException("The GaugeMBean is not a compliant MBean");
-        }
-    }
-
-    /**
-     * Checks if the instance of the specified {@link Metric} is assignable from the specified {@link Class}
-     * 
-     * @param metric The {@link Metric} to check
-     * @param clazz The expected assignable {@link Class}
-     * @throws IllegalArgumentException if the specified {@link Metric} is not assignable from the specified {@link Class}
-     */
-    private static void checkInstance(Metric metric, Class<?> clazz) {
-        if (!metric.getClass().isAssignableFrom(clazz)) {
-            throw new IllegalArgumentException("Invalid metric specified for '" + clazz.getSimpleName() + "' mbean: '" + metric.getClass() + "'");
-        }
-    }
+    GaugeMBean gauge(Gauge<?> gauge, MetricDescriptor metricDescriptor);
 }

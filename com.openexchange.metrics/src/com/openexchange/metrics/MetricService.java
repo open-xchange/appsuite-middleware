@@ -46,73 +46,86 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.metrics;
 
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.Gauge;
-import com.codahale.metrics.Histogram;
-import com.codahale.metrics.Meter;
-import com.codahale.metrics.MetricRegistry.MetricSupplier;
-import com.codahale.metrics.Timer;
+import java.util.function.Supplier;
+import com.openexchange.metrics.jmx.MetricServiceListener;
+import com.openexchange.metrics.types.Counter;
+import com.openexchange.metrics.types.Gauge;
+import com.openexchange.metrics.types.Histogram;
+import com.openexchange.metrics.types.Meter;
+import com.openexchange.metrics.types.Timer;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link MetricService}
  *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
+@SingletonService
 public interface MetricService {
 
     /**
-     * Gets an existing {@link Histogram} for the given name or creates and
+     * Gets an existing {@link Histogram} for the specified {@link MetricDescriptor} or creates and
      * remembers a new one if it doesn't exist yet.
      *
-     * @param group The metric group
-     * @param name The metric name
+     * @param descriptior The {@link MetricDescriptor}
      * @return the metric instance
      */
-    Histogram getHistogram(String group, String name);
+    Histogram getHistogram(MetricDescriptor descriptor);
 
     /**
-     * Gets an existing {@link Timer} for the given name or creates and
+     * Gets an existing {@link Timer} for the specified {@link MetricDescriptor} or creates and
      * remembers a new one if it doesn't exist yet.
      *
-     * @param group The metric group
-     * @param name The metric name
+     * @param descriptior The {@link MetricDescriptor}
      * @return the metric instance
      */
-    Timer timer(String group, String name);
+    Timer getTimer(MetricDescriptor descriptor);
 
     /**
-     * Gets an existing {@link Counter} for the given name or creates and
+     * Gets an existing {@link Counter} for the specified {@link MetricDescriptor} or creates and
      * remembers a new one if it doesn't exist yet.
      *
-     * @param group The metric group
-     * @param name The metric name
+     * @param descriptior The {@link MetricDescriptor}
      * @return the metric instance
      */
-    Counter getCounter(String group, String name);
+    Counter getCounter(MetricDescriptor descriptor);
 
     /**
-     * Gets an existing {@link Gauge} for the given name or creates and
-     * remembers a new one if it doesn't exist yet.
+     * Gets an existing {@link Gauge} for the specified {@link MetricDescriptor} with the specified {@link Supplier}
+     * or creates and remembers a new one if it doesn't exist yet.
      *
-     * @param group The metric group
-     * @param name The metric name
+     * @param descriptior The {@link MetricDescriptor}
      * @return the metric instance
      */
-    @SuppressWarnings("rawtypes")
-    Gauge getGauge(String group, String name, MetricSupplier<Gauge> metricSupplier);
+    <T> Gauge<T> getGauge(MetricDescriptor descriptor);
 
     /**
-     * Gets an existing {@link Meter} for the given name or creates and
+     * Gets an existing {@link Meter} for the specified {@link MetricDescriptor} or creates and
      * remembers a new one if it doesn't exist yet.
      *
-     * @param group The metric group
-     * @param name The metric name
+     * @param descriptior The {@link MetricDescriptor}
      * @return the metric instance
      */
-    Meter meter(String group, String name);
+    Meter getMeter(MetricDescriptor descriptor);
 
-    com.openexchange.metrics.Meter meter(MeterDescriptor descriptor);
+    /**
+     * Adds a {@link MetricServiceListener} to a collection of listeners that will be notified on
+     * metric creation. Listeners will be notified in the order in which they are added.
+     * <p/>
+     * <b>N.B.:</b> The listener will be notified of all existing metrics when it first registers.
+     *
+     * @param listener the listener that will be notified
+     */
+    void addListener(MetricServiceListener listener);
 
+    /**
+     * Removes a {@link MetricServiceListener} from this registry's collection of listeners.
+     *
+     * @param listener the listener that will be removed
+     */
+    void removeListener(MetricServiceListener listener);
 }

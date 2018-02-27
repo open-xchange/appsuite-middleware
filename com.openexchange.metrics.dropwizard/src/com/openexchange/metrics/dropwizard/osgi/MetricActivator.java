@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,65 +47,58 @@
  *
  */
 
-package com.openexchange.metrics.types;
+package com.openexchange.metrics.dropwizard.osgi;
+
+import com.openexchange.management.ManagementService;
+import com.openexchange.metrics.MetricService;
+import com.openexchange.metrics.dropwizard.impl.DropwizardMetricService;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * <p>{@link Meter} measures the rate at which a set of events occur.</p>
- * 
+ * {@link MetricActivator}
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface Meter extends Metric {
+public class MetricActivator extends HousekeepingActivator {
 
     /**
-     * Mark the occurrence of an event.
+     * Initialises a new {@link MetricActivator}.
      */
-    void mark();
+    public MetricActivator() {
+        super();
+    }
 
-    /**
-     * Mark the occurrence of a given number of events.
+    /*
+     * (non-Javadoc)
      *
-     * @param n the number of events
+     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
      */
-    void mark(long n);
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] {};
+    }
 
-    /**
-     * Returns the number of events which have been marked.
+    /*
+     * (non-Javadoc)
      *
-     * @return the number of events which have been marked
+     * @see com.openexchange.osgi.DeferredActivator#startBundle()
      */
-    long getCount();
+    @Override
+    protected void startBundle() throws Exception {
+        DropwizardMetricService dropwizardService = new DropwizardMetricService();
+        registerService(MetricService.class, dropwizardService);
+        track(ManagementService.class, new DropwizardMetricServiceListenerServiceTracker(dropwizardService));
+        openTrackers();
+    }
 
-    /**
-     * Returns the one-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
-     * 
-     * @return the one-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
-     */
-    double getOneMinuteRate();
-
-    /**
-     * Returns the five-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
+    /*
+     * (non-Javadoc)
      *
-     * @return the five-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
+     * @see com.openexchange.osgi.HousekeepingActivator#stopBundle()
      */
-    double getFiveMinuteRate();
-
-    /**
-     * Returns the fifteen-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
-     *
-     * @return the fifteen-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
-     */
-    double getFifteenMinuteRate();
-
-    /**
-     * Returns the mean rate at which events have occurred since the meter was created.
-     *
-     * @return the mean rate at which events have occurred since the meter was created
-     */
-    double getMeanRate();
+    @Override
+    protected void stopBundle() throws Exception {
+        unregisterService(MetricService.class);
+        super.stopBundle();
+    }
 }

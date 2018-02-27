@@ -47,65 +47,96 @@
  *
  */
 
-package com.openexchange.metrics.types;
+package com.openexchange.metrics.dropwizard.types;
+
+import com.openexchange.metrics.types.Meter;
 
 /**
- * <p>{@link Meter} measures the rate at which a set of events occur.</p>
- * 
+ * {@link DropwizardMeter}
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface Meter extends Metric {
+public class DropwizardMeter implements Meter {
+
+    private final com.codahale.metrics.Meter delegate;
 
     /**
-     * Mark the occurrence of an event.
-     */
-    void mark();
-
-    /**
-     * Mark the occurrence of a given number of events.
-     *
-     * @param n the number of events
-     */
-    void mark(long n);
-
-    /**
-     * Returns the number of events which have been marked.
-     *
-     * @return the number of events which have been marked
-     */
-    long getCount();
-
-    /**
-     * Returns the one-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
+     * Initialises a new {@link DropwizardMeter}.
      * 
-     * @return the one-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
+     * @param meter The delegate {@link com.codahale.metrics.Meter}
      */
-    double getOneMinuteRate();
+    public DropwizardMeter(com.codahale.metrics.Meter meter) {
+        super();
+        this.delegate = meter;
+    }
 
-    /**
-     * Returns the five-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
-     *
-     * @return the five-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.types.Meter#mark()
      */
-    double getFiveMinuteRate();
+    @Override
+    public void mark() {
+        delegate.mark();
+    }
 
-    /**
-     * Returns the fifteen-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
-     *
-     * @return the fifteen-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.types.Meter#mark(long)
      */
-    double getFifteenMinuteRate();
+    @Override
+    public void mark(long n) {
+        delegate.mark(n);
+    }
 
-    /**
-     * Returns the mean rate at which events have occurred since the meter was created.
-     *
-     * @return the mean rate at which events have occurred since the meter was created
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.types.Meter#getCount()
      */
-    double getMeanRate();
+    @Override
+    public long getCount() {
+        return delegate.getCount();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.types.Meter#getOneMinuteRate()
+     */
+    @Override
+    public double getOneMinuteRate() {
+        return delegate.getOneMinuteRate();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.types.Meter#getFiveMinuteRate()
+     */
+    @Override
+    public double getFiveMinuteRate() {
+        return delegate.getFiveMinuteRate();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.types.Meter#getFifteenMinuteRate()
+     */
+    @Override
+    public double getFifteenMinuteRate() {
+        return delegate.getFifteenMinuteRate();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.types.Meter#getMeanRate()
+     */
+    @Override
+    public double getMeanRate() {
+        return delegate.getMeanRate();
+    }
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,65 +47,64 @@
  *
  */
 
-package com.openexchange.metrics.types;
+package com.openexchange.metrics.dropwizard.types;
+
+import com.codahale.metrics.Snapshot;
+import com.openexchange.metrics.types.Histogram;
 
 /**
- * <p>{@link Meter} measures the rate at which a set of events occur.</p>
- * 
+ * {@link DropwizardHistogram}
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface Meter extends Metric {
+public class DropwizardHistogram implements Histogram {
+
+    private com.codahale.metrics.Histogram delegate;
 
     /**
-     * Mark the occurrence of an event.
+     * Initialises a new {@link Dropwizard1Histogram}.
      */
-    void mark();
+    public DropwizardHistogram(com.codahale.metrics.Histogram histogram) {
+        super();
+        this.delegate = histogram;
+    }
 
-    /**
-     * Mark the occurrence of a given number of events.
-     *
-     * @param n the number of events
-     */
-    void mark(long n);
-
-    /**
-     * Returns the number of events which have been marked.
-     *
-     * @return the number of events which have been marked
-     */
-    long getCount();
-
-    /**
-     * Returns the one-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
+    /*
+     * (non-Javadoc)
      * 
-     * @return the one-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
+     * @see com.openexchange.metrics.types.Histogram#update(int)
      */
-    double getOneMinuteRate();
+    @Override
+    public void update(int value) {
+        delegate.update(value);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.types.Histogram#update(long)
+     */
+    @Override
+    public void update(long value) {
+        delegate.update(value);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.types.Histogram#getCount()
+     */
+    @Override
+    public long getCount() {
+        return delegate.getCount();
+    }
 
     /**
-     * Returns the five-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
-     *
-     * @return the five-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
+     * Returns a snapshot of the values.
+     * 
+     * @return a snapshot of the values.
      */
-    double getFiveMinuteRate();
-
-    /**
-     * Returns the fifteen-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
-     *
-     * @return the fifteen-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
-     */
-    double getFifteenMinuteRate();
-
-    /**
-     * Returns the mean rate at which events have occurred since the meter was created.
-     *
-     * @return the mean rate at which events have occurred since the meter was created
-     */
-    double getMeanRate();
+    public Snapshot getSnapshot() {
+        return delegate.getSnapshot();
+    }
 }

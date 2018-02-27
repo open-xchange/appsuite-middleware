@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,65 +47,78 @@
  *
  */
 
-package com.openexchange.metrics.types;
+package com.openexchange.metrics.jmx.beans;
+
+import com.codahale.metrics.Meter;
+import com.openexchange.management.MBeanMethodAnnotation;
 
 /**
- * <p>{@link Meter} measures the rate at which a set of events occur.</p>
- * 
+ * {@link MeterMBean}
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface Meter extends Metric {
-
-    /**
-     * Mark the occurrence of an event.
-     */
-    void mark();
-
-    /**
-     * Mark the occurrence of a given number of events.
-     *
-     * @param n the number of events
-     */
-    void mark(long n);
+public interface MeterMBean extends MetricMBean {
 
     /**
      * Returns the number of events which have been marked.
      *
      * @return the number of events which have been marked
      */
+    @MBeanMethodAnnotation(description = "Returns the number of events which have been marked.", parameterDescriptions = { "" }, parameters = { "" })
     long getCount();
-
-    /**
-     * Returns the one-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
-     * 
-     * @return the one-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
-     */
-    double getOneMinuteRate();
-
-    /**
-     * Returns the five-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
-     *
-     * @return the five-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
-     */
-    double getFiveMinuteRate();
-
-    /**
-     * Returns the fifteen-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
-     *
-     * @return the fifteen-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
-     */
-    double getFifteenMinuteRate();
 
     /**
      * Returns the mean rate at which events have occurred since the meter was created.
      *
      * @return the mean rate at which events have occurred since the meter was created
      */
+    @MBeanMethodAnnotation(description = "Returns the mean rate at which events have occurred since the meter was created.", parameterDescriptions = { "" }, parameters = { "" })
     double getMeanRate();
+
+    /**
+     * Returns the one-minute exponentially-weighted moving average rate at which events have
+     * occurred since the meter was created.
+     * <p/>
+     * This rate has the same exponential decay factor as the one-minute load average in the
+     * <code>top</code> Unix command.
+     *
+     * @return the one-minute exponentially-weighted moving average rate at which events have
+     *         occurred since the meter was created
+     */
+    @MBeanMethodAnnotation(description = "Returns the one-minute exponentially-weighted moving average rate at which events have occurred since the meter was created. This rate has the same exponential decay factor as the one-minute load average in the top Unix command.", parameterDescriptions = { "" }, parameters = { "" })
+    double getOneMinuteRate();
+
+    /**
+     * Returns the five-minute exponentially-weighted moving average rate at which events have
+     * occurred since the meter was created.
+     * <p/>
+     * This rate has the same exponential decay factor as the five-minute load average in the
+     * <code>top</code> Unix command.
+     *
+     * @return the five-minute exponentially-weighted moving average rate at which events have
+     *         occurred since the meter was created
+     */
+    @MBeanMethodAnnotation(description = "Returns the five-minute exponentially-weighted moving average rate at which events have occurred since the meter was created. This rate has the same exponential decay factor as the five-minute load average in the top Unix command.", parameterDescriptions = { "" }, parameters = { "" })
+    double getFiveMinuteRate();
+
+    /**
+     * Returns the fifteen-minute exponentially-weighted moving average rate at which events have
+     * occurred since the meter was created.
+     * <p/>
+     * This rate has the same exponential decay factor as the fifteen-minute load average in the
+     * {@code top} Unix command.
+     *
+     * @return the fifteen-minute exponentially-weighted moving average rate at which events have
+     *         occurred since the meter was created
+     */
+    @MBeanMethodAnnotation(description = "Returns the fifteen-minute exponentially-weighted moving average rate at which events have occurred since the meter was created. This rate has the same exponential decay factor as the fifteen-minute load average in the top Unix command.", parameterDescriptions = { "" }, parameters = { "" })
+    double getFifteenMinuteRate();
+
+    /**
+     * Returns the rate unit of the {@link Meter}
+     * 
+     * @return the rate unit of the {@link Meter}
+     */
+    @MBeanMethodAnnotation(description = "Returns the rate unit of the meter", parameterDescriptions = { "" }, parameters = { "" })
+    String getRateUnit();
 }

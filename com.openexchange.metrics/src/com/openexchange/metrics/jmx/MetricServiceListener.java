@@ -47,65 +47,94 @@
  *
  */
 
-package com.openexchange.metrics.types;
+package com.openexchange.metrics.jmx;
+
+import com.openexchange.metrics.MetricDescriptor;
+import com.openexchange.metrics.types.Counter;
+import com.openexchange.metrics.types.Gauge;
+import com.openexchange.metrics.types.Histogram;
+import com.openexchange.metrics.types.Meter;
+import com.openexchange.metrics.types.Timer;
 
 /**
- * <p>{@link Meter} measures the rate at which a set of events occur.</p>
- * 
+ * {@link MetricServiceListener}
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface Meter extends Metric {
+public interface MetricServiceListener {
 
     /**
-     * Mark the occurrence of an event.
-     */
-    void mark();
-
-    /**
-     * Mark the occurrence of a given number of events.
+     * Called when a {@link Gauge} is added to the registry.
      *
-     * @param n the number of events
+     * @param descriptor The {@link Gauge}'s descriptor
+     * @param gauge the gauge
      */
-    void mark(long n);
+    void onGaugeAdded(MetricDescriptor descriptor, Gauge<?> gauge);
 
     /**
-     * Returns the number of events which have been marked.
+     * Called when a {@link Gauge} is removed from the registry.
      *
-     * @return the number of events which have been marked
+     * @param name the gauge's name
      */
-    long getCount();
+    void onGaugeRemoved(String name);
 
     /**
-     * Returns the one-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
-     * 
-     * @return the one-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
-     */
-    double getOneMinuteRate();
-
-    /**
-     * Returns the five-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
+     * Called when a {@link Counter} is added to the registry.
      *
-     * @return the five-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
+     * @param descriptor The {@link Counter}'s descriptor
+     * @param counter the counter
      */
-    double getFiveMinuteRate();
+    void onCounterAdded(MetricDescriptor descriptor, Counter counter);
 
     /**
-     * Returns the fifteen-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
+     * Called when a {@link Counter} is removed from the registry.
      *
-     * @return the fifteen-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
+     * @param name the counter's name
      */
-    double getFifteenMinuteRate();
+    void onCounterRemoved(String name);
 
     /**
-     * Returns the mean rate at which events have occurred since the meter was created.
+     * Called when a {@link Histogram} is added to the registry.
      *
-     * @return the mean rate at which events have occurred since the meter was created
+     * @param descriptor The {@link Histogram}'s descriptor
+     * @param histogram the histogram
      */
-    double getMeanRate();
+    void onHistogramAdded(MetricDescriptor descriptor, Histogram histogram);
+
+    /**
+     * Called when a {@link Histogram} is removed from the registry.
+     *
+     * @param name the histogram's name
+     */
+    void onHistogramRemoved(String name);
+
+    /**
+     * Called when a {@link Meter} is added to the registry.
+     *
+     * @param descriptor The {@link Meter}'s descriptor
+     * @param meter the meter
+     */
+    void onMeterAdded(MetricDescriptor descriptor, Meter meter);
+
+    /**
+     * Called when a {@link Meter} is removed from the registry.
+     *
+     * @param name the meter's name
+     */
+    void onMeterRemoved(String name);
+
+    /**
+     * Called when a {@link Timer} is added to the registry.
+     *
+     * @param descriptor The {@link Timer}'s descriptor
+     * @param timer the timer
+     */
+    void onTimerAdded(MetricDescriptor descriptor, Timer timer);
+
+    /**
+     * Called when a {@link Timer} is removed from the registry.
+     *
+     * @param name the timer's name
+     */
+    void onTimerRemoved(String name);
 }

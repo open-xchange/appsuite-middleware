@@ -57,8 +57,10 @@ import com.amazonaws.metrics.RequestMetricCollector;
 import com.amazonaws.util.AWSRequestMetrics;
 import com.amazonaws.util.AWSRequestMetrics.Field;
 import com.amazonaws.util.TimingInfo;
-import com.codahale.metrics.Timer;
+import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.MetricService;
+import com.openexchange.metrics.MetricType;
+import com.openexchange.metrics.types.Timer;
 
 /**
  * {@link S3FileStorageRequestMetricCollector}
@@ -67,14 +69,14 @@ import com.openexchange.metrics.MetricService;
  */
 public class S3FileStorageRequestMetricCollector extends RequestMetricCollector {
 
-    private final MetricService metrics;
+    private final MetricService metricService;
 
     /**
      * Initialises a new {@link S3FileStorageRequestMetricCollector}.
      */
-    public S3FileStorageRequestMetricCollector(MetricService metrics) {
+    public S3FileStorageRequestMetricCollector(MetricService metricService) {
         super();
-        this.metrics = metrics;
+        this.metricService = metricService;
     }
 
     /*
@@ -101,17 +103,20 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
             AWSRequestMetrics metrics = request.getAWSRequestMetrics();
             TimingInfo timingInfo = metrics.getTimingInfo();
             Double timeTakenMillisIfKnown = timingInfo.getTimeTakenMillisIfKnown();
-            if (timeTakenMillisIfKnown != null) {
-                long longValue = timeTakenMillisIfKnown.longValue();
-                Field predefined = (Field) type;
-                switch (predefined) {
-                    case ClientExecuteTime:
-                        String methodName = request.getHttpMethod().name();
-                        Timer timer = this.metrics.timer("s3", "RequestTimes." + methodName);
-                        timer.update(longValue, TimeUnit.MILLISECONDS);
-                    default:
-                        break;
-                }
+            if (timeTakenMillisIfKnown == null) {
+                return;
+            }
+
+            long longValue = timeTakenMillisIfKnown.longValue();
+            Field predefined = (Field) type;
+            switch (predefined) {
+                case ClientExecuteTime:
+                    String methodName = request.getHttpMethod().name();
+                    MetricDescriptor metricDescriptor = MetricDescriptor.newBuilder("s3", "RequestTimes." + methodName, MetricType.TIMER).withDescription("The execution time of requests measured in events/sec").build();
+                    Timer timer = metricService.getTimer(metricDescriptor);
+                    timer.update(longValue, TimeUnit.MILLISECONDS);
+                default:
+                    break;
             }
         }
     }

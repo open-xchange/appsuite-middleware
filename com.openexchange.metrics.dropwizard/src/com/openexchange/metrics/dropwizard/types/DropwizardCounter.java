@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2018-2020 OX Software GmbH
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,65 +47,74 @@
  *
  */
 
-package com.openexchange.metrics.types;
+package com.openexchange.metrics.dropwizard.types;
+
+import com.openexchange.metrics.types.Counter;
 
 /**
- * <p>{@link Meter} measures the rate at which a set of events occur.</p>
- * 
+ * {@link DropwizardCounter}
+ *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface Meter extends Metric {
+public class DropwizardCounter implements Counter {
+
+    private com.codahale.metrics.Counter delegate;
 
     /**
-     * Mark the occurrence of an event.
+     * Initialises a new {@link DropwizardCounter}.
      */
-    void mark();
+    public DropwizardCounter(com.codahale.metrics.Counter counter) {
+        super();
+        this.delegate = counter;
+    }
 
-    /**
-     * Mark the occurrence of a given number of events.
-     *
-     * @param n the number of events
-     */
-    void mark(long n);
-
-    /**
-     * Returns the number of events which have been marked.
-     *
-     * @return the number of events which have been marked
-     */
-    long getCount();
-
-    /**
-     * Returns the one-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
+    /*
+     * (non-Javadoc)
      * 
-     * @return the one-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
+     * @see com.openexchange.metrics.types.Counter#incement()
      */
-    double getOneMinuteRate();
+    @Override
+    public void incement() {
+        delegate.inc();
+    }
 
-    /**
-     * Returns the five-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
-     *
-     * @return the five-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.types.Counter#incrementBy(long)
      */
-    double getFiveMinuteRate();
+    @Override
+    public void incrementBy(long n) {
+        delegate.inc(n);
+    }
 
-    /**
-     * Returns the fifteen-minute exponentially-weighted moving average rate at which events have
-     * occurred since the meter was created.
-     *
-     * @return the fifteen-minute exponentially-weighted moving average rate at which events have
-     *         occurred since the meter was created
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.types.Counter#decrement()
      */
-    double getFifteenMinuteRate();
+    @Override
+    public void decrement() {
+        delegate.dec();
+    }
 
-    /**
-     * Returns the mean rate at which events have occurred since the meter was created.
-     *
-     * @return the mean rate at which events have occurred since the meter was created
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.types.Counter#decrementBy(long)
      */
-    double getMeanRate();
+    @Override
+    public void decrementBy(long n) {
+        delegate.dec(n);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.metrics.types.Counter#getCount()
+     */
+    @Override
+    public long getCount() {
+        return delegate.getCount();
+    }
 }
