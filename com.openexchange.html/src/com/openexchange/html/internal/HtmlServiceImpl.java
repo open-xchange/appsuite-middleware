@@ -624,11 +624,7 @@ public final class HtmlServiceImpl implements HtmlService {
                 htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
             } else {
                 // First, check size
-                int maxLength = HtmlServices.htmlThreshold();
-                if (maxLength > 0 && html.length() > maxLength) {
-                    LOG.info("HTML content is too big: max. '{}', but is '{}'.", I(maxLength), I(html.length()));
-                    throw HtmlExceptionCodes.TOO_BIG.create(I(maxLength), I(html.length()));
-                }
+                checkSize(html);
 
                 if (options.isSanitize()) {
                     boolean[] sanitized = new boolean[] { true };
@@ -708,6 +704,14 @@ public final class HtmlServiceImpl implements HtmlService {
         } catch (final RuntimeException e) {
             LOG.warn("HTML content will be returned un-sanitized.", e);
             return htmlSanitizeResult;
+        }
+    }
+
+    private void checkSize(String html) throws OXException {
+        int maxLength = HtmlServices.htmlThreshold();
+        if (maxLength > 0 && html.length() > maxLength) {
+            LOG.info("HTML content is too big: max. '{}', but is '{}'.", I(maxLength), I(html.length()));
+            throw HtmlExceptionCodes.TOO_BIG.create(I(maxLength), I(html.length()));
         }
     }
 

@@ -104,12 +104,7 @@ public class CalendarFolderConverter {
         ParameterizedFolder folder = new CalendarStorageFolder(treeId, contentType);
         folder.setAccountID(getQualifiedAccountID(providerId, accountId));
         folder.setID(calendarFolder.getId());
-        // TODO: should be drawn by client
-        if (null != calendarFolder.getAccountError()) {
-            folder.setName("\u26a0\ufe0f " + calendarFolder.getName());
-        } else {
-            folder.setName(calendarFolder.getName());
-        }
+        folder.setName(calendarFolder.getName());
         folder.setPermissions(getStoragePermissions(calendarFolder.getPermissions()));
         folder.setSubscribed(calendarFolder.isSubscribed());
         folder.setSubfolderIDs(new String[0]);
