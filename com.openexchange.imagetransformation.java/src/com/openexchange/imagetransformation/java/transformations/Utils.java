@@ -74,6 +74,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imagetransformation.Utility;
 import com.openexchange.imagetransformation.java.exif.ExifTool;
 import com.openexchange.imagetransformation.java.exif.Orientation;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.images.ImageTransformationUtility;
 import com.twelvemonkeys.imageio.plugins.bmp.BMPImageReaderSpi;
 import com.twelvemonkeys.imageio.plugins.bmp.CURImageReaderSpi;
@@ -120,12 +121,12 @@ public class Utils {
         for (ImageReaderSpi readerSpi : readerSpis) {
             readerSpi.onRegistration(registry, ImageReaderSpi.class);
             for (String formatName : readerSpi.getFormatNames()) {
-                readerSpiByFormatName.put(formatName, readerSpi);
+                readerSpiByFormatName.put(Strings.toLowerCase(formatName), readerSpi);
             }
             String[] fileSuffixes = readerSpi.getFileSuffixes();
             if (null != fileSuffixes) {
                 for (String extension : readerSpi.getFileSuffixes()) {
-                    readerSpiByExtension.put(extension, readerSpi);
+                    readerSpiByExtension.put(Strings.toLowerCase(extension), readerSpi);
                 }
             }
         }
@@ -149,10 +150,10 @@ public class Utils {
             ImageReaderSpi readerSpi = null;
             String extension = getFileExtension(fileName);
             if (null != extension) {
-                readerSpi = READER_SPI_BY_EXTENSION.get(extension);
+                readerSpi = READER_SPI_BY_EXTENSION.get(Strings.toLowerCase(extension));
             }
             if (null == readerSpi) {
-                readerSpi = READER_SPI_BY_FORMAT_NAME.get(Utility.getImageFormat(contentType));
+                readerSpi = READER_SPI_BY_FORMAT_NAME.get(Strings.toLowerCase(Utility.getImageFormat(contentType)));
             }
             if (null != readerSpi) {
                 try {
