@@ -58,11 +58,11 @@ import com.openexchange.oauth.scope.OAuthScope;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum MSLiveConnectOAuthScope implements OAuthScope {
-    calendar_ro("wl.calendars", OXScope.calendar_ro),
-    calendar("wl.calendars_update", OXScope.calendar),
-    contacts_ro("wl.contacts_birthday wl.contacts_photos wl.contacts_emails wl.photos wl.postal_addresses", OXScope.contacts_ro),
-    contacts("wl.contacts_create wl.contacts_birthday wl.contacts_photos wl.contacts_emails wl.photos wl.postal_addresses", OXScope.contacts),
-    drive("wl.skydrive wl.skydrive_update", OXScope.drive);
+    calendar_ro("wl.calendars wl.offline_access", OXScope.calendar_ro),
+    calendar("wl.calendars_update wl.offline_access", OXScope.calendar),
+    contacts_ro("wl.contacts_birthday wl.contacts_photos wl.contacts_emails wl.photos wl.postal_addresses wl.offline_access", OXScope.contacts_ro),
+    contacts("wl.contacts_create wl.contacts_birthday wl.contacts_photos wl.contacts_emails wl.photos wl.postal_addresses wl.offline_access", OXScope.contacts),
+    drive("wl.skydrive wl.skydrive_update wl.offline_access", OXScope.drive);
 
     private final String mapping;
     private final OXScope module;

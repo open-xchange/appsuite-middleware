@@ -1,3 +1,9 @@
+open-xchange-configjump-generic (7.8.3-45) stable; urgency=medium
+
+  * Build for patch 2018-02-26 (4582)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 19 Feb 2018 11:02:27 +0100
+
 open-xchange-configjump-generic (7.8.3-44) stable; urgency=medium
 
   * Build for patch 2018-02-05 (4554)

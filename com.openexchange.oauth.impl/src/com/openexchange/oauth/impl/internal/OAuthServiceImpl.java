@@ -832,7 +832,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                  * Commit
                  */
                 writeCon.commit();
-
+                
                 // No need to re-authorise if access not present
                 OAuthAccess access = oAuthAccessRegistry.get(contextId, user);
                 if (access != null) {
