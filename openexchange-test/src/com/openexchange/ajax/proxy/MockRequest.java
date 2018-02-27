@@ -79,7 +79,6 @@ public class MockRequest implements AJAXRequest<MockResponse> {
     private int statusCode;
     private Map<String, String> responseHeaders;
     private int delay;
-    private MockRequestMethod method;
 
     public MockRequest(String uri, InputStream response) {
         this(uri, response, HttpStatus.SC_OK);
@@ -94,11 +93,6 @@ public class MockRequest implements AJAXRequest<MockResponse> {
     }
 
     public MockRequest(String uri, InputStream response, int statusCode, Map<String, String> responseHeaders, int delay) {
-        this(MockRequestMethod.GET, uri, response, statusCode, responseHeaders, delay);
-    }
-
-    public MockRequest(MockRequestMethod method, String uri, InputStream response, int statusCode, Map<String, String> responseHeaders, int delay) {
-        this.method = method;
         this.uri = uri;
         this.response = response;
         this.statusCode = statusCode;
@@ -126,7 +120,6 @@ public class MockRequest implements AJAXRequest<MockResponse> {
         parameters.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "mock"));
         parameters.add(new Parameter(MockConstants.URI_KEY, uri));
         parameters.add(new Parameter(MockConstants.STATUS_CODE_KEY, Integer.toString(statusCode)));
-        parameters.add(new Parameter(MockConstants.METHOD_KEY, method.name()));
 
         if (responseHeaders != null && !responseHeaders.isEmpty()) {
             parameters.add(new Parameter(MockConstants.HEADERS_KEY, addHeaders()));
