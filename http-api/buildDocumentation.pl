@@ -5,10 +5,11 @@ use warnings;
 use strict;
 use v5.10;
 use Pod::Usage;
+use File::HomeDir;
 
 
 my $api = "http_api";
-my $target = "~/Desktop/documentation";
+my $target = File::HomeDir->my_home."/Desktop/documentation";
 my $deps;
 my $help;
 
