@@ -53,6 +53,11 @@ import com.openexchange.management.ManagementService;
 import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.jmx.AbstractMetricServiceListener;
 import com.openexchange.metrics.jmx.MetricMBeanFactory;
+import com.openexchange.metrics.types.Counter;
+import com.openexchange.metrics.types.Gauge;
+import com.openexchange.metrics.types.Histogram;
+import com.openexchange.metrics.types.Meter;
+import com.openexchange.metrics.types.Timer;
 
 /**
  * {@link DropwizardMetricServiceListener}
@@ -74,12 +79,11 @@ public class DropwizardMetricServiceListener extends AbstractMetricServiceListen
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.metrics.jmx.MetricServiceListener#onGaugeAdded(com.openexchange.metrics.MetricDescriptor, com.openexchange.metrics.types.Gauge)
+     * @see com.openexchange.metrics.jmx.MetricServiceListener#onGaugeAdded(com.openexchange.metrics.MetricDescriptor, Gauge)
      */
     @Override
-    public void onGaugeAdded(MetricDescriptor descriptor, com.openexchange.metrics.types.Gauge<?> gauge) {
-        // TODO Auto-generated method stub
-
+    public void onGaugeAdded(MetricDescriptor descriptor, Gauge<?> gauge) {
+        registerMBean(gauge, descriptor);
     }
 
     /*
@@ -96,12 +100,11 @@ public class DropwizardMetricServiceListener extends AbstractMetricServiceListen
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.metrics.jmx.MetricServiceListener#onCounterAdded(com.openexchange.metrics.MetricDescriptor, com.openexchange.metrics.types.Counter)
+     * @see com.openexchange.metrics.jmx.MetricServiceListener#onCounterAdded(com.openexchange.metrics.MetricDescriptor, Counter)
      */
     @Override
-    public void onCounterAdded(MetricDescriptor descriptor, com.openexchange.metrics.types.Counter counter) {
-        // TODO Auto-generated method stub
-
+    public void onCounterAdded(MetricDescriptor descriptor, Counter counter) {
+        registerMBean(counter, descriptor);
     }
 
     /*
@@ -118,12 +121,11 @@ public class DropwizardMetricServiceListener extends AbstractMetricServiceListen
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.metrics.jmx.MetricServiceListener#onHistogramAdded(com.openexchange.metrics.MetricDescriptor, com.openexchange.metrics.types.Histogram)
+     * @see com.openexchange.metrics.jmx.MetricServiceListener#onHistogramAdded(com.openexchange.metrics.MetricDescriptor, Histogram)
      */
     @Override
-    public void onHistogramAdded(MetricDescriptor descriptor, com.openexchange.metrics.types.Histogram histogram) {
-        // TODO Auto-generated method stub
-
+    public void onHistogramAdded(MetricDescriptor descriptor, Histogram histogram) {
+        registerMBean(histogram, descriptor);
     }
 
     /*
@@ -140,12 +142,11 @@ public class DropwizardMetricServiceListener extends AbstractMetricServiceListen
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.metrics.jmx.MetricServiceListener#onMeterAdded(com.openexchange.metrics.MetricDescriptor, com.openexchange.metrics.types.Meter)
+     * @see com.openexchange.metrics.jmx.MetricServiceListener#onMeterAdded(com.openexchange.metrics.MetricDescriptor, Meter)
      */
     @Override
-    public void onMeterAdded(MetricDescriptor descriptor, com.openexchange.metrics.types.Meter meter) {
-        // TODO Auto-generated method stub
-
+    public void onMeterAdded(MetricDescriptor descriptor, Meter meter) {
+        registerMBean(meter, descriptor);
     }
 
     /*
@@ -162,12 +163,11 @@ public class DropwizardMetricServiceListener extends AbstractMetricServiceListen
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.metrics.jmx.MetricServiceListener#onTimerAdded(com.openexchange.metrics.MetricDescriptor, com.openexchange.metrics.types.Timer)
+     * @see com.openexchange.metrics.jmx.MetricServiceListener#onTimerAdded(com.openexchange.metrics.MetricDescriptor, Timer)
      */
     @Override
-    public void onTimerAdded(MetricDescriptor descriptor, com.openexchange.metrics.types.Timer timer) {
-        // TODO Auto-generated method stub
-
+    public void onTimerAdded(MetricDescriptor descriptor, Timer timer) {
+        registerMBean(timer, descriptor);
     }
 
     /*
