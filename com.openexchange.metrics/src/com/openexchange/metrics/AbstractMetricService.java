@@ -228,7 +228,7 @@ public abstract class AbstractMetricService implements MetricService {
      * @param descriptor The {@link MetricDescriptor}
      */
     private void notifyListenerOfRemovedMetric(MetricServiceListener listener, MetricDescriptor descriptor) {
-        MetricServiceListenerNotifier notifier = listenerNotifiersOnAdd.get(descriptor.getMetricType());
+        MetricServiceListenerNotifier notifier = listenerNotifiersOnRemove.get(descriptor.getMetricType());
         if (notifier == null) {
             LOG.debug("No listener notifier found for metric type '{}'", descriptor.getMetricType());
             return;
