@@ -197,7 +197,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
          */
         JSONObject internalConfig = null != account.getInternalConfiguration() ? account.getInternalConfiguration() : new JSONObject();
         String name = internalConfig.optString("name", null);
-        if (Strings.isEmpty(name)) {
+        if (Strings.isEmpty(name) || BirthdaysCalendarStrings.CALENDAR_NAME.equals(name)) {
             name = stringHelper.getString(BirthdaysCalendarStrings.CALENDAR_NAME);
         }
         settings.setName(name);
