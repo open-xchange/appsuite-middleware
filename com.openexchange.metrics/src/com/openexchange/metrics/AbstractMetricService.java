@@ -164,6 +164,7 @@ public abstract class AbstractMetricService implements MetricService {
             notifyListenersOnAdd(descriptor, dropwizardMetric);
             return dropwizardMetric;
         }
+        LOG.debug("Meanwhile another metric of type '{}' and name '{}' was registered by another thread. Returning that metric.", descriptor.getMetricType(), descriptor.getFullName());
         return raced;
     }
 
