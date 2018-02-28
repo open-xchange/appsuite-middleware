@@ -91,7 +91,7 @@ abstract class AbstractDropboxAccess {
         this.dropboxOAuthAccess = dropboxOAuthAccess;
         this.session = session;
         this.account = account;
-        this.client = (DbxClientV2) dropboxOAuthAccess.getClient().client;
+        this.client = ((DropboxClient) dropboxOAuthAccess.getClient().client).dbxClient;
     }
 
     /**
