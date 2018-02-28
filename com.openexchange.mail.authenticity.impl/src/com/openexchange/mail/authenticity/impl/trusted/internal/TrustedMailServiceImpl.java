@@ -152,16 +152,24 @@ public class TrustedMailServiceImpl implements ForcedReloadable, TrustedMailServ
             return;
         }
 
-        if (MailAuthenticityStatus.PASS.equals(authenticityResult.getStatus())) {
-            String mailAddress = getMailAddress(mailMessage);
-            TrustedMail trustedDomain = checkMail(tenant, mailAddress);
-            if (trustedDomain != null) {
-                authenticityResult.setStatus(MailAuthenticityStatus.TRUSTED);
-                if (trustedDomain.getImage() != null) {
-                    authenticityResult.addAttribute(MailAuthenticityResultKey.IMAGE, trustedDomain.getImage().getUID());
-                }
-            }
+        if (false == MailAuthenticityStatus.PASS.equals(authenticityResult.getStatus())) {
+            return;
         }
+
+        String mailAddress = getMailAddress(mailMessage);
+        if (Strings.isEmpty(mailAddress)) {
+            return;
+        }
+        TrustedMail trustedDomain = checkMail(tenant, mailAddress);
+        if (trustedDomain == null) {
+            return;
+        }
+        authenticityResult.setStatus(MailAuthenticityStatus.TRUSTED);
+        if (trustedDomain.getImage() == null) {
+            return;
+
+        }
+        authenticityResult.addAttribute(MailAuthenticityResultKey.IMAGE, trustedDomain.getImage().getUID());
     }
 
     private TrustedMail checkMail(String tenant, String mailAddress) {

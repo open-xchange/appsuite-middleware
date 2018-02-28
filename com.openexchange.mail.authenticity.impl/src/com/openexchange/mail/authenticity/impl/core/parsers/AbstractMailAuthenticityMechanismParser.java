@@ -126,7 +126,7 @@ abstract class AbstractMailAuthenticityMechanismParser implements BiFunction<Map
      * @return <code>true</code> if there is a match between the domains, <code>false</code> otherwise
      */
     private boolean checkDomainMatch(MailAuthenticityResult overallResult, String domain) {
-        String fromDomain = overallResult.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN, String.class);
+        String fromDomain = overallResult.getAttribute(MailAuthenticityResultKey.FROM_HEADER_DOMAIN, String.class);
         return fromDomain.equals(domain);
     }
 
