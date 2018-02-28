@@ -176,6 +176,10 @@ public abstract class AbstractMetricService implements MetricService {
         String key = metricDescriptor.getFullName();
         metrics.remove(key);
         MetricRegisterer registerer = registerers.get(metricDescriptor.getMetricType());
+        if (registerer == null) {
+            return;
+        }
+
         registerer.unregister(metricDescriptor);
         notifyListenersOnRemove(metricDescriptor);
     }

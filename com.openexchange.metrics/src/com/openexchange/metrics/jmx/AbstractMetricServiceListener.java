@@ -203,8 +203,8 @@ public abstract class AbstractMetricServiceListener implements MetricServiceList
         if (indexOf <= 0) {
             properties.put("name", name);
         } else {
-            properties.put("name", name.substring(indexOf));
-            properties.put("type", name.substring(indexOf + 1));
+            properties.put("type", name.substring(0, indexOf));
+            properties.put("name", name.substring(indexOf + 1));
         }
         return ObjectName.getInstance(DOMAIN_NAME, properties);
     }
