@@ -170,9 +170,7 @@ public class ITipEventUpdate implements EventUpdate {
     public boolean isAboutStateChangesOnly(EventField[] relevant) {
         // First, let's see if any fields besides the state tracking fields have changed
         Set<EventField> differing = new HashSet<>(getUpdatedFields());
-        differing.remove(EventField.ATTENDEES);
-        differing.removeAll(Arrays.asList(relevant));
-        if (false == differing.isEmpty()) {
+        if (differing.removeAll(Arrays.asList(relevant))) {
             return false; // There is at least one relevant change left.
         }
 
