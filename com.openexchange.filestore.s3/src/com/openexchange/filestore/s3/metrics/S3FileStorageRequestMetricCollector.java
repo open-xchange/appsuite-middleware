@@ -125,7 +125,7 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
     }
 
     /**
-     * Retrieves the metric decriptor for the specified HTTP method
+     * Retrieves the metric descriptor for the specified HTTP method
      * 
      * @param methodName the method name
      * @return The {@link MetricDescriptor} for the specified HTTP method
@@ -144,6 +144,9 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
         return raced;
     }
 
+    /**
+     * Stops the metric collector and unregisters all metrics
+     */
     void stop() {
         for (MetricDescriptor metricDescriptor : metricDescriptors.values()) {
             metricService.removeMetric(metricDescriptor);
