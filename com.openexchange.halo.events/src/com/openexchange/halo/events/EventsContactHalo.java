@@ -58,6 +58,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -67,6 +69,7 @@ import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultSearchFilter;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccess;
 import com.openexchange.chronos.provider.composition.IDBasedCalendarAccessFactory;
+import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.SortOrder.Order;
 import com.openexchange.exception.OXException;
@@ -120,12 +123,12 @@ public class EventsContactHalo extends AbstractContactHalo implements HaloContac
         /*
          * init calendar access, search matching events & return appropriate result
          */
-        List<Event> events = null;
+        Map<String, EventsResult> resultsPerFolder = null;
         IDBasedCalendarAccess calendarAccess = initCalendarAccess(request);
         boolean committed = false;
         try {
             calendarAccess.startTransaction();
-            events = initCalendarAccess(request).searchEvents(null, filters, null);
+            resultsPerFolder = initCalendarAccess(request).searchEvents(null, filters, null);
             calendarAccess.commit();
             committed = true;
         } finally {
@@ -133,6 +136,13 @@ public class EventsContactHalo extends AbstractContactHalo implements HaloContac
                 calendarAccess.rollback();
             }
             calendarAccess.finish();
+        }
+        List<Event> events = new ArrayList<Event>();
+        for (Entry<String, EventsResult> entry : resultsPerFolder.entrySet()) {
+            List<Event> eventsPerFolder = entry.getValue().getEvents();
+            if (null != eventsPerFolder) {
+                events.addAll(eventsPerFolder);
+            }
         }
         AJAXRequestResult result = new AJAXRequestResult(events, getMaximumTimestamp(events), "event");
         List<OXException> warnings = calendarAccess.getWarnings();
