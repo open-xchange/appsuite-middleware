@@ -192,7 +192,7 @@ public abstract class AbstractMetricService implements MetricService {
      */
     private void notifyListenersOnAdd(MetricDescriptor descriptor, Metric metric) {
         for (MetricServiceListener listener : listeners) {
-            notifyListenerOfAddedMetric(listener, metric, descriptor);
+            notifyListener(listenerNotifiersOnAdd, listener, metric, descriptor);
         }
     }
 
@@ -204,39 +204,24 @@ public abstract class AbstractMetricService implements MetricService {
      */
     private void notifyListenersOnRemove(MetricDescriptor descriptor) {
         for (MetricServiceListener listener : listeners) {
-            notifyListenerOfRemovedMetric(listener, descriptor);
+            notifyListener(listenerNotifiersOnRemove, listener, null, descriptor);
         }
     }
 
     /**
-     * Notifies the specified listener about the specified added {@link Metric}
+     * Notifies the specified listener
      * 
-     * @param listener The listener to notify
+     * @param notifiers The notifiers
+     * @param listener The listener
      * @param metric The {@link Metric}
      * @param descriptor The {@link MetricDescriptor}
      */
-    private void notifyListenerOfAddedMetric(MetricServiceListener listener, Metric metric, MetricDescriptor descriptor) {
-        MetricServiceListenerNotifier notifier = listenerNotifiersOnAdd.get(descriptor.getMetricType());
+    private void notifyListener(Map<MetricType, MetricServiceListenerNotifier> notifiers, MetricServiceListener listener, Metric metric, MetricDescriptor descriptor) {
+        MetricServiceListenerNotifier notifier = notifiers.get(descriptor.getMetricType());
         if (notifier == null) {
             LOG.debug("No listener notifier found for metric type '{}'", descriptor.getMetricType());
             return;
         }
         notifier.notify(listener, metric, descriptor);
-    }
-
-    /**
-     * Notifies the specified listener about the specified removed {@link Metric}
-     * 
-     * @param listener The listener to notify
-     * @param metric The {@link Metric}
-     * @param descriptor The {@link MetricDescriptor}
-     */
-    private void notifyListenerOfRemovedMetric(MetricServiceListener listener, MetricDescriptor descriptor) {
-        MetricServiceListenerNotifier notifier = listenerNotifiersOnRemove.get(descriptor.getMetricType());
-        if (notifier == null) {
-            LOG.debug("No listener notifier found for metric type '{}'", descriptor.getMetricType());
-            return;
-        }
-        notifier.notify(listener, null, descriptor);
     }
 }
