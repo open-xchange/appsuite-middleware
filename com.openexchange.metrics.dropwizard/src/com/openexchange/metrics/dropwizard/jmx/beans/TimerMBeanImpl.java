@@ -56,6 +56,7 @@ import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.dropwizard.types.DropwizardTimer;
 import com.openexchange.metrics.jmx.beans.AbstractMetricMBean;
 import com.openexchange.metrics.jmx.beans.TimerMBean;
+import com.openexchange.metrics.types.Timer;
 
 /**
  * {@link TimerMBeanImpl}
@@ -73,8 +74,8 @@ public class TimerMBeanImpl extends AbstractMetricMBean implements TimerMBean {
     /**
      * Initialises a new {@link TimerMBeanImpl}.
      * 
-     * @param metricDescriptor TODO
-     *
+     * @param timer The {@link Timer} metric
+     * @param metricDescriptor The {@link MetricDescriptor}
      * @throws NotCompliantMBeanException
      */
     public TimerMBeanImpl(DropwizardTimer timer, MetricDescriptor metricDescriptor) throws NotCompliantMBeanException {
@@ -82,8 +83,8 @@ public class TimerMBeanImpl extends AbstractMetricMBean implements TimerMBean {
         this.timer = timer;
         this.rateUnit = metricDescriptor.getUnit() + "/" + calculateRateUnit(metricDescriptor.getRate());
         this.rateFactor = metricDescriptor.getRate().toSeconds(1);
-        this.durationFactor = 1.0 / TimeUnit.MILLISECONDS.toNanos(1); // TODO
-        this.durationUnit = TimeUnit.MILLISECONDS.toString().toLowerCase(Locale.US); // TODO
+        this.durationFactor = 1.0 / TimeUnit.MILLISECONDS.toNanos(1);
+        this.durationUnit = TimeUnit.MILLISECONDS.toString().toLowerCase(Locale.US);
     }
 
     /**

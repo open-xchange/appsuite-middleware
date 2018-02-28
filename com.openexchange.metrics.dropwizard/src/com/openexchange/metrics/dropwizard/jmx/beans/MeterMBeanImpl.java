@@ -56,6 +56,7 @@ import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.dropwizard.types.DropwizardMeter;
 import com.openexchange.metrics.jmx.beans.AbstractMetricMBean;
 import com.openexchange.metrics.jmx.beans.MeterMBean;
+import com.openexchange.metrics.types.Meter;
 
 /**
  * {@link MeterMBeanImpl}
@@ -71,8 +72,8 @@ public class MeterMBeanImpl extends AbstractMetricMBean implements MeterMBean {
     /**
      * Initialises a new {@link MeterMBeanImpl}.
      * 
-     * @param metricDescriptor TODO
-     *
+     * @param meter The {@link Meter} metric
+     * @param metricDescriptor The {@link MetricDescriptor}
      * @throws NotCompliantMBeanException
      */
     public MeterMBeanImpl(DropwizardMeter meter, MetricDescriptor metricDescriptor) throws NotCompliantMBeanException {

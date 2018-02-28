@@ -54,6 +54,7 @@ import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.dropwizard.types.DropwizardHistogram;
 import com.openexchange.metrics.jmx.beans.AbstractMetricMBean;
 import com.openexchange.metrics.jmx.beans.HistogramMBean;
+import com.openexchange.metrics.types.Histogram;
 
 /**
  * {@link HistogramMBeanImpl}
@@ -66,10 +67,9 @@ public class HistogramMBeanImpl extends AbstractMetricMBean implements Histogram
 
     /**
      * Initialises a new {@link HistogramMBeanImpl}.
-     * @param metricDescriptor TODO
-     * @param description
-     * @param mbeanInterface
      * 
+     * @param histogram The {@link Histogram} metric
+     * @param metricDescriptor The {@link MetricDescriptor}
      * @throws NotCompliantMBeanException
      */
     public HistogramMBeanImpl(DropwizardHistogram histogram, MetricDescriptor metricDescriptor) throws NotCompliantMBeanException {

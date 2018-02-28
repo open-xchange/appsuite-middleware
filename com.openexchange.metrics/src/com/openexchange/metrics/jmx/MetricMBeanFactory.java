@@ -74,7 +74,7 @@ public interface MetricMBeanFactory {
      * Creates a new {@link CounterMBean} from the specified {@link Counter} metric
      * 
      * @param counter The {@link Counter} from which to create the mbean
-     * @param metricDescriptor TODO
+     * @param metricDescriptor The {@link MetricDescriptor}
      * @return The {@link CounterMBean}
      */
     CounterMBean counter(Counter counter, MetricDescriptor metricDescriptor);
@@ -83,6 +83,7 @@ public interface MetricMBeanFactory {
      * Creates a new {@link TimerMBean} from the specified {@link Timer} metric
      * 
      * @param counter The {@link Timer} from which to create the mbean
+     * @param metricDescriptor The {@link MetricDescriptor}
      * @return The {@link TimerMBean}
      */
     TimerMBean timer(Timer timer, MetricDescriptor metricDescriptor);
@@ -91,13 +92,15 @@ public interface MetricMBeanFactory {
      * Creates a new {@link MeterMBean} from the specified {@link Meter} metric
      * 
      * @param counter The {@link Meter} from which to create the mbean
+     * @param metricDescriptor The {@link MetricDescriptor}
      * @return The {@link MeterMBean}
      */
     MeterMBean meter(Meter meter, MetricDescriptor metricDescriptor);
 
     /**
      * Creates a new {@link HistogramMBean} from the specified {@link Histogram} metric
-     * @param metricDescriptor TODO
+     * 
+     * @param metricDescriptor The {@link MetricDescriptor}
      * @param counter The {@link Histogram} from which to create the mbean
      * 
      * @return The {@link HistogramMBean}
@@ -106,9 +109,9 @@ public interface MetricMBeanFactory {
 
     /**
      * Creates a new {@link GaugeMBean} from the specified {@link Gauge} metric
-     * @param metricDescriptor TODO
-     * @param counter The {@link Gauge} from which to create the mbean
      * 
+     * @param metricDescriptor The {@link MetricDescriptor}
+     * @param counter The {@link Gauge} from which to create the mbean
      * @return The {@link GaugeMBean}
      */
     GaugeMBean gauge(Gauge<?> gauge, MetricDescriptor metricDescriptor);

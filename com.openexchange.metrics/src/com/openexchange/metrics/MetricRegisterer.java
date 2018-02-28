@@ -58,8 +58,18 @@ import com.openexchange.metrics.types.Metric;
  */
 public interface MetricRegisterer {
 
+    /**
+     * Registers a new {@link Metric} or gets an already existing one
+     * 
+     * @param descriptor The {@link MetricDescriptor} for the {@link Metric}
+     * @return the new or already existing one {@link Metric}
+     */
     Metric register(MetricDescriptor descriptor);
 
+    /**
+     * Unregisters a {@link Metric} described with the specified {@link MetricDescriptor}
+     * 
+     * @param descriptor The {@link MetricDescriptor}
+     */
     void unregister(MetricDescriptor descriptor);
-
 }

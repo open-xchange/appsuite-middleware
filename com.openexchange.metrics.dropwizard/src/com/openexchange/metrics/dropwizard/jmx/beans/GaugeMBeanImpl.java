@@ -54,6 +54,7 @@ import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.dropwizard.types.DropwizardGauge;
 import com.openexchange.metrics.jmx.beans.AbstractMetricMBean;
 import com.openexchange.metrics.jmx.beans.GaugeMBean;
+import com.openexchange.metrics.types.Gauge;
 
 /**
  * {@link GaugeMBeanImpl}
@@ -66,10 +67,9 @@ public class GaugeMBeanImpl extends AbstractMetricMBean implements GaugeMBean {
 
     /**
      * Initialises a new {@link GaugeMBeanImpl}.
-     * @param metricDescriptor TODO
-     * @param description
-     * @param mbeanInterface
      * 
+     * @param gauge The {@link Gauge} metric
+     * @param metricDescriptor The {@link MetricDescriptor}
      * @throws NotCompliantMBeanException
      */
     public GaugeMBeanImpl(DropwizardGauge gauge, MetricDescriptor metricDescriptor) throws NotCompliantMBeanException {
