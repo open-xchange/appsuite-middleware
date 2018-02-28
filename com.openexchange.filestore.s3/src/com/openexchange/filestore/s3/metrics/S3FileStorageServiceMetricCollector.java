@@ -137,5 +137,6 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
         for (MetricDescriptor metricDescriptor : metricDescriptors.values()) {
             metricService.removeMetric(metricDescriptor);
         }
+        metricDescriptors.clear();
     }
 }

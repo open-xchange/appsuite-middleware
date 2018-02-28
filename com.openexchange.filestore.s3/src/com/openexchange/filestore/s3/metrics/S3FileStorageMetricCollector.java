@@ -93,7 +93,7 @@ public class S3FileStorageMetricCollector extends MetricCollector {
             return false;
         }
 
-        // Not started? Initliase the request and service metric collectors
+        // Not started? Initialise the request and service metric collectors
         s3FileStorageRequestMetricCollector = new S3FileStorageRequestMetricCollector(metrics);
         s3FileStorageServiceMetricCollector = new S3FileStorageServiceMetricCollector(metrics);
         started = true;
@@ -110,11 +110,17 @@ public class S3FileStorageMetricCollector extends MetricCollector {
         if (false == started) {
             return false;
         }
-        ((S3FileStorageRequestMetricCollector) s3FileStorageRequestMetricCollector).stop();
-        ((S3FileStorageServiceMetricCollector) s3FileStorageServiceMetricCollector).stop();
+
         // Was started? Replace the request and service metric collectors
+        S3FileStorageRequestMetricCollector tmpReqCollector = (S3FileStorageRequestMetricCollector) s3FileStorageRequestMetricCollector;
+        S3FileStorageServiceMetricCollector tmpServCollector = (S3FileStorageServiceMetricCollector) s3FileStorageServiceMetricCollector;
+
         s3FileStorageRequestMetricCollector = RequestMetricCollector.NONE;
         s3FileStorageServiceMetricCollector = ServiceMetricCollector.NONE;
+
+        tmpReqCollector.stop();
+        tmpServCollector.stop();
+
         started = false;
         return true;
     }
