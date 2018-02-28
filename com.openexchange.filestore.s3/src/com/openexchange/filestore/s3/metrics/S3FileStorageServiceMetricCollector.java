@@ -55,7 +55,6 @@ import com.amazonaws.metrics.ByteThroughputProvider;
 import com.amazonaws.metrics.ServiceLatencyProvider;
 import com.amazonaws.metrics.ServiceMetricCollector;
 import com.amazonaws.metrics.ThroughputMetricType;
-import com.amazonaws.services.s3.metrics.S3ServiceMetric;
 import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.MetricService;
 import com.openexchange.metrics.MetricType;
@@ -88,13 +87,7 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
     @Override
     public void collectByteThroughput(final ByteThroughputProvider provider) {
         ThroughputMetricType throughputMetricType = provider.getThroughputMetricType();
-        String name = throughputMetricType.name();
-        if (throughputMetricType == S3ServiceMetric.S3DownloadThroughput) {
-            name = "DownloadThroughput";
-        } else if (throughputMetricType == S3ServiceMetric.S3UploadThroughput) {
-            name = "UploadThroughput";
-        }
-        MetricDescriptor metricDescriptor = getMetricDescriptor(name);
+        MetricDescriptor metricDescriptor = getMetricDescriptor(throughputMetricType.name());
         Meter meter = metricService.getMeter(metricDescriptor);
         int bytes = provider.getByteCount();
         meter.mark(Integer.toUnsignedLong(bytes));
