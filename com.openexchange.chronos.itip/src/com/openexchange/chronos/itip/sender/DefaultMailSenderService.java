@@ -64,6 +64,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.chronos.Attachment;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ical.CalendarExport;
@@ -136,16 +137,17 @@ public class DefaultMailSenderService implements MailSenderService {
             prepareAndSend(mail, session, type, event, addAttachments);
         } catch (OXException | MessagingException e) {
             if (addAttachments) {
+                LOG.warn("Couldn't send message with attachments. Try to send without attachments", e);
                 // Try to resend mail without attachments
                 try {
-                    event.removeAttachments();
                     prepareAndSend(mail, session, type, event, false);
                     return;
                 } catch (MessagingException | OXException e2) {
                     LOG.error("Unable to compose message", e2);
                 }
+            } else {
+                LOG.error("Unable to compose message", e);
             }
-            LOG.error("Unable to compose message", e);
         }
     }
 
@@ -213,7 +215,9 @@ public class DefaultMailSenderService implements MailSenderService {
         } else { // (text + html) + iCal
             message.setContentType(MULTIPART_MIXED);
             Multipart multipart = new MimeMultipart(MIXED);
-            addAttachments(mail, multipart, session);
+            if (addAttachments) {
+                addAttachments(mail, multipart, session);
+            }
             generateTextAndHtmlAndIcalAndIcalAttachment(multipart, mail, charset, session, false);
             text = multipart;
         }
@@ -231,7 +235,8 @@ public class DefaultMailSenderService implements MailSenderService {
     private void addAttachments(NotificationMail mail, Multipart multipart, Session session) throws OXException {
         CalendarService calendarService = Services.getService(CalendarService.class, true);
         CalendarSession init = calendarService.init(session);
-        EventID eventID = new EventID(mail.getActor().getFolderId(), mail.getEvent().getId());
+        Attendee actor = mail.getEvent().getAttendees().stream().filter(a -> mail.getActor().getIdentifier() == a.getEntity()).findFirst().orElse(null);
+        EventID eventID = new EventID(null == actor ? mail.getActor().getFolderId() : actor.getFolderId(), mail.getEvent().getId());
         try {
             for (Attachment attachment : mail.getAttachments()) {
                 // Skip all attachments that are not hosted by us
