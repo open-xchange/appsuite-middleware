@@ -75,7 +75,7 @@ public abstract class AbstractMetricService implements MetricService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractMetricService.class);
 
-    private final ConcurrentMap<String, Metric> metrics;
+    private final ConcurrentMap<String, MetricInformation> metrics;
     private final Map<MetricType, MetricRegisterer> registerers;
     private final Map<MetricType, MetricServiceListenerNotifier> listenerNotifiersOnAdd;
     private final Map<MetricType, MetricServiceListenerNotifier> listenerNotifiersOnRemove;
@@ -127,7 +127,9 @@ public abstract class AbstractMetricService implements MetricService {
     @Override
     public void addListener(MetricServiceListener listener) {
         listeners.add(listener);
-        //TODO: notify already registered metrics
+        for (MetricInformation metricInformation : metrics.values()) {
+            notifyListenersOnAdd(metricInformation);
+        }
     }
 
     /*
@@ -154,23 +156,23 @@ public abstract class AbstractMetricService implements MetricService {
             throw new IllegalArgumentException("Cannot register a metric with a 'null' metric descriptor.");
         }
         String key = descriptor.getFullName();
-        Metric metric = metrics.get(key);
-        if (metric != null) {
-            return metric;
+        MetricInformation metricInformation = metrics.get(key);
+        if (metricInformation != null) {
+            return metricInformation.getMetric();
         }
 
         MetricRegisterer registerer = registerers.get(descriptor.getMetricType());
         if (registerer == null) {
             throw new IllegalArgumentException("There is no metric registerer for metric type '" + descriptor.getMetricType() + "'");
         }
-        Metric dropwizardMetric = registerer.register(descriptor);
-        Metric raced = metrics.putIfAbsent(key, dropwizardMetric);
+        MetricInformation dropwizardMetric = new MetricInformation(registerer.register(descriptor), descriptor);
+        MetricInformation raced = metrics.putIfAbsent(key, dropwizardMetric);
         if (raced == null) {
-            notifyListenersOnAdd(descriptor, dropwizardMetric);
-            return dropwizardMetric;
+            notifyListenersOnAdd(dropwizardMetric);
+            return dropwizardMetric.getMetric();
         }
         LOG.debug("Meanwhile another metric of type '{}' and name '{}' was registered by another thread. Returning that metric.", descriptor.getMetricType(), descriptor.getFullName());
-        return raced;
+        return raced.getMetric();
     }
 
     /**
@@ -196,9 +198,9 @@ public abstract class AbstractMetricService implements MetricService {
      * @param descriptor The {@link MetricDescriptor}
      * @param metric The added {@link Metric}
      */
-    private void notifyListenersOnAdd(MetricDescriptor descriptor, Metric metric) {
+    private void notifyListenersOnAdd(MetricInformation metricInformation) {
         for (MetricServiceListener listener : listeners) {
-            notifyListener(listenerNotifiersOnAdd, listener, metric, descriptor);
+            notifyListener(listenerNotifiersOnAdd, listener, metricInformation.getMetric(), metricInformation.getMetricDescriptor());
         }
     }
 
