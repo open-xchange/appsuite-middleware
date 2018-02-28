@@ -249,6 +249,9 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
             @Override
             protected Void call(CalendarStorage storage) throws OXException {
                 CalendarAccount account = storage.getAccountStorage().loadAccount(session.getUserId(), id);
+                if (null == account) {
+                    throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(id);
+                }
                 if (null != account.getLastModified() && account.getLastModified().getTime() > clientTimestamp) {
                     throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(id), clientTimestamp, account.getLastModified().getTime());
                 }
@@ -377,6 +380,9 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
             @Override
             protected CalendarAccount call(CalendarStorage storage) throws OXException {
                 CalendarAccount account = storage.getAccountStorage().loadAccount(userId, accountId);
+                if (null == account) {
+                    throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId);
+                }
                 if (null != account.getLastModified() && account.getLastModified().getTime() > clientTimestamp) {
                     throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(String.valueOf(accountId), clientTimestamp, account.getLastModified().getTime());
                 }
