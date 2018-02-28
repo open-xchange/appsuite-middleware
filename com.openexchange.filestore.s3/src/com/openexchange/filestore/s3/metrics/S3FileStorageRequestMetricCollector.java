@@ -49,6 +49,8 @@
 
 package com.openexchange.filestore.s3.metrics;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import com.amazonaws.Request;
 import com.amazonaws.Response;
@@ -57,8 +59,10 @@ import com.amazonaws.metrics.RequestMetricCollector;
 import com.amazonaws.util.AWSRequestMetrics;
 import com.amazonaws.util.AWSRequestMetrics.Field;
 import com.amazonaws.util.TimingInfo;
-import com.codahale.metrics.Timer;
+import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.MetricService;
+import com.openexchange.metrics.MetricType;
+import com.openexchange.metrics.types.Timer;
 
 /**
  * {@link S3FileStorageRequestMetricCollector}
@@ -67,14 +71,16 @@ import com.openexchange.metrics.MetricService;
  */
 public class S3FileStorageRequestMetricCollector extends RequestMetricCollector {
 
-    private final MetricService metrics;
+    private final MetricService metricService;
+    private final ConcurrentMap<String, MetricDescriptor> metricDescriptors;
 
     /**
      * Initialises a new {@link S3FileStorageRequestMetricCollector}.
      */
-    public S3FileStorageRequestMetricCollector(MetricService metrics) {
+    public S3FileStorageRequestMetricCollector(MetricService metricService) {
         super();
-        this.metrics = metrics;
+        this.metricService = metricService;
+        metricDescriptors = new ConcurrentHashMap<>(8);
     }
 
     /*
@@ -101,18 +107,46 @@ public class S3FileStorageRequestMetricCollector extends RequestMetricCollector 
             AWSRequestMetrics metrics = request.getAWSRequestMetrics();
             TimingInfo timingInfo = metrics.getTimingInfo();
             Double timeTakenMillisIfKnown = timingInfo.getTimeTakenMillisIfKnown();
-            if (timeTakenMillisIfKnown != null) {
-                long longValue = timeTakenMillisIfKnown.longValue();
-                Field predefined = (Field) type;
-                switch (predefined) {
-                    case ClientExecuteTime:
-                        String methodName = request.getHttpMethod().name();
-                        Timer timer = this.metrics.timer("s3", "RequestTimes." + methodName);
-                        timer.update(longValue, TimeUnit.MILLISECONDS);
-                    default:
-                        break;
-                }
+            if (timeTakenMillisIfKnown == null) {
+                return;
             }
+
+            long longValue = timeTakenMillisIfKnown.longValue();
+            Field predefined = (Field) type;
+            switch (predefined) {
+                case ClientExecuteTime:
+                    MetricDescriptor metricDescriptor = getMetricDescriptor(request.getHttpMethod().name());
+                    Timer timer = metricService.getTimer(metricDescriptor);
+                    timer.update(longValue, TimeUnit.MILLISECONDS);
+                default:
+                    break;
+            }
+        }
+    }
+
+    /**
+     * Retrieves the metric decriptor for the specified HTTP method
+     * 
+     * @param methodName the method name
+     * @return The {@link MetricDescriptor} for the specified HTTP method
+     */
+    private MetricDescriptor getMetricDescriptor(String methodName) {
+        MetricDescriptor metricDescriptor = metricDescriptors.get(methodName);
+        if (metricDescriptor != null) {
+            return metricDescriptor;
+        }
+
+        metricDescriptor = MetricDescriptor.newBuilder("s3", "RequestTimes." + methodName, MetricType.TIMER).withDescription("The execution time of " + methodName + " requests measured in events/sec").build();
+        MetricDescriptor raced = metricDescriptors.putIfAbsent(methodName, metricDescriptor);
+        if (raced == null) {
+            return metricDescriptor;
+        }
+        return raced;
+    }
+
+    void stop() {
+        for (MetricDescriptor metricDescriptor : metricDescriptors.values()) {
+            metricService.removeMetric(metricDescriptor);
         }
     }
 }

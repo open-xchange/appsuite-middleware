@@ -64,7 +64,7 @@ public abstract class AbstractShareInfo implements SubfolderAwareShareInfo {
 
     private final ShareTarget srcTarget;
     private final ShareTarget dstTarget;
-    private final Boolean includeSubfolders;
+    private final boolean includeSubfolders;
 
     /**
      * Initializes a new {@link AbstractShareInfo}.
@@ -73,7 +73,7 @@ public abstract class AbstractShareInfo implements SubfolderAwareShareInfo {
      * @param dstTarget The share target from the recipients point of view
      * @param includeSubfolders Whether sub-folders should be included in case the target is a infostore folder
      */
-    protected AbstractShareInfo(ShareTarget srcTarget, ShareTarget dstTarget, Boolean includeSubfolders) {
+    protected AbstractShareInfo(ShareTarget srcTarget, ShareTarget dstTarget, boolean includeSubfolders) {
         super();
         this.srcTarget = srcTarget;
         this.dstTarget = dstTarget;
@@ -122,7 +122,7 @@ public abstract class AbstractShareInfo implements SubfolderAwareShareInfo {
     }
 
     @Override
-    public Boolean isIncludeSubfolders() {
+    public boolean isIncludeSubfolders() {
         return includeSubfolders;
     }
 

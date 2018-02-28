@@ -350,15 +350,15 @@ public class NotificationMail {
                     return false;
                 }
             }
+            if (recipient.getConfiguration().forceCancelMails() && isCancelMail()) {
+                return true;
+            }
             if (stateType.equals(Type.DELETED)) {
                 return false;
             }
         }
         if (!recipientIsOrganizerAndHasNoAccess()) {
             return false;
-        }
-        if (recipient.getConfiguration().forceCancelMails() && isCancelMail()) {
-            return true;
         }
         // TODO
         //        if (event != null && event.containsNotification() && !event.getNotification()) {

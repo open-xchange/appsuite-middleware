@@ -291,9 +291,9 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      *            of the user's {@link SearchAware} calendar accounts
      * @param filters A list of additional filters to be applied on the search, or <code>null</code> if not specified
      * @param queries The queries to search for, or <code>null</code> if not specified
-     * @return The found events, or an empty list if there are none
+     * @return The found events per folder, or an empty map if there are none
      */
-    List<Event> searchEvents(List<String> folderIds, List<SearchFilter> filters, List<String> queries) throws OXException;
+    Map<String, EventsResult> searchEvents(List<String> folderIds, List<SearchFilter> filters, List<String> queries) throws OXException;
 
     /**
      * Gets lists of new and updated as well as deleted events since a specific timestamp in a folder.

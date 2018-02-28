@@ -185,11 +185,11 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public List<Event> searchEvents(CalendarSession session, String[] folderIds, List<SearchFilter> filters, List<String> queries) throws OXException {
-        return new InternalCalendarStorageOperation<List<Event>>(session) {
+    public Map<String, EventsResult> searchEvents(CalendarSession session, List<String> folderIds, List<SearchFilter> filters, List<String> queries) throws OXException {
+        return new InternalCalendarStorageOperation<Map<String, EventsResult>>(session) {
 
             @Override
-            protected List<Event> execute(CalendarSession session, CalendarStorage storage) throws OXException {
+            protected Map<String, EventsResult> execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new SearchPerformer(session, storage).perform(folderIds, filters, queries);
             }
         }.executeQuery();

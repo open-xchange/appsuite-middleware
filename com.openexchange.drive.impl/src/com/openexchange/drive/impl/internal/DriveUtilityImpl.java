@@ -110,7 +110,6 @@ import com.openexchange.share.LinkUpdate;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.Entities;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DriveUtilityImpl}
@@ -642,7 +641,7 @@ public class DriveUtilityImpl implements DriveUtility {
             File file = files.next();
             JSONObject jsonObject = new JsonFileMetadata(syncSession, file).build();
             if (file.getOrigin() != null) {
-                jsonObject.put(ORIGIN, OriginPathFolderFieldWriter.getInstance().getOrigin(file.getOrigin(), syncSession.getServerSession()));
+                jsonObject.put(ORIGIN, OriginPathFolderFieldWriter.getInstance().getOrigin(file.getOrigin(), syncSession));
             }
             fileArray.put(jsonObject);
         }
@@ -663,7 +662,7 @@ public class DriveUtilityImpl implements DriveUtility {
             jsonObject.put(CREATED_BY, folder.getCreatedBy());
             jsonObject.put(MODIFIED_BY, folder.getModifiedBy());
             FolderPath origin = ((OriginAwareFileStorageFolder) folder).getOrigin();
-            jsonObject.put(ORIGIN, OriginPathFolderFieldWriter.getInstance().getOrigin(origin, syncSession.getServerSession()));
+            jsonObject.put(ORIGIN, OriginPathFolderFieldWriter.getInstance().getOrigin(origin, syncSession));
             folderArray.put(jsonObject);
         }
         return folderArray;
@@ -711,7 +710,7 @@ public class DriveUtilityImpl implements DriveUtility {
             super();
         }
 
-        public String getOrigin(FolderPath originPath, ServerSession session) throws JSONException {
+        public String getOrigin(FolderPath originPath, SyncSession session) throws JSONException {
             if (null == originPath) {
                 return null;
             }
@@ -735,7 +734,7 @@ public class DriveUtilityImpl implements DriveUtility {
                 }
 
                 UserizedFolder folder = getFolderFor(folderId, session);
-                Locale locale = session.getUser().getLocale();
+                Locale locale = session.getDriveSession().getLocale();
                 StringBuilder sb = new StringBuilder();
                 sb.append(folder.getLocalizedName(locale));
 
@@ -769,38 +768,39 @@ public class DriveUtilityImpl implements DriveUtility {
             }
         }
 
-        private UserizedFolder getInfoStoreDefaultFolder(ServerSession session) throws OXException {
+        private UserizedFolder getInfoStoreDefaultFolder(SyncSession session) throws OXException {
             FolderServiceDecorator decorator = initDecorator(session);
             FolderService folderService = DriveServiceLookup.getService(FolderService.class, true);
-            return folderService.getDefaultFolder(session.getUser(), TREE_ID, InfostoreContentType.getInstance(), session, decorator);
+            return folderService.getDefaultFolder(session.getServerSession().getUser(), TREE_ID, InfostoreContentType.getInstance(), session.getServerSession(), decorator);
         }
 
-        private UserizedFolder getFolderFor(String folderId, ServerSession session) throws OXException {
+        private UserizedFolder getFolderFor(String folderId, SyncSession session) throws OXException {
             FolderServiceDecorator decorator = initDecorator(session);
             FolderService folderService = DriveServiceLookup.getService(FolderService.class, true);
-            return folderService.getFolder(TREE_ID, folderId, session, decorator);
+            return folderService.getFolder(TREE_ID, folderId, session.getServerSession(), decorator);
         }
 
-        private UserizedFolder[] getSuboldersFor(String folderId, ServerSession session) throws OXException {
+        private UserizedFolder[] getSuboldersFor(String folderId, SyncSession session) throws OXException {
             FolderServiceDecorator decorator = initDecorator(session);
             FolderService folderService = DriveServiceLookup.getService(FolderService.class, true);
-            FolderResponse<UserizedFolder[]> subfolderResponse = folderService.getSubfolders(TREE_ID, folderId, true, session, decorator);
+            FolderResponse<UserizedFolder[]> subfolderResponse = folderService.getSubfolders(TREE_ID, folderId, true, session.getServerSession(), decorator);
             return subfolderResponse.getResponse();
         }
 
         /**
          * Creates and initializes a folder service decorator ready to use with calls to the underlying folder service.
          *
+         * @param session The sync session
          * @return A new folder service decorator
          */
-        private FolderServiceDecorator initDecorator(ServerSession session) {
+        private FolderServiceDecorator initDecorator(SyncSession session) {
             FolderServiceDecorator decorator = new FolderServiceDecorator();
-            Object connection = session.getParameter(Connection.class.getName());
+            Object connection = session.getServerSession().getParameter(Connection.class.getName());
             if (null != connection) {
                 decorator.put(Connection.class.getName(), connection);
             }
             decorator.put("altNames", Boolean.TRUE.toString());
-            decorator.setLocale(session.getUser().getLocale());
+            decorator.setLocale(session.getDriveSession().getLocale());
             return decorator;
         }
     }

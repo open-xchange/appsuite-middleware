@@ -64,6 +64,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.core.tools.PermissionResolver;
+import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -204,7 +205,7 @@ public abstract class ExtendedPermission {
         if (null == timeZoneID) {
             timeZoneID = requestData.getSession().getUser().getTimeZone();
         }
-        return TimeZone.getTimeZone(timeZoneID);
+        return TimeZoneUtils.getTimeZone(timeZoneID);
     }
 
 }

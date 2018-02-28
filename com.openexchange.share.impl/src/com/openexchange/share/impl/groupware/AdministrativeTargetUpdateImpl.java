@@ -141,9 +141,8 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
                 List<OCLPermission> appliedPermissions = folderTargetProxy.getAppliedPermissions();
                 List<OCLPermission> removedPermissions = folderTargetProxy.getRemovedPermissions();
 
-                Context context = getContextService().loadContext(contextID);
                 for (Integer id : subfolderIds) {
-                    FolderObject sub = FolderObject.loadFolderObjectFromDB(id, context);
+                    FolderObject sub = folderAccess.getFolderObject(id.intValue());
                     prepareInheritedPermissions(sub, appliedPermissions, removedPermissions);
                     folderManager.updateFolder(sub, false, true, sub.getLastModified().getTime());
                 }
@@ -167,18 +166,19 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
             originalPermissions = new ArrayList<>();
         }
 
+        String parentId = String.valueOf(folder.getParentFolderID());
         List<OCLPermission> filtered = new ArrayList<>(added.size());
         for (OCLPermission add : added) {
-            if(add.getType() == FolderPermissionType.LEGATOR) {
-                add.setPermissionLegator(String.valueOf(folder.getParentFolderID()));
+            if (add.getType() == FolderPermissionType.LEGATOR) {
+                add.setPermissionLegator(parentId);
                 add.setType(FolderPermissionType.INHERITED);
                 filtered.add(add);
             }
         }
 
         for (OCLPermission rem : removed) {
-            if(rem.getType() == FolderPermissionType.LEGATOR) {
-                rem.setPermissionLegator(String.valueOf(folder.getParentFolderID()));
+            if (rem.getType() == FolderPermissionType.LEGATOR) {
+                rem.setPermissionLegator(parentId);
             }
             rem.setType(FolderPermissionType.INHERITED);
         }

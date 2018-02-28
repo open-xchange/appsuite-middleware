@@ -80,25 +80,29 @@ public enum FolderPermissionType {
     }
 
     /**
-     * Return the corresponding {@link FolderPermissionType} with the given type number or the {@link FolderPermissionType#NORMAL} type in case the given type number is unknown.
-     * @param type The type number
-     * @return The {@link FolderPermissionType}
-     */
-    public static FolderPermissionType getType(int type) {
-        for (FolderPermissionType tmp : FolderPermissionType.values()) {
-            if (tmp.type == type) {
-                return tmp;
-            }
-        }
-        return NORMAL;
-    }
-
-    /**
      * Returns the identifying number of this type
      *
      * @return the type number
      */
     public int getTypeNumber() {
         return type;
+    }
+
+    /**
+     * Return the corresponding {@link FolderPermissionType} with the given type number or the {@link FolderPermissionType#NORMAL} type in case the given type number is unknown.
+     * @param type The type number
+     * @return The {@link FolderPermissionType}
+     */
+    public static FolderPermissionType getType(int type) {
+        switch (type) {
+            case 0:
+                return NORMAL;
+            case 1:
+                return LEGATOR;
+            case 2:
+                return INHERITED;
+            default:
+                return NORMAL;
+        }
     }
 }

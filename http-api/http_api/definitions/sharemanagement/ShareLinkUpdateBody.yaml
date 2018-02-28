@@ -25,4 +25,4 @@ properties:
     description: Can be used by the client to save arbitrary JSON data along with the share.
   includeSubfolders:
     type: boolean
-    description: An optional flag indicating whether subfolders should be included or not. Only applicable for infostore folders.
+    description: An optional flag indicating whether subfolders should be included or not. Only applicable for Drive folders.

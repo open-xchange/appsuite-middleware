@@ -68,6 +68,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
+import com.openexchange.chronos.common.DefaultEventsResult;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.AutoProvisioningCalendarProvider;
 import com.openexchange.chronos.provider.CalendarAccess;
@@ -82,6 +83,7 @@ import com.openexchange.chronos.provider.composition.impl.idmangling.IDMangling;
 import com.openexchange.chronos.provider.extensions.WarningsAware;
 import com.openexchange.chronos.provider.groupware.GroupwareCalendarAccess;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.server.ServiceLookup;
@@ -444,6 +446,23 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
             }
         }
         return foldersIdsPerAccount;
+    }
+
+    /**
+     * Builds a map of error events results for the supplied collection of exceptions, mapped to the corresponding folder identifier.
+     *
+     * @param errorsPerFolderId A map of errors associated with the corresponding folder identifier
+     * @return A corresponding map of error event results, or an empty map if there were no errors
+     */
+    protected static Map<String, EventsResult> getErrorResults(Map<String, OXException> errorsPerFolderId) {
+        if (null != errorsPerFolderId && 0 < errorsPerFolderId.size()) {
+            Map<String, EventsResult> eventsResults = new HashMap<String, EventsResult>(errorsPerFolderId.size());
+            for (Entry<String, OXException> entry : errorsPerFolderId.entrySet()) {
+                eventsResults.put(entry.getKey(), new DefaultEventsResult(entry.getValue()));
+            }
+            return eventsResults;
+        }
+        return Collections.emptyMap();
     }
 
     /**

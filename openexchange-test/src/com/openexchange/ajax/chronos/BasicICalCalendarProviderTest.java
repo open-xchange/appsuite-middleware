@@ -719,6 +719,19 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         assertEquals(1, allEvents.size());
         assertTrue(EventManager.isSeriesMaster(allEvents.get(0)));
     }
+    
+    @Test
+    public void testGet_Unauthorized_returnException() throws ApiException, OXException, IOException, JSONException {
+        String externalUri = "http://example.com/files/testGet_Unauthorized_returnException.ics";
+        mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_UNAUTHORIZED);
+
+        String newFolderId = createDefaultAccount(externalUri);
+//        EventsResponse eventsResponse = userApi.getChronosApi().getAllEvents(userApi.getSession(), DateTimeUtil.getZuluDateTime(from.getTime()).getValue(), DateTimeUtil.getZuluDateTime(until.getTime()).getValue(), folder, fields, order, sort, expand, true, false);
+        List<EventData> allEvents = eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis()), false, newFolderId);
+
+        System.out.println();
+    }
+
 
     private List<EventId> createEventIDs(List<EventData> allEvents, int maxEvents, String folder) {
         List<EventId> ids = new ArrayList<>();

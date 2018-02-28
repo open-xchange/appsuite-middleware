@@ -5,7 +5,10 @@ Bundle-SymbolicName: com.openexchange.dav
 Bundle-Version: 7.10.0
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Import-Package: com.google.common.io,
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.cache,
+ com.google.common.io,
  com.openexchange.ajax,
  com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,

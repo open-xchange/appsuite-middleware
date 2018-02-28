@@ -372,7 +372,7 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
     BAD_AUTH_CONFIGURATION("Account cannot be created. Too many auth mechanisms provided by client: %1$s", BAD_AUTH_CONFIGURATION_MSG, Category.CATEGORY_USER_INPUT, 4046),
 
     //TODO: check if needed/useful, check code
-    AUTH_FAILED("Authentication failed to access the resource at %1$s", AUTH_FAILED_MSG, Category.CATEGORY_ERROR, 4010),
+    AUTH_FAILED("Authentication failed to access the resource at %1$s", AUTH_FAILED_MSG, Category.CATEGORY_USER_INPUT, 4010),
 
     ;
 

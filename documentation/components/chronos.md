@@ -664,7 +664,7 @@ For backwards compatibility, the new ``timestamp`` property is used to drive the
 
 ## Allowed Attendee Changes
 
-Previously, only the user's permissions in the underlying folder were considered when checking if an event can be updated or not. For meetings with multiple attendees that usually appear in each of the attendee's default calendar folders, this meant that every internal user that attends a meeting was able to edit the event. 
+Previously, only the user's permissions in the underlying folder were considered when checking if an event can be updated or not. For meetings with multiple attendees that usually appear in each of the attendee's default calendar folders, this meant that every internal user that attends a meeting was able to edit or delete the event. 
 
 However, iCalendar standards require to consider different *roles* here - mainly depending on the calendar user being the organizer of an event or not. While the organizer can perform any changes to the event, the other attendees are quite limited regarding the allowed changes (see RFC 6638, section 3.2.2.1): 
 
@@ -722,4 +722,31 @@ Clients that need to be aware of which actions are actually possible by a certai
 - Whenever data should be manipulated in a way beyond the allowed attendee changes (see above), the calendar user needs to be the organizer of the event, hence the ``organizer`` flag would have to be present. Additionally, the folder permissions need to allow *write object* permissions for the event in question (i.e. either *write all* or *write own* objects).
 - Whenever attendee-related data such as the participation status or the user's personal alarms should be modified, the calendar user needs to be an attendee of the event, hence the ``attendee`` flag would have to be present. No additional folder permissions are required.
 
+
+## UTF-8 Support
+
+The new calendaring stack uses new database tables to store event data. Data from existing events is migrated during the upgrade, see chapter "Migration of legacy data" above. The same database tables are also used for caching data of external calendar subscriptions.
+
+The newly introduced database tables come with full support for storing all symbols from the Unicode character set, whose code points range from U+000000 to U+10FFFF. However, this may also require to adjust some MySQL configuration.
+
+### UTF-8 in MySQL
+
+UTF-8 is a variable-width encoding that encodes each symbol using one to four bytes, i.e. commonly used symbols with a lower code point (ASCII) are encoded using fewer bytes, while it is still possible to store BMP (U+000000 to U+00FFFF) and astral symbols (U+010000 to U+10FFFF). 
+
+The default ``utf8`` character set of MySQL uses a maximum of three bytes per character, so it only allows unicode characters in the BMP range, while any supplementary astral symbols cannot be stored at all. Attempting to do so results in an incorrect string warning, which is treated as error by the middleware. Whenever 4-byte characters have to be stored, the extended character set ``utf8mb4`` is required.
+
+### JDBC Connection Character Set
+
+All strings sent from the Java middleware using the JDBC driver to the database are converted automatically from native Java Unicode to the client encoding. The encoding between client (Connector/J) and MySQL server is automatically detected upon connection. So, once the server advertises support for ``utf8mb4``, this will be negotiated automatically, hence there is no need to modify the driver settings (as defined in ``configdb.properties``).
+
+So, in order to finally use 4-byte UTF-8 character sets, the MySQL server should be configured with ``character_set_server=utf8mb4``. Otherwise, the allowed characters may still be restricted to the BMP range (``utf8`` with three bytes per character), and 
+
+### Replaying Storage
+
+As noted above in "Migration of legacy data", the database will work temporarily in a mode where all write operations are 'replayed' to the legacy database tables after the migration is finished, to prevent data loss in case a downgrade should ever be required. As the previously used database tables do still not support astral symbols, those problematic characters are removed implicitly when storing them there. 
+
+### References / further reading
+- https://dev.mysql.com/doc/connector-j/en/connector-j-reference-charsets.html
+- https://bugs.open-xchange.com/show_bug.cgi?id=54504
+- https://confluence.open-xchange.com/display/MID/MySql+charsets+and+collations
 
