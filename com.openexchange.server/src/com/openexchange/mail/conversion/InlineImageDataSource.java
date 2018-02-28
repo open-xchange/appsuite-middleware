@@ -196,6 +196,7 @@ public final class InlineImageDataSource implements ImageDataSource {
                 if (auth != null) {
                     sb.append("&cryptoAuth=");
                     sb.append(URLEncoder.encode(auth, "UTF-8"));
+                    sb.append("&session=" + session.getSessionID());
                 }
             } catch (OXException | UnsupportedEncodingException ex) {
                 // Don't care...
