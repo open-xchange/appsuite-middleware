@@ -522,7 +522,8 @@ public class CalendarServiceImpl implements CalendarService {
                 while (iterator.hasNext()) {
                     AlarmTrigger trigger = iterator.next();
                     try {
-                        Event loadEvent = storage.getEventStorage().loadEvent(trigger.getEventId(), new EventField[] {EventField.ORGANIZER, EventField.ATTENDEES});
+                        Event loadEvent = storage.getEventStorage().loadEvent(trigger.getEventId(), new EventField[] { EventField.ID, EventField.ORGANIZER });
+                        loadEvent = storage.getUtilities().loadAdditionalEventData(session.getUserId(), loadEvent, new EventField[] { EventField.ATTENDEES });
                         if(loadEvent==null) {
                             dropCurrentEntry(iterator, String.valueOf(trigger.getAlarm()), "Event not found.");
                             continue;
