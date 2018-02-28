@@ -49,83 +49,60 @@
 
 package com.openexchange.filestore.s3.metrics;
 
-import java.util.concurrent.TimeUnit;
-import com.amazonaws.Request;
-import com.amazonaws.Response;
-import com.amazonaws.metrics.AwsSdkMetrics;
-import com.amazonaws.metrics.RequestMetricCollector;
-import com.amazonaws.util.AWSRequestMetrics;
-import com.amazonaws.util.AWSRequestMetrics.Field;
-import com.amazonaws.util.TimingInfo;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.MetricService;
 import com.openexchange.metrics.MetricType;
-import com.openexchange.metrics.types.Timer;
 
 /**
- * {@link S3FileStorageRequestMetricCollector}
+ * {@link MetricDescriptorCache}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class S3FileStorageRequestMetricCollector extends RequestMetricCollector {
+public class MetricDescriptorCache {
 
-    private final MetricService metricService;
-    private MetricDescriptorCache metricDescriptorCache;
+    private final ConcurrentMap<String, MetricDescriptor> metricDescriptors;
+    private MetricService metricService;
+    private final String group;
 
     /**
-     * Initialises a new {@link S3FileStorageRequestMetricCollector}.
+     * Initialises a new {@link MetricDescriptorCache}.
      */
-    public S3FileStorageRequestMetricCollector(MetricService metricService) {
+    public MetricDescriptorCache(MetricService metricService, String group) {
         super();
         this.metricService = metricService;
-        metricDescriptorCache = new MetricDescriptorCache(metricService, "s3");
-    }
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.amazonaws.metrics.RequestMetricCollector#collectMetrics(com.amazonaws.Request, com.amazonaws.Response)
-     */
-    @Override
-    public void collectMetrics(Request<?> request, Response<?> response) {
-        timeRequest(request);
+        this.group = group;
+        metricDescriptors = new ConcurrentHashMap<>(8);
     }
 
     /**
-     * Measures the the runtime of the specified {@link Request}
-     *
-     * @param request The {@link Request} for which to measure the runtime
+     * Retrieves the metric descriptor for the specified HTTP method
+     * 
+     * @param name the method name
+     * @return The {@link MetricDescriptor} for the specified HTTP method
      */
-    private void timeRequest(Request<?> request) {
-        for (com.amazonaws.metrics.MetricType type : AwsSdkMetrics.getPredefinedMetrics()) {
-            if (!(type instanceof Field)) {
-                continue;
-            }
-
-            AWSRequestMetrics metrics = request.getAWSRequestMetrics();
-            TimingInfo timingInfo = metrics.getTimingInfo();
-            Double timeTakenMillisIfKnown = timingInfo.getTimeTakenMillisIfKnown();
-            if (timeTakenMillisIfKnown == null) {
-                return;
-            }
-
-            long longValue = timeTakenMillisIfKnown.longValue();
-            Field predefined = (Field) type;
-            switch (predefined) {
-                case ClientExecuteTime:
-                    MetricDescriptor metricDescriptor = metricDescriptorCache.getMetricDescriptor(MetricType.TIMER, "RequestTimes." + request.getHttpMethod().name(), "The execution time of %s requests measured in events/sec", "events");
-                    Timer timer = metricService.getTimer(metricDescriptor);
-                    timer.update(longValue, TimeUnit.MILLISECONDS);
-                default:
-                    break;
-            }
+    MetricDescriptor getMetricDescriptor(MetricType metricType, String name, String description, String unit) {
+        MetricDescriptor metricDescriptor = metricDescriptors.get(name);
+        if (metricDescriptor != null) {
+            return metricDescriptor;
         }
+
+        metricDescriptor = MetricDescriptor.newBuilder(group, name, metricType).withUnit(unit).withDescription(String.format(description, name)).build();
+        MetricDescriptor raced = metricDescriptors.putIfAbsent(name, metricDescriptor);
+        if (raced == null) {
+            return metricDescriptor;
+        }
+        return raced;
     }
 
     /**
-     * Stops the metric collector and unregisters all metrics
+     * Unregisters all metrics and clears the cache
      */
-    void stop() {
-        metricDescriptorCache.clear();
+    void clear() {
+        for (MetricDescriptor metricDescriptor : metricDescriptors.values()) {
+            metricService.removeMetric(metricDescriptor);
+        }
+        metricDescriptors.clear();
     }
 }
