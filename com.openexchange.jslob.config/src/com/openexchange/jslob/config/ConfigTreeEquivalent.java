@@ -49,8 +49,12 @@
 
 package com.openexchange.jslob.config;
 
+import java.util.Comparator;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 
 /**
@@ -61,10 +65,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class ConfigTreeEquivalent {
 
     /** The config tree to JSlob mappings */
-    public final Map<String, String> config2lob;
+    public final ConcurrentMap<String, String> config2lob;
 
     /** The JSlob to config tree mappings */
-    public final Map<String, String> lob2config;
+    public final ConcurrentMap<String, String> lob2config;
 
     /**
      * Initializes a new {@link ConfigTreeEquivalent}.
@@ -73,6 +77,52 @@ public final class ConfigTreeEquivalent {
         super();
         config2lob = new ConcurrentHashMap<String, String>(32, 0.9f, 1);
         lob2config = new ConcurrentHashMap<String, String>(32, 0.9f, 1);
+    }
+
+    /**
+     * Merges specified config tree equivalent into this one.
+     *
+     * @param other The other one to merge
+     */
+    public void mergeWith(ConfigTreeEquivalent other) {
+        if (null == other) {
+            return;
+        }
+
+        ConcurrentMap<String, String> thisConfig2lob = this.config2lob;
+        for (Map.Entry<String, String> e : other.config2lob.entrySet()) {
+            thisConfig2lob.putIfAbsent(e.getKey(), e.getValue());
+        }
+
+        ConcurrentMap<String, String> thisLob2config = this.lob2config;
+        for (Map.Entry<String, String> e : other.lob2config.entrySet()) {
+            thisLob2config.putIfAbsent(e.getKey(), e.getValue());
+        }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(config2lob.size() << 4);
+
+        Set<Map.Entry<String, String>> entrySet = new TreeSet<>(new Comparator<Map.Entry<String, String>>() {
+
+            @Override
+            public int compare(Map.Entry<String, String> entry1, Map.Entry<String, String> entry2) {
+                return entry1.getKey().compareToIgnoreCase(entry2.getKey());
+            }
+        });
+        entrySet.addAll(config2lob.entrySet());
+
+        boolean first = true;
+        for (Map.Entry<String, String> e : entrySet) {
+            if (first) {
+                first = false;
+            } else {
+                sb.append('\n');
+            }
+            sb.append(e.getKey()).append(" > ").append(e.getValue());
+        }
+        return sb.toString();
     }
 
 }

@@ -66,6 +66,8 @@ public class OAuthAccount {
 
     private String serviceId;
 
+    private String scope;
+
 
     public OAuthAccount() {
         super();
@@ -111,6 +113,14 @@ public class OAuthAccount {
         this.serviceId = serviceId;
     }
 
+    public String getScope() {
+        return scope;
+    }
+
+    public void setScope(String scope) {
+        this.scope = scope;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -119,6 +129,7 @@ public class OAuthAccount {
         result = prime * result + ((accessToken == null) ? 0 : accessToken.hashCode());
         result = prime * result + ((displayName == null) ? 0 : displayName.hashCode());
         result = prime * result + ((serviceId == null) ? 0 : serviceId.hashCode());
+        result = prime * result + ((scope == null) ? 0 : scope.hashCode());
         return result;
     }
 
@@ -162,6 +173,13 @@ public class OAuthAccount {
         } else if (!serviceId.equals(other.serviceId)) {
             return false;
         }
+        if (scope == null) {
+            if (other.scope != null) {
+                return false;
+            }
+        } else if (!scope.equals(other.scope)) {
+            return false;
+        }
         return true;
     }
 
@@ -170,7 +188,7 @@ public class OAuthAccount {
      */
     @Override
     public String toString() {
-        return "ID: " + id + ", Name: " + displayName + ", Token: " + accessToken + ", Secret: " + accessSecret + ", Service: " + serviceId;
+        return "ID: " + id + ", Name: " + displayName + ", Token: " + accessToken + ", Secret: " + accessSecret + ", Service: " + serviceId + ", Scope: " + scope;
     }
 
 }

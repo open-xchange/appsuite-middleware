@@ -85,6 +85,7 @@ import com.openexchange.filestore.impl.osgi.Services;
 import com.openexchange.filestore.unified.KnownContributor;
 import com.openexchange.filestore.unified.UnifiedQuotaService;
 import com.openexchange.filestore.unified.UsageResult;
+import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.osgi.ServiceListings;
 
@@ -189,15 +190,15 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             return null;
         }
 
-        if (false == isUnifiedQuotaEnabledFor(userId, contextId)) {
-            LOGGER.debug("Unified Quota is not enabled for user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId));
-            return null;
-        }
-
         Iterator<UnifiedQuotaService> iter = unifiedQuotaServices.iterator();
         if (false == iter.hasNext()) {
             // No one available...
             LOGGER.warn("No Unified Quota service available for file storage '{}' of user {} in context {}, although it has been enabled.", uri, Integer.valueOf(userId), Integer.valueOf(contextId));
+            return null;
+        }
+
+        if (false == checkIfUnifiedQuotaIsEnabledFor(userId, contextId)) {
+            LOGGER.debug("Unified Quota is not enabled for user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId));
             return null;
         }
 
@@ -212,6 +213,18 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
 
         LOGGER.debug("No Unified Quota service applicable for file storage '{}' of user {} in context {}.", uri, Integer.valueOf(userId), Integer.valueOf(contextId));
         return null;
+    }
+
+    private boolean checkIfUnifiedQuotaIsEnabledFor(int userId, int contextId) throws OXException {
+        try {
+            return isUnifiedQuotaEnabledFor(userId, contextId);
+        } catch (OXException e) {
+            if (UserConfigurationCodes.NOT_FOUND.equals(e)) {
+                // Such a user does not (yet) exist. Thus Unified Quota cannot be enabled.
+                return false;
+            }
+            throw e;
+        }
     }
 
     @Override

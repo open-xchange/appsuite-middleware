@@ -76,6 +76,7 @@ import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.StrictHostnameVerifier;
 import org.apache.http.cookie.ClientCookie;
@@ -194,7 +195,7 @@ public final class HttpClients {
 
         final SchemeRegistry schemeRegistry = new SchemeRegistry();
         schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-        schemeRegistry.register(new Scheme("https", 443, new SSLSocketFactory(f, sslConfig.getSupportedProtocols(), sslConfig.getSupportedCipherSuites(), new StrictHostnameVerifier())));
+        schemeRegistry.register(new Scheme("https", 443, new SSLSocketFactory(f, sslConfig.getSupportedProtocols(), sslConfig.getSupportedCipherSuites(), sslConfig.isVerifyHostname() ? new StrictHostnameVerifier() : new AllowAllHostnameVerifier())));
 
         ClientConnectionManager ccm = new ClientConnectionManager(schemeRegistry, config.maxConnectionsPerRoute, config.maxTotalConnections, config.keepAliveMonitorInterval);
         ccm.setIdleConnectionCloser(new IdleConnectionCloser(ccm, config.keepAliveDuration));
