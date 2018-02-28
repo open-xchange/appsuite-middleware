@@ -146,8 +146,13 @@ public abstract class AbstractMetricService implements MetricService {
      * 
      * @param descriptor The {@link MetricDescriptor}
      * @return The newly registered {@link Metric} or an already existing one
+     * @throws IllegalArgumentException if the {@link MetricDescriptor} is <code>null</code> or
+     *             no registerer exists for the {@link MetricType} specified by the descriptor
      */
     protected Metric registerOrGet(MetricDescriptor descriptor) {
+        if (descriptor == null) {
+            throw new IllegalArgumentException("Cannot register a metric with a 'null' metric descriptor.");
+        }
         String key = descriptor.getFullName();
         Metric metric = metrics.get(key);
         if (metric != null) {
