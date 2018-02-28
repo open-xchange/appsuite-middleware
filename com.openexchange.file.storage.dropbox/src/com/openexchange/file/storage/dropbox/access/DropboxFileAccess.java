@@ -793,7 +793,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         }
 
         long fileSize = file.getFileSize();
-        DropboxFile dbxFile = fileSize > CHUNK_SIZE ? sessionUpload(file, data) : singleUpload(file, data);
+        DropboxFile dbxFile = fileSize <= 0 || fileSize > CHUNK_SIZE ? sessionUpload(file, data) : singleUpload(file, data);
         file.copyFrom(dbxFile, copyFields);
         return dbxFile.getIDTuple();
     }
@@ -824,14 +824,28 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      * @throws OXException If an error is occurred
      */
     private DropboxFile sessionUpload(File file, InputStream data) throws OXException {
+        if (data instanceof SizeKnowingInputStream) {
+            try {
+                long length = ((SizeKnowingInputStream) data).getSize();
+                return doSessionUploadUsing(file, data, length);
+            } finally {
+                Streams.close(data);
+            }
+        }
+
+        // Otherwise we need to flush the stream to an instance of ThresholdFileHolder to know its size precisely
         ThresholdFileHolder sink = null;
         try {
             sink = new ThresholdFileHolder();
             sink.write(data);
+            return doSessionUploadUsing(file, sink.getStream(), sink.getCount());
+        } finally {
+            Streams.close(sink);
+        }
+    }
 
-            // Work with local stream
-            InputStream stream = sink.getStream();
-
+    private DropboxFile doSessionUploadUsing(File file, InputStream stream, long length) throws OXException {
+        try {
             // Start an upload session and get the session id
             UploadSessionStartUploader uploadSession = client.files().uploadSessionStart();
             UploadSessionStartResult result = uploadSession.uploadAndFinish(stream, CHUNK_SIZE);
@@ -840,14 +854,14 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
             // Start uploading chunks of data
             UploadSessionCursor cursor = new UploadSessionCursor(sessionId, offset);
-            while (sink.getCount() - offset > CHUNK_SIZE) {
+            while (length - offset > CHUNK_SIZE) {
                 client.files().uploadSessionAppendV2(cursor).uploadAndFinish(stream, CHUNK_SIZE);
                 offset += CHUNK_SIZE;
                 cursor = new UploadSessionCursor(sessionId, offset);
             }
 
             // Upload the remaining chunk
-            long remaining = sink.getCount() - offset;
+            long remaining = length - offset;
             CommitInfo commitInfo = new CommitInfo(toPath(file.getFolderId(), file.getFileName()), WriteMode.OVERWRITE, false, file.getLastModified(), false);
             UploadSessionFinishUploader sessionFinish = client.files().uploadSessionFinish(cursor, commitInfo);
             FileMetadata metadata = sessionFinish.uploadAndFinish(stream, remaining);
@@ -858,8 +872,6 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         } catch (IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } finally {
-            Streams.close(sink);
         }
     }
 
