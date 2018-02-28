@@ -122,7 +122,7 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
             return metricDescriptor;
         }
 
-        metricDescriptor = MetricDescriptor.newBuilder("s3", name, MetricType.METER).withDescription("The " + name + " in bytes/sec").build();
+        metricDescriptor = MetricDescriptor.newBuilder("s3", name, MetricType.METER).withUnit("bytes").withDescription("The " + name + " in bytes/sec").build();
         MetricDescriptor raced = metricDescriptors.putIfAbsent(name, metricDescriptor);
         if (raced == null) {
             return metricDescriptor;
