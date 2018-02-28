@@ -166,7 +166,7 @@ public class TransportHandler {
         httpURLConnection.setReadTimeout(2500);
         httpURLConnection.setUseCaches(false);
         httpURLConnection.setDoOutput(true);
-        httpURLConnection.setChunkedStreamingMode(65536); // This enforces 'sun.net.www.protocol.http.HttpURLConnection' to use a "streaming" output stream; otherwise outgoing data is stored into a ByteArrayOutputStream (likely causing an OOME; see Bug 57260)
+        httpURLConnection.setFixedLengthStreamingMode(report.length()); // This enforces 'sun.net.www.protocol.http.HttpURLConnection' to use a "streaming" output stream; otherwise outgoing data is stored into a ByteArrayOutputStream (likely causing an OOME; see Bug 57260)
         httpURLConnection.setDoInput(true);
         httpURLConnection.setRequestMethod("POST");
         httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
