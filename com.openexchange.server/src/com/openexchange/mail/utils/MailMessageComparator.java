@@ -305,10 +305,10 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                     if (msg2.isSeen()) {
                         return compareByReceivedDate(msg1, msg2, false);
                     }
-                    return -1;
+                    return 1;
                 }
                 if (msg2.isSeen()) {
-                    return 1;
+                    return -1;
                 }
                 return compareByReceivedDate(msg1, msg2, false);
             }
@@ -321,10 +321,10 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                     if (msg2.isAnswered()) {
                         return compareByReceivedDate(msg1, msg2, false);
                     }
-                    return -1;
+                    return 1;
                 }
                 if (msg2.isAnswered()) {
-                    return 1;
+                    return -1;
                 }
                 return compareByReceivedDate(msg1, msg2, false);
             }
@@ -337,10 +337,10 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                     if (msg2.isForwarded()) {
                         return compareByReceivedDate(msg1, msg2, false);
                     }
-                    return -1;
+                    return 1;
                 }
                 if (msg2.isForwarded()) {
-                    return 1;
+                    return -1;
                 }
                 return compareByReceivedDate(msg1, msg2, false);
             }
@@ -353,10 +353,10 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                     if (msg2.isDraft()) {
                         return compareByReceivedDate(msg1, msg2, false);
                     }
-                    return -1;
+                    return 1;
                 }
                 if (msg2.isDraft()) {
-                    return 1;
+                    return -1;
                 }
                 return compareByReceivedDate(msg1, msg2, false);
             }
@@ -369,10 +369,10 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                     if (msg2.isFlagged()) {
                         return compareByReceivedDate(msg1, msg2, false);
                     }
-                    return -1;
+                    return 1;
                 }
                 if (msg2.isFlagged()) {
-                    return 1;
+                    return -1;
                 }
                 return compareByReceivedDate(msg1, msg2, false);
             }
