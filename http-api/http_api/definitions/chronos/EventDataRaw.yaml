@@ -1,3 +1,4 @@
+$ref: ../common/CommonResponseData.yaml
 startDate:
     $ref: "#/definitions/DateTimeData"
     description: The starting date of the event.
