@@ -42,6 +42,8 @@
     tags:
       - Chronos
     summary: Gets all events of multiple folders.
+    consumes:
+      - application/json
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query
