@@ -578,7 +578,7 @@ public final class HtmlServiceImpl implements HtmlService {
                     }
                 }
 
-                html = removeComments(html, hasBody);
+                html = removeComments(html, hasBody, options);
 
                 // Perform one-shot sanitizing
                 html = replacePercentTags(html);
@@ -721,7 +721,7 @@ public final class HtmlServiceImpl implements HtmlService {
         }
     }
 
-    private static String removeComments(String html, boolean hasBody) {
+    private static String removeComments(String html, boolean hasBody, HtmlSanitizeOptions options) {
         Document document = Jsoup.parse(html);
         final Set<Node> removedNodes = new HashSet<>(16, 0.9F);
         document.traverse(new NodeVisitor() {
@@ -741,6 +741,7 @@ public final class HtmlServiceImpl implements HtmlService {
         for (Node node : removedNodes) {
             node.remove();
         }
+        handlePrettyPrint(options, document);
         return hasBody ? document.outerHtml() : document.body().html();
     }
 
