@@ -69,6 +69,11 @@ public enum MailAuthenticityResultKey {
      * Defines the domain of the 'From' header from the e-mail
      * which the authenticity was evaluated.
      */
+    FROM_HEADER_DOMAIN("from_header_domain", false),
+    /**
+     * Defines the domain of the '*.from' attribute of a mechanism
+     * result that is part of the response.
+     */
     FROM_DOMAIN("from_domain"),
     /**
      * Defines the {@link MailAuthenticityMechanismResult}s that were

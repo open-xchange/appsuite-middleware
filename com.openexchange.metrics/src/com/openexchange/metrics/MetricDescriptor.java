@@ -148,6 +148,86 @@ public class MetricDescriptor {
         return description;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((description == null) ? 0 : description.hashCode());
+        result = prime * result + ((fullName == null) ? 0 : fullName.hashCode());
+        result = prime * result + ((group == null) ? 0 : group.hashCode());
+        result = prime * result + ((metricType == null) ? 0 : metricType.hashCode());
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((rate == null) ? 0 : rate.hashCode());
+        result = prime * result + ((unit == null) ? 0 : unit.hashCode());
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final MetricDescriptor other = (MetricDescriptor) obj;
+        if (description == null) {
+            if (other.description != null) {
+                return false;
+            }
+        } else if (!description.equals(other.description)) {
+            return false;
+        }
+        if (fullName == null) {
+            if (other.fullName != null) {
+                return false;
+            }
+        } else if (!fullName.equals(other.fullName)) {
+            return false;
+        }
+        if (group == null) {
+            if (other.group != null) {
+                return false;
+            }
+        } else if (!group.equals(other.group)) {
+            return false;
+        }
+        if (metricType != other.metricType) {
+            return false;
+        }
+        if (name == null) {
+            if (other.name != null) {
+                return false;
+            }
+        } else if (!name.equals(other.name)) {
+            return false;
+        }
+        if (rate != other.rate) {
+            return false;
+        }
+        if (unit == null) {
+            if (other.unit != null) {
+                return false;
+            }
+        } else if (!unit.equals(other.unit)) {
+            return false;
+        }
+        return true;
+    }
+
     ////////////////////////////// SETTERS //////////////////////////////
 
     /**
@@ -155,7 +235,7 @@ public class MetricDescriptor {
      * 
      * @param rate to set
      */
-    void setRate(TimeUnit rate) {
+    void setRate(final TimeUnit rate) {
         this.rate = rate;
     }
 
@@ -164,7 +244,7 @@ public class MetricDescriptor {
      * 
      * @param unit to set
      */
-    void setUnit(String unit) {
+    void setUnit(final String unit) {
         this.unit = unit;
     }
 
@@ -173,7 +253,7 @@ public class MetricDescriptor {
      * 
      * @param group the group to set
      */
-    void setGroup(String group) {
+    void setGroup(final String group) {
         this.group = group;
     }
 
@@ -182,7 +262,7 @@ public class MetricDescriptor {
      * 
      * @param name the name to set
      */
-    void setName(String name) {
+    void setName(final String name) {
         this.name = name;
     }
 
@@ -191,7 +271,7 @@ public class MetricDescriptor {
      *
      * @param metricType The metricType to set
      */
-    void setMetricType(MetricType metricType) {
+    void setMetricType(final MetricType metricType) {
         this.metricType = metricType;
     }
 
@@ -200,7 +280,7 @@ public class MetricDescriptor {
      *
      * @param metricSupplier The metricSupplier to set
      */
-    void setMetricSupplier(Supplier<?> metricSupplier) {
+    void setMetricSupplier(final Supplier<?> metricSupplier) {
         this.metricSupplier = metricSupplier;
     }
 
@@ -209,8 +289,8 @@ public class MetricDescriptor {
      * 
      * @param fqn The full qualified name of the metric
      */
-    void setFQN(String fqn) {
-        this.fullName = fqn;
+    void setFQN(final String fqn) {
+        fullName = fqn;
     }
 
     /**
@@ -218,7 +298,7 @@ public class MetricDescriptor {
      *
      * @param description The description to set
      */
-    public void setDescription(String description) {
+    public void setDescription(final String description) {
         this.description = description;
     }
 
@@ -230,7 +310,7 @@ public class MetricDescriptor {
      * @param metricType metric's type
      * @return the new {@link MetricBuilder}
      */
-    public static MetricBuilder newBuilder(String group, String name, MetricType metricType) {
+    public static MetricBuilder newBuilder(final String group, final String name, final MetricType metricType) {
         return new MetricBuilder(group, name, metricType);
     }
 
@@ -258,7 +338,7 @@ public class MetricDescriptor {
          * @param name The name for the metric
          * @param metricType The {@link MetricType}
          */
-        public MetricBuilder(final String group, final String name, MetricType metricType) {
+        public MetricBuilder(final String group, final String name, final MetricType metricType) {
             super();
             this.group = group;
             this.name = name;
@@ -271,7 +351,7 @@ public class MetricDescriptor {
          * @param rate The {@link TimeUnit} rate to set
          * @return the {@link MetricBuilder} for chained calls
          */
-        public MetricBuilder withRate(TimeUnit rate) {
+        public MetricBuilder withRate(final TimeUnit rate) {
             this.rate = rate;
             return this;
         }
@@ -282,7 +362,7 @@ public class MetricDescriptor {
          * @param unit The unit to set
          * @return the {@link MetricBuilder} for chained calls
          */
-        public MetricBuilder withUnit(String unit) {
+        public MetricBuilder withUnit(final String unit) {
             this.unit = unit;
             return this;
         }
@@ -293,7 +373,7 @@ public class MetricDescriptor {
          * @param supplier The {@link Supplier} to set
          * @return the {@link MetricBuilder} for chained calls
          */
-        public MetricBuilder withMetricSupplier(Supplier<?> supplier) {
+        public MetricBuilder withMetricSupplier(final Supplier<?> supplier) {
             this.supplier = supplier;
             return this;
         }
@@ -304,7 +384,7 @@ public class MetricDescriptor {
          * @param description the description to set
          * @return the {@link MetricBuilder} for chained calls
          */
-        public MetricBuilder withDescription(String description) {
+        public MetricBuilder withDescription(final String description) {
             this.description = description;
             return this;
         }
@@ -317,7 +397,7 @@ public class MetricDescriptor {
         public MetricDescriptor build() {
             checkNotNull(group, "group");
             checkNotNull(name, "name");
-            MetricDescriptor descriptor = prepare();
+            final MetricDescriptor descriptor = prepare();
             fill(descriptor);
             return descriptor;
         }
@@ -336,7 +416,7 @@ public class MetricDescriptor {
          * @return The prepared {@link MetricDescriptor} as type {@link T}
          */
         protected MetricDescriptor prepare() {
-            MetricDescriptor descriptor = new MetricDescriptor();
+            final MetricDescriptor descriptor = new MetricDescriptor();
             descriptor.setGroup(group);
             descriptor.setName(name);
             return descriptor;
@@ -347,7 +427,7 @@ public class MetricDescriptor {
          * 
          * @param descriptor The descriptor of which the values shall be filled
          */
-        protected void fill(MetricDescriptor descriptor) {
+        protected void fill(final MetricDescriptor descriptor) {
             descriptor.setRate(rate);
             descriptor.setUnit(unit);
             descriptor.setMetricSupplier(supplier);
@@ -364,7 +444,7 @@ public class MetricDescriptor {
          * @return The reference if not <code>null</code>
          * @throws IllegalArgumentException if the specified reference is <code>null</code>
          */
-        static <T> T checkNotNull(T reference, String errorMessage) {
+        static <T> T checkNotNull(final T reference, final String errorMessage) {
             if (reference == null) {
                 throw new IllegalArgumentException(errorMessage);
             }

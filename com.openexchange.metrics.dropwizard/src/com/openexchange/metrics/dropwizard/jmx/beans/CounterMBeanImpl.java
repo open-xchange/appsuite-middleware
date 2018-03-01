@@ -54,6 +54,7 @@ import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.dropwizard.types.DropwizardCounter;
 import com.openexchange.metrics.jmx.beans.AbstractMetricMBean;
 import com.openexchange.metrics.jmx.beans.CounterMBean;
+import com.openexchange.metrics.types.Counter;
 
 /**
  * {@link CounterMBeanImpl}
@@ -67,10 +68,8 @@ public class CounterMBeanImpl extends AbstractMetricMBean implements CounterMBea
     /**
      * Initialises a new {@link CounterMBeanImpl}.
      * 
-     * @param metricDescriptor TODO
-     * @param description
-     * @param mbeanInterface
-     * 
+     * @param counter The {@link Counter} metric
+     * @param metricDescriptor The {@link MetricDescriptor}
      * @throws NotCompliantMBeanException
      */
     public CounterMBeanImpl(DropwizardCounter counter, MetricDescriptor metricDescriptor) throws NotCompliantMBeanException {

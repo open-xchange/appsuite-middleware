@@ -53,7 +53,6 @@ import com.amazonaws.metrics.ByteThroughputProvider;
 import com.amazonaws.metrics.ServiceLatencyProvider;
 import com.amazonaws.metrics.ServiceMetricCollector;
 import com.amazonaws.metrics.ThroughputMetricType;
-import com.amazonaws.services.s3.metrics.S3ServiceMetric;
 import com.openexchange.metrics.MetricDescriptor;
 import com.openexchange.metrics.MetricService;
 import com.openexchange.metrics.MetricType;
@@ -67,12 +66,14 @@ import com.openexchange.metrics.types.Meter;
 public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector {
 
     private MetricService metricService;
+    private final MetricDescriptorCache metricDescriptorCache;
 
     /**
      * Initialises a new {@link S3FileStorageServiceMetricCollector}.
      */
     public S3FileStorageServiceMetricCollector(MetricService metricService) {
         super();
+        metricDescriptorCache = new MetricDescriptorCache(metricService, "s3");
         this.metricService = metricService;
     }
 
@@ -84,13 +85,7 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
     @Override
     public void collectByteThroughput(final ByteThroughputProvider provider) {
         ThroughputMetricType throughputMetricType = provider.getThroughputMetricType();
-        String name = throughputMetricType.name();
-        if (throughputMetricType == S3ServiceMetric.S3DownloadThroughput) {
-            name = "DownloadThroughput";
-        } else if (throughputMetricType == S3ServiceMetric.S3UploadThroughput) {
-            name = "UploadThroughput";
-        }
-        MetricDescriptor metricDescriptor = MetricDescriptor.newBuilder("s3", name, MetricType.METER).withUnit("bytes").withDescription("The " + name + " in bytes/sec").build();
+        MetricDescriptor metricDescriptor = metricDescriptorCache.getMetricDescriptor(MetricType.METER, throughputMetricType.name(), "The %s in bytes/sec", "bytes");
         Meter meter = metricService.getMeter(metricDescriptor);
         int bytes = provider.getByteCount();
         meter.mark(Integer.toUnsignedLong(bytes));
@@ -105,7 +100,11 @@ public class S3FileStorageServiceMetricCollector extends ServiceMetricCollector 
     public void collectLatency(final ServiceLatencyProvider provider) {
         // no-op
     }
-    
+
+    /**
+     * Stops the metric collector and unregisters all metrics
+     */
     void stop() {
+        metricDescriptorCache.clear();
     }
 }

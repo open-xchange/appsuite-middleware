@@ -105,6 +105,10 @@ public interface EventStorage {
 
     /**
      * Loads a specific event.
+     * <p/>
+     * <b>Note:</b> Only the fields from the <i>event</i> storage are loaded, so any auxiliary data (attendees, alarms, attachments)
+     * needs to be retrieved afterwards explicitly from the corresponding storages, e.g. using
+     * {@link CalendarStorageUtilities#loadAdditionalEventData}.
      *
      * @param eventId The identifier of the event to load
      * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
@@ -114,6 +118,10 @@ public interface EventStorage {
 
     /**
      * Loads a specific exception from a recurring event series.
+     * <p/>
+     * <b>Note:</b> Only the fields from the <i>event</i> storage are loaded, so any auxiliary data (attendees, alarms, attachments)
+     * needs to be retrieved afterwards explicitly from the corresponding storages, e.g. using
+     * {@link CalendarStorageUtilities#loadAdditionalEventData}.
      *
      * @param seriesId The identifier of the event series to load
      * @param recurrenceId The recurrence identifier of the exception to load
@@ -124,6 +132,10 @@ public interface EventStorage {
 
     /**
      * Loads all overridden occurrences (<i>change exceptions</i>) from a recurring event series.
+     * <p/>
+     * <b>Note:</b> Only the fields from the <i>event</i> storage are loaded, so any auxiliary data (attendees, alarms, attachments)
+     * needs to be retrieved afterwards explicitly from the corresponding storages, e.g. using
+     * {@link CalendarStorageUtilities#loadAdditionalEventData}.
      *
      * @param seriesId The identifier of the event series to load
      * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
@@ -133,6 +145,10 @@ public interface EventStorage {
 
     /**
      * Searches for events.
+     * <p/>
+     * <b>Note:</b> Only the fields from the <i>event</i> storage are loaded, so any auxiliary data (attendees, alarms, attachments)
+     * needs to be retrieved afterwards explicitly from the corresponding storages, e.g. using
+     * {@link CalendarStorageUtilities#loadAdditionalEventData}.
      *
      * @param searchTerm The search term to use
      * @param searchOptions The search options to apply, or <code>null</code> if not specified
@@ -143,6 +159,10 @@ public interface EventStorage {
 
     /**
      * Searches for events.
+     * <p/>
+     * <b>Note:</b> Only the fields from the <i>event</i> storage are loaded, so any auxiliary data (attendees, alarms, attachments)
+     * needs to be retrieved afterwards explicitly from the corresponding storages, e.g. using
+     * {@link CalendarStorageUtilities#loadAdditionalEventData}.
      *
      * @param searchTerm The search term to use
      * @param filters A list of additional filters to be applied on the search, or <code>null</code> if not specified
@@ -154,6 +174,10 @@ public interface EventStorage {
 
     /**
      * Searches for previously deleted events in the stored <i>tombstone</i> records.
+     * <p/>
+     * <b>Note:</b> Only the fields from the <i>event</i> storage are loaded, so any auxiliary data (attendees, alarms, attachments)
+     * needs to be retrieved afterwards explicitly from the corresponding storages, e.g. using
+     * {@link CalendarStorageUtilities#loadAdditionalEventTombstoneData}.
      *
      * @param searchTerm The search term to use
      * @param searchOptions The search options to apply, or <code>null</code> if not specified
@@ -164,6 +188,10 @@ public interface EventStorage {
 
     /**
      * Searches for events of one or more attendees that overlap a specific timerange.
+     * <p/>
+     * <b>Note:</b> Only the fields from the <i>event</i> storage are loaded, so any auxiliary data (attendees, alarms, attachments)
+     * needs to be retrieved afterwards explicitly from the corresponding storages, e.g. using
+     * {@link CalendarStorageUtilities#loadAdditionalEventData}.
      *
      * @param attendees The attendees to restrict the results to
      * @param includeTransparent <code>true</code> to also include events marks as {@link Transp#TRANSPARENT}, <code>false</code>, otherwise

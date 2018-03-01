@@ -93,6 +93,23 @@ public class OAuthAccessRegistryServiceImpl implements OAuthAccessRegistryServic
     }
 
     /**
+     * Notifies this registry that specified user went inactive.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     */
+    public void userInactive(int userId, int contextId) {
+        ConcurrentMap<String, OAuthAccessRegistryImpl> map = mapRef.get();
+        if (null == map) {
+            return;
+        }
+
+        for (OAuthAccessRegistryImpl registry : map.values()) {
+            registry.removeIfLast(contextId, userId);
+        }
+    }
+
+    /**
      * Clears this registry
      */
     public void clear() {

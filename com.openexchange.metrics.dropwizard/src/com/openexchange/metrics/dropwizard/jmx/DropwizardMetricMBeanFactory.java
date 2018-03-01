@@ -112,7 +112,7 @@ public class DropwizardMetricMBeanFactory implements MetricMBeanFactory {
     public TimerMBean timer(Timer timer, MetricDescriptor metricDescriptor) {
         checkInstance(timer, DropwizardTimer.class);
         try {
-            return new TimerMBeanImpl((DropwizardTimer) timer, metricDescriptor); //TODO: pass the metric descriptor time unit
+            return new TimerMBeanImpl((DropwizardTimer) timer, metricDescriptor);
         } catch (NotCompliantMBeanException e) {
             throw new IllegalArgumentException("The TimerMBean is not a compliant MBean");
         }

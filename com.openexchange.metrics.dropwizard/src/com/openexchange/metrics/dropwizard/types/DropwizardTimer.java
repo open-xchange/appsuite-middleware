@@ -54,6 +54,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import com.codahale.metrics.Snapshot;
 import com.openexchange.exception.OXException;
+import com.openexchange.metrics.exceptions.MetricExceptionCode;
 import com.openexchange.metrics.types.Timer;
 
 /**
@@ -92,8 +93,7 @@ public class DropwizardTimer implements Timer {
         try {
             return delegate.time(event);
         } catch (Exception e) {
-            //TODO: better exception
-            throw new OXException(e);
+            throw MetricExceptionCode.ERROR_WHILE_TIMING.create(e);
         }
     }
 

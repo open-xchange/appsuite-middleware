@@ -57,6 +57,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
@@ -103,11 +104,15 @@ public class SessionRESTService {
             throw ServiceExceptionCode.absentService(SessiondService.class);
         }
 
+        CryptographicServiceAuthenticationFactory cryptoAuthenticationFactory = services.getOptionalService(CryptographicServiceAuthenticationFactory.class);
+
         try {
             Session ses = sessiondService.getSession(session);
             if(ses != null){
                 final boolean isGuest = Boolean.TRUE.equals(ses.getParameter(Session.PARAM_GUEST));
-                return new JSONObject(6).put("context", ses.getContextId()).put("user", ses.getUserId()).put("guest", isGuest);
+                final String cryptoSessionId = cryptoAuthenticationFactory != null ?
+                    cryptoAuthenticationFactory.getSessionValueFrom(ses) : null;
+                return new JSONObject(6).put("context", ses.getContextId()).put("user", ses.getUserId()).put("guest", isGuest).put("cryptoSessionId", cryptoSessionId);
             }
             return new JSONObject();
         } catch (JSONException e) {

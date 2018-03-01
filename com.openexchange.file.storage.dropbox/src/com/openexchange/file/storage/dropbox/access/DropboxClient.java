@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,44 +47,32 @@
  *
  */
 
-package com.openexchange.metrics.dropwizard.jmx.beans;
+package com.openexchange.file.storage.dropbox.access;
 
-import javax.management.NotCompliantMBeanException;
-import com.openexchange.metrics.MetricDescriptor;
-import com.openexchange.metrics.dropwizard.types.DropwizardGauge;
-import com.openexchange.metrics.jmx.beans.AbstractMetricMBean;
-import com.openexchange.metrics.jmx.beans.GaugeMBean;
-import com.openexchange.metrics.types.Gauge;
+import com.dropbox.core.http.HttpRequestor;
+import com.dropbox.core.v2.DbxClientV2;
 
 /**
- * {@link GaugeMBeanImpl}
+ * {@link DropboxClient}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public class GaugeMBeanImpl extends AbstractMetricMBean implements GaugeMBean {
+public class DropboxClient {
 
-    private final DropwizardGauge gauge;
+    /** The actual Dropbox client */
+    public final DbxClientV2 dbxClient;
+
+    /** The HTTP requester, whcih is used by Dropbox client */
+    public final HttpRequestor httpRequestor;
 
     /**
-     * Initialises a new {@link GaugeMBeanImpl}.
-     * 
-     * @param gauge The {@link Gauge} metric
-     * @param metricDescriptor The {@link MetricDescriptor}
-     * @throws NotCompliantMBeanException
+     * Initializes a new {@link DropboxClient}.
      */
-    public GaugeMBeanImpl(DropwizardGauge gauge, MetricDescriptor metricDescriptor) throws NotCompliantMBeanException {
-        super(GaugeMBean.class, metricDescriptor);
-        this.gauge = gauge;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.metrics.jmx.GaugeMBean#getValue()
-     */
-    @Override
-    public Object getValue() {
-        return gauge.getValue();
+    public DropboxClient(DbxClientV2 client, HttpRequestor httpRequestor) {
+        super();
+        this.dbxClient = client;
+        this.httpRequestor = httpRequestor;
     }
 
 }

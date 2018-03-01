@@ -91,6 +91,15 @@ public interface CryptographicServiceAuthenticationFactory {
     String createAuthenticationFrom(Session session, String data) throws OXException;
 
     /**
+     * Gets the cryptographic session identifier from the given {@link Session}
+     *
+     * @param session  The session to get the cryptographic session identifier for
+     * @return The value operating as cryptographic session identifier
+     * @throws OXException
+     */
+    String getSessionValueFrom(Session session) throws OXException;
+
+    /**
      * Gets the authentication token for specified session
      *
      * @param session The session
@@ -106,4 +115,5 @@ public interface CryptographicServiceAuthenticationFactory {
      * @return The token value
      */
     String getTokenValueFromString(String string);
+
 }

@@ -61,8 +61,8 @@ import javax.mail.internet.InternetAddress;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.InterruptibleCharSequence;
-import com.openexchange.java.Strings;
 import com.openexchange.java.InterruptibleCharSequence.InterruptedRuntimeException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.authenticity.AllowedAuthServId;
 import com.openexchange.mail.authenticity.MailAuthenticityAttribute;
@@ -153,7 +153,7 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
 
                 // Extract the domain from the 'From' header
                 try {
-                    overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, extractDomain(from));
+                    overallResult.addAttribute(MailAuthenticityResultKey.FROM_HEADER_DOMAIN, extractDomain(from));
                     overallResult.addAttribute(MailAuthenticityResultKey.TRUSTED_SENDER, from.getAddress());
                 } catch (final IllegalArgumentException e) {
                     // Malformed 'From' header, return with 'Not Analyzed' result
@@ -359,6 +359,7 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
         if (bestOfDMARC != null) {
             // If DMARC passes we set the overall status to PASS
             if (DMARCResult.PASS.equals(bestOfDMARC.getResult()) && bestOfDMARC.isDomainMatch()) {
+                overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, bestOfDMARC.getDomain());
                 overallResult.setStatus(MailAuthenticityStatus.PASS);
                 return;
             } else if (DMARCResult.FAIL.equals(bestOfDMARC.getResult())) {
@@ -475,7 +476,13 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
                 dkimFailed = true;
                 break;
             case PASS:
-                overallResult.setStatus(bestOfDKIM.isDomainMatch() ? MailAuthenticityStatus.PASS : MailAuthenticityStatus.NEUTRAL);
+                if (bestOfDKIM.isDomainMatch()) {
+                    overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, bestOfDKIM.getDomain());
+                    overallResult.setStatus(MailAuthenticityStatus.PASS);
+                } else {
+                    overallResult.setStatus(MailAuthenticityStatus.NEUTRAL);
+                }
+
                 break;
             default:
                 overallResult.setStatus(bestOfDKIM.getResult().convert());
@@ -522,7 +529,12 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
                 if (dkimFailed) {
                     overallResult.setStatus(bestOfSPF.isDomainMatch() ? MailAuthenticityStatus.NEUTRAL : MailAuthenticityStatus.FAIL);
                 } else if (MailAuthenticityStatus.PASS != overallResult.getStatus()) {
-                    overallResult.setStatus(bestOfSPF.isDomainMatch() ? MailAuthenticityStatus.PASS : MailAuthenticityStatus.NEUTRAL);
+                    if (bestOfSPF.isDomainMatch()) {
+                        overallResult.setStatus(MailAuthenticityStatus.PASS);
+                        overallResult.addAttribute(MailAuthenticityResultKey.FROM_DOMAIN, bestOfSPF.getDomain());
+                    } else {
+                        overallResult.setStatus(MailAuthenticityStatus.NEUTRAL);
+                    }
                 }
                 break;
             case PERMERROR:

@@ -56,7 +56,6 @@ import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDE
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_UPDATE_CACHE;
 import static com.openexchange.tools.arrays.Collections.unmodifiableSet;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -115,13 +114,34 @@ public class AllAction extends ChronosAction {
 
     @Override
     protected AJAXRequestResult perform(IDBasedCalendarAccess calendarAccess, AJAXRequestData requestData) throws OXException {
-        List<String> folderIds = parseFolderIds(requestData);
-        if (null == folderIds) {
-            List<Event> eventsOfUser = calendarAccess.getEventsOfUser();
-            return new AJAXRequestResult(eventsOfUser, CalendarUtils.getMaximumTimestamp(eventsOfUser), EventResultConverter.INPUT_FORMAT);
+        JSONObject jsonObject = requestData.getData(JSONObject.class);
+        if (null != jsonObject) {
+            /*
+             * PUT with folder identifiers in body; results for each requested folder & return appropriate result
+             */
+            List<String> folderIds;
+            try {
+                JSONArray jsonArray = jsonObject.getJSONArray(PARAMETER_FOLDERS);
+                folderIds = new ArrayList<String>(jsonArray.length());
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    folderIds.add(jsonArray.getString(i));
+                }
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+            }
+            Map<String, EventsResult> eventsResults = calendarAccess.getEventsInFolders(folderIds);
+            return new AJAXRequestResult(eventsResults, getMaximumTimestamp(eventsResults), EventsPerFolderResultConverter.INPUT_FORMAT);
         }
-        Map<String, EventsResult> eventsResults = calendarAccess.getEventsInFolders(folderIds);
-        return new AJAXRequestResult(eventsResults, getMaximumTimestamp(eventsResults), EventsPerFolderResultConverter.INPUT_FORMAT);
+        /*
+         * assume GET with single folder as optional parameter; get events in single folder or all events of user
+         */
+        List<Event> events;
+        if (requestData.containsParameter(AJAXServlet.PARAMETER_FOLDERID)) {
+            events = calendarAccess.getEventsInFolder(requestData.getParameter(AJAXServlet.PARAMETER_FOLDERID));
+        } else {
+            events = calendarAccess.getEventsOfUser();
+        }
+        return new AJAXRequestResult(events, CalendarUtils.getMaximumTimestamp(events), EventResultConverter.INPUT_FORMAT);
     }
 
     private static Date getMaximumTimestamp(Map<String, EventsResult> eventsResults) {
@@ -133,26 +153,6 @@ public class AllAction extends ChronosAction {
             maximumTimestamp = Math.max(maximumTimestamp, entry.getValue().getTimestamp());
         }
         return new Date(maximumTimestamp);
-    }
-
-    private static List<String> parseFolderIds(AJAXRequestData requestData) throws OXException {
-        JSONObject jsonObject = requestData.getData(JSONObject.class);
-        if (null == jsonObject) {
-            if (requestData.containsParameter(AJAXServlet.PARAMETER_FOLDERID)) {
-                return Collections.singletonList(requestData.getParameter(AJAXServlet.PARAMETER_FOLDERID));
-            }
-            return null;
-        }
-        try {
-            JSONArray jsonArray = jsonObject.getJSONArray(PARAMETER_FOLDERS);
-            List<String> folderIds = new ArrayList<String>(jsonArray.length());
-            for (int i = 0; i < jsonArray.length(); i++) {
-                folderIds.add(jsonArray.getString(i));
-            }
-            return folderIds;
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
-        }
     }
 
 }

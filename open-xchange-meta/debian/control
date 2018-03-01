@@ -91,3 +91,15 @@ Architecture: all
 Provides: open-xchange-meta-backend
 Depends: open-xchange, open-xchange-core, open-xchange-imap, open-xchange-pop3, open-xchange-smtp, open-xchange-calendar-printing, open-xchange-gui-wizard-plugin, open-xchange-report-client
 Description: The Open-Xchange Meta package for OX6 backend packages
+
+##
+## transitional packages
+##
+
+Package: open-xchange-linkedin
+Architecture: all
+Section: oldlibs
+Priority: extra
+Description: Emtpy transitional package.
+ This package can be removed as the integration of Open-Xchange with LinkedIn
+ was discontinued.

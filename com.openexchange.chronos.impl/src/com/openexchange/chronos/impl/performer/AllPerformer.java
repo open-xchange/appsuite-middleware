@@ -183,12 +183,15 @@ public class AllPerformer extends AbstractQueryPerformer {
         /*
          * load event data per folder & additional event data per calendar user
          */
-        EventField[] fields = getFields(session);
+        EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
         SearchOptions searchOptions = new SearchOptions(session);
         Map<CalendarFolder, List<Event>> eventsPerFolder = new HashMap<CalendarFolder, List<Event>>(folders.size());
         for (Entry<Integer, List<CalendarFolder>> entry : getFoldersPerCalendarUserId(folders).entrySet()) {
             List<Event> eventsForCalendarUser = new ArrayList<Event>();
             for (CalendarFolder folder : entry.getValue()) {
+                /*
+                 * load events in folder
+                 */
                 try {
                     requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
                     List<Event> eventsInFolder = storage.getEventStorage().searchEvents(getFolderIdTerm(session, folder), searchOptions, fields);
@@ -198,7 +201,10 @@ public class AllPerformer extends AbstractQueryPerformer {
                     resultsPerFolderId.put(folder.getId(), new DefaultEventsResult(e));
                 }
             }
-            eventsForCalendarUser = storage.getUtilities().loadAdditionalEventData(i(entry.getKey()), eventsForCalendarUser, fields);
+            /*
+             * batch-load additional event data for this calendar user
+             */
+            storage.getUtilities().loadAdditionalEventData(i(entry.getKey()), eventsForCalendarUser, fields);
         }
         /*
          * post process events, based on each requested folder's perspective

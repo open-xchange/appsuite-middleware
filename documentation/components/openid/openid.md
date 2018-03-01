@@ -62,9 +62,15 @@ There are three relevant bundles, the `com.openexchange.oidc` bundle, which cont
 ## The OIDC Backend
 The core implementation of the OIDC Backend can be used as reference to all further implementations. To keep the needed effort as small as possible, every new implementation should extend the core `com.openexchange.oidc.spi.AbstractOIDCBackend` and override only those functions, that should behave differently. The configuration of every backend is loaded from an implementation of the `com.openexchange.oidc.OIDCBackendConfig` interface. The developer should also extend the core implementation of this interface, which is `com.openexchange.oidc.spi.AbstractOIDCBackendConfig` and replace only those property calls, that are different from the core configuration. This way multiple backends can share the same proprties, which reduces redundancy and keeps maintenance efforts samll. The `com.openexchange.oidc.tools.OIDCTools` provide a set of useful functions and constants, remember to have a look at those, before implementing the same for every backend.
 
-# Operators Guide
+## The used Cookies
 
-Wie installiere ich die Core Implementierung von OpenID? Wie installiere ich Custom Implementierungen, welche properties sind dafür wichtig? Wie verwende ich das Feature ohne das Core-Backend mit zu starten?
+The OpenID cookie for autologin features will always start with `open-xchange-oidc-`, followed by a calculated hash value. The cookie will be deleted when the session is terminated or the web browser is closed. The other cookies are the `open-xchange-public-session-`, `open-xchange-secret-` and `open-xchange-session-` cookie.
+
+## Tokens
+
+The Oauth Access and Refresh tokens are both stored in the user session, alongside with the IDToken of the user. The refresh token is automatically used to get a new Access token, when needed. The IDToken stores the users unique identification in the `subject` field. How the needed uid and cid are extracted from this information, depends on the content. For the default implementation it is assumed, that the uid and cid are stored in `uid@cid` format.
+
+# Operators Guide
 
 If you want to enable this feature without starting the implemented core backend, you have to disable it by setting `com.openexchange.oidc.startDefaultBackend=false`. For an overview of all possible properties and their description, take a look at all [OpenID properties](https://documentation.open-xchange.com/components/middleware/config/develop/index.html#mode=features&feature=OIDC)
 
@@ -80,3 +86,4 @@ The frontend plugin `open-xchange-appsuite-oidc` is deactivated by default. In o
     default:
         host: my-domain.com
         oidcLogin: true
+

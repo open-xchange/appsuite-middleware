@@ -111,10 +111,10 @@ public class S3Activator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(S3Activator.class);
+        logger.info("Stopping bundle: com.openexchange.filestore.s3");
 
         AwsSdkMetrics.setMetricCollector(null);
 
-        logger.info("Stopping bundle: com.openexchange.filestore.s3");
         super.stopBundle();
     }
 }

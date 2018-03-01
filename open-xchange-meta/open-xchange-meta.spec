@@ -269,6 +269,20 @@ Authors:
 --------
     Open-Xchange
 
+# --- transitional packages --------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------
+%package -n     open-xchange-linkedin
+Group:          Applications/Productivity
+Summary:        The Open-Xchange Meta package for OX6 backend packages
+
+%description -n open-xchange-linkedin
+Emtpy transitional package as the integration of Open-Xchange with LinkedIn was
+discontinued. This package can be removed.
+
+Authors:
+--------
+    Open-Xchange
+
 # ----------------------------------------------------------------------------------------------------
 
 %description
@@ -361,6 +375,10 @@ Authors:
 %doc README.TXT
 
 %files -n open-xchange-meta-cpanel
+%defattr(-,root,root)
+%doc README.TXT
+
+%files -n open-xchange-linkedin
 %defattr(-,root,root)
 %doc README.TXT
 

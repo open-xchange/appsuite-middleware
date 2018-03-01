@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,44 +47,84 @@
  *
  */
 
-package com.openexchange.metrics.dropwizard.jmx.beans;
+package com.openexchange.metrics;
 
-import javax.management.NotCompliantMBeanException;
-import com.openexchange.metrics.MetricDescriptor;
-import com.openexchange.metrics.dropwizard.types.DropwizardGauge;
-import com.openexchange.metrics.jmx.beans.AbstractMetricMBean;
-import com.openexchange.metrics.jmx.beans.GaugeMBean;
-import com.openexchange.metrics.types.Gauge;
+import com.openexchange.metrics.types.Metric;
 
 /**
- * {@link GaugeMBeanImpl}
+ * {@link MetricInformation}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class GaugeMBeanImpl extends AbstractMetricMBean implements GaugeMBean {
+public class MetricInformation {
 
-    private final DropwizardGauge gauge;
+    private final Metric metric;
+    private final MetricDescriptor metricDescriptor;
 
     /**
-     * Initialises a new {@link GaugeMBeanImpl}.
-     * 
-     * @param gauge The {@link Gauge} metric
-     * @param metricDescriptor The {@link MetricDescriptor}
-     * @throws NotCompliantMBeanException
+     * Initialises a new {@link MetricInformation}.
      */
-    public GaugeMBeanImpl(DropwizardGauge gauge, MetricDescriptor metricDescriptor) throws NotCompliantMBeanException {
-        super(GaugeMBean.class, metricDescriptor);
-        this.gauge = gauge;
+    public MetricInformation(final Metric metric, final MetricDescriptor metricDescriptor) {
+        super();
+        this.metric = metric;
+        this.metricDescriptor = metricDescriptor;
+    }
+
+    /**
+     * Gets the metricDescriptor
+     *
+     * @return The metricDescriptor
+     */
+    public MetricDescriptor getMetricDescriptor() {
+        return metricDescriptor;
+    }
+
+    /**
+     * Gets the metric
+     *
+     * @return The metric
+     */
+    public Metric getMetric() {
+        return metric;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.metrics.jmx.GaugeMBean#getValue()
+     * @see java.lang.Object#hashCode()
      */
     @Override
-    public Object getValue() {
-        return gauge.getValue();
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((metricDescriptor == null) ? 0 : metricDescriptor.hashCode());
+        return result;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final MetricInformation other = (MetricInformation) obj;
+        if (metricDescriptor == null) {
+            if (other.metricDescriptor != null) {
+                return false;
+            }
+        } else if (!metricDescriptor.equals(other.metricDescriptor)) {
+            return false;
+        }
+        return true;
+    }
 }

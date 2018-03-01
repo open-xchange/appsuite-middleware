@@ -147,7 +147,9 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
         /*
          * prepare default internal config
          */
-        return new JSONObject();
+        JSONObject internalConfig = new JSONObject();
+        internalConfig.putSafe("name", BirthdaysCalendarStrings.CALENDAR_NAME);
+        return internalConfig;
     }
 
     @Override

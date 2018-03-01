@@ -75,7 +75,7 @@ public abstract class AbstractMetricService implements MetricService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractMetricService.class);
 
-    private final ConcurrentMap<String, Metric> metrics;
+    private final ConcurrentMap<String, MetricInformation> metrics;
     private final Map<MetricType, MetricRegisterer> registerers;
     private final Map<MetricType, MetricServiceListenerNotifier> listenerNotifiersOnAdd;
     private final Map<MetricType, MetricServiceListenerNotifier> listenerNotifiersOnRemove;
@@ -127,7 +127,9 @@ public abstract class AbstractMetricService implements MetricService {
     @Override
     public void addListener(MetricServiceListener listener) {
         listeners.add(listener);
-        //TODO: notify already registered metrics
+        for (MetricInformation metricInformation : metrics.values()) {
+            notifyListenersOnAdd(metricInformation);
+        }
     }
 
     /*
@@ -146,25 +148,31 @@ public abstract class AbstractMetricService implements MetricService {
      * 
      * @param descriptor The {@link MetricDescriptor}
      * @return The newly registered {@link Metric} or an already existing one
+     * @throws IllegalArgumentException if the {@link MetricDescriptor} is <code>null</code> or
+     *             no registerer exists for the {@link MetricType} specified by the descriptor
      */
     protected Metric registerOrGet(MetricDescriptor descriptor) {
+        if (descriptor == null) {
+            throw new IllegalArgumentException("Cannot register a metric with a 'null' metric descriptor.");
+        }
         String key = descriptor.getFullName();
-        Metric metric = metrics.get(key);
-        if (metric != null) {
-            return metric;
+        MetricInformation metricInformation = metrics.get(key);
+        if (metricInformation != null) {
+            return metricInformation.getMetric();
         }
 
         MetricRegisterer registerer = registerers.get(descriptor.getMetricType());
         if (registerer == null) {
             throw new IllegalArgumentException("There is no metric registerer for metric type '" + descriptor.getMetricType() + "'");
         }
-        Metric dropwizardMetric = registerer.register(descriptor);
-        Metric raced = metrics.putIfAbsent(key, dropwizardMetric);
+        MetricInformation dropwizardMetric = new MetricInformation(registerer.register(descriptor), descriptor);
+        MetricInformation raced = metrics.putIfAbsent(key, dropwizardMetric);
         if (raced == null) {
-            notifyListenersOnAdd(descriptor, dropwizardMetric);
-            return dropwizardMetric;
+            notifyListenersOnAdd(dropwizardMetric);
+            return dropwizardMetric.getMetric();
         }
-        return raced;
+        LOG.debug("Meanwhile another metric of type '{}' and name '{}' was registered by another thread. Returning that metric.", descriptor.getMetricType(), descriptor.getFullName());
+        return raced.getMetric();
     }
 
     /**
@@ -176,6 +184,10 @@ public abstract class AbstractMetricService implements MetricService {
         String key = metricDescriptor.getFullName();
         metrics.remove(key);
         MetricRegisterer registerer = registerers.get(metricDescriptor.getMetricType());
+        if (registerer == null) {
+            return;
+        }
+
         registerer.unregister(metricDescriptor);
         notifyListenersOnRemove(metricDescriptor);
     }
@@ -186,9 +198,9 @@ public abstract class AbstractMetricService implements MetricService {
      * @param descriptor The {@link MetricDescriptor}
      * @param metric The added {@link Metric}
      */
-    private void notifyListenersOnAdd(MetricDescriptor descriptor, Metric metric) {
+    private void notifyListenersOnAdd(MetricInformation metricInformation) {
         for (MetricServiceListener listener : listeners) {
-            notifyListenerOfAddedMetric(listener, metric, descriptor);
+            notifyListener(listenerNotifiersOnAdd, listener, metricInformation.getMetric(), metricInformation.getMetricDescriptor());
         }
     }
 
@@ -200,39 +212,24 @@ public abstract class AbstractMetricService implements MetricService {
      */
     private void notifyListenersOnRemove(MetricDescriptor descriptor) {
         for (MetricServiceListener listener : listeners) {
-            notifyListenerOfRemovedMetric(listener, descriptor);
+            notifyListener(listenerNotifiersOnRemove, listener, null, descriptor);
         }
     }
 
     /**
-     * Notifies the specified listener about the specified added {@link Metric}
+     * Notifies the specified listener
      * 
-     * @param listener The listener to notify
+     * @param notifiers The notifiers
+     * @param listener The listener
      * @param metric The {@link Metric}
      * @param descriptor The {@link MetricDescriptor}
      */
-    private void notifyListenerOfAddedMetric(MetricServiceListener listener, Metric metric, MetricDescriptor descriptor) {
-        MetricServiceListenerNotifier notifier = listenerNotifiersOnAdd.get(descriptor.getMetricType());
+    private void notifyListener(Map<MetricType, MetricServiceListenerNotifier> notifiers, MetricServiceListener listener, Metric metric, MetricDescriptor descriptor) {
+        MetricServiceListenerNotifier notifier = notifiers.get(descriptor.getMetricType());
         if (notifier == null) {
             LOG.debug("No listener notifier found for metric type '{}'", descriptor.getMetricType());
             return;
         }
         notifier.notify(listener, metric, descriptor);
-    }
-
-    /**
-     * Notifies the specified listener about the specified removed {@link Metric}
-     * 
-     * @param listener The listener to notify
-     * @param metric The {@link Metric}
-     * @param descriptor The {@link MetricDescriptor}
-     */
-    private void notifyListenerOfRemovedMetric(MetricServiceListener listener, MetricDescriptor descriptor) {
-        MetricServiceListenerNotifier notifier = listenerNotifiersOnRemove.get(descriptor.getMetricType());
-        if (notifier == null) {
-            LOG.debug("No listener notifier found for metric type '{}'", descriptor.getMetricType());
-            return;
-        }
-        notifier.notify(listener, null, descriptor);
     }
 }

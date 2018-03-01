@@ -10,6 +10,7 @@ Bundle-ClassPath: .,
  lib/metrics-jmx-4.0.3-SNAPSHOT.jar
 Export-Package: com.codahale.metrics,
  com.openexchange.metrics,
+ com.openexchange.metrics.exceptions,
  com.openexchange.metrics.jmx,
  com.openexchange.metrics.jmx.beans,
  com.openexchange.metrics.types

@@ -165,7 +165,7 @@ public class ICalEventImportExportTest extends AbstractChronosTest {
     public void testICalEventImportUIDHandling() throws Exception {
         getEventData(ICalImportExportManager.RECURRENCE_IMPORT_ICS);
         String response = importICalFile(ICalImportExportManager.RECURRENCE_IMPORT_ICS);
-        assertTrue(response.contains("The event could not be created due to another conflicting event with the same unique identifier"));
+        assertTrue(response.contains("The appointment could not be created due to another conflicting appointment with the same unique identifier"));
     }
 
     @Test

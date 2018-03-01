@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,44 +47,62 @@
  *
  */
 
-package com.openexchange.metrics.dropwizard.jmx.beans;
+package com.openexchange.filestore.s3.metrics;
 
-import javax.management.NotCompliantMBeanException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.metrics.MetricDescriptor;
-import com.openexchange.metrics.dropwizard.types.DropwizardGauge;
-import com.openexchange.metrics.jmx.beans.AbstractMetricMBean;
-import com.openexchange.metrics.jmx.beans.GaugeMBean;
-import com.openexchange.metrics.types.Gauge;
+import com.openexchange.metrics.MetricService;
+import com.openexchange.metrics.MetricType;
 
 /**
- * {@link GaugeMBeanImpl}
+ * {@link MetricDescriptorCache}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class GaugeMBeanImpl extends AbstractMetricMBean implements GaugeMBean {
+public class MetricDescriptorCache {
 
-    private final DropwizardGauge gauge;
+    private final ConcurrentMap<String, MetricDescriptor> metricDescriptors;
+    private MetricService metricService;
+    private final String group;
 
     /**
-     * Initialises a new {@link GaugeMBeanImpl}.
-     * 
-     * @param gauge The {@link Gauge} metric
-     * @param metricDescriptor The {@link MetricDescriptor}
-     * @throws NotCompliantMBeanException
+     * Initialises a new {@link MetricDescriptorCache}.
      */
-    public GaugeMBeanImpl(DropwizardGauge gauge, MetricDescriptor metricDescriptor) throws NotCompliantMBeanException {
-        super(GaugeMBean.class, metricDescriptor);
-        this.gauge = gauge;
+    public MetricDescriptorCache(MetricService metricService, String group) {
+        super();
+        this.metricService = metricService;
+        this.group = group;
+        metricDescriptors = new ConcurrentHashMap<>(8);
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Retrieves the metric descriptor for the specified HTTP method
      * 
-     * @see com.openexchange.metrics.jmx.GaugeMBean#getValue()
+     * @param name the method name
+     * @return The {@link MetricDescriptor} for the specified HTTP method
      */
-    @Override
-    public Object getValue() {
-        return gauge.getValue();
+    MetricDescriptor getMetricDescriptor(MetricType metricType, String name, String description, String unit) {
+        MetricDescriptor metricDescriptor = metricDescriptors.get(name);
+        if (metricDescriptor != null) {
+            return metricDescriptor;
+        }
+
+        metricDescriptor = MetricDescriptor.newBuilder(group, name, metricType).withUnit(unit).withDescription(String.format(description, name)).build();
+        MetricDescriptor raced = metricDescriptors.putIfAbsent(name, metricDescriptor);
+        if (raced == null) {
+            return metricDescriptor;
+        }
+        return raced;
     }
 
+    /**
+     * Unregisters all metrics and clears the cache
+     */
+    void clear() {
+        for (MetricDescriptor metricDescriptor : metricDescriptors.values()) {
+            metricService.removeMetric(metricDescriptor);
+        }
+        metricDescriptors.clear();
+    }
 }
