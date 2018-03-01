@@ -189,9 +189,8 @@ public final class InlineImageDataSource implements ImageDataSource {
         CryptographicServiceAuthenticationFactory crypto = serviceLookup.getOptionalService(CryptographicServiceAuthenticationFactory.class);
         if (crypto != null) {  // Images may be encrypted within an Email
             try {
-                String auth = null;
                 // Try to get authentication from Image URL, else from session
-                auth = imageLocation.getAuth() == null ? crypto.getAuthTokenFromSession(session) : crypto.getTokenValueFromString(imageLocation.getAuth());
+                String auth = imageLocation.getAuth() == null ? crypto.getAuthTokenFromSession(session) : crypto.getTokenValueFromString(imageLocation.getAuth());
                 if (auth != null) {
                     sb.append("&cryptoAuth=").append(URLEncoder.encode(auth, "UTF-8"));
                     sb.append("&session=").append(session.getSessionID());
