@@ -748,8 +748,8 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     }
 
     /**
-     * Checks that s specific event can be updated by the current session's user under the perspective of the current folder, by either
-     * requiring delete access for <i>own</i> or <i>all</i> objects, based on the user being the creator of the event or not.
+     * Checks that a specific event can be updated by the current session's user under the perspective of the current folder, by either
+     * requiring write access for <i>own</i> or <i>all</i> objects, based on the user being the creator of the event or not.
      * <p/>
      * Additionally, the event's classification is checked.
      *
@@ -784,7 +784,23 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      *             {@link CalendarExceptionCodes#RESTRICTED_BY_CLASSIFICATION}
      */
     protected void requireWritePermissions(Event originalEvent, Attendee updatedAttendee) throws OXException {
-        requireWritePermissions(originalEvent, Collections.singletonList(updatedAttendee));
+        if (false == matches(updatedAttendee, calendarUserId)) {
+            /*
+             * always require permissions for whole event in case an attendee different from the calendar user updated
+             */
+            requireWritePermissions(originalEvent);
+        }
+        if (session.getUserId() != calendarUserId) {
+            /*
+             * user acts on behalf of other calendar user, allow attendee update based on permissions in underlying folder
+             */
+            if (matches(originalEvent.getCreatedBy(), session.getUserId())) {
+                requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, WRITE_OWN_OBJECTS, NO_PERMISSIONS);
+            } else {
+                requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, NO_PERMISSIONS);
+            }
+            Check.classificationAllowsUpdate(folder, originalEvent);
+        }
     }
 
     /**
@@ -798,8 +814,8 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
      *             {@link CalendarExceptionCodes#RESTRICTED_BY_CLASSIFICATION}
      */
     protected void requireWritePermissions(Event originalEvent, List<Attendee> updatedAttendees) throws OXException {
-        if (null != updatedAttendees && (1 < updatedAttendees.size() || session.getUserId() != updatedAttendees.get(0).getEntity())) {
-            requireWritePermissions(originalEvent);
+        for (Attendee updatedAttendee : updatedAttendees) {
+            requireWritePermissions(originalEvent, updatedAttendee);
         }
     }
 

@@ -435,7 +435,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         if (realChange) {
             requireWritePermissions(originalEvent);
         } else {
-            requireWritePermissions(originalEvent, session.getEntityResolver().prepareUserAttendee(session.getUserId()));
+            requireWritePermissions(originalEvent, session.getEntityResolver().prepareUserAttendee(calendarUserId));
         }
         storage.getEventStorage().updateEvent(deltaEvent);
         return true;
