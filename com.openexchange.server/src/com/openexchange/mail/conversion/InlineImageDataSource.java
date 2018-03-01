@@ -52,7 +52,6 @@ package com.openexchange.mail.conversion;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.shouldRetry;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -194,11 +193,10 @@ public final class InlineImageDataSource implements ImageDataSource {
                 // Try to get authentication from Image URL, else from session
                 auth = imageLocation.getAuth() == null ? crypto.getAuthTokenFromSession(session) : crypto.getTokenValueFromString(imageLocation.getAuth());
                 if (auth != null) {
-                    sb.append("&cryptoAuth=");
-                    sb.append(URLEncoder.encode(auth, "UTF-8"));
-                    sb.append("&session=" + session.getSessionID());
+                    sb.append("&cryptoAuth=").append(URLEncoder.encode(auth, "UTF-8"));
+                    sb.append("&session=").append(session.getSessionID());
                 }
-            } catch (OXException | UnsupportedEncodingException ex) {
+            } catch (Exception ex) {
                 // Don't care...
                 LOG.debug("", ex);
             }
