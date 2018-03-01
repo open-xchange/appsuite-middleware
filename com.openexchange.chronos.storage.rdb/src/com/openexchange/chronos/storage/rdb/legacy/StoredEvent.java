@@ -123,6 +123,11 @@ public class StoredEvent extends DelegatingEvent {
     }
 
     @Override
+    public boolean containsRecurrenceRule() {
+        return delegate.containsRecurrenceRule() || delegate.getRecurrenceRule() != null;
+    }
+
+    @Override
     public Date getCreated() {
         /*
          * truncate milliseconds from creation date to avoid bad rounding in MySQL versions >= 5.6.4.
@@ -285,8 +290,9 @@ public class StoredEvent extends DelegatingEvent {
              * iterate recurrence and take over end date of "last" occurrence
              */
             long millis = delegate.getEndDate().getTimestamp();
-            for (int i = 1; i <= SeriesPattern.MAX_OCCURRENCESE && iterator.hasNext(); millis = iterator.next().getValue().getTimestamp(), i++)
+            for (int i = 1; i <= SeriesPattern.MAX_OCCURRENCESE && iterator.hasNext(); millis = iterator.next().getValue().getTimestamp(), i++) {
                 ;
+            }
             calendar.setTimeInMillis(millis);
             calendar.set(Calendar.HOUR_OF_DAY, endHour);
             calendar.set(Calendar.MINUTE, endMinute);
