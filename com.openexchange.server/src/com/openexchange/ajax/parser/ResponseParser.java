@@ -63,7 +63,6 @@ import com.openexchange.ajax.fields.ResponseFields.ParsingFields;
 import com.openexchange.ajax.fields.ResponseFields.TruncatedFields;
 import com.openexchange.exception.Categories;
 import com.openexchange.exception.Category;
-import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Parsing;
 import com.openexchange.exception.OXException.ProblematicAttribute;
@@ -155,13 +154,7 @@ public final class ResponseParser {
             }
             final Object[] args = parseErrorMessageArgs(json.optJSONArray(ResponseFields.ERROR_PARAMS));
             final String logMessage = json.optString(ResponseFields.ERROR_DESC);
-            final OXException exception;
-            final Category category = categories.get(0);
-            if (category.getLogLevel().implies(LogLevel.DEBUG)) {
-                exception = new OXException(number, message, args);
-            } else {
-                exception = new OXException(number, message, args);
-            }
+            final OXException exception = new OXException(number, message, args);
             exception.setLogMessage(logMessage);
             exception.setPrefix(prefix);
             for (final Category cat : categories) {
@@ -237,7 +230,7 @@ public final class ResponseParser {
         if (code == null || code.length() == 0) {
             return EnumComponent.NONE.getAbbreviation();
         }
-        final int pos = code.indexOf('-');
+        final int pos = code.lastIndexOf('-');
         if (pos != -1) {
             final String abbr = code.substring(0, pos);
             final EnumComponent component = EnumComponent.byAbbreviation(abbr);
@@ -260,7 +253,7 @@ public final class ResponseParser {
         if (code == null || code.length() == 0) {
             return 0;
         }
-        final int pos = code.indexOf('-');
+        final int pos = code.lastIndexOf('-');
         if (pos != -1) {
             try {
                 return Integer.parseInt(code.substring(pos + 1));
