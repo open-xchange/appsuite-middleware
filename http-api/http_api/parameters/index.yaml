@@ -441,3 +441,12 @@ QueryParamChronosExtendedEntities:
     If set to 'true' attendees of internal users will be extended by a 'contact' field, which contains some of the contact fields of this user.
   required: false
   default: false
+QueryParamChronosUpdateCache:
+  name: updateCache
+  in: query
+  type: boolean
+  description: |
+    If set to 'true' the cache will be forced to be updated (e. g. by contacting the underlying external account)
+  required: false
+  default: false
+  

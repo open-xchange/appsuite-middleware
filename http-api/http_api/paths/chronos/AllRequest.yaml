@@ -29,6 +29,7 @@
       - $ref: "#/parameters/QueryParamChronosExpand"
       - $ref: "#/parameters/QueryParamChronosIncludePrivate"
       - $ref: "#/parameters/QueryParamChronosExtendedEntities"
+      - $ref: "#/parameters/QueryParamChronosUpdateCache"
     responses:
       200:
         description: |
@@ -63,6 +64,7 @@
       - $ref: "#/parameters/QueryParamChronosSort"
       - $ref: "#/parameters/QueryParamChronosExpand"
       - $ref: "#/parameters/QueryParamChronosIncludePrivate"
+      - $ref: "#/parameters/QueryParamChronosUpdateCache"
       - in: body
         name: body
         description: A JSON object containing the folder ids.
