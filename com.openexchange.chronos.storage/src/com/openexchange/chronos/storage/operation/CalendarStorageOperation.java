@@ -88,6 +88,8 @@ public abstract class CalendarStorageOperation<T> {
     /** The random number generator */
     private static final Random RANDOM = new Random();
 
+    private boolean hasWritten = false;
+
     protected final int contextId;
     private final DatabaseService dbService;
     private final Connection foreignConnection;
@@ -133,11 +135,19 @@ public abstract class CalendarStorageOperation<T> {
     /**
      * Performs the operation using the initialized calendar storage.
      *
-     * @param session The calendar session
      * @param storage The initialized calendar storage to use
      * @return The result
      */
     protected abstract T call(CalendarStorage storage) throws OXException;
+
+    /**
+     * Checks whether the operation has written data or not
+     *
+     * @return True if it has written, false otherwise
+     */
+    protected boolean hasWritten() {
+        return hasWritten;
+    }
 
     /**
      * Invoked after a connection was acquired and backed.
@@ -185,6 +195,7 @@ public abstract class CalendarStorageOperation<T> {
         }
         while (true) {
             try {
+                hasWritten = true;
                 return doExecuteUpdate();
             } catch (OXException e) {
                 if (retryCount > maxRetries || false == mayTryAgain(e)) {
@@ -234,7 +245,11 @@ public abstract class CalendarStorageOperation<T> {
                     dbService.backWritableAfterReading(contextId, writeConnection);
                 } else {
                     autocommit(writeConnection);
-                    dbService.backWritable(contextId, writeConnection);
+                    if (hasWritten()) {
+                        dbService.backWritable(contextId, writeConnection);
+                    } else {
+                        dbService.backWritableAfterReading(contextId, writeConnection);
+                    }
                 }
             }
         }
