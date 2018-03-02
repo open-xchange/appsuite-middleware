@@ -521,9 +521,10 @@ public abstract class EventConverter {
         }
         //appointment.getNotification();
         //appointment.getRecurrenceCalculator();
-        if (appointment.containsParticipants()) {
+        if (appointment.containsParticipants() || appointment.containsUserParticipants()) {
             UserParticipant[] users = appointment.containsUserParticipants() ? appointment.getUsers() : null;
-            event.setAttendees(getAttendees(appointment.getParticipants(), users));
+            Participant[] participants = appointment.containsParticipants() ? appointment.getParticipants() : null;
+            event.setAttendees(getAttendees(participants, users));
         }
         if (appointment.containsOrganizerId() || appointment.containsOrganizer() || appointment.containsPrincipal() || appointment.containsPrincipalId()) {
             event.setOrganizer(getOrganizer(appointment.getOrganizerId(), appointment.getOrganizer(), appointment.getPrincipalId(), appointment.getPrincipal()));
@@ -846,17 +847,19 @@ public abstract class EventConverter {
     /**
      * Converts an array of participants into their corresponding attendees.
      *
-     * @param participants The participants to convert
-     * @param users The optionally defined user participant data, or <code>null</code> if not set
+     * @param participants The participants to convert, or <code>null</code> if not set
+     * @param users The user participant data, or <code>null</code> if not set
      * @return The attendees
      */
     private static List<Attendee> getAttendees(Participant[] participants, UserParticipant[] users) {
-        if (null == participants) {
+        if (null == participants && null == users) {
             return null;
         }
-        List<Attendee> attendees = new ArrayList<Attendee>(participants.length);
-        for (Participant participant : participants) {
-            attendees.add(getAttendee(participant));
+        List<Attendee> attendees = new ArrayList<Attendee>();
+        if (null != participants) {
+            for (Participant participant : participants) {
+                attendees.add(getAttendee(participant));
+            }
         }
         if (null != users) {
             for (UserParticipant user : users) {
@@ -864,10 +867,7 @@ public abstract class EventConverter {
                 if (null != existingAttendee) {
                     copyProperties(getAttendee(user), existingAttendee);
                 } else {
-                    //TODO: add from users array or not?
-                    // needs to be ignored for
-                    // - com.openexchange.ajax.appointment.bugtests.Bug15903Test.testUpdatedParticipants()
-                    //                     attendees.add(getAttendee(user));
+                    attendees.add(getAttendee(user));
                 }
             }
         }
