@@ -415,6 +415,9 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     private int updateEvent(Connection connection, int contextID, int objectID, Event event) throws SQLException, OXException {
         Event eventData = Compat.adjustPriorUpdate(this, connection, event);
         EventField[] assignedfields = MAPPER.getAssignedFields(eventData);
+        if (0 == assignedfields.length) {
+            return 0;
+        }
         String sql = new StringBuilder()
             .append("UPDATE prg_dates SET ").append(MAPPER.getAssignments(assignedfields)).append(' ')
             .append("WHERE cid=? AND intfield01=?;")
