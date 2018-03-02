@@ -288,10 +288,10 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * insert event & notify handlers
          */
-        InternalCalendarResult result = new CalendarResultStorageOperation(session) {
+        InternalCalendarResult result = new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
-            protected InternalCalendarResult perform(CalendarSession session, CalendarStorage storage) throws OXException {
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new CreatePerformer(storage, session, getFolder(session, folderId)).perform(new UnmodifiableEvent(event));
             }
         }.executeUpdate();
@@ -307,10 +307,10 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * update event & notify handlers
          */
-        InternalCalendarResult result = new CalendarResultStorageOperation(session) {
+        InternalCalendarResult result = new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
-            protected InternalCalendarResult perform(CalendarSession session, CalendarStorage storage) throws OXException {
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new UpdatePerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), eventID.getRecurrenceID(), new UnmodifiableEvent(event), clientTimestamp);
             }
 
@@ -327,10 +327,10 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * update event & notify handlers
          */
-        InternalCalendarResult result = new CalendarResultStorageOperation(session) {
+        InternalCalendarResult result = new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
-            protected InternalCalendarResult perform(CalendarSession session, CalendarStorage storage) throws OXException {
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new UpdatePerformer(storage, session, getFolder(session, eventID.getFolderID()), EnumSet.of(Role.ORGANIZER)).perform(eventID.getObjectID(), eventID.getRecurrenceID(), new UnmodifiableEvent(event), clientTimestamp);
             }
 
@@ -347,10 +347,10 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * touch event & notify handlers
          */
-        InternalCalendarResult result = new CalendarResultStorageOperation(session) {
+        InternalCalendarResult result = new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
-            protected InternalCalendarResult perform(CalendarSession session, CalendarStorage storage) throws OXException {
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new TouchPerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID());
             }
 
@@ -367,10 +367,10 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * move event
          */
-        InternalCalendarResult result = new CalendarResultStorageOperation(session) {
+        InternalCalendarResult result = new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
-            protected InternalCalendarResult perform(CalendarSession session, CalendarStorage storage) throws OXException {
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new MovePerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), getFolder(session, folderId), clientTimestamp);
             }
         }.executeUpdate();
@@ -386,10 +386,10 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * update attendee
          */
-        InternalCalendarResult result = new CalendarResultStorageOperation(session) {
+        InternalCalendarResult result = new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
-            protected InternalCalendarResult perform(CalendarSession session, CalendarStorage storage) throws OXException {
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new UpdateAttendeePerformer(storage, session, getFolder(session, eventID.getFolderID(), false))
                     .perform(eventID.getObjectID(), eventID.getRecurrenceID(), attendee, Long.valueOf(clientTimestamp));
 
@@ -407,10 +407,10 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * update attendee
          */
-        InternalCalendarResult result = new CalendarResultStorageOperation(session) {
+        InternalCalendarResult result = new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
-            protected InternalCalendarResult perform(CalendarSession session, CalendarStorage storage) throws OXException {
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new UpdateAlarmsPerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), eventID.getRecurrenceID(), alarms, Long.valueOf(clientTimestamp));
 
             }
@@ -427,10 +427,10 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * delete event
          */
-        InternalCalendarResult result = new CalendarResultStorageOperation(session) {
+        InternalCalendarResult result = new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
-            protected InternalCalendarResult perform(CalendarSession session, CalendarStorage storage) throws OXException {
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new DeletePerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), eventID.getRecurrenceID(), clientTimestamp);
 
             }
@@ -447,10 +447,10 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * split event series, notify handlers & return userized result
          */
-        return notifyHandlers(new CalendarResultStorageOperation(session) {
+        return notifyHandlers(new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
 
             @Override
-            protected InternalCalendarResult perform(CalendarSession session, CalendarStorage storage) throws OXException {
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new SplitPerformer(storage, session, getFolder(session, eventID.getFolderID())).perform(eventID.getObjectID(), splitPoint, uid, clientTimestamp);
 
             }
@@ -462,10 +462,12 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * delete event
          */
-        InternalCalendarResult result = new CalendarResultStorageOperation(session) {
+        InternalCalendarResult result = new InternalCalendarStorageOperation<InternalCalendarResult>(session) {
+
             @Override
-            protected InternalCalendarResult perform(CalendarSession session, CalendarStorage storage) throws OXException {
+            protected InternalCalendarResult execute(CalendarSession session, CalendarStorage storage) throws OXException {
                 return new ClearPerformer(storage, session, getFolder(session, folderId)).perform(clientTimestamp);
+
             }
         }.executeUpdate();
         /*
