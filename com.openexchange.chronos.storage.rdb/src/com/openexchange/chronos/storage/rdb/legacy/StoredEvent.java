@@ -124,7 +124,10 @@ public class StoredEvent extends DelegatingEvent {
 
     @Override
     public boolean containsRecurrenceRule() {
-        return delegate.containsRecurrenceRule() || delegate.getRecurrenceRule() != null;
+        /*
+         * a changed start- or end-date requires an update of the recurrence rule, too
+         */
+        return delegate.containsRecurrenceRule() || delegate.containsStartDate() || delegate.containsEndDate();
     }
 
     @Override
