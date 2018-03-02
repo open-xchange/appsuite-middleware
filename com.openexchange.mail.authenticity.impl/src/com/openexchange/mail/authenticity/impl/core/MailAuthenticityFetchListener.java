@@ -63,6 +63,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterators;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailAttributation;
@@ -313,9 +314,13 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         } catch (InterruptedException e) {
             // Keep interrupted status
             Thread.currentThread().interrupt();
-            for (Future<Void> future : submittedTasks.keySet()) {
-                future.cancel(true);
+
+            // Cancel submitted tasks in reverse order
+            Future<?>[] futures = Iterators.toArray(submittedTasks.keySet().iterator(), Future.class);
+            for (int i = futures.length; i-- > 0;) {
+                futures[i].cancel(true);
             }
+
             throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
         }
         return MailFetchListenerResult.neutral(mails, cacheable);
