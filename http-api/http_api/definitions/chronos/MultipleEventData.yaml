@@ -1,0 +1,13 @@
+type: object
+properties:
+  folder:
+    type: string
+  events:
+    type: array
+    items:
+      $ref: EventData.yaml
+  timestamp:
+    type: integer
+    format: int64
+    description: The timestamp of the event.
+    readOnly: true

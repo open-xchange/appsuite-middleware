@@ -78,4 +78,4 @@
           sorted in ascending order by the field `start_date`. In case of errors the responsible fields in the
           response are filled (see [Error handling](#error-handling)).
         schema:
-          $ref: "#/definitions/EventsResponse"
+          $ref: "#/definitions/MultipleFolderEventsResponse"

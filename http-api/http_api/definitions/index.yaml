@@ -150,8 +150,12 @@ EventResponse:
   $ref: ./chronos/EventResponse.yaml
 EventsResponse:
   $ref: ./chronos/EventsResponse.yaml
+MultipleFolderEventsResponse:
+  $ref: ./chronos/MultipleFolderEventsResponse.yaml
 EventData:
   $ref: ./chronos/EventData.yaml
+MultipleEventData:
+  $ref: ./chronos/MultipleEventData.yaml
 EventId:
   $ref: ./chronos/EventId.yaml
 CalendarUser:
