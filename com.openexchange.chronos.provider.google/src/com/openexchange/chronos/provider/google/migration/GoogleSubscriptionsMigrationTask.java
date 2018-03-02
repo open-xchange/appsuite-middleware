@@ -181,8 +181,14 @@ public class GoogleSubscriptionsMigrationTask extends UpdateTaskAdapter {
 
                 UserizedFolder folder = folderService.getFolder("0", sub.getFolderId(), userService.getUser(sub.getUserId(), ctx), ctx, new FolderServiceDecorator());
                 Set<Integer> userFromPermissions = getUserFromPermissions(folder.getPermissions(), groupService, ctx);
+                int folderId = Integer.valueOf(sub.getFolderId());
                 for (Integer user : userFromPermissions) {
-                    storage.insertFolderProperty(ctxId, Integer.valueOf(sub.getFolderId()), user, "cal/subscribed", Boolean.FALSE.toString(), writeCon);
+                    String folderProperty = storage.getFolderProperty(ctxId, folderId, user, "cal/subscribed");
+                    if (folderProperty == null) {
+                        storage.insertFolderProperty(ctxId, folderId, user, "cal/subscribed", Boolean.FALSE.toString(), writeCon);
+                    } else if (Boolean.valueOf(folderProperty) == true) {
+                        storage.updateFolderProperty(ctxId, folderId, user, "cal/subscribed", Boolean.FALSE.toString(), writeCon);
+                    }
                 }
             }
         }
