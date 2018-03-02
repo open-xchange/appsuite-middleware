@@ -96,6 +96,7 @@ import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalen
 import com.openexchange.testing.httpclient.models.FolderDataComOpenexchangeCalendarExtendedPropertiesDescription;
 import com.openexchange.testing.httpclient.models.FolderPermission;
 import com.openexchange.testing.httpclient.models.FolderUpdateResponse;
+import com.openexchange.testing.httpclient.models.MultipleFolderEventsResponse;
 import com.openexchange.testing.httpclient.models.NewFolderBody;
 import com.openexchange.testing.httpclient.models.NewFolderBodyFolder;
 import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
@@ -859,7 +860,6 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         
     }
 
-
     @Test
     public void testMultipleGet_forbidden_returnExceptionWhenReadFromDB() throws ApiException, OXException, IOException, JSONException {
         String externalUri = "http://example.com/files/testMultipleGet_forbidden_returnExceptionWhenReadFromDB.ics";
@@ -870,24 +870,19 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         ChronosFolderBody body = new ChronosFolderBody();
         body.addFoldersItem(newFolderId);
         //load resource data
-        EventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, false, false, false);
+        MultipleFolderEventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, false, false, false);
         // return from db
-        EventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, false, false, false);
+        MultipleFolderEventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, false, false, false);
 
         EventDataError initialResponseError = initialAllEventResponse.getData().get(0).getError();
-        EventData secondResponseError = secondEventResponse.getData().get(0);
-        assertEquals(initialResponseError.getCode(), secondResponseError.getError().getCode());
-        assertEquals(initialResponseError.getErrorId(), secondResponseError.getError().getErrorId());
-        assertEquals(initialResponseError.getErrorDesc(), secondResponseError.getError().getErrorDesc());
-        assertEquals(initialResponseError.getCategory(), secondResponseError.getError().getCategory());
-        assertEquals(initialResponseError.getCategories(), secondResponseError.getError().getCategories());
-
-        assertNull(initialAllEventResponse.getError());
-        assertNull(initialAllEventResponse.getErrorDesc());
-        assertNull(initialAllEventResponse.getCode());
-        assertNull(secondEventResponse.getError());
-        assertNull(secondEventResponse.getErrorDesc());
-        assertNull(secondEventResponse.getCode());
+        EventDataError secondResponseError = secondEventResponse.getData().get(0).getError();
+        assertEquals(initialResponseError.getCode(), secondResponseError.getCode());
+        assertEquals(initialResponseError.getErrorId(), secondResponseError.getErrorId());
+        assertEquals(initialResponseError.getErrorDesc(), secondResponseError.getErrorDesc());
+        assertEquals(initialResponseError.getCategory(), secondResponseError.getCategory());
+        assertEquals(initialResponseError.getCategories(), secondResponseError.getCategories());
+        assertEquals(0, initialAllEventResponse.getData().get(0).getEvents().size());
+        assertEquals(0, secondEventResponse.getData().get(0).getEvents().size());
     }
 
     @Test
@@ -900,7 +895,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         ChronosFolderBody body = new ChronosFolderBody();
         body.addFoldersItem(newFolderId);
 
-        EventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, false, false, true);
+        MultipleFolderEventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, false, false, true);
         clear(externalUri);
         EventDataError initialResponseError = initialAllEventResponse.getData().get(0).getError();
 
@@ -918,7 +913,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         }
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_OK);
 
-        EventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, false, false, true);
+        MultipleFolderEventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, false, false, true);
 
         EventDataError secondResponseError = secondEventResponse.getData().get(0).getError();
 
