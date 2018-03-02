@@ -63,6 +63,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openexchange.ajax.chronos.manager.ChronosApiException;
+import com.openexchange.ajax.proxy.ClearRequest;
 import com.openexchange.ajax.proxy.MockRequest;
 import com.openexchange.ajax.proxy.MockRequestMethod;
 import com.openexchange.ajax.proxy.StartMockServerRequest;
@@ -94,6 +95,11 @@ public abstract class AbstractExternalProviderChronosTest extends AbstractChrono
         super.setUp();
         setUpConfiguration();
         client.execute(new StartMockServerRequest());
+    }
+    
+    protected void clear(String uri) throws OXException, IOException, JSONException {
+        ClearRequest clearRequest = new ClearRequest(uri);
+        client.execute(clearRequest);
     }
 
     /**

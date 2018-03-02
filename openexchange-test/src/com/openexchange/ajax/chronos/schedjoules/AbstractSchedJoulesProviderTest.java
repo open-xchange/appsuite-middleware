@@ -73,8 +73,8 @@ abstract class AbstractSchedJoulesProviderTest extends AbstractExternalProviderC
 
     private static final Map<String, String> CONFIG = new HashMap<String, String>();
     static {
-        CONFIG.put("com.openexchange.chronos.schedjoules.host", "example.com");
-        CONFIG.put("com.openexchange.chronos.schedjoules.scheme", "http");
+        CONFIG.put("com.openexchange.calendar.schedjoules.host", "example.com");
+        CONFIG.put("com.openexchange.calendar.schedjoules.scheme", "http");
     }
 
     static final Map<String, String> RESPONSE_HEADERS = Collections.singletonMap(HttpHeaders.CONTENT_TYPE, "application/json");
