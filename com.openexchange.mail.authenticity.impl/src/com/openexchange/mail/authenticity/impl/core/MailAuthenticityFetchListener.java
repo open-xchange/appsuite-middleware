@@ -455,7 +455,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         }
 
         /**
-         * Marks the mails processed by this task with <code>neutral</code> authenticity result
+         * Marks the mails processed by this task as <code>neutral</code> by applying {@link MailAuthenticityResult#NEUTRAL_RESULT the special authenticity result} to all of them.
          */
         public void markAsNeutral() {
             for (MailMessage mail : mails) {
