@@ -386,7 +386,7 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     /**
-     * A set of those {@link OXExceptionCode} that should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
+     * A set of those {@link OXExceptionCode}s that should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
      */
     private static final Set<OXExceptionCode> IGNOREES = ImmutableSet.<OXExceptionCode> of(
             OXFolderExceptionCode.NOT_EXISTS,
@@ -412,7 +412,7 @@ public class DispatcherServlet extends SessionServlet {
      * @param e The {@code OXException} instance to check
      * @return <code>true</code> to ignore; otherwise <code>false</code> for common error handling
      */
-    protected static boolean ignore(OXException e) {
+    public static boolean ignore(OXException e) {
         if (e.isLightWeight()) {
             return true;
         }
@@ -702,34 +702,46 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     protected void logException(@Nullable Exception e, @Nullable LogLevel logLevel, int statusCode) {
-        if (null == e) {
+        logException(e, LOG, statusCode, logLevel);
+    }
+
+    /**
+     * Logs specified exception according to specified arguments.
+     *
+     * @param e The exception to log or <code>null</code> to do nothing
+     * @param logger The logger instance to use
+     * @param optStatusCode The optional status code in case an HTTP error is about to be advertised to client; or less than/equal to <code>0</code> (zero) for no HTTP error
+     * @param optLogLevel The optional log level; if <code>null</code> then <code>ERROR</code> is used
+     */
+    public static void logException(@Nullable Exception e, org.slf4j.Logger logger, int optStatusCode, @Nullable LogLevel optLogLevel) {
+        if (null == e || null == logger) {
             return;
         }
 
-        String msg = statusCode > 0 ? new StringBuilder("Error processing request. Signaling HTTP error ").append(statusCode).toString() : "Error processing request.";
+        String msg = optStatusCode > 0 ? new StringBuilder("Error processing request. Signaling HTTP error ").append(optStatusCode).toString() : "Error processing request.";
 
-        if (null == logLevel) {
-            LOG.error(msg, e);
+        if (null == optLogLevel) {
+            logger.error(msg, e);
             return;
         }
 
-        switch (logLevel) {
+        switch (optLogLevel) {
         case TRACE:
-            LOG.trace(msg, e);
+            logger.trace(msg, e);
             break;
         case DEBUG:
-            LOG.debug(msg, e);
+            logger.debug(msg, e);
             break;
         case INFO:
-            LOG.info(msg, e);
+            logger.info(msg, e);
             break;
         case WARNING:
-            LOG.warn(msg, e);
+            logger.warn(msg, e);
             break;
         case ERROR:
             // fall-through
         default:
-            LOG.error(msg, e);
+            logger.error(msg, e);
         }
     }
 

@@ -885,9 +885,10 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      */
     private DropboxFile singleUpload(File file, InputStream data) throws OXException {
         String name = file.getFileName();
-        if(name==null){
+        if (name == null) {
             name = file.getId();
         }
+
         String path = new StringBuilder(file.getFolderId()).append('/').append(name).toString();
         try {
             UploadBuilder builder = client.files().uploadBuilder(path).withMode(WriteMode.OVERWRITE).withAutorename(false);

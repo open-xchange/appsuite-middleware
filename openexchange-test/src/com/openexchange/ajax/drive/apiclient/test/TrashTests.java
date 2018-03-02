@@ -61,11 +61,8 @@ import com.openexchange.ajax.folder.manager.FolderManager;
 import com.openexchange.ajax.framework.AbstractAPIClientSession;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.invoker.ApiException;
-import com.openexchange.testing.httpclient.models.CommonResponse;
 import com.openexchange.testing.httpclient.models.DriveActionsResponse;
 import com.openexchange.testing.httpclient.models.FoldersResponse;
-import com.openexchange.testing.httpclient.models.RestoreFromTrashData;
-import com.openexchange.testing.httpclient.models.RestoreFromTrashResponse;
 import com.openexchange.testing.httpclient.models.TrashContent;
 import com.openexchange.testing.httpclient.models.TrashFolderResponse;
 import com.openexchange.testing.httpclient.models.TrashTargetsBody;
@@ -150,7 +147,7 @@ public class TrashTests extends AbstractAPIClientSession {
 
         TrashTargetsBody body = new TrashTargetsBody();
         body.addFilesItem(data.getFiles().get(0).getName());
-        CommonResponse removeFromTrash = driveApi.deleteFromTrash(folderApi.getSession(), String.valueOf(infostoreFolder), body);
+        TrashFolderResponse removeFromTrash = driveApi.deleteFromTrash(folderApi.getSession(), String.valueOf(infostoreFolder), body);
         assertNull(removeFromTrash.getErrorDesc(), removeFromTrash.getError());
 
         trashContent = driveApi.getTrashContent(folderApi.getSession(), "/");
@@ -171,10 +168,10 @@ public class TrashTests extends AbstractAPIClientSession {
 
         TrashTargetsBody body = new TrashTargetsBody();
         body.addFilesItem(data.getFiles().get(0).getName());
-        RestoreFromTrashResponse restoredFromTrash = driveApi.restoreFromTrash(folderApi.getSession(), String.valueOf(infostoreFolder), body);
+        TrashFolderResponse restoredFromTrash = driveApi.restoreFromTrash(folderApi.getSession(), String.valueOf(infostoreFolder), body);
         assertNull(restoredFromTrash.getErrorDesc(), restoredFromTrash.getError());
         assertNotNull(restoredFromTrash.getData());
-        RestoreFromTrashData restoreData = restoredFromTrash.getData();
+        TrashContent restoreData = restoredFromTrash.getData();
         assertNotNull(restoreData.getFiles());
         assertEquals(1, restoreData.getFiles().size());
         assertTrue(restoreData.getFiles().get(0).getPath().isEmpty()); // Restored to root

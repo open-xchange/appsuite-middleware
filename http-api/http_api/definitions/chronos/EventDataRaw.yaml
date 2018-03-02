@@ -14,11 +14,8 @@ timestamp:
   description: The timestamp of the event.
   readOnly: true
 categories:
-  type: array
+  type: string
   description: An array of categories.
-  items:
-    type: string
-    description: A category.
 filename:
   type: string
   description:  The filename of the event.
@@ -166,4 +163,7 @@ flags:
 relatedTo:
   type: string
   description: The relationship between this and other events.
-      
+error:
+  type: object
+  properties:
+    $ref: ../common/CommonResponseData.yaml

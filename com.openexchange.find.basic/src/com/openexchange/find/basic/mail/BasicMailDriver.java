@@ -240,7 +240,6 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
                 vals[0] = folder;
                 vals[1] = prefixAvailable ? Boolean.valueOf(mailServletInterface.getMailConfig().getCapabilities().hasFileNameSearch()) : Boolean.FALSE;
                 vals[2] = Boolean.valueOf(mailServletInterface.getMailConfig().getCapabilities().hasAttachmentMarker());
-
                 return vals;
             }
         });
@@ -419,7 +418,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         OrderDirection orderDirection = OrderDirection.DESC;
         String fullname = folder.getFullname();
 
-        MailMessage[] messages = mailServletInterface.searchMails(fullname, indexRange, sortField, orderDirection, searchTerm, fields, headers);
+        MailMessage[] messages = mailServletInterface.searchMails(MailFolderUtility.prepareFullname(mailServletInterface.getMailAccess().getAccountId(), fullname), indexRange, sortField, orderDirection, searchTerm, fields, headers);
         List<MailMessage> resultMessages = new ArrayList<MailMessage>(messages.length);
         Collections.addAll(resultMessages, messages);
         return resultMessages;

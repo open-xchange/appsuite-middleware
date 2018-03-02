@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.json.actions;
 
-import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -65,7 +64,6 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
 import com.openexchange.json.cache.JsonCacheService;
 import com.openexchange.json.cache.JsonCaches;
-import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
@@ -361,14 +359,13 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                         }
                     }
 
-                    FullnameArgument fa = prepareMailFolderParam(folderId);
                     IndexRange indexRange = null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]);
                     MailSortField sortField = MailSortField.getField(sortCol);
                     OrderDirection orderDirection = OrderDirection.getOrderDirection(orderDir);
 
                     MailMessage[] result;
                     MailField[] fields = MailField.getFields(columns);
-                    result = mailInterface.searchMails(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, fields, headers);
+                    result = mailInterface.searchMails(folderId, indexRange, sortField, orderDirection, searchTerm, fields, headers);
 
                     for (MailMessage mm : result) {
                         if (null != mm) {

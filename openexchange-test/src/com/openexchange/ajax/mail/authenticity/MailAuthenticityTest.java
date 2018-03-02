@@ -158,9 +158,9 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
          */
         MailResponse resp = api.getMail(getClient().getSession(), FOLDER, IMPORTED_EMAILS.get(PASS_ALL).getId(), null, 0, null, false, null, null, null, null, null, null);
         MailData mail = checkResponse(resp);
-        AuthenticationResult authenticationResult = mail.getAuthenticationResults();
+        AuthenticationResult authenticationResult = mail.getAuthenticity();
         Assert.assertNotNull(authenticationResult);
-        List<MechanismResult> mailAuthenticityMechanismResults = authenticationResult.getMailAuthenticityMechanismResults();
+        List<MechanismResult> mailAuthenticityMechanismResults = authenticationResult.getUnconsideredResults();
         Assert.assertEquals(3, mailAuthenticityMechanismResults.size());
 
         boolean spf = false, dmarc = false, dkim = false;
@@ -187,9 +187,9 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
          */
         resp = api.getMail(getClient().getSession(), FOLDER, IMPORTED_EMAILS.get(PISHING).getId(), null, 0, null, false, null, null, null, null, null, null);
         mail = checkResponse(resp);
-        authenticationResult = mail.getAuthenticationResults();
+        authenticationResult = mail.getAuthenticity();
         Assert.assertNotNull(authenticationResult);
-        mailAuthenticityMechanismResults = authenticationResult.getMailAuthenticityMechanismResults();
+        mailAuthenticityMechanismResults = authenticationResult.getUnconsideredResults();
         Assert.assertFalse(mailAuthenticityMechanismResults.isEmpty());
 
         spf = false;
@@ -218,9 +218,9 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
          */
         resp = api.getMail(getClient().getSession(), FOLDER, IMPORTED_EMAILS.get(NONE).getId(), null, 0, null, false, null, null, null, null, null, null);
         mail = checkResponse(resp);
-        authenticationResult = mail.getAuthenticationResults();
+        authenticationResult = mail.getAuthenticity();
         Assert.assertNotNull(authenticationResult);
-        mailAuthenticityMechanismResults = authenticationResult.getMailAuthenticityMechanismResults();
+        mailAuthenticityMechanismResults = authenticationResult.getUnconsideredResults();
         Assert.assertFalse(mailAuthenticityMechanismResults.isEmpty());
 
         spf = false;
@@ -252,7 +252,7 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
          */
         MailResponse resp = api.getMail(getClient().getSession(), FOLDER, IMPORTED_EMAILS.get(TRUSTED).getId(), null, 0, null, false, null, null, null, null, null, null);
         MailData mail = checkResponse(resp);
-        AuthenticationResult authenticationResult = mail.getAuthenticationResults();
+        AuthenticationResult authenticationResult = mail.getAuthenticity();
         Assert.assertNotNull(authenticationResult);
         Assert.assertEquals(StatusEnum.PASS, authenticationResult.getStatus());
         Assert.assertNotNull(authenticationResult.getTrusted());

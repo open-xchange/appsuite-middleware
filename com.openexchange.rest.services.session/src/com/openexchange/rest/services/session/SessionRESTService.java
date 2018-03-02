@@ -99,22 +99,33 @@ public class SessionRESTService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public JSONObject all(@PathParam("session") String session) throws OXException {
-        SessiondService sessiondService = services.getOptionalService(SessiondService.class);
-        if (null == sessiondService) {
-            throw ServiceExceptionCode.absentService(SessiondService.class);
-        }
-
-        CryptographicServiceAuthenticationFactory cryptoAuthenticationFactory = services.getOptionalService(CryptographicServiceAuthenticationFactory.class);
-
         try {
-            Session ses = sessiondService.getSession(session);
-            if(ses != null){
-                final boolean isGuest = Boolean.TRUE.equals(ses.getParameter(Session.PARAM_GUEST));
-                final String cryptoSessionId = cryptoAuthenticationFactory != null ?
-                    cryptoAuthenticationFactory.getSessionValueFrom(ses) : null;
-                return new JSONObject(6).put("context", ses.getContextId()).put("user", ses.getUserId()).put("guest", isGuest).put("cryptoSessionId", cryptoSessionId);
+            SessiondService sessiondService = services.getOptionalService(SessiondService.class);
+            if (null == sessiondService) {
+                throw ServiceExceptionCode.absentService(SessiondService.class);
             }
-            return new JSONObject();
+
+            Session ses = sessiondService.getSession(session);
+            if (ses == null) {
+                // No such session...
+                return new JSONObject(0);
+            }
+
+            // Basic user information
+            JSONObject jResponse = new JSONObject(6).put("context", ses.getContextId()).put("user", ses.getUserId());
+
+            // Add "guest" flag
+            boolean isGuest = Boolean.TRUE.equals(ses.getParameter(Session.PARAM_GUEST));
+            jResponse.put("guest", isGuest);
+
+            // Add crypto session identifier
+            CryptographicServiceAuthenticationFactory cryptoAuthenticationFactory = services.getOptionalService(CryptographicServiceAuthenticationFactory.class);
+            if (cryptoAuthenticationFactory != null) {
+                String cryptoSessionId = cryptoAuthenticationFactory.getSessionValueFrom(ses);
+                jResponse.put("cryptoSessionId", cryptoSessionId);
+            }
+
+            return jResponse;
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
