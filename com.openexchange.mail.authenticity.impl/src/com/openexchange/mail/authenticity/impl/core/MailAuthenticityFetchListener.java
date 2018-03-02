@@ -287,8 +287,9 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
             for (Map.Entry<Future<Void>, MailAuthenticityTask> submitted : submittedTasks.entrySet()) {
                 Future<Void> future = submitted.getKey();
                 MailAuthenticityTask task = submitted.getValue();
+                long timeoutMillis = getTimeoutMillis(task.getNumberOfMails());
                 try {
-                    future.get(getTimeoutMillis(task.getNumberOfMails()), TimeUnit.MILLISECONDS);
+                    future.get(timeoutMillis, TimeUnit.MILLISECONDS);
                     LOGGER.debug("Verified mail authenticity for mails \"{}\" ({}) in folder {} after {} µs", task.getMailIds(),
                         Integer.valueOf(task.getNumberOfMails()), task.getMailFolder(), Long.valueOf(task.getDurationMicros()));
                 } catch (ExecutionException e) {
@@ -297,14 +298,24 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
                     task.markAsNeutral();
                 } catch (TimeoutException e) {
                     future.cancel(true);
-                    LOGGER.warn("Timeout while verifying mail authenticity for mails \"{}\" ({}) in folder {} after {} µs", task.getMailIds(),
-                        Integer.valueOf(task.getNumberOfMails()), task.getMailFolder(), Long.valueOf(task.getDurationMicros()));
+                    long durationMicros = task.getDurationMicros();
+                    if (durationMicros == 0) {
+                        // Task not yet in execution; still enqueued in thread pool
+                        LOGGER.warn("Timeout while verifying mail authenticity for mails \"{}\" ({}) in folder {} after {} ms. Task has not been executed.", task.getMailIds(),
+                            Integer.valueOf(task.getNumberOfMails()), task.getMailFolder(), Long.valueOf(timeoutMillis));
+                    } else {
+                        LOGGER.warn("Timeout while verifying mail authenticity for mails \"{}\" ({}) in folder {} after {} ms", task.getMailIds(),
+                            Integer.valueOf(task.getNumberOfMails()), task.getMailFolder(), Long.valueOf(timeoutMillis));
+                    }
                     task.markAsNeutral();
                 }
             }
         } catch (InterruptedException e) {
             // Keep interrupted status
             Thread.currentThread().interrupt();
+            for (Future<Void> future : submittedTasks.keySet()) {
+                future.cancel(true);
+            }
             throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
         }
         return MailFetchListenerResult.neutral(mails, cacheable);
@@ -327,19 +338,27 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
 
         MailAuthenticityTask task = new MailAuthenticityTask(mail, handler, session, ALWAYS_ACCEPT_FOLDER_CHECKER);
         Future<Void> future = threadPool.submit(task);
+        long timeoutMillis = getTimeoutMillis(1);
         try {
-            future.get(getTimeoutMillis(1), TimeUnit.MILLISECONDS);
+            future.get(timeoutMillis, TimeUnit.MILLISECONDS);
             LOGGER.debug("Verified mail authenticity for mail \"{}\" in folder {} after {} µs", mail.getMailId(), mail.getFolder(), Long.valueOf(task.getDurationMicros()));
         } catch (ExecutionException e) {
             LOGGER.warn("Error while verifying mail authenticity for mail \"{}\" in folder {} after {} µs", mail.getMailId(), mail.getFolder(), Long.valueOf(task.getDurationMicros()), e.getCause());
             mail.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
         } catch (TimeoutException e) {
             future.cancel(true);
-            LOGGER.warn("Timeout while verifying mail authenticity for mail \"{}\" in folder {} after {} µs", mail.getMailId(), mail.getFolder(), Long.valueOf(task.getDurationMicros()));
+            long durationMicros = task.getDurationMicros();
+            if (durationMicros == 0) {
+                // Task not yet in execution; still enqueued in thread pool
+                LOGGER.warn("Timeout while verifying mail authenticity for mail \"{}\" in folder {} after {} ms. Task has not been executed.", mail.getMailId(), mail.getFolder(), Long.valueOf(timeoutMillis));
+            } else {
+                LOGGER.warn("Timeout while verifying mail authenticity for mail \"{}\" in folder {} after {} ms", mail.getMailId(), mail.getFolder(), Long.valueOf(timeoutMillis));
+            }
             mail.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
         } catch (InterruptedException e) {
             // Keep interrupted status
             Thread.currentThread().interrupt();
+            future.cancel(true);
             throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
         }
 
@@ -365,7 +384,6 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         private final MailAuthenticityHandler handler;
         private final Session session;
         private final FolderChecker folderChecker;
-        private final long initTime;
         private final AtomicLong durationMicros;
 
         MailAuthenticityTask(MailMessage mail, MailAuthenticityHandler handler, Session session, FolderChecker folderChecker) {
@@ -378,7 +396,6 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
             this.handler = handler;
             this.session = session;
             this.folderChecker = folderChecker;
-            initTime = System.nanoTime();
             durationMicros = new AtomicLong(0);
         }
 
@@ -387,7 +404,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
          * <p>
          * Should only be called when this task has been completed.
          *
-         * @return The duration or <code>0</code> if not yet completed
+         * @return The duration or <code>0</code> if not yet in execution
          */
         public long getDurationMicros() {
             return durationMicros.get();
@@ -444,8 +461,15 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         }
 
         @Override
+        public void beforeExecute(Thread thread) {
+            durationMicros.set(System.nanoTime());
+            super.beforeExecute(thread);
+        }
+
+        @Override
         public void afterExecute(Throwable throwable) {
-            durationMicros.set(TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - initTime));
+            long taskStartNanos = durationMicros.get();
+            durationMicros.set(TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - taskStartNanos));
             super.afterExecute(throwable);
         }
 
