@@ -52,11 +52,11 @@ package com.openexchange.contact.storage.ldap.database;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link LdapDeleteListener}
@@ -80,13 +80,13 @@ public class LdapDeleteListener implements DeleteListener {
             stmt = writeCon.prepareStatement("DELETE FROM ldapIds WHERE cid = ?");
             stmt.setInt(pos, contextId);
             stmt.executeUpdate();
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         } catch (SQLException e) {
             throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (Exception e) {
             throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 

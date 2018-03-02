@@ -52,11 +52,11 @@ package com.openexchange.groupware.delete.objectusagecount;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.tools.sql.DBUtils;
 
 
 /**
@@ -86,7 +86,7 @@ public class ObjectUsageCountDeleteListener implements DeleteListener {
             } catch (SQLException e) {
                 throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } finally {
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
             }
         }
     }

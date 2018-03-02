@@ -49,8 +49,6 @@
 
 package com.openexchange.passwordchange.history;
 
-import com.openexchange.passwordchange.history.PasswordChangeInfo;
-
 /**
  * {@link PasswordChangeInfo} - The information provided and written to the database considering the password change.
  *

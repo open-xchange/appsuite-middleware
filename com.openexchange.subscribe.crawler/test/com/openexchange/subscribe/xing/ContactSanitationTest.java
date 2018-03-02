@@ -49,13 +49,10 @@
 
 package com.openexchange.subscribe.xing;
 
+import static org.junit.Assert.assertFalse;
 import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.crawler.internal.ContactSanitizer;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * {@link ContactSanitationTest}

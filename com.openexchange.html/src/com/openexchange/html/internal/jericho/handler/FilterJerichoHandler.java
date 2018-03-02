@@ -68,15 +68,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import net.htmlparser.jericho.Attribute;
-import net.htmlparser.jericho.Attributes;
-import net.htmlparser.jericho.CharacterReference;
-import net.htmlparser.jericho.EndTag;
-import net.htmlparser.jericho.HTMLElementName;
-import net.htmlparser.jericho.HTMLElements;
-import net.htmlparser.jericho.Segment;
-import net.htmlparser.jericho.StartTag;
-import net.htmlparser.jericho.Tag;
 import com.openexchange.html.HtmlServices;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.internal.css.CSSMatcher;
@@ -87,6 +78,15 @@ import com.openexchange.java.InterruptibleCharSequence;
 import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
 import com.openexchange.java.Strings;
+import net.htmlparser.jericho.Attribute;
+import net.htmlparser.jericho.Attributes;
+import net.htmlparser.jericho.CharacterReference;
+import net.htmlparser.jericho.EndTag;
+import net.htmlparser.jericho.HTMLElementName;
+import net.htmlparser.jericho.HTMLElements;
+import net.htmlparser.jericho.Segment;
+import net.htmlparser.jericho.StartTag;
+import net.htmlparser.jericho.Tag;
 
 /**
  * {@link FilterJerichoHandler}

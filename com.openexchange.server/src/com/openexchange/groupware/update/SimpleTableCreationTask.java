@@ -52,8 +52,8 @@ package com.openexchange.groupware.update;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
 /**
@@ -89,9 +89,9 @@ public abstract class SimpleTableCreationTask extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
         }
     }
 
@@ -104,7 +104,7 @@ public abstract class SimpleTableCreationTask extends UpdateTaskAdapter {
             stmt = con.createStatement();
             stmt.execute(getStatement());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 }

@@ -49,8 +49,6 @@
 
 package com.openexchange.unifiedinbox.copy;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.linked.TIntLinkedList;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.mail.api.MailAccess;
@@ -58,6 +56,8 @@ import com.openexchange.session.Session;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.unifiedinbox.utility.UnifiedInboxUtility;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.linked.TIntLinkedList;
 
 final class KF2AFEqualCallable implements Task<Object> {
 

@@ -40,8 +40,6 @@
 
 package com.sun.mail.imap;
 
-import java.util.*;
-
 /**
  * An access control list entry for a particular authentication identifier
  * (user or group).  Associates a set of Rights with the identifier.

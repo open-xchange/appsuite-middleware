@@ -1,6 +1,8 @@
 package com.openexchange.caldav.query;
 
 import static com.openexchange.time.TimeTools.D;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.List;
@@ -9,10 +11,6 @@ import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 import org.junit.Test;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /*
  *

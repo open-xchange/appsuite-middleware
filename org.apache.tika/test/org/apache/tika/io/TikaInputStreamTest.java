@@ -16,6 +16,9 @@
  */
 package org.apache.tika.io;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -27,10 +30,6 @@ import java.io.OutputStream;
 import java.net.URL;
 import org.apache.tika.metadata.Metadata;
 import org.junit.Test;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 public class TikaInputStreamTest {
          @Test

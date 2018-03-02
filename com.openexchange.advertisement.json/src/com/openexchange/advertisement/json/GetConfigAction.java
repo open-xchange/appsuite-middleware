@@ -50,7 +50,6 @@
 package com.openexchange.advertisement.json;
 
 import org.json.JSONValue;
-
 import com.openexchange.advertisement.AdvertisementConfigService;
 import com.openexchange.advertisement.AdvertisementPackageService;
 import com.openexchange.advertisement.json.osgi.Services;

@@ -50,11 +50,8 @@
 package com.openexchange.http.client.xml;
 
 import java.io.InputStream;
-
 import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.w3c.dom.Document;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
 import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;

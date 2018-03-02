@@ -50,8 +50,8 @@
 package com.openexchange.tools.servlet;
 
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
-import static com.openexchange.exception.OXExceptionStrings.MESSAGE_RETRY;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE_DENIED;
+import static com.openexchange.exception.OXExceptionStrings.MESSAGE_RETRY;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;

@@ -51,8 +51,6 @@ package com.openexchange.webdav.protocol.impl;
 
 import java.util.HashMap;
 import java.util.Map;
-
-
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavFactory;

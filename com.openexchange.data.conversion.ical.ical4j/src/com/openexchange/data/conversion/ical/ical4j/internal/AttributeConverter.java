@@ -51,12 +51,12 @@ package com.openexchange.data.conversion.ical.ical4j.internal;
 
 import java.util.List;
 import java.util.TimeZone;
-import net.fortuna.ical4j.model.component.CalendarComponent;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
+import net.fortuna.ical4j.model.component.CalendarComponent;
 
 /**
  *

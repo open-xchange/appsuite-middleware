@@ -49,6 +49,9 @@
 
 package com.openexchange.messaging.json.actions.messages;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import java.util.Arrays;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -63,10 +66,6 @@ import com.openexchange.messaging.SimMessageAccess;
 import com.openexchange.messaging.SimMessageAccess.Call;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.tools.session.SimServerSession;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 
 /**

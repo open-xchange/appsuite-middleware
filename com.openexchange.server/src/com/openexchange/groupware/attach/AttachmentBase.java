@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.attach;
 
-import gnu.trove.map.TIntObjectMap;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.SortedSet;
@@ -62,6 +61,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.session.Session;
 import com.openexchange.tx.TransactionAware;
 import com.openexchange.tx.TransactionException;
+import gnu.trove.map.TIntObjectMap;
 
 public interface AttachmentBase extends TransactionAware {
 

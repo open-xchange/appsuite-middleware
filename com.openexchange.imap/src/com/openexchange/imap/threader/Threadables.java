@@ -65,7 +65,6 @@ import java.util.regex.Pattern;
 import javax.mail.FetchProfile;
 import javax.mail.Header;
 import javax.mail.MessagingException;
-import javax.mail.UIDFolder;
 import javax.mail.internet.InternetHeaders;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.config.ConfigurationService;

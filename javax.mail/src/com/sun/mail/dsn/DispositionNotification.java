@@ -40,15 +40,15 @@
 
 package com.sun.mail.dsn;
 
-import java.io.*;
-import java.util.*;
-
-import javax.mail.*;
-import javax.mail.internet.*;
-
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Enumeration;
+import javax.mail.MessagingException;
+import javax.mail.internet.InternetHeaders;
 import com.sun.mail.util.LineOutputStream;	// XXX
-import com.sun.mail.util.PropUtil;
 import com.sun.mail.util.MailLogger;
+import com.sun.mail.util.PropUtil;
 
 /**
  * A message/disposition-notification message content, as defined in

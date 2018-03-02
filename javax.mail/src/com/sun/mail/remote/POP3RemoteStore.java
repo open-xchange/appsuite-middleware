@@ -40,7 +40,9 @@
 
 package com.sun.mail.remote;
 
-import javax.mail.*;
+import javax.mail.Session;
+import javax.mail.Store;
+import javax.mail.URLName;
 import com.sun.mail.pop3.POP3Store;
 
 /**

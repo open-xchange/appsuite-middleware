@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax;
 
-import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -82,12 +81,12 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
-import com.openexchange.ajax.requesthandler.jobqueue.JobInfo;
-import com.openexchange.ajax.requesthandler.jobqueue.JobQueueExceptionCodes;
 import com.openexchange.ajax.requesthandler.AJAXState;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.ajax.requesthandler.Dispatchers;
+import com.openexchange.ajax.requesthandler.jobqueue.JobInfo;
+import com.openexchange.ajax.requesthandler.jobqueue.JobQueueExceptionCodes;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
@@ -113,6 +112,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
+import gnu.trove.ConcurrentTIntObjectHashMap;
 
 /**
  * The <tt>Multiple</tt> Servlet processes <a href="http://oxpedia.org/wiki/index.php?title=HTTP_API#Module_.22multiple.22">multiple incoming JSON</a> requests.

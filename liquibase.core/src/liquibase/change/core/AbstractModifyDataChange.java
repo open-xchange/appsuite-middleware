@@ -1,9 +1,10 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
-
 import java.util.ArrayList;
 import java.util.List;
+import liquibase.change.AbstractChange;
+import liquibase.change.ColumnConfig;
+import liquibase.change.DatabaseChangeProperty;
 
 /**
  * Encapsulates common fields for update and delete changes.

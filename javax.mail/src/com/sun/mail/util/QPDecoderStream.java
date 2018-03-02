@@ -40,7 +40,10 @@
 
 package com.sun.mail.util;
 
-import java.io.*;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PushbackInputStream;
 
 /**
  * This class implements a QP Decoder. It is implemented as

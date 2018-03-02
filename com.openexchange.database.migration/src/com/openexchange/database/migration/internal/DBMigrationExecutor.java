@@ -57,9 +57,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import liquibase.Liquibase;
-import liquibase.changelog.ChangeSet;
-import liquibase.exception.ValidationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.database.migration.DBMigration;
@@ -67,6 +64,9 @@ import com.openexchange.database.migration.DBMigrationCallback;
 import com.openexchange.database.migration.DBMigrationConnectionProvider;
 import com.openexchange.database.migration.DBMigrationExceptionCodes;
 import com.openexchange.exception.OXException;
+import liquibase.Liquibase;
+import liquibase.changelog.ChangeSet;
+import liquibase.exception.ValidationFailedException;
 
 /**
  * {@link DBMigrationExecutor}

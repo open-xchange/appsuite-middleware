@@ -67,6 +67,7 @@ import com.openexchange.realtime.management.RealtimeConfigMBean;
 import com.openexchange.realtime.management.RealtimeConfigManagement;
 import com.openexchange.realtime.osgi.RealtimeServiceRegistry;
 import com.openexchange.server.Initialization;
+import com.openexchange.threadpool.RunLoop;
 
 /**
  * {@link RealtimeConfig} Collects and exposes configuration parameters needed by the realtime stack.

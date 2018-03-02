@@ -55,6 +55,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -63,7 +64,6 @@ import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.snippet.db.Tables;
 import com.openexchange.snippet.rdb.Services;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RdbSnippetCreateTableTask}
@@ -113,9 +113,9 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(writeCon);
+                Databases.rollback(writeCon);
             }
-            DBUtils.autocommit(writeCon);
+            Databases.autocommit(writeCon);
         }
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RdbSnippetCreateTableTask.class);
         logger.info("UpdateTask ''{}'' successfully performed!", RdbSnippetCreateTableTask.class.getSimpleName());
@@ -132,7 +132,7 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -143,7 +143,7 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
             rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
             return (rs.next() && rs.getString("TABLE_NAME").equals(table));
         } finally {
-            DBUtils.closeSQLStuff(rs);
+            Databases.closeSQLStuff(rs);
         }
     }
 

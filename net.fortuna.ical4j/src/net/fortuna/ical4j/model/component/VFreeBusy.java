@@ -34,7 +34,6 @@ package net.fortuna.ical4j.model.component;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.ComponentList;
 import net.fortuna.ical4j.model.DateRange;

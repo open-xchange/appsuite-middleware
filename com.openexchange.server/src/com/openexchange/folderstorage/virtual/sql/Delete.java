@@ -76,7 +76,6 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link Delete} - SQL for deleting a virtual folder.
@@ -127,9 +126,9 @@ public final class Delete {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(con); // ROLLBACK
+                Databases.rollback(con); // ROLLBACK
             }
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
             if (modified) {
                 databaseService.backWritable(cid, con);
             } else {
@@ -192,9 +191,9 @@ public final class Delete {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(con); // ROLLBACK
+                Databases.rollback(con); // ROLLBACK
             }
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
             databaseService.backWritable(cid, con);
         }
     }
@@ -241,7 +240,7 @@ public final class Delete {
             } catch (final SQLException e) {
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             } finally {
-                DBUtils.closeSQLStuff(rs, stmt);
+                Databases.closeSQLStuff(rs, stmt);
                 rs = null;
                 stmt = null;
             }
@@ -261,7 +260,7 @@ public final class Delete {
             } catch (final SQLException e) {
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             } finally {
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
             }
             /*
              * Backup permission data
@@ -277,7 +276,7 @@ public final class Delete {
             } catch (final SQLException e) {
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             } finally {
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
             }
             /*
              * Backup subscribe data
@@ -293,7 +292,7 @@ public final class Delete {
             } catch (final SQLException e) {
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             } finally {
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
             }
         }
         /*
@@ -310,7 +309,7 @@ public final class Delete {
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
         /*
          * Delete permission data
@@ -326,7 +325,7 @@ public final class Delete {
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
         /*
          * Delete folder data
@@ -342,7 +341,7 @@ public final class Delete {
         } catch (final SQLException e) {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
         /*
          * Post event

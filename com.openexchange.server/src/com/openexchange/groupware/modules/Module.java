@@ -49,14 +49,14 @@
 
 package com.openexchange.groupware.modules;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.TObjectIntMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.map.hash.TObjectIntHashMap;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.Permission;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 
 /**
  * {@link Module} - A module known to Open-Xchange Server.

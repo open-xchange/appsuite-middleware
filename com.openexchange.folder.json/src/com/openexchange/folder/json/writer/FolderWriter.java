@@ -89,7 +89,6 @@ import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Tools;
 import com.openexchange.publish.PublicationTarget;

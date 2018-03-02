@@ -44,8 +44,6 @@
 
 package com.sun.mail.auth;
 
-import java.security.*;
-
 //import static sun.security.provider.ByteArrayAccess.*;
 
 /**

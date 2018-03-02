@@ -49,12 +49,12 @@
 
 package com.openexchange.tools.oxfolder.memory;
 
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link ConditionTree} - A condition tree for a certain user/group.

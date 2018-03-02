@@ -50,7 +50,6 @@
 package com.openexchange.webdav.action;
 
 import javax.servlet.http.HttpServletResponse;
-
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 public class WebdavMaxUploadSizeAction extends AbstractAction {

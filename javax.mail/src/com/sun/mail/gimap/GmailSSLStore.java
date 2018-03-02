@@ -40,7 +40,8 @@
 
 package com.sun.mail.gimap;
 
-import javax.mail.*;
+import javax.mail.Session;
+import javax.mail.URLName;
 
 /**
  * Support "gimaps" protocol name.

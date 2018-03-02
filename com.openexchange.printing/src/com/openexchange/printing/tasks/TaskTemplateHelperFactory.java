@@ -52,13 +52,13 @@ package com.openexchange.printing.tasks;
 
 import java.util.Map;
 import java.util.TimeZone;
+import com.openexchange.ajax.printing.TemplateHelperFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.ajax.printing.TemplateHelperFactory;
 import com.openexchange.tools.session.ServerSession;
 
 public class TaskTemplateHelperFactory implements TemplateHelperFactory {

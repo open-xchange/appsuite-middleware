@@ -67,11 +67,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.slf4j.spi.MDCAdapter;
-import ch.qos.logback.classic.util.LogbackMDCAdapter;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
+import ch.qos.logback.classic.util.LogbackMDCAdapter;
 
 /**
  * {@link LogProperties} - Provides thread-local log properties.

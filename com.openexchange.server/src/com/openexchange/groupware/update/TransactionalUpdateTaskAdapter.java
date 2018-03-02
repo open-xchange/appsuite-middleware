@@ -51,8 +51,8 @@ package com.openexchange.groupware.update;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.sql.DBUtils;
 
 
 /**
@@ -91,9 +91,9 @@ public abstract class TransactionalUpdateTaskAdapter extends UpdateTaskAdapter {
                 rollback = false;
             } finally {
                 if (rollback) {
-                    DBUtils.rollback(con);
+                    Databases.rollback(con);
                 }
-                DBUtils.autocommit(con);
+                Databases.autocommit(con);
             }
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());

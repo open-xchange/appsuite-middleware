@@ -1,7 +1,5 @@
 package liquibase.resource;
 
-import liquibase.util.StringUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -9,6 +7,7 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import liquibase.util.StringUtils;
 
 /**
  * An implementation of liquibase.FileOpener that opens file from the class loader.

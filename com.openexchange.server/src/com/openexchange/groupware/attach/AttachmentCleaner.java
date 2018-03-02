@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.attach;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.event.impl.ContactEventInterface;
 import com.openexchange.event.impl.NoDelayEventInterface;
@@ -66,6 +64,8 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 
 public class AttachmentCleaner implements TaskEventInterface, ContactEventInterface, NoDelayEventInterface {
 

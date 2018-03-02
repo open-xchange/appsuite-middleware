@@ -40,26 +40,23 @@
 
 package com.sun.mail.pop3;
 
-import java.util.Properties;
-import java.util.Vector;
-import java.util.logging.Level;
-import java.lang.reflect.*;
-
-import javax.mail.*;
-import javax.mail.internet.*;
-import java.io.File;
-import java.io.PrintStream;
-import java.io.IOException;
 import java.io.EOFException;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.util.Collections;
 import java.util.Map;
-
-import com.sun.mail.util.PropUtil;
-import com.sun.mail.util.MailLogger;
-import com.sun.mail.util.SocketConnectException;
-import com.sun.mail.iap.ProtocolException;
-import com.sun.mail.imap.protocol.IMAPProtocol;
+import java.util.logging.Level;
+import javax.mail.AuthenticationFailedException;
+import javax.mail.Folder;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Store;
+import javax.mail.URLName;
 import com.sun.mail.util.MailConnectException;
+import com.sun.mail.util.MailLogger;
+import com.sun.mail.util.PropUtil;
+import com.sun.mail.util.SocketConnectException;
 
 /**
  * A POP3 Message Store.  Contains only one folder, "INBOX".

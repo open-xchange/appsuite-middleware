@@ -49,12 +49,13 @@
 
 package com.openexchange.groupware.settings.impl;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptions;
 import com.openexchange.groupware.contexts.Context;
@@ -67,7 +68,6 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * This class implements the storage for settings using a relational database.
@@ -282,7 +282,7 @@ public class RdbSettingStorage extends SettingStorage {
             final int result = stmt.executeUpdate();
             return (result > 0);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -302,7 +302,7 @@ public class RdbSettingStorage extends SettingStorage {
                 return false;
             }
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 

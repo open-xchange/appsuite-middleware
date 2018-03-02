@@ -58,9 +58,6 @@ import static com.openexchange.server.impl.OCLPermission.READ_ALL_OBJECTS;
 import static com.openexchange.server.impl.OCLPermission.READ_FOLDER;
 import static com.openexchange.server.impl.OCLPermission.WRITE_OWN_OBJECTS;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.list.linked.TIntLinkedList;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -97,6 +94,9 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.linked.TIntLinkedList;
 
 /**
  * {@link OXFolderAdminHelper} - Helper class for admin.

@@ -60,9 +60,6 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import net.htmlparser.jericho.Renderer;
-import net.htmlparser.jericho.Segment;
-import net.htmlparser.jericho.Source;
 import org.apache.commons.io.IOUtils;
 import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
@@ -73,6 +70,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.textxtraction.AbstractTextXtractService;
 import com.openexchange.textxtraction.DelegateTextXtraction;
 import com.openexchange.textxtraction.TextXtractExceptionCodes;
+import net.htmlparser.jericho.Renderer;
+import net.htmlparser.jericho.Segment;
+import net.htmlparser.jericho.Source;
 
 
 /**

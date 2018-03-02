@@ -60,8 +60,8 @@ import com.openexchange.secret.recovery.EncryptedItemCleanUpService;
 import com.openexchange.secret.recovery.SecretMigrator;
 import com.openexchange.secret.recovery.json.action.CheckAction;
 import com.openexchange.secret.recovery.json.action.CleanUpAction;
-import com.openexchange.secret.recovery.json.action.RemoveAction;
 import com.openexchange.secret.recovery.json.action.MigrateAction;
+import com.openexchange.secret.recovery.json.action.RemoveAction;
 import com.openexchange.server.ServiceLookup;
 
 /**

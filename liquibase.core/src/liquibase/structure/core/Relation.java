@@ -1,10 +1,9 @@
 package liquibase.structure.core;
 
-import liquibase.structure.AbstractDatabaseObject;
-import liquibase.structure.DatabaseObject;
-
 import java.util.ArrayList;
 import java.util.List;
+import liquibase.structure.AbstractDatabaseObject;
+import liquibase.structure.DatabaseObject;
 
 /**
  * A container of columns. Usually a table or view.

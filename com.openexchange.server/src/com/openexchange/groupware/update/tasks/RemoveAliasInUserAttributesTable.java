@@ -53,13 +53,13 @@ import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RemoveAliasInUserAttributesTable}
@@ -92,9 +92,9 @@ public class RemoveAliasInUserAttributesTable extends UpdateTaskAdapter {
         } finally {
             closeSQLStuff(stmt);
             if (rollback) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
         }
     }
 

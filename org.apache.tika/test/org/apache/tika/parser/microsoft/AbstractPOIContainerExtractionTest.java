@@ -16,6 +16,8 @@
  */
 package org.apache.tika.parser.microsoft;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
@@ -24,10 +26,6 @@ import org.apache.tika.extractor.ContainerExtractor;
 import org.apache.tika.extractor.EmbeddedResourceHandler;
 import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.mime.MediaType;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * Parent class of tests that the various POI powered parsers are

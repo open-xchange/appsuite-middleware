@@ -72,6 +72,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.rest.services.database.DatabaseRESTErrorCodes;
 import com.openexchange.rest.services.database.migrations.VersionChecker;
@@ -81,7 +82,6 @@ import com.openexchange.rest.services.database.transactions.Transaction;
 import com.openexchange.rest.services.database.transactions.TransactionKeeper;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link DatabaseRESTPerformer}
@@ -763,10 +763,10 @@ public class DatabaseRESTPerformer {
      */
     private void cleanup() throws OXException {
         for (ResultSet rs : resultSets) {
-            DBUtils.closeSQLStuff(rs);
+            Databases.closeSQLStuff(rs);
         }
         for (Statement stmt : statements) {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
         ConnectionPostProcessor postProcessor = this.postProcessor;
         if (postProcessor != null) {
@@ -1162,9 +1162,7 @@ public class DatabaseRESTPerformer {
      * @param r The response builder
      */
     private void addHeaders(ResponseBuilder r) {
-        r.header("Pragma", "no-cache")
-            .header("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0")
-            .header("X-OX-ACHTUNG", "This is an internal API that may change without notice");
+        r.header("Pragma", "no-cache").header("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0").header("X-OX-ACHTUNG", "This is an internal API that may change without notice");
     }
 
     /**

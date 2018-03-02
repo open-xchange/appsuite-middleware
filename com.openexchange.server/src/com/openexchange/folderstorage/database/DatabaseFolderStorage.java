@@ -88,6 +88,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -175,7 +176,6 @@ import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.oxfolder.UpdatedFolderHandler;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.sql.DBUtils;
 import gnu.trove.ConcurrentTIntObjectHashMap;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
@@ -426,7 +426,7 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                 } catch (final SQLException e) {
                     throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
                 } finally {
-                    DBUtils.autocommit(con.connection);
+                    Databases.autocommit(con.connection);
                     final DatabaseService databaseService = services.getService(DatabaseService.class);
                     if (null != databaseService) {
                         con.close(databaseService, params.getContext().getContextId());
@@ -1599,9 +1599,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
             params.putParameter(getFolderType(), PARAM_CONNECTION, null);
             if (con.isWritable()) {
                 try {
-                    DBUtils.rollback(con.connection);
+                    Databases.rollback(con.connection);
                 } finally {
-                    DBUtils.autocommit(con.connection);
+                    Databases.autocommit(con.connection);
                     final DatabaseService databaseService = services.getService(DatabaseService.class);
                     if (null != databaseService) {
                         con.close(databaseService, params.getContext().getContextId());
@@ -1647,9 +1647,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
                             connectionMode.connection.commit();
                         } catch (final Exception e) {
                             // Ignore
-                            DBUtils.rollback(connectionMode.connection);
+                            Databases.rollback(connectionMode.connection);
                         }
-                        DBUtils.autocommit(connectionMode.connection);
+                        Databases.autocommit(connectionMode.connection);
                     }
                     connectionMode.close(databaseService, context.getContextId());
                 }

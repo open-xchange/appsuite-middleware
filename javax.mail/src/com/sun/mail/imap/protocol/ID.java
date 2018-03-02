@@ -40,8 +40,12 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.util.*;
-import com.sun.mail.iap.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import com.sun.mail.iap.Argument;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.iap.Response;
 
 /**
  * This class represents the response to the ID command. <p>

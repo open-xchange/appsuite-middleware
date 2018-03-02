@@ -50,8 +50,6 @@ package com.openexchange.admin.rmi.impl;
 
 import java.rmi.RemoteException;
 import java.util.concurrent.ExecutionException;
-
-
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.OXTaskMgmtInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;

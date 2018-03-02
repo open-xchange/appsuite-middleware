@@ -40,8 +40,7 @@
 
 package javax.mail.event;
 
-import java.util.*;
-import javax.mail.*;
+import javax.mail.Folder;
 
 /**
  * This class models Folder <em>existence</em> events. FolderEvents are

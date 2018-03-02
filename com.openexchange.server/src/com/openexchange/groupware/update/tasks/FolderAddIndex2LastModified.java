@@ -49,16 +49,16 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.tools.update.Tools.createIndex;
 import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link FolderAddIndex2LastModified} - Creates indexes on tables "prg_contacts" and "del_contacts" to improve auto-complete
@@ -91,7 +91,7 @@ public final class FolderAddIndex2LastModified extends UpdateTaskAdapter {
             throw createSQLError(e);
         } finally {
             if (rollback) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
             autocommit(con);
         }

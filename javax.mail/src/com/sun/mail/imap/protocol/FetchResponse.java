@@ -41,10 +41,16 @@
 package com.sun.mail.imap.protocol;
 
 import static com.sun.mail.imap.Utility.toUpperCase;
-import java.io.*;
-import java.util.*;
-import com.sun.mail.util.*;
-import com.sun.mail.iap.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import com.sun.mail.iap.ParsingException;
+import com.sun.mail.iap.Protocol;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.iap.Response;
+import com.sun.mail.util.ASCIIUtility;
 
 /**
  * This class represents a FETCH response obtained from the input stream

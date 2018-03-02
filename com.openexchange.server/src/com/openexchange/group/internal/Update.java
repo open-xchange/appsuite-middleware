@@ -50,9 +50,6 @@
 package com.openexchange.group.internal;
 
 import static com.openexchange.java.Autoboxing.I;
-import gnu.trove.iterator.TIntIterator;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
@@ -60,6 +57,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupEventConstants;
@@ -73,7 +71,9 @@ import com.openexchange.i18n.LocalizableArgument;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
-import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * This class integrates all operations to be done if a group is updated.
@@ -219,10 +219,10 @@ final class Update {
             update(con);
             con.commit();
         } catch (final SQLException e) {
-            DBUtils.rollback(con);
+            Databases.rollback(con);
             throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
-            DBUtils.rollback(con);
+            Databases.rollback(con);
             throw e;
         } finally {
             try {
@@ -282,10 +282,10 @@ final class Update {
             writeConnectionUsed = propagate(con);
             con.commit();
         } catch (final SQLException e) {
-            DBUtils.rollback(con);
+            Databases.rollback(con);
             throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
-            DBUtils.rollback(con);
+            Databases.rollback(con);
             throw e;
         } finally {
             try {

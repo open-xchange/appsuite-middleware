@@ -49,8 +49,7 @@
 
 package com.openexchange.groupware.impl;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import gnu.trove.ConcurrentTIntObjectHashMap;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -59,6 +58,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
+import gnu.trove.ConcurrentTIntObjectHashMap;
 
 /**
  * This class contains methods to generate unique identifier for all groupware

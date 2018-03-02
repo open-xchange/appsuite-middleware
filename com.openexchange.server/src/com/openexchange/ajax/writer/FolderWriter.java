@@ -50,8 +50,6 @@
 package com.openexchange.ajax.writer;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.SQLException;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -82,6 +80,8 @@ import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * FolderWriter

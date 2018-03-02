@@ -53,11 +53,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.id.IDExceptionCodes;
 import com.openexchange.id.IDGeneratorService;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link IDGeneratorServiceImpl}
@@ -164,7 +164,7 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
             final int result = stmt.executeUpdate();
             return (result > 0);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -181,7 +181,7 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
             }
             return -1;
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -199,7 +199,7 @@ public final class IDGeneratorServiceImpl implements IDGeneratorService {
                 return false;
             }
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 

@@ -54,8 +54,8 @@ import java.util.List;
 import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.exception.OXException;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 
 

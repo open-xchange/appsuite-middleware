@@ -1,7 +1,9 @@
 package liquibase.precondition.core;
 
-import liquibase.changelog.DatabaseChangeLog;
+import java.util.ArrayList;
+import java.util.List;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
@@ -9,9 +11,6 @@ import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.precondition.Precondition;
 import liquibase.precondition.PreconditionLogic;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Class for controling "or" logic in preconditions.

@@ -50,10 +50,10 @@ package com.openexchange.database.migration.internal;
 
 import java.util.Collection;
 import java.util.Set;
-import liquibase.servicelocator.DefaultPackageScanClassResolver;
-import liquibase.servicelocator.PackageScanFilter;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.BundleWiring;
+import liquibase.servicelocator.DefaultPackageScanClassResolver;
+import liquibase.servicelocator.PackageScanFilter;
 
 /**
  * OSGi specific {@link DefaultPackageScanClassResolver}

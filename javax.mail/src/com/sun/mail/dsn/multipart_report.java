@@ -40,11 +40,13 @@
 
 package com.sun.mail.dsn;
 
-import java.io.*;
 import java.awt.datatransfer.DataFlavor;
-import javax.activation.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import javax.activation.ActivationDataFlavor;
+import javax.activation.DataContentHandler;
+import javax.activation.DataSource;
 import javax.mail.MessagingException;
-import javax.mail.internet.*;
 
 
 /**

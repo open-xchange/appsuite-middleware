@@ -51,12 +51,10 @@ package com.openexchange.http.client.apache;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import org.apache.commons.httpclient.Cookie;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethodBase;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPResponse;
 

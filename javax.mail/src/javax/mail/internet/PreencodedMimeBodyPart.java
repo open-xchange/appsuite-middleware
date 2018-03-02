@@ -40,10 +40,10 @@
 
 package javax.mail.internet;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Enumeration;
-import javax.mail.*;
-
+import javax.mail.MessagingException;
 import com.sun.mail.util.LineOutputStream;
 
 /**

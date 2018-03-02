@@ -16,11 +16,8 @@
  */
 package org.apache.tika;
 
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 public class TikaDetectionTest {
     private final Tika tika = new Tika();

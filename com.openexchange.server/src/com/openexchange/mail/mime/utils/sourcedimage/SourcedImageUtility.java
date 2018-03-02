@@ -56,8 +56,8 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.version.Version;
 import com.openexchange.tools.regex.MatcherReplacer;
+import com.openexchange.version.Version;
 
 
 /**

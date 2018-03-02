@@ -51,12 +51,12 @@ package com.openexchange.data.conversion.ical.ical4j.internal.appointment;
 
 import java.util.List;
 import java.util.TimeZone;
-import net.fortuna.ical4j.model.component.VEvent;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
+import net.fortuna.ical4j.model.component.VEvent;
 
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>

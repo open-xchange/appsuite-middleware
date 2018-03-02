@@ -51,7 +51,6 @@ package com.openexchange.groupware.tools.mappings.json;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.exception.OXException;
 
 /**

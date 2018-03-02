@@ -40,8 +40,8 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 /**

@@ -40,7 +40,8 @@
 
 package com.sun.mail.iap;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * An interface for objects that provide data dynamically for use in

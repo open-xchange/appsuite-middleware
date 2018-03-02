@@ -40,11 +40,12 @@
 
 package com.sun.mail.iap;
 
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-
-import com.sun.mail.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import com.sun.mail.util.ASCIIUtility;
 
 /**
  * This class represents a response obtained from the input stream

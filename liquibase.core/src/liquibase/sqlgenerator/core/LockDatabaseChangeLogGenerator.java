@@ -1,5 +1,7 @@
 package liquibase.sqlgenerator.core;
 
+import java.net.InetAddress;
+import java.sql.Timestamp;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -10,9 +12,6 @@ import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.LockDatabaseChangeLogStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.util.NetUtil;
-
-import java.net.InetAddress;
-import java.sql.Timestamp;
 
 public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDatabaseChangeLogStatement> {
 

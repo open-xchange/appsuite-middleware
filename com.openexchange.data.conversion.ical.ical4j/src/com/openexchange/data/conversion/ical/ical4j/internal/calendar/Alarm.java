@@ -56,6 +56,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
+import com.openexchange.data.conversion.ical.Mode;
+import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
+import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
+import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.tasks.Task;
+import com.openexchange.java.Strings;
 import net.fortuna.ical4j.model.ComponentList;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Dur;
@@ -75,17 +86,6 @@ import net.fortuna.ical4j.model.property.RelatedTo;
 import net.fortuna.ical4j.model.property.Trigger;
 import net.fortuna.ical4j.model.property.Uid;
 import net.fortuna.ical4j.model.property.XProperty;
-import com.openexchange.data.conversion.ical.ConversionError;
-import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.Mode;
-import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
-import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
-import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.tasks.Task;
-import com.openexchange.java.Strings;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

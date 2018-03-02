@@ -73,7 +73,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.usersetting.UserSettingMailDeleteListener;
 import com.openexchange.mailaccount.internal.MailAccountDeleteListener;
 import com.openexchange.preferences.UserSettingServerDeleteListener;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.sessiond.impl.SessionDeleteListener;
 import com.openexchange.tools.file.QuotaUsageDelete;
 import com.openexchange.tools.file.UserQuotaUsageDelete;

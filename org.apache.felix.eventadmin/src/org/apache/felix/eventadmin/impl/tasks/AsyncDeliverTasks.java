@@ -24,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import org.apache.felix.eventadmin.impl.handler.EventHandlerProxy;
 import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 
 /**
  * This class does the actual work of the asynchronous event dispatch.

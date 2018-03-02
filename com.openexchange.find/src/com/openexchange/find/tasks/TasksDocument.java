@@ -49,9 +49,9 @@
 
 package com.openexchange.find.tasks;
 
-import com.openexchange.groupware.tasks.Task;
 import com.openexchange.find.Document;
 import com.openexchange.find.DocumentVisitor;
+import com.openexchange.groupware.tasks.Task;
 
 /**
  * {@link TasksDocument} - The document for a file.

@@ -49,10 +49,6 @@
 
 package com.openexchange.file.storage.rdb.internal;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.TIntIntMap;
-import gnu.trove.map.hash.TIntIntHashMap;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -66,6 +62,7 @@ import java.util.Set;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -81,7 +78,10 @@ import com.openexchange.secret.SecretEncryptionService;
 import com.openexchange.secret.SecretEncryptionStrategy;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
 
 /**
  * {@link RdbFileStorageAccountStorage} - The file storage account storage backed by database.
@@ -144,11 +144,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
             stmt.setInt(pos, id);
             rs = stmt.executeQuery();
             if (!rs.next()) {
-                throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(
-                    Integer.valueOf(id),
-                    serviceId,
-                    Integer.valueOf(session.getUserId()),
-                    Integer.valueOf(contextId));
+                throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(id), serviceId, Integer.valueOf(session.getUserId()), Integer.valueOf(contextId));
             }
             final FileStorageService messagingService = getService(FileStorageServiceRegistry.class).getFileStorageService(serviceId);
             final DefaultFileStorageAccount account = new DefaultFileStorageAccount();
@@ -185,7 +181,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         } catch (final SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(contextId, rc);
         }
     }
@@ -259,7 +255,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         } catch (final SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(contextId, rc);
         }
     }
@@ -309,7 +305,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         } catch (final SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(contextId, rc);
         }
     }
@@ -351,7 +347,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         } catch (final SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             databaseService.backReadOnly(contextId, rc);
         }
     }
@@ -369,7 +365,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         PreparedStatement stmt = null;
         boolean rollback = false;
         try {
-            DBUtils.startTransaction(wc); // BEGIN
+            Databases.startTransaction(wc); // BEGIN
             rollback = true;
             /*
              * Save account configuration using generic conf
@@ -428,10 +424,10 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(wc); // ROLL-BACK
+                Databases.rollback(wc); // ROLL-BACK
             }
-            DBUtils.closeSQLStuff(stmt);
-            DBUtils.autocommit(wc);
+            Databases.closeSQLStuff(stmt);
+            Databases.autocommit(wc);
             databaseService.backWritable(contextId, wc);
         }
     }
@@ -465,7 +461,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
 
     @Override
     public void deleteAccount(final String serviceId, final FileStorageAccount account, final Session session) throws OXException {
-        deleteAccounts(serviceId, new FileStorageAccount[] {account}, new int[] {0}, session);
+        deleteAccounts(serviceId, new FileStorageAccount[] { account }, new int[] { 0 }, session);
     }
 
     /**
@@ -486,7 +482,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         final Connection wc = databaseService.getWritable(contextId);
         boolean rollback = false;
         try {
-            DBUtils.startTransaction(wc); // BEGIN
+            Databases.startTransaction(wc); // BEGIN
             rollback = true;
             for (int i = 0; i < accounts.length; i++) {
                 final FileStorageAccount account = accounts[i];
@@ -517,7 +513,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                     stmt.setInt(pos, accountId);
                     stmt.executeUpdate();
                 } finally {
-                    DBUtils.closeSQLStuff(stmt);
+                    Databases.closeSQLStuff(stmt);
                 }
             }
             wc.commit(); // COMMIT
@@ -528,9 +524,9 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(wc); // ROLL-BACK
+                Databases.rollback(wc); // ROLL-BACK
             }
-            DBUtils.autocommit(wc);
+            Databases.autocommit(wc);
             databaseService.backWritable(contextId, wc);
         }
     }
@@ -548,7 +544,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         PreparedStatement stmt = null;
         boolean rollback = false;
         try {
-            DBUtils.startTransaction(wc); // BEGIN
+            Databases.startTransaction(wc); // BEGIN
             rollback = true;
             final int accountId = Integer.parseInt(account.getId());
             /*
@@ -601,10 +597,10 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(wc); // ROLL-BACK
+                Databases.rollback(wc); // ROLL-BACK
             }
-            DBUtils.closeSQLStuff(stmt);
-            DBUtils.autocommit(wc);
+            Databases.closeSQLStuff(stmt);
+            Databases.autocommit(wc);
             databaseService.backWritable(contextId, wc);
         }
     }
@@ -645,7 +641,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
             rs = stmt.executeQuery();
             return rs.next() ? rs.getInt(1) : -1;
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -701,7 +697,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         } catch (final SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             if (con != null) {
                 databaseService.backReadOnly(contextId, con);
             }
@@ -732,7 +728,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         } catch (final SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             if (con != null) {
                 databaseService.backReadOnly(contextId, con);
             }
@@ -803,7 +799,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
         } catch (final SQLException e) {
             throw FileStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             if (con != null) {
                 databaseService.backReadOnly(session.getContextId(), con);
             }

@@ -40,14 +40,23 @@
 
 package com.sun.mail.smtp;
 
-import java.io.*;
-import java.util.*;
+import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Level;
-import javax.security.sasl.*;
-import javax.security.auth.callback.*;
 import javax.mail.MessagingException;
-
-import com.sun.mail.util.*;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.NameCallback;
+import javax.security.auth.callback.PasswordCallback;
+import javax.security.sasl.RealmCallback;
+import javax.security.sasl.RealmChoiceCallback;
+import javax.security.sasl.Sasl;
+import javax.security.sasl.SaslClient;
+import javax.security.sasl.SaslException;
+import com.sun.mail.util.ASCIIUtility;
+import com.sun.mail.util.BASE64DecoderStream;
+import com.sun.mail.util.BASE64EncoderStream;
+import com.sun.mail.util.MailLogger;
 
 /**
  * This class contains a single method that does authentication using

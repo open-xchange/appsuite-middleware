@@ -49,7 +49,8 @@
 
 package com.openexchange.tools.webdav;
 
-import static com.openexchange.tools.servlet.http.Tools.*;
+import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
+import static com.openexchange.tools.servlet.http.Tools.sendEmptyErrorResponse;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;

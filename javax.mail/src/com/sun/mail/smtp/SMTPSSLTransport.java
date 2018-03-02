@@ -40,7 +40,8 @@
 
 package com.sun.mail.smtp;
 
-import javax.mail.*;
+import javax.mail.Session;
+import javax.mail.URLName;
 
 /**
  * This class implements the Transport abstract class using SMTP

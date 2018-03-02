@@ -32,7 +32,6 @@
 package net.fortuna.ical4j.model.property;
 
 import java.text.ParseException;
-
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.PeriodList;

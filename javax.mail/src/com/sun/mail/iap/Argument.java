@@ -40,11 +40,15 @@
 
 package com.sun.mail.iap;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import com.sun.mail.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import com.sun.mail.util.ASCIIUtility;
 
 /**
  * @author  John Mani

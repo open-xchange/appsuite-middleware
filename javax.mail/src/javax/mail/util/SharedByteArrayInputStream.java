@@ -40,7 +40,8 @@
 
 package javax.mail.util;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import javax.mail.internet.SharedInputStream;
 
 /**

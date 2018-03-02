@@ -49,12 +49,6 @@
 
 package com.openexchange.tools.oxfolder.downgrade.sql;
 
-import gnu.trove.TIntCollection;
-import gnu.trove.iterator.TIntIterator;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -63,6 +57,12 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.database.Databases;
 import com.openexchange.groupware.container.FolderObject;
+import gnu.trove.TIntCollection;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link OXFolderDowngradeSQL} - Provides several SQL commands in order to

@@ -40,8 +40,10 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.util.*;
-import com.sun.mail.iap.*;
+import java.util.ArrayList;
+import java.util.List;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.iap.Response;
 
 /**
  * This class and its inner class represent the response to the

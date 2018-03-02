@@ -52,8 +52,8 @@ package com.openexchange.calendar.printing.blocks;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.calendar.printing.CPEvent;
 import com.openexchange.calendar.printing.CPCalendar;
+import com.openexchange.calendar.printing.CPEvent;
 
 /**
  * This abstract class is the super class for all partitioning strategies that use weeks. Weeks are special, because a view on a month might

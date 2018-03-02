@@ -49,13 +49,11 @@
 
 package com.openexchange.subscribe.crawler;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import com.openexchange.exception.OXException;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.crawler.internal.WorkflowFactory;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>

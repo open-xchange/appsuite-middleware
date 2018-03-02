@@ -49,9 +49,6 @@
 
 package com.openexchange.unifiedinbox;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TObjectProcedure;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
@@ -67,6 +64,9 @@ import com.openexchange.session.Session;
 import com.openexchange.unifiedinbox.config.MailAccountUnifiedINBOXProperties;
 import com.openexchange.unifiedinbox.config.UnifiedInboxConfig;
 import com.openexchange.unifiedinbox.services.Services;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TObjectProcedure;
 
 /**
  * {@link UnifiedInboxAccess} - Access to Unified Mail.

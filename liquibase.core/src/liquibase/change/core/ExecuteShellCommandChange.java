@@ -1,8 +1,12 @@
 package liquibase.change.core;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import liquibase.change.AbstractChange;
-import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -18,11 +22,6 @@ import liquibase.statement.core.CommentStatement;
 import liquibase.statement.core.RuntimeStatement;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Executes a given shell executable.

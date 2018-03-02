@@ -40,8 +40,6 @@
 
 package javax.mail.internet;
 
-import java.util.*;
-
 /**
  * This class tokenizes RFC822 and MIME headers into the basic
  * symbols specified by RFC822 and MIME. <p>

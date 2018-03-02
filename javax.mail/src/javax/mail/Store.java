@@ -40,10 +40,11 @@
 
 package javax.mail;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import javax.mail.event.*;
+import java.util.Vector;
+import javax.mail.event.FolderEvent;
+import javax.mail.event.FolderListener;
+import javax.mail.event.StoreEvent;
+import javax.mail.event.StoreListener;
 
 /**
  * An abstract class that models a message store and its

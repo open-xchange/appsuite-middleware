@@ -50,7 +50,6 @@
 package com.openexchange.imap.cache;
 
 import javax.mail.MessagingException;
-
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.imap.services.Services;

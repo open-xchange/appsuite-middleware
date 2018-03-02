@@ -1,10 +1,9 @@
 package liquibase.database;
 
-import liquibase.util.StringUtils;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import liquibase.util.StringUtils;
 
 public class DatabaseList {
     /**

@@ -100,7 +100,6 @@ package com.openexchange.ajax.conversion;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.TimeZone;
-import java.util.UUID;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;

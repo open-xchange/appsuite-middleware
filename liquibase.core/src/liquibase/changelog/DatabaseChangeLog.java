@@ -1,5 +1,7 @@
 package liquibase.changelog;
 
+import java.util.ArrayList;
+import java.util.List;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.changelog.visitor.ValidatingVisitor;
@@ -10,9 +12,6 @@ import liquibase.exception.ValidationFailedException;
 import liquibase.logging.LogFactory;
 import liquibase.precondition.Conditional;
 import liquibase.precondition.core.PreconditionContainer;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Encapsulates the information stored in the change log XML file.

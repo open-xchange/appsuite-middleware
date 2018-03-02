@@ -54,10 +54,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
-
 import com.openexchange.scripting.rhino.SharedScope;
 
 /**

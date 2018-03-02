@@ -49,13 +49,14 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.tools.update.Tools.createIndex;
 import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
 import org.slf4j.Logger;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -64,7 +65,6 @@ import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.WorkingLevel;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link ContactsAddDepartmentIndex4AutoCompleteSearch}
@@ -114,7 +114,7 @@ public class ContactsAddDepartmentIndex4AutoCompleteSearch extends UpdateTaskAda
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(connection);
+                Databases.rollback(connection);
             }
             autocommit(connection);
         }

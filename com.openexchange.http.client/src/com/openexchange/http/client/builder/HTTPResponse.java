@@ -50,7 +50,6 @@
 package com.openexchange.http.client.builder;
 
 import java.util.Map;
-
 import com.openexchange.exception.OXException;
 
 public interface HTTPResponse {

@@ -40,7 +40,9 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.io.*;
+import java.io.CharArrayWriter;
+import java.io.IOException;
+import java.io.Writer;
 
 
 /**

@@ -40,15 +40,13 @@
 
 package org.glassfish.grizzly.servlet;
 
-import junit.framework.TestCase;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
 import org.glassfish.grizzly.http.server.HttpServer;
+import junit.framework.TestCase;
 
 /**
  * Contains utility methods for testing {@link HttpServer}.

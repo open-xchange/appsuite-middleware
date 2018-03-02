@@ -40,12 +40,11 @@
 
 package com.sun.mail.imap;
 
-import java.io.PrintStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
-
-import javax.mail.*;
-import com.sun.mail.util.PropUtil;
+import javax.mail.Message;
 import com.sun.mail.util.MailLogger;
 
 /**

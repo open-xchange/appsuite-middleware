@@ -56,12 +56,12 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.subscription.storage.rdb.RdbPushSubscriptionRegistry;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link PnsDeleteListener}
@@ -125,7 +125,7 @@ public final class PnsDeleteListener implements DeleteListener {
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

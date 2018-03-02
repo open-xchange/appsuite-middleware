@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.AJAXRequest.Parameter;
 import com.openexchange.ajax.importexport.actions.AbstractImportRequest.Action;
 import com.openexchange.java.Strings;
 import edu.emory.mathcs.backport.java.util.Arrays;

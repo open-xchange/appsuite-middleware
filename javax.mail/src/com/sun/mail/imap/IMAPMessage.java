@@ -40,17 +40,55 @@
 
 package com.sun.mail.imap;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
-import java.io.*;
-import java.util.*;
-
-import javax.mail.*;
-import javax.mail.internet.*;
-import javax.activation.*;
-
-import com.sun.mail.util.*;
-import com.sun.mail.iap.*;
-import com.sun.mail.imap.protocol.*;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import javax.activation.DataHandler;
+import javax.mail.Address;
+import javax.mail.FetchProfile;
+import javax.mail.Flags;
+import javax.mail.FolderClosedException;
+import javax.mail.Header;
+import javax.mail.IllegalWriteException;
+import javax.mail.Message;
+import javax.mail.MessageRemovedException;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.UIDFolder;
+import javax.mail.internet.ContentType;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.InternetHeaders;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeUtility;
+import com.sun.mail.iap.ConnectionException;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.iap.Response;
+import com.sun.mail.imap.protocol.BODY;
+import com.sun.mail.imap.protocol.BODYSTRUCTURE;
+import com.sun.mail.imap.protocol.ENVELOPE;
+import com.sun.mail.imap.protocol.FetchItem;
+import com.sun.mail.imap.protocol.FetchResponse;
+import com.sun.mail.imap.protocol.IMAPProtocol;
+import com.sun.mail.imap.protocol.INTERNALDATE;
+import com.sun.mail.imap.protocol.Item;
+import com.sun.mail.imap.protocol.MODSEQ;
+import com.sun.mail.imap.protocol.RFC822DATA;
+import com.sun.mail.imap.protocol.RFC822SIZE;
+import com.sun.mail.imap.protocol.UID;
+import com.sun.mail.imap.protocol.X_MAILBOX;
+import com.sun.mail.imap.protocol.X_REAL_UID;
+import com.sun.mail.util.ReadableMime;
 
 /**
  * This class implements an IMAPMessage object. <p>

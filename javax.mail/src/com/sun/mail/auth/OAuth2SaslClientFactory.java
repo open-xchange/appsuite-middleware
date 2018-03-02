@@ -40,11 +40,13 @@
 
 package com.sun.mail.auth;
 
-import java.util.*;
 import java.security.Provider;
 import java.security.Security;
-import javax.security.sasl.*;
-import javax.security.auth.callback.*;
+import java.util.Map;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.sasl.SaslClient;
+import javax.security.sasl.SaslClientFactory;
+import javax.security.sasl.SaslException;
 
 /**
  * JavaMail SASL client factory for OAUTH2.

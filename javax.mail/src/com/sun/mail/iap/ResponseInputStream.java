@@ -40,8 +40,9 @@
 
 package com.sun.mail.iap;
 
-import java.io.*;
-import com.sun.mail.iap.ByteArray;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import com.sun.mail.util.ASCIIUtility;
 
 /**

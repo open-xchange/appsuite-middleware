@@ -16,14 +16,11 @@
  */
 package org.apache.tika.sax;
 
+import static org.junit.Assert.assertEquals;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import org.apache.tika.metadata.Metadata;
 import org.junit.Test;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * Test cases for the {@link BodyContentHandler} class.

@@ -49,14 +49,11 @@
 
 package com.openexchange.mail.config;
 
+import static org.junit.Assert.assertTrue;
 import java.util.LinkedList;
 import java.util.List;
 import org.junit.Test;
 import com.openexchange.java.Strings;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * {@link Bug38266Test}

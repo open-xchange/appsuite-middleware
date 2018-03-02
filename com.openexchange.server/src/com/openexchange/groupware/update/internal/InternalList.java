@@ -54,7 +54,6 @@ import java.util.List;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.tasks.AddOAuthColumnToMailAccountTableTask;
-import com.openexchange.groupware.update.tasks.AddOriginColumnToInfostoreDocumentTables;
 import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardIdsTask;
 import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardPrincipalTask;
 import com.openexchange.groupware.update.tasks.AddSharedParentFolderToFolderPermissionTableUpdateTask;

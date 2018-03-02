@@ -49,17 +49,17 @@
 
 package com.openexchange.ajax.contact;
 
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.anyOf;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import org.junit.Test;
 import com.openexchange.ajax.contact.action.UpdateRequest;
 import com.openexchange.ajax.contact.action.UpdateResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.anyOf;
-import static org.hamcrest.CoreMatchers.nullValue;
 
 /**
  * {@link Bug55372Test}

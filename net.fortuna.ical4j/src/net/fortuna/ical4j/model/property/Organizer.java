@@ -33,7 +33,6 @@ package net.fortuna.ical4j.model.property;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.Property;

@@ -40,7 +40,8 @@
 
 package com.sun.mail.pop3;
 
-import javax.mail.*;
+import javax.mail.Session;
+import javax.mail.URLName;
 
 /**
  * A POP3 Message Store using SSL.  Contains only one folder, "INBOX".

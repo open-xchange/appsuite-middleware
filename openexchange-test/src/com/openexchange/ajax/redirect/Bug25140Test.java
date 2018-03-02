@@ -50,7 +50,8 @@
 package com.openexchange.ajax.redirect;
 
 import static com.openexchange.java.Autoboxing.I;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.client.params.ClientPNames;

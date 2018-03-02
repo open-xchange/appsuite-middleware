@@ -40,8 +40,14 @@
 
 package com.sun.mail.handlers;
 
-import java.io.*;
-import javax.activation.*;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import javax.activation.ActivationDataFlavor;
+import javax.activation.DataSource;
 import javax.mail.internet.ContentType;
 import javax.mail.internet.MimeUtility;
 

@@ -62,7 +62,6 @@ import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.nodes.XmlDeclaration;
 import org.jsoup.parser.InterruptedParsingException;
-import org.jsoup.parser.ParseErrorList;
 import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
 import org.jsoup.select.NodeVisitor;

@@ -50,10 +50,7 @@
 package com.openexchange.webdav.action;
 
 import java.io.IOException;
-
 import javax.servlet.http.HttpServletResponse;
-
-
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 public class WebdavExistsAction extends AbstractAction {

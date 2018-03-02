@@ -18,7 +18,9 @@
  */
 package org.apache.felix.eventadmin.impl.security;
 
-import org.osgi.framework.*;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.ServiceFactory;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventAdmin;
 
 /**

@@ -50,24 +50,24 @@
 package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.linked.TIntLinkedList;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.procedure.TIntObjectProcedure;
-import gnu.trove.procedure.TIntProcedure;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.procedure.TIntObjectProcedure;
+import gnu.trove.procedure.TIntProcedure;
 
 /**
  * {@link ContactAdjustLastModifiedForChangedSenderAddress}
@@ -111,9 +111,9 @@ public final class ContactAdjustLastModifiedForChangedSenderAddress extends Upda
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
         }
     }
 
@@ -136,7 +136,7 @@ public final class ContactAdjustLastModifiedForChangedSenderAddress extends Upda
                 }
                 ids.add(rs.getInt(1));
             }
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
 
             final AtomicReference<SQLException> exceptionReference = new AtomicReference<SQLException>();
             map.forEachEntry(new TIntObjectProcedure<TIntList>() {
@@ -174,7 +174,7 @@ public final class ContactAdjustLastModifiedForChangedSenderAddress extends Upda
                         exceptionReference.set(e);
                         return false;
                     } finally {
-                        DBUtils.closeSQLStuff(innerStmt);
+                        Databases.closeSQLStuff(innerStmt);
                     }
                 }
             }); // end of for-each procedure
@@ -183,7 +183,7 @@ public final class ContactAdjustLastModifiedForChangedSenderAddress extends Upda
                 throw sqlException;
             }
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

@@ -40,7 +40,8 @@
 
 package com.sun.mail.imap;
 
-import javax.mail.*;
+import javax.mail.Session;
+import javax.mail.URLName;
 
 /**
  * This class provides access to an IMAP message store over SSL.

@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.yahoo;
 
+import static org.junit.Assert.assertTrue;
 import java.util.List;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
@@ -56,10 +57,6 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.yahoo.internal.OAuthServiceMetaDataYahooImpl;
 import com.openexchange.oauth.yahoo.internal.YahooServiceImpl;
 import com.openexchange.oauth.yahoo.osgi.YahooOAuthActivator;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * {@link YahooConnectionTest}

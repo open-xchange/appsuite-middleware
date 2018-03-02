@@ -54,12 +54,12 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.List;
-import liquibase.resource.ResourceAccessor;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.wiring.BundleWiring;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import liquibase.resource.ResourceAccessor;
 
 /**
  * A {@link BundleResourceAccessor} allows to access arbitrary resources of

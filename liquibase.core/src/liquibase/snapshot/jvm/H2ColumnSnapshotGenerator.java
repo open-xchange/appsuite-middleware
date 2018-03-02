@@ -1,5 +1,6 @@
 package liquibase.snapshot.jvm;
 
+import java.sql.SQLException;
 import liquibase.database.Database;
 import liquibase.database.core.H2Database;
 import liquibase.exception.DatabaseException;
@@ -7,8 +8,6 @@ import liquibase.snapshot.CachedRow;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
-
-import java.sql.SQLException;
 
 public class H2ColumnSnapshotGenerator extends ColumnSnapshotGenerator {
     @Override

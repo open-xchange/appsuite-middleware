@@ -80,6 +80,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -170,7 +171,6 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.sql.DBUtils;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 
@@ -2519,16 +2519,16 @@ public final class OutlookFolderStorage implements FolderStorage, SubfolderListi
                     }
                     con.commit(); // COMMIT
                 } catch (final SQLException e) {
-                    DBUtils.rollback(con); // ROLLBACK
+                    Databases.rollback(con); // ROLLBACK
                     throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
                 } catch (final OXException e) {
-                    DBUtils.rollback(con); // ROLLBACK
+                    Databases.rollback(con); // ROLLBACK
                     throw e;
                 } catch (final Exception e) {
-                    DBUtils.rollback(con); // ROLLBACK
+                    Databases.rollback(con); // ROLLBACK
                     throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
                 } finally {
-                    DBUtils.autocommit(con);
+                    Databases.autocommit(con);
                     databaseService.backWritable(contextId, con);
                 }
             } else {

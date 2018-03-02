@@ -49,8 +49,6 @@
 
 package com.openexchange.filestore.impl;
 
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -74,6 +72,8 @@ import com.openexchange.filestore.Info;
 import com.openexchange.filestore.QuotaFileStorageExceptionCodes;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.filestore.impl.osgi.Services;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link DbFileStorage2EntitiesResolver} - Utility class.

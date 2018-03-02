@@ -49,8 +49,6 @@
 
 package com.openexchange.messaging.generic.internal;
 
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.procedure.TIntProcedure;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -67,6 +65,8 @@ import com.openexchange.messaging.MessagingService;
 import com.openexchange.messaging.generic.services.MessagingGenericServiceRegistry;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.session.Session;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.procedure.TIntProcedure;
 
 /**
  * {@link CachingMessagingAccountStorage} - The messaging account manager backed by {@link CacheService}.

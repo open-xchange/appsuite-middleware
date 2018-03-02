@@ -49,7 +49,6 @@
 
 package com.openexchange.realtime.synthetic;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.realtime.ComponentHandle;
 import com.openexchange.realtime.packet.Stanza;
 

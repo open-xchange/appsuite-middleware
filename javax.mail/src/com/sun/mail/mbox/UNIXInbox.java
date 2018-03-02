@@ -40,7 +40,9 @@
 
 package com.sun.mail.mbox;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 
 public class UNIXInbox extends UNIXFolder implements InboxFile {
     private final String user;

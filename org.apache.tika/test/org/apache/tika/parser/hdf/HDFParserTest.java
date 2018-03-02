@@ -16,6 +16,8 @@
  */
 package org.apache.tika.parser.hdf;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 //JDK imports
 import java.io.InputStream;
 //TIKA imports
@@ -25,11 +27,6 @@ import org.apache.tika.parser.Parser;
 import org.apache.tika.sax.BodyContentHandler;
 import org.junit.Test;
 import org.xml.sax.ContentHandler;
-//Junit imports
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * 

@@ -51,7 +51,6 @@ package com.openexchange.ajax.customizer;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.ajax.customizer.AdditionalField;
 import com.openexchange.tools.session.ServerSession;
 
 

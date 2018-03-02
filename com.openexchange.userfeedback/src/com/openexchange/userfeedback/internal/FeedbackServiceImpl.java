@@ -70,7 +70,6 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.validate.ParameterValidator;
 import com.openexchange.userfeedback.ExportResultConverter;
 import com.openexchange.userfeedback.FeedbackMetaData;
@@ -206,7 +205,7 @@ public class FeedbackServiceImpl implements FeedbackService {
             statement.setString(9, feedbackMetaData.getServerVersion());
             statement.execute();
         } finally {
-            DBUtils.closeSQLStuff(statement);
+            Databases.closeSQLStuff(statement);
         }
     }
 
@@ -268,7 +267,7 @@ public class FeedbackServiceImpl implements FeedbackService {
             }
             return result;
         } finally {
-            DBUtils.closeSQLStuff(statement);
+            Databases.closeSQLStuff(statement);
         }
     }
 
@@ -308,9 +307,9 @@ public class FeedbackServiceImpl implements FeedbackService {
             throw FeedbackExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
         } finally {
             if (rollback) {
-                DBUtils.rollback(writeCon);
+                Databases.rollback(writeCon);
             }
-            DBUtils.autocommit(writeCon);
+            Databases.autocommit(writeCon);
             dbService.backWritableForGlobal(ctxGroup, writeCon);
         }
     }
@@ -335,7 +334,7 @@ public class FeedbackServiceImpl implements FeedbackService {
             } while (rs.next());
             return results;
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -349,7 +348,7 @@ public class FeedbackServiceImpl implements FeedbackService {
             stmt.setLong(4, filter.end());
             stmt.execute();
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 }

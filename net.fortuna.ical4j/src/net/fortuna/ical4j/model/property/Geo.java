@@ -32,9 +32,7 @@
 package net.fortuna.ical4j.model.property;
 
 import java.math.BigDecimal;
-
 import org.apache.commons.lang.StringUtils;
-
 import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyFactoryImpl;

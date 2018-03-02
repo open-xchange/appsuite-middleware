@@ -55,6 +55,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Locale;
 import java.util.Map;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
@@ -115,7 +116,7 @@ public final class StorageDeleteListener implements MailAccountDeleteListener {
                 } catch (final SQLException e) {
                     throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
                 } finally {
-                    DBUtils.closeSQLStuff(rs, stmt);
+                    Databases.closeSQLStuff(rs, stmt);
                 }
             }
             if (!url.startsWith(POP3Provider.PROTOCOL_POP3.getName())) {

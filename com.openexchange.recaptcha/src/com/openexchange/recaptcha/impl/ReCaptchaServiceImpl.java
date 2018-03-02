@@ -50,12 +50,12 @@
 package com.openexchange.recaptcha.impl;
 
 import java.util.Properties;
+import com.openexchange.recaptcha.ReCaptchaService;
 import net.tanesha.recaptcha.ReCaptcha;
 import net.tanesha.recaptcha.ReCaptchaException;
 import net.tanesha.recaptcha.ReCaptchaFactory;
 import net.tanesha.recaptcha.ReCaptchaImpl;
 import net.tanesha.recaptcha.ReCaptchaResponse;
-import com.openexchange.recaptcha.ReCaptchaService;
 
 /**
  * {@link ReCaptchaServiceImpl}

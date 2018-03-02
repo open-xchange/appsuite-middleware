@@ -51,10 +51,10 @@ package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
@@ -73,7 +73,7 @@ public class MakeUUIDPrimaryForDListTablesV2 extends MakeUUIDPrimaryForDListTabl
         Connection con = params.getConnection();
         boolean rollback = false;
         try {
-            DBUtils.startTransaction(con);
+            Databases.startTransaction(con);
             rollback = true;
 
             Tools.modifyColumns(con, TABLE, new Column("cid", "INT4 NOT NULL"));
@@ -84,9 +84,9 @@ public class MakeUUIDPrimaryForDListTablesV2 extends MakeUUIDPrimaryForDListTabl
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
         }
     }
 }

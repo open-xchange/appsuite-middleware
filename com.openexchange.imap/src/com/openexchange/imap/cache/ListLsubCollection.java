@@ -50,7 +50,6 @@
 package com.openexchange.imap.cache;
 
 import static com.openexchange.imap.IMAPCommandsCollection.performCommand;
-import gnu.trove.map.hash.TObjectIntHashMap;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -92,6 +91,7 @@ import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.IMAPResponse;
 import com.sun.mail.imap.protocol.Namespaces;
 import com.sun.mail.imap.protocol.Namespaces.Namespace;
+import gnu.trove.map.hash.TObjectIntHashMap;
 
 /**
  * {@link ListLsubCollection}

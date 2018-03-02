@@ -54,10 +54,6 @@ import java.util.List;
 import java.util.TimeZone;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.idn.IDNA;
-import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.model.parameter.Cn;
-import net.fortuna.ical4j.model.property.Organizer;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
@@ -72,6 +68,10 @@ import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty
 import com.openexchange.java.Strings;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.parameter.Cn;
+import net.fortuna.ical4j.model.property.Organizer;
 
 /**
  * Test implementation to write the organizer.

@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import org.slf4j.Logger;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
@@ -14,7 +15,6 @@ import com.openexchange.mailmapping.MailResolver;
 import com.openexchange.mailmapping.ResolvedMail;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
 
 
@@ -82,7 +82,7 @@ public class ParallelsMailMappingService implements MailResolver {
             LOG.error("unable to find context containing mail address", e);
             throw new OXException(e);
         } finally {
-            DBUtils.closeSQLStuff(rs, prep);
+            Databases.closeSQLStuff(rs, prep);
             dbservice.backReadOnly(con);
         }
 

@@ -1,6 +1,18 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.util.ArrayList;
+import java.util.List;
+import liquibase.change.AbstractChange;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeWithColumns;
+import liquibase.change.CheckSum;
+import liquibase.change.ColumnConfig;
+import liquibase.change.DatabaseChange;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -14,10 +26,6 @@ import liquibase.statement.core.InsertStatement;
 import liquibase.structure.core.Column;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVReader;
-
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 
 
 @DatabaseChange(name="loadData",

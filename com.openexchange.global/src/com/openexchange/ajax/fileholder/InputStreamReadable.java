@@ -51,7 +51,6 @@ package com.openexchange.ajax.fileholder;
 
 import java.io.IOException;
 import java.io.InputStream;
-import com.openexchange.ajax.fileholder.Readable;
 
 
 /**

@@ -40,7 +40,8 @@
 
 package com.sun.mail.imap;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The Rights class represents the set of rights for an authentication

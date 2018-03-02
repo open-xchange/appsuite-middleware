@@ -53,12 +53,12 @@ import static com.openexchange.database.Databases.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.tasks.objectpermission.ObjectPermissionCreateTableTask;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RemoveInconsistentLocksUpdateTasks} removes all file locks which may be hold by any user which doesn't have any permissions to do so anymore.
@@ -102,9 +102,9 @@ public class RemoveInconsistentLocksUpdateTasks extends UpdateTaskAdapter {
         } finally {
             closeSQLStuff(stmt);
             if (rollback) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
         }
     }
 

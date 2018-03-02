@@ -60,12 +60,12 @@ import java.util.Map.Entry;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.outlook.osgi.Services;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link Update} - SQL for updating a MS outlook folder.
@@ -106,16 +106,16 @@ public final class Update {
             updateIds(cid, tree, user, newId, oldId, delim, con);
             con.commit(); // COMMIT
         } catch (final SQLException e) {
-            DBUtils.rollback(con); // ROLLBACK
+            Databases.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
-            DBUtils.rollback(con); // ROLLBACK
+            Databases.rollback(con); // ROLLBACK
             throw e;
         } catch (final Exception e) {
-            DBUtils.rollback(con); // ROLLBACK
+            Databases.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
             databaseService.backWritable(cid, con);
         }
     }
@@ -143,7 +143,7 @@ public final class Update {
             stmt.setInt(4, user);
             stmt.setString(5, oldId);
             stmt.executeUpdate();
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
 
             final StringBuilder tmp = new StringBuilder();
             final String prefix = tmp.append(oldId).append(delim).toString();
@@ -163,7 +163,7 @@ public final class Update {
 
                     parentIds.put(newS, oldS);
                 } while (rs.next());
-                DBUtils.closeSQLStuff(rs, stmt);
+                Databases.closeSQLStuff(rs, stmt);
 
                 stmt = con.prepareStatement("UPDATE virtualTree SET parentId = ? WHERE cid = ? AND tree = ? AND user = ? AND parentId = ?");
                 for (final Entry<String, String> entry : parentIds.entrySet()) {
@@ -183,7 +183,7 @@ public final class Update {
             debugSQL(stmt);
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -212,16 +212,16 @@ public final class Update {
             }
             con.commit(); // COMMIT
         } catch (final SQLException e) {
-            DBUtils.rollback(con); // ROLLBACK
+            Databases.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
-            DBUtils.rollback(con); // ROLLBACK
+            Databases.rollback(con); // ROLLBACK
             throw e;
         } catch (final Exception e) {
-            DBUtils.rollback(con); // ROLLBACK
+            Databases.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
             databaseService.backWritable(cid, con);
         }
     }
@@ -255,16 +255,16 @@ public final class Update {
             updateLastModified(cid, tree, user, folderId, lastModified, con);
             con.commit(); // COMMIT
         } catch (final SQLException e) {
-            DBUtils.rollback(con); // ROLLBACK
+            Databases.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
-            DBUtils.rollback(con); // ROLLBACK
+            Databases.rollback(con); // ROLLBACK
             throw e;
         } catch (final Exception e) {
-            DBUtils.rollback(con); // ROLLBACK
+            Databases.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
             databaseService.backWritable(cid, con);
         }
     }
@@ -296,7 +296,7 @@ public final class Update {
             debugSQL(stmt);
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -329,7 +329,7 @@ public final class Update {
             debugSQL(stmt);
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -362,7 +362,7 @@ public final class Update {
             debugSQL(stmt);
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -395,7 +395,7 @@ public final class Update {
             debugSQL(stmt);
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 

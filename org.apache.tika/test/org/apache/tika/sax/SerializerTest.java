@@ -16,13 +16,10 @@
  */
 package org.apache.tika.sax;
 
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.helpers.AttributesImpl;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 public class SerializerTest {
          @Test

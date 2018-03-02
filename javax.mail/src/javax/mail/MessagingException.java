@@ -40,8 +40,6 @@
 
 package javax.mail;
 
-import java.lang.*;
-
 /**
  * The base class for all exceptions thrown by the Messaging classes
  *

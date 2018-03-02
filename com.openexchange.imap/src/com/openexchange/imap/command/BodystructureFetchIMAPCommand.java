@@ -49,8 +49,6 @@
 
 package com.openexchange.imap.command;
 
-import gnu.trove.map.TLongIntMap;
-import gnu.trove.map.hash.TLongIntHashMap;
 import javax.mail.MessagingException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
@@ -58,6 +56,8 @@ import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 import com.sun.mail.imap.protocol.FetchResponse;
 import com.sun.mail.imap.protocol.Item;
 import com.sun.mail.imap.protocol.UID;
+import gnu.trove.map.TLongIntMap;
+import gnu.trove.map.hash.TLongIntHashMap;
 
 /**
  * {@link BodystructureFetchIMAPCommand} - performs a prefetch of messages in given folder with only those fields set that need to be

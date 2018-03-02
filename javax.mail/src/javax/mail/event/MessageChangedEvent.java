@@ -40,8 +40,7 @@
 
 package javax.mail.event;
 
-import java.util.*;
-import javax.mail.*;
+import javax.mail.Message;
 
 /**
  * This class models Message change events.

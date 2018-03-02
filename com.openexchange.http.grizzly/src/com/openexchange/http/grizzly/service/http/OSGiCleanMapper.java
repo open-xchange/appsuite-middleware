@@ -99,12 +99,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-
-import org.osgi.service.http.HttpContext;
-
-import javax.servlet.Servlet;
 import java.util.concurrent.locks.ReentrantLock;
+import javax.servlet.Servlet;
 import org.glassfish.grizzly.http.server.HttpHandler;
+import org.osgi.service.http.HttpContext;
 
 /**
  * Context mapper.

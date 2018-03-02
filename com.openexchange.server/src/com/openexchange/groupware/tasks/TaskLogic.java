@@ -49,14 +49,14 @@
 
 package com.openexchange.groupware.tasks;
 
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import static com.openexchange.groupware.tasks.StorageType.ACTIVE;
 import static com.openexchange.groupware.tasks.StorageType.DELETED;
 import static com.openexchange.groupware.tasks.StorageType.REMOVED;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.isTransactionRollbackException;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -68,6 +68,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import com.openexchange.annotation.Nullable;
+import com.openexchange.database.Databases;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupStorage;
@@ -740,7 +741,7 @@ public final class TaskLogic {
                 final Connection con = DBPool.pickupWriteable(ctx);
                 condition.resetTransactionRollbackException();
                 try {
-                    DBUtils.startTransaction(con);
+                    Databases.startTransaction(con);
                     final Task t = clone(task);
                     deleteTask(ctx, con, userId, t, lastModified);
                     Reminder.deleteReminder(ctx, con, task);

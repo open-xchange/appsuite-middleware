@@ -3,18 +3,17 @@ package liquibase.sqlgenerator.core;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.core.SybaseASADatabase;
-import liquibase.structure.core.Index;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateIndexStatement;
+import liquibase.structure.core.Index;
 import liquibase.util.StringUtils;
 
 public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {

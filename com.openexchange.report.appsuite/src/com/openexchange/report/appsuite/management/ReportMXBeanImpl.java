@@ -49,7 +49,6 @@
 
 package com.openexchange.report.appsuite.management;
 
-import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.report.appsuite.ReportService;
 import com.openexchange.report.appsuite.internal.LocalReportService;

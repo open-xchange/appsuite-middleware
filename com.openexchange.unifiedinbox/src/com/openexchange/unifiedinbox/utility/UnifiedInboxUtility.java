@@ -51,8 +51,6 @@ package com.openexchange.unifiedinbox.utility;
 
 import static com.openexchange.mail.MailPath.SEPERATOR;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,6 +63,8 @@ import com.openexchange.mailaccount.UnifiedInboxUID;
 import com.openexchange.unifiedinbox.UnifiedInboxAccess;
 import com.openexchange.unifiedinbox.UnifiedInboxException;
 import com.openexchange.unifiedinbox.services.Services;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link UnifiedInboxUtility} - Utility methods for Unified Mail.

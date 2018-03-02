@@ -50,16 +50,16 @@ package com.openexchange.data.conversion.ical.ical4j.internal.appointment;
 
 import java.util.List;
 import java.util.TimeZone;
-import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.property.Transp;
-import net.fortuna.ical4j.model.property.XProperty;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Strings;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.property.Transp;
+import net.fortuna.ical4j.model.property.XProperty;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

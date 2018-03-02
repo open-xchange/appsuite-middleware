@@ -53,13 +53,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import twitter4j.OXTwitter;
-import twitter4j.OXTwitterImpl;
-import twitter4j.TwitterException;
-import twitter4j.auth.AuthorizationFactory;
-import twitter4j.auth.RequestToken;
-import twitter4j.conf.Configuration;
-import twitter4j.conf.ConfigurationContext;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -67,6 +60,13 @@ import com.gargoylesoftware.htmlunit.html.HtmlForm;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
+import twitter4j.OXTwitter;
+import twitter4j.OXTwitterImpl;
+import twitter4j.TwitterException;
+import twitter4j.auth.AuthorizationFactory;
+import twitter4j.auth.RequestToken;
+import twitter4j.conf.Configuration;
+import twitter4j.conf.ConfigurationContext;
 
 
 /**

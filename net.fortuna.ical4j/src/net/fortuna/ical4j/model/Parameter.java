@@ -32,11 +32,9 @@
 package net.fortuna.ical4j.model;
 
 import java.net.URISyntaxException;
-
-import net.fortuna.ical4j.util.Strings;
-
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
+import net.fortuna.ical4j.util.Strings;
 
 /**
  * Defines an iCalendar parameter. Subclasses of this class provide additional validation and typed values for specific

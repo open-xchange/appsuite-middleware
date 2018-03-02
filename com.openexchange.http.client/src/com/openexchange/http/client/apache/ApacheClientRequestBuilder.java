@@ -51,7 +51,6 @@ package com.openexchange.http.client.apache;
 
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.commons.httpclient.HttpState;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.http.client.builder.HTTPDeleteRequestBuilder;

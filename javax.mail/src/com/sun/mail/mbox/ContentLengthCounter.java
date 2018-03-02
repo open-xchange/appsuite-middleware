@@ -40,7 +40,8 @@
 
 package com.sun.mail.mbox;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Count the number of bytes in the body of the message written to the stream.

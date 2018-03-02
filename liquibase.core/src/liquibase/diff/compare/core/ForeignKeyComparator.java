@@ -1,5 +1,6 @@
 package liquibase.diff.compare.core;
 
+import java.util.Set;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;
@@ -11,8 +12,6 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
-
-import java.util.Set;
 
 public class ForeignKeyComparator implements DatabaseObjectComparator {
     @Override

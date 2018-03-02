@@ -49,18 +49,15 @@
 
 package com.openexchange.ajax.requesthandler.converters.preview.cache.groupware;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
 import java.sql.Connection;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
-
 
 /**
  * The data column of previewData was previously of type blob. In MySQL
@@ -78,7 +75,7 @@ public class ChangeDataToLongblob extends UpdateTaskAdapter {
         Connection con = params.getConnection();
         boolean rollback = false;
         try {
-            startTransaction(con);
+            Databases.startTransaction(con);
             rollback = true;
             Column cData = new Column("data", "longblob");
             Tools.checkAndModifyColumns(con, "previewData", cData);
@@ -90,9 +87,9 @@ public class ChangeDataToLongblob extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                rollback(con);
+                Databases.rollback(con);
             }
-            autocommit(con);
+            Databases.autocommit(con);
         }
     }
 

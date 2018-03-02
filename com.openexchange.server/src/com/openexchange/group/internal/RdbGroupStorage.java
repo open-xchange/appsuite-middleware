@@ -49,11 +49,9 @@
 
 package com.openexchange.group.internal;
 
+import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.group.internal.SQLStrings.INSERT_GROUP;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.linked.TIntLinkedList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -71,6 +69,8 @@ import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.LdapUtility;
 import com.openexchange.java.Strings;
 import com.openexchange.server.impl.DBPool;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.linked.TIntLinkedList;
 
 /**
  * This class implements the group storage using a relational database.

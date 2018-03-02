@@ -84,7 +84,6 @@ import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.pns.subscription.storage.ClientAndTransport;
 import com.openexchange.pns.subscription.storage.MapBackedHits;
 import com.openexchange.pns.subscription.storage.rdb.cache.RdbPushSubscriptionRegistryCache;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RdbPushSubscriptionRegistry}
@@ -977,7 +976,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
