@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.storage.rdb.legacy;
 
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import java.sql.Connection;
@@ -94,6 +96,9 @@ import com.openexchange.search.SearchTerm;
 public class RdbEventStorage extends RdbStorage implements EventStorage {
 
     private static final EventMapper MAPPER = EventMapper.getInstance();
+    private static final EventField[] SERIES_PATTERN_FIELDS = new EventField[] {
+        EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE
+    };
 
     private final EntityResolver entityResolver;
 
@@ -260,18 +265,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
 
     @Override
     public void insertEvent(Event event) throws OXException {
-        int updated = 0;
-        Connection connection = null;
-        try {
-            connection = dbProvider.getWriteConnection(context);
-            txPolicy.setAutoCommit(connection, false);
-            updated = insertEvent(connection, context.getContextId(), event);
-            txPolicy.commit(connection);
-        } catch (SQLException e) {
-            throw asOXException(e, MAPPER, event, connection, "prg_dates");
-        } finally {
-            release(connection, updated);
-        }
+        insertEvents(Collections.singletonList(event));
     }
 
     @Override
@@ -283,6 +277,13 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             txPolicy.setAutoCommit(connection, false);
             for (Event event : events) {
                 updated += insertEvent(connection, context.getContextId(), event);
+                /*
+                 * also take over series pattern from master for newly inserted change exception
+                 */
+                if (isSeriesException(event)) {
+                    Event seriesMaster = selectEvent(connection, context.getContextId(), asInt(event.getSeriesId()), SERIES_PATTERN_FIELDS);
+                    updated += updateRecurrenceData(connection, context.getContextId(), asInt(event.getSeriesId()), seriesMaster);
+                }
             }
             txPolicy.commit(connection);
         } catch (SQLException e) {
@@ -299,7 +300,20 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated = updateEvent(connection, context.getContextId(), asInt(event.getId()), event);
+            updated += updateEvent(connection, context.getContextId(), asInt(event.getId()), event);
+            if (isSeriesMaster(event) && event.containsRecurrenceRule()) {
+                /*
+                 * also propagate updated series pattern for existing change exceptions
+                 */
+                updated += updateRecurrenceData(connection, context.getContextId(), asInt(event.getId()), event);
+            }
+            if (isSeriesException(event) && event.containsSeriesId()) {
+                /*
+                 * also take over series pattern from other master for re-assigned change exceptions (after recurrence split)
+                 */
+                Event seriesMaster = selectEvent(connection, context.getContextId(), asInt(event.getSeriesId()), SERIES_PATTERN_FIELDS);
+                updated += updateRecurrenceData(connection, context.getContextId(), asInt(event.getSeriesId()), seriesMaster);
+            }
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw asOXException(e, MAPPER, event, connection, "prg_dates");
@@ -427,6 +441,22 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             parameterIndex = MAPPER.setParameters(stmt, parameterIndex, eventData, assignedfields);
             stmt.setInt(parameterIndex++, contextID);
             stmt.setInt(parameterIndex++, objectID);
+            return logExecuteUpdate(stmt);
+        }
+    }
+
+    private int updateRecurrenceData(Connection connection, int contextID, int seriesID, Event seriesMaster) throws SQLException, OXException {
+        Event eventData = Compat.adjustPriorUpdate(this, connection, seriesMaster);
+        EventField[] assignedfields = { EventField.RECURRENCE_RULE };
+        String sql = new StringBuilder()
+            .append("UPDATE prg_dates SET ").append(MAPPER.getAssignments(assignedfields)).append(' ')
+            .append("WHERE cid=? AND intfield02=?;")
+        .toString();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            parameterIndex = MAPPER.setParameters(stmt, parameterIndex, eventData, assignedfields);
+            stmt.setInt(parameterIndex++, contextID);
+            stmt.setInt(parameterIndex++, seriesID);
             return logExecuteUpdate(stmt);
         }
     }
@@ -634,9 +664,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
      * @return The recurrence data, or <code>null</code> if not found
      */
     RecurrenceData selectRecurrenceData(Connection connection, int seriesID, boolean deleted) throws SQLException, OXException {
-        EventField[] fields = MAPPER.getMappedFields(new EventField[] {
-            EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE
-        });
+        EventField[] fields = SERIES_PATTERN_FIELDS;
         String sql = new StringBuilder()
             .append("SELECT ").append(MAPPER.getColumns(fields))
             .append(" FROM ").append(deleted ? "del_dates" : "prg_dates")
