@@ -773,9 +773,9 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         checkFolderExistence(file.getFolderId());
 
         if ((null == modifiedFields || modifiedFields.contains(Field.FILENAME)) && false == Strings.isEmpty(file.getFileName()) && file.getId() != FileStorageFileAccess.NEW)
-            /*
-             * first check if there is already such a file
-             */
+        /*
+         * first check if there is already such a file
+         */
         {
             String path = toPath(file.getFolderId(), file.getId());
             String toPath = toPath(file.getFolderId(), file.getFileName());
@@ -792,15 +792,14 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
         }
 
-        long fileSize = file.getFileSize();
-        DropboxFile dbxFile = fileSize <= 0 || fileSize > CHUNK_SIZE ? sessionUpload(file, data) : singleUpload(file, data);
+        DropboxFile dbxFile = initiateUpload(file, data);
         file.copyFrom(dbxFile, copyFields);
         return dbxFile.getIDTuple();
     }
 
-    private void checkFolderExistence(String folderId) throws OXException{
+    private void checkFolderExistence(String folderId) throws OXException {
         try {
-            if(Strings.isEmpty(folderId) || folderId.equals("/")){
+            if (Strings.isEmpty(folderId) || folderId.equals("/")) {
                 return; // The root folder is always present
             }
             getFolderMetadata(folderId);
@@ -816,18 +815,18 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     }
 
     /**
-     * Uploads the specified file in chunks
+     * Initiates the file upload and decides whether to do a single upload or a chunk-wise upload.
      *
      * @param file The {@link File} to upload
      * @param data The {@link InputStream} containing the actual data
      * @return The {@link IDTuple} of the uploaded file
      * @throws OXException If an error is occurred
      */
-    private DropboxFile sessionUpload(File file, InputStream data) throws OXException {
+    private DropboxFile initiateUpload(File file, InputStream data) throws OXException {
         if (data instanceof SizeKnowingInputStream) {
             try {
                 long length = ((SizeKnowingInputStream) data).getSize();
-                return doSessionUploadUsing(file, data, length);
+                return length > CHUNK_SIZE ? doSessionUploadUsing(file, data, length) : singleUpload(file, data);
             } finally {
                 Streams.close(data);
             }
@@ -838,40 +837,10 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         try {
             sink = new ThresholdFileHolder();
             sink.write(data);
-            return doSessionUploadUsing(file, sink.getStream(), sink.getCount());
+            long length = sink.getCount();
+            return length > CHUNK_SIZE ? doSessionUploadUsing(file, sink.getStream(), length) : singleUpload(file, sink.getStream());
         } finally {
             Streams.close(sink);
-        }
-    }
-
-    private DropboxFile doSessionUploadUsing(File file, InputStream stream, long length) throws OXException {
-        try {
-            // Start an upload session and get the session id
-            UploadSessionStartUploader uploadSession = client.files().uploadSessionStart();
-            UploadSessionStartResult result = uploadSession.uploadAndFinish(stream, CHUNK_SIZE);
-            String sessionId = result.getSessionId();
-            long offset = CHUNK_SIZE;
-
-            // Start uploading chunks of data
-            UploadSessionCursor cursor = new UploadSessionCursor(sessionId, offset);
-            while (length - offset > CHUNK_SIZE) {
-                client.files().uploadSessionAppendV2(cursor).uploadAndFinish(stream, CHUNK_SIZE);
-                offset += CHUNK_SIZE;
-                cursor = new UploadSessionCursor(sessionId, offset);
-            }
-
-            // Upload the remaining chunk
-            long remaining = length - offset;
-            CommitInfo commitInfo = new CommitInfo(toPath(file.getFolderId(), file.getFileName()), WriteMode.OVERWRITE, false, file.getLastModified(), false);
-            UploadSessionFinishUploader sessionFinish = client.files().uploadSessionFinish(cursor, commitInfo);
-            FileMetadata metadata = sessionFinish.uploadAndFinish(stream, remaining);
-
-            // Return
-            return new DropboxFile(metadata, userId);
-        } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
-        } catch (IOException e) {
-            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -896,6 +865,46 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             return new DropboxFile(metadata, userId);
         } catch (UploadErrorException e) {
             throw DropboxExceptionHandler.handleUploadErrorException(e, path, accountDisplayName);
+        } catch (DbxException e) {
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
+        } catch (IOException e) {
+            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Uploads the specified file chunk-wise
+     * 
+     * @param file The {@link File} to upload
+     * @param stream The {@link InputStream} containing the actual data
+     * @param length The length of the data
+     * @return The {@link IDTuple} of the uploaded file
+     * @throws OXException if an error is occurred
+     */
+    private DropboxFile doSessionUploadUsing(File file, InputStream stream, long length) throws OXException {
+        try {
+            // Start an upload session and get the session id
+            UploadSessionStartUploader uploadSession = client.files().uploadSessionStart();
+            UploadSessionStartResult result = uploadSession.uploadAndFinish(stream, CHUNK_SIZE);
+            String sessionId = result.getSessionId();
+            long offset = CHUNK_SIZE;
+
+            // Start uploading chunks of data
+            UploadSessionCursor cursor = new UploadSessionCursor(sessionId, offset);
+            while (length - offset > CHUNK_SIZE) {
+                client.files().uploadSessionAppendV2(cursor).uploadAndFinish(stream, CHUNK_SIZE);
+                offset += CHUNK_SIZE;
+                cursor = new UploadSessionCursor(sessionId, offset);
+            }
+
+            // Upload the remaining chunk
+            long remaining = length - offset;
+            CommitInfo commitInfo = new CommitInfo(toPath(file.getFolderId(), file.getFileName()), WriteMode.OVERWRITE, false, file.getLastModified(), false);
+            UploadSessionFinishUploader sessionFinish = client.files().uploadSessionFinish(cursor, commitInfo);
+            FileMetadata metadata = sessionFinish.uploadAndFinish(stream, remaining);
+
+            // Return
+            return new DropboxFile(metadata, userId);
         } catch (DbxException e) {
             throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         } catch (IOException e) {
