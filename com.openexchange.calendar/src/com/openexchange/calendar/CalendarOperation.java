@@ -970,6 +970,17 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 recColl.removeUserParticipant(cdao, edao.getSharedFolderOwner());
             }
         } else if (cdao.getFolderType() == FolderObject.SHARED) {
+            // create in/move to shared folder, update in shared folder and folder owner is missing: add it
+            if (!cdao.containsParticipants()) {
+                if (null != edao && null != edao.getParticipants()) {
+                    cdao.setParticipants(edao.getParticipants());
+                }
+            }
+            if (!cdao.containsUserParticipants()) {
+                if (null != edao && null != edao.getUsers()) {
+                    cdao.setUsers(edao.getUsers());
+                }
+            }
             if (cdao.containsParentFolderID()) {
                 cdao.setSharedFolderOwner(ofa.getFolderOwner(cdao.getParentFolderID()));
             } else {
