@@ -290,15 +290,15 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
                 try {
                     future.get(getTimeoutMillis(task.getNumberOfMails()), TimeUnit.MILLISECONDS);
                     LOGGER.debug("Verified mail authenticity for mails \"{}\" ({}) in folder {} after {} µs", task.getMailIds(),
-                        task.getNumberOfMails(), task.getMailFolder(), task.getDurationMicros());
+                        Integer.valueOf(task.getNumberOfMails()), task.getMailFolder(), Long.valueOf(task.getDurationMicros()));
                 } catch (ExecutionException e) {
                     LOGGER.warn("Error while verifying mail authenticity for mails \"{}\" ({}) in folder {} after {} µs", task.getMailIds(),
-                        task.getNumberOfMails(), task.getMailFolder(), task.getDurationMicros(), e.getCause());
+                        Integer.valueOf(task.getNumberOfMails()), task.getMailFolder(), Long.valueOf(task.getDurationMicros()), e.getCause());
                     task.markAsNeutral();
                 } catch (TimeoutException e) {
                     future.cancel(true);
                     LOGGER.warn("Timeout while verifying mail authenticity for mails \"{}\" ({}) in folder {} after {} µs", task.getMailIds(),
-                        task.getNumberOfMails(), task.getMailFolder(), task.getDurationMicros());
+                        Integer.valueOf(task.getNumberOfMails()), task.getMailFolder(), Long.valueOf(task.getDurationMicros()));
                     task.markAsNeutral();
                 }
             }
@@ -329,13 +329,13 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         Future<Void> future = threadPool.submit(task);
         try {
             future.get(getTimeoutMillis(1), TimeUnit.MILLISECONDS);
-            LOGGER.debug("Verified mail authenticity for mail \"{}\" in folder {} after {} µs", mail.getMailId(), mail.getFolder(), task.getDurationMicros());
+            LOGGER.debug("Verified mail authenticity for mail \"{}\" in folder {} after {} µs", mail.getMailId(), mail.getFolder(), Long.valueOf(task.getDurationMicros()));
         } catch (ExecutionException e) {
-            LOGGER.warn("Error while verifying mail authenticity for mail \"{}\" in folder {} after {} µs", mail.getMailId(), mail.getFolder(), task.getDurationMicros(), e.getCause());
+            LOGGER.warn("Error while verifying mail authenticity for mail \"{}\" in folder {} after {} µs", mail.getMailId(), mail.getFolder(), Long.valueOf(task.getDurationMicros()), e.getCause());
             mail.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
         } catch (TimeoutException e) {
             future.cancel(true);
-            LOGGER.warn("Timeout while verifying mail authenticity for mail \"{}\" in folder {} after {} µs", mail.getMailId(), mail.getFolder(), task.getDurationMicros());
+            LOGGER.warn("Timeout while verifying mail authenticity for mail \"{}\" in folder {} after {} µs", mail.getMailId(), mail.getFolder(), Long.valueOf(task.getDurationMicros()));
             mail.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
         } catch (InterruptedException e) {
             // Keep interrupted status
