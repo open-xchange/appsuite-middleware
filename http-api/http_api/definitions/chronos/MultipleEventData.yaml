@@ -1,11 +1,12 @@
 type: object
 properties:
+  $ref: ../common/CommonResponseData.yaml
   folder:
     type: string
   events:
     type: array
     items:
-      $ref: EventData.yaml
+      $ref: "#/definitions/EventData"
   timestamp:
     type: integer
     format: int64
