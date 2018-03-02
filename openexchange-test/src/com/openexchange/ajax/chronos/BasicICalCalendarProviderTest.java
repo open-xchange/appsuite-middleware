@@ -670,7 +670,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
 
         //get events to fill table
         String columns = "recurrenceId, seriesId, id, summary";
-        List<EventData> allEvents = eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(365)), true, newFolderId, null, columns);
+        List<EventData> allEvents = eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(365)), true, false, newFolderId, null, columns);
         for (Iterator<EventData> iterator = allEvents.iterator(); iterator.hasNext();) {
             EventData eventData = iterator.next();
             if (!eventData.getSummary().contains("Test-Series")) {
@@ -719,7 +719,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         assertEquals(1, allEvents.size());
         assertTrue(EventManager.isSeriesMaster(allEvents.get(0)));
     }
-    
+
     @Test
     public void testGet_Unauthorized_returnException() throws ApiException, OXException, IOException, JSONException {
         String externalUri = "http://example.com/files/testGet_Unauthorized_returnException.ics";

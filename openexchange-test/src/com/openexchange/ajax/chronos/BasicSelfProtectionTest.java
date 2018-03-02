@@ -114,7 +114,7 @@ public class BasicSelfProtectionTest extends AbstractChronosTest {
         long timestamp = eventManager.getLastTimeStamp();
 
         // Query all event occurrences
-        EventsResponse eventsResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), fromStr, untilStr, folderId, null, null, null, true, true, false);
+        EventsResponse eventsResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), fromStr, untilStr, folderId, null, null, null, true, false, true, false);
         Assert.assertNotNull("Response doesn't contain an error", eventsResponse.getError());
         Assert.assertEquals(excpectedErrorCode, eventsResponse.getCode());
 

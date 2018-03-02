@@ -186,7 +186,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         ChronosApi secondUserChronosApi = user2.getChronosApi();
         String secondUserFolder = getDefaultFolder(secondSession, user2.getClient());
         // Do a request to get a valid timestamp
-        EventsResponse allEvents = secondUserChronosApi.getAllEvents(secondSession, "20170101T000000Z", "20180101T000000Z", secondUserFolder, null, null, null, false, true, false);
+        EventsResponse allEvents = secondUserChronosApi.getAllEvents(secondSession, "20170101T000000Z", "20180101T000000Z", secondUserFolder, null, null, null, false, false, true, false);
         assertNull(allEvents.getErrorDesc(), allEvents.getError());
         Long timestamp = allEvents.getTimestamp();
 
