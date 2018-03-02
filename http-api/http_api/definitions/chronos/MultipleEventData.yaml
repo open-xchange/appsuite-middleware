@@ -1,6 +1,9 @@
 type: object
 properties:
-  $ref: ../common/CommonResponseData.yaml
+  error:
+    type: object
+    properties:
+      $ref: ../common/CommonResponseData.yaml
   folder:
     type: string
   events:
