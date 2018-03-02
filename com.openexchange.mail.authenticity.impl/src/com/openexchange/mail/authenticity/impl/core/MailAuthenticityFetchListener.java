@@ -61,6 +61,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicLong;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
@@ -274,27 +275,31 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         Session session = mailAccess.getSession();
         FolderChecker folderChecker = new DenyIfContainedFolderChecker(mailAccess.getFolderStorage().getDraftsFolder(), mailAccess.getFolderStorage().getSentFolder());
         List<MailMessage[]> partitions = com.openexchange.tools.arrays.Arrays.partition(mails, 100);
-        Map<Future<Void>, MailMessage[]> submittedTasks = new LinkedHashMap<Future<Void>, MailMessage[]>(partitions.size());
+        Map<Future<Void>, MailAuthenticityTask> submittedTasks = new LinkedHashMap<>(partitions.size());
         for (MailMessage[] partition : partitions) {
-            Future<Void> future = threadPool.submit(new MailAuthenticityTask(partition, handler, session, folderChecker));
-            submittedTasks.put(future, partition);
+            MailAuthenticityTask task = new MailAuthenticityTask(partition, handler, session, folderChecker);
+            Future<Void> future = threadPool.submit(task);
+            submittedTasks.put(future, task);
         }
         partitions = null; // Help GC
 
         try {
-            for (Map.Entry<Future<Void>, MailMessage[]> submitted : submittedTasks.entrySet()) {
+            for (Map.Entry<Future<Void>, MailAuthenticityTask> submitted : submittedTasks.entrySet()) {
                 Future<Void> future = submitted.getKey();
+                MailAuthenticityTask task = submitted.getValue();
                 try {
-                    future.get(2, TimeUnit.SECONDS);
+                    future.get(getTimeoutMillis(task.getNumberOfMails()), TimeUnit.MILLISECONDS);
+                    LOGGER.debug("Verified mail authenticity for mails \"{}\" ({}) in folder {} after {} µs", task.getMailIds(),
+                        task.getNumberOfMails(), task.getMailFolder(), task.getDurationMicros());
                 } catch (ExecutionException e) {
-                    MailMessage[] associatedMails = submitted.getValue();
-                    LOGGER.warn("Error while verifying mail authenticity for mails \"{}\" in folder {}", getMailIds(associatedMails), getMailFolder(associatedMails), e.getCause());
-                    markAsNeutral(associatedMails);
+                    LOGGER.warn("Error while verifying mail authenticity for mails \"{}\" ({}) in folder {} after {} µs", task.getMailIds(),
+                        task.getNumberOfMails(), task.getMailFolder(), task.getDurationMicros(), e.getCause());
+                    task.markAsNeutral();
                 } catch (TimeoutException e) {
-                    MailMessage[] associatedMails = submitted.getValue();
                     future.cancel(true);
-                    LOGGER.warn("Timeout while verifying mail authenticity for mails \"{}\" in folder {}", getMailIds(associatedMails), getMailFolder(associatedMails));
-                    markAsNeutral(associatedMails);
+                    LOGGER.warn("Timeout while verifying mail authenticity for mails \"{}\" ({}) in folder {} after {} µs", task.getMailIds(),
+                        task.getNumberOfMails(), task.getMailFolder(), task.getDurationMicros());
+                    task.markAsNeutral();
                 }
             }
         } catch (InterruptedException e) {
@@ -320,15 +325,17 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
             return mail;
         }
 
-        Future<Void> future = threadPool.submit(new MailAuthenticityTask(mail, handler, session, ALWAYS_ACCEPT_FOLDER_CHECKER));
+        MailAuthenticityTask task = new MailAuthenticityTask(mail, handler, session, ALWAYS_ACCEPT_FOLDER_CHECKER);
+        Future<Void> future = threadPool.submit(task);
         try {
-            future.get(1, TimeUnit.SECONDS);
+            future.get(getTimeoutMillis(1), TimeUnit.MILLISECONDS);
+            LOGGER.debug("Verified mail authenticity for mail \"{}\" in folder {} after {} µs", mail.getMailId(), mail.getFolder(), task.getDurationMicros());
         } catch (ExecutionException e) {
-            LOGGER.warn("Error while verifying mail authenticity for mail \"{}\" in folder {}", mail.getMailId(), mail.getFolder(), e.getCause());
+            LOGGER.warn("Error while verifying mail authenticity for mail \"{}\" in folder {} after {} µs", mail.getMailId(), mail.getFolder(), task.getDurationMicros(), e.getCause());
             mail.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
         } catch (TimeoutException e) {
             future.cancel(true);
-            LOGGER.warn("Timeout while verifying mail authenticity for mail \"{}\" in folder {}", mail.getMailId(), mail.getFolder());
+            LOGGER.warn("Timeout while verifying mail authenticity for mail \"{}\" in folder {} after {} µs", mail.getMailId(), mail.getFolder(), task.getDurationMicros());
             mail.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
         } catch (InterruptedException e) {
             // Keep interrupted status
@@ -339,6 +346,17 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         return mail;
     }
 
+    /**
+     * Gets the timeout in milliseconds for <code>num</code> mails.
+     *
+     * @param num Number of mails
+     * @return The milliseconds
+     */
+    private long getTimeoutMillis(int num) {
+        long min = Math.max(5000l, num * 100l);
+        return Math.min(min, 30000l);
+    }
+
     // --------------------------------------------------------------------------------------------------------------
 
     private static class MailAuthenticityTask extends AbstractTrackableTask<Void> {
@@ -347,6 +365,8 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         private final MailAuthenticityHandler handler;
         private final Session session;
         private final FolderChecker folderChecker;
+        private final long initTime;
+        private final AtomicLong durationMicros;
 
         MailAuthenticityTask(MailMessage mail, MailAuthenticityHandler handler, Session session, FolderChecker folderChecker) {
             this(new MailMessage[] { mail }, handler, session, folderChecker);
@@ -358,6 +378,75 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
             this.handler = handler;
             this.session = session;
             this.folderChecker = folderChecker;
+            initTime = System.nanoTime();
+            durationMicros = new AtomicLong(0);
+        }
+
+        /**
+         * Gets the duration of this task in micro seconds.
+         * <p>
+         * Should only be called when this task has been completed.
+         *
+         * @return The duration or <code>0</code> if not yet completed
+         */
+        public long getDurationMicros() {
+            return durationMicros.get();
+        }
+
+        /**
+         * Gets the number of mails processed by this task
+         *
+         * @return The number of mails
+         */
+        public int getNumberOfMails() {
+            return mails.length;
+        }
+
+        /**
+         * Gets a comma-separated string containing the identifiers of the mails processed by this task
+         *
+         * @return The mail identifiers as a string
+         */
+        public String getMailIds() {
+            StringBuilder sb = new StringBuilder(mails.length << 2);
+            boolean first = true;
+            for (MailMessage mail : mails) {
+                if (null != mail) {
+                    if (first) {
+                        first = false;
+                    } else {
+                        sb.append(", ");
+                    }
+                    sb.append(mail.getMailId());
+                }
+            }
+            return sb.toString();
+        }
+
+        /**
+         * Gets the identifier of the mail folder
+         *
+         * @return The mail folder
+         */
+        public String getMailFolder() {
+            return mails[0].getFolder();
+        }
+
+        /**
+         * Marks the mails processed by this task with <code>neutral</code> authenticity result
+         */
+        public void markAsNeutral() {
+            for (MailMessage mail : mails) {
+                if (null != mail) {
+                    mail.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
+                }
+            }
+        }
+
+        @Override
+        public void afterExecute(Throwable throwable) {
+            durationMicros.set(TimeUnit.NANOSECONDS.toMicros(System.nanoTime() - initTime));
+            super.afterExecute(throwable);
         }
 
         @Override
@@ -413,6 +502,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
                 }
             }
         }
+
     }
 
     private static interface FolderChecker {
@@ -441,34 +531,6 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
         public boolean isFolderAcceptedFrom(MailMessage mail) {
             String folder = mail.getFolder();
             return folder == null || !foldersToDeny.contains(folder);
-        }
-    }
-
-    private String getMailIds(MailMessage[] mails) {
-        StringBuilder sb = new StringBuilder(mails.length << 2);
-        boolean first = true;
-        for (MailMessage mail : mails) {
-            if (null != mail) {
-                if (first) {
-                    first = false;
-                } else {
-                    sb.append(", ");
-                }
-                sb.append(mail.getMailId());
-            }
-        }
-        return sb.toString();
-    }
-
-    private String getMailFolder(MailMessage[] mails) {
-        return mails[0].getFolder();
-    }
-
-    private void markAsNeutral(MailMessage[] mails) {
-        for (MailMessage mail : mails) {
-            if (null != mail) {
-                mail.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
-            }
         }
     }
 
