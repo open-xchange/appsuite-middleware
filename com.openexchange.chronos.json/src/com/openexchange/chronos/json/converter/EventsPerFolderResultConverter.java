@@ -66,6 +66,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+
 /**
  * {@link EventsPerFolderResultConverter}
  *
@@ -137,7 +138,9 @@ public class EventsPerFolderResultConverter extends EventResultConverter {
         try {
             jsonObject.put("folder", folderId);
             if (null != eventsResult.getError()) {
-                ResponseWriter.addException(jsonObject, eventsResult.getError());
+                JSONObject error = new JSONObject();
+                ResponseWriter.addException(error, eventsResult.getError());
+                jsonObject.put("error", error);
             } else {
                 jsonObject.putOpt("events", convertEvents(eventsResult.getEvents(), timeZoneID, session, requestedFields, extendedEntities));
                 jsonObject.put("timestamp", eventsResult.getTimestamp());
