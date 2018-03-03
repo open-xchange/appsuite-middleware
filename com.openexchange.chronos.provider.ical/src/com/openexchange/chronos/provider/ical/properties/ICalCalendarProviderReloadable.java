@@ -72,6 +72,7 @@ public class ICalCalendarProviderReloadable implements Reloadable {
 
     private static final String[] PROPERTIES = new String[] {
         ICalCalendarProviderProperties.refreshInterval.getFQPropertyName(), // reloadable via LeanConfigurationService
+        ICalCalendarProviderProperties.retryAfterErrorInterval.getFQPropertyName(), // reloadable via LeanConfigurationService
         ICalCalendarProviderProperties.maxFileSize.getFQPropertyName(), // reloadable via LeanConfigurationService
 
         ICalCalendarProviderProperties.connectionTimeout.getFQPropertyName(),
