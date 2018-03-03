@@ -115,14 +115,8 @@ public class TestCachingCalendarAccessImpl extends BasicCachingCalendarAccess {
     }
 
     @Override
-    public long getRetryAfterErrorInterval() {
+    public long getRetryAfterErrorInterval(OXException e) {
         return 1;
-    }
-
-    @Override
-    public void handleExceptions(OXException e) {
-        // TODO Auto-generated method stub
-
     }
 
     @Override

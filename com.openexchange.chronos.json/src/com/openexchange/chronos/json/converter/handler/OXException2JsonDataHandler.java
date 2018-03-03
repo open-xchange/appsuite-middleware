@@ -94,12 +94,8 @@ public class OXException2JsonDataHandler implements DataHandler {
             if (null == sourceData) {
                 result.setData(null);
             } else if (OXException.class.isInstance(sourceData)) {
-                boolean includeStacktrace = true;
-                if (dataArguments.containsKey("includeStacktrace")) {
-                    includeStacktrace = Boolean.parseBoolean(dataArguments.get("includeStacktrace"));
-                }
                 JSONObject jsonObject = new JSONObject();
-                ResponseWriter.addException(jsonObject, (OXException) sourceData, includeStacktrace);
+                ResponseWriter.addException(jsonObject, (OXException) sourceData);
                 result.setData(jsonObject);
             } else {
                 throw DataExceptionCodes.TYPE_NOT_SUPPORTED.create(sourceData.getClass().toString());

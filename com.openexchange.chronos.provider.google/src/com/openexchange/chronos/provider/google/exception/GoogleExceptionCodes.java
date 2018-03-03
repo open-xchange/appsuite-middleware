@@ -54,6 +54,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
+import com.openexchange.exception.OXExceptionStrings;
 
 /**
  *
@@ -67,6 +68,8 @@ public enum GoogleExceptionCodes implements DisplayableOXExceptionCode {
      * "The google calendar with id '%1$s' couldn't be found. Please provide a valid calendar id."
      */
     CALENDAR_NOT_FOUND("The google calendar with id '%1$s' couldn't be found. Please provide a valid calendar id.", GoogleExceptionMessages.CALENDAR_NOT_FOUND_MSG, CATEGORY_USER_INPUT, 1),
+
+    OAUTH_INITIALIZATION_FAILED("Initialization of the oauthAccess failed. Stopping initialization of the GoogleCalendarAccess.", OXExceptionStrings.MESSAGE, CATEGORY_USER_INPUT, 2),
     ;
 
     public static final String PREFIX = "GOOGLE_CALENDAR";

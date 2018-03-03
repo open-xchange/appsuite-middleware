@@ -58,6 +58,7 @@ import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.context.ContextService;
+import com.openexchange.conversion.ConversionService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -82,26 +83,26 @@ public class CachingCalendarAccessActivator extends HousekeepingActivator {
         //@formatter:off
         return new Class<?>[] { CalendarStorageFactory.class, DatabaseService.class, ContextService.class,
             CalendarUtilities.class, CalendarAccountService.class, AdministrativeCalendarAccountService.class,
-            RecurrenceService.class, LeanConfigurationService.class };
+            RecurrenceService.class, LeanConfigurationService.class, ConversionService.class };
         //@formatter:on
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
-            getLogger(CachingCalendarAccessActivator.class).info("starting bundle {}", context.getBundle());
+            getLogger(CachingCalendarAccessActivator.class).info("starting bundle {}", context.getBundle().getSymbolicName());
             Services.setServiceLookup(this);
 
             openTrackers();
         } catch (Exception e) {
-            getLogger(CachingCalendarAccessActivator.class).error("error starting {}", context.getBundle(), e);
+            getLogger(CachingCalendarAccessActivator.class).error("error starting {}", context.getBundle().getSymbolicName(), e);
             throw e;
         }
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        getLogger(CachingCalendarAccessActivator.class).info("stopping bundle {}", context.getBundle());
+        getLogger(CachingCalendarAccessActivator.class).info("stopping bundle {}", context.getBundle().getSymbolicName());
         Services.setServiceLookup(null);
         super.stopBundle();
     }

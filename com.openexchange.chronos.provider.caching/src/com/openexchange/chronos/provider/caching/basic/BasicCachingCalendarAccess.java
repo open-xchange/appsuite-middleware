@@ -56,18 +56,19 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.Check;
+import com.openexchange.chronos.common.DataHandlers;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
-import com.openexchange.chronos.provider.caching.CachingCalendarException;
 import com.openexchange.chronos.provider.caching.DiffAwareExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.handlers.SearchHandler;
@@ -93,6 +94,11 @@ import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
+import com.openexchange.conversion.ConversionResult;
+import com.openexchange.conversion.ConversionService;
+import com.openexchange.conversion.DataArguments;
+import com.openexchange.conversion.DataHandler;
+import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -159,13 +165,6 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     }
 
     /**
-     * Allows the underlying calendar provider to handle {@link OXException}s that might occur while retrieving data from the external source.
-     *
-     * @param e The {@link OXException} occurred
-     */
-    public abstract void handleExceptions(OXException e);
-
-    /**
      * Defines the refresh interval in minutes that has to be expired to contact the external event provider for the up-to-date calendar.<br>
      * <br>
      * If the value is <=0 the default of one day will be used.
@@ -177,9 +176,11 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     /**
      * Defines how long should be wait for the next request to the external calendar provider in case an error occurred.
      *
+     * @param e The {@link OXException} occurred
      * @return The time in {@link TimeUnit#MINUTES} that should be wait for contacting the external calendar provider for updates.
+     * @see {@link BasicCachingCalendarConstants.MINIMUM_DEFAULT_RETRY_AFTER_ERROR_INTERVAL}
      */
-    public abstract long getRetryAfterErrorInterval();
+    public abstract long getRetryAfterErrorInterval(OXException e);
 
     /**
      * Returns an {@link ExternalCalendarResult} containing all external {@link Event}s by querying the underlying calendar for the given account and additional information.<b>
@@ -193,25 +194,48 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
     @Override
     public final Event getEvent(String eventId, RecurrenceId recurrenceId) throws OXException {
         cache();
+        containsError();
         return new SingleEventResponseGenerator(this, eventId, recurrenceId).generate();
     }
 
     @Override
     public final List<Event> getEvents(List<EventID> eventIDs) throws OXException {
         cache();
+        containsError();
         return new DedicatedEventsResponseGenerator(this, eventIDs).generate();
     }
 
     @Override
     public List<Event> getEvents() throws OXException {
         cache();
+        containsError();
         return new AccountResponseGenerator(this).generate();
     }
 
     @Override
     public final List<Event> getChangeExceptions(String seriesId) throws OXException {
         cache();
+        containsError();
         return new ChangeExceptionsResponseGenerator(this, seriesId).generate();
+    }
+
+    /**
+     * Throws an {@link OXException} when the account contains an error due to previous execution
+     * 
+     * @throws OXException
+     */
+    private void containsError() throws OXException {
+        if (this.account.getInternalConfiguration().hasAndNotNull("lastError")) {
+            DataHandler dataHandler = Services.getService(ConversionService.class).getDataHandler(DataHandlers.JSON2OXEXCEPTION);
+            try {
+                ConversionResult result = dataHandler.processData(new SimpleData<JSONObject>(new JSONObject(this.account.getInternalConfiguration().get("lastError").toString())), new DataArguments(), null);
+                if (null != result && null != result.getData() && OXException.class.isInstance(result.getData())) {
+                    throw (OXException) result.getData();
+                }
+            } catch (JSONException e) {
+                LOG.error("Unable to process data.", e);
+            }
+        }
     }
 
     private void cache() throws OXException {
@@ -259,14 +283,18 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
                 }
             }
             cachingHandler.updateLastUpdated(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1));
+            success();
         } catch (OXException e) {
             LOG.info("Unable to update cache for account {}: {}", account.getAccountId(), e.getMessage(), e);
             warnings.add(e);
 
             handleInternally(cachingHandler, e);
-            handleExceptions(e);
             throw e;
         }
+    }
+
+    private void success() {
+        account.getInternalConfiguration().remove("lastError");
     }
 
     /**
@@ -450,16 +478,36 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         }
     }
 
-    private void handleInternally(CachingHandler cachingHandler, OXException e) throws OXException {
-        if(e instanceof CachingCalendarException) {
-            throw ((CachingCalendarException) e).getExceptionToIgnore();
+    private void handleInternally(CachingHandler cachingHandler, OXException e) {
+        OXException copy = new OXException(e);
+        long retryAfterErrorInterval = getRetryAfterErrorInterval(copy);
+        if (retryAfterErrorInterval < BasicCachingCalendarConstants.MINIMUM_DEFAULT_RETRY_AFTER_ERROR_INTERVAL) { // prevent wrong configuration that will allow ongoing external requests
+            retryAfterErrorInterval = BasicCachingCalendarConstants.MINIMUM_DEFAULT_RETRY_AFTER_ERROR_INTERVAL;
         }
-        if (e.getExceptionCode() == null || e.getExceptionCode().equals(CalendarExceptionCodes.AUTH_FAILED.create(""))) {
-            return;
-        }
-        long timeoutInMillis = TimeUnit.MINUTES.toMillis(getRetryAfterErrorInterval());
+        long timeoutInMillis = TimeUnit.MINUTES.toMillis(retryAfterErrorInterval);
         long nextProcessingAfter = System.currentTimeMillis() + timeoutInMillis;
         cachingHandler.updateLastUpdated(nextProcessingAfter);
+
+        rememberOXException(copy);
+    }
+
+    /**
+     * @param exception - The {@link OXException} to remember
+     */
+    private void rememberOXException(OXException exception) {
+        JSONObject internalConfig = account.getInternalConfiguration();
+
+        DataHandler dataHandler = Services.getService(ConversionService.class).getDataHandler(DataHandlers.OXEXCEPTION2JSON);
+        try {
+            ConversionResult result = dataHandler.processData(new SimpleData<OXException>(exception), new DataArguments(), null);
+            if (null != result && null != result.getData() && JSONObject.class.isInstance(result.getData())) {
+                JSONObject errorJson = (JSONObject) result.getData();
+                errorJson.remove("error_stack");
+                internalConfig.putSafe("lastError", errorJson);
+            }
+        } catch (OXException e1) {
+            LOG.error("Unable to process data.", e1);
+        }
     }
 
     /**

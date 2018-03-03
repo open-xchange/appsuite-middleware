@@ -47,35 +47,19 @@
  *
  */
 
-package com.openexchange.chronos.provider.caching;
-
-import com.openexchange.exception.OXException;
+package com.openexchange.chronos.provider.caching.basic;
 
 /**
- * {@link CachingCalendarException}
+ * {@link BasicCachingCalendarConstants}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class CachingCalendarException extends OXException{
+public class BasicCachingCalendarConstants {
 
     /**
-     * serialVersionUID
+     * The minimum interval (in minutes) that is allowed to be configured when implementing com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess.getRetryAfterErrorInterval(OXException)
      */
-    private static final long serialVersionUID = -4290670058564810766L;
-    private final OXException exceptionToIgnore;
-
-    private CachingCalendarException(OXException ex) {
-        super();
-        exceptionToIgnore = ex;
-    }
-
-    public static CachingCalendarException create(OXException ex) {
-        return new CachingCalendarException(ex);
-    }
-
-    public OXException getExceptionToIgnore() {
-        return exceptionToIgnore;
-    }
+    public static final int MINIMUM_DEFAULT_RETRY_AFTER_ERROR_INTERVAL = 1;
 
 }
