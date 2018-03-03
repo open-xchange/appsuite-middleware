@@ -19,7 +19,6 @@ package org.apache.felix.eventadmin.impl.tasks;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
-
 import org.apache.felix.eventadmin.impl.util.LogWrapper;
 
 

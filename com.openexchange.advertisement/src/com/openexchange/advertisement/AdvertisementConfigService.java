@@ -52,7 +52,6 @@ package com.openexchange.advertisement;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONValue;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 

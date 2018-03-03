@@ -49,7 +49,8 @@
 
 package com.openexchange.groupware.contact;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;

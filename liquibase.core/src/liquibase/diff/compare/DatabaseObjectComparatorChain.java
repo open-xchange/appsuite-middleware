@@ -1,10 +1,10 @@
 package liquibase.diff.compare;
 
+import java.util.List;
+import java.util.Set;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.structure.DatabaseObject;
-
-import java.util.*;
 
 public class DatabaseObjectComparatorChain implements Cloneable {
     private List<DatabaseObjectComparator> comparators;

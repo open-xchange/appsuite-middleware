@@ -93,7 +93,6 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.sql.SearchStrings;
 
 /**
@@ -170,7 +169,7 @@ public class SearchEngineImpl extends DBService {
                     SearchIterators.close(iter);
                 } else if (con != null) {
                     releaseReadConnection(session.getContext(), con);
-                    DBUtils.closeSQLStuff(stmt);
+                    Databases.closeSQLStuff(stmt);
                 }
             }
         }
@@ -280,7 +279,7 @@ public class SearchEngineImpl extends DBService {
                         SearchIterators.close(iter);
                     } else if (con != null) {
                         releaseReadConnection(session.getContext(), con);
-                        DBUtils.closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                     }
                 }
             }
@@ -492,7 +491,7 @@ public class SearchEngineImpl extends DBService {
                 LOG.error("", e);
                 throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, sqlQuery.toString());
             } finally {
-                DBUtils.closeSQLStuff(results, statement);
+                Databases.closeSQLStuff(results, statement);
             }
             if (0 == objectIDs.size()) {
                 return SearchIteratorAdapter.emptyIterator();
@@ -523,7 +522,7 @@ public class SearchEngineImpl extends DBService {
                     if (iter != null) {
                         SearchIterators.close(iter);
                     } else if (connection != null) {
-                        DBUtils.closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                     }
                 }
             }

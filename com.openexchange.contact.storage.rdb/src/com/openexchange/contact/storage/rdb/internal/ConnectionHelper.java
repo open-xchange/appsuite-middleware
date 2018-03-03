@@ -53,10 +53,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import com.openexchange.contact.ContactSessionParameterNames;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.session.Session;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link ConnectionHelper}
@@ -167,10 +167,10 @@ public class ConnectionHelper {
     public void backWritable() throws OXException {
         if (null != writableConnection) {
             if (false == committed) {
-                DBUtils.rollback(writableConnection);
+                Databases.rollback(writableConnection);
             }
             if (backWritable) {
-                DBUtils.autocommit(writableConnection);
+                Databases.autocommit(writableConnection);
                 databaseService.backWritable(session.getContextId(), writableConnection);
                 writableConnection = null;
             }
@@ -185,10 +185,10 @@ public class ConnectionHelper {
     public void backWritableAfterReading() throws OXException {
         if (null != writableConnection) {
             if (false == committed) {
-                DBUtils.rollback(writableConnection);
+                Databases.rollback(writableConnection);
             }
             if (backWritable) {
-                DBUtils.autocommit(writableConnection);
+                Databases.autocommit(writableConnection);
                 databaseService.backWritableAfterReading(session.getContextId(), writableConnection);
                 writableConnection = null;
             }

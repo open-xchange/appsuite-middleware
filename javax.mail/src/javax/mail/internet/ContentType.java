@@ -40,10 +40,6 @@
 
 package javax.mail.internet;
 
-import javax.mail.*;
-import java.util.*;
-import java.io.*;
-
 /**
  * This class represents a MIME Content-Type value. It provides
  * methods to parse a Content-Type string into individual components

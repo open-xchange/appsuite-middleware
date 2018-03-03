@@ -45,7 +45,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
-import javax.mail.event.*;
+import javax.mail.event.TransportEvent;
+import javax.mail.event.TransportListener;
 
 /**
  * An abstract class that models a message transport.

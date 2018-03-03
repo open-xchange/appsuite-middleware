@@ -1,9 +1,8 @@
 package liquibase.statement.core;
 
+import java.util.List;
 import liquibase.change.ColumnConfig;
 import liquibase.statement.AbstractSqlStatement;
-
-import java.util.List;
 
 public class CopyRowsStatement extends AbstractSqlStatement {
 

@@ -31,16 +31,11 @@
  */
 package net.fortuna.ical4j.model;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-
-import net.fortuna.ical4j.util.Dates;
-
 import org.apache.commons.lang.builder.HashCodeBuilder;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import net.fortuna.ical4j.util.Dates;
 
 /**
  * $Id$

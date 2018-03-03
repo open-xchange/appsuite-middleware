@@ -50,7 +50,6 @@
 package com.openexchange.saml;
 
 import java.io.IOException;
-import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.opensaml.saml2.core.Assertion;

@@ -49,6 +49,10 @@
 
 package gnu.trove;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import gnu.trove.function.TObjectFunction;
 import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.map.TIntObjectMap;
@@ -56,10 +60,6 @@ import gnu.trove.procedure.TIntObjectProcedure;
 import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.procedure.TObjectProcedure;
 import gnu.trove.set.TIntSet;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.NoSuchElementException;
 
 /**
  * {@link EmptyTIntObjectMap}

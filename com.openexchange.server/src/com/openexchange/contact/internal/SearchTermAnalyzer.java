@@ -51,7 +51,6 @@ package com.openexchange.contact.internal;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.Operand;

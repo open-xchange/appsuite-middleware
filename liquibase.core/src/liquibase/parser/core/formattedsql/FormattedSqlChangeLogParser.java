@@ -1,5 +1,10 @@
 package liquibase.parser.core.formattedsql;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.ChangeLogParameters;
@@ -13,10 +18,6 @@ import liquibase.precondition.core.SqlPrecondition;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
 import liquibase.util.StringUtils;
-
-import java.io.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class FormattedSqlChangeLogParser implements ChangeLogParser {
 

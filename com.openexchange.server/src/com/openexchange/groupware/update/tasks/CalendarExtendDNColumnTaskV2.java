@@ -49,19 +49,18 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link CalendarExtendDNColumnTaskV2}
@@ -113,9 +112,9 @@ public class CalendarExtendDNColumnTaskV2 implements UpdateTaskV2 {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
         }
     }
 
@@ -144,7 +143,7 @@ public class CalendarExtendDNColumnTaskV2 implements UpdateTaskV2 {
         } catch (final SQLException e) {
             throw wrapSQLException(e);
         } finally {
-            closeSQLStuff(rs);
+            Databases.closeSQLStuff(rs);
             rs = null;
         }
 
@@ -156,7 +155,7 @@ public class CalendarExtendDNColumnTaskV2 implements UpdateTaskV2 {
         } catch (final SQLException e) {
             throw wrapSQLException(e);
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
 
         LOG.info("{}: Size of column `dn` in table `{}` successfully extended.", CalendarExtendDNColumnTaskV2.class.getSimpleName(), tableName);

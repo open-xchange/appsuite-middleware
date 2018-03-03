@@ -41,7 +41,6 @@
 package com.sun.mail.gimap;
 
 import javax.mail.Message;
-import javax.mail.search.StringTerm;
 
 /**
  * This class implements searching for the Gmail thread ID.

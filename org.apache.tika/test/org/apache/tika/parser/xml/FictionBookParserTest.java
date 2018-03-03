@@ -16,6 +16,8 @@
  */
 package org.apache.tika.parser.xml;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
 import org.apache.tika.extractor.ContainerExtractor;
 import org.apache.tika.extractor.ParserContainerExtractor;
@@ -25,10 +27,6 @@ import org.apache.tika.parser.microsoft.AbstractPOIContainerExtractionTest;
 import org.apache.tika.sax.BodyContentHandler;
 import org.junit.Test;
 import org.xml.sax.ContentHandler;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 public class FictionBookParserTest {         @Test
      public void testFB2() throws Exception {

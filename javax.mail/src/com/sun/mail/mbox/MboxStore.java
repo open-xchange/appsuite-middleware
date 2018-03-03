@@ -40,8 +40,13 @@
 
 package com.sun.mail.mbox;
 
-import java.io.*;
-import javax.mail.*;
+import javax.mail.AuthenticationFailedException;
+import javax.mail.Flags;
+import javax.mail.Folder;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Store;
+import javax.mail.URLName;
 
 public class MboxStore extends Store {
 

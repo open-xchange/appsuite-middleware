@@ -1,10 +1,9 @@
 package liquibase.database.jvm;
 
-import liquibase.exception.DatabaseException;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import liquibase.exception.DatabaseException;
 
 public class DerbyConnection extends JdbcConnection {
 

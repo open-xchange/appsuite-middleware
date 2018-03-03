@@ -50,9 +50,9 @@
 package com.openexchange.twitter.internal;
 
 import java.util.Date;
-import twitter4j.Status;
 import com.openexchange.twitter.RetweetDetails;
 import com.openexchange.twitter.User;
+import twitter4j.Status;
 
 /**
  * {@link RetweetDetailsImpl} - The retweet details implementation.

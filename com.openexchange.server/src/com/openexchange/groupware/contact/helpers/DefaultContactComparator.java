@@ -49,11 +49,11 @@
 
 package com.openexchange.groupware.contact.helpers;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.Comparator;
 import java.util.Locale;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.Order;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 
 /**

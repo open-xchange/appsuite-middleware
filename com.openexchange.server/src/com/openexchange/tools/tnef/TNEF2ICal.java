@@ -62,6 +62,9 @@ import java.net.URISyntaxException;
 import java.util.Date;
 import java.util.Locale;
 import java.util.regex.Pattern;
+import com.openexchange.groupware.i18n.Notifications;
+import com.openexchange.i18n.LocaleTools;
+import com.openexchange.i18n.tools.StringHelper;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.component.VAlarm;
@@ -91,9 +94,6 @@ import net.freeutils.tnef.Attr;
 import net.freeutils.tnef.MAPIProp;
 import net.freeutils.tnef.MAPIProps;
 import net.freeutils.tnef.RawInputStream;
-import com.openexchange.groupware.i18n.Notifications;
-import com.openexchange.i18n.LocaleTools;
-import com.openexchange.i18n.tools.StringHelper;
 
 /**
  * {@link TNEF2ICal}

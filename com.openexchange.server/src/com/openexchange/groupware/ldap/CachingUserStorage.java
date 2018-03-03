@@ -49,7 +49,8 @@
 
 package com.openexchange.groupware.ldap;
 
-import static com.openexchange.java.Autoboxing.*;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;

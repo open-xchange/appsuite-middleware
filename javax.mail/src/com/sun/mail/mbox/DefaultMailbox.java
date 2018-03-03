@@ -40,7 +40,11 @@
 
 package com.sun.mail.mbox;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 
 public class DefaultMailbox extends Mailbox {
     private final String home;

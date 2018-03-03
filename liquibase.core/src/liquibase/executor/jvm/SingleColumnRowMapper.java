@@ -6,7 +6,6 @@ import java.sql.Clob;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-
 import liquibase.util.JdbcUtils;
 import liquibase.util.NumberUtils;
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.sessionmanagement.tests;
 
+import static org.hamcrest.Matchers.is;
 import java.util.Collection;
 import org.junit.Assert;
 import org.junit.Test;
@@ -59,7 +60,6 @@ import com.openexchange.ajax.sessionmanagement.actions.AllResponse;
 import com.openexchange.ajax.sessionmanagement.actions.ClearRequest;
 import com.openexchange.ajax.sessionmanagement.actions.ClearResponse;
 import com.openexchange.session.management.ManagedSession;
-import static org.hamcrest.Matchers.is;
 
 /**
  * {@link RemoveAllOtherSessionsTest}

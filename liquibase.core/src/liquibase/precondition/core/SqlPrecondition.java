@@ -1,10 +1,14 @@
 package liquibase.precondition.core;
 
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
-import liquibase.exception.*;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.executor.ExecutorService;
 import liquibase.precondition.Precondition;
 import liquibase.statement.core.RawSqlStatement;

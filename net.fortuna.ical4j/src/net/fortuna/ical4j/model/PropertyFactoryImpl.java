@@ -34,7 +34,6 @@ package net.fortuna.ical4j.model;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.text.ParseException;
-
 import net.fortuna.ical4j.model.property.Action;
 import net.fortuna.ical4j.model.property.Attach;
 import net.fortuna.ical4j.model.property.Attendee;

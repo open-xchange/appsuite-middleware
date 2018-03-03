@@ -52,11 +52,11 @@ package com.openexchange.drive.events.subscribe.rdb;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link DriveEventSubscriptionsDeleteListener}
@@ -106,7 +106,7 @@ public class DriveEventSubscriptionsDeleteListener implements DeleteListener {
             stmt.setInt(1, cid);
             return SQL.logExecuteUpdate(stmt);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -118,7 +118,7 @@ public class DriveEventSubscriptionsDeleteListener implements DeleteListener {
             stmt.setInt(2, user);
             return SQL.logExecuteUpdate(stmt);
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 

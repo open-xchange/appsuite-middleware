@@ -51,8 +51,8 @@ package com.openexchange.calendar.printing.days;
 
 import java.util.Calendar;
 import java.util.Date;
-import com.openexchange.calendar.printing.CPEvent;
 import com.openexchange.calendar.printing.CPCalendar;
+import com.openexchange.calendar.printing.CPEvent;
 
 /**
  * {@link CalendarTools}

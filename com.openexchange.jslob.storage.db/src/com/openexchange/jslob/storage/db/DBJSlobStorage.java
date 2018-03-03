@@ -49,9 +49,6 @@
 
 package com.openexchange.jslob.storage.db;
 
-import gnu.trove.iterator.TIntObjectIterator;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.ByteArrayOutputStream;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -84,6 +81,9 @@ import com.openexchange.jslob.JSlobId;
 import com.openexchange.jslob.storage.JSlobStorage;
 import com.openexchange.jslob.storage.db.cache.CachingJSlobStorage;
 import com.openexchange.server.ServiceLookup;
+import gnu.trove.iterator.TIntObjectIterator;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link DBJSlobStorage}

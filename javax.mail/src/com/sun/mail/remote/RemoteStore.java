@@ -40,9 +40,14 @@
 
 package com.sun.mail.remote;
 
-import java.io.*;
-import javax.mail.*;
-import com.sun.mail.mbox.*;
+import javax.mail.Flags;
+import javax.mail.Folder;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Store;
+import javax.mail.URLName;
+import com.sun.mail.mbox.MboxStore;
 
 /**
  * A wrapper around a local <code>MboxStore</code> that fetches data

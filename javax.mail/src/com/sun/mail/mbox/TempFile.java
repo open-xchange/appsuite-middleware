@@ -40,12 +40,11 @@
 
 package com.sun.mail.mbox;
 
-import java.util.*;
-import java.net.*;
-import java.io.*;
-import java.security.*;
-
-import com.sun.mail.util.PropUtil;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import javax.mail.util.SharedFileInputStream;
 
 /**

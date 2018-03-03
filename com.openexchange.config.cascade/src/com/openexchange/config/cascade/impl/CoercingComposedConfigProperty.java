@@ -50,7 +50,6 @@
 package com.openexchange.config.cascade.impl;
 
 import java.util.List;
-
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 import com.openexchange.exception.OXException;

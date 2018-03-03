@@ -40,8 +40,8 @@
 
 package javax.mail.event;
 
-import java.util.*;
-import javax.mail.*;
+import javax.mail.Folder;
+import javax.mail.Message;
 
 /**
  * This class notifies changes in the number of messages in a folder. <p>

@@ -354,7 +354,7 @@ public final class DBUtils {
             }
             return retval;
         } finally {
-            DBUtils.closeSQLStuff(result);
+            Databases.closeSQLStuff(result);
         }
     }
 

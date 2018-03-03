@@ -1,6 +1,10 @@
 package liquibase.util.csv.opencsv.bean;
 
 
+import java.beans.IntrospectionException;
+import java.beans.PropertyDescriptor;
+import java.io.IOException;
+
 /**
  Copyright 2007 Kyle Miller.
 
@@ -18,10 +22,6 @@ package liquibase.util.csv.opencsv.bean;
  */
 
 import liquibase.util.csv.opencsv.CSVReader;
-
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
-import java.io.IOException;
 
 public interface MappingStrategy {
 

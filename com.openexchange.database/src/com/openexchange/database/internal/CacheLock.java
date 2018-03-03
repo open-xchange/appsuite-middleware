@@ -49,9 +49,9 @@
 
 package com.openexchange.database.internal;
 
+import java.util.concurrent.locks.Lock;
 import com.openexchange.exception.OXException;
 import com.openexchange.lock.AccessControl;
-import java.util.concurrent.locks.Lock;
 
 /**
  * {@link CacheLock}

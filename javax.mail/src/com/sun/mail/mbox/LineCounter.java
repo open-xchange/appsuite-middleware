@@ -40,7 +40,9 @@
 
 package com.sun.mail.mbox;
 
-import java.io.*;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Count number of lines output.

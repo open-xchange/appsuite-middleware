@@ -1,6 +1,11 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import java.math.BigInteger;
+import liquibase.change.AbstractChange;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.DatabaseChange;
+import liquibase.change.DatabaseChangeNote;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.statement.SequenceNextValueFunction;
@@ -9,8 +14,6 @@ import liquibase.statement.core.AddAutoIncrementStatement;
 import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.statement.core.CreateSequenceStatement;
 import liquibase.statement.core.SetNullableStatement;
-
-import java.math.BigInteger;
 
 /**
  * Makes an existing column into an auto-increment column.

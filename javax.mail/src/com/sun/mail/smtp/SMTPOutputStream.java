@@ -40,7 +40,8 @@
 
 package com.sun.mail.smtp;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 import com.sun.mail.util.CRLFOutputStream;
 
 /**

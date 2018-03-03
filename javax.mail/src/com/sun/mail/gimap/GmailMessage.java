@@ -40,16 +40,15 @@
 
 package com.sun.mail.gimap;
 
-import java.io.*;
-
-import javax.mail.*;
-import javax.mail.internet.*;
-
-import com.sun.mail.util.*;
-import com.sun.mail.iap.*;
-import com.sun.mail.imap.*;
-import com.sun.mail.imap.protocol.*;
-import com.sun.mail.gimap.protocol.*;
+import javax.mail.FolderClosedException;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import com.sun.mail.gimap.protocol.GmailProtocol;
+import com.sun.mail.iap.ConnectionException;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPMessage;
+import com.sun.mail.imap.protocol.IMAPProtocol;
 
 /**
  * A Gmail message.  Adds methods to access Gmail-specific per-message data.

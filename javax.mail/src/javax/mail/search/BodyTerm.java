@@ -41,7 +41,10 @@
 package javax.mail.search;
 
 import java.io.IOException;
-import javax.mail.*;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Part;
 
 /**
  * This class implements searches on a message body.

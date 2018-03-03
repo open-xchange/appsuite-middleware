@@ -49,8 +49,8 @@
 
 package com.openexchange.filestore.impl;
 
-import it.geosolutions.imageio.stream.eraf.EnhancedRandomAccessFile;
 import java.io.IOException;
+import it.geosolutions.imageio.stream.eraf.EnhancedRandomAccessFile;
 
 /**
  * {@link RandomAccessFileInputStream}

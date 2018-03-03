@@ -54,7 +54,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import com.google.common.collect.ImmutableList;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Strings;
 
 /**

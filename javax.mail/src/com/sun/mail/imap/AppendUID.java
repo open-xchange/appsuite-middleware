@@ -40,8 +40,6 @@
 
 package com.sun.mail.imap;
 
-import com.sun.mail.iap.*;
-
 /**
  * Information from the APPENDUID response code
  * defined by the UIDPLUS extension -

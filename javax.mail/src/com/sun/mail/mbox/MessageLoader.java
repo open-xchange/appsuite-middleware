@@ -40,8 +40,12 @@
 
 package com.sun.mail.mbox;
 
-import java.io.*;
-import java.util.*;
+import java.io.EOFException;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.List;
 
 /**
  * A support class that contains the state and logic needed when

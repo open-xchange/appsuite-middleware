@@ -1,14 +1,13 @@
 package liquibase.structure.core;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 public class DatabaseObjectFactory {
 

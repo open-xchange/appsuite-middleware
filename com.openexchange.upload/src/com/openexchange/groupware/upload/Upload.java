@@ -50,7 +50,6 @@
 package com.openexchange.groupware.upload;
 
 import java.util.Iterator;
-import com.openexchange.groupware.upload.UploadFile;
 
 /**
  * {@link Upload} - Represents a successfully parsed upload.

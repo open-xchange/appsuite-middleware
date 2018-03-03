@@ -40,11 +40,11 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.util.Map;
 import java.util.HashMap;
 import java.util.Locale;
-
-import com.sun.mail.iap.*;
+import java.util.Map;
+import com.sun.mail.iap.ParsingException;
+import com.sun.mail.iap.Response;
 
 /**
  * STATUS response.

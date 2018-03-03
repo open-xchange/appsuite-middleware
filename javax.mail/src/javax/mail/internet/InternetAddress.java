@@ -43,12 +43,13 @@ package javax.mail.internet;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.StringTokenizer;
-import java.util.Locale;
 import java.nio.charset.StandardCharsets;
-import javax.mail.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.StringTokenizer;
+import javax.mail.Address;
+import javax.mail.Session;
 import com.sun.mail.util.PropUtil;
 
 /**

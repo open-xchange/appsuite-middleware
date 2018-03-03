@@ -49,6 +49,9 @@
 
 package com.openexchange.messaging.json;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,10 +62,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.messaging.ContentDisposition;
 import com.openexchange.messaging.MessagingHeader;
 import com.openexchange.messaging.generic.internet.MimeContentType;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 
 /**

@@ -52,13 +52,13 @@ package liquibase.precondition.ext;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import org.apache.commons.lang.Validate;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.CustomPreconditionErrorException;
 import liquibase.exception.CustomPreconditionFailedException;
 import liquibase.precondition.CustomPrecondition;
-import org.apache.commons.lang.Validate;
 
 /**
  * Verifies the size of the database column by ignoring the type of the column!

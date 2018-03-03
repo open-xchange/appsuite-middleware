@@ -49,11 +49,11 @@
 
 package gnu.trove;
 
+import java.util.Collection;
+import java.util.NoSuchElementException;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.TIntSet;
-import java.util.Collection;
-import java.util.NoSuchElementException;
 
 /**
  * {@link EmptyTIntSet} - The empty {@link TIntSet} implementation.

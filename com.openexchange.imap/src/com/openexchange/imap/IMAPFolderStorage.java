@@ -52,10 +52,6 @@ package com.openexchange.imap;
 import static com.openexchange.java.Strings.quoteReplacement;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
-import gnu.trove.procedure.TIntProcedure;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TCharHashSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -146,11 +142,15 @@ import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.ACL;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPFolder.ProtocolCommand;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.Rights;
-import com.sun.mail.imap.IMAPFolder.ProtocolCommand;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.ListInfo;
+import gnu.trove.procedure.TIntProcedure;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TCharHashSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link IMAPFolderStorage} - The IMAP folder storage implementation.

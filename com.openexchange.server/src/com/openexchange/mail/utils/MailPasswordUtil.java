@@ -77,7 +77,6 @@ import com.openexchange.secret.SecretEncryptionStrategy;
 import com.openexchange.secret.SecretExceptionCodes;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link MailPasswordUtil} - Utility class to encrypt/decrypt passwords with a key aka <b>p</b>assword <b>b</b>ased <b>e</b>ncryption
@@ -154,7 +153,7 @@ public final class MailPasswordUtil {
                             stmt.setInt(3, session.getUserId());
                             stmt.setInt(4, customizationNote.accountId);
                             stmt.executeUpdate();
-                            DBUtils.closeSQLStuff(stmt);
+                            Databases.closeSQLStuff(stmt);
                         }
 
                         if (customizationNote.server.equals(mailAccount.getTransportServer())) {
@@ -166,7 +165,7 @@ public final class MailPasswordUtil {
                             stmt.executeUpdate();
                         }
                     } finally {
-                        DBUtils.closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                     }
 
                     try {

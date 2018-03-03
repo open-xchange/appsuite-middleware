@@ -51,7 +51,6 @@ package com.openexchange.oauth.provider.tools;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashSet;
 import java.util.Set;
 import com.google.common.collect.ImmutableSet;
 

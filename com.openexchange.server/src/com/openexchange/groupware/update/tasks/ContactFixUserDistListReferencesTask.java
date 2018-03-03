@@ -53,13 +53,13 @@ import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link ContactFixUserDistListReferencesTask}
@@ -108,9 +108,9 @@ public final class ContactFixUserDistListReferencesTask extends UpdateTaskAdapte
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(connection);
+                Databases.rollback(connection);
             }
-            DBUtils.autocommit(connection);
+            Databases.autocommit(connection);
         }
     }
 
@@ -128,7 +128,7 @@ public final class ContactFixUserDistListReferencesTask extends UpdateTaskAdapte
             statement = connection.prepareStatement(sql);
             return statement.executeUpdate();
         } finally {
-            DBUtils.closeSQLStuff(statement);
+            Databases.closeSQLStuff(statement);
         }
     }
 
@@ -146,7 +146,7 @@ public final class ContactFixUserDistListReferencesTask extends UpdateTaskAdapte
             statement = connection.prepareStatement(sql);
             return statement.executeUpdate();
         } finally {
-            DBUtils.closeSQLStuff(statement);
+            Databases.closeSQLStuff(statement);
         }
     }
 

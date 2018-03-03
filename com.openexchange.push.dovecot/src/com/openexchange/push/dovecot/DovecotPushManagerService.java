@@ -62,7 +62,6 @@ import java.util.concurrent.ExecutionException;
 import org.slf4j.Logger;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Hazelcasts;
-import com.hazelcast.core.IExecutorService;
 import com.hazelcast.core.Member;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dovecot.doveadm.client.DoveAdmClient;

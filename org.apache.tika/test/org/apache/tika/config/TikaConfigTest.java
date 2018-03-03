@@ -16,15 +16,12 @@
  */
 package org.apache.tika.config;
 
+import static org.junit.Assert.fail;
 import java.net.URL;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.DefaultParser;
 import org.junit.Test;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 public class TikaConfigTest {
     /**

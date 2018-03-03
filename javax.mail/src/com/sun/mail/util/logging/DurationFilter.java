@@ -41,7 +41,8 @@
 package com.sun.mail.util.logging;
 
 import static com.sun.mail.util.logging.LogManagerProperties.fromLogManager;
-import java.util.logging.*;
+import java.util.logging.Filter;
+import java.util.logging.LogRecord;
 
 /**
  * A filter used to limit log records based on a maximum generation rate.

@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.writer;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -74,6 +72,8 @@ import com.openexchange.messaging.MessagingFolder;
 import com.openexchange.messaging.MessagingPermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.session.ServerSession;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link MessagingFolderWriter} - The messaging folder writer.

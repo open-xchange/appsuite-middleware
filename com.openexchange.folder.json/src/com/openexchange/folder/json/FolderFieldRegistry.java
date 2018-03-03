@@ -49,8 +49,6 @@
 
 package com.openexchange.folder.json;
 
-import gnu.trove.ConcurrentTIntObjectHashMap;
-import gnu.trove.map.TIntObjectMap;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -59,6 +57,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.folderstorage.FolderField;
+import gnu.trove.ConcurrentTIntObjectHashMap;
+import gnu.trove.map.TIntObjectMap;
 
 
 /**

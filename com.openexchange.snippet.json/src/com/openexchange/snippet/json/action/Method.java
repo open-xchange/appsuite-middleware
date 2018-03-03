@@ -49,10 +49,10 @@
 
 package com.openexchange.snippet.json.action;
 
-import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * An enumeration for HTTP methods.

@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.tools.iterator;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.database.Databases.closeSQLStuff;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

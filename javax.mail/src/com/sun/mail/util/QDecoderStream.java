@@ -40,7 +40,8 @@
 
 package com.sun.mail.util;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * This class implements a Q Decoder as defined in RFC 2047

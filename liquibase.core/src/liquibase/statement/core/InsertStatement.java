@@ -2,7 +2,6 @@ package liquibase.statement.core;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import liquibase.change.ColumnConfig;
 import liquibase.statement.AbstractSqlStatement;
 

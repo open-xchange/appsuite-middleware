@@ -40,28 +40,54 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.io.*;
-import java.util.*;
-import java.text.*;
-import java.lang.reflect.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.lang.reflect.Constructor;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Level;
-
-import javax.mail.*;
-import javax.mail.internet.*;
-import javax.mail.search.*;
-
-import com.sun.mail.util.*;
-import com.sun.mail.iap.*;
+import javax.mail.Flags;
+import javax.mail.Folder;
+import javax.mail.Quota;
+import javax.mail.UIDFolder;
+import javax.mail.internet.MimeUtility;
+import javax.mail.search.SearchException;
+import javax.mail.search.SearchTerm;
 import com.sun.mail.auth.Ntlm;
-
+import com.sun.mail.iap.Argument;
+import com.sun.mail.iap.BadCommandException;
+import com.sun.mail.iap.ByteArray;
+import com.sun.mail.iap.CommandFailedException;
+import com.sun.mail.iap.ConnectionException;
+import com.sun.mail.iap.Literal;
+import com.sun.mail.iap.LiteralException;
+import com.sun.mail.iap.ParsingException;
+import com.sun.mail.iap.Protocol;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.iap.Response;
 import com.sun.mail.imap.ACL;
-import com.sun.mail.imap.Rights;
 import com.sun.mail.imap.AppendUID;
 import com.sun.mail.imap.CopyUID;
-import com.sun.mail.imap.SortTerm;
 import com.sun.mail.imap.ResyncData;
+import com.sun.mail.imap.Rights;
+import com.sun.mail.imap.SortTerm;
 import com.sun.mail.imap.Utility;
+import com.sun.mail.util.ASCIIUtility;
+import com.sun.mail.util.BASE64EncoderStream;
+import com.sun.mail.util.MailLogger;
+import com.sun.mail.util.PropUtil;
 
 /**
  * This class extends the iap.Protocol object and implements IMAP

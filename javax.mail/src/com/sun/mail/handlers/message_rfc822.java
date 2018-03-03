@@ -40,11 +40,17 @@
 
 package com.sun.mail.handlers;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Properties;
-import javax.activation.*;
-import javax.mail.*;
-import javax.mail.internet.*;
+import javax.activation.ActivationDataFlavor;
+import javax.activation.DataSource;
+import javax.mail.Message;
+import javax.mail.MessageAware;
+import javax.mail.MessageContext;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.internet.MimeMessage;
 
 
 /**

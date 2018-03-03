@@ -49,18 +49,18 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.database.Databases.autocommit;
 import static com.openexchange.tools.update.Tools.createIndex;
 import static com.openexchange.tools.update.Tools.existsIndex;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
 import org.slf4j.LoggerFactory;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link DListAddIndexForLookup} - Creates indexes on tables "prg_dlist" and "del_dlist" to improve look-up.
@@ -97,7 +97,7 @@ public final class DListAddIndexForLookup extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.UPDATE_FAILED.create(e, params.getSchema().getSchema(), e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
             autocommit(con);
         }

@@ -49,11 +49,11 @@
 
 package com.openexchange.webdav.protocol;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 public class Multistatus<T> implements Iterable<WebdavStatus<T>>{
 

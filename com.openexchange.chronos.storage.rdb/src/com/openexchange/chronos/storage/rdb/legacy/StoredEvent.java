@@ -111,7 +111,7 @@ public class StoredEvent extends DelegatingEvent {
         /*
          * a changed recurrence rule requires an update of the start-date, too
          */
-        return delegate.containsStartDate() || containsRecurrenceRule();
+        return delegate.containsStartDate() || delegate.containsRecurrenceRule();
     }
 
     @Override
@@ -119,12 +119,15 @@ public class StoredEvent extends DelegatingEvent {
         /*
          * a changed recurrence rule requires an update of the end-date, too
          */
-        return delegate.containsEndDate() || containsRecurrenceRule();
+        return delegate.containsEndDate() || delegate.containsRecurrenceRule();
     }
 
     @Override
     public boolean containsRecurrenceRule() {
-        return delegate.containsRecurrenceRule() || delegate.getRecurrenceRule() != null;
+        /*
+         * a changed start- or end-date requires an update of the recurrence rule, too
+         */
+        return delegate.containsRecurrenceRule() || isSeriesMaster(delegate) && (delegate.containsStartDate() || delegate.containsEndDate());
     }
 
     @Override

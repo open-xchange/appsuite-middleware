@@ -40,8 +40,8 @@
 
 package javax.mail.search;
 
-import javax.mail.Message;
 import javax.mail.Address;
+import javax.mail.Message;
 
 /**
  * This class implements string comparisons for the Recipient Address

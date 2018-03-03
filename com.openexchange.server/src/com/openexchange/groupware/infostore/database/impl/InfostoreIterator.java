@@ -61,6 +61,7 @@ import java.util.Date;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -75,7 +76,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.AsciiReader;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.sql.DBUtils;
 
 public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
 
@@ -220,7 +220,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         }
 
         try {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             provider.releaseReadConnection(ctx, con);
         } finally {
             con = null;
@@ -294,7 +294,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
             this.con = con;
         } catch (final SQLException x) {
             if(stmt != null) {
-                DBUtils.closeSQLStuff(null, stmt);
+                Databases.closeSQLStuff(null, stmt);
             }
             if(con != null) {
                 provider.releaseReadConnection(ctx, con);
@@ -304,7 +304,7 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
             this.exception =e;
         } finally {
             if (close) {
-                DBUtils.closeSQLStuff(rs, stmt);
+                Databases.closeSQLStuff(rs, stmt);
                 provider.releaseReadConnection(ctx, con);
             }
         }

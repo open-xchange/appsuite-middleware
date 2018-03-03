@@ -71,8 +71,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TimeZone;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import org.dmfs.rfc5545.DateTime;
@@ -84,7 +82,6 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.Check;
 import com.openexchange.chronos.common.DefaultEventsResult;
 import com.openexchange.chronos.common.FreeBusyUtils;
@@ -125,13 +122,10 @@ import com.openexchange.chronos.service.EventsResult;
 import com.openexchange.chronos.service.FreeBusyResult;
 import com.openexchange.chronos.service.ImportResult;
 import com.openexchange.chronos.service.SearchFilter;
-import com.openexchange.chronos.service.SearchOptions;
-import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.service.UpdatesResult;
 import com.openexchange.config.lean.LeanConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.java.util.TimeZones;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -262,13 +256,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         } else {
             CompletionService<Map<String, EventsResult>> completionService = getCompletionService();
             for (Entry<CalendarAccount, List<String>> entry : relativeFolderIdsPerAccount.entrySet()) {
-                completionService.submit(new Callable<Map<String, EventsResult>>() {
-
-                    @Override
-                    public Map<String, EventsResult> call() throws Exception {
-                        return getEventsInFolders(entry.getKey(), entry.getValue());
-                    }
-                });
+                completionService.submit(() -> getEventsInFolders(entry.getKey(), entry.getValue()));
             }
             eventsResults.putAll(collectEventsResults(completionService, relativeFolderIdsPerAccount.size()));
         }
@@ -334,13 +322,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         } else {
             CompletionService<Map<String, EventsResult>> completionService = getCompletionService();
             for (Entry<CalendarAccount, List<String>> entry : relativeFolderIdsPerAccount.entrySet()) {
-                completionService.submit(new Callable<Map<String, EventsResult>>() {
-
-                    @Override
-                    public Map<String, EventsResult> call() throws Exception {
-                        return searchEventsInFolders(entry.getKey(), entry.getValue(), filters, queries);
-                    }
-                });
+                completionService.submit(() -> searchEventsInFolders(entry.getKey(), entry.getValue(), filters, queries));
             }
             eventsResults.putAll(collectEventsResults(completionService, relativeFolderIdsPerAccount.size()));
         }
@@ -367,13 +349,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         }
         CompletionService<Map<String, EventsResult>> completionService = getCompletionService();
         for (CalendarAccount account : accounts) {
-            completionService.submit(new Callable<Map<String, EventsResult>>() {
-
-                @Override
-                public Map<String, EventsResult> call() throws Exception {
-                    return searchEventsInFolders(account, null, filters, queries);
-                }
-            });
+            completionService.submit(() -> searchEventsInFolders(account, null, filters, queries));
         }
         return collectEventsResults(completionService, accounts.size());
     }
@@ -476,32 +452,9 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         List<CalendarFolder> folders = new ArrayList<CalendarFolder>();
         for (CalendarAccount account : getAccounts()) {
             try {
-                CalendarAccess access = getAccess(account);
-                if (GroupwareCalendarAccess.class.isInstance(access)) {
-                    List<GroupwareCalendarFolder> groupwareFolders = ((GroupwareCalendarAccess) access).getVisibleFolders(type);
-                    folders.addAll(withUniqueID(groupwareFolders, account));
-                } else if (GroupwareFolderType.PRIVATE.equals(type)) {
-                    if (FolderCalendarAccess.class.isInstance(access)) {
-                        folders.addAll(withUniqueID(((FolderCalendarAccess) access).getVisibleFolders(), account));
-                    } else if (BasicCalendarAccess.class.isInstance(access)) {
-                        CalendarFolder folder;
-                        if (false == hasCapability(account.getProviderId())) {
-                            OXException accountError = CalendarExceptionCodes.MISSING_CAPABILITY.create(CalendarProviders.getCapabilityName(account.getProviderId()));
-                            warnings.add(accountError);
-                            folder = getBasicCalendarFolder((BasicCalendarAccess) access, isAutoProvisioned(account), accountError);
-                        } else {
-                            folder = getBasicCalendarFolder((BasicCalendarAccess) access, isAutoProvisioned(account));
-                        }
-                        folders.add(withUniqueID(folder, account));
-                    }
-                }
+                folders.addAll(withUniqueID(getVisibleFolders(account, type), account));
             } catch (OXException e) {
-                // TODO: persist exception in account data
-                if (false == CalendarExceptionCodes.MISSING_CAPABILITY.equals(e)) {
-                    e = withUniqueIDs(e, account.getAccountId());
-                    LOG.warn("Error getting visible folders from calendar account {}: {}", I(account.getAccountId()), e.getMessage(), e);
-                }
-                continue;
+                throw withUniqueIDs(e, account.getAccountId());
             }
         }
         return folders;
@@ -511,23 +464,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     public AccountAwareCalendarFolder getFolder(String folderId) throws OXException {
         CalendarAccount account = getAccount(getAccountId(folderId), false);
         try {
-            CalendarAccess access = getAccess(account.getAccountId());
-            if (FolderCalendarAccess.class.isInstance(access)) {
-                CalendarFolder folder = ((FolderCalendarAccess) access).getFolder(getRelativeFolderId(folderId));
-                return withUniqueID(folder, account);
-            }
-            if (BasicCalendarAccess.class.isInstance(access)) {
-                Check.folderMatches(getRelativeFolderId(folderId), BasicCalendarAccess.FOLDER_ID);
-                CalendarFolder folder;
-                if (false == hasCapability(account.getProviderId())) {
-                    OXException accountError = CalendarExceptionCodes.MISSING_CAPABILITY.create(CalendarProviders.getCapabilityName(account.getProviderId()));
-                    folder = getBasicCalendarFolder((BasicCalendarAccess) access, isAutoProvisioned(account), accountError);
-                } else {
-                    folder = getBasicCalendarFolder((BasicCalendarAccess) access, isAutoProvisioned(account));
-                }
-                return withUniqueID(folder, account);
-            }
-            throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
+            return withUniqueID(getFolder(account, getRelativeFolderId(folderId)), account);
         } catch (OXException e) {
             throw withUniqueIDs(e, account.getAccountId());
         }
@@ -764,6 +701,109 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     }
 
     /**
+     * Gets all visible folders of a certain type in a specific calendar account.
+     * <p/>
+     * In case of certain errors (provider not available or disabled by capability), a placeholder folder for the non-functional account
+     * is returned automatically.
+     *
+     * @param account The calendar account to get the visible folders from
+     * @param type The groupware folder type
+     * @return The visible folders (with <i>relative</i> identifiers), or an empty list if there are none
+     */
+    private List<? extends CalendarFolder> getVisibleFolders(CalendarAccount account, GroupwareFolderType type) throws OXException {
+        /*
+         * non-private folders are handled by groupware calendar access exclusively
+         */
+        if (false == GroupwareFolderType.PRIVATE.equals(type) && DEFAULT_ACCOUNT.getAccountId() != account.getAccountId()) {
+            return Collections.emptyList();
+        }
+        /*
+         * init calendar access for account, falling back to a placeholder folder in case access cannot be established (provider not available or similar)
+         */
+        CalendarAccess access;
+        try {
+            access = getAccess(account);
+        } catch (OXException e) {
+            return Collections.singletonList(getBasicCalendarFolder(account, e));
+        }
+        /*
+         * check if provider is enabled by capability, falling back to a placeholder folder if not
+         */
+        if (false == hasCapability(account.getProviderId())) {
+            OXException error = CalendarExceptionCodes.MISSING_CAPABILITY.create(CalendarProviders.getCapabilityName(account.getProviderId()));
+            if (BasicCalendarAccess.class.isInstance(access)) {
+                return Collections.singletonList(getBasicCalendarFolder((BasicCalendarAccess) access, isAutoProvisioned(account), error));
+            }
+            return Collections.singletonList(getBasicCalendarFolder(account, error));
+        }
+        /*
+         * query or build visible folders for calendar account
+         */
+        if (GroupwareCalendarAccess.class.isInstance(access)) {
+            return ((GroupwareCalendarAccess) access).getVisibleFolders(type);
+        }
+        if (false == GroupwareFolderType.PRIVATE.equals(type)) {
+            return Collections.emptyList();
+        }
+        if (FolderCalendarAccess.class.isInstance(access)) {
+            return ((FolderCalendarAccess) access).getVisibleFolders();
+        }
+        if (BasicCalendarAccess.class.isInstance(access)) {
+            return Collections.singletonList(getBasicCalendarFolder((BasicCalendarAccess) access, isAutoProvisioned(account)));
+        }
+        /*
+         * unsupported, otherwise (should not get here, though)
+         */
+        throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
+    }
+
+    /**
+     * Gets all visible folders of a certain type in a specific calendar account.
+     * <p/>
+     * In case of certain errors (provider not available or disabled by capability), a placeholder folder for the non-functional account
+     * is returned automatically.
+     *
+     * @param account The calendar account to get the folder from
+     * @param folderId The <i>relative</i> identifier of the folder to get
+     * @return The folder (with <i>relative</i> identifiers)
+     */
+    private CalendarFolder getFolder(CalendarAccount account, String folderId) throws OXException {
+        /*
+         * init calendar access for account, falling back to a placeholder folder in case access cannot be established (provider not available or similar)
+         */
+        CalendarAccess access;
+        try {
+            access = getAccess(account);
+        } catch (OXException e) {
+            return getBasicCalendarFolder(account, e);
+        }
+        /*
+         * check if provider is enabled by capability, falling back to a placeholder folder if not
+         */
+        if (false == hasCapability(account.getProviderId())) {
+            OXException error = CalendarExceptionCodes.MISSING_CAPABILITY.create(CalendarProviders.getCapabilityName(account.getProviderId()));
+            if (BasicCalendarAccess.class.isInstance(access)) {
+                return getBasicCalendarFolder((BasicCalendarAccess) access, isAutoProvisioned(account), error);
+            }
+            return getBasicCalendarFolder(account, error);
+        }
+        /*
+         * query or get the folder from account
+         */
+        if (FolderCalendarAccess.class.isInstance(access)) {
+            return ((FolderCalendarAccess) access).getFolder(folderId);
+        }
+        if (BasicCalendarAccess.class.isInstance(access)) {
+            Check.folderMatches(folderId, BasicCalendarAccess.FOLDER_ID);
+            return getBasicCalendarFolder((BasicCalendarAccess) access, isAutoProvisioned(account));
+        }
+        /*
+         * unsupported, otherwise (should not get here, though)
+         */
+        throw CalendarExceptionCodes.UNSUPPORTED_OPERATION_FOR_PROVIDER.create(account.getProviderId());
+    }
+
+    /**
      * Gets all events in a list of folders from a specific calendar account. Potential errors are placed in the results implicitly.
      *
      * @param account The calendar account
@@ -864,17 +904,6 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         return results;
     }
 
-    private List<Event> sort(List<Event> events) throws OXException {
-        if (null != events && 0 < events.size()) {
-            SortOrder[] sortOrders = new SearchOptions(this).getSortOrders();
-            if (null != sortOrders && 0 < sortOrders.length) {
-                TimeZone timeZone = CalendarUtils.optTimeZone(session.getUser().getTimeZone(), TimeZones.UTC);
-                CalendarUtils.sortEvents(events, sortOrders, timeZone);
-            }
-        }
-        return events;
-    }
-
     private SelfProtection getSelfProtection() throws OXException {
         if (protection == null) {
             LeanConfigurationService leanConfigurationService = services.getService(LeanConfigurationService.class);
@@ -920,6 +949,18 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         if (null != accountError) {
             folder.setAccountError(accountError); // prefer passed account error if assigned
         }
+        return folder;
+    }
+
+    private CalendarFolder getBasicCalendarFolder(CalendarAccount account, OXException accountError) {
+        DefaultCalendarFolder folder = new DefaultCalendarFolder();
+        folder.setId(BasicCalendarAccess.FOLDER_ID);
+        folder.setLastModified(account.getLastModified());
+        folder.setPermissions(Collections.singletonList(new DefaultCalendarPermission(session.getUserId(),
+            CalendarPermission.READ_FOLDER, CalendarPermission.READ_ALL_OBJECTS, CalendarPermission.NO_PERMISSIONS,
+            CalendarPermission.NO_PERMISSIONS, true, false, 0)));
+        folder.setAccountError(accountError);
+        folder.setName(getAccountName(account));
         return folder;
     }
 

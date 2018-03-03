@@ -49,7 +49,6 @@
 
 package com.openexchange.publish.database;
 
-import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.SimpleTableCreationTask;
 
 /**

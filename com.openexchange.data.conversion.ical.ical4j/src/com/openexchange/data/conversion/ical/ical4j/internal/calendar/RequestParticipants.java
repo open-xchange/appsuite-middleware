@@ -50,6 +50,10 @@
 package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 
 import java.net.URISyntaxException;
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.contexts.Context;
 import net.fortuna.ical4j.model.ParameterList;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.parameter.CuType;
@@ -57,10 +61,6 @@ import net.fortuna.ical4j.model.parameter.PartStat;
 import net.fortuna.ical4j.model.parameter.Role;
 import net.fortuna.ical4j.model.parameter.Rsvp;
 import net.fortuna.ical4j.model.property.Attendee;
-import com.openexchange.data.conversion.ical.ConversionError;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.contexts.Context;
 
 /**
  * {@link RequestParticipants}

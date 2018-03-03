@@ -60,10 +60,10 @@ import com.openexchange.pns.Hits;
 import com.openexchange.pns.IteratorBackedHits;
 import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushSubscription;
-import com.openexchange.pns.subscription.storage.rdb.RdbPushSubscriptionRegistry;
 import com.openexchange.pns.PushSubscriptionListener;
 import com.openexchange.pns.PushSubscriptionProvider;
 import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.pns.subscription.storage.rdb.RdbPushSubscriptionRegistry;
 
 
 /**

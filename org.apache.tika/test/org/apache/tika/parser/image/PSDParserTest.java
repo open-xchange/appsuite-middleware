@@ -16,16 +16,13 @@
  */
 package org.apache.tika.parser.image;
 
+import static org.junit.Assert.assertEquals;
 import java.io.InputStream;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.Parser;
 import org.junit.Test;
 import org.xml.sax.helpers.DefaultHandler;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 public class PSDParserTest {
     private final Parser parser = new PSDParser();

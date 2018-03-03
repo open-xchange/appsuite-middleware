@@ -32,7 +32,6 @@
 package net.fortuna.ical4j.data;
 
 import java.nio.charset.Charset;
-
 import net.fortuna.ical4j.util.CompatibilityHints;
 
 /**

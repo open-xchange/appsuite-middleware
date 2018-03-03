@@ -17,8 +17,8 @@
 
 package org.quartz.examples.example13;
 
-import org.quartz.PersistJobDataAfterExecution;
-import org.quartz.DisallowConcurrentExecution;;
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.PersistJobDataAfterExecution;;
 
 /**
  * This job has the same functionality of SimpleRecoveryJob

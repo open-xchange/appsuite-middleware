@@ -40,9 +40,14 @@
 
 package javax.mail.util;
 
-import java.io.*;
-import javax.activation.*;
-import javax.mail.internet.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import javax.activation.DataSource;
+import javax.mail.internet.ContentType;
+import javax.mail.internet.MimeUtility;
+import javax.mail.internet.ParseException;
 
 /**
  * A DataSource backed by a byte array.  The byte array may be

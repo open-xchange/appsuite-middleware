@@ -40,9 +40,11 @@
 
 package com.sun.mail.handlers;
 
-import java.io.IOException;
 import java.awt.datatransfer.DataFlavor;
-import javax.activation.*;
+import java.io.IOException;
+import javax.activation.ActivationDataFlavor;
+import javax.activation.DataContentHandler;
+import javax.activation.DataSource;
 
 /**
  * Base class for other DataContentHandlers.

@@ -40,10 +40,14 @@
 
 package com.sun.mail.mbox;
 
-import javax.mail.*;
-import javax.mail.internet.*;
-import javax.activation.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import javax.activation.DataHandler;
+import javax.mail.IllegalWriteException;
+import javax.mail.MessagingException;
+import javax.mail.MethodNotSupportedException;
+import javax.mail.internet.InternetHeaders;
+import javax.mail.internet.MimeBodyPart;
 
 /**
  * This class represents a SunV3 BodyPart.

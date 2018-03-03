@@ -40,7 +40,10 @@
 
 package com.sun.mail.mbox;
 
-import java.io.*;
+import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 
 public class UNIXFolder extends UNIXFile implements MailFile {
     protected transient RandomAccessFile file;

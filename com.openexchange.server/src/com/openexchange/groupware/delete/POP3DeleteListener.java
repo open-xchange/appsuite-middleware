@@ -52,8 +52,8 @@ package com.openexchange.groupware.delete;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * Removes a users POP3 synchronization information. Those table have a foreign key on mail account tables and this information must be
@@ -76,7 +76,7 @@ final class POP3DeleteListener implements DeleteListener {
                 stmt.setInt(pos++, contextId);
                 stmt.setInt(pos++, user);
                 stmt.executeUpdate();
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
 
                 stmt = writeCon.prepareStatement("DELETE FROM pop3_storage_ids WHERE cid=? AND user=?");
                 pos = 1;
@@ -86,7 +86,7 @@ final class POP3DeleteListener implements DeleteListener {
             } catch (final SQLException e) {
                 throw DeleteFailedExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } finally {
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
             }
         }
     }

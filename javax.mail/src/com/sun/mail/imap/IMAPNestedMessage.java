@@ -40,10 +40,15 @@
 
 package com.sun.mail.imap;
 
-import java.io.*;
-import javax.mail.*;
-import com.sun.mail.imap.protocol.*;
+import javax.mail.Flags;
+import javax.mail.FolderClosedException;
+import javax.mail.MessageRemovedException;
+import javax.mail.MessagingException;
+import javax.mail.MethodNotSupportedException;
 import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.imap.protocol.BODYSTRUCTURE;
+import com.sun.mail.imap.protocol.ENVELOPE;
+import com.sun.mail.imap.protocol.IMAPProtocol;
 
 /**
  * This class implements a nested IMAP message

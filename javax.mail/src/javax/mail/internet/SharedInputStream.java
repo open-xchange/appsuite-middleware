@@ -40,7 +40,7 @@
 
 package javax.mail.internet;
 
-import java.io.*;
+import java.io.InputStream;
 
 /**
  * An InputStream that is backed by data that can be shared by multiple

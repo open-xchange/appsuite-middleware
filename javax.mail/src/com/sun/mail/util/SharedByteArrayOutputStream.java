@@ -40,9 +40,8 @@
 
 package com.sun.mail.util;
 
-import java.io.InputStream;
 import java.io.ByteArrayOutputStream;
-
+import java.io.InputStream;
 import javax.mail.util.SharedByteArrayInputStream;
 
 /**

@@ -43,7 +43,8 @@ package com.sun.mail.imap.protocol;
 import java.util.ArrayList;
 import java.util.List;
 import javax.mail.internet.ParameterList;
-import com.sun.mail.iap.*; 
+import com.sun.mail.iap.ParsingException;
+import com.sun.mail.iap.Response;
 import com.sun.mail.util.PropUtil;
 
 /**

@@ -1,5 +1,8 @@
 package liquibase.diff.output.changelog.core;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateIndexChange;
@@ -14,10 +17,6 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.StringUtils;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 public class ChangedIndexChangeGenerator implements ChangedObjectChangeGenerator {
     @Override

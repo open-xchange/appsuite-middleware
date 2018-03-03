@@ -1,10 +1,9 @@
 package liquibase.executor.jvm;
 
-import liquibase.exception.DatabaseException;
-import liquibase.statement.SqlStatement;
-
 import java.sql.SQLException;
 import java.sql.Statement;
+import liquibase.exception.DatabaseException;
+import liquibase.statement.SqlStatement;
 
 /**
  * Generic callback interface for code that operates on a JDBC Statement.

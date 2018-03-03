@@ -49,12 +49,12 @@
 
 package com.openexchange.twitter;
 
-import twitter4j.TwitterException;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
+import twitter4j.TwitterException;
 
 /**
  * {@link TwitterExceptionCodes} - Enumeration about all {@link TwitterException}s.

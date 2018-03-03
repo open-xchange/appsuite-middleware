@@ -50,6 +50,7 @@
 package com.openexchange.servlet;
 
 import javax.servlet.Filter;
+import javax.servlet.Servlet;
 
 
 /**

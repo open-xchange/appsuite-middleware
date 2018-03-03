@@ -40,13 +40,20 @@
 
 package javax.mail;
 
-import java.io.*;
-import java.lang.*;
 import java.util.Vector;
-import java.util.StringTokenizer;
 import java.util.concurrent.Executor;
+import javax.mail.event.ConnectionEvent;
+import javax.mail.event.ConnectionListener;
+import javax.mail.event.FolderEvent;
+import javax.mail.event.FolderListener;
+import javax.mail.event.MailEvent;
+import javax.mail.event.MessageChangedEvent;
+import javax.mail.event.MessageChangedListener;
+import javax.mail.event.MessageCountEvent;
+import javax.mail.event.MessageCountListener;
+import javax.mail.event.MessageRecentEvent;
+import javax.mail.event.MessageRecentListener;
 import javax.mail.search.SearchTerm;
-import javax.mail.event.*;
 
 /**
  * Folder is an abstract class that represents a folder for mail

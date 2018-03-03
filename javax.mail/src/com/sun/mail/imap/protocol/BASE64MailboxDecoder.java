@@ -40,8 +40,8 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.text.StringCharacterIterator;
 import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
 
 /**
  * See the BASE64MailboxEncoder for a description of the RFC2060 and how

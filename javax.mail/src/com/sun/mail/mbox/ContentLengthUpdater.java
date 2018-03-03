@@ -40,7 +40,9 @@
 
 package com.sun.mail.mbox;
 
-import java.io.*;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Update the Content-Length header in the message written to the stream.

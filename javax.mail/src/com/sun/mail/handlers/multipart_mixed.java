@@ -40,8 +40,10 @@
 
 package com.sun.mail.handlers;
 
-import java.io.*;
-import javax.activation.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import javax.activation.ActivationDataFlavor;
+import javax.activation.DataSource;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.internet.MimeMultipart;

@@ -40,8 +40,8 @@
 
 package com.sun.mail.remote;
 
-import javax.mail.*;
-import com.sun.mail.mbox.*;
+import javax.mail.MessagingException;
+import com.sun.mail.mbox.MboxFolder;
 
 /**
  * A remote Inbox folder.  The data is actually managed by our subclass

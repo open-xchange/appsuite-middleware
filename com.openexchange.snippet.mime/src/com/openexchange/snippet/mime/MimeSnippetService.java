@@ -54,8 +54,8 @@ import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.session.Session;
-import com.openexchange.snippet.mime.groupware.QuotaMode;
 import com.openexchange.snippet.QuotaAwareSnippetService;
+import com.openexchange.snippet.mime.groupware.QuotaMode;
 
 /**
  * {@link MimeSnippetService} - The "filestore" using snippet service.

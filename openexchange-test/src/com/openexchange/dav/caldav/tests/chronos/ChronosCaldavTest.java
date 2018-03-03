@@ -90,7 +90,7 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
         Date twoWeeks = instance.getTime();
         String rangeStart = DateTimeUtil.formatZuluDate(yesterday);
         String rangeEnd = DateTimeUtil.formatZuluDate(twoWeeks);
-        EventsResponse allEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), rangeStart, rangeEnd, getDefaultFolder(), null, null, null, true, true, false);
+        EventsResponse allEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), rangeStart, rangeEnd, getDefaultFolder(), null, null, null, true, false, true, false);
         checkResponse(allEventResponse.getError(), allEventResponse.getErrorDesc(), allEventResponse.getData());
 
         for (EventData event : allEventResponse.getData()) {
@@ -127,7 +127,7 @@ public class ChronosCaldavTest extends AbstractChronosCaldavTest {
         Date twoWeeks = instance.getTime();
         String rangeStart = DateTimeUtil.formatZuluDate(yesterday);
         String rangeEnd = DateTimeUtil.formatZuluDate(twoWeeks);
-        EventsResponse allEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), rangeStart, rangeEnd, getDefaultFolder(), null, null, null, true, true, false);
+        EventsResponse allEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), rangeStart, rangeEnd, getDefaultFolder(), null, null, null, true, false, true, false);
         checkResponse(allEventResponse.getError(), allEventResponse.getErrorDesc(), allEventResponse.getData());
 
         List<EventData> result = new ArrayList<>();

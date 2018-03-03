@@ -40,11 +40,19 @@
 
 package com.sun.mail.imap;
 
-import java.io.*;
-import javax.mail.*;
-import com.sun.mail.imap.protocol.*;
-import com.sun.mail.iap.*;
-import com.sun.mail.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import javax.mail.Flags;
+import javax.mail.Folder;
+import javax.mail.FolderClosedException;
+import javax.mail.MessagingException;
+import com.sun.mail.iap.ByteArray;
+import com.sun.mail.iap.ConnectionException;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.imap.protocol.BODY;
+import com.sun.mail.imap.protocol.IMAPProtocol;
+import com.sun.mail.util.FolderClosedIOException;
+import com.sun.mail.util.MessageRemovedIOException;
 
 /**
  * This class implements an IMAP data stream.

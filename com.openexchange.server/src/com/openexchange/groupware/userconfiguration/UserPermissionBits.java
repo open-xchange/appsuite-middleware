@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.userconfiguration;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Set;
@@ -63,6 +61,8 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 
 
 /**

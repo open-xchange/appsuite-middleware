@@ -40,16 +40,41 @@
 
 package javax.mail.internet;
 
-import javax.mail.*;
-import javax.activation.*;
-import java.lang.*;
-import java.io.*;
-import java.util.*;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectStreamException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
-import com.sun.mail.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.List;
+import javax.activation.DataHandler;
+import javax.mail.Address;
+import javax.mail.Flags;
+import javax.mail.Folder;
+import javax.mail.FolderClosedException;
+import javax.mail.Header;
+import javax.mail.IllegalWriteException;
+import javax.mail.Message;
+import javax.mail.MessageRemovedException;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.Session;
 import javax.mail.util.LimitExceededException;
 import javax.mail.util.LimitedStringBuilder;
 import javax.mail.util.SharedByteArrayInputStream;
+import com.sun.mail.util.ASCIIUtility;
+import com.sun.mail.util.FolderClosedIOException;
+import com.sun.mail.util.LineOutputStream;
+import com.sun.mail.util.MessageRemovedIOException;
+import com.sun.mail.util.MimeUtil;
+import com.sun.mail.util.PropUtil;
 
 /**
  * This class represents a MIME style email message. It implements

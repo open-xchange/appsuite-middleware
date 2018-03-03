@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -58,11 +56,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
 /**
@@ -109,7 +107,7 @@ public final class CreateMissingPrimaryKeys extends UpdateTaskAdapter {
                         stmt = con.createStatement();
                         stmt.execute("ALTER TABLE genconf_attributes_bools ADD PRIMARY KEY (`cid`,`id`,`name`), DROP KEY cid");
                     } finally {
-                        closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                     }
                 }
                 return null;
@@ -133,7 +131,7 @@ public final class CreateMissingPrimaryKeys extends UpdateTaskAdapter {
                         stmt = con.createStatement();
                         stmt.execute("ALTER TABLE genconf_attributes_strings ADD PRIMARY KEY (`cid`,`id`,`name`), DROP KEY cid");
                     } finally {
-                        closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                     }
                 }
                 return null;
@@ -157,7 +155,7 @@ public final class CreateMissingPrimaryKeys extends UpdateTaskAdapter {
                         stmt = con.createStatement();
                         stmt.execute("ALTER TABLE user_setting_server ADD PRIMARY KEY (`cid`,`user`), DROP KEY cid");
                     } finally {
-                        closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                     }
                 }
                 return null;
@@ -181,7 +179,7 @@ public final class CreateMissingPrimaryKeys extends UpdateTaskAdapter {
                         stmt = con.createStatement();
                         stmt.execute("ALTER TABLE user_attribute ADD PRIMARY KEY (`cid`,`id`,`name`,`value`(128)), DROP KEY cid_2");
                     } finally {
-                        closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                     }
                 }
                 return null;
@@ -205,7 +203,7 @@ public final class CreateMissingPrimaryKeys extends UpdateTaskAdapter {
                         stmt = con.createStatement();
                         stmt.execute("ALTER TABLE ical_principal ADD PRIMARY KEY (`cid`,`object_id`), ADD INDEX `indexPrincipal` (`cid`,`principal`(64))");
                     } finally {
-                        closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                     }
                 }
                 return null;
@@ -229,7 +227,7 @@ public final class CreateMissingPrimaryKeys extends UpdateTaskAdapter {
                         stmt = con.createStatement();
                         stmt.execute("ALTER TABLE ical_ids ADD PRIMARY KEY (`cid`,`object_id`), ADD INDEX `indexPrincipal` (`cid`,`principal_id`)");
                     } finally {
-                        closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                     }
                 }
                 return null;
@@ -253,7 +251,7 @@ public final class CreateMissingPrimaryKeys extends UpdateTaskAdapter {
                         stmt = con.createStatement();
                         stmt.execute("ALTER TABLE vcard_principal ADD PRIMARY KEY (`cid`,`object_id`), ADD INDEX `indexPrincipal` (`cid`,`principal`(64))");
                     } finally {
-                        closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                     }
                 }
                 return null;
@@ -277,7 +275,7 @@ public final class CreateMissingPrimaryKeys extends UpdateTaskAdapter {
                         stmt = con.createStatement();
                         stmt.execute("ALTER TABLE vcard_ids ADD PRIMARY KEY (`cid`,`object_id`), ADD INDEX `indexPrincipal` (`cid`,`principal_id`)");
                     } finally {
-                        closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                     }
                 }
                 return null;
@@ -301,7 +299,7 @@ public final class CreateMissingPrimaryKeys extends UpdateTaskAdapter {
                         stmt = con.createStatement();
                         stmt.execute("ALTER TABLE infostoreReservedPaths ADD PRIMARY KEY (`cid`,`folder`)");
                     } finally {
-                        closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                     }
                 }
                 return null;
@@ -325,7 +323,7 @@ public final class CreateMissingPrimaryKeys extends UpdateTaskAdapter {
                         stmt = con.createStatement();
                         stmt.execute("ALTER TABLE updateTask ADD PRIMARY KEY (`cid`,`taskName`(255)), DROP KEY full");
                     } finally {
-                        closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                     }
                 }
                 return null;
@@ -343,16 +341,13 @@ public final class CreateMissingPrimaryKeys extends UpdateTaskAdapter {
 
             @Override
             public Void call() throws SQLException {
-                if (!Tools.existsPrimaryKey(
-                    con,
-                    "prg_links",
-                    splitter.split("(`cid`,`firstid`,`firstmodule`,`firstfolder`,`secondid`,`secondmodule`,`secondfolder`)"))) {
+                if (!Tools.existsPrimaryKey(con, "prg_links", splitter.split("(`cid`,`firstid`,`firstmodule`,`firstfolder`,`secondid`,`secondmodule`,`secondfolder`)"))) {
                     Statement stmt = null;
                     try {
                         stmt = con.createStatement();
                         stmt.execute("ALTER TABLE prg_links ADD PRIMARY KEY (`cid`,`firstid`,`firstmodule`,`firstfolder`,`secondid`,`secondmodule`,`secondfolder`)");
                     } finally {
-                        closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                     }
                 }
                 return null;
@@ -376,7 +371,7 @@ public final class CreateMissingPrimaryKeys extends UpdateTaskAdapter {
                         stmt = con.createStatement();
                         stmt.execute("ALTER TABLE prg_contacts_linkage ADD PRIMARY KEY (`cid`,`intfield01`,`intfield02`)");
                     } finally {
-                        closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                     }
                 }
                 return null;
@@ -421,7 +416,7 @@ public final class CreateMissingPrimaryKeys extends UpdateTaskAdapter {
                         stmt = con.createStatement();
                         stmt.execute("ALTER TABLE reminder DROP INDEX `" + name + "`");
                     } finally {
-                        closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                     }
                 }
                 return null;
@@ -457,7 +452,7 @@ public final class CreateMissingPrimaryKeys extends UpdateTaskAdapter {
                         stmt = con.createStatement();
                         stmt.execute("ALTER TABLE virtualBackupPermission DROP INDEX `" + name + "`");
                     } finally {
-                        closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                     }
                 }
                 return null;
@@ -493,7 +488,7 @@ public final class CreateMissingPrimaryKeys extends UpdateTaskAdapter {
                         stmt = con.createStatement();
                         stmt.execute("ALTER TABLE virtualPermission DROP INDEX `" + name + "`");
                     } finally {
-                        closeSQLStuff(stmt);
+                        Databases.closeSQLStuff(stmt);
                     }
                 }
                 return null;
@@ -511,7 +506,7 @@ public final class CreateMissingPrimaryKeys extends UpdateTaskAdapter {
         Connection con = params.getConnection();
         boolean rollback = false;
         try {
-            DBUtils.startTransaction(con);
+            Databases.startTransaction(con);
             rollback = true;
 
             /*
@@ -540,9 +535,9 @@ public final class CreateMissingPrimaryKeys extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
             }
-            autocommit(con);
+            Databases.autocommit(con);
         }
     }
 }

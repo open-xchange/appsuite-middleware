@@ -50,14 +50,12 @@
 package com.openexchange.global.tools.id;
 
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Test;
 import com.openexchange.tools.id.IDMangler;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * {@link IDManglerTest}

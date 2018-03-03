@@ -61,8 +61,8 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.sun.mail.imap.IMAPStore;
-import com.sun.mail.imap.QueuingIMAPStore;
 import com.sun.mail.imap.ProtocolListener;
+import com.sun.mail.imap.QueuingIMAPStore;
 import com.sun.mail.util.MailLogger;
 
 

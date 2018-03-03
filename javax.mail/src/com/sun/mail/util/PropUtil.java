@@ -40,7 +40,7 @@
 
 package com.sun.mail.util;
 
-import java.util.*;
+import java.util.Properties;
 import javax.mail.Session;
 
 /**

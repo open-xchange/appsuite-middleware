@@ -49,18 +49,18 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link FolderDefaultValuesForDelTablesTasks} - Adds default values to the 'del_oxfolder_tree', and 'virtualBackupTree' tables.
@@ -100,7 +100,7 @@ public final class FolderDefaultValuesForDelTablesTasks extends UpdateTaskAdapte
                     stmt = connection.prepareStatement("ALTER TABLE del_oxfolder_tree ALTER COLUMN fname SET DEFAULT ''");
                     stmt.executeUpdate();
                 } finally {
-                    DBUtils.closeSQLStuff(stmt);
+                    Databases.closeSQLStuff(stmt);
                 }
             }
 
@@ -110,7 +110,7 @@ public final class FolderDefaultValuesForDelTablesTasks extends UpdateTaskAdapte
                     stmt = connection.prepareStatement("ALTER TABLE virtualBackupTree ALTER COLUMN name SET DEFAULT ''");
                     stmt.executeUpdate();
                 } finally {
-                    DBUtils.closeSQLStuff(stmt);
+                    Databases.closeSQLStuff(stmt);
                 }
             }
 

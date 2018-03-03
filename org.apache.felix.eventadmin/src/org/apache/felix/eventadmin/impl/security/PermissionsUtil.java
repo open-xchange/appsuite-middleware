@@ -19,7 +19,6 @@
 package org.apache.felix.eventadmin.impl.security;
 
 import java.security.Permission;
-
 import org.osgi.service.event.TopicPermission;
 
 /**

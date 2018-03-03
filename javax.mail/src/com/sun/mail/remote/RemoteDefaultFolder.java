@@ -40,8 +40,10 @@
 
 package com.sun.mail.remote;
 
-import javax.mail.*;
-import com.sun.mail.mbox.*;
+import javax.mail.Folder;
+import javax.mail.Store;
+import com.sun.mail.mbox.MboxFolder;
+import com.sun.mail.mbox.MboxStore;
 
 /**
  * The default folder for the "remote" protocol.

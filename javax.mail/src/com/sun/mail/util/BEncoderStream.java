@@ -40,7 +40,7 @@
 
 package com.sun.mail.util;
 
-import java.io.*;
+import java.io.OutputStream;
 
 /**
  * This class implements a 'B' Encoder as defined by RFC2047 for

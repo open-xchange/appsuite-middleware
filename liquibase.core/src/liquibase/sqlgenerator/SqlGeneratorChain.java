@@ -1,13 +1,12 @@
 package liquibase.sqlgenerator;
 
+import java.util.Iterator;
+import java.util.SortedSet;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
-
-import java.util.Iterator;
-import java.util.SortedSet;
 
 public class SqlGeneratorChain {
     private Iterator<SqlGenerator> sqlGenerators;

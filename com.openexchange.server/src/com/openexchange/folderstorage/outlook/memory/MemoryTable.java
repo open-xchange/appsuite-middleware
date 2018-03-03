@@ -49,7 +49,6 @@
 
 package com.openexchange.folderstorage.outlook.memory;
 
-import gnu.trove.ConcurrentTIntObjectHashMap;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -68,6 +67,7 @@ import com.openexchange.folderstorage.outlook.memory.impl.MemoryFolderImpl;
 import com.openexchange.folderstorage.outlook.memory.impl.MemoryTreeImpl;
 import com.openexchange.folderstorage.outlook.sql.Utility;
 import com.openexchange.session.Session;
+import gnu.trove.ConcurrentTIntObjectHashMap;
 
 /**
  * {@link MemoryTable} - The in-memory representation of the virtual folder table.

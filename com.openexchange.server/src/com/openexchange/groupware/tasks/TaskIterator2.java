@@ -50,7 +50,6 @@
 package com.openexchange.groupware.tasks;
 
 import static com.openexchange.java.Autoboxing.I;
-import gnu.trove.map.TIntObjectMap;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -65,6 +64,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.slf4j.Logger;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -79,7 +79,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.Collections;
 import com.openexchange.tools.exceptions.ExceptionUtils;
-import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.map.TIntObjectMap;
 
 /**
  * This class implements the new iterator for tasks that fixes problems with
@@ -350,7 +350,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
             exc = TaskExceptionCode.THREAD_ISSUE.create(t);
         } finally {
             preread.finished();
-            DBUtils.closeSQLStuff(result, stmt);
+            Databases.closeSQLStuff(result, stmt);
             if (null == con) {
                 DBPool.closeReaderSilent(ctx, myCon);
             }

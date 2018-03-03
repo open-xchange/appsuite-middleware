@@ -50,7 +50,6 @@
 package com.openexchange.conversion.simple.osgi;
 
 import org.osgi.framework.ServiceReference;
-
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.conversion.simple.SimpleConverter;

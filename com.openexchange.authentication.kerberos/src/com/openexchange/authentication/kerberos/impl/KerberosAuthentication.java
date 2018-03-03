@@ -49,8 +49,8 @@
 
 package com.openexchange.authentication.kerberos.impl;
 
-import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING;
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING;
+import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING;
 import static com.openexchange.authentication.kerberos.impl.ConfigurationProperty.PROXY_DELIMITER;
 import static com.openexchange.authentication.kerberos.impl.ConfigurationProperty.PROXY_USER;
 import java.util.List;

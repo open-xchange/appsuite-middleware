@@ -1,9 +1,8 @@
 package liquibase.changelog.filter;
 
+import java.util.List;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
-
-import java.util.List;
 
 public class ActuallyExecutedChangeSetFilter extends RanChangeSetFilter {
 

@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -58,6 +56,8 @@ import java.sql.SQLException;
 import com.openexchange.database.Databases;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.update.SimpleUpdateTask;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 
 /**
  * {@link CheckForPublicInfostoreFolderTask} - Checks for missing folder 'public_infostore' (15) in any available context.

@@ -40,9 +40,15 @@
 
 package javax.mail.internet;
 
-import java.io.*;
-import java.util.*;
-import javax.mail.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
+import javax.mail.Header;
+import javax.mail.MessagingException;
 import com.sun.mail.util.LineInputStream;
 import com.sun.mail.util.PropUtil;
 

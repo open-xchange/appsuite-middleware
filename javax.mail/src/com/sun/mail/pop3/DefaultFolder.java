@@ -40,7 +40,11 @@
 
 package com.sun.mail.pop3;
 
-import javax.mail.*;
+import javax.mail.Flags;
+import javax.mail.Folder;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.MethodNotSupportedException;
 
 /**
  * The POP3 DefaultFolder.  Only contains the "INBOX" folder.

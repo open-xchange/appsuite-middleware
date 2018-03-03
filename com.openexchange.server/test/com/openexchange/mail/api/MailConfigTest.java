@@ -49,6 +49,8 @@
 
 package com.openexchange.mail.api;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.config.MailProperties;
@@ -59,7 +61,6 @@ import com.openexchange.secret.SecretEncryptionStrategy;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.session.SimSession;
-import static org.junit.Assert.*;
 
 /**
  * {@link MailConfigTest}

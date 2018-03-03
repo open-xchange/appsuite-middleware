@@ -14,8 +14,11 @@ timestamp:
   description: The timestamp of the event.
   readOnly: true
 categories:
-  type: string
+  type: array
   description: An array of categories.
+  items:
+    type: string
+    description: A category.
 filename:
   type: string
   description:  The filename of the event.

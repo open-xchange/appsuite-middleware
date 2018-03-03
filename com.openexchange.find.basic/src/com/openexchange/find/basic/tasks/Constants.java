@@ -49,10 +49,10 @@
 
 package com.openexchange.find.basic.tasks;
 
-import com.google.common.collect.ImmutableSet;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import com.google.common.collect.ImmutableSet;
 
 /**
  * {@link Constants}

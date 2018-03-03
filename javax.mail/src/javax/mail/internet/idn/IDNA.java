@@ -49,9 +49,9 @@
 
 package javax.mail.internet.idn;
 
-import gnu.inet.encoding.IDNAException;
 import javax.mail.internet.AddressException;
 import org.slf4j.LoggerFactory;
+import gnu.inet.encoding.IDNAException;
 
 /**
  * {@link IDNA} - Helper class for internationalized domain names (IDN).

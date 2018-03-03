@@ -59,8 +59,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.copy.CopyUserTaskService;
 import com.openexchange.user.copy.ObjectMapping;
 import com.openexchange.user.copy.UserCopyExceptionCodes;
@@ -68,7 +68,6 @@ import com.openexchange.user.copy.internal.CopyTools;
 import com.openexchange.user.copy.internal.connection.ConnectionFetcherTask;
 import com.openexchange.user.copy.internal.context.ContextLoadTask;
 import com.openexchange.user.copy.internal.user.UserCopyTask;
-
 
 /**
  * {@link UWACopyTask}
@@ -85,16 +84,12 @@ public class UWACopyTask implements CopyUserTaskService {
 
     private static final String INSERT_POSITION_SQL = "INSERT INTO uwaWidgetPosition (cid, user, id, adj) VALUES (?, ?, ?, ?)";
 
-
     /**
      * @see com.openexchange.user.copy.CopyUserTaskService#getAlreadyCopied()
      */
     @Override
     public String[] getAlreadyCopied() {
-        return new String[] {
-            UserCopyTask.class.getName(),
-            ContextLoadTask.class.getName(),
-            ConnectionFetcherTask.class.getName()
+        return new String[] { UserCopyTask.class.getName(), ContextLoadTask.class.getName(), ConnectionFetcherTask.class.getName()
         };
     }
 
@@ -120,7 +115,7 @@ public class UWACopyTask implements CopyUserTaskService {
         final Connection dstCon = copyTools.getDestinationConnection();
 
         try {
-            if (DBUtils.tableExists(srcCon, "uwaWidget")) {
+            if (Databases.tableExists(srcCon, "uwaWidget")) {
                 final List<Widget> widgets = loadWidgetsFromDB(srcCon, i(srcCtxId), i(srcUsrId));
                 writeWidgetsToDB(dstCon, i(dstCtxId), i(dstUsrId), widgets);
             }
@@ -168,8 +163,8 @@ public class UWACopyTask implements CopyUserTaskService {
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            DBUtils.closeSQLStuff(wstmt);
-            DBUtils.closeSQLStuff(pstmt);
+            Databases.closeSQLStuff(wstmt);
+            Databases.closeSQLStuff(pstmt);
         }
     }
 
@@ -208,7 +203,7 @@ public class UWACopyTask implements CopyUserTaskService {
                         widget.setAdj(prs.getString(1));
                     }
                 } finally {
-                    DBUtils.closeSQLStuff(prs);
+                    Databases.closeSQLStuff(prs);
                 }
 
                 widgets.add(widget);
@@ -216,8 +211,8 @@ public class UWACopyTask implements CopyUserTaskService {
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            DBUtils.closeSQLStuff(wrs, wstmt);
-            DBUtils.closeSQLStuff(pstmt);
+            Databases.closeSQLStuff(wrs, wstmt);
+            Databases.closeSQLStuff(pstmt);
         }
 
         return widgets;
@@ -227,7 +222,6 @@ public class UWACopyTask implements CopyUserTaskService {
      * @see com.openexchange.user.copy.CopyUserTaskService#done(java.util.Map, boolean)
      */
     @Override
-    public void done(final Map<String, ObjectMapping<?>> copied, final boolean failed) {
-    }
+    public void done(final Map<String, ObjectMapping<?>> copied, final boolean failed) {}
 
 }

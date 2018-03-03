@@ -63,7 +63,6 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.java.util.Tools;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link Delete} - SQL for deleting a virtual folder.
@@ -106,9 +105,9 @@ public final class Delete {
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(con); // ROLLBACK
+                Databases.rollback(con); // ROLLBACK
             }
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
             databaseService.backWritable(cid, con);
         }
     }
@@ -229,16 +228,16 @@ public final class Delete {
             con.commit(); // COMMIT
             return ret;
         } catch (final SQLException e) {
-            DBUtils.rollback(con); // ROLLBACK
+            Databases.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
-            DBUtils.rollback(con); // ROLLBACK
+            Databases.rollback(con); // ROLLBACK
             throw e;
         } catch (final Exception e) {
-            DBUtils.rollback(con); // ROLLBACK
+            Databases.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.autocommit(con);
+            Databases.autocommit(con);
             databaseService.backWritable(cid, con);
         }
     }
@@ -292,7 +291,7 @@ public final class Delete {
                 debugSQL(stmt);
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             } finally {
-                DBUtils.closeSQLStuff(rs, stmt);
+                Databases.closeSQLStuff(rs, stmt);
             }
         }
 
@@ -319,7 +318,7 @@ public final class Delete {
                 final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Delete.class);
                 log.debug("Backup failed.", e);
             } finally {
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
             }
             /*
              * Backup permission data
@@ -339,7 +338,7 @@ public final class Delete {
                 final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Delete.class);
                 log.debug("Backup failed.", e);
             } finally {
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
             }
             /*
              * Backup subscribe data
@@ -359,7 +358,7 @@ public final class Delete {
                 final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Delete.class);
                 log.debug("Backup failed.", e);
             } finally {
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
             }
         }
         /*
@@ -379,7 +378,7 @@ public final class Delete {
             debugSQL(stmt);
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
         /*
          * Delete permission data
@@ -398,7 +397,7 @@ public final class Delete {
             debugSQL(stmt);
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
         /*
          * Delete folder data
@@ -418,7 +417,7 @@ public final class Delete {
             debugSQL(stmt);
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
 
         if (success) {

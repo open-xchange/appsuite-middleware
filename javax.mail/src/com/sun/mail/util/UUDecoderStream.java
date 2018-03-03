@@ -40,7 +40,9 @@
 
 package com.sun.mail.util;
 
-import java.io.*;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * This class implements a UUDecoder. It is implemented as

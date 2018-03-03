@@ -33,7 +33,6 @@ package net.fortuna.ical4j.util;
 
 import java.io.InputStream;
 import java.net.URL;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

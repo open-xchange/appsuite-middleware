@@ -41,15 +41,15 @@
 package com.sun.mail.gimap;
 
 import java.io.IOException;
-
-import javax.mail.*;
-
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.URLName;
+import com.sun.mail.gimap.protocol.GmailProtocol;
 import com.sun.mail.iap.ProtocolException;
-import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.ListInfo;
-import com.sun.mail.gimap.protocol.GmailProtocol;
 
 /**
  * A Gmail Store.  Defaults to imap.gmail.com with SSL.

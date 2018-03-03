@@ -40,10 +40,21 @@
 
 package javax.mail.internet;
 
-import java.util.*;
-import java.io.*;
-import com.sun.mail.util.PropUtil;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import com.sun.mail.util.ASCIIUtility;
+import com.sun.mail.util.PropUtil;
 
 /**
  * This class holds MIME parameters (attribute-value pairs).

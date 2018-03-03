@@ -51,8 +51,8 @@ package com.openexchange.oauth.scope;
 
 import java.util.Set;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.DefaultAPI;
 import com.openexchange.oauth.API;
+import com.openexchange.oauth.DefaultAPI;
 
 /**
  * {@link OAuthScopeRegistry} - Central access point for all available {@link OAuthScope}s for all supported

@@ -6,8 +6,6 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.services.example.ExampleService;
 import com.openexchange.rest.services.example.ExampleService2;
-import com.openexchange.rest.services.example.RESTConfigurationService;
-import com.openexchange.rest.services.example.RESTHtmlService;
 import com.openexchange.rest.services.example.Shuffler;
 
 public class Activator extends HousekeepingActivator {

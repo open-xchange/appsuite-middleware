@@ -91,20 +91,18 @@
 
 package com.openexchange.http.grizzly.service.http;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
 import org.glassfish.grizzly.http.server.EmptyReadLock;
 import org.glassfish.grizzly.http.server.EmptyWriteLock;
 import org.glassfish.grizzly.servlet.FilterChainFactory;
 import org.glassfish.grizzly.servlet.ServletConfigImpl;
+import org.glassfish.grizzly.servlet.ServletHandler;
 import org.glassfish.grizzly.servlet.WebappContext;
 import org.osgi.service.http.HttpContext;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-import java.lang.String;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import org.glassfish.grizzly.servlet.ServletHandler;
 
 /**
  * OSGi customized {@link ServletHandler}.

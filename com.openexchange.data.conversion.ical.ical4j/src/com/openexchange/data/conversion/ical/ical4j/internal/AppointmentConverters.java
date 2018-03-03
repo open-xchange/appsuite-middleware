@@ -51,7 +51,6 @@ package com.openexchange.data.conversion.ical.ical4j.internal;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.fortuna.ical4j.model.component.VEvent;
 import com.openexchange.data.conversion.ical.ical4j.internal.appointment.ChangeExceptions;
 import com.openexchange.data.conversion.ical.ical4j.internal.appointment.DeleteExceptions;
 import com.openexchange.data.conversion.ical.ical4j.internal.appointment.IgnoreConflicts;
@@ -78,6 +77,7 @@ import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Uid;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.XMicrosoftCdoAlldayEvent;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.groupware.container.Appointment;
+import net.fortuna.ical4j.model.component.VEvent;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>

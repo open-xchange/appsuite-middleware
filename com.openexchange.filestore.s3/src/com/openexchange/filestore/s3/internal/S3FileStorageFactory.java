@@ -69,6 +69,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -178,7 +179,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
                 AmazonS3Exception s3Exception = (AmazonS3Exception) cause;
                 if (s3Exception.getStatusCode() == 400) {
                     // throw a simple OXException here to be able forwarding this exception to RMI clients (Bug #42102)
-                    throw new OXException(S3ExceptionCode.BadRequest.getNumber(), S3ExceptionMessages.BadRequest_MSG);
+                    throw new OXException(S3ExceptionCode.BadRequest.getNumber(), S3ExceptionMessages.BadRequest_MSG, s3Exception);
                 }
             }
 
@@ -380,12 +381,10 @@ public class S3FileStorageFactory implements FileStorageProvider {
      */
     private String initBucket(AmazonS3Client s3client, String filestoreID, StringBuilder sb, ConfigurationService configService) throws OXException {
         String bucketName = requireProperty(getPropertyName(sb, filestoreID, "bucketName"), configService);
+
+        boolean bucketExists = false;
         try {
-            if (false == s3client.doesBucketExist(bucketName)) {
-                String region = configService.getProperty(getPropertyName(sb, filestoreID, "region"), "us-west-2");
-                s3client.createBucket(new CreateBucketRequest(bucketName, Region.fromValue(region)));
-            }
-            return bucketName;
+            bucketExists = s3client.doesBucketExist(bucketName);
         } catch (IllegalArgumentException e) {
             throw S3ExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (AmazonClientException e) {
@@ -393,6 +392,29 @@ public class S3FileStorageFactory implements FileStorageProvider {
         } catch (RuntimeException e) {
             throw S3ExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+
+        if (false == bucketExists) {
+            String region = configService.getProperty(getPropertyName(sb, filestoreID, "region"), "us-west-2");
+            try {
+                s3client.createBucket(new CreateBucketRequest(bucketName, Region.fromValue(region)));
+            } catch (IllegalArgumentException e) {
+                throw S3ExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } catch (AmazonS3Exception e) {
+                if ("InvalidLocationConstraint".equals(e.getErrorCode())) {
+                    // Failed to create such a bucket
+                    throw S3ExceptionCode.BUCKET_CREATION_FAILED.create(bucketName, region);
+                }
+                throw S3ExceptionCode.wrap(e);
+            } catch (AmazonServiceException e) {
+                throw S3ExceptionCode.wrap(e);
+            } catch (AmazonClientException e) {
+                throw S3ExceptionCode.wrap(e);
+            } catch (RuntimeException e) {
+                throw S3ExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        }
+
+        return bucketName;
     }
 
     private String requireProperty(String propertyName, ConfigurationService configService) throws OXException {

@@ -1,11 +1,14 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import java.math.BigInteger;
+import liquibase.change.AbstractChange;
+import liquibase.change.Change;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.DatabaseChange;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateSequenceStatement;
-
-import java.math.BigInteger;
 
 /**
  * Creates a new sequence.

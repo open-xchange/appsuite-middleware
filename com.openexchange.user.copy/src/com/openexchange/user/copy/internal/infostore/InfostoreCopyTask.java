@@ -62,6 +62,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.filestore.Info;
@@ -74,7 +75,6 @@ import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.java.Streams;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.copy.CopyUserTaskService;
 import com.openexchange.user.copy.ObjectMapping;
 import com.openexchange.user.copy.UserCopyExceptionCodes;
@@ -244,8 +244,8 @@ public class InfostoreCopyTask implements CopyUserTaskService {
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            DBUtils.closeSQLStuff(stmt1);
-            DBUtils.closeSQLStuff(stmt2);
+            Databases.closeSQLStuff(stmt1);
+            Databases.closeSQLStuff(stmt2);
         }
 
     }
@@ -310,7 +310,7 @@ public class InfostoreCopyTask implements CopyUserTaskService {
             } catch (final SQLException e) {
                 throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
             } finally {
-                DBUtils.closeSQLStuff(rs, stmt);
+                Databases.closeSQLStuff(rs, stmt);
             }
             for (Map.Entry<DocumentMetadata, List<DocumentMetadata>> entry : documents.entrySet()) {
                 DocumentMetadata master = entry.getKey();
@@ -343,7 +343,7 @@ public class InfostoreCopyTask implements CopyUserTaskService {
                 } catch (final SQLException e) {
                     throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
                 } finally {
-                    DBUtils.closeSQLStuff(rs, stmt);
+                    Databases.closeSQLStuff(rs, stmt);
                 }
             }
         }

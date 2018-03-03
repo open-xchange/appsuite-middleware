@@ -50,7 +50,6 @@
 package com.openexchange.pop3.storage.mailaccount;
 
 import static com.openexchange.pop3.storage.mailaccount.util.Utility.prependPath2Fullname;
-import gnu.trove.map.TIntObjectMap;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -78,6 +77,7 @@ import com.openexchange.pop3.storage.FullnameUIDPair;
 import com.openexchange.pop3.storage.POP3StorageTrashContainer;
 import com.openexchange.pop3.storage.POP3StorageUIDLMap;
 import com.openexchange.session.Session;
+import gnu.trove.map.TIntObjectMap;
 
 /**
  * {@link MailAccountPOP3MessageStorage} - POP3 storage message storage.

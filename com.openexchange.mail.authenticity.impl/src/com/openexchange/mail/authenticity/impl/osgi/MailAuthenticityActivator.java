@@ -71,8 +71,8 @@ import com.openexchange.mail.authenticity.impl.core.MailAuthenticityHandlerRegis
 import com.openexchange.mail.authenticity.impl.core.MailAuthenticityJSlobEntry;
 import com.openexchange.mail.authenticity.impl.core.metrics.MailAuthenticityMetricFileLogger;
 import com.openexchange.mail.authenticity.impl.core.metrics.MailAuthenticityMetricLogger;
-import com.openexchange.mail.authenticity.impl.trusted.internal.TrustedMailServiceImpl;
 import com.openexchange.mail.authenticity.impl.trusted.internal.TrustedMailDataSource;
+import com.openexchange.mail.authenticity.impl.trusted.internal.TrustedMailServiceImpl;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;

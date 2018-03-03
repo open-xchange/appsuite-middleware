@@ -52,7 +52,6 @@ package com.openexchange.snippet.mime;
 import static com.openexchange.mail.mime.MimeDefaultSession.getDefaultSession;
 import static com.openexchange.snippet.mime.Services.getService;
 import static com.openexchange.snippet.utils.SnippetUtils.sanitizeContent;
-import com.google.common.collect.ImmutableSet;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -89,6 +88,7 @@ import javax.mail.internet.MimePart;
 import javax.mail.internet.MimeUtility;
 import javax.mail.util.ByteArrayDataSource;
 import org.slf4j.Logger;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.container.ThresholdFileHolder.ThresholdFileHolderInputStream;
 import com.openexchange.config.ConfigurationService;
@@ -123,17 +123,17 @@ import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaType;
 import com.openexchange.session.Session;
-import com.openexchange.snippet.mime.groupware.QuotaMode;
-import com.openexchange.snippet.utils.SnippetUtils;
 import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultAttachment;
+import com.openexchange.snippet.DefaultAttachment.InputStreamProvider;
 import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.Property;
 import com.openexchange.snippet.ReferenceType;
 import com.openexchange.snippet.Snippet;
 import com.openexchange.snippet.SnippetExceptionCodes;
 import com.openexchange.snippet.SnippetManagement;
-import com.openexchange.snippet.DefaultAttachment.InputStreamProvider;
+import com.openexchange.snippet.mime.groupware.QuotaMode;
+import com.openexchange.snippet.utils.SnippetUtils;
 
 /**
  * {@link MimeSnippetManagement}

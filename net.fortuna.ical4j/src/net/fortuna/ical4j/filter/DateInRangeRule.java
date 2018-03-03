@@ -32,7 +32,6 @@
 package net.fortuna.ical4j.filter;
 
 import java.util.Date;
-
 import net.fortuna.ical4j.model.DateRange;
 
 /**

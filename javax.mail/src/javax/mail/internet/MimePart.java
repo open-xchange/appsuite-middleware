@@ -40,9 +40,10 @@
 
 package javax.mail.internet;
 
-import javax.mail.*;
-import java.io.*;
 import java.util.Enumeration;
+import javax.mail.IllegalWriteException;
+import javax.mail.MessagingException;
+import javax.mail.Part;
 
 /**
  * The MimePart interface models an <strong>Entity</strong> as defined

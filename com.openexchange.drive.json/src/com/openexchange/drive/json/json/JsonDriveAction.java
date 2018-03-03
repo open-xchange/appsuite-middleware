@@ -57,9 +57,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.drive.Action;
+import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveVersion;
-import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.exception.OXException;
 

@@ -1,6 +1,5 @@
 package com.openexchange.saml;
 
-import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

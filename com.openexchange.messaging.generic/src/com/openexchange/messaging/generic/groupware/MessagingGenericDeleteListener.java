@@ -49,14 +49,12 @@
 
 package com.openexchange.messaging.generic.groupware;
 
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.procedure.TIntProcedure;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -64,7 +62,9 @@ import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.messaging.generic.services.MessagingGenericServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.procedure.TIntProcedure;
 
 /**
  * {@link MessagingGenericDeleteListener}
@@ -107,10 +107,10 @@ public final class MessagingGenericDeleteListener implements DeleteListener {
                         confIds.add(rs.getInt(1));
                     }
                 } finally {
-                    DBUtils.closeSQLStuff(rs);
+                    Databases.closeSQLStuff(rs);
                 }
             }
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             /*
              * Delete account configurations using generic conf
              */
@@ -150,7 +150,7 @@ public final class MessagingGenericDeleteListener implements DeleteListener {
         } catch (final Exception e) {
             throw DeleteFailedExceptionCodes.ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 

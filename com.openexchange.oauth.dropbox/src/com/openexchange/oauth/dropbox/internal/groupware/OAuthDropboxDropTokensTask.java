@@ -52,13 +52,13 @@ package com.openexchange.oauth.dropbox.internal.groupware;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.impl.internal.groupware.OAuthCreateTableTask2;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link OAuthDropboxDropTokensTask}
@@ -88,7 +88,7 @@ public class OAuthDropboxDropTokensTask extends UpdateTaskAdapter {
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(statement);
+            Databases.closeSQLStuff(statement);
         }
     }
 

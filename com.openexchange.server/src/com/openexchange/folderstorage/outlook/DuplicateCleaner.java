@@ -55,6 +55,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -65,7 +66,6 @@ import com.openexchange.folderstorage.cache.CacheFolderStorage;
 import com.openexchange.folderstorage.outlook.sql.Delete;
 import com.openexchange.folderstorage.outlook.sql.Duplicate;
 import com.openexchange.java.util.Tools;
-import com.openexchange.tools.sql.DBUtils;
 
 
 /**
@@ -158,17 +158,17 @@ public final class DuplicateCleaner {
                 con.commit(); // COMMIT
                 actionPerformed = true;
             } catch (final OXException e) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
                 throw e;
             } catch (final SQLException e) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
                 throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
             } catch (final RuntimeException e) {
-                DBUtils.rollback(con);
+                Databases.rollback(con);
                 throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
                 if (null != con) {
-                    DBUtils.autocommit(con);
+                    Databases.autocommit(con);
                     Database.back(contextId, true, con);
                 }
             }

@@ -40,12 +40,14 @@
 
 package javax.mail;
 
-import java.net.*;
-
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStreamWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.BitSet;
 import java.util.Locale;
 

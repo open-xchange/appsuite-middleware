@@ -16,6 +16,7 @@
  */
 package org.apache.tika.parser.ibooks;
 
+import static org.junit.Assert.assertEquals;
 import java.io.InputStream;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.TikaCoreProperties;
@@ -24,10 +25,6 @@ import org.apache.tika.parser.epub.EpubParser;
 import org.apache.tika.sax.BodyContentHandler;
 import org.junit.Test;
 import org.xml.sax.ContentHandler;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 public class iBooksParserTest {
          @Test

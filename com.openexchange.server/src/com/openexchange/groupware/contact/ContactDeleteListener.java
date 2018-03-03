@@ -50,8 +50,6 @@
 package com.openexchange.groupware.contact;
 
 import static com.openexchange.java.Autoboxing.I;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -73,7 +71,8 @@ import com.openexchange.groupware.delete.DeleteFailedExceptionCodes;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 
 /**
  * {@link ContactDeleteListener} - The delete listener for contact module
@@ -151,7 +150,7 @@ public final class ContactDeleteListener implements DeleteListener {
             while (rs.next()) {
                 l.add(new int[] { rs.getInt(1), rs.getInt(2) }); // distribution-list-id, contact-id
             }
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             /*
              * Delete the entries which refer to the user which should be deleted
              */
@@ -164,7 +163,7 @@ public final class ContactDeleteListener implements DeleteListener {
                 stmt.addBatch();
             }
             stmt.executeBatch();
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             /*
              * Check if any distribution list has no entry after deleting user's entries
              */
@@ -185,7 +184,7 @@ public final class ContactDeleteListener implements DeleteListener {
                         toDelete.add(dlistId);
                     }
                 }
-                DBUtils.closeSQLStuff(rs, stmt);
+                Databases.closeSQLStuff(rs, stmt);
             }
             /*
              * Delete empty distribution lists
@@ -199,12 +198,12 @@ public final class ContactDeleteListener implements DeleteListener {
                     stmt.addBatch();
                 }
                 stmt.executeBatch();
-                DBUtils.closeSQLStuff(rs, stmt);
+                Databases.closeSQLStuff(rs, stmt);
             }
         } catch (final SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -409,7 +408,7 @@ public final class ContactDeleteListener implements DeleteListener {
         } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(result, stmt);
+            Databases.closeSQLStuff(result, stmt);
         }
     }
 
@@ -436,7 +435,7 @@ public final class ContactDeleteListener implements DeleteListener {
         } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -470,7 +469,7 @@ public final class ContactDeleteListener implements DeleteListener {
         } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -518,7 +517,7 @@ public final class ContactDeleteListener implements DeleteListener {
         } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -558,7 +557,7 @@ public final class ContactDeleteListener implements DeleteListener {
                 }
                 stmt.executeUpdate();
             } finally {
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
             }
             /*
              * prg_contacts_linkage (obsoloete?)
@@ -573,7 +572,7 @@ public final class ContactDeleteListener implements DeleteListener {
                 }
                 stmt.executeUpdate();
             } finally {
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
             }
             /*
              * prg_contacts_image
@@ -586,7 +585,7 @@ public final class ContactDeleteListener implements DeleteListener {
                 }
                 stmt.executeUpdate();
             } finally {
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
             }
             /*
              * prg_contacts
@@ -599,7 +598,7 @@ public final class ContactDeleteListener implements DeleteListener {
                 }
                 return stmt.executeUpdate();
             } finally {
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
             }
         } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());

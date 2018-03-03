@@ -49,7 +49,8 @@
 
 package com.openexchange.mailaccount.json.actions;
 
-import static com.openexchange.tools.sql.DBUtils.*;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.LinkedList;
@@ -113,10 +114,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
     @Override
     protected AJAXRequestResult innerPerform(AJAXRequestData requestData, ServerSession session, JSONValue jData) throws OXException, JSONException {
         if (!session.getUserPermissionBits().isMultipleMailAccounts()) {
-            throw
-            MailAccountExceptionCodes.NOT_ENABLED.create(
-                Integer.valueOf(session.getUserId()),
-                Integer.valueOf(session.getContextId()));
+            throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
         }
 
         MailAccountDescription accountDescription = new MailAccountDescription();

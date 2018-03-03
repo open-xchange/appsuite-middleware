@@ -50,7 +50,6 @@
 package com.openexchange.webdav.action;
 
 import javax.servlet.http.HttpServletResponse;
-
 import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavFactory;

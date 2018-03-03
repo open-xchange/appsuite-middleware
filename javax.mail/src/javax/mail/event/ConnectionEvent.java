@@ -40,9 +40,6 @@
 
 package javax.mail.event;
 
-import java.util.*;
-import javax.mail.*;
-
 /**
  * This class models Connection events.
  *

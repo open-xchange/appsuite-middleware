@@ -50,14 +50,11 @@
 package com.openexchange.http.client.xml;
 
 import java.io.InputStream;
-
 import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.joox.JOOX;
 import org.joox.Match;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
 import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;

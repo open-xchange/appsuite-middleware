@@ -40,15 +40,35 @@
 
 package com.sun.mail.imap;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.SequenceInputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Enumeration;
 import java.util.Locale;
-import javax.mail.*;
-import javax.mail.internet.*;
-import javax.activation.*;
-import com.sun.mail.util.*;
-import com.sun.mail.iap.*;
-import com.sun.mail.imap.protocol.*;
+import javax.activation.DataHandler;
+import javax.mail.FolderClosedException;
+import javax.mail.Header;
+import javax.mail.IllegalWriteException;
+import javax.mail.MessageRemovedException;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.internet.ContentType;
+import javax.mail.internet.InternetHeaders;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeUtility;
+import com.sun.mail.iap.BadCommandException;
+import com.sun.mail.iap.ConnectionException;
+import com.sun.mail.iap.ProtocolException;
+import com.sun.mail.iap.Response;
+import com.sun.mail.imap.protocol.BODY;
+import com.sun.mail.imap.protocol.BODYSTRUCTURE;
+import com.sun.mail.imap.protocol.IMAPProtocol;
+import com.sun.mail.util.LineOutputStream;
+import com.sun.mail.util.PropUtil;
+import com.sun.mail.util.ReadableMime;
+import com.sun.mail.util.SharedByteArrayOutputStream;
 
 /**
  * An IMAP body part.

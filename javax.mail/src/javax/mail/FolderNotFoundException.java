@@ -40,8 +40,6 @@
 
 package javax.mail;
 
-import java.lang.*;
-
 /**
  * This exception is thrown by Folder methods, when those
  * methods are invoked on a non existent folder.

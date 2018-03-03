@@ -276,7 +276,7 @@ public abstract class AbstractUserCopyTest {
                 return 0;
             }
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
             getDBService().backReadOnly(con);
         }
     }   
@@ -414,7 +414,7 @@ public abstract class AbstractUserCopyTest {
         } catch (final SQLException e) {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
 
         return folders;

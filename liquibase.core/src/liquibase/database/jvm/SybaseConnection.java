@@ -1,9 +1,8 @@
 package liquibase.database.jvm;
 
-import liquibase.exception.DatabaseException;
-
 import java.sql.Connection;
 import java.sql.Savepoint;
+import liquibase.exception.DatabaseException;
 
 /**
  * A Sybase specific Delegate that removes the calls to commit

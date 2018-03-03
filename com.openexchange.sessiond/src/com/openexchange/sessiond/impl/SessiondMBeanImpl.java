@@ -54,8 +54,8 @@ import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.AnnotatedStandardMBean;
-import com.openexchange.sessiond.mbean.SessiondMBean;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.mbean.SessiondMBean;
 import com.openexchange.sessiond.osgi.Services;
 import com.openexchange.sessionstorage.SessionStorageService;
 

@@ -50,7 +50,6 @@
 package com.openexchange.contact.internal;
 
 import java.util.concurrent.atomic.AtomicReference;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;

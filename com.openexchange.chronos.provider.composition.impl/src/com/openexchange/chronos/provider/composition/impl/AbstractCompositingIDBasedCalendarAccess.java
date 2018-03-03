@@ -66,6 +66,7 @@ import java.util.Set;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.json.JSONObject;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.chronos.common.DefaultEventsResult;
@@ -557,6 +558,25 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
     }
 
     /**
+     * Gets a (fallback) for the account's display name, in case the corresponding settings are not available.
+     *
+     * @param account The account to get the name for
+     * @return The account name
+     */
+    protected String getAccountName(CalendarAccount account) {
+        String fallbackName = "Account " + account.getAccountId();
+        try {
+            JSONObject internalConfig = account.getInternalConfiguration();
+            if (null != internalConfig) {
+                return internalConfig.optString("name", fallbackName);
+            }
+        } catch (Exception e) {
+            LOG.debug("Error getting display name for calendar account \"{}\": {}", account.getProviderId(), e.getMessage());
+        }
+        return fallbackName;
+    }
+
+    /**
      * Gets all registered free/busy providers.
      *
      * @return A list of all registered free/busy providers
@@ -578,7 +598,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
         return new ThreadPoolCompletionService<V>(threadPool);
     }
 
-    private <T extends CalendarAccess> boolean supports(CalendarAccount account, Class<T> extensionClass) throws OXException {
+    protected <T extends CalendarAccess> boolean supports(CalendarAccount account, Class<T> extensionClass) throws OXException {
         CalendarProvider provider = providerRegistry.getCalendarProvider(account.getProviderId());
         if (null == provider) {
             LOG.warn("Calendar provider \"{}\" for account {} not found; skipping.", account.getProviderId(), account.getAccountId());
@@ -592,7 +612,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
         return false;
     }
 
-    private <T extends CalendarAccess> boolean supports(CalendarAccount account, CalendarCapability capability) throws OXException {
+    protected <T extends CalendarAccess> boolean supports(CalendarAccount account, CalendarCapability capability) throws OXException {
         CalendarProvider provider = providerRegistry.getCalendarProvider(account.getProviderId());
         if (null == provider) {
             LOG.warn("Calendar provider \"{}\" for account {} not found; skipping.", account.getProviderId(), account.getAccountId());

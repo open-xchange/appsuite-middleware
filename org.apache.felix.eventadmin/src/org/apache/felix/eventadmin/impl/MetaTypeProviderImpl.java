@@ -21,7 +21,6 @@ package org.apache.felix.eventadmin.impl;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Dictionary;
-
 import org.osgi.service.cm.ConfigurationException;
 import org.osgi.service.cm.ManagedService;
 import org.osgi.service.metatype.AttributeDefinition;

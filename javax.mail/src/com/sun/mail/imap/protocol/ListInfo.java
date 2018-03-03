@@ -40,10 +40,9 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.util.List;
 import java.util.ArrayList;
-
-import com.sun.mail.iap.*;
+import java.util.List;
+import com.sun.mail.iap.ParsingException;
 
 /**
  * A LIST response.

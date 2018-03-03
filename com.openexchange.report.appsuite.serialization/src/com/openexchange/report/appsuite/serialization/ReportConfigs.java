@@ -2,15 +2,7 @@
 package com.openexchange.report.appsuite.serialization;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.HashMap;
-import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.OpenType;
-import javax.management.openmbean.SimpleType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ReportConfigs implements Serializable {
 

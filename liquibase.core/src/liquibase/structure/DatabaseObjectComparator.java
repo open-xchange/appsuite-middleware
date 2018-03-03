@@ -1,8 +1,7 @@
 package liquibase.structure;
 
-import liquibase.util.StringUtils;
-
 import java.util.Comparator;
+import liquibase.util.StringUtils;
 
 public class DatabaseObjectComparator implements Comparator<DatabaseObject> {
 

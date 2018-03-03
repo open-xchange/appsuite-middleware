@@ -381,17 +381,17 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error occurs
      */
     public List<EventData> getAllEvents(Date from, Date until, boolean expand, String folder, SortOrder sortOrder) throws ApiException {
-        return getAllEvents(from, until, expand, folder, sortOrder, null);
+        return getAllEvents(from, until, expand, false, folder, sortOrder, null);
     }
 
-    public List<EventData> getAllEvents(Date from, Date until, boolean expand, String folder, SortOrder sortOrder, String fields) throws ApiException {
+    public List<EventData> getAllEvents(Date from, Date until, boolean expand, boolean showPrivate, String folder, SortOrder sortOrder, String fields) throws ApiException {
         String sort = null;
         String order = null;
         if (sortOrder != null) {
             sort = sortOrder.getBy().name();
             order = sortOrder.isDescending() ? SortOrder.Order.DESC.name() : SortOrder.Order.ASC.name();
         }
-        EventsResponse eventsResponse = userApi.getChronosApi().getAllEvents(userApi.getSession(), DateTimeUtil.getZuluDateTime(from.getTime()).getValue(), DateTimeUtil.getZuluDateTime(until.getTime()).getValue(), folder, fields, order, sort, expand, true, false);
+        EventsResponse eventsResponse = userApi.getChronosApi().getAllEvents(userApi.getSession(), DateTimeUtil.getZuluDateTime(from.getTime()).getValue(), DateTimeUtil.getZuluDateTime(until.getTime()).getValue(), folder, fields, order, sort, expand, showPrivate, true, false);
         return checkResponse(eventsResponse.getErrorDesc(), eventsResponse.getError(), eventsResponse.getData());
     }
 

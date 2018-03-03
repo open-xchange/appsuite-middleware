@@ -49,8 +49,6 @@
 
 package com.openexchange.session;
 
-import com.openexchange.session.Session;
-
 /**
  * {@link UserAndContext} - An immutable pair of user and context identifier.
  *

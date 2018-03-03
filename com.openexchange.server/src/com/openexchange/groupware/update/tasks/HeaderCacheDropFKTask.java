@@ -49,8 +49,8 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -61,7 +61,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
 /**
@@ -124,7 +123,7 @@ public final class HeaderCacheDropFKTask extends UpdateTaskAdapter {
                     stmt = con.createStatement();
                     stmt.execute("ALTER TABLE " + table + " DROP FOREIGN KEY " + keyName);
                 } finally {
-                    DBUtils.closeSQLStuff(null, stmt);
+                    Databases.closeSQLStuff(null, stmt);
                 }
             }
         }

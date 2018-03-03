@@ -40,12 +40,11 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.util.List;
 import java.util.ArrayList;
-
+import java.util.List;
 import javax.mail.Flags;
-
-import com.sun.mail.iap.*;
+import com.sun.mail.iap.ParsingException;
+import com.sun.mail.iap.Response;
 
 /**
  * Information collected when opening a mailbox.

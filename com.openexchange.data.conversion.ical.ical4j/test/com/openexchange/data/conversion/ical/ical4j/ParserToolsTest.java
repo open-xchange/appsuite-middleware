@@ -1,11 +1,10 @@
 package com.openexchange.data.conversion.ical.ical4j;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.TimeZone;
 import org.junit.Test;
 import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 
 public class ParserToolsTest {	

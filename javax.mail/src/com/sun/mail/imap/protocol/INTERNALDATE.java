@@ -40,16 +40,14 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.util.Date;
-import java.util.TimeZone;
-import java.util.Locale;
+import java.text.FieldPosition;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.text.FieldPosition;
-
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 import javax.mail.internet.MailDateFormat;
-
-import com.sun.mail.iap.*; 
+import com.sun.mail.iap.ParsingException; 
 
 
 /**

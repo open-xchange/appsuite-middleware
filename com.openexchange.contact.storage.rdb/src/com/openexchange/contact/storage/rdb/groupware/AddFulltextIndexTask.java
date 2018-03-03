@@ -49,8 +49,6 @@
 
 package com.openexchange.contact.storage.rdb.groupware;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -63,19 +61,19 @@ import java.util.List;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.contact.storage.rdb.search.FulltextAutocompleteAdapter;
 import com.openexchange.contact.storage.rdb.sql.Table;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.java.Strings;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 import com.planetj.math.rabinhash.RabinHashFunction32;
 
 /**
  * {@link AddFulltextIndexTask} - Checks existence of an appropriate FULLTEXT index for fields configured via
- * <code>"com.openexchange.contact.fulltextIndexFields"</code> setting; creates it if missing &  dropping obsolete ones.
+ * <code>"com.openexchange.contact.fulltextIndexFields"</code> setting; creates it if missing & dropping obsolete ones.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
@@ -178,9 +176,9 @@ public class AddFulltextIndexTask extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(connection);
+                Databases.rollback(connection);
             }
-            autocommit(connection);
+            Databases.autocommit(connection);
         }
     }
 
@@ -190,7 +188,7 @@ public class AddFulltextIndexTask extends UpdateTaskAdapter {
             stmt = connection.createStatement();
             return stmt.execute(new StringBuilder("CREATE FULLTEXT INDEX `").append(name).append("` ON ").append(Table.CONTACTS).append(" (").append(Mappers.CONTACT.getColumns(fields)).append(");").toString());
         } finally {
-            closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -203,7 +201,7 @@ public class AddFulltextIndexTask extends UpdateTaskAdapter {
             rs = stmt.executeQuery();
             return rs.next() ? rs.getString(2) : null;
         } finally {
-            closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 

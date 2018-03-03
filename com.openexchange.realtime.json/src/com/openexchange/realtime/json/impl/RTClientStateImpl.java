@@ -50,7 +50,6 @@
 package com.openexchange.realtime.json.impl;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -58,7 +57,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.realtime.json.actions.SendAction;
 import com.openexchange.realtime.json.protocol.RTClientState;

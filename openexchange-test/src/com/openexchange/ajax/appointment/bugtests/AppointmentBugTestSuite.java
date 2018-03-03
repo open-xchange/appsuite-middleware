@@ -141,7 +141,8 @@ import com.openexchange.test.concurrent.ParallelSuite;
     Bug51918Test.class,
     Bug53073Test.class,
     Bug55690Test.class,
-    Bug56359Test.class
+    Bug56359Test.class,
+    Bug56589Test.class,
 })
 public class AppointmentBugTestSuite {
 

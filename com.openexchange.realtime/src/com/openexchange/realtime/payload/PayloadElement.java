@@ -49,9 +49,9 @@
 
 package com.openexchange.realtime.payload;
 
+import static com.openexchange.realtime.util.CopyObject.copyObject;
 import java.io.Serializable;
 import com.openexchange.realtime.util.ElementPath;
-import static com.openexchange.realtime.util.CopyObject.copyObject;
 
 /**
  * {@link PayloadElement} - Represents a stanza's payload element that is any (POJO) object linked with its format identifier. Namespace and

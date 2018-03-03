@@ -63,11 +63,11 @@ import com.openexchange.authentication.LoginInfo;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.custom.parallels.osgi.Services;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
 
 
@@ -247,7 +247,7 @@ public class ParallelsOXAuthentication implements AuthenticationService {
         } finally {
 
             // close resultset and statement before releasing connection back to pool
-            DBUtils.closeSQLStuff(rs, prep);
+            Databases.closeSQLStuff(rs, prep);
 
             // return configdb connection back to pool
             Database.back(false, configdb_read);

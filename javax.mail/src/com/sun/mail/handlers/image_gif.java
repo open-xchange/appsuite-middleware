@@ -40,9 +40,13 @@
 
 package com.sun.mail.handlers;
 
-import java.io.*;
-import java.awt.*;
-import javax.activation.*;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import javax.activation.ActivationDataFlavor;
+import javax.activation.DataSource;
 
 /**
  * DataContentHandler for image/gif.

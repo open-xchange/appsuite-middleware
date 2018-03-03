@@ -49,8 +49,6 @@
 
 package com.openexchange.java;
 
-import com.openexchange.java.Strings;
-
 /**
  * {@link ConvertUtils} - Static methods that help to convert.
  *

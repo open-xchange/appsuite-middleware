@@ -50,8 +50,6 @@
 package com.openexchange.groupware.infostore.paths.impl;
 
 import static com.openexchange.java.Autoboxing.I;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -73,6 +71,8 @@ import com.openexchange.groupware.infostore.WebdavFolderAliases;
 import com.openexchange.groupware.infostore.webdav.URLCache;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.webdav.protocol.WebdavPath;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 public class PathResolverImpl extends AbstractPathResolver implements URLCache {
     private Mode MODE;

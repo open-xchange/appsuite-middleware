@@ -60,9 +60,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.rest.services.database.DatabaseRESTErrorCodes;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * The {@link DBVersionChecker} implements the VersionChecker interface. It caches version data for a schema and module for 30 minutes.
@@ -115,7 +115,7 @@ public class DBVersionChecker implements VersionChecker {
                 stmt.setString(2, newVersionId);
 
                 int update = stmt.executeUpdate();
-                DBUtils.closeSQLStuff(stmt);
+                Databases.closeSQLStuff(stmt);
 
                 if (update == 1) {
                     return null;
@@ -131,7 +131,7 @@ public class DBVersionChecker implements VersionChecker {
                 return null;
             }
 
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
             stmt = con.prepareStatement("SELECT version FROM serviceSchemaVersion WHERE module = ?");
             stmt.setString(1, module);
 
@@ -154,8 +154,8 @@ public class DBVersionChecker implements VersionChecker {
             } catch (SQLException x) {
                 // IGNORE
             }
-            DBUtils.closeSQLStuff(stmt);
-            DBUtils.closeSQLStuff(rs);
+            Databases.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(rs);
         }
     }
 
@@ -185,7 +185,7 @@ public class DBVersionChecker implements VersionChecker {
             } catch (SQLException x) {
                 throw DatabaseRESTErrorCodes.SQL_ERROR.create(x.getMessage());
             } finally {
-                DBUtils.closeSQLStuff(query, stmt);
+                Databases.closeSQLStuff(query, stmt);
             }
         }
 
@@ -259,7 +259,7 @@ public class DBVersionChecker implements VersionChecker {
             if (rs.next()) {
                 return false;
             }
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
 
             //   CREATE LOCK
             stmt = con.prepareStatement("INSERT IGNORE INTO serviceSchemaMigrationLock (module, expires) VALUES (?, ?)");
@@ -271,7 +271,7 @@ public class DBVersionChecker implements VersionChecker {
         } catch (SQLException x) {
             throw DatabaseRESTErrorCodes.SQL_ERROR.create(x.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -285,7 +285,7 @@ public class DBVersionChecker implements VersionChecker {
         } catch (SQLException x) {
             throw DatabaseRESTErrorCodes.SQL_ERROR.create(x.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -301,7 +301,7 @@ public class DBVersionChecker implements VersionChecker {
         } catch (SQLException x) {
             throw DatabaseRESTErrorCodes.SQL_ERROR.create(x.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 }

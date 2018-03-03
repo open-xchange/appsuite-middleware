@@ -56,15 +56,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import twitter4j.OXTwitter;
-import twitter4j.OXTwitterImpl;
-import twitter4j.auth.AuthorizationFactory;
-import twitter4j.auth.BasicAuthorization;
-import twitter4j.auth.NullAuthorization;
-import twitter4j.auth.OAuthAuthorization;
-import twitter4j.auth.RequestToken;
-import twitter4j.conf.Configuration;
-import twitter4j.conf.OXConfigurationBase;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.FailingHttpStatusCodeException;
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -78,6 +69,15 @@ import com.openexchange.twitter.TwitterAccess;
 import com.openexchange.twitter.TwitterAccessToken;
 import com.openexchange.twitter.TwitterExceptionCodes;
 import com.openexchange.twitter.TwitterService;
+import twitter4j.OXTwitter;
+import twitter4j.OXTwitterImpl;
+import twitter4j.auth.AuthorizationFactory;
+import twitter4j.auth.BasicAuthorization;
+import twitter4j.auth.NullAuthorization;
+import twitter4j.auth.OAuthAuthorization;
+import twitter4j.auth.RequestToken;
+import twitter4j.conf.Configuration;
+import twitter4j.conf.OXConfigurationBase;
 
 /**
  * {@link TwitterServiceImpl} - The twitter service implementation based on <a

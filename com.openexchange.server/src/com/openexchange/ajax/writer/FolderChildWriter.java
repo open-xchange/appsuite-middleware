@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.writer;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -59,6 +57,8 @@ import org.json.JSONWriter;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.session.Session;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link FolderChildWriter}

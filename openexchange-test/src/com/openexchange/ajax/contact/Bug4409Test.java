@@ -1,7 +1,9 @@
 
 package com.openexchange.ajax.contact;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.UUID;
 import org.junit.Test;
 import com.openexchange.ajax.contact.action.GetRequest;

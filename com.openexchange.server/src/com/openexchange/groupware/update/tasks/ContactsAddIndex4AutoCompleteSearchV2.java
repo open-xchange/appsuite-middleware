@@ -55,6 +55,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Arrays;
 import org.slf4j.Logger;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -63,7 +64,6 @@ import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.WorkingLevel;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link ContactsAddIndex4AutoCompleteSearchV2}
@@ -117,9 +117,9 @@ public class ContactsAddIndex4AutoCompleteSearchV2 extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
             if (rollback) {
-                DBUtils.rollback(connection);
+                Databases.rollback(connection);
             }
-            DBUtils.autocommit(connection);
+            Databases.autocommit(connection);
         }
         log.info("{} successfully performed.", ContactsAddIndex4AutoCompleteSearchV2.class.getSimpleName());
     }

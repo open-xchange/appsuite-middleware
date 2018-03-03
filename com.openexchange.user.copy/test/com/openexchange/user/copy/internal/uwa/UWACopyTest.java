@@ -105,7 +105,7 @@ public class UWACopyTest extends AbstractUserCopyTest {
         try {
             copyTask.copyUser(getBasicObjectMapping());
         } catch (final OXException e) {
-            DBUtils.rollback(dstCon);
+            Databases.rollback(dstCon);
             e.printStackTrace();
             fail("A UserCopyException occurred.");
         }        
@@ -118,7 +118,7 @@ public class UWACopyTest extends AbstractUserCopyTest {
     @After
     public void tearDown()
  throws Exception {
-        DBUtils.autocommit(dstCon);
+        Databases.autocommit(dstCon);
         deleteAllFromTablesForCid(dstCtx.getContextId(), "cid", dstCon, "uwaWidget", "uwaWidgetPosition");
         super.tearDown();
     }

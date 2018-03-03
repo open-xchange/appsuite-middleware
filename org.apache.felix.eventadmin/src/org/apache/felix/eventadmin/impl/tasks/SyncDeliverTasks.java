@@ -21,7 +21,6 @@ package org.apache.felix.eventadmin.impl.tasks;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.TimeoutException;
-
 import org.apache.felix.eventadmin.impl.handler.EventHandlerProxy;
 import org.osgi.service.event.Event;
 

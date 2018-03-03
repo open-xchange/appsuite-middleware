@@ -40,15 +40,37 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.util.*;
 import java.io.IOException;
-
-import javax.mail.*;
-import javax.mail.search.*;
-import com.sun.mail.iap.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import javax.mail.Flags;
+import javax.mail.Message;
+import javax.mail.search.AddressTerm;
+import javax.mail.search.AndTerm;
+import javax.mail.search.BodyTerm;
+import javax.mail.search.ComparisonTerm;
+import javax.mail.search.DateTerm;
+import javax.mail.search.FlagTerm;
+import javax.mail.search.FromStringTerm;
+import javax.mail.search.FromTerm;
+import javax.mail.search.HeaderTerm;
+import javax.mail.search.MessageIDTerm;
+import javax.mail.search.NotTerm;
+import javax.mail.search.OrTerm;
+import javax.mail.search.ReceivedDateTerm;
+import javax.mail.search.RecipientStringTerm;
+import javax.mail.search.RecipientTerm;
+import javax.mail.search.SearchException;
+import javax.mail.search.SearchTerm;
+import javax.mail.search.SentDateTerm;
+import javax.mail.search.SizeTerm;
+import javax.mail.search.StringTerm;
+import javax.mail.search.SubjectTerm;
+import com.sun.mail.iap.Argument;
+import com.sun.mail.imap.ModifiedSinceTerm;
 import com.sun.mail.imap.OlderTerm;
 import com.sun.mail.imap.YoungerTerm;
-import com.sun.mail.imap.ModifiedSinceTerm;
 
 /**
  * This class traverses a search-tree and generates the 

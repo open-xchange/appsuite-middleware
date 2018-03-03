@@ -1,12 +1,11 @@
 package liquibase.changelog.visitor;
 
+import java.util.ArrayList;
+import java.util.List;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ListVisitor implements ChangeSetVisitor {
 

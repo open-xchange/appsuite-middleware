@@ -40,13 +40,26 @@
 
 package javax.mail.internet;
 
-import javax.mail.*;
-import javax.activation.*;
-import java.util.*;
-import java.io.*;
-import com.sun.mail.util.LineOutputStream;
-import com.sun.mail.util.LineInputStream;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Collections;
+import java.util.Map;
+import javax.activation.DataSource;
+import javax.mail.BodyPart;
+import javax.mail.IllegalWriteException;
+import javax.mail.MessageAware;
+import javax.mail.MessageContext;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.mail.MultipartDataSource;
 import com.sun.mail.util.ASCIIUtility;
+import com.sun.mail.util.LineInputStream;
+import com.sun.mail.util.LineOutputStream;
 import com.sun.mail.util.PropUtil;
 
 /**

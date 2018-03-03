@@ -40,7 +40,6 @@
 
 package javax.mail.internet;
 
-import java.net.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.mail.Session;
 

@@ -1,9 +1,12 @@
 package liquibase.dbdoc;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
-
-import java.io.*;
 
 public class ChangeLogWriter {
     protected File outputDir;

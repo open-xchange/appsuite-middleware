@@ -1,0 +1,17 @@
+type: object
+properties:
+  error:
+    type: object
+    properties:
+      $ref: ../common/CommonResponseData.yaml
+  folder:
+    type: string
+  events:
+    type: array
+    items:
+      $ref: "#/definitions/EventData"
+  timestamp:
+    type: integer
+    format: int64
+    description: The timestamp of the event.
+    readOnly: true

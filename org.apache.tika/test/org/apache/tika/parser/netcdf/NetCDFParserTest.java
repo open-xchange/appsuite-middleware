@@ -16,6 +16,7 @@
  */
 package org.apache.tika.parser.netcdf;
 
+import static org.junit.Assert.assertEquals;
 //JDK imports
 import java.io.InputStream;
 //TIKA imports
@@ -26,11 +27,6 @@ import org.apache.tika.parser.Parser;
 import org.apache.tika.sax.BodyContentHandler;
 import org.junit.Test;
 import org.xml.sax.ContentHandler;
-//Junit imports
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  * Test cases to exercise the {@link NetCDFParser}.

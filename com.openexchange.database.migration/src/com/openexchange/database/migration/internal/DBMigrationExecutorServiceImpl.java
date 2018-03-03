@@ -57,11 +57,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import liquibase.Liquibase;
-import liquibase.changelog.ChangeSet;
-import liquibase.exception.LiquibaseException;
-import liquibase.exception.LockException;
-import liquibase.exception.ValidationFailedException;
 import com.openexchange.database.migration.DBMigration;
 import com.openexchange.database.migration.DBMigrationCallback;
 import com.openexchange.database.migration.DBMigrationConnectionProvider;
@@ -70,6 +65,11 @@ import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.database.migration.DBMigrationState;
 import com.openexchange.database.migration.mbean.MBeanRegisterer;
 import com.openexchange.exception.OXException;
+import liquibase.Liquibase;
+import liquibase.changelog.ChangeSet;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.LockException;
+import liquibase.exception.ValidationFailedException;
 
 /**
  * Implementation of {@link DBMigrationExecutorService} to execute database migrations via liquibase.

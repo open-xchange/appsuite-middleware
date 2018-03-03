@@ -55,6 +55,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.database.AbstractCreateTableImpl;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
@@ -62,7 +63,6 @@ import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.messaging.generic.services.MessagingGenericServiceRegistry;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link MessagingGenericCreateTableTask}
@@ -134,7 +134,7 @@ public final class MessagingGenericCreateTableTask extends AbstractCreateTableIm
         } catch (final SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -145,7 +145,7 @@ public final class MessagingGenericCreateTableTask extends AbstractCreateTableIm
             rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
             return (rs.next() && rs.getString("TABLE_NAME").equals(table));
         } finally {
-            DBUtils.closeSQLStuff(rs);
+            Databases.closeSQLStuff(rs);
         }
     }
 
