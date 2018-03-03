@@ -62,7 +62,7 @@ public class ICalCalendarConstants {
 
     public static final String URI = "uri";
     public static final String ETAG = "etag";
-    public static final String LAST_UPDATE = "lastUpdate";
+    public static final String LAST_LAST_MODIFIED = "lastLastModified";
     public static final String NAME = "name";
     public static final String DESCRIPTION = "description";
     public static final String REFRESH_INTERVAL = "refreshInterval";
