@@ -46,12 +46,10 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
@@ -201,11 +199,11 @@ public class IMAPStore extends Store
     public static final String ID_ARGUMENTS = "arguments";
     public static final String ID_ENVIRONMENT = "environment";
 
-    private static final AtomicReference<List<ProtocolListener>> PROTOCOL_LISTENERS_REF = new AtomicReference<List<ProtocolListener>>(null);
+    private static final AtomicReference<ProtocolListenerCollection> PROTOCOL_LISTENERS_REF = new AtomicReference<ProtocolListenerCollection>(null);
 
     /**
      * Adds specified protocol listener
-     * 
+     *
      * @param protocolListener The protocol listener to add
      */
     public static synchronized void addProtocolListener(ProtocolListener protocolListener) {
@@ -213,42 +211,43 @@ public class IMAPStore extends Store
             return;
         }
 
-        List<ProtocolListener> listeners = PROTOCOL_LISTENERS_REF.get();
+        ProtocolListenerCollection listeners = PROTOCOL_LISTENERS_REF.get();
         if (null == listeners) {
-            listeners = new CopyOnWriteArrayList<>();
-            PROTOCOL_LISTENERS_REF.set(listeners);
+            PROTOCOL_LISTENERS_REF.set(ProtocolListenerCollection.newCollection(protocolListener));
+        } else {
+            listeners.add(protocolListener);
         }
-        listeners.add(protocolListener);
     }
 
     /**
      * Removes specified protocol listener
-     * 
+     *
      * @param protocolListener The protocol listener to remove
      */
     public static synchronized void removeProtocolListener(ProtocolListener protocolListener) {
         if (null == protocolListener) {
             return;
         }
-        
-        List<ProtocolListener> listeners = PROTOCOL_LISTENERS_REF.get();
+
+        ProtocolListenerCollection listeners = PROTOCOL_LISTENERS_REF.get();
         if (null == listeners) {
             return;
         }
-        
-        listeners.remove(protocolListener);
-        if (listeners.isEmpty()) {
+
+        boolean lastRemoved = listeners.remove(protocolListener);
+        if (lastRemoved) {
             PROTOCOL_LISTENERS_REF.set(null);
         }
     }
 
     /**
-     * Gets the currently available protocol listeners.
-     * 
+     * Gets a snapshot of the currently available protocol listeners.
+     *
      * @return The protocol listeners or <code>null</code> if none registered
      */
-    public static List<ProtocolListener> getProtocolListeners() {
-        return PROTOCOL_LISTENERS_REF.get();
+    public static ProtocolListenerCollection getProtocolListeners() {
+        ProtocolListenerCollection collection = PROTOCOL_LISTENERS_REF.get();
+        return null == collection ? null : collection.snapshot();
     }
 
     protected final String name;		// name of this protocol
@@ -715,25 +714,29 @@ public class IMAPStore extends Store
 	// check if closeFoldersOnStoreFailure is set
 	closeFoldersOnStoreFailure = PropUtil.getBooleanSessionProperty(session,
 	    "mail." + name + ".closefoldersonstorefailure", true);
-	if (closeFoldersOnStoreFailure)
-	    logger.config("closeFoldersOnStoreFailure");
+	if (closeFoldersOnStoreFailure) {
+        logger.config("closeFoldersOnStoreFailure");
+    }
 
 	// check if COMPRESS is enabled
 	enableCompress = PropUtil.getBooleanSessionProperty(session,
 	    "mail." + name + ".compress.enable", false);
-	if (enableCompress)
-	    logger.config("enable COMPRESS");
+	if (enableCompress) {
+        logger.config("enable COMPRESS");
+    }
 
 	// check if finalizeCleanClose is enabled
 	finalizeCleanClose = PropUtil.getBooleanSessionProperty(session,
 	    "mail." + name + ".finalizecleanclose", false);
-	if (finalizeCleanClose)
-	    logger.config("close connection cleanly in finalize");
+	if (finalizeCleanClose) {
+        logger.config("close connection cleanly in finalize");
+    }
 
 	overwritePreLoginCapabilitiesAfterLogin = PropUtil.getBooleanSessionProperty(session,
         "mail." + name + ".overwriteprelogincapabilities", false);
-	if (overwritePreLoginCapabilitiesAfterLogin)
-	    logger.config("overwrite pre-login capabilities after login");
+	if (overwritePreLoginCapabilitiesAfterLogin) {
+        logger.config("overwrite pre-login capabilities after login");
+    }
 
 	s = session.getProperty("mail." + name + ".folder.class");
 	if (s != null) {
@@ -806,7 +809,7 @@ public class IMAPStore extends Store
         if (null == name) {
             return null;
         }
-        
+
         Map<String, String> clientParameters = this.clientParameters;
         return null == clientParameters ? null : clientParameters.get(name);
     }
@@ -898,8 +901,9 @@ public class IMAPStore extends Store
             }
 	} catch (com.sun.mail.imap.protocol.IMAPReferralException ex) {
 	    // login failure due to IMAP REFERRAL, close connection to server
-	    if (protocol != null)
-		protocol.disconnect();
+	    if (protocol != null) {
+            protocol.disconnect();
+        }
 	    protocol = null;
 	    throw new ReferralException(ex.getUrl(), ex.getMessage());
 	} catch (CommandFailedException cex) {
@@ -950,7 +954,7 @@ public class IMAPStore extends Store
 	} catch (IOException ioex) {
 	    throw new MessagingException(ioex.getMessage(), ioex);
 	}
-	
+
 
         return true;
 	}
@@ -993,7 +997,9 @@ public class IMAPStore extends Store
 	    }
 	}
 	if (p.isAuthenticated())
-	    return;		// no need to login
+     {
+        return;		// no need to login
+    }
 
 	// allow subclasses to issue commands before login
 	preLogin(p);
@@ -1022,12 +1028,12 @@ public class IMAPStore extends Store
                 this.generatedExternalId = generatedExternalId;
             }
         }
-        
+
         if (null == clientParams && guid != null) {
             clientParams = new LinkedHashMap<String, String>(2);
             clientParams.put("GUID", guid);
         }
-        
+
         if (null != clientParams) {
             try {
                 p.id(clientParams);
@@ -1057,19 +1063,22 @@ public class IMAPStore extends Store
 	if (enableSASL) {
 	    try {
 		p.sasllogin(saslMechanisms, saslRealm, authzid, u, pw);
-		if (!p.isAuthenticated())
-		    throw new CommandFailedException(
+		if (!p.isAuthenticated()) {
+            throw new CommandFailedException(
 						"SASL authentication failed");
+        }
 	    } catch (UnsupportedOperationException ex) {
 		// continue to try other authentication methods below
 	    }
 	}
-	
-	if (!p.isAuthenticated())
-	    authenticate(p, authzid, u, pw);
 
-	if (proxyAuthUser != null)
-	    p.proxyauth(proxyAuthUser);
+	if (!p.isAuthenticated()) {
+        authenticate(p, authzid, u, pw);
+    }
+
+	if (proxyAuthUser != null) {
+        p.proxyauth(proxyAuthUser);
+    }
 
 	/*
      * Propagate client IP address if non-null
@@ -1095,7 +1104,7 @@ public class IMAPStore extends Store
 		// ignore other exceptions that "should never happen"
 	    }
 	}
-	
+
 	if (enableCompress) {
 	    if (p.hasCapability("COMPRESS=DEFLATE")) {
 		p.compress();
@@ -1104,8 +1113,9 @@ public class IMAPStore extends Store
 
     	// if server supports UTF-8, enable it for client use
 	// note that this is safe to enable even if mail.mime.allowutf8=false
-	if (p.hasCapability("UTF8=ACCEPT") || p.hasCapability("UTF8=ONLY"))
-	    p.enable("UTF8=ACCEPT");
+	if (p.hasCapability("UTF8=ACCEPT") || p.hasCapability("UTF8=ONLY")) {
+        p.enable("UTF8=ACCEPT");
+    }
     }
 
     /**
@@ -1125,7 +1135,7 @@ public class IMAPStore extends Store
     public synchronized long getValidity() {
         return myValidity;
     }
-    
+
     /**
      * Authenticate using one of the non-SASL mechanisms.
      *
@@ -1146,8 +1156,9 @@ public class IMAPStore extends Store
 	// match is used.
 	String mechs = session.getProperty("mail." + name + ".auth.mechanisms");
 
-	if (mechs == null)
-	    mechs = defaultAuthenticationMechanisms;
+	if (mechs == null) {
+        mechs = defaultAuthenticationMechanisms;
+    }
 
 	/*
 	 * Loop through the list of mechanisms supplied by the user
@@ -1169,9 +1180,10 @@ public class IMAPStore extends Store
 		boolean disabled = PropUtil.getBooleanSessionProperty(
 					session, dprop, m.equals("XOAUTH2"));
 		if (disabled) {
-		    if (logger.isLoggable(Level.FINE))
-			logger.fine("mechanism " + m +
-					" disabled by property: " + dprop);
+		    if (logger.isLoggable(Level.FINE)) {
+                logger.fine("mechanism " + m +
+                		" disabled by property: " + dprop);
+            }
 		    continue;
 		}
 	    }
@@ -1183,17 +1195,17 @@ public class IMAPStore extends Store
 		continue;
 	    }
 
-	    if (m.equals("PLAIN"))
-		p.authplain(authzid, user, password);
-	    else if (m.equals("LOGIN"))
-		p.authlogin(user, password);
-	    else if (m.equals("NTLM"))
-		p.authntlm(authzid, user, password);
-	    else if (m.equals("XOAUTH2"))
-		p.authoauth2(user, password);
-        else if (m.equals("OAUTHBEARER"))
-        p.authoauthbearer(user, password);
-	    else {
+	    if (m.equals("PLAIN")) {
+            p.authplain(authzid, user, password);
+        } else if (m.equals("LOGIN")) {
+            p.authlogin(user, password);
+        } else if (m.equals("NTLM")) {
+            p.authntlm(authzid, user, password);
+        } else if (m.equals("XOAUTH2")) {
+            p.authoauth2(user, password);
+        } else if (m.equals("OAUTHBEARER")) {
+            p.authoauthbearer(user, password);
+        } else {
 		logger.log(Level.FINE, "no authenticator for mechanism {0}", m);
 		continue;
 	    }
@@ -1282,7 +1294,7 @@ public class IMAPStore extends Store
             if (authenticatedConnections.isEmpty()) {
                 throw new IllegalStateException("Not connected");
             }
-            
+
             try {
                 int to = -1;
                 for (IMAPProtocol imapProtocol : authenticatedConnections) {
@@ -1421,8 +1433,9 @@ public class IMAPStore extends Store
 
 	    // Add folder to folder-list
 	    if (folder != null) {
-                if (pool.folders == null)
+                if (pool.folders == null) {
                     pool.folders = new Vector<IMAPFolder>();
+                }
 		pool.folders.addElement(folder);
 	    }
         }
@@ -1948,7 +1961,7 @@ public class IMAPStore extends Store
 
     /**
      * Gets the remote IP address of the end-point this instance is connected to, or <code>null</code> if it is unconnected.
-     * 
+     *
      * @return The remote IP address, or <code>null</code> if it is unconnected.
      */
     public synchronized java.net.InetAddress getRemoteAddress()
