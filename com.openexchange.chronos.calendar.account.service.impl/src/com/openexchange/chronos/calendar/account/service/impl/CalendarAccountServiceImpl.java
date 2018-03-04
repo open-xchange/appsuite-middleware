@@ -319,9 +319,10 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
                      */
                     List<CalendarAccount> accounts = storage.getAccountStorage().loadAccounts(session.getUserId());
                     for (AutoProvisioningCalendarProvider calendarProvider : getProvidersRequiringProvisioning(session, accounts)) {
+                        int maxAccounts = getMaxAccounts(calendarProvider, session.getContextId(), session.getUserId());
                         JSONObject userConfig = new JSONObject();
                         JSONObject internalConfig = calendarProvider.autoConfigureAccount(session, userConfig, parameters);
-                        CalendarAccount account = insertAccount(storage.getAccountStorage(), calendarProvider.getId(), session.getUserId(), internalConfig, userConfig);
+                        CalendarAccount account = insertAccount(storage.getAccountStorage(), calendarProvider.getId(), session.getUserId(), internalConfig, userConfig, maxAccounts);
                         calendarProvider.onAccountCreated(session, account, parameters);
                         accounts.add(account);
                     }
@@ -432,8 +433,9 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
                 /*
                  * insert account after checking if maximum number of allowed accounts is reached for this provider
                  */
-                checkMaxAccountsNotReached(storage, calendarProvider, contextId, userId);
-                return insertAccount(storage.getAccountStorage(), calendarProvider.getId(), userId, internalConfig, userConfig);
+                int maxAccounts = getMaxAccounts(calendarProvider, contextId, userId);
+                checkMaxAccountsNotReached(storage, calendarProvider, userId, maxAccounts);
+                return insertAccount(storage.getAccountStorage(), calendarProvider.getId(), userId, internalConfig, userConfig, maxAccounts);
             }
         }.executeUpdate();
         /*
@@ -451,16 +453,17 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
      * @param userId The user identifier
      * @param internalConfig The account's internal / protected configuration data
      * @param userConfig The account's external / user configuration data
+     * @param maxAccounts The maximum number of accounts allowed for this provider and user
      * @return The new calendar account
      */
-    private CalendarAccount insertAccount(CalendarAccountStorage storage, String providerId, int userId, JSONObject internalConfig, JSONObject userConfig) throws OXException {
+    private CalendarAccount insertAccount(CalendarAccountStorage storage, String providerId, int userId, JSONObject internalConfig, JSONObject userConfig, int maxAccounts) throws OXException {
         int accountId;
         if (CalendarAccount.DEFAULT_ACCOUNT.getProviderId().equals(providerId)) {
             accountId = CalendarAccount.DEFAULT_ACCOUNT.getAccountId();
         } else {
             accountId = storage.nextId();
         }
-        storage.insertAccount(new DefaultCalendarAccount(providerId, accountId, userId, internalConfig, userConfig, new Date()));
+        storage.insertAccount(new DefaultCalendarAccount(providerId, accountId, userId, internalConfig, userConfig, new Date()), maxAccounts);
         return storage.loadAccount(userId, accountId);
     }
 
@@ -528,8 +531,7 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
         return ConfigViews.getDefinedIntPropertyFrom(CalendarProviders.getMaxAccountsPropertyName(provider), defaultValue, view);
     }
 
-    private void checkMaxAccountsNotReached(CalendarStorage storage, CalendarProvider provider, int contextId, int userId) throws OXException {
-        int maxAccounts = getMaxAccounts(provider, contextId, userId);
+    private void checkMaxAccountsNotReached(CalendarStorage storage, CalendarProvider provider, int userId, int maxAccounts) throws OXException {
         if (0 < maxAccounts) {
             int numAccounts = storage.getAccountStorage().loadAccounts(new int[] { userId }, provider.getId()).size();
             if (maxAccounts <= numAccounts) {

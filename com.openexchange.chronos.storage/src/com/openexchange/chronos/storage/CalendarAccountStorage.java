@@ -80,6 +80,14 @@ public interface CalendarAccountStorage {
     void insertAccount(CalendarAccount account) throws OXException;
 
     /**
+     * Inserts a new calendar account.
+     *
+     * @param account The account data to insert
+     * @param maxAccounts The maximum number of accounts allowed for this provider and user
+     */
+    void insertAccount(CalendarAccount account, int maxAccounts) throws OXException;
+
+    /**
      * Updates an existing calendar account.
      *
      * @param account The account data to update

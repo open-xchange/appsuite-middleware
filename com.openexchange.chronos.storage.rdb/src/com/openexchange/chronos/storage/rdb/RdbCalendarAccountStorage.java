@@ -165,6 +165,22 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
     }
 
     @Override
+    public void insertAccount(CalendarAccount account, int maxAccounts) throws OXException {
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated = insertAccount(connection, context.getContextId(), account, maxAccounts);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw asOXException(e);
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    @Override
     public void updateAccount(CalendarAccount account, long clientTimestamp) throws OXException {
         int updated = 0;
         Connection connection = null;
@@ -304,6 +320,42 @@ public class RdbCalendarAccountStorage extends RdbStorage implements CalendarAcc
                 stmt.setLong(5, System.currentTimeMillis());
                 stmt.setBinaryStream(6, internalConfigStream);
                 stmt.setBinaryStream(7, userConfigStream);
+                return logExecuteUpdate(stmt);
+            } finally {
+                Streams.close(internalConfigStream, userConfigStream);
+            }
+        }
+    }
+
+    private static int insertAccount(Connection connection, int cid, CalendarAccount account, int maxAccounts) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("INSERT INTO calendar_account (cid,id,provider,user,modified,internalConfig,userConfig) ")
+        ;
+        if (0 < maxAccounts) {
+            stringBuilder.append("SELECT ?,?,?,?,?,?,? FROM DUAL ")
+                .append("WHERE ?>(SELECT COUNT(*) FROM calendar_account WHERE cid=? AND user=? AND provider=?);");
+        } else {
+            stringBuilder.append("VALUES (?,?,?,?,?,?,?);");
+        }
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            InputStream internalConfigStream = null;
+            InputStream userConfigStream = null;
+            try {
+                internalConfigStream = serialize(account.getInternalConfiguration());
+                userConfigStream = serialize(account.getUserConfiguration());
+                stmt.setInt(1, cid);
+                stmt.setInt(2, account.getAccountId());
+                stmt.setString(3, account.getProviderId());
+                stmt.setInt(4, account.getUserId());
+                stmt.setLong(5, System.currentTimeMillis());
+                stmt.setBinaryStream(6, internalConfigStream);
+                stmt.setBinaryStream(7, userConfigStream);
+                if (0 < maxAccounts) {
+                    stmt.setInt(8, maxAccounts);
+                    stmt.setInt(9, cid);
+                    stmt.setInt(10, account.getUserId());
+                    stmt.setString(11, account.getProviderId());
+                }
                 return logExecuteUpdate(stmt);
             } finally {
                 Streams.close(internalConfigStream, userConfigStream);
