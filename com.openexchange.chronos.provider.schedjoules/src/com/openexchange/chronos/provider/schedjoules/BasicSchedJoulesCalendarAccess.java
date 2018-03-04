@@ -139,11 +139,6 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
     }
 
     @Override
-    public void handleExceptions(OXException e) {
-        // no-op
-    }
-
-    @Override
     public ExternalCalendarResult getAllEvents() throws OXException {
         String itemId = account.getUserConfiguration().optString(SchedJoulesFields.ITEM_ID);
         JSONObject internalConfig = account.getInternalConfiguration();
@@ -173,7 +168,7 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
     }
 
     @Override
-    public long getRetryAfterErrorInterval() {
+    public long getRetryAfterErrorInterval(OXException e) {
         return TimeUnit.MINUTES.toMinutes(EXTERNAL_REQUEST_TIMEOUT);
     }
 

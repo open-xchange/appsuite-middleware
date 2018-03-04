@@ -60,10 +60,12 @@ import org.dmfs.rfc5545.Duration;
 import org.json.JSONObject;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.TimeTransparency;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarConstants;
 import com.openexchange.chronos.provider.ical.conn.ICalFeedClient;
 import com.openexchange.chronos.provider.ical.properties.ICalCalendarProviderProperties;
 import com.openexchange.chronos.provider.ical.result.GetResponse;
@@ -150,11 +152,6 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
     }
 
     @Override
-    public void handleExceptions(OXException e) {
-        //nothing to handle
-    }
-
-    @Override
     public ExternalCalendarResult getAllEvents() throws OXException {
         GetResponse getResult = feedClient.executeRequest();
         String etag = iCalFeedConfig.getEtag();
@@ -172,19 +169,24 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
     }
 
     @Override
-    public long getRetryAfterErrorInterval() {
-        return TimeUnit.MINUTES.toMinutes(60);
+    public long getRetryAfterErrorInterval(OXException e) {
+        if (e == null || e.getExceptionCode() == null || CalendarExceptionCodes.AUTH_FAILED.equals(e)) {
+            return BasicCachingCalendarConstants.MINIMUM_DEFAULT_RETRY_AFTER_ERROR_INTERVAL;
+        }
+        return services.getService(LeanConfigurationService.class).getLongProperty(session.getUserId(), session.getContextId(), ICalCalendarProviderProperties.retryAfterErrorInterval);
     }
 
     private void updateICalConfiguration(GetResponse importResult) {
         JSONObject iCalConfig = getICalConfiguration();
-        setLastUpdate(iCalConfig);
+        setLastUpdate(importResult, iCalConfig);
         setRefreshInterval(importResult, iCalConfig);
         setETag(importResult, iCalConfig);
     }
 
-    private void setLastUpdate(JSONObject iCalConfig) {
-        iCalConfig.putSafe(ICalCalendarConstants.LAST_UPDATE, System.currentTimeMillis());
+    private void setLastUpdate(GetResponse importResult, JSONObject iCalConfig) {
+        if (Strings.isNotEmpty(importResult.getLastModified())) {
+            iCalConfig.putSafe(ICalCalendarConstants.LAST_LAST_MODIFIED, importResult.getLastModified());
+        }
     }
 
     private void setETag(GetResponse importResult, JSONObject iCalConfig) {

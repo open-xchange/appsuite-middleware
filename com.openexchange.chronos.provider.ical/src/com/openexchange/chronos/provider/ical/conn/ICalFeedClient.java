@@ -246,7 +246,7 @@ public class ICalFeedClient {
                 throw ICalProviderExceptionCodes.NO_FEED.create(iCalFeedConfig.getFeedUrl());
         }
         if (statusCode >= 400 && statusCode <= 499) {
-            throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(iCalFeedConfig.getFeedUrl(), "Unknown server response. Status code {}.", statusCode);
+            throw ICalProviderExceptionCodes.UNEXPECTED_FEED_ERROR.create(iCalFeedConfig.getFeedUrl(), "Unknown server response. Status code " + statusCode);
         }
 
         // Assert the 5xx codes

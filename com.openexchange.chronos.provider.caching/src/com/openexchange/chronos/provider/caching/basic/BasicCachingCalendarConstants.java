@@ -47,45 +47,19 @@
  *
  */
 
-package com.openexchange.chronos.provider.ical.properties;
-
-import com.openexchange.chronos.provider.ical.conn.ICalFeedClient;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.DefaultInterests;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-
+package com.openexchange.chronos.provider.caching.basic;
 
 /**
- * {@link ICalCalendarProviderReloadable}
+ * {@link BasicCachingCalendarConstants}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
-public class ICalCalendarProviderReloadable implements Reloadable {
+public class BasicCachingCalendarConstants {
 
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        ICalFeedClient.reset();
-        ICalCalendarProviderProperties.reset();
-    }
+    /**
+     * The minimum interval (in minutes) that is allowed to be configured when implementing com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess.getRetryAfterErrorInterval(OXException)
+     */
+    public static final int MINIMUM_DEFAULT_RETRY_AFTER_ERROR_INTERVAL = 1;
 
-    private static final String[] PROPERTIES = new String[] {
-        ICalCalendarProviderProperties.refreshInterval.getFQPropertyName(), // reloadable via LeanConfigurationService
-        ICalCalendarProviderProperties.retryAfterErrorInterval.getFQPropertyName(), // reloadable via LeanConfigurationService
-        ICalCalendarProviderProperties.maxFileSize.getFQPropertyName(), // reloadable via LeanConfigurationService
-
-        ICalCalendarProviderProperties.connectionTimeout.getFQPropertyName(),
-        ICalCalendarProviderProperties.maxConnections.getFQPropertyName(),
-        ICalCalendarProviderProperties.maxConnectionsPerRoute.getFQPropertyName(),
-        ICalCalendarProviderProperties.socketReadTimeout.getFQPropertyName(),
-        
-        ICalCalendarProviderProperties.blacklistedHosts.getFQPropertyName(),
-        ICalCalendarProviderProperties.schemes.getFQPropertyName(),
-    };
-
-    @Override
-    public Interests getInterests() {
-        return DefaultInterests.builder().propertiesOfInterest(PROPERTIES).build();
-    }
 }

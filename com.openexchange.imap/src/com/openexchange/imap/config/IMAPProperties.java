@@ -66,6 +66,7 @@ import java.util.regex.PatternSyntaxException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -75,6 +76,7 @@ import com.openexchange.imap.HostExtractingGreetingListener;
 import com.openexchange.imap.IMAPProtocol;
 import com.openexchange.imap.entity2acl.Entity2ACL;
 import com.openexchange.imap.services.Services;
+import com.openexchange.imap.util.CircuitBreakerCommandListener;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.api.AbstractProtocolProperties;
@@ -85,6 +87,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.UserAndContext;
 import com.openexchange.spamhandler.SpamHandler;
+import com.sun.mail.imap.IMAPStore;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -405,6 +408,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private boolean enableAttachmentSearch;
 
+    private List<CircuitBreakerCommandListener> breakers;
+
     /**
      * Initializes a new {@link IMAPProperties}
      */
@@ -422,6 +427,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         allowFolderCaches = true;
         hostExtractingGreetingListener = null;
         enableAttachmentSearch = false;
+        breakers = null;
     }
 
     @Override
@@ -767,6 +773,86 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             args.add(lineSeparator);
         }
 
+        {
+            String tmp = configuration.getProperty("com.openexchange.imap.breaker.names", "").trim();
+            tmp = Strings.isEmpty(tmp) ? null : tmp;
+            if (null != tmp) {
+                tmp = tmp.trim();
+                String[] names = Strings.splitByComma(tmp);
+                List<CircuitBreakerCommandListener> breakerList = new ArrayList<>(names.length);
+                NextName: for (String name : names) {
+                    String propertyName = "com.openexchange.imap.breaker." + name + ".hosts";
+                    String hosts = configuration.getProperty(propertyName, "");
+                    if (Strings.isEmpty(hosts)) {
+                        LOG.warn("Missing value for property {}. Skipping breaker configuration for {}", propertyName, name);
+                        continue NextName;
+                    }
+
+                    propertyName = "com.openexchange.imap.breaker." + name + ".ports";
+                    String ports = configuration.getProperty(propertyName, "");
+                    if (Strings.isEmpty(ports)) {
+                        ports = null;
+                    }
+
+                    int percent;
+                    {
+                        propertyName = "com.openexchange.imap.breaker." + name + ".percent";
+                        String sPercent = configuration.getProperty(propertyName, "");
+                        if (Strings.isEmpty(sPercent)) {
+                            LOG.warn("Missing value for property {}. Skipping breaker configuration for {}", propertyName, name);
+                            continue NextName;
+                        }
+                        try {
+                            percent = Integer.parseInt(sPercent.trim());
+                        } catch (NumberFormatException e) {
+                            LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for {}", propertyName, name);
+                            continue NextName;
+                        }
+                    }
+
+                    long windowMillis;
+                    {
+                        propertyName = "com.openexchange.imap.breaker." + name + ".windowMillis";
+                        String sWindowMillis = configuration.getProperty(propertyName, "");
+                        if (Strings.isEmpty(sWindowMillis)) {
+                            LOG.warn("Missing value for property {}. Skipping breaker configuration for {}", propertyName, name);
+                            continue NextName;
+                        }
+                        try {
+                            windowMillis = Long.parseLong(sWindowMillis.trim());
+                        } catch (NumberFormatException e) {
+                            LOG.warn("Invalid value for property {}. Not a number. Skipping breaker configuration for {}", propertyName, name);
+                            continue NextName;
+                        }
+                    }
+
+                    Set<String> hostSet = ImmutableSet.copyOf(Strings.splitByComma(hosts));
+                    Set<Integer> portSet;
+                    if (null == ports) {
+                        portSet = null;
+                    } else {
+                        portSet = new HashSet<>(6);
+                        for (String sPort : Strings.splitByComma(ports)) {
+                            try {
+                                portSet.add(Integer.valueOf(sPort.trim()));
+                            } catch (NumberFormatException e) {
+                                LOG.warn("Invalid value for port. Not a number. Skipping breaker configuration for {}", name);
+                                continue NextName;
+                            }
+                        }
+                    }
+                    breakerList.add(new CircuitBreakerCommandListener(hostSet, portSet, percent, windowMillis));
+                    logBuilder.append("    Added circuit breaker for hosts: {}{}");
+                    args.add(hostSet);
+                    args.add(Strings.getLineSeparator());
+                }
+                breakers = breakerList;
+                for (CircuitBreakerCommandListener breaker : breakerList) {
+                    IMAPStore.addProtocolListener(breaker);
+                }
+            }
+        }
+
         logBuilder.append("Global IMAP properties successfully loaded!");
 
         LOG.info(logBuilder.toString(), args.toArray(new Object[args.size()]));
@@ -798,6 +884,13 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         cipherSuites = null;
         hostExtractingGreetingListener = null;
         enableAttachmentSearch = false;
+        List<CircuitBreakerCommandListener> breakerList = breakers;
+        if (null != breakerList) {
+            for (CircuitBreakerCommandListener breaker : breakerList) {
+                IMAPStore.removeProtocolListener(breaker);
+            }
+        }
+        breakers = null;
     }
 
     /**

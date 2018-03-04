@@ -75,9 +75,9 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolderProperty;
 import com.openexchange.chronos.provider.basic.CalendarSettings;
-import com.openexchange.chronos.provider.caching.CachingCalendarException;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
+import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarConstants;
 import com.openexchange.chronos.provider.google.GoogleCalendarConfigField;
 import com.openexchange.chronos.provider.google.config.GoogleCalendarConfig;
 import com.openexchange.chronos.provider.google.converter.GoogleEventConverter;
@@ -146,7 +146,7 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
                  * Initialization of the oauthAccess failed. Stopping initialization of the GoogleCalendarAccess.
                  * Set refreshInterval to minimum.
                  */
-                throw CachingCalendarException.create(e);
+                throw GoogleExceptionCodes.OAUTH_INITIALIZATION_FAILED.create(e);
             }
 
             if (checkConfig) {
@@ -307,7 +307,10 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
     }
 
     @Override
-    public long getRetryAfterErrorInterval() {
+    public long getRetryAfterErrorInterval(OXException e) {
+        if (e == null || e.getExceptionCode() == null || CalendarExceptionCodes.AUTH_FAILED.equals(e) || GoogleExceptionCodes.OAUTH_INITIALIZATION_FAILED.equals(e)) {
+            return BasicCachingCalendarConstants.MINIMUM_DEFAULT_RETRY_AFTER_ERROR_INTERVAL;
+        }
         return requestTimeout;
     }
 
@@ -355,11 +358,6 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
         settings.setExtendedProperties(extendedProperties);
         settings.setSubscribed(true);
         return settings;
-    }
-
-    @Override
-    public void handleExceptions(OXException e) {
-        // TODO handle exception
     }
 
     @Override

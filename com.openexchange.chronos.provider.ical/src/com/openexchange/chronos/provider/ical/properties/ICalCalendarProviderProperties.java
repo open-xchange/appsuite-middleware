@@ -70,6 +70,10 @@ import com.openexchange.net.HostList;
 public enum ICalCalendarProviderProperties implements Property {
 
     /**
+     * Defines the default timeout interval for contacting the external resource after an error occurred.
+     */
+    retryAfterErrorInterval(60L, ICalCalendarProviderProperties.PREFIX), // one hour
+    /**
      * Defines the default refresh interval of the calendar feeds
      */
     refreshInterval(10080L, ICalCalendarProviderProperties.PREFIX), // one week

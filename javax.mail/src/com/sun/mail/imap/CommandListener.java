@@ -47,35 +47,29 @@
  *
  */
 
-package com.openexchange.chronos.provider.caching;
+package com.sun.mail.imap;
 
-import com.openexchange.exception.OXException;
+import java.io.IOException;
+import com.sun.mail.iap.ProtocolException;
 
 /**
- * {@link CachingCalendarException}
+ * {@link CommandListener} - Receives call-backs before and after every issued command to IMAP store.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class CachingCalendarException extends OXException{
+public interface CommandListener extends ProtocolListener {
 
     /**
-     * serialVersionUID
+     * Called when an IMAP command is about to be issued
+     * <p>
+     * <b>Note</b>: If an exception is thrown by this listener, actual command execution is aborted!
+     *
+     * @param event The event providing command details
+     * @return <code>true</code> if this command listener is applicable; otherwise <code>false</code>
+     * @throws IOException If an I/O error occurs
+     * @throws ProtocolException If handling the event fails
      */
-    private static final long serialVersionUID = -4290670058564810766L;
-    private final OXException exceptionToIgnore;
-
-    private CachingCalendarException(OXException ex) {
-        super();
-        exceptionToIgnore = ex;
-    }
-
-    public static CachingCalendarException create(OXException ex) {
-        return new CachingCalendarException(ex);
-    }
-
-    public OXException getExceptionToIgnore() {
-        return exceptionToIgnore;
-    }
+    boolean onBeforeCommandIssued(CommandEvent event) throws IOException, ProtocolException;
 
 }

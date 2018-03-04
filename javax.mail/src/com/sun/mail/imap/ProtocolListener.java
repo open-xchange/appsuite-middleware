@@ -58,12 +58,13 @@ import com.sun.mail.iap.ProtocolException;
  * @since v7.10.0
  */
 public interface ProtocolListener {
-    
+
     /**
      * Called when an IMAP command has been issued
-     * 
-     * @param event The event providing command details
+     *
+     * @param event The event providing response details
      * @throws ProtocolException If handling the event fails
      */
     void onResponse(ResponseEvent event) throws ProtocolException;
+
 }

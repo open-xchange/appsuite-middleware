@@ -114,7 +114,7 @@ public class ICalCalendarFeedConfig {
             adaptScheme();
 
             this.etag = icalConfig.optString(ICalCalendarConstants.ETAG, null);
-            this.lastUpdated = icalConfig.optLong(ICalCalendarConstants.LAST_UPDATE, -1L);
+            this.lastUpdated = icalConfig.optLong(ICalCalendarConstants.LAST_LAST_MODIFIED, -1L);
         }
 
         private void adaptScheme() {

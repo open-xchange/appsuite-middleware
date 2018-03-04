@@ -51,6 +51,7 @@ package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -725,24 +726,9 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         assertTrue(EventManager.isSeriesMaster(allEvents.get(0)));
     }
 
-    @Test
-    public void testGet_forbiddenWhileReading_returnSameExceptionForSecondRequest() throws ApiException, OXException, IOException, JSONException {
-        String externalUri = "http://example.com/files/testGet_Unauthorized_returnException.ics";
-        mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_FORBIDDEN);
-
-        String newFolderId = createDefaultAccount(externalUri);
-        EventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, false, true, false, false);
-        EventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, false, true, false, false);
-
-        assertEquals(initialAllEventResponse.getError(), secondEventResponse.getError());
-        assertEquals(initialAllEventResponse.getData(), secondEventResponse.getData());
-        assertEquals(initialAllEventResponse.getCode(), secondEventResponse.getCode());
-        assertEquals(initialAllEventResponse.getErrorId(), secondEventResponse.getErrorId());
-        assertEquals(initialAllEventResponse.getErrorDesc(), secondEventResponse.getErrorDesc());
-        assertEquals(initialAllEventResponse.getCategory(), secondEventResponse.getCategory());
-        assertEquals(initialAllEventResponse.getCategories(), secondEventResponse.getCategories());
-    }
-
+    // =====================================================================================
+    // ============================== dealing with exceptions ==============================
+    // =====================================================================================
     private static final int RETRY_INTERVAL = 1;
     private static final Map<String, String> CONFIG = new HashMap<String, String>();
     static {
@@ -765,22 +751,23 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
     }
 
     @Test
-    public void testGet_forbidden_returnExceptionWhenReadFromDB() throws ApiException, OXException, IOException, JSONException {
-        String externalUri = "http://example.com/files/testGet_forbidden_returnExceptionWhenReadFromDB.ics";
-        clear(externalUri);
+    public void testGet_forbiddenWhileReading_returnSameExceptionForSecondRequest() throws ApiException, OXException, IOException, JSONException {
+        String externalUri = "http://example.com/files/testGet_Unauthorized_returnException.ics";
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_FORBIDDEN);
 
         String newFolderId = createDefaultAccount(externalUri);
-        EventsResponse initialReadResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, false, true, false, false);
-        EventsResponse fromDBResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, false, true, false, true);
+        EventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, false, true, false, false);
+        EventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEvents(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), newFolderId, null, null, null, false, true, false, false);
 
-        assertEquals(initialReadResponse.getCode(), fromDBResponse.getCode());
-        assertEquals(initialReadResponse.getErrorId(), fromDBResponse.getErrorId());
-        assertEquals(initialReadResponse.getErrorDesc(), fromDBResponse.getErrorDesc());
-        assertEquals(initialReadResponse.getCategory(), fromDBResponse.getCategory());
-        assertEquals(initialReadResponse.getCategories(), fromDBResponse.getCategories());
+        assertEquals(initialAllEventResponse.getError(), secondEventResponse.getError());
+        assertEquals(initialAllEventResponse.getData(), secondEventResponse.getData());
+        assertEquals(initialAllEventResponse.getCode(), secondEventResponse.getCode());
+        assertEquals(initialAllEventResponse.getErrorId(), secondEventResponse.getErrorId());
+        assertEquals(initialAllEventResponse.getErrorDesc(), secondEventResponse.getErrorDesc());
+        assertEquals(initialAllEventResponse.getCategory(), secondEventResponse.getCategory());
+        assertEquals(initialAllEventResponse.getCategories(), secondEventResponse.getCategories());
     }
-    
+
     @Test
     public void testGet_forbiddenButSecondRequestOk_removeExceptionFromResponse() throws ApiException, OXException, IOException, JSONException {
         String externalUri = "http://example.com/files/testGet_forbiddenButSecondRequestOk_removeExceptionFromResponse.ics";
@@ -854,10 +841,10 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         assertNotNull(initialAllEventResponse.getCategory());
         assertNotNull(initialAllEventResponse.getCategories());
     }
-    
+
     @Test
     public void testGet_authFailed() throws ApiException, OXException, IOException, JSONException {
-        
+
     }
 
     @Test
@@ -918,8 +905,55 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         EventDataError secondResponseError = secondEventResponse.getData().get(0).getError();
 
         assertNull(secondResponseError);
-        assertEquals(38, secondEventResponse.getData().size());
+        assertEquals(38, secondEventResponse.getData().get(0).getEvents().size());
     }
+
+    @Test
+    public void testMultipleGet_forbiddenAndSecondRequestNotFound_changeExceptionInResponse() throws ApiException, OXException, IOException, JSONException {
+        String externalUri = "http://example.com/files/testGet_forbiddenAndSecondRequestNotFound_changeExceptionInResponse.ics";
+        clear(externalUri);
+        mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_FORBIDDEN);
+
+        String newFolderId = createDefaultAccount(externalUri);
+        ChronosFolderBody body = new ChronosFolderBody();
+        body.addFoldersItem(newFolderId);
+
+        MultipleFolderEventsResponse initialAllEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, false, false, true);
+        clear(externalUri);
+        EventDataError initialResponseError = initialAllEventResponse.getData().get(0).getError();
+
+        assertEquals(0, initialAllEventResponse.getData().get(0).getEvents().size());
+        assertNotNull(initialResponseError.getError());
+        assertNotNull(initialResponseError.getCode());
+        assertNotNull(initialResponseError.getErrorId());
+        assertNotNull(initialResponseError.getErrorDesc());
+        assertNotNull(initialResponseError.getCategory());
+        assertNotNull(initialResponseError.getCategories());
+        assertEquals("ICAL-PROV-5001", initialResponseError.getCode());
+
+        try {
+            Thread.sleep(61000);
+        } catch (InterruptedException e) {
+            //
+        }
+        mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_NOT_FOUND);
+
+        MultipleFolderEventsResponse secondEventResponse = defaultUserApi.getChronosApi().getAllEventsForMultipleFolders(defaultUserApi.getSession(), DateTimeUtil.getZuluDateTime(new Date(dateToMillis("20000702T201500Z")).getTime()).getValue(), DateTimeUtil.getZuluDateTime(new Date(System.currentTimeMillis()).getTime()).getValue(), body, null, null, null, false, false, true);
+        EventDataError secondResponseError = secondEventResponse.getData().get(0).getError();
+
+        assertEquals(0, secondEventResponse.getData().get(0).getEvents().size());
+        assertEquals("ICAL-PROV-4043", secondResponseError.getCode());
+        assertNotNull(secondResponseError.getError());
+        assertNotNull(secondResponseError.getCode());
+        assertNotNull(secondResponseError.getErrorId());
+        assertNotNull(secondResponseError.getErrorDesc());
+
+        assertNotEquals(initialResponseError.getError(), secondResponseError.getError());
+        assertNotEquals(initialResponseError.getCode(), secondResponseError.getCode());
+        assertNotEquals(initialResponseError.getErrorId(), secondResponseError.getErrorId());
+        assertNotEquals(initialResponseError.getErrorDesc(), secondResponseError.getErrorDesc());
+    }
+
     private List<EventId> createEventIDs(List<EventData> allEvents, int maxEvents, String folder) {
         List<EventId> ids = new ArrayList<>();
         for (int i = 0; i < maxEvents; i++) {
