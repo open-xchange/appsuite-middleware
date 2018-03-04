@@ -354,6 +354,11 @@ public class CalendarAccountServiceImpl implements CalendarAccountService, Admin
     }
 
     @Override
+    public CalendarAccount getAccount(int contextId, int userId, int id) throws OXException {
+        return initAccountStorage(contextId, null).loadAccount(userId, id);
+    }
+
+    @Override
     public List<CalendarAccount> getAccounts(int contextId, int[] userIds, String providerId) throws OXException {
         return sort(initAccountStorage(contextId, null).loadAccounts(userIds, providerId));
     }

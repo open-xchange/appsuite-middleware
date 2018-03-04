@@ -221,7 +221,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
 
     /**
      * Throws an {@link OXException} when the account contains an error due to previous execution
-     * 
+     *
      * @throws OXException
      */
     private void containsError() throws OXException {
@@ -403,7 +403,8 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         caching.putSafe(CachingCalendarAccessConstants.LOCKED_FOR_UPDATE_BY, lockedBy);
         AdministrativeCalendarAccountService accountService = Services.getService(AdministrativeCalendarAccountService.class);
         try {
-            account = accountService.updateAccount(session.getContextId(), session.getUserId(), account.getAccountId(), internalConfig, null, account.getLastModified().getTime());
+            accountService.updateAccount(session.getContextId(), session.getUserId(), account.getAccountId(), internalConfig, null, account.getLastModified().getTime());
+            account = accountService.getAccount(session.getContextId(), session.getUserId(), account.getAccountId());
             caching = account.getInternalConfiguration().optJSONObject(CachingCalendarAccessConstants.CACHING);
             if (null == caching) {
                 return false;
