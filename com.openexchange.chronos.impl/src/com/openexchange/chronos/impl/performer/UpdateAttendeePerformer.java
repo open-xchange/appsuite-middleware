@@ -183,11 +183,6 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
          * prepare update
          */
         Attendee attendeeUpdate = prepareAttendeeUpdate(originalEvent, originalAttendee, attendee);
-        if (null == attendeeUpdate) {
-            //TODO or throw?
-            //            result.addUpdate(new UpdateResultImpl(originalEvent, originalEvent));
-            return;
-        }
         if (attendeeUpdate.containsFolderID()) {
             /*
              * store tombstone references in case of a move operation for the attendee
@@ -276,7 +271,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
      * @param originalEvent The original event
      * @param originalAttendee The original attendee
      * @param updatedAttendee The updated attendee
-     * @return A 'delta' attendee representing the changes, or <code>null</code> if no changes need to be stored
+     * @return A 'delta' attendee representing the changes
      */
     private Attendee prepareAttendeeUpdate(Event originalEvent, Attendee originalAttendee, Attendee updatedAttendee) throws OXException {
         /*
@@ -284,10 +279,6 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
          */
         Attendee attendeeUpdate = AttendeeMapper.getInstance().getDifferences(originalAttendee, updatedAttendee);
         AttendeeField[] updatedFields = AttendeeMapper.getInstance().getAssignedFields(attendeeUpdate);
-        if (0 == updatedFields.length) {
-            // TODO or throw?
-            return null;
-        }
         for (AttendeeField field : updatedFields) {
             switch (field) {
                 case FOLDER_ID:
