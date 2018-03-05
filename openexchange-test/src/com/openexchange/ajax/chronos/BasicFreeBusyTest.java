@@ -52,6 +52,7 @@ package com.openexchange.ajax.chronos;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -164,12 +165,18 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         assertEquals("BUSY", freeBusyTimes.get(2).getFbType());
     }
 
+    private long getRandomTimeBetweenTwoDates () {
+        long beginTime = Timestamp.valueOf("2000-01-01 00:00:00").getTime();
+        long endTime = Timestamp.valueOf("2020-12-31 00:58:00").getTime();
+        long diff = endTime - beginTime + 1;
+        return beginTime + (long) (Math.random() * diff);
+    }
+    
     @Test
     public void testFreeBusyTimeWithOverlappingEventsWithDifferentStati() throws Exception {
-        Date now = new Date();
-        int offset = TimeZone.getDefault().getOffset(now.getTime());
+        long first = getRandomTimeBetweenTwoDates();
+        int offset = TimeZone.getDefault().getOffset(first);
         // Define starting dates
-        long first = 1000 * (now.getTime() / 1000);
         long second = first + TimeUnit.MINUTES.toMillis(30);
         long third = second + TimeUnit.MINUTES.toMillis(30);
         long nextWeek = first + TimeUnit.DAYS.toMillis(7);
@@ -311,7 +318,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         ChronosCalendarResultResponse createEvent = defaultUserApi.getChronosApi().createEvent(defaultUserApi.getSession(), folderId, createSingleEvent(summary, start, end, attendees), true, false, false, null, null, false);
         assertNull(createEvent.getErrorDesc(), createEvent.getError());
         assertNotNull(createEvent.getData());
-        EventData event = createEvent.getData().getCreated().get(0);
+        EventData event = createEvent.getData(). getCreated().get(0);
         EventId eventId = new EventId();
         eventId.setId(event.getId());
         eventId.setFolder(folderId);
