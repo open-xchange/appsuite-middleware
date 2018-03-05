@@ -171,7 +171,7 @@ public class ActionPerformerAction extends AbstractITipAction {
                                 // Set the attachment to the event
                                 attachment.setData(fileHolder);
                             } catch (IOException e) {
-                                LOG.error("Couldn't convert input stream tp processaable data. Removing attachment from event.", e);
+                                LOG.error("Couldn't convert input stream to processable data. Removing attachment from event.", e);
                                 removeAttachmentFromEvent(it, stream, fileHolder);
                             } catch (OXException e) {
                                 // Check for MailExceptionCode.ATTACHMENT_NOT_FOUND
