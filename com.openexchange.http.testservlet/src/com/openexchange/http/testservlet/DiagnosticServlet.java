@@ -53,7 +53,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiConsumer;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -115,12 +118,21 @@ public class DiagnosticServlet extends HttpServlet {
     private static final long serialVersionUID = 9099870094224041974L;
     private ServiceLookup services;
 
+    private final Map<ServletParameter, BiConsumer<DiagnosticService, StringBuilder>> pageInjectors;
+
     /**
      * Default constructor.
      */
     public DiagnosticServlet(ServiceLookup services) {
         super();
         this.services = services;
+
+        Map<ServletParameter, BiConsumer<DiagnosticService, StringBuilder>> pi = new HashMap<>(4);
+        pi.put(ServletParameter.charsets, (diagnosticService, page) -> writeList(diagnosticService.getCharsets(true), page));
+        pi.put(ServletParameter.ciphersuites, (diagnosticService, page) -> writeList(diagnosticService.getCipherSuites(), page));
+        pi.put(ServletParameter.protocols, (diagnosticService, page) -> writeList(diagnosticService.getProtocols(), page));
+        pi.put(ServletParameter.version, (diagnosticService, page) -> page.append(diagnosticService.getVersion()).append("\n"));
+        pageInjectors = Collections.unmodifiableMap(pi);
     }
 
     /**
@@ -131,12 +143,7 @@ public class DiagnosticServlet extends HttpServlet {
         String parameter = req.getParameter("param");
         final StringBuilder page = new StringBuilder(1024);
         if (Strings.isEmpty(parameter)) {
-            writeStatusAndContentType(resp, HttpServletResponse.SC_BAD_REQUEST);
-            writeHeader(resp, page, "Error");
-            page.append("<p>Missing \"param\" URL parameter. Possible value(s):</p>\n");
-            writeList(ServletParameter.getParameters(), page);
-            writeFooter(page);
-            flush(resp, page);
+            writeBadRequest(resp, "Missing 'param' URL parameter. Possible value(s):", page);
             return;
         }
 
@@ -145,41 +152,39 @@ public class DiagnosticServlet extends HttpServlet {
             servletParameter = ServletParameter.valueOf(parameter);
         } catch (Exception e) {
             // Unknown parameter value
-            writeStatusAndContentType(resp, HttpServletResponse.SC_BAD_REQUEST);
-            writeHeader(resp, page, "Error");
-            page.append("<p>Unknown parameter value: ");
-            page.append(parameter);
-            page.append("</p>\n");
-            writeFooter(page);
-            flush(resp, page);
+            writeBadRequest(resp, "Unknown parameter value: " + parameter, page);
             return;
         }
 
         writeHeader(resp, page, servletParameter.getDescription());
         writeStatusAndContentType(resp, HttpServletResponse.SC_OK);
         DiagnosticService diagnosticService = services.getService(DiagnosticService.class);
-        switch (servletParameter) {
-            case charsets:
-                writeList(diagnosticService.getCharsets(true), page);
-                break;
-            case ciphersuites:
-                writeList(diagnosticService.getCipherSuites(), page);
-                break;
-            case protocols:
-                writeList(diagnosticService.getProtocols(), page);
-                break;
-            case version:
-                page.append(diagnosticService.getVersion()).append("\n");
-                break;
-            default:
-                // Unknown parameter value
-                writeStatusAndContentType(resp, HttpServletResponse.SC_BAD_REQUEST);
-                writeHeader(resp, page, "Error");
-                page.append("<p>Unknown parameter value: ");
-                page.append(servletParameter.name());
-                page.append("</p>\n");
-                break;
+        BiConsumer<DiagnosticService, StringBuilder> injector = pageInjectors.get(servletParameter);
+        if (injector == null) {
+            writeBadRequest(resp, "Unknown parameter value: " + servletParameter.name(), page);
+            return;
         }
+        injector.accept(diagnosticService, page);
+        writeFooter(page);
+        flush(resp, page);
+    }
+
+    ///////////////////////////////// HELPERS ///////////////////////////////////
+
+    /**
+     * Writes and flushes a bad request with the specified error message
+     * 
+     * @param resp The {@link HttpServletResponse}
+     * @param errorMessage The error message to write
+     * @param page The {@link StringBuilder} holding the page content
+     * @throws IOException if an I/O error occurs while flushing the page
+     */
+    private void writeBadRequest(HttpServletResponse resp, String errorMessage, StringBuilder page) throws IOException {
+        writeStatusAndContentType(resp, HttpServletResponse.SC_BAD_REQUEST);
+        writeHeader(resp, page, "Error");
+        page.append("<p>").append(errorMessage);
+        page.append("</p>\n");
+        writeList(ServletParameter.getParameters(), page);
         writeFooter(page);
         flush(resp, page);
     }
