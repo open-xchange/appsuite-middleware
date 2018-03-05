@@ -66,6 +66,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
@@ -223,8 +224,9 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
             resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
 
+            Map<Integer, List<Alarm>> alarms = storage.getAlarmStorage().loadAlarms(updatedMasterEvent);
             storage.getAlarmTriggerStorage().deleteTriggers(originalSeriesMaster.getId());
-            storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent);
+            storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, alarms);
         }
     }
 
@@ -288,8 +290,9 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             resultTracker.trackDeletion(originalEvent);
             resultTracker.trackCreation(updatedEvent);
         }
+        Map<Integer, List<Alarm>> alarms = storage.getAlarmStorage().loadAlarms(updatedEvent);
         storage.getAlarmTriggerStorage().deleteTriggers(originalEvent.getId());
-        storage.getAlarmTriggerStorage().insertTriggers(updatedEvent);
+        storage.getAlarmTriggerStorage().insertTriggers(updatedEvent, alarms);
         /*
          * recursively perform pending updates of change exceptions, too
          */

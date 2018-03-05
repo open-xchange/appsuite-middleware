@@ -64,6 +64,7 @@ import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.java.Autoboxing.i;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
@@ -248,8 +249,9 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
                 resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
 
+                Map<Integer, List<Alarm>> alarms = storage.getAlarmStorage().loadAlarms(updatedMasterEvent);
                 storage.getAlarmTriggerStorage().deleteTriggers(originalSeriesMaster.getId());
-                storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent);
+                storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, alarms);
             }
         } else if (isSeriesException(originalEvent)) {
             /*

@@ -72,7 +72,6 @@ import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.exception.ProblemSeverity;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.RecurrenceService;
-import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.AlarmTriggerStorage;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
 import com.openexchange.database.Databases;
@@ -96,7 +95,6 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     private static final int DELETE_CHUNK_SIZE = 200;
 
     private final int accountId;
-    private final AlarmStorage alarmStorage;
     private final RecurrenceService recurrenceService;
     private final EntityResolver resolver;
 
@@ -112,10 +110,9 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
      * @param txPolicy The transaction policy
      * @throws OXException
      */
-    protected RdbAlarmTriggerStorage(Context context, int accountId, DBProvider dbProvider, DBTransactionPolicy txPolicy, AlarmStorage alarmStorage, EntityResolver resolver) throws OXException {
+    protected RdbAlarmTriggerStorage(Context context, int accountId, DBProvider dbProvider, DBTransactionPolicy txPolicy, EntityResolver resolver) throws OXException {
         super(context, dbProvider, txPolicy);
         this.accountId = accountId;
-        this.alarmStorage = alarmStorage;
         this.recurrenceService = Services.getService(RecurrenceService.class, true);
         this.resolver = resolver;
     }
@@ -261,12 +258,6 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
      */
     private AlarmTrigger readTrigger(ResultSet resultSet, AlarmTriggerField... fields) throws SQLException, OXException {
         return MAPPER.fromResultSet(resultSet, fields);
-    }
-
-    @Override
-    public void insertTriggers(Event event) throws OXException {
-        Map<Integer, List<Alarm>> alarmsPerAttendee = alarmStorage.loadAlarms(event);
-        insertTriggers(event, alarmsPerAttendee);
     }
 
     @Override

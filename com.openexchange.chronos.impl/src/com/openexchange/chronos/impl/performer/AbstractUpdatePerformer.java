@@ -325,8 +325,9 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         resultTracker.trackUpdate(originalEvent, updatedEvent);
 
         // Update alarm trigger
+        Map<Integer, List<Alarm>> alarms = storage.getAlarmStorage().loadAlarms(updatedEvent);
         storage.getAlarmTriggerStorage().deleteTriggers(updatedEvent.getId());
-        storage.getAlarmTriggerStorage().insertTriggers(updatedEvent);
+        storage.getAlarmTriggerStorage().insertTriggers(updatedEvent, alarms);
     }
 
     /**
@@ -415,9 +416,11 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     }
 
     private void removeAlarmTrigger(Event createdException, Event updatedMasterEvent) throws OXException {
-        storage.getAlarmTriggerStorage().insertTriggers(createdException);
+        Map<Integer, List<Alarm>> exxceptionAlarms = storage.getAlarmStorage().loadAlarms(createdException);
+        storage.getAlarmTriggerStorage().insertTriggers(createdException, exxceptionAlarms);
+        Map<Integer, List<Alarm>> masterAlarms = storage.getAlarmStorage().loadAlarms(updatedMasterEvent);
         storage.getAlarmTriggerStorage().deleteTriggers(updatedMasterEvent.getId());
-        storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent);
+        storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, masterAlarms);
     }
 
     /**
@@ -543,8 +546,9 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
          * insert new alarms
          */
         insertAlarms(event, userId, alarmUpdates.getAddedItems(), false);
+        Map<Integer, List<Alarm>> loadAlarms = storage.getAlarmStorage().loadAlarms(event);
         storage.getAlarmTriggerStorage().deleteTriggers(event.getId());
-        storage.getAlarmTriggerStorage().insertTriggers(event);
+        storage.getAlarmTriggerStorage().insertTriggers(event, loadAlarms);
 
         return true;
     }

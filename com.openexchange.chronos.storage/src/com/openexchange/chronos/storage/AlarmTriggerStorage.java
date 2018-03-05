@@ -74,14 +74,6 @@ public interface AlarmTriggerStorage {
     void insertTriggers(Event event, Map<Integer, List<Alarm>> alarmsPerUserId) throws OXException;
 
     /**
-     * Inserts all necessary triggers for the given event. In case of an update remove all existing triggers first.
-     *
-     * @param event The event to insert triggers for
-     * @throws OXException
-     */
-    void insertTriggers(Event event) throws OXException;
-
-    /**
      * Inserts all necessary triggers for the given alarm objects.
      * This method adds alarm trigger objects as a batch operation and does some additional performance optimizations.
      *
