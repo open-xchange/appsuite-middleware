@@ -74,6 +74,8 @@ import com.openexchange.server.ServiceLookup;
  */
 public class DiagnosticServlet extends HttpServlet {
 
+    private static final String TEXT_HTML_CONTENT_TYPE = "text/html";
+
     private enum ServletParameter {
         charsets("Character Sets"),
         ciphersuites("Cipher Suites"),
@@ -292,6 +294,6 @@ public class DiagnosticServlet extends HttpServlet {
      */
     private void writeStatusAndContentType(HttpServletResponse resp, int statusCode) {
         resp.setStatus(statusCode);
-        resp.setContentType("text/html");
+        resp.setContentType(TEXT_HTML_CONTENT_TYPE);
     }
 }
