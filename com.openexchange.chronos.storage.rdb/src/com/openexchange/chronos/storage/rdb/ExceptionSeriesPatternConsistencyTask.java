@@ -70,15 +70,22 @@ public class ExceptionSeriesPatternConsistencyTask extends UpdateTaskAdapter {
 
     private static final String FIND_MISSING_PATTERN = "SELECT exception.cid, exception.intfield01, exception.intfield02 FROM prg_dates exception JOIN prg_dates master ON exception.cid = master.cid AND exception.intfield02 = master.intfield01 AND (exception.field06 != master.field06 OR exception.field06 IS NULL)";
 
-    private static final String REPAIR_MISSING_PATTERN = "UPDATE prg_dates SET field06 = (SELECT field06 FROM prg_dates WHERE cid = ? AND intfield01 = ?) WHERE cid = ? AND intfield01 = ?;";
+    private static final String GET_CORRECT_PATTERN = "SELECT field06 FROM prg_dates WHERE cid = ? AND intfield01 = ?;";
+
+    private static final String REPAIR_MISSING_PATTERN = "UPDATE prg_dates SET field06 = ? WHERE cid = ? AND intfield01 = ?;";
 
     private static final String FIND_MISSING_RECURRENCE_CALCULATOR = "SELECT exception.cid, exception.intfield01, exception.intfield02 FROM prg_dates exception JOIN prg_dates master ON exception.cid = master.cid AND exception.intfield02 = master.intfield01 AND exception.intfield04 != master.intfield04;";
 
-    private static final String REPAIR_MISSING_RECURRENCE_CALCULATOR = "UPDATE prg_dates SET intfield04 = (SELECT intfield04 FROM prg_dates WHERE cid = ? AND intfield01 = ?) WHERE cid = ? AND intfield01 = ?";
+    private static final String REPAIR_MISSING_RECURRENCE_CALCULATOR = "UPDATE prg_dates SET intfield04 = ? WHERE cid = ? AND intfield01 = ?";
+
+    private static final String GET_CORRECT_RECURRENCE_CALCULATOR = "SELECT intfield04 FROM prg_dates WHERE cid = ? AND intfield01 = ?;";
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ExceptionSeriesPatternConsistencyTask.class);
 
     @Override
     public String[] getDependencies() {
-        return new String[] {};
+        return new String[] { "com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2"
+        };
     }
 
     @Override
@@ -109,23 +116,48 @@ public class ExceptionSeriesPatternConsistencyTask extends UpdateTaskAdapter {
 
     private void repairPattern(Connection con) throws SQLException {
         ResultSet rs = null;
-        PreparedStatement stmt = null;
+        PreparedStatement findStmt = null;
+        PreparedStatement repairStmt = null;
         try {
-            rs = con.prepareStatement(FIND_MISSING_PATTERN).executeQuery();
-            stmt = con.prepareStatement(REPAIR_MISSING_PATTERN);
+            findStmt = con.prepareStatement(FIND_MISSING_PATTERN);
+            rs = findStmt.executeQuery();
+            repairStmt = con.prepareStatement(REPAIR_MISSING_PATTERN);
             while (rs.next()) {
                 int cid = rs.getInt("cid");
                 int intfield01 = rs.getInt("intfield01");
                 int intfield02 = rs.getInt("intfield02");
 
-                stmt.setInt(1, cid);
-                stmt.setInt(2, intfield02);
-                stmt.setInt(3, cid);
-                stmt.setInt(4, intfield01);
+                String corrected = getCorrectPattern(con, cid, intfield02);
+                if (corrected == null) {
+                    LOG.warn("Unable to find master pattern for {}/{}", cid, intfield01);
+                    continue;
+                }
 
-                stmt.addBatch();
+                repairStmt.setString(1, corrected);
+                repairStmt.setInt(2, cid);
+                repairStmt.setInt(3, intfield01);
+
+                repairStmt.addBatch();
             }
-            stmt.executeBatch();
+            repairStmt.executeBatch();
+        } finally {
+            Databases.closeSQLStuff(findStmt);
+            Databases.closeSQLStuff(rs, repairStmt);
+        }
+    }
+
+    private String getCorrectPattern(Connection con, int cid, int id) throws SQLException {
+        ResultSet rs = null;
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(GET_CORRECT_PATTERN);
+            stmt.setInt(1, cid);
+            stmt.setInt(2, id);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return null;
+            }
+            return rs.getString("field06");
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
@@ -133,23 +165,48 @@ public class ExceptionSeriesPatternConsistencyTask extends UpdateTaskAdapter {
 
     private void repairRecurrenceCalculator(Connection con) throws SQLException {
         ResultSet rs = null;
-        PreparedStatement stmt = null;
+        PreparedStatement findStmt = null;
+        PreparedStatement repairStmt = null;
         try {
-            rs = con.prepareStatement(FIND_MISSING_RECURRENCE_CALCULATOR).executeQuery();
-            stmt = con.prepareStatement(REPAIR_MISSING_RECURRENCE_CALCULATOR);
+            findStmt = con.prepareStatement(FIND_MISSING_RECURRENCE_CALCULATOR);
+            rs = findStmt.executeQuery();
+            repairStmt = con.prepareStatement(REPAIR_MISSING_RECURRENCE_CALCULATOR);
             while (rs.next()) {
                 int cid = rs.getInt("cid");
                 int intfield01 = rs.getInt("intfield01");
                 int intfield02 = rs.getInt("intfield02");
 
-                stmt.setInt(1, cid);
-                stmt.setInt(2, intfield02);
-                stmt.setInt(3, cid);
-                stmt.setInt(4, intfield01);
+                String corrected = getCorrectRecurrenceCalculator(con, cid, intfield02);
+                if (corrected == null) {
+                    LOG.warn("Unable to find master recurrence calculator for {}/{}", cid, intfield01);
+                    continue;
+                }
 
-                stmt.addBatch();
+                repairStmt.setString(1, corrected);
+                repairStmt.setInt(2, cid);
+                repairStmt.setInt(3, intfield01);
+
+                repairStmt.addBatch();
             }
-            stmt.executeBatch();
+            repairStmt.executeBatch();
+        } finally {
+            Databases.closeSQLStuff(findStmt);
+            Databases.closeSQLStuff(rs, repairStmt);
+        }
+    }
+
+    private String getCorrectRecurrenceCalculator(Connection con, int cid, int id) throws SQLException {
+        ResultSet rs = null;
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(GET_CORRECT_RECURRENCE_CALCULATOR);
+            stmt.setInt(1, cid);
+            stmt.setInt(2, id);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return null;
+            }
+            return rs.getString("field06");
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
