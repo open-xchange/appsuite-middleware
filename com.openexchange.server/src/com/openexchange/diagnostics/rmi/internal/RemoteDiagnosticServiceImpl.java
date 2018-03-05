@@ -47,65 +47,67 @@
  *
  */
 
-package com.openexchange.diagnostics.osgi;
+package com.openexchange.diagnostics.rmi.internal;
 
-import java.rmi.Remote;
-import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.rmi.RemoteException;
+import java.util.List;
 import com.openexchange.diagnostics.DiagnosticService;
-import com.openexchange.diagnostics.internal.DiagnosticServiceImpl;
-import com.openexchange.diagnostics.rmi.internal.RemoteDiagnosticServiceImpl;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.diagnostics.rmi.RemoteDiagnosticService;
 
 /**
- * {@link DiagnosticsActivator}
+ * {@link RemoteDiagnosticServiceImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DiagnosticsActivator extends HousekeepingActivator {
+public class RemoteDiagnosticServiceImpl implements RemoteDiagnosticService {
+
+    private DiagnosticService delegate;
 
     /**
-     * Initialises a new {@link DiagnosticsActivator}.
+     * Initialises a new {@link RemoteDiagnosticServiceImpl}.
      */
-    public DiagnosticsActivator() {
+    public RemoteDiagnosticServiceImpl(DiagnosticService diagnosticService) {
         super();
+        this.delegate = diagnosticService;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.osgi.DeferredActivator#getNeededServices()
+     * @see com.openexchange.diagnostics.rmi.RemoteDiagnosticInterface#getCharsets(boolean)
      */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    public List<String> getCharsets(boolean aliases) throws RemoteException {
+        return delegate.getCharsets(aliases);
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.osgi.DeferredActivator#startBundle()
+     * @see com.openexchange.diagnostics.rmi.RemoteDiagnosticInterface#getProtocols()
      */
     @Override
-    protected void startBundle() throws Exception {
-        Logger logger = LoggerFactory.getLogger(DiagnosticsActivator.class);
-        logger.info("Registering DiagnosticService");
-        DiagnosticServiceImpl diagnosticService = new DiagnosticServiceImpl();
-        registerService(DiagnosticService.class, diagnosticService);
-        registerService(Remote.class, new RemoteDiagnosticServiceImpl(diagnosticService));
+    public List<String> getProtocols() throws RemoteException {
+        return delegate.getProtocols();
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.osgi.DeferredActivator#stop(org.osgi.framework.BundleContext)
+     * @see com.openexchange.diagnostics.rmi.RemoteDiagnosticInterface#getCipherSuites()
      */
     @Override
-    public void stop(BundleContext context) throws Exception {
-        Logger logger = LoggerFactory.getLogger(DiagnosticsActivator.class);
-        logger.info("Unregistering DiagnosticService");
-        unregisterService(DiagnosticService.class);
-        super.stop(context);
+    public List<String> getCipherSuites() throws RemoteException {
+        return delegate.getCipherSuites();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.diagnostics.rmi.RemoteDiagnosticInterface#getVersion()
+     */
+    @Override
+    public String getVersion() throws RemoteException {
+        return delegate.getVersion();
     }
 }
