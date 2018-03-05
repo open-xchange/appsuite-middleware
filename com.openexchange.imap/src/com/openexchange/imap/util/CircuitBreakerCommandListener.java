@@ -128,11 +128,18 @@ public class CircuitBreakerCommandListener implements CommandListener {
      * @param percent The whole number percentage of failures that will be tolerated (i.e. the percentage of failures has to be strictly greater than this number in order to trip the breaker).
      *                For example, if the percentage is <code>3</code>, any calculated failure percentage above that number during the window will cause the breaker to trip.
      * @param windowMillis The length of the window in milliseconds
+     * @throws IllegalArgumentException If invalid/arguments are passed
      */
     public CircuitBreakerCommandListener(Set<String> hosts, Set<Integer> optPorts, int percent, long windowMillis) {
         super();
         if (null == hosts || hosts.isEmpty()) {
             throw new IllegalArgumentException("hosts must not be null or empty.");
+        }
+        if (percent < 0 || percent > 100) {
+            throw new IllegalArgumentException("percent is required to be between 0 and 100 (inclusive).");
+        }
+        if (windowMillis <= 0) {
+            throw new IllegalArgumentException("windowMillis must be greater than 0 (zero).");
         }
         this.hosts = lowerCaseSetFor(hosts);
         this.ports = null == optPorts || optPorts.isEmpty() ? null : optPorts;

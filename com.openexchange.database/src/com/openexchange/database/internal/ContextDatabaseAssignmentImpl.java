@@ -99,6 +99,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     private static final String CACHE_NAME = "OXDBPoolCache";
 
     private static class CacheLockHolder {
+        // Wrapper class to initialize only when needed
         static final CacheLock fallbackGlobalCacheLock = CacheLock.cacheLockFor(new ReentrantLock(true));
     }
 
