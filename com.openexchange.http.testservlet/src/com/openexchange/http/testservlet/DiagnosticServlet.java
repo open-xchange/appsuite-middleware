@@ -151,7 +151,7 @@ public class DiagnosticServlet extends HttpServlet {
         ServletParameter servletParameter;
         try {
             servletParameter = ServletParameter.valueOf(parameter);
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             // Unknown parameter value
             writeBadRequest(resp, "Unknown parameter value: " + parameter, page);
             return;
@@ -163,10 +163,10 @@ public class DiagnosticServlet extends HttpServlet {
             return;
         }
 
-        writeHeader(resp, page, servletParameter.getDescription());
-        writeStatusAndContentType(resp, HttpServletResponse.SC_OK);
-
         try {
+            writeHeader(resp, page, servletParameter.getDescription());
+            writeStatusAndContentType(resp, HttpServletResponse.SC_OK);
+
             DiagnosticService diagnosticService = services.getService(DiagnosticService.class);
             if (diagnosticService == null) {
                 writeError(resp, HttpServletResponse.SC_SERVICE_UNAVAILABLE, "Diagnostic service unavailable", page, false);
