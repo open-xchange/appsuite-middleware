@@ -68,7 +68,7 @@ import com.openexchange.tools.update.Tools;
  */
 public class ExceptionSeriesPatternConsistencyTask extends UpdateTaskAdapter {
 
-    private static final String FIND_MISSING_PATTERN = "SELECT cid, intfield01, intfield02 FROM prg_dates WHERE intfield02 > 0 AND intfield02 != intfield01 AND field06 IS NULL;";
+    private static final String FIND_MISSING_PATTERN = "SELECT exception.cid, exception.intfield01, exception.intfield02 FROM prg_dates exception JOIN prg_dates master ON exception.cid = master.cid AND exception.intfield02 = master.intfield01 AND (exception.field06 != master.field06 OR exception.field06 IS NULL)";
 
     private static final String REPAIR_MISSING_PATTERN = "UPDATE prg_dates SET field06 = (SELECT field06 FROM prg_dates WHERE cid = ? AND intfield01 = ?) WHERE cid = ? AND intfield01 = ?;";
 
