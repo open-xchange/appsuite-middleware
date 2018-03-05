@@ -241,7 +241,7 @@ public class DiagnosticServlet extends HttpServlet {
     private void writeList(List<String> list, StringBuilder page) {
         page.append("<ul>\n");
         for (String element : list) {
-            page.append("<li>").append(element).append("</li>");
+            page.append("<li>").append(element).append("</li>\n");
         }
         page.append("</ul>\n");
     }
