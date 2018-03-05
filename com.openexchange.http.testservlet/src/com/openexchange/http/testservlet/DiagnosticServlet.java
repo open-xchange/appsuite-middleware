@@ -63,6 +63,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.diagnostics.DiagnosticService;
 import com.openexchange.java.Strings;
+import com.openexchange.osgi.ShutDownRuntimeException;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -156,23 +157,34 @@ public class DiagnosticServlet extends HttpServlet {
             return;
         }
 
-        writeHeader(resp, page, servletParameter.getDescription());
-        writeStatusAndContentType(resp, HttpServletResponse.SC_OK);
-        DiagnosticService diagnosticService = services.getService(DiagnosticService.class);
         BiConsumer<DiagnosticService, StringBuilder> injector = pageInjectors.get(servletParameter);
         if (injector == null) {
             writeBadRequest(resp, "Unknown parameter value: " + servletParameter.name(), page);
             return;
         }
-        injector.accept(diagnosticService, page);
-        writeFooter(page);
-        flush(resp, page);
+
+        writeHeader(resp, page, servletParameter.getDescription());
+        writeStatusAndContentType(resp, HttpServletResponse.SC_OK);
+
+        try {
+            DiagnosticService diagnosticService = services.getService(DiagnosticService.class);
+            if (diagnosticService == null) {
+                writeError(resp, HttpServletResponse.SC_SERVICE_UNAVAILABLE, "Diagnostic service unavailable", page, false);
+            }
+            injector.accept(diagnosticService, page);
+            writeFooter(page);
+            flush(resp, page);
+        } catch (ShutDownRuntimeException e) {
+            writeError(resp, HttpServletResponse.SC_SERVICE_UNAVAILABLE, "Server is shutting down", page, false);
+        } catch (IllegalStateException e) {
+            writeBadRequest(resp, "Diagnostic service unavailable", page, false);
+        }
     }
 
     ///////////////////////////////// HELPERS ///////////////////////////////////
 
     /**
-     * Writes and flushes a bad request with the specified error message
+     * Writes and flushes a bad request with the specified error message and writes the possible {@link ServletParameter}s
      * 
      * @param resp The {@link HttpServletResponse}
      * @param errorMessage The error message to write
@@ -180,11 +192,40 @@ public class DiagnosticServlet extends HttpServlet {
      * @throws IOException if an I/O error occurs while flushing the page
      */
     private void writeBadRequest(HttpServletResponse resp, String errorMessage, StringBuilder page) throws IOException {
-        writeStatusAndContentType(resp, HttpServletResponse.SC_BAD_REQUEST);
+        writeBadRequest(resp, errorMessage, page, true);
+    }
+
+    /**
+     * Writes and flushes a bad request with the specified error message
+     * 
+     * @param resp The {@link HttpServletResponse}
+     * @param errorMessage The error message to write
+     * @param page The {@link StringBuilder} holding the page content
+     * @param writePossibleServletParameters whether to write the possible {@link ServletParameter}s
+     * @throws IOException if an I/O error occurs while flushing the page
+     */
+    private void writeBadRequest(HttpServletResponse resp, String errorMessage, StringBuilder page, boolean writePossibleServletParameters) throws IOException {
+        writeError(resp, HttpServletResponse.SC_BAD_REQUEST, errorMessage, page, writePossibleServletParameters);
+    }
+
+    /**
+     * Writes and flushes an erroneous request with the specified error message and the specified status code
+     * 
+     * @param resp The {@link HttpServletResponse}
+     * @param statusCode The status code
+     * @param errorMessage The error message to write
+     * @param page The {@link StringBuilder} holding the page content
+     * @param writePossibleServletParameters whether to write the possible {@link ServletParameter}s
+     * @throws IOException if an I/O error occurs while flushing the page
+     */
+    private void writeError(HttpServletResponse resp, int statusCode, String errorMessage, StringBuilder page, boolean writePossibleServletParameters) throws IOException {
+        writeStatusAndContentType(resp, statusCode);
         writeHeader(resp, page, "Error");
         page.append("<p>").append(errorMessage);
         page.append("</p>\n");
-        writeList(ServletParameter.getParameters(), page);
+        if (writePossibleServletParameters) {
+            writeList(ServletParameter.getParameters(), page);
+        }
         writeFooter(page);
         flush(resp, page);
     }
