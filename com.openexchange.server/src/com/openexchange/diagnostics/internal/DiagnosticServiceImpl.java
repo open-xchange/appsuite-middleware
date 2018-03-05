@@ -115,17 +115,7 @@ public class DiagnosticServiceImpl implements DiagnosticService {
     public List<String> getProtocols() {
         List<String> protocols = new LinkedList<String>();
         for (Provider provider : Security.getProviders()) {
-            for (Object prop : provider.keySet()) {
-                if (!(prop instanceof String)) {
-                    continue;
-                }
-                String key = (String) prop;
-                if (key.startsWith("SSLContext.") && !key.equals("SSLContext.Default") && key.matches(".*[0-9].*")) {
-                    protocols.add(key.substring("SSLContext.".length()));
-                } else if (key.startsWith("Alg.Alias.SSLContext.") && key.matches(".*[0-9].*")) {
-                    protocols.add(key.substring("Alg.Alias.SSLContext.".length()));
-                }
-            }
+            parseProvider(protocols, provider);
         }
         Collections.sort(protocols);
         return Collections.unmodifiableList(protocols);
@@ -193,5 +183,25 @@ public class DiagnosticServiceImpl implements DiagnosticService {
 
         Collections.sort(charsetWithAliases);
         return Collections.unmodifiableList(charsetWithAliases);
+    }
+
+    /**
+     * Parses the SSL protocols of the specified {@link Provider} and adds them to the specified {@link List}
+     * 
+     * @param protocols The {@link List} with all parsed protocols
+     * @param provider The {@link Provider} for which to parse the SSL protocols
+     */
+    private void parseProvider(List<String> protocols, Provider provider) {
+        for (Object prop : provider.keySet()) {
+            if (!(prop instanceof String)) {
+                continue;
+            }
+            String key = (String) prop;
+            if (key.startsWith("SSLContext.") && !key.equals("SSLContext.Default") && key.matches(".*[0-9].*")) {
+                protocols.add(key.substring("SSLContext.".length()));
+            } else if (key.startsWith("Alg.Alias.SSLContext.") && key.matches(".*[0-9].*")) {
+                protocols.add(key.substring("Alg.Alias.SSLContext.".length()));
+            }
+        }
     }
 }
