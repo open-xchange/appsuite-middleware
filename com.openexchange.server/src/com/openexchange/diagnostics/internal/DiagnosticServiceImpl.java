@@ -74,7 +74,8 @@ import com.openexchange.version.Version;
 public class DiagnosticServiceImpl implements DiagnosticService {
 
     private final BiConsumer<Map.Entry<String, Charset>, StringBuilder> charsetAliasConsumer = (charset, charsetBuilder) -> getCharsetAlias(charset, charsetBuilder);
-    private final BiConsumer<Map.Entry<String, Charset>, StringBuilder> charsetConsumer = (charset, charsetBuilder) -> {};
+    private final BiConsumer<Map.Entry<String, Charset>, StringBuilder> charsetConsumer = (charset, charsetBuilder) -> {
+    };
 
     /**
      * Initialises a new {@link DiagnosticServiceImpl}.
@@ -157,6 +158,12 @@ public class DiagnosticServiceImpl implements DiagnosticService {
 
     /////////////////////////////////////// HELPERS ///////////////////////////////////
 
+    /**
+     * Appends to the specified {@link StringBuilder} all aliases of the specified {@link Charset} (if any)
+     * 
+     * @param charset The {@link Charset}
+     * @param charsetBuilder The {@link StringBuilder} containing the string representation of the current {@link Charset} entry
+     */
     private void getCharsetAlias(Map.Entry<String, Charset> charset, StringBuilder charsetBuilder) {
         Charset cs = charset.getValue();
         if (cs == null) {
@@ -172,14 +179,15 @@ public class DiagnosticServiceImpl implements DiagnosticService {
     }
 
     /**
+     * Converts the specified {@link Set} to a sorted unmodifiable {@link List}
      * 
-     * @param charsets
-     * @param size
-     * @return
+     * @param strings The {@link Set} with the strings to convert
+     * @param size The size of the new {@link List}
+     * @return A sorted and unmodifiable {@link List} with the contents of the specified {@link Set}
      */
-    private List<String> convertToSortedList(Set<String> charsets, int size) {
+    private List<String> convertToSortedList(Set<String> strings, int size) {
         List<String> charsetWithAliases = new ArrayList<>(size);
-        for (String charset : charsets) {
+        for (String charset : strings) {
             charsetWithAliases.add(charset);
         }
 
