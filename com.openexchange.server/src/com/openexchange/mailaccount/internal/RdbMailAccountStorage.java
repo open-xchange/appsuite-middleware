@@ -2087,11 +2087,37 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     String transportURL = mailAccount.generateTransportServerURL();
                     if (null != transportURL) {
                         stmt.close();
+                        TransportAuth transportAuth;
+                        if (attributes.contains(Attribute.TRANSPORT_AUTH_LITERAL)) {
+                            transportAuth = mailAccount.getTransportAuth();
+                        } else {
+                            transportAuth = TransportAuth.MAIL;
+                        }
                         String encryptedTransportPassword;
                         if (session == null) {
                             encryptedTransportPassword = null;
                         } else {
-                            encryptedTransportPassword = encrypt(mailAccount.getTransportPassword(), session);
+                            if (TransportAuth.MAIL == transportAuth || TransportAuth.NONE == transportAuth) {
+                                encryptedTransportPassword = null;
+                            } else {
+                                if (attributes.contains(Attribute.TRANSPORT_PASSWORD_LITERAL)) {
+                                    encryptedTransportPassword = encrypt(mailAccount.getTransportPassword(), session);
+                                } else {
+                                    // Don't know better since unknown
+                                    encryptedTransportPassword = null;
+                                }
+                            }
+                        }
+                        String transportLogin;
+                        if (TransportAuth.MAIL == transportAuth || TransportAuth.NONE == transportAuth) {
+                            transportLogin = null;
+                        } else {
+                            if (attributes.contains(Attribute.TRANSPORT_LOGIN_LITERAL)) {
+                                transportLogin = mailAccount.getTransportLogin();
+                            } else {
+                                // Don't know better since unknown
+                                transportLogin = null;
+                            }
                         }
                         // cid, id, user, name, url, login, password, send_addr, default_flag
                         stmt = con.prepareStatement("INSERT INTO user_transport_account (cid, id, user, name, url, login, password, send_addr, default_flag, personal, replyTo, starttls, oauth) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
@@ -2111,31 +2137,52 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                             }
                         }
                         stmt.setString(pos++, transportURL);
-                        setOptionalString(stmt, pos++, mailAccount.getTransportLogin());
+                        setOptionalString(stmt, pos++, transportLogin);
                         setOptionalString(stmt, pos++, encryptedTransportPassword);
                         {
-                            String primaryAddress = mailAccount.getPrimaryAddress();
-                            if (Strings.isEmpty(primaryAddress)) {
+                            String primaryAddress;
+                            if (attributes.contains(Attribute.PRIMARY_ADDRESS_LITERAL)) {
+                                primaryAddress = mailAccount.getPrimaryAddress();
+                            } else {
                                 if (null == storageVersion) {
                                     storageVersion = getMailAccount(mailAccount.getId(), userId, contextId, con);
                                 }
-                                setOptionalString(stmt, pos++, storageVersion.getPrimaryAddress());
-                            } else {
-                                setOptionalString(stmt, pos++, mailAccount.getPrimaryAddress());
+                                primaryAddress = storageVersion.getPrimaryAddress();
                             }
+                            setOptionalString(stmt, pos++, primaryAddress);
                         }
                         stmt.setInt(pos++, 0); // default flag
-                        String personal = mailAccount.getPersonal();
-                        if (isEmpty(personal)) {
-                            stmt.setNull(pos++, TYPE_VARCHAR);
-                        } else {
-                            stmt.setString(pos++, personal);
+                        {
+                            String personal;
+                            if (attributes.contains(Attribute.PERSONAL_LITERAL)) {
+                                personal = mailAccount.getPersonal();
+                            } else {
+                                if (null == storageVersion) {
+                                    storageVersion = getMailAccount(mailAccount.getId(), userId, contextId, con);
+                                }
+                                personal = storageVersion.getPersonal();
+                            }
+                            if (isEmpty(personal)) {
+                                stmt.setNull(pos++, TYPE_VARCHAR);
+                            } else {
+                                stmt.setString(pos++, personal);
+                            }
                         }
-                        String replyTo = mailAccount.getReplyTo();
-                        if (isEmpty(replyTo)) {
-                            stmt.setNull(pos++, TYPE_VARCHAR);
-                        } else {
-                            stmt.setString(pos++, replyTo);
+                        {
+                            String replyTo;
+                            if (attributes.contains(Attribute.REPLY_TO_LITERAL)) {
+                                replyTo = mailAccount.getReplyTo();
+                            } else {
+                                if (null == storageVersion) {
+                                    storageVersion = getMailAccount(mailAccount.getId(), userId, contextId, con);
+                                }
+                                replyTo = storageVersion.getReplyTo();
+                            }
+                            if (isEmpty(replyTo)) {
+                                stmt.setNull(pos++, TYPE_VARCHAR);
+                            } else {
+                                stmt.setString(pos++, replyTo);
+                            }
                         }
                         stmt.setInt(pos++, mailAccount.isTransportStartTls() ? 1 : 0);
 
