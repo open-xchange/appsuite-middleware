@@ -156,6 +156,9 @@ public final class SearchAction extends AbstractMailAction {
             }
             boolean ignoreSeen = req.optBool("unseen");
             Boolean ignoreDeleted = getIgnoreDeleted(req);
+            if (ignoreDeleted == null) {
+                ignoreDeleted = new Boolean(true);
+            }
 
             final JSONValue searchValue = (JSONValue) req.getRequest().requireData();
             /*
