@@ -82,6 +82,7 @@ import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataSource;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -172,20 +173,28 @@ public class ActionPerformerAction extends AbstractITipAction {
                                 attachment.setData(fileHolder);
                             } catch (IOException e) {
                                 LOG.error("Couldn't convert input stream to processable data. Removing attachment from event.", e);
-                                removeAttachmentFromEvent(it, stream, fileHolder);
+                                it.remove();
+                                Streams.close(fileHolder);
                             } catch (OXException e) {
                                 // Check for MailExceptionCode.ATTACHMENT_NOT_FOUND
                                 if (e.getErrorCode().equals("MSG-0049")) {
                                     LOG.warn("Unable to find attachment with CID {}. Removing attachment from event.", attachment.getUri(), e);
-                                    removeAttachmentFromEvent(it, stream, fileHolder);
+                                    it.remove();
+                                    Streams.close(fileHolder);
                                 } else {
                                     throw e;
                                 }
+                            } finally {
+                                Streams.close(stream);
                             }
                         }
                     } else {
                         LOG.error("Unable to get conversion module for attachments. Removing attachments from event.");
-                        event.removeAttachments();
+                        if (change.getCurrentEvent().containsAttachments()) {
+                            event.setAttachments(new LinkedList<>());
+                        } else {
+                            event.removeAttachments();
+                        }
                     }
                 }
             }
@@ -198,8 +207,8 @@ public class ActionPerformerAction extends AbstractITipAction {
             Event original = change.getDiff().getOriginal();
             Event update = change.getDiff().getUpdate();
 
-            List<Attachment> originals = new LinkedList<>(original.getAttachments());
-            List<Attachment> updated = update.getAttachments();
+            List<Attachment> originals = original.containsAttachments() && original.getAttachments() != null ? new LinkedList<>(original.getAttachments()) : new LinkedList<>();
+            List<Attachment> updated = update.containsAttachments() && update.getAttachments() != null ? new LinkedList<>(update.getAttachments()) : new LinkedList<>();
 
             if (originals.size() != updated.size()) {
                 return true;
@@ -221,14 +230,8 @@ public class ActionPerformerAction extends AbstractITipAction {
         return false;
     }
 
-    private void removeAttachmentFromEvent(Iterator<Attachment> it, InputStream stream, ByteArrayFileHolder fileHolder) {
-        it.remove();
-        Streams.close(stream);
-        Streams.close(fileHolder);
-    }
-
     private String prepareUri(String uri) {
-        if (uri.startsWith("CID:")) {
+        if (Strings.isNotEmpty(uri) && uri.startsWith("CID:")) {
             return uri.substring(4);
         }
         return uri;
