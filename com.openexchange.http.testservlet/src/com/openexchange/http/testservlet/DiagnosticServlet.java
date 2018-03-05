@@ -51,44 +51,57 @@ package com.openexchange.http.testservlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
-import java.security.Provider;
-import java.security.Security;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.diagnostics.DiagnosticService;
 import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link DiagnosticServlet} - Default Servlet for JVM diagnostics.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class DiagnosticServlet extends HttpServlet {
 
-    private final List<String> defaultCipherSuites;
+    private enum ServletParameter {
+        charsets("Character Sets"),
+        ciphersuites("Cipher Suites"),
+        protocols("SSL Protocols"),
+        version("Version");
+
+        private final String description;
+
+        /**
+         * Initialises a new {@link DiagnosticServlet.ServletParameter}.
+         */
+        private ServletParameter(String description) {
+            this.description = description;
+        }
+
+        /**
+         * Gets the description
+         *
+         * @return The description
+         */
+        public String getDescription() {
+            return description;
+        }
+    }
+
+    private static final long serialVersionUID = 9099870094224041974L;
+    private ServiceLookup services;
 
     /**
      * Default constructor.
      */
-    public DiagnosticServlet() {
+    public DiagnosticServlet(ServiceLookup services) {
         super();
-
-        // SSL cipher suites
-        String[] defaultCipherSuites = ((javax.net.ssl.SSLSocketFactory) javax.net.ssl.SSLSocketFactory.getDefault()).getDefaultCipherSuites();
-        final List<String> l = new CopyOnWriteArrayList<String>();
-        for (String cipherSuites : defaultCipherSuites) {
-            l.add(cipherSuites);
-        }
-        this.defaultCipherSuites = l;
+        this.services = services;
     }
 
     /**
@@ -97,152 +110,126 @@ public class DiagnosticServlet extends HttpServlet {
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         String parameter = req.getParameter("param");
-        if (Strings.isEmpty(parameter)) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.setContentType("text/html");
-            PrintWriter writer = resp.getWriter();
-            final StringBuilder page = new StringBuilder(1024);
-            page.append("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n");
-            page.append("<html>\n");
-            page.append("<head><title>Diagnostic</title></head>\n");
-            page.append("<body>\n");
-            page.append("<h1>Diagnostic</h1><hr/>\n");
-            page.append("<p>Missing \"param\" URL parameter. Possible value(s):</p>\n<ul>\n");
-            page.append("<li>ciphersuites</li>\n");
-            page.append("<li>version</li>\n");
-            page.append("</ul>\n");
-            page.append("</body>\n</html>");
-            writer.write(page.toString());
-            writer.flush();
-            return;
-        }
-
-        if ("charsets".equalsIgnoreCase(parameter)) {
-            SortedMap<String, Charset> availableCharsets = Charset.availableCharsets();
-
-            resp.setStatus(HttpServletResponse.SC_OK);
-            resp.setContentType("text/html");
-            PrintWriter writer = resp.getWriter();
-            final StringBuilder page = new StringBuilder(1024);
-            page.append("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n");
-            page.append("<html>\n");
-            page.append("<head><title>Diagnostic</title></head>\n");
-            page.append("<body>\n");
-            page.append("<h1>Character Sets</h1><hr/>\n");
-            page.append("<ul>\n");
-
-            for (Map.Entry<String, Charset> charset : availableCharsets.entrySet()) {
-                Charset cs = charset.getValue();
-                Set<String> aliases = cs.aliases();
-                page.append("<li>");
-                page.append(charset.getKey());
-                if (null != aliases && !aliases.isEmpty()) {
-                    for (String alias : aliases) {
-                        page.append(", ").append(alias);
-                    }
-                }
-                page.append("<li>").append(charset.getKey()).append("</li>\n");
-            }
-
-            page.append("</ul>\n");
-            page.append("</body>\n</html>");
-            writer.write(page.toString());
-            writer.flush();
-            return;
-        }
-
-        if ("ciphersuites".equalsIgnoreCase(parameter)) {
-            resp.setStatus(HttpServletResponse.SC_OK);
-            resp.setContentType("text/html");
-            PrintWriter writer = resp.getWriter();
-            final StringBuilder page = new StringBuilder(1024);
-            page.append("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n");
-            page.append("<html>\n");
-            page.append("<head><title>Diagnostic</title></head>\n");
-            page.append("<body>\n");
-            page.append("<h1>Cipher Suites</h1><hr/>\n");
-            page.append("<ul>\n");
-
-            for (String suite : defaultCipherSuites) {
-                page.append("<li>").append(suite).append("</li>\n");
-            }
-
-            page.append("</ul>\n");
-            page.append("</body>\n</html>");
-            writer.write(page.toString());
-            writer.flush();
-            return;
-        }
-
-        if ("protocols".equalsIgnoreCase(parameter)) {
-            resp.setStatus(HttpServletResponse.SC_OK);
-            resp.setContentType("text/html");
-            PrintWriter writer = resp.getWriter();
-            final StringBuilder page = new StringBuilder(1024);
-            page.append("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n");
-            page.append("<html>\n");
-            page.append("<head><title>Diagnostic</title></head>\n");
-            page.append("<body>\n");
-            page.append("<h1>SSL protocols</h1><hr/>\n");
-            page.append("<ul>\n");
-
-            List<String> protocols = new LinkedList<String>();
-            for (Provider provider : Security.getProviders()) {
-                for (Object prop : provider.keySet()) {
-                    String key = (String)prop;
-                    if (key.startsWith("SSLContext.") && !key.equals("SSLContext.Default") && key.matches(".*[0-9].*")) {
-                        protocols.add(key.substring("SSLContext.".length()));
-                    } else if (key.startsWith("Alg.Alias.SSLContext.") && key.matches(".*[0-9].*")) {
-                        protocols.add(key.substring("Alg.Alias.SSLContext.".length()));
-                    }
-                }
-            }
-            Collections.sort(protocols);
-
-            for (String protocol : protocols) {
-                page.append("<li>").append(protocol).append("</li>\n");
-            }
-
-            page.append("</ul>\n");
-            page.append("</body>\n</html>");
-            writer.write(page.toString());
-            writer.flush();
-            return;
-        }
-
-        if ("version".equalsIgnoreCase(parameter)) {
-            resp.setStatus(HttpServletResponse.SC_OK);
-            resp.setContentType("text/html");
-            PrintWriter writer = resp.getWriter();
-            final StringBuilder page = new StringBuilder(1024);
-            page.append("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n");
-            page.append("<html>\n");
-            page.append("<head><title>Version</title></head>\n");
-            page.append("<body>\n");
-            page.append("<h1>Version</h1><hr/>\n");
-            page.append("<p>\n");
-            page.append(com.openexchange.version.Version.getInstance().getVersionString()).append("\n");
-            page.append("</p>\n");
-            page.append("</body>\n</html>");
-            writer.write(page.toString());
-            writer.flush();
-            return;
-        }
-
-        // Unknown parameter value
-        resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        resp.setContentType("text/html");
-        PrintWriter writer = resp.getWriter();
         final StringBuilder page = new StringBuilder(1024);
+        if (Strings.isEmpty(parameter)) {
+            writeStatusAndContentType(resp, HttpServletResponse.SC_BAD_REQUEST);
+            writeHeader(resp, page, "Error");
+            page.append("<p>Missing \"param\" URL parameter. Possible value(s):</p>\n<ul>\n");
+            for (ServletParameter servletParameter : ServletParameter.values()) {
+                page.append("<li>").append(servletParameter.name()).append("</li>\n");
+            }
+            page.append("</ul>\n");
+            writeFooter(page);
+            flush(resp, page);
+            return;
+        }
+
+        ServletParameter servletParameter;
+        try {
+            servletParameter = ServletParameter.valueOf(parameter);
+        } catch (Exception e) {
+            // Unknown parameter value
+            writeStatusAndContentType(resp, HttpServletResponse.SC_BAD_REQUEST);
+            writeHeader(resp, page, "Error");
+            page.append("<p>Unknown parameter value: ");
+            page.append(parameter);
+            page.append("</p>\n");
+            writeFooter(page);
+            flush(resp, page);
+            return;
+        }
+
+        writeHeader(resp, page, servletParameter.getDescription());
+        DiagnosticService diagnosticService = services.getService(DiagnosticService.class);
+        switch (servletParameter) {
+            case charsets:
+                page.append("<ul>\n");
+                List<String> charsets = diagnosticService.getCharsets(true);
+                for (String charset : charsets) {
+                    page.append("<li>").append(charset).append("</li>");
+                }
+                page.append("</ul>\n");
+                break;
+            case ciphersuites:
+                page.append("<ul>\n");
+                List<String> cipherSuites = diagnosticService.getCipherSuites();
+                for (String suite : cipherSuites) {
+                    page.append("<li>").append(suite).append("</li>\n");
+                }
+                page.append("</ul>\n");
+                break;
+            case protocols:
+                page.append("<ul>\n");
+                List<String> protocols = diagnosticService.getProtocols();
+                for (String protocol : protocols) {
+                    page.append("<li>").append(protocol).append("</li>\n");
+                }
+                page.append("</ul>\n");
+                break;
+            case version:
+                page.append(diagnosticService.getVersion()).append("\n");
+                break;
+            default:
+                // Unknown parameter value
+                writeStatusAndContentType(resp, HttpServletResponse.SC_BAD_REQUEST);
+                writeHeader(resp, page, "Error");
+                page.append("<p>Unknown parameter value: ");
+                page.append(servletParameter.name());
+                page.append("</p>\n");
+                break;
+        }
+        writeFooter(page);
+        flush(resp, page);
+    }
+
+    /**
+     * Writes the header of the page
+     * 
+     * @param resp The {@link HttpServletResponse}
+     * @param page The {@link StringBuilder} holding the page content
+     * @param servletParameter The {@link ServletParameter}
+     */
+    private void writeHeader(HttpServletResponse resp, StringBuilder page, String header) {
         page.append("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n");
         page.append("<html>\n");
         page.append("<head><title>Diagnostic</title></head>\n");
         page.append("<body>\n");
-        page.append("<h1>Diagnostic</h1><hr/>\n");
-        page.append("<p>Unknown parameter value</p>\n");
+        page.append("<h1>");
+        page.append(header);
+        page.append("</h1><hr/>\n");
+    }
+
+    /**
+     * Writes the footer of the page
+     * 
+     * @param page The {@link StringBuilder} holding the page content
+     * 
+     */
+    private void writeFooter(StringBuilder page) {
         page.append("</body>\n</html>");
+    }
+
+    /**
+     * Flushes the content to the stream
+     * 
+     * @param resp The {@link HttpServletResponse}
+     * @param page The {@link StringBuilder} holding the page content
+     * @throws IOException if an I/O error occurs while flushing the page
+     */
+    private void flush(HttpServletResponse resp, StringBuilder page) throws IOException {
+        PrintWriter writer = resp.getWriter();
         writer.write(page.toString());
         writer.flush();
     }
 
+    /**
+     * Writes the status and content of a bad request
+     * 
+     * @param resp The {@link HttpServletResponse}
+     * @param int the status code to return
+     */
+    private void writeStatusAndContentType(HttpServletResponse resp, int statusCode) {
+        resp.setStatus(statusCode);
+        resp.setContentType("text/html");
+    }
 }
