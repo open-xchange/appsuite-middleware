@@ -98,14 +98,52 @@ public interface AlarmStorage {
      */
     void insertAlarms(Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventId) throws OXException;
 
+    /**
+     * Loads all user alarms for the given event
+     *
+     * @param event The event
+     * @return A map of alarms per user id
+     * @throws OXException
+     */
     Map<Integer, List<Alarm>> loadAlarms(Event event) throws OXException;
 
+    /**
+     * Loads the alarms of a given user for a given event.
+     *
+     * @param event The event
+     * @param userID The user id
+     * @return A list of alarms
+     * @throws OXException
+     */
     List<Alarm> loadAlarms(Event event, int userID) throws OXException;
 
+    /**
+     * Loads all alarms for the given user for the given events
+     *
+     * @param events The events
+     * @param userID The user id
+     * @return A map of a list of alarms per event id
+     * @throws OXException
+     */
     Map<String, List<Alarm>> loadAlarms(List<Event> events, int userID) throws OXException;
 
+    /**
+     * Loads all alarms for the given events
+     *
+     * @param events The events
+     * @return A map of alarms per user id per event id
+     * @throws OXException
+     */
     Map<String, Map<Integer, List<Alarm>>> loadAlarms(List<Event> events) throws OXException;
 
+    /**
+     * Updates the alarms for a given event and user.
+     *
+     * @param event The event
+     * @param userID The user id
+     * @param alarms The updated alarms
+     * @throws OXException
+     */
     void updateAlarms(Event event, int userID, List<Alarm> alarms) throws OXException;
 
     /**
