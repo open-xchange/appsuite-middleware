@@ -74,8 +74,7 @@ import com.openexchange.version.Version;
 public class DiagnosticServiceImpl implements DiagnosticService {
 
     private final BiConsumer<Map.Entry<String, Charset>, StringBuilder> charsetAliasConsumer = (charset, charsetBuilder) -> getCharsetAlias(charset, charsetBuilder);
-    private final BiConsumer<Map.Entry<String, Charset>, StringBuilder> charsetConsumer = (charset, charsetBuilder) -> {
-    };
+    private final BiConsumer<Map.Entry<String, Charset>, StringBuilder> charsetConsumer = (charset, charsetBuilder) -> {};
 
     /**
      * Initialises a new {@link DiagnosticServiceImpl}.
