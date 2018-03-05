@@ -144,7 +144,7 @@ public class DiagnosticServlet extends HttpServlet {
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         String parameter = req.getParameter("param");
-        final StringBuilder page = new StringBuilder(1024);
+        StringBuilder page = new StringBuilder(1024);
         if (Strings.isEmpty(parameter)) {
             writeBadRequest(resp, "Missing 'param' URL parameter. Possible value(s):", page);
             return;
@@ -172,6 +172,7 @@ public class DiagnosticServlet extends HttpServlet {
             DiagnosticService diagnosticService = services.getService(DiagnosticService.class);
             if (diagnosticService == null) {
                 writeError(resp, HttpServletResponse.SC_SERVICE_UNAVAILABLE, "Diagnostic service unavailable", page, false);
+                return;
             }
             injector.accept(diagnosticService, page);
             writeFooter(page);
