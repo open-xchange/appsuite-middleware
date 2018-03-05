@@ -140,6 +140,7 @@ public class DiagnosticServlet extends HttpServlet {
         }
 
         writeHeader(resp, page, servletParameter.getDescription());
+        writeStatusAndContentType(resp, HttpServletResponse.SC_OK);
         DiagnosticService diagnosticService = services.getService(DiagnosticService.class);
         switch (servletParameter) {
             case charsets:
