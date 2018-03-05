@@ -260,17 +260,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             }
             eventsResults.putAll(collectEventsResults(completionService, relativeFolderIdsPerAccount.size()));
         }
-        if (1 < eventsResults.size()) {
-            /*
-             * return a sorted list of results per folder (same order as requested)
-             */
-            LinkedHashMap<String, EventsResult> sortedResults = new LinkedHashMap<String, EventsResult>(eventsResults.size());
-            for (String folderId : folderIds) {
-                sortedResults.put(folderId, eventsResults.get(folderId));
-            }
-            eventsResults = sortedResults;
-        }
-        return eventsResults;
+        return getOrderedResults(eventsResults, folderIds);
     }
 
     @Override
@@ -326,17 +316,7 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
             }
             eventsResults.putAll(collectEventsResults(completionService, relativeFolderIdsPerAccount.size()));
         }
-        if (1 < eventsResults.size() && null != folderIds) {
-            /*
-             * return a sorted list of results per folder (same order as requested)
-             */
-            LinkedHashMap<String, EventsResult> sortedResults = new LinkedHashMap<String, EventsResult>(eventsResults.size());
-            for (String folderId : folderIds) {
-                sortedResults.put(folderId, eventsResults.get(folderId));
-            }
-            eventsResults = sortedResults;
-        }
-        return eventsResults;
+        return getOrderedResults(eventsResults, folderIds);
     }
 
     public Map<String, EventsResult> searchEvents(List<SearchFilter> filters, List<String> queries) throws OXException {
@@ -983,6 +963,23 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         }
         settings.setSubscribed(calendarFolder.isSubscribed());
         return settings;
+    }
+
+    /**
+     * Creates a map whose entries are in the same order as the folder identifiers were requested by the client.
+     *
+     * @param resultsPerFolderId The unordered events results map
+     * @param requestedFolderIds The folder identifiers in a list as requested from the client
+     * @return The ordered results
+     */
+    private static Map<String, EventsResult> getOrderedResults(Map<String, EventsResult> resultsPerFolderId, List<String> requestedFolderIds) {
+        if (null != requestedFolderIds && null != resultsPerFolderId && 1 < requestedFolderIds.size()) {
+            LinkedHashMap<String, EventsResult> sortedResults = new LinkedHashMap<String, EventsResult>(requestedFolderIds.size());
+            for (String folderId : requestedFolderIds) {
+                sortedResults.put(folderId, resultsPerFolderId.get(folderId));
+            }
+        }
+        return resultsPerFolderId;
     }
 
 }
