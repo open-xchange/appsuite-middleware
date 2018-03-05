@@ -51,6 +51,8 @@ package com.openexchange.http.testservlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -75,6 +77,14 @@ public class DiagnosticServlet extends HttpServlet {
         version("Version");
 
         private final String description;
+        private static final List<String> parameters;
+        static {
+            List<String> p = new ArrayList<>(ServletParameter.values().length);
+            for (ServletParameter servletParameter : ServletParameter.values()) {
+                p.add(servletParameter.name());
+            }
+            parameters = Collections.unmodifiableList(p);
+        }
 
         /**
          * Initialises a new {@link DiagnosticServlet.ServletParameter}.
@@ -90,6 +100,15 @@ public class DiagnosticServlet extends HttpServlet {
          */
         public String getDescription() {
             return description;
+        }
+
+        /**
+         * Returns an unmodifiable {@link List} of all available {@link ServletParameter}s
+         * 
+         * @return an unmodifiable {@link List} of all available {@link ServletParameter}s
+         */
+        public static List<String> getParameters() {
+            return parameters;
         }
     }
 
@@ -114,11 +133,8 @@ public class DiagnosticServlet extends HttpServlet {
         if (Strings.isEmpty(parameter)) {
             writeStatusAndContentType(resp, HttpServletResponse.SC_BAD_REQUEST);
             writeHeader(resp, page, "Error");
-            page.append("<p>Missing \"param\" URL parameter. Possible value(s):</p>\n<ul>\n");
-            for (ServletParameter servletParameter : ServletParameter.values()) {
-                page.append("<li>").append(servletParameter.name()).append("</li>\n");
-            }
-            page.append("</ul>\n");
+            page.append("<p>Missing \"param\" URL parameter. Possible value(s):</p>\n");
+            writeList(ServletParameter.getParameters(), page);
             writeFooter(page);
             flush(resp, page);
             return;
@@ -144,28 +160,13 @@ public class DiagnosticServlet extends HttpServlet {
         DiagnosticService diagnosticService = services.getService(DiagnosticService.class);
         switch (servletParameter) {
             case charsets:
-                page.append("<ul>\n");
-                List<String> charsets = diagnosticService.getCharsets(true);
-                for (String charset : charsets) {
-                    page.append("<li>").append(charset).append("</li>");
-                }
-                page.append("</ul>\n");
+                writeList(diagnosticService.getCharsets(true), page);
                 break;
             case ciphersuites:
-                page.append("<ul>\n");
-                List<String> cipherSuites = diagnosticService.getCipherSuites();
-                for (String suite : cipherSuites) {
-                    page.append("<li>").append(suite).append("</li>\n");
-                }
-                page.append("</ul>\n");
+                writeList(diagnosticService.getCipherSuites(), page);
                 break;
             case protocols:
-                page.append("<ul>\n");
-                List<String> protocols = diagnosticService.getProtocols();
-                for (String protocol : protocols) {
-                    page.append("<li>").append(protocol).append("</li>\n");
-                }
-                page.append("</ul>\n");
+                writeList(diagnosticService.getProtocols(), page);
                 break;
             case version:
                 page.append(diagnosticService.getVersion()).append("\n");
@@ -181,6 +182,20 @@ public class DiagnosticServlet extends HttpServlet {
         }
         writeFooter(page);
         flush(resp, page);
+    }
+
+    /**
+     * Writes the specified {@link List} to the specified page as <code>&lt;ul&gt;&lt;li&gt;...&lt;/li&gt;&lt;/ul&gt</code> list
+     * 
+     * @param list The {@link List} to write
+     * @param page The {@link StringBuilder} holding the page content
+     */
+    private void writeList(List<String> list, StringBuilder page) {
+        page.append("<ul>\n");
+        for (String element : list) {
+            page.append("<li>").append(element).append("</li>");
+        }
+        page.append("</ul>\n");
     }
 
     /**
