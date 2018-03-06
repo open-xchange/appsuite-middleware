@@ -625,10 +625,10 @@ public abstract class OXServlet extends WebDavServlet {
      */
     private void addUnauthorizedHeader(final HttpServletRequest req, final HttpServletResponse resp) {
         if (useHttpAuth()) {
-            resp.addHeader("WWW-Authenticate", "Basic realm=\"" + basicRealm + "\", encoding=\"UTF-8\"");
+            resp.addHeader(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"" + basicRealm + "\", encoding=\"UTF-8\"");
             if (allowOAuthAccess()) {
                 if (getOAuthResourceService() != null) {
-                    resp.addHeader("WWW-Authenticate", "Bearer");
+                    resp.addHeader(HttpHeaders.WWW_AUTHENTICATE, "Bearer");
                 }
             }
         }
@@ -640,7 +640,7 @@ public abstract class OXServlet extends WebDavServlet {
      * @param resp the response to that the header should be added.
      */
     private static void addBasicAuthenticateHeader(HttpServletResponse resp) {
-        resp.addHeader("WWW-Authenticate", "Basic realm=\"" + basicRealm + "\", encoding=\"UTF-8\"");
+        resp.addHeader(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"" + basicRealm + "\", encoding=\"UTF-8\"");
     }
 
     /**

@@ -169,8 +169,8 @@ public final class KerberosTicketReload extends SessionServlet implements LoginR
     }
 
     private static void notAuthorized(HttpServletResponse resp, String message) throws IOException {
-        resp.addHeader("WWW-Authenticate", "NEGOTIATE");
-        resp.addHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
+        resp.addHeader(HttpHeaders.WWW_AUTHENTICATE, "NEGOTIATE");
+        resp.addHeader(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"Open-Xchange\"");
         resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, message);
     }
 }

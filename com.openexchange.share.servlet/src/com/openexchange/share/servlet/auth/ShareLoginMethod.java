@@ -56,7 +56,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpHeaders;
-import com.openexchange.ajax.fields.Header;
 import com.openexchange.authentication.GuestAuthenticated;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.exception.OXException;
@@ -259,7 +258,7 @@ public class ShareLoginMethod implements LoginMethodClosure {
     private static String getAuthHeader(LoginResultImpl loginResult) {
         Map<String, List<String>> headers = loginResult.getRequest().getHeaders();
         if (null != headers) {
-            List<String> authHeaders = headers.get(Header.AUTH_HEADER);
+            List<String> authHeaders = headers.get(HttpHeaders.AUTHORIZATION);
             if (null != authHeaders && 0 < authHeaders.size()) {
                 return authHeaders.get(0);
             }

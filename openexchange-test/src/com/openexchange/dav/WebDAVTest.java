@@ -69,6 +69,7 @@ import org.apache.commons.httpclient.HeaderElement;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpMethodBase;
+import org.apache.http.HttpHeaders;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.DavException;
@@ -154,7 +155,7 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
             props.add(PropertyNames.CURRENT_USER_PRINCIPAL);
             propFind = new PropFindMethod(Config.getBaseUri() + "/", DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
             if (HttpServletResponse.SC_UNAUTHORIZED == new HttpClient().executeMethod(propFind)) {
-                for (Header header : propFind.getResponseHeaders("WWW-Authenticate")) {
+                for (Header header : propFind.getResponseHeaders(HttpHeaders.WWW_AUTHENTICATE)) {
                     if (header.getValue().startsWith("Bearer")) {
                         authMethods.add(new Object[] { AUTH_METHOD_OAUTH });
                     } else if (header.getValue().startsWith("Basic")) {
