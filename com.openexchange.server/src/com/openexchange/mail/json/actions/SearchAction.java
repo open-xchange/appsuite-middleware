@@ -235,14 +235,8 @@ public final class SearchAction extends AbstractMailAction {
             SearchTerm<?> searchTerm;
             if (ignoreDeleted || ignoreSeen) {
                 SearchTerm<?> main = mailInterface.createSearchTermFrom(searchCols, searchPats, true);
-
                 SearchTerm<?> first = ignoreSeen ? new FlagTerm(MailMessage.FLAG_SEEN, false) : null;
-                SearchTerm<?> second;
-                if (ignoreDeleted) {
-                    second = new FlagTerm(MailMessage.FLAG_DELETED, !ignoreDeleted);
-                } else {
-                    second = null;
-                }
+                SearchTerm<?> second = ignoreDeleted ? new FlagTerm(MailMessage.FLAG_DELETED, !ignoreDeleted) : null;
                 if (null == first) {
                     searchTerm = null == second ? main : new ANDTerm(main, second);
                 } else {
@@ -305,14 +299,8 @@ public final class SearchAction extends AbstractMailAction {
         SearchTerm<?> searchTerm;
         if (ignoreDeleted || ignoreSeen) {
             SearchTerm<?> main = mailInterface.createSearchTermFrom(SearchTermParser.parse(searchArray));
-
             SearchTerm<?> first = ignoreSeen ? new FlagTerm(MailMessage.FLAG_SEEN, false) : null;
-            SearchTerm<?> second;
-            if (ignoreDeleted) {
-                second = new FlagTerm(MailMessage.FLAG_DELETED, !ignoreDeleted);
-            } else {
-                second = null;
-            }
+            SearchTerm<?> second = ignoreDeleted ? new FlagTerm(MailMessage.FLAG_DELETED, !ignoreDeleted) : null;
             if (null == first) {
                 searchTerm = null == second ? main : new ANDTerm(main, second);
             } else {
