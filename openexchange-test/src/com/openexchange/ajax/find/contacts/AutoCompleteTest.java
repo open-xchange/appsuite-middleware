@@ -72,14 +72,14 @@ public class AutoCompleteTest extends ContactsFindTest {
     public void testAutocompleteCurrentUser() throws Exception {
         String defaultAddress = getClient().getValues().getDefaultAddress();
         Contact ownContact = getClient().execute(new GetRequest(getClient().getValues().getUserId(), TimeZones.UTC)).getContact();
-        ComplexDisplayItem displayItem = DisplayItems.convert(ownContact, getClient().getValues().getLocale());
+        ComplexDisplayItem displayItem = DisplayItems.convert(ownContact, getClient().getValues().getLocale(), i18nServiceRegistry);
         assertFoundFacetInAutocomplete(defaultAddress.substring(0, 3), displayItem.getDisplayName());
     }
 
     @Test
     public void testAutocompleteOtherContact() throws Exception {
         Contact contact = cotm.newAction(randomContact());
-        ComplexDisplayItem displayItem = DisplayItems.convert(contact, getClient().getValues().getLocale());
+        ComplexDisplayItem displayItem = DisplayItems.convert(contact, getClient().getValues().getLocale(), i18nServiceRegistry);
         assertFoundFacetInAutocomplete(contact.getDisplayName().substring(0, 3), displayItem.getDisplayName());
         assertFoundFacetInAutocomplete(contact.getSurName().substring(0, 4), displayItem.getDisplayName());
         assertFoundFacetInAutocomplete(contact.getGivenName().substring(0, 5), displayItem.getDisplayName());

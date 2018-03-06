@@ -132,6 +132,7 @@ import com.openexchange.find.spi.SearchConfiguration;
 import com.openexchange.find.util.DisplayItems;
 import com.openexchange.find.util.TimeFrame;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
 import com.openexchange.java.util.TimeZones;
@@ -379,7 +380,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         for (Contact contact : contacts) {
             String valueId = prepareFacetValueId("contact", session.getContextId(), Integer.toString(contact.getObjectID()));
             List<String> queries = extractMailAddessesFrom(contact);
-            builder.addValue(buildContactValue(valueId, queries, DisplayItems.convert(contact, session.getUser().getLocale()), toAsDefaultOption, session));
+            builder.addValue(buildContactValue(valueId, queries, DisplayItems.convert(contact, session.getUser().getLocale(), Services.optionalService(I18nServiceRegistry.class)), toAsDefaultOption, session));
             valuesAdded = true;
         }
 

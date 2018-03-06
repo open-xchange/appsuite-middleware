@@ -102,7 +102,7 @@ public class AutocompleteTest extends CalendarFindTest {
         GetRequest getRequest = new GetRequest(getClient().getValues().getUserId(), getClient().getValues().getTimeZone());
         GetResponse getResponse = getClient().execute(getRequest);
         Contact contact = getResponse.getContact();
-        String displayName = DisplayItems.convert(contact, getClient().getValues().getLocale()).getDisplayName();
+        String displayName = DisplayItems.convert(contact, getClient().getValues().getLocale(), i18nServiceRegistry).getDisplayName();
         assertFoundFacetInAutocomplete(defaultAddress.substring(0, 3), displayName);
     }
 
@@ -118,7 +118,7 @@ public class AutocompleteTest extends CalendarFindTest {
         contact.setEmail3(randomUID() + "@example.com");
         contact.setUid(randomUID());
         contact = contactManager.newAction(contact);
-        String displayName = DisplayItems.convert(contact, getClient().getValues().getLocale()).getDisplayName();
+        String displayName = DisplayItems.convert(contact, getClient().getValues().getLocale(), i18nServiceRegistry).getDisplayName();
         assertFoundFacetInAutocomplete(contact.getDisplayName().substring(0, 3), displayName);
         assertFoundFacetInAutocomplete(contact.getSurName().substring(0, 4), displayName);
         assertFoundFacetInAutocomplete(contact.getGivenName().substring(0, 5), displayName);
