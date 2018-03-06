@@ -88,7 +88,7 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
      * @param storage The underlying calendar storage
      * @param session The calendar session
      */
-    protected AbstractFreeBusyPerformer(CalendarSession session, CalendarStorage storage) throws OXException {
+    protected AbstractFreeBusyPerformer(CalendarSession session, CalendarStorage storage) {
         super(session, storage);
     }
 
@@ -112,7 +112,7 @@ public class AbstractFreeBusyPerformer extends AbstractQueryPerformer {
      * @return The timezone
      */
     protected TimeZone getTimeZone(Attendee attendee) throws OXException {
-        if (isInternal(attendee) && CalendarUserType.INDIVIDUAL.equals(attendee)) {
+        if (isInternal(attendee) && CalendarUserType.INDIVIDUAL.equals(attendee.getCuType())) {
             return session.getEntityResolver().getTimeZone(attendee.getEntity());
         }
         return Utils.getTimeZone(session);
