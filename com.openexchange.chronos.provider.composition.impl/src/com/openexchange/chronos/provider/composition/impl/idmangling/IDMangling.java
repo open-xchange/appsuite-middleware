@@ -388,14 +388,14 @@ public class IDMangling {
     /**
      * Gets the relative representation of a specific unique composite folder identifier.
      * <p/>
-     * {@link IDMangling#ROOT_FOLDER_IDS} are passed as-is implicitly.
+     * {@link IDMangling#ROOT_FOLDER_IDS} are passed as-is implicitly, same goes for identifiers starting with {@link IDMangling#SHARED_PREFIX}.
      *
      * @param uniqueFolderId The unique composite folder identifier, e.g. <code>cal://4/35</code>
      * @return The extracted relative folder identifier
      * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_FOLDER} if passed identifier can't be unmangled to its relative representation
      */
     public static String getRelativeFolderId(String uniqueFolderId) throws OXException {
-        if (ROOT_FOLDER_IDS.contains(uniqueFolderId)) {
+        if (ROOT_FOLDER_IDS.contains(uniqueFolderId) || uniqueFolderId.startsWith(SHARED_PREFIX)) {
             return uniqueFolderId;
         }
         try {

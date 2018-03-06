@@ -64,6 +64,7 @@ import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.java.Autoboxing.i;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
@@ -183,11 +184,6 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
          * prepare update
          */
         Attendee attendeeUpdate = prepareAttendeeUpdate(originalEvent, originalAttendee, attendee);
-        if (null == attendeeUpdate) {
-            //TODO or throw?
-            //            result.addUpdate(new UpdateResultImpl(originalEvent, originalEvent));
-            return;
-        }
         if (attendeeUpdate.containsFolderID()) {
             /*
              * store tombstone references in case of a move operation for the attendee
@@ -253,8 +249,9 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
                 Event updatedMasterEvent = loadEventData(originalSeriesMaster.getId());
                 resultTracker.trackUpdate(originalSeriesMaster, updatedMasterEvent);
 
+                Map<Integer, List<Alarm>> alarms = storage.getAlarmStorage().loadAlarms(updatedMasterEvent);
                 storage.getAlarmTriggerStorage().deleteTriggers(originalSeriesMaster.getId());
-                storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent);
+                storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, alarms);
             }
         } else if (isSeriesException(originalEvent)) {
             /*
@@ -276,7 +273,7 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
      * @param originalEvent The original event
      * @param originalAttendee The original attendee
      * @param updatedAttendee The updated attendee
-     * @return A 'delta' attendee representing the changes, or <code>null</code> if no changes need to be stored
+     * @return A 'delta' attendee representing the changes
      */
     private Attendee prepareAttendeeUpdate(Event originalEvent, Attendee originalAttendee, Attendee updatedAttendee) throws OXException {
         /*
@@ -284,10 +281,6 @@ public class UpdateAttendeePerformer extends AbstractUpdatePerformer {
          */
         Attendee attendeeUpdate = AttendeeMapper.getInstance().getDifferences(originalAttendee, updatedAttendee);
         AttendeeField[] updatedFields = AttendeeMapper.getInstance().getAssignedFields(attendeeUpdate);
-        if (0 == updatedFields.length) {
-            // TODO or throw?
-            return null;
-        }
         for (AttendeeField field : updatedFields) {
             switch (field) {
                 case FOLDER_ID:

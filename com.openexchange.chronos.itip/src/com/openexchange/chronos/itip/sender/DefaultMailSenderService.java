@@ -152,8 +152,9 @@ public class DefaultMailSenderService implements MailSenderService {
     }
 
     private void prepareAndSend(NotificationMail mail, Session session, State.Type type, Event event, boolean addAttachments) throws MessagingException, OXException {
-        MailObject message = new MailObject(session, event.getId(), mail.getRecipient().getFolderId(), Types.APPOINTMENT, type != null ? type.toString() : null);
+        ITipMailObject message = new ITipMailObject(session, event.getId(), mail.getRecipient().getFolderId(), Types.APPOINTMENT, type != null ? type.toString() : null);
         message.setAdditionalHeaders(mail.getAdditionalHeaders());
+        message.setAdditionalHeaders(mail.getAdditionalReferences());
         message.setInternalRecipient(!mail.getRecipient().isExternal() && !mail.getRecipient().isResource());
         message.setFromAddr(getAddress(mail.getSender()));
         message.addToAddr(getAddress(mail.getRecipient()));

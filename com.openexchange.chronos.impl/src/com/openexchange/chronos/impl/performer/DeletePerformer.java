@@ -56,12 +56,15 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.splitExceptionDates;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.Duration;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -331,8 +334,9 @@ public class DeletePerformer extends AbstractUpdatePerformer {
     }
 
     private void updateAlarmTrigger(Event originalMasterEvent, Event updatedMasterEvent) throws OXException {
+        Map<Integer, List<Alarm>> alarms = storage.getAlarmStorage().loadAlarms(updatedMasterEvent);
         storage.getAlarmTriggerStorage().deleteTriggers(originalMasterEvent.getId());
-        storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent);
+        storage.getAlarmTriggerStorage().insertTriggers(updatedMasterEvent, alarms);
     }
 
     /**

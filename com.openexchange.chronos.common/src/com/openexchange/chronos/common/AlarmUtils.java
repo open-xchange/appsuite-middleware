@@ -482,12 +482,13 @@ public class AlarmUtils extends CalendarUtils {
         Iterator<Event> iterator = recurrenceService.iterateEventOccurrences(seriesMaster, startDate, null);
         while (iterator.hasNext()) {
             Event occurrence = iterator.next();
-            if (occurrence.getStartDate().getTimestamp() < startDate.getTime()) {
-                continue;
-            }
+
             Date triggerTime = getTriggerTime(alarm.getTrigger(), occurrence, timeZone);
             if (null == triggerTime) {
                 return null;
+            }
+            if(triggerTime.getTime() < startDate.getTime()) {
+                continue;
             }
             if (null == alarm.getAcknowledged() || alarm.getAcknowledged().before(triggerTime)) {
                 return triggerTime;
@@ -663,7 +664,7 @@ public class AlarmUtils extends CalendarUtils {
                 if (null == alarm1) {
                     return null == alarm2;
                 } else if (null != alarm2) {
-                    if (0 < alarm1.getId() && alarm1.getId() == alarm2.getId()) {
+                    if (0 != alarm1.getId() && alarm1.getId() == alarm2.getId()) {
                         return true;
                     }
                     if (null != alarm1.getUid() && alarm1.getUid().equals(alarm2.getUid())) {

@@ -140,10 +140,10 @@ flags:
   description: Flags indicating certain aspects of an event.
   items:
     type: string
-    enum: ["attachment", "alarms", "scheduled", "organizer", "attendee", "private", "confidential", "transparent", "event_tentative", "event_confirmed", "event_cancelled", "needs_action", "accepted", "declined", "tentative", "delegated", "series", "overridden", "first_occurrence", "last_occurrence" ]
+    enum: ["attachments", "alarms", "scheduled", "organizer", "attendee", "private", "confidential", "transparent", "event_tentative", "event_confirmed", "event_cancelled", "needs_action", "accepted", "declined", "tentative", "delegated", "series", "overridden", "first_occurrence", "last_occurrence" ]
     description: >
       Event Flags:
-       * `attachment` - The event contains at least one attachment. 
+       * `attachments` - The event contains at least one attachment. 
        * `alarms` - The calendar user has at least one alarm associated with the event.
        * `scheduled` - Event is a <i>group-scheduled</i> meeting with an organizer.
        * `organizer` - The calendar user is the <i>organizer<i> of the meeting. 

@@ -84,7 +84,6 @@ import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceIterator;
 import com.openexchange.chronos.service.RecurrenceService;
-import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.AlarmTriggerStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.rdb.RdbStorage;
@@ -112,8 +111,6 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
 
     private final RecurrenceService recurrenceService;
 
-    private final AlarmStorage alarmStorage;
-
     private final RdbEventStorage eventStorage;
 
     /**
@@ -125,11 +122,10 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
      * @param txPolicy The transaction policy
      * @throws OXException
      */
-    public RdbAlarmTriggerStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy, AlarmStorage alarmStorage, RdbEventStorage eventStorage) throws OXException {
+    public RdbAlarmTriggerStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy, RdbEventStorage eventStorage) throws OXException {
         super(context, dbProvider, txPolicy);
         this.entityResolver = entityResolver;
         this.recurrenceService = Services.getService(RecurrenceService.class, true);
-        this.alarmStorage = alarmStorage;
         this.eventStorage = eventStorage;
     }
 
@@ -218,7 +214,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         for (Alarm alarm : displayAlarms) {
             if (AlarmUtils.isSnoozed(alarm, displayAlarms)) {
                 snoozeAlarms.add(alarm);
-            } else if (0 <= getReminderMinutes(alarm.getTrigger(), event, timeZone)) {
+            } else if (0 <= getReminderMinutes(alarm.getTrigger(), event)) {
                 regularAlarms.add(alarm);
             }
         }
@@ -231,7 +227,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             if (null != snoozedAlarm) {
                 Date nextTriggerTime = optNextTriggerTime(event, snoozeAlarm, timeZone, snoozedAlarm.getAcknowledged());
                 if (null != nextTriggerTime) {
-                    int reminderMinutes = getReminderMinutes(snoozedAlarm.getTrigger(), event, timeZone);
+                    int reminderMinutes = getReminderMinutes(snoozedAlarm.getTrigger(), event);
                     return new ReminderData(null != originalReminder ? originalReminder.id : 0, reminderMinutes, nextTriggerTime.getTime());
                 }
             }
@@ -243,7 +239,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             if (null != regularAlarm) {
                 Date nextTriggerTime = optNextTriggerTime(event, regularAlarm, timeZone);
                 if (null != nextTriggerTime) {
-                    int reminderMinutes = getReminderMinutes(regularAlarm.getTrigger(), event, timeZone);
+                    int reminderMinutes = getReminderMinutes(regularAlarm.getTrigger(), event);
                     return new ReminderData(null != originalReminder ? originalReminder.id : 0, reminderMinutes, nextTriggerTime.getTime());
                 }
             }
@@ -251,7 +247,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         return null;
     }
 
-    private int getReminderMinutes(Trigger trigger, Event event, TimeZone timeZone) throws OXException {
+    private int getReminderMinutes(Trigger trigger, Event event) throws OXException {
         String duration = AlarmUtils.getTriggerDuration(trigger, event, Services.getService(RecurrenceService.class));
         return null == duration ? 0 : -1 * (int) TimeUnit.MILLISECONDS.toMinutes(AlarmUtils.getTriggerDuration(duration));
     }
@@ -289,7 +285,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
      * @param timeZone The timezone to consider when evaluating the next trigger time of <i>floating</i> events
      * @return The next alarm, or <code>null</code> if there is none
      */
-    private Alarm chooseNextAlarm(Event event, ReminderData originalReminder, List<Alarm> alarms, TimeZone timeZone) throws OXException {
+    private Alarm chooseNextAlarm(Event event, ReminderData originalReminder, List<Alarm> alarms, TimeZone timeZone) {
         if (null == alarms || 0 == alarms.size()) {
             return null;
         }
@@ -373,12 +369,6 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             LOG.warn("Error determining next trigger time for alarm", e);
         }
         return null;
-    }
-
-    @Override
-    public void insertTriggers(Event event) throws OXException {
-        Map<Integer, List<Alarm>> alarmsPerAttendee = alarmStorage.loadAlarms(event);
-        insertTriggers(event, alarmsPerAttendee);
     }
 
     @Override
@@ -467,8 +457,10 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     private List<AlarmTrigger> selectTriggers(Connection connection, int contextID, int userID, Date until) throws SQLException, OXException {
         List<AlarmTrigger> triggers = new ArrayList<AlarmTrigger>();
         String sql = new StringBuilder()
-            .append("SELECT object_id,target_id,alarm,folder,recurrence FROM reminder WHERE cid=? AND userid=?")
-            .append(null != until ? " AND alarm<?" : "").append("AND module=?")
+            .append("SELECT r.object_id,r.target_id,r.alarm,r.folder,r.recurrence,p.reminder ")
+            .append("FROM reminder AS r JOIN prg_dates_members AS p ON r.target_id=p.object_id AND r.userid=p.member_uid AND r.cid=p.cid ")
+            .append("WHERE r.cid=? AND r.userid=?")
+            .append(null != until ? " AND r.alarm<?" : "").append("AND r.module=?")
         .toString();
         RecurrenceService recurrenceService = Services.getService(RecurrenceService.class);
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -498,7 +490,9 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
 
                         RecurrenceData data = eventStorage.selectRecurrenceData(connection, targetId, false);
                         if (null != data) {
-                            RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(data, calendar.getTime(), null);
+                            int reminder = resultSet.getInt("reminder");
+                            RecurrenceIterator<RecurrenceId> iterator = recurrenceService.iterateRecurrenceIds(data, new Date(calendar.getTime().getTime()+TimeUnit.MINUTES.toMillis(reminder)), null);
+
                             if (iterator.hasNext()) {
                                 trigger.setRecurrenceId(iterator.next());
                             }
@@ -531,7 +525,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
      * @param resultSet The result set to read from
      * @return The reminder data, or <code>null</code> if not set
      */
-    private static ReminderData readReminder(ResultSet resultSet) throws SQLException, OXException {
+    private static ReminderData readReminder(ResultSet resultSet) throws SQLException {
         int reminderMinutes = resultSet.getInt("m.reminder");
         if (resultSet.wasNull()) {
             return null;
