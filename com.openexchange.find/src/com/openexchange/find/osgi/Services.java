@@ -102,11 +102,8 @@ public class Services {
      * @return The service or <code>null</code> if absent
      */
     public static <T> T optService(Class<T> clazz) {
-        try {
-            return getServiceLookup().getService(clazz);
-        } catch (final IllegalStateException e) {
-            return null;
-        }
+        ServiceLookup serviceLookup = LOOKUP.get();
+        return null == serviceLookup ? null : serviceLookup.getOptionalService(clazz);
     }
 
     /**
