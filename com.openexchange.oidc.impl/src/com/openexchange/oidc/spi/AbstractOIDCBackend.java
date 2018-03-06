@@ -293,6 +293,10 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     @Override
     public AuthenticationInfo resolveAuthenticationResponse(HttpServletRequest request, OIDCTokenResponse tokenResponse) throws OXException {
         JWT idToken = tokenResponse.getOIDCTokens().getIDToken();
+        if (null == idToken) {
+            throw OXException.general("Missing IDToken");
+        }
+        
         String subject = "";
         try {
             JWTClaimsSet jwtClaimsSet = idToken.getJWTClaimsSet();
