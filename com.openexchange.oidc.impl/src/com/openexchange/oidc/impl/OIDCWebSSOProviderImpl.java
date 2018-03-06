@@ -106,6 +106,7 @@ import com.openexchange.oidc.tools.OIDCTools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.session.reservation.SessionReservationService;
+import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -429,7 +430,11 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         String sessionId = logoutRequestInfo.getSessionId();
         LOG.trace("Try to logout user, via OP with sessionId: {}", sessionId);
         //logout user
-        return this.getRedirectForLogoutFromOXServer(this.getSessionFromId(sessionId), request, response, logoutRequestInfo);
+        Session session = this.getSessionFromId(sessionId);
+        if (null == session) {
+            throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+        }
+        return this.getRedirectForLogoutFromOXServer(session, request, response, logoutRequestInfo);
     }
 
     private String getRedirectForLogoutFromOXServer(Session session, HttpServletRequest request, HttpServletResponse response, LogoutRequestInfo logoutRequestInfo) throws OXException {
