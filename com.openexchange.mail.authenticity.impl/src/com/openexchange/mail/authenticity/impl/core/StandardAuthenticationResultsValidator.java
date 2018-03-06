@@ -585,10 +585,9 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
                 return 0;
             } else if (mam1 == null) {
                 return 1;
-            } else if (mam2 == null) {
+            } else {
                 return -1;
             }
-            return 0;
         }
     }
 
