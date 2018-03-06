@@ -73,6 +73,7 @@ import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.utils.MimeStorageUtility;
 import com.openexchange.mail.search.SearchTerm;
+import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
@@ -112,12 +113,13 @@ public final class ThreadSorts {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                StringBuilder commandBuilder = new StringBuilder(32).append(uid ? "UID THREAD" : "THREAD").append(" REFERENCES UTF-8 ");
+                String cmd = uid ? "UID THREAD" : "THREAD";
+
+                Argument args = new Argument().writeAtom("REFERENCES UTF-8");
 
                 if (searchTerm != null) {
                     try {
-                        commandBuilder.append(new SearchSequence().generateSequence(searchTerm.getJavaMailSearchTerm(), "UTF-8"));
-                        commandBuilder.append(" ");
+                        args.append(new SearchSequence(p).generateSequence(searchTerm.getJavaMailSearchTerm(), "UTF-8"));
                     } catch (final IOException ioex) {
                         // should never happen
                         throw new WrappingProtocolException("", new SearchException(ioex.toString()));
@@ -125,14 +127,13 @@ public final class ThreadSorts {
                         throw new WrappingProtocolException("", e);
                     }
                 }
-                commandBuilder.append(sortRange);
-                final String command = commandBuilder.toString();
+                args.writeAtom(sortRange);
                 final Response[] r;
                 {
                     final long start = System.currentTimeMillis();
-                    r = p.command(command, null);
+                    r = p.command(cmd, args);
                     final long dur = System.currentTimeMillis() - start;
-                    log.debug("\"{}\" for \"{}\" ({}) took {}msec.", command, imapFolder.getFullName(), imapFolder.getStore(), Long.valueOf(dur));
+                    log.debug("\"{}\" for \"{}\" ({}) took {}msec.", cmd, imapFolder.getFullName(), imapFolder.getStore(), Long.valueOf(dur));
                     mailInterfaceMonitor.addUseTime(dur);
                 }
                 final Response response = r[r.length - 1];
@@ -151,13 +152,13 @@ public final class ThreadSorts {
                     }
                     p.notifyResponseHandlers(r);
                 } else if (response.isBAD()) {
-                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(cmd));
                     throw new ProtocolException(new StringBuilder("IMAP server does not support THREAD command: ").append(response.toString()).toString());
                 } else if (response.isNO()) {
-                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(cmd));
                     throw new ProtocolException(new StringBuilder("IMAP server does not support THREAD command: ").append(response.toString()).toString());
                 } else {
-                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(cmd));
                     p.handleResult(response);
                 }
                 return retval;
