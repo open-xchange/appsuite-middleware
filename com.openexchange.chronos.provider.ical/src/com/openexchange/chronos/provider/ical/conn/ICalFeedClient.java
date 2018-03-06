@@ -302,20 +302,23 @@ public class ICalFeedClient {
 
     private static class ICalFeedHttpClient {
 
-        private static CloseableHttpClient httpClient;
+        private static volatile CloseableHttpClient httpClient;
 
         static CloseableHttpClient getInstance() {
-            if (httpClient == null) {
+            CloseableHttpClient tmp = httpClient;
+            if (tmp == null) {
                 synchronized (ICalFeedHttpClient.class) {
-                    if (httpClient == null) {
+                    tmp = httpClient;
+                    if (tmp == null) {
                         ClientConfig config = ClientConfig.newInstance();
                         config.setUserAgent("Open-Xchange Calendar Feed Client");
                         init(config);
-                        httpClient = HttpClients.getHttpClient(config, Services.getService(SSLSocketFactoryProvider.class), Services.getService(SSLConfigurationService.class));
+                        tmp = HttpClients.getHttpClient(config, Services.getService(SSLSocketFactoryProvider.class), Services.getService(SSLConfigurationService.class));
+                        httpClient = tmp;
                     }
                 }
             }
-            return httpClient;
+            return tmp;
         }
 
         static void init(ClientConfig config) {
@@ -334,7 +337,11 @@ public class ICalFeedClient {
         }
 
         static void reset() {
-            httpClient = null;
+            CloseableHttpClient tmp = httpClient;
+            if (tmp != null) {
+                httpClient = null;
+                HttpClients.shutDown(tmp);
+            }
         }
     }
 }
