@@ -424,7 +424,9 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
         if (null == connection) {
             // Get connection an re-call this function
             insertFolderProperties(contextId, folderId, userId, properties);
+            return;
         }
+
         PreparedStatement stmt = null;
         try {
             for (String propertyName : properties.keySet()) {
@@ -436,8 +438,9 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
                 stmt.setString(4, propertyName);
                 stmt.setString(5, properties.get(propertyName));
 
-                // Execute
+                // Execute & close
                 stmt.executeUpdate();
+                Databases.closeSQLStuff(stmt);
             }
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
