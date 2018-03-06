@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * 
+ *
  * {@link Services}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -110,10 +110,7 @@ public final class Services {
      * @return The service or <code>null</code> if absent
      */
     public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        try {
-            return getService(clazz);
-        } catch (final IllegalStateException e) {
-            return null;
-        }
+        ServiceLookup serviceLookup = REF.get();
+        return null == serviceLookup ? null : serviceLookup.getOptionalService(clazz);
     }
 }
