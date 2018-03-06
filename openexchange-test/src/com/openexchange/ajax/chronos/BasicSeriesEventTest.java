@@ -224,7 +224,7 @@ public class BasicSeriesEventTest extends AbstractChronosTest {
 
         EventData updatedEvent = eventManager.updateOccurenceEvent(updatedData, occurence.getRecurrenceId());
 
-        UpdatesResult updates = eventManager.getUpdates(new Date(updatedEvent.getTimestamp()));
+        UpdatesResult updates = eventManager.getUpdates(today);
 
         // Get updates
         assertEquals(2, updates.getNewAndModified().size());
