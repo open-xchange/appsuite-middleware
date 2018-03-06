@@ -49,18 +49,30 @@
 
 package com.openexchange.ajax.fields;
 
+import org.apache.http.HttpHeaders;
+
 /**
  * Contains constants for header attribute names.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @deprecated - use {@link HttpHeaders} instead
  */
+@Deprecated
 public class Header {
 
+    /**
+     * @deprecated - use {@link HttpHeaders#USER_AGENT} instead
+     */
+    @Deprecated
     public static final String USER_AGENT = "user-agent";
 
+    /**
+     * @deprecated - use {@link HttpHeaders#AUTHORIZATION} instead
+     */
+    @Deprecated
     public static final String AUTH_HEADER = "authorization";
 
-    public Header() {
+    private Header() {
         super();
     }
 }

@@ -66,8 +66,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.http.HttpHeaders;
 import com.openexchange.ajax.AJAXUtility;
-import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
@@ -210,7 +210,7 @@ public final class LoginTools {
     }
 
     public static String parseUserAgent(HttpServletRequest req) {
-        return parseParameter(req, LoginFields.USER_AGENT, req.getHeader(Header.USER_AGENT));
+        return parseParameter(req, LoginFields.USER_AGENT, req.getHeader(HttpHeaders.USER_AGENT));
     }
 
     /**

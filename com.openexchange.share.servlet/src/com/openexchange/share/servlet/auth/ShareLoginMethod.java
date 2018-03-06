@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.http.HttpHeaders;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.authentication.GuestAuthenticated;
 import com.openexchange.authentication.SessionEnhancement;
@@ -246,7 +247,7 @@ public class ShareLoginMethod implements LoginMethodClosure {
         if (false == Strings.isEmpty(user.getMail()) || false == Strings.isEmpty(user.getPasswordMech())) {
             StringBuilder builder = appendRealm(new StringBuilder(32).append("Basic realm=\""));
             builder.append("\", encoding=\"UTF-8\"");
-            response.setHeader("WWW-Authenticate", builder.toString());
+            response.setHeader(HttpHeaders.WWW_AUTHENTICATE, builder.toString());
         }
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "401 Unauthorized");
     }

@@ -57,12 +57,12 @@ import java.io.IOException;
 import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.http.HttpHeaders;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.context.ContextService;
@@ -105,7 +105,7 @@ public final class Tokens implements LoginRequestHandler {
         String clientToken = LoginTools.parseParameter(req, CLIENT_TOKEN);
         String serverToken = LoginTools.parseParameter(req, SERVER_TOKEN);
         String client = LoginTools.parseParameter(req, CLIENT_PARAM);
-        String userAgent = req.getHeader(Header.USER_AGENT);
+        String userAgent = req.getHeader(HttpHeaders.USER_AGENT);
 
         // TODO Register this login action dynamically if LoginPerformer and UserService gets available.
         ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class, false);

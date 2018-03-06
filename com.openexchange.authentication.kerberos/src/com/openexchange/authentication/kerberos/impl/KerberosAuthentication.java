@@ -56,7 +56,7 @@ import static com.openexchange.authentication.kerberos.impl.ConfigurationPropert
 import java.util.List;
 import java.util.Map;
 import javax.security.auth.login.LoginException;
-import com.openexchange.ajax.fields.Header;
+import org.apache.http.HttpHeaders;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -172,7 +172,7 @@ public class KerberosAuthentication implements AuthenticationService {
         if (tmp instanceof Map<?, ?>) {
             @SuppressWarnings("unchecked")
             Map<String, List<String>> headers = (Map<String, List<String>>) tmp;
-            tmp = headers.get(Header.AUTH_HEADER);
+            tmp = headers.get(HttpHeaders.AUTHORIZATION);
             if (tmp instanceof List<?>) {
                 @SuppressWarnings("unchecked")
                 List<String> values = (List<String>) tmp;
