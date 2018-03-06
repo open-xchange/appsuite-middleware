@@ -122,7 +122,7 @@ public abstract class AbstractICalExporter implements ICalExport {
             }
         }
 
-        ThresholdFileHolder sink = new ThresholdFileHolder();
+        ThresholdFileHolder sink = null;
         boolean error = true;
         try {
             sink = getExportDataSource(session, null);
