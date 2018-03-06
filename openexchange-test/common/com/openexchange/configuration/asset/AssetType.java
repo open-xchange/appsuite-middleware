@@ -55,5 +55,5 @@ package com.openexchange.configuration.asset;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum AssetType {
-    txt, jpg, png, eml, vcf, html, svg, ods, odt, htm, base64, gif, pdf, ics, json;
+    txt, jpg, png, eml, vcf, html, svg, ods, odt, htm, base64, gif, pdf, ics, json, properties;
 }
