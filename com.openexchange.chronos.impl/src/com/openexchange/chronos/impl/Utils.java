@@ -687,7 +687,8 @@ public class Utils {
         if (ownPermission.getReadPermission() == Permission.READ_OWN_OBJECTS && matches(event.getCreatedBy(), userId)) {
             return true;
         }
-        if (matches(event.getCalendarUser(), userId) || isAttendee(event, userId) || isOrganizer(event, userId)) {
+        if ((PublicType.getInstance().equals(folder.getType()) || PrivateType.getInstance().equals(folder.getType())) && 
+            (matches(event.getCalendarUser(), userId) || isAttendee(event, userId) || isOrganizer(event, userId))) {
             return true;
         }
         return false;
