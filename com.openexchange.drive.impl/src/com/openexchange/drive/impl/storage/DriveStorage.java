@@ -1452,7 +1452,7 @@ public class DriveStorage {
         Map<String, File> ID2FileMapping = new HashMap<>();
         do {
             File file = documents.next();
-            if (files.contains(file.getFileName())) {
+            if (null != file && files.contains(file.getFileName())) {
                 String fileId = file.getId();
                 ID2FileMapping.put(fileId, file);
             }
