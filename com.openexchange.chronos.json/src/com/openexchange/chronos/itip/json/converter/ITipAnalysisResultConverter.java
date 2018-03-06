@@ -245,7 +245,6 @@ public class ITipAnalysisResultConverter implements ResultConverter {
     private JSONArray convertAttendees(List<Attendee> attendees) throws JSONException {
         JSONArray result = new JSONArray(attendees.size());
         for (Attendee attendee : attendees) {
-            EventMapper.getInstance();
             result.put(EventMapper.serializeCalendarUser(attendee));
         }
         return result;
