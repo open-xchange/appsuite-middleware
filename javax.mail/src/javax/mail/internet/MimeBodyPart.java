@@ -200,11 +200,12 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * @exception	MessagingException for failures
      */
     public MimeBodyPart(InputStream is) throws MessagingException {
-	if (!(is instanceof ByteArrayInputStream) &&
+	super();
+    if (!(is instanceof ByteArrayInputStream) &&
 	    !(is instanceof BufferedInputStream) &&
 	    !(is instanceof SharedInputStream))
 	    is = new BufferedInputStream(is);
-	
+	try {
 	headers = new InternetHeaders(is);
 
 	if (is instanceof SharedInputStream) {
@@ -217,7 +218,9 @@ public class MimeBodyPart extends BodyPart implements MimePart {
 		throw new MessagingException("Error reading input stream", ioex);
 	    }
 	}
-
+	} finally {
+	    try { is.close(); } catch (Exception e) {/* ignore */}
+	}
     }
 
     /**
