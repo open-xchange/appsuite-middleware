@@ -200,14 +200,9 @@ public class AJAXConfig extends AbstractConfig {
         ECHO_HEADER("echo_header"),
 
         /**
-         * Directory which contains test mails (rfc 822 files)
-         */
-        TEST_MAIL_DIR("testMailDir"),
-
-        /**
          * Directory which contains test files
          */
-        TEST_INFOSTORE_DIR("testInfostoreDir"),
+        TEST_DIR("testMailDir"),
 
         MAIL_PORT("mailPort"),
 

@@ -131,7 +131,7 @@ public class BasicMailTest extends AbstractMailFindTest {
         modified.setObjectID(ownContact.getObjectID());
 
         AJAXConfig.init();
-        String testDataDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR);
+        String testDataDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR);
         byte[] image = FileUtils.readFileToByteArray(new File(testDataDir, "contact_image.png"));
         modified.setImage1(image);
         modified.setImageContentType("image/png");

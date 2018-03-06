@@ -90,7 +90,7 @@ public class AssetManager {
      * Reads the assets folder
      */
     private void readAssets() {
-        String path = AJAXConfig.getProperty(Property.TEST_MAIL_DIR);
+        String path = AJAXConfig.getProperty(Property.TEST_DIR);
         File assetsPath = new File(path);
         if (!assetsPath.exists()) {
             throw new IllegalArgumentException("The path '" + path + "' for the assets folder is invalid.");

@@ -113,7 +113,7 @@ public class Bug29865Test extends AbstractMailTest {
 
     private static String readFile(String fileName) {
         try {
-            @SuppressWarnings("resource") BufferedReader br = new BufferedReader(new FileReader(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR) + fileName));
+            @SuppressWarnings("resource") BufferedReader br = new BufferedReader(new FileReader(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR) + fileName));
             StringBuilder sb = new StringBuilder();
             String line = br.readLine();
 

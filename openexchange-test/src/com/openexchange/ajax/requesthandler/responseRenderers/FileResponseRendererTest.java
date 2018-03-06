@@ -614,7 +614,7 @@ public class FileResponseRendererTest {
 
     @Test
     public void testContentLengthMailAttachments_Bug26926() {
-        String testDataDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR);
+        String testDataDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR);
         try {
             InputStream is = null;
             is = new FileInputStream(new File(testDataDir + "26926_27394.pdf"));

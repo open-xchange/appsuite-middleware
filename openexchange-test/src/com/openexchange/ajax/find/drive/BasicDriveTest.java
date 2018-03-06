@@ -122,7 +122,7 @@ public class BasicDriveTest extends AbstractFindTest {
     public void setUp() throws Exception {
         super.setUp();
         AJAXConfig.init();
-        String testDataDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR);
+        String testDataDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR);
         java.io.File file = new java.io.File(testDataDir, "BasicDriveTest.tmp");
 
         String folderName = "findApiDriveTestFolder_" + System.currentTimeMillis();
