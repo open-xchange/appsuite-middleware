@@ -155,10 +155,7 @@ public final class SearchAction extends AbstractMailAction {
                 }
             }
             boolean ignoreSeen = req.optBool("unseen");
-            Boolean ignoreDeleted = getIgnoreDeleted(req);
-            if (ignoreDeleted == null) {
-                ignoreDeleted = new Boolean(true);
-            }
+            boolean ignoreDeleted = getIgnoreDeleted(req, true);
 
             final JSONValue searchValue = (JSONValue) req.getRequest().requireData();
             /*
@@ -202,7 +199,7 @@ public final class SearchAction extends AbstractMailAction {
         }
     }
 
-    private AJAXRequestResult searchByColumnAndPattern(MailRequest req, MailServletInterface mailInterface, JSONValue searchValue, int orderDir, String sort, String folderId, boolean ignoreSeen, Boolean ignoreDeleted, int[] columns, int[] fromToIndices, String[] headers) throws JSONException, OXException {
+    private AJAXRequestResult searchByColumnAndPattern(MailRequest req, MailServletInterface mailInterface, JSONValue searchValue, int orderDir, String sort, String folderId, boolean ignoreSeen, boolean ignoreDeleted, int[] columns, int[] fromToIndices, String[] headers) throws JSONException, OXException {
         Collection<OXException> warnings = null;
         /*
          * Parse body into a JSON array
@@ -241,7 +238,7 @@ public final class SearchAction extends AbstractMailAction {
 
                 SearchTerm<?> first = ignoreSeen ? new FlagTerm(MailMessage.FLAG_SEEN, false) : null;
                 SearchTerm<?> second;
-                if (ignoreDeleted != null) {
+                if (ignoreDeleted) {
                     second = new FlagTerm(MailMessage.FLAG_DELETED, !ignoreDeleted);
                 } else {
                     second = null;
@@ -293,7 +290,7 @@ public final class SearchAction extends AbstractMailAction {
         return result;
     }
 
-    private AJAXRequestResult searchByFilter(MailRequest req, MailServletInterface mailInterface, JSONValue searchValue, int orderDir, String sort, String folderId, boolean ignoreSeen, Boolean ignoreDeleted, int[] columns, int[] fromToIndices, String[] headers) throws JSONException, OXException {
+    private AJAXRequestResult searchByFilter(MailRequest req, MailServletInterface mailInterface, JSONValue searchValue, int orderDir, String sort, String folderId, boolean ignoreSeen, boolean ignoreDeleted, int[] columns, int[] fromToIndices, String[] headers) throws JSONException, OXException {
         // Body is a JSON object
         JSONArray searchArray = searchValue.toObject().getJSONArray(Mail.PARAMETER_FILTER);
         /*
@@ -306,12 +303,12 @@ public final class SearchAction extends AbstractMailAction {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailInterface.getMailAccess();
 
         SearchTerm<?> searchTerm;
-        if (ignoreDeleted != null || ignoreSeen) {
+        if (ignoreDeleted || ignoreSeen) {
             SearchTerm<?> main = mailInterface.createSearchTermFrom(SearchTermParser.parse(searchArray));
 
             SearchTerm<?> first = ignoreSeen ? new FlagTerm(MailMessage.FLAG_SEEN, false) : null;
             SearchTerm<?> second;
-            if (ignoreDeleted != null) {
+            if (ignoreDeleted) {
                 second = new FlagTerm(MailMessage.FLAG_DELETED, !ignoreDeleted);
             } else {
                 second = null;
