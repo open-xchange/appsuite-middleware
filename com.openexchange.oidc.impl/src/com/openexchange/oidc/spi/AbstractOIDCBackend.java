@@ -300,6 +300,9 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
         String subject = "";
         try {
             JWTClaimsSet jwtClaimsSet = idToken.getJWTClaimsSet();
+            if (null == jwtClaimsSet) {
+                throw OIDCExceptionCode.UNABLE_TO_LOAD_USERINFO.create("Failed to get the JWTClaimSet from idToken.");
+            }
             subject = jwtClaimsSet.getSubject();
         } catch (java.text.ParseException e) {
             throw OIDCExceptionCode.UNABLE_TO_LOAD_USERINFO.create(e, "Failed to get the JWTClaimSet from idToken.");
