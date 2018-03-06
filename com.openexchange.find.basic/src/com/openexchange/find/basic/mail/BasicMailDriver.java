@@ -777,7 +777,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             comparison = Comparison.GREATER_EQUALS;
             timestamp = cal.getTime().getTime();
         } else {
-            return null;
+            throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, FIELD_DATE);
         }
 
         return new Pair<Comparison, Long>(comparison, Long.valueOf(timestamp));
