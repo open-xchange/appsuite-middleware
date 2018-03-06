@@ -51,10 +51,14 @@ package com.openexchange.mail.mime;
 
 import static com.openexchange.java.Strings.toUpperCase;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
+import java.io.StringReader;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.james.mime4j.field.contenttype.parser.ContentTypeParser;
+import org.apache.james.mime4j.field.contenttype.parser.ParseException;
+import org.apache.james.mime4j.field.contenttype.parser.TokenMgrError;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -279,18 +283,42 @@ public class ContentType extends ParameterizedHeader {
         return !PATTERN_TOKEN.matcher(token).matches();
     }
 
-    /**
-     * The regular expression capturing whitespace characters.
-     */
-    private static final Pattern PATTERN_WHITESPACE = Pattern.compile("\\s+");
-
-    private static final String EMPTY = "";
-
     private static String clearWhitespaces(final String str) {
         if (null == str) {
             return null;
         }
-        return PATTERN_WHITESPACE.matcher(str).replaceAll(EMPTY);
+
+        StringBuilder sb = null;
+        int length = str.length();
+        for (int i = 0; i < length; i++) {
+            char ch = str.charAt(i);
+            if (Strings.isWhitespace(ch)) {
+                if (null == sb) {
+                    sb = new StringBuilder(length);
+                    if (i > 0) {
+                        sb.append(str, 0, i);
+                    }
+                }
+            } else {
+                if (null != sb) {
+                    sb.append(ch);
+                }
+            }
+        }
+
+        return null == sb ? str : sb.toString();
+    }
+
+    private static boolean isValidContentType(String contentType) {
+        try {
+            ContentTypeParser parser = new ContentTypeParser(new StringReader(contentType));
+            parser.parse();
+            return true;
+        } catch (ParseException e) {
+            return false;
+        } catch (TokenMgrError e) {
+            return false;
+        }
     }
 
     /**
@@ -424,6 +452,9 @@ public class ContentType extends ParameterizedHeader {
         if ((null == contentType) || (contentType.length() == 0)) {
             setContentType(DEFAULT_CONTENT_TYPE);
             return;
+        }
+        if (strict && !isValidContentType(contentType)) {
+            throw MailExceptionCode.INVALID_CONTENT_TYPE.create(contentType);
         }
         try {
             final String cts = prepareParameterizedHeader(contentType);
