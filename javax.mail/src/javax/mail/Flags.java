@@ -323,12 +323,13 @@ public class Flags implements Cloneable, Serializable {
 	if (user_flags != null && (f.system_flags & USER_BIT) == 0) {
 	    HashMap<String, String> otherUserFlags = f.user_flags;
         if (otherUserFlags != null) {
-		for (String key : user_flags.keySet()) {
-		    if (!otherUserFlags.containsKey(key)) {
-			user_flags.remove(key);
+		for (Iterator<String> it = user_flags.keySet().iterator(); it.hasNext();) {
+            String key = it.next();
+            if (!otherUserFlags.containsKey(key)) {
+			it.remove();
 			changed = true;
 		    }
-		}
+        }
 	    } else {
 		// if anything in user_flags, throw them away
 		changed = !user_flags.isEmpty();
