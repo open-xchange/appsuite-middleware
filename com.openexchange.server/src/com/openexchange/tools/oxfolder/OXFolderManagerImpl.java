@@ -571,7 +571,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         FolderObject storageObject = originalFolder.clone();
 
         int optionz = options;
-        if (((optionz & OPTION_TRASHING) >= 0) && performMove) {
+        if (((optionz & OPTION_TRASHING) > 0) && performMove) {
             int newParentFolderID = fo.getParentFolderID();
             if (newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
                 if ((FolderObject.TRASH == getFolderTypeFromMaster(newParentFolderID)) && (FolderObject.TRASH != getFolderTypeFromMaster(storageObject.getParentFolderID()))) {
