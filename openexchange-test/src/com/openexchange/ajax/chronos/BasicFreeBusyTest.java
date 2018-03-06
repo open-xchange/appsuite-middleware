@@ -171,7 +171,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         long diff = endTime - beginTime + 1;
         return beginTime + (long) (Math.random() * diff);
     }
-    
+
     @Test
     public void testFreeBusyTimeWithOverlappingEventsWithDifferentStati() throws Exception {
         long first = getRandomTimeBetweenTwoDates();
@@ -193,13 +193,13 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         ChronosApi secondUserChronosApi = user2.getChronosApi();
         String secondUserFolder = getDefaultFolder(secondSession, user2.getClient());
         // Do a request to get a valid timestamp
-        EventsResponse allEvents = secondUserChronosApi.getAllEvents(secondSession, "20170101T000000Z", "20180101T000000Z", secondUserFolder, null, null, null, false, false, true, false);
+        EventsResponse allEvents = secondUserChronosApi.getAllEvents(secondSession, "20170101T000000Z", "20180101T000000Z", secondUserFolder, null, null, null, false, true, false);
         assertNull(allEvents.getErrorDesc(), allEvents.getError());
         Long timestamp = allEvents.getTimestamp();
 
         // Create three overlapping events
         createEvent("first", first, first + TimeUnit.HOURS.toMillis(1), users);
-        ChronosUpdatesResponse updates = secondUserChronosApi.getUpdates(secondSession, secondUserFolder, timestamp, null, null, null, null, null, false, true, false);
+        ChronosUpdatesResponse updates = secondUserChronosApi.getUpdates(secondSession, secondUserFolder, timestamp, null, null, null, null, null, false, false);
         assertNull(updates.getErrorDesc(), updates.getError());
         assertNotNull(updates.getData());
         assertEquals(1, updates.getData().getNewAndModified().size());
@@ -216,7 +216,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         assertNotNull(updateAttendee.getData());
 
         createEvent("second", second, second + TimeUnit.HOURS.toMillis(1), users);
-        updates = secondUserChronosApi.getUpdates(secondSession, secondUserFolder, updateAttendee.getTimestamp(), null, null, null, null, null, false, true, false);
+        updates = secondUserChronosApi.getUpdates(secondSession, secondUserFolder, updateAttendee.getTimestamp(), null, null, null, null, null, false, false);
         assertNull(updates.getErrorDesc(), updates.getError());
         assertNotNull(updates.getData());
         assertEquals(1, updates.getData().getNewAndModified().size());
@@ -233,7 +233,7 @@ public class BasicFreeBusyTest extends AbstractChronosTest {
         assertNotNull(updateAttendee2.getData());
 
         createEvent("third", third, third + TimeUnit.HOURS.toMillis(1), users);
-        updates = secondUserChronosApi.getUpdates(secondSession, secondUserFolder, updateAttendee2.getTimestamp(), null, null, null, null, null, false, true, false);
+        updates = secondUserChronosApi.getUpdates(secondSession, secondUserFolder, updateAttendee2.getTimestamp(), null, null, null, null, null, false, false);
         assertNull(updates.getErrorDesc(), updates.getError());
         assertNotNull(updates.getData());
         assertEquals(1, updates.getData().getNewAndModified().size());
