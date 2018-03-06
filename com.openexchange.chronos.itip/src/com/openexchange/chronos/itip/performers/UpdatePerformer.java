@@ -84,7 +84,7 @@ import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.java.Strings;
 
 /**
- * 
+ *
  * {@link ITipChange}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
@@ -112,12 +112,12 @@ public class UpdatePerformer extends AbstractActionPerformer {
 
         Map<String, Event> processed = new HashMap<String, Event>();
 
-        for (ITipChange change : changes) {
+        NextChange: for (ITipChange change : changes) {
 
             Event event = change.getNewEvent();
             if (event == null) {
                 LOGGER.debug("No event found to process.");
-                continue;
+                continue NextChange;
             }
 
             // TODO: event.setNotification(true);
@@ -131,17 +131,29 @@ public class UpdatePerformer extends AbstractActionPerformer {
                 ITipEventUpdate diff = change.getDiff();
                 if (null != diff && false == diff.isEmpty()) {
                     event = updateEvent(original, event, session);
+                    if (null == event) {
+                        LOGGER.warn("No event found to process.");
+                        continue NextChange;
+                    }
                 } else {
-                    continue;
+                    continue NextChange;
                 }
             } else if (exceptionCreate) {
                 Event masterEvent = original = change.getMasterEvent();
                 event.setSeriesId(masterEvent.getSeriesId());
                 event = updateEvent(masterEvent, event, session);
+                if (null == event) {
+                    LOGGER.warn("No event found to process.");
+                    continue NextChange;
+                }
             } else {
                 ensureFolderId(event, session);
                 event.removeId();
                 event = createEvent(event, session);
+                if (null == event) {
+                    LOGGER.warn("No event found to process.");
+                    continue NextChange;
+                }
             }
 
             if (!change.isException()) {
@@ -206,7 +218,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
 
     /**
      * Creates a new event based on the given event.
-     * 
+     *
      * @param event The event to create
      * @param session The {@link CalendarSession}
      * @return The newly created event
@@ -225,7 +237,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
 
     /**
      * Ensures that the given user is attendee of the event
-     * 
+     *
      * @param event The event to check if the user is in
      * @param currentEvent The original event
      * @param action The {@link ITipAction} to be performed
@@ -287,7 +299,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
 
     /**
      * Loads a specific user
-     * 
+     *
      * @param session The {@link CalendarSession}
      * @param userId The user to load
      * @return The user as {@link Attendee}
@@ -299,7 +311,7 @@ public class UpdatePerformer extends AbstractActionPerformer {
 
     /**
      * Get a specific value from a specific attendee
-     * 
+     *
      * @param event The event containing the attendees
      * @param userId The identifier of the attendee
      * @param field The {@link AttendeeField} to get the value from
