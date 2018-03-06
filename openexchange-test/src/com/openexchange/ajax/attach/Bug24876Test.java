@@ -54,7 +54,6 @@ import java.io.ByteArrayInputStream;
 import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import com.openexchange.ajax.attach.actions.AttachRequest;
 import com.openexchange.ajax.attach.actions.ListRequest;
@@ -63,7 +62,6 @@ import com.openexchange.ajax.contact.action.DeleteRequest;
 import com.openexchange.ajax.contact.action.GetRequest;
 import com.openexchange.ajax.contact.action.InsertRequest;
 import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.MultipleRequest;
 import com.openexchange.ajax.framework.ProvisioningSetup;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.container.Contact;
@@ -115,21 +113,6 @@ public final class Bug24876Test {
     @Test
     public void testList() throws Exception {
         ListResponse response = client.execute(new ListRequest(contact, new int[] { attachmentId }, new int[] { AttachmentField.CREATION_DATE }, TimeZones.UTC));
-        assertEquals("attachment listing did not return the only created attachment", 1, response.getArray().length);
-        long toTest = 0;
-        for (Object[] values : response) {
-            toTest = ((Long) values[response.getColumnPos(AttachmentField.CREATION_DATE)]).longValue();
-        }
-        assertEquals("time stamp for attachments is wrong in list request", timestamp, toTest);
-    }
-
-    /**
-     * Test is disabled. Multiple servlet needs parameter module which conflicts with module parameter of attachment list request.
-     */
-    @Test
-    @Ignore
-    public void testMultipleList() throws Exception {
-        ListResponse response = client.execute(MultipleRequest.create(new ListRequest(contact, new int[] { attachmentId }, new int[] { AttachmentField.CREATION_DATE }, TimeZones.UTC))).getResponse(0);
         assertEquals("attachment listing did not return the only created attachment", 1, response.getArray().length);
         long toTest = 0;
         for (Object[] values : response) {
