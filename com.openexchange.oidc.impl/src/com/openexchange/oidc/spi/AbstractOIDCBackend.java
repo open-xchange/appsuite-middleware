@@ -305,7 +305,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
             throw OIDCExceptionCode.UNABLE_TO_LOAD_USERINFO.create(e, "Failed to get the JWTClaimSet from idToken.");
         }
 
-        if (subject.isEmpty()) {
+        if (Strings.isEmpty(subject)) {
             throw OIDCExceptionCode.UNABLE_TO_LOAD_USERINFO.create("unable to get a valid subject.");
         }
         AuthenticationInfo resultInfo = this.loadUserFromServer(subject);
