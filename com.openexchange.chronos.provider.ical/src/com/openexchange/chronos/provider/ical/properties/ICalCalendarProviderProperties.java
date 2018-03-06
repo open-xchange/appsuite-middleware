@@ -72,7 +72,7 @@ public enum ICalCalendarProviderProperties implements Property {
     /**
      * Defines the default timeout interval for contacting the external resource after an error occurred.
      */
-    retryAfterErrorInterval(60L, ICalCalendarProviderProperties.PREFIX), // one hour
+    retryAfterErrorInterval(3600L, ICalCalendarProviderProperties.PREFIX), // one hour
     /**
      * Defines the default refresh interval of the calendar feeds
      */

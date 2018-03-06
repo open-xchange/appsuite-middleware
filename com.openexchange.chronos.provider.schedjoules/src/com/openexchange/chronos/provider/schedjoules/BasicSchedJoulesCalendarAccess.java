@@ -93,9 +93,9 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
     private static final String DEFAULT_CALENDAR_NAME = "calendar";
 
     /**
-     * Defines the amount of time to wait before attempting another external request upon failure. Defaults in 60 minutes.
+     * Defines the amount of time to wait before attempting another external request upon failure. Defaults in 1 hour.
      */
-    private static final int EXTERNAL_REQUEST_TIMEOUT = 60;
+    private static final int EXTERNAL_REQUEST_TIMEOUT = 3600;
 
     /**
      * Initialises a new {@link BasicSchedJoulesCalendarAccess}.

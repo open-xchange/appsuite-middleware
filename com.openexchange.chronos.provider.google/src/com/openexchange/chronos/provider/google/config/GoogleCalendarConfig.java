@@ -65,7 +65,7 @@ public class GoogleCalendarConfig {
 
     private static final Property REFRESH_INTERVAL_PROP = DefaultProperty.valueOf("com.openexchange.chronos.provider.google.refreshInterval", new Long(10));
 
-    private static final Property REQUEST_TIMEOUT_PROP = DefaultProperty.valueOf("com.openexchange.chronos.provider.google.requestTimeout", new Long(30));
+    private static final Property REQUEST_TIMEOUT_PROP = DefaultProperty.valueOf("com.openexchange.chronos.provider.google.requestTimeout", new Long(1800));
 
     public static long getResfrehInterval(Session session) {
 

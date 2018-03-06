@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.provider.caching.basic;
 
+import com.openexchange.exception.OXException;
+
 /**
  * {@link BasicCachingCalendarConstants}
  *
@@ -58,8 +60,8 @@ package com.openexchange.chronos.provider.caching.basic;
 public class BasicCachingCalendarConstants {
 
     /**
-     * The minimum interval (in minutes) that is allowed to be configured when implementing com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess.getRetryAfterErrorInterval(OXException)
+     * The minimum interval (in seconds) that is allowed to be configured when implementing {@link BasicCachingCalendarAccess#getRetryAfterErrorInterval(OXException)}
      */
-    public static final int MINIMUM_DEFAULT_RETRY_AFTER_ERROR_INTERVAL = 1;
+    public static final int MINIMUM_DEFAULT_RETRY_AFTER_ERROR_INTERVAL = 2;
 
 }
