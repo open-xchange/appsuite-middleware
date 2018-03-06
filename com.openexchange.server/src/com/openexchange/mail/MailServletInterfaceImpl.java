@@ -2494,7 +2494,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 case COLOR_LABEL:
                     contained = candidate.containsColorLabel();
                     break;
-                case MIME_TYPE:
+                case CONTENT_TYPE:
                     contained = candidate.containsContentType();
                     break;
                 case DISPOSITION_NOTIFICATION_TO:

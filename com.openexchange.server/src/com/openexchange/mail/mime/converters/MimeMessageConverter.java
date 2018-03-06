@@ -1133,6 +1133,7 @@ public final class MimeMessageConverter {
                     }
                 }
             };
+            FILLER_MAP_EXT.put(MailField.CONTENT_TYPE, filler);
             FILLER_MAP_EXT.put(MailField.MIME_TYPE, filler);
         }
         FILLER_MAP_EXT.put(MailField.ATTACHMENT, new MailMessageFieldFiller() {
@@ -1443,6 +1444,7 @@ public final class MimeMessageConverter {
                     mailMessage.setContentType(ct);
                 }
             };
+            FILLER_MAP.put(MailField.CONTENT_TYPE, filler);
             FILLER_MAP.put(MailField.MIME_TYPE, filler);
         }
 

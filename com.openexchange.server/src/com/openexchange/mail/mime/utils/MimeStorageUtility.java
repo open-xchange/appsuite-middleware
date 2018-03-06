@@ -211,7 +211,7 @@ public final class MimeStorageUtility {
             set.add(MailField.TEXT_PREVIEW);
         }
         if (fetchProfile.contains(FetchProfile.Item.CONTENT_INFO)) {
-            set.add(MailField.MIME_TYPE);
+            set.add(MailField.CONTENT_TYPE);
             set.add(MailField.ATTACHMENT);
         }
         if (fetchProfile.contains(FetchProfile.Item.FLAGS)) {
@@ -523,6 +523,7 @@ public final class MimeStorageUtility {
         final EnumMap<MailField, FetchProfile.Item> field2item = new EnumMap<MailField, FetchProfile.Item>(MailField.class);
         field2item.put(MailField.HEADERS, IMAPFolder.FetchProfileItem.HEADERS);
         field2item.put(MailField.ID, UIDFolder.FetchProfileItem.UID);
+        field2item.put(MailField.CONTENT_TYPE, FetchProfile.Item.CONTENT_INFO);
         field2item.put(MailField.ATTACHMENT, FetchProfile.Item.FLAGS); // or has_attachment?!
         field2item.put(MailField.MIME_TYPE, FetchProfile.Item.CONTENT_INFO);
         field2item.put(MailField.SIZE, FetchProfile.Item.SIZE);

@@ -188,7 +188,7 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
         }
     }
 
-    private static final MailField[] FIELDS_HEADER_CT = { MailField.HEADERS, MailField.MIME_TYPE };
+    private static final MailField[] FIELDS_HEADER_CT = { MailField.HEADERS, MailField.CONTENT_TYPE };
 
     private static final String NAME = "SpamAssassin";
 
