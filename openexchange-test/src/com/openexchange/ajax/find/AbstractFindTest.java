@@ -117,11 +117,7 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
         random = new Random();
         client2 = getClient2();
         folderManager2 = new FolderTestManager(client2);
-        // Mocks
-        
         i18nServiceRegistry = mock(I18nServiceRegistry.class);
-//        ServiceLookup services = mock(ServiceLookup.class);
-//        when(services.getOptionalService(I18nServiceRegistry.class)).thenReturn(i18nServiceRegistry);
     }
 
     @After
