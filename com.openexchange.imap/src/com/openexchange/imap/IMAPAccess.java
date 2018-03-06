@@ -1379,6 +1379,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     int hash = getHashFor(userId, contextId);
                     imapProps.put("mail.imap.multiAddress.key", Integer.toString(hash));
                 }
+                /*
+                 * Pass max. wait timeout
+                 */
+                int maxRetries = IMAPProperties.getInstance().getMultipleAddressesMaxRetryAttempts(userId, contextId);
+                if (maxRetries >= 0) {
+                    imapProps.put("mail.imap.multiAddress.maxRetries", Integer.toString(maxRetries));
+                }
             }
         }
         /*

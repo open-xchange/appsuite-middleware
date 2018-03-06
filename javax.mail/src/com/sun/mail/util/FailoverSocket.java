@@ -76,6 +76,8 @@ public class FailoverSocket extends Socket {
         PropUtil.getBooleanSystemProperty("mail.socket.debug", false),
         System.out);
 
+    private static final int DEFAULT_CONNECT_TIMEOUT = 1000;
+
     // ----------------------------------------------------------------------------------------------------
 
     private final Socket socket;
@@ -86,6 +88,7 @@ public class FailoverSocket extends Socket {
     private final Properties props;
     private final String prefix;
     private final boolean useSSL;
+    private final long backoffBaseMillis;
 
     /**
      * Initializes a new {@link FailoverSocket}.
@@ -100,10 +103,19 @@ public class FailoverSocket extends Socket {
         this.prefix = prefix;
         this.useSSL = useSSL;
         this.selector = selector;
-        this.socket = connectToNext(0);
+
+        // Get configured connect timeout from properties
+        int connectTimeout = PropUtil.getIntProperty(props, prefix + ".connectiontimeout", -1);
+        backoffBaseMillis = connectTimeout > 1000 ? 1000L : 100L;
+
+        // Determine max. retry attempts
+        int maxRetries = PropUtil.getIntProperty(props, prefix + ".multiAddress.maxRetries", 3);
+
+        // Establish socket (with fail-over behavior)
+        this.socket = connectToNext(0, Math.min(maxRetries, selector.length()));
     }
 
-    private Socket connectToNext(int retryCount) throws IOException {
+    private Socket connectToNext(int retryCount, int maxRetries) throws IOException {
         // Grab the IP address to use
         InetAddress addressToUse = selector.currentAddress();
 
@@ -111,19 +123,21 @@ public class FailoverSocket extends Socket {
         try {
             return SocketFetcher.getSocket(addressToUse, host, port, props, prefix, useSSL);
         } catch (com.sun.mail.util.SocketConnectException e) {
-            // Connect attempt failed. Retry using exponential back-off.
+            // Connect attempt to IP address failed. Notify address selector
+            selector.failoverAddress(addressToUse);
+
+            // Retry using exponential back-off.
             int retry = retryCount + 1;
-            if (retry >= selector.length()) {
-                // Tried with all available IP addresses. Giving up...
+            if (retry >= maxRetries) {
+                // Redeemed all retry attempts. Giving up...
                 throw e;
             }
-            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            long backoffNanos = TimeUnit.NANOSECONDS.convert((retry * backoffBaseMillis) + ((long) (Math.random() * backoffBaseMillis)), TimeUnit.MILLISECONDS);
             if (logger.isLoggable(Level.FINER)) {
-                logger.finer("Failed to connect to " + e.getHost() + " (address " + e.getAddress() + "), port " + e.getPort() + ". Retrying in " + TimeUnit.NANOSECONDS.toMillis(nanosToWait) + " milliseconds");
+                logger.finer("Failed to connect to " + e.getHost() + " (address " + e.getAddress() + "), port " + e.getPort() + ". Retrying in " + TimeUnit.NANOSECONDS.toMicros(backoffNanos) + " microseconds");
             }
-            LockSupport.parkNanos(nanosToWait);
-            selector.failoverAddress(addressToUse);
-            return connectToNext(retry);
+            LockSupport.parkNanos(backoffNanos);
+            return connectToNext(retry, maxRetries);
         }
     }
 
