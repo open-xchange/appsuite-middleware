@@ -97,25 +97,22 @@ public class CommonResultConverterRegistry implements ServiceTrackerCustomizer<R
 
     @Override
     public void removedService(ServiceReference<ResultConverter> reference, ResultConverter service) {
-        if (null != service && converters.contains(service.getInputFormat())) {
+        if (null != service) {
             Map<String, ResultConverter> map = converters.get(service.getInputFormat());
-            if (map.containsKey(service.getOutputFormat())) {
-                map.remove(service.getOutputFormat());
+            if (null != map) {
+                if (map.containsKey(service.getOutputFormat())) {
+                    map.remove(service.getOutputFormat());
+                }
+                converters.put(service.getInputFormat(), map);
+                context.ungetService(reference);
             }
-            converters.put(service.getInputFormat(), map);
-            context.ungetService(reference);
         }
     }
 
     @Override
     public ResultConverter getResultConverter(String inputFormat, String outputFormat) {
-        if (converters.containsKey(inputFormat)) {
-            Map<String, ResultConverter> map = converters.get(inputFormat);
-            if (map.containsKey(outputFormat)) {
-                return map.get(outputFormat);
-            }
-        }
-        return null;
+        Map<String, ResultConverter> map = converters.get(inputFormat);
+        return null != map ? map.get(outputFormat) : null;
     }
 
     /**
@@ -126,12 +123,13 @@ public class CommonResultConverterRegistry implements ServiceTrackerCustomizer<R
      */
     public ResultConverter addResultConverter(ResultConverter resultConverter) {
         if (null != resultConverter) {
-            Map<String, ResultConverter> map;
-            if (converters.containsKey(resultConverter.getInputFormat())) {
-                map = converters.get(resultConverter.getInputFormat());
-            } else {
-                map = new ConcurrentHashMap<String, ResultConverter>(16, 0.9f, 1);
-                converters.put(resultConverter.getInputFormat(), map);
+            Map<String, ResultConverter> map = converters.get(resultConverter.getInputFormat());
+            if (null == map) {
+                Map<String, ResultConverter> newmap = new ConcurrentHashMap<String, ResultConverter>(16, 0.9f, 1);
+                map = converters.putIfAbsent(resultConverter.getInputFormat(), newmap);
+                if (null == map) {
+                    map = newmap;
+                }
             }
             map.put(resultConverter.getOutputFormat(), resultConverter);
             return resultConverter;
