@@ -88,7 +88,7 @@ public class PortableDropAllPermanentListenerCallable extends AbstractCustomPort
 
     @Override
     public Boolean call() throws Exception {
-        PushManagerRegistry.getInstance().stopAllPermanentListener();
+        PushManagerRegistry.getInstance().stopAllPermanentListener(false); // No reconnect since we are going to restart them in cluster
         return Boolean.TRUE;
     }
 
