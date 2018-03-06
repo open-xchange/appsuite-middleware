@@ -251,8 +251,8 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
             }
 
             final boolean ignoreSeen = req.optBool("unseen");
-            final Boolean ignoreDeleted = getIgnoreDeleted(req);
-            final boolean filterApplied = (ignoreSeen || (ignoreDeleted != null));
+            final boolean ignoreDeleted = getIgnoreDeleted(req, false);
+            final boolean filterApplied = (ignoreSeen || ignoreDeleted);
             if (filterApplied) {
                 // Ensure flags is contained in provided columns
                 final int fieldFlags = MailListField.FLAGS.getField();
@@ -299,12 +299,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                     SearchTerm<?> searchTerm;
                     {
                         SearchTerm<?> first = ignoreSeen ? new FlagTerm(MailMessage.FLAG_SEEN, false) : null;
-                        SearchTerm<?> second;
-                        if (ignoreDeleted != null) {
-                            second = new FlagTerm(MailMessage.FLAG_DELETED, !ignoreDeleted);
-                        } else {
-                            second = null;
-                        }
+                        SearchTerm<?> second = ignoreDeleted ? new FlagTerm(MailMessage.FLAG_DELETED, !ignoreDeleted) : null;
                         searchTerm = null != first && null != second ? new ANDTerm(first, second) : (null == first ? second : first);
 
                         // Check if mail categories are enabled
