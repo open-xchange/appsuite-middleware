@@ -47,7 +47,7 @@ public class DeleteTest extends AppointmentTest {
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.DAILY);
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         appointmentObj.setInterval(1);
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
@@ -60,9 +60,8 @@ public class DeleteTest extends AppointmentTest {
         appointmentObj.setTitle("testDeleteRecurrenceWithPosition - exception");
         appointmentObj.setStartDate(new Date(startTime + 60 * 60 * 1000));
         appointmentObj.setEndDate(new Date(endTime + 60 * 60 * 1000));
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         appointmentObj.setShownAs(Appointment.ABSENT);
-        appointmentObj.setOrganizer(testUser.getUser());
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrencePosition(changeExceptionPosition);
         appointmentObj.setIgnoreConflicts(true);
@@ -82,7 +81,7 @@ public class DeleteTest extends AppointmentTest {
         compareObject(appointmentObj, loadAppointment, appointmentObj.getStartDate().getTime(), appointmentObj.getEndDate().getTime());
     }
 
-    // Bug #12173 
+    // Bug #12173
     @Test
     public void testDeleteRecurrenceWithDate() throws Exception {
         final Calendar c = Calendar.getInstance();
@@ -104,20 +103,20 @@ public class DeleteTest extends AppointmentTest {
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(appointmentFolderId);
         appointmentObj.setRecurrenceType(Appointment.DAILY);
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         appointmentObj.setInterval(1);
         appointmentObj.setUntil(until);
         appointmentObj.setIgnoreConflicts(true);
         final int objectId = catm.insert(appointmentObj).getObjectID();
-        
+
         Appointment loadAppointment = catm.get(appointmentFolderId, objectId);
         compareObject(appointmentObj, loadAppointment, startTime, endTime);
-        
+
         catm.delete(appointmentObj, exceptionDate);
         assertFalse(catm.getLastResponse().hasError());
-        
+
         loadAppointment = catm.get(appointmentFolderId, objectId);
-        
+
         assertNotNull(loadAppointment);
     }
 }
