@@ -61,6 +61,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
 import com.nimbusds.oauth2.sdk.AuthorizationGrant;
@@ -261,7 +262,11 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         try {
             TokenRequest tokenReq = this.createTokenRequest(request);
             OIDCTokenResponse tokenResponse = this.getTokenResponse(tokenReq);
-            IDTokenClaimsSet validTokenResponse = this.backend.validateIdToken(tokenResponse.getOIDCTokens().getIDToken(), storedRequestInformation.getNonce());
+            JWT idToken = tokenResponse.getOIDCTokens().getIDToken();
+            if (null == idToken) {
+                throw OXException.general("Missing IDToken");
+            }
+            IDTokenClaimsSet validTokenResponse = this.backend.validateIdToken(idToken, storedRequestInformation.getNonce());
             if (validTokenResponse == null) {
                 throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create("IDToken validation failed, no claim set could be extracted");
             }
