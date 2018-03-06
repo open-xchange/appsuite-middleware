@@ -467,7 +467,8 @@ public class NewTest extends AppointmentTest {
         appointmentObj.setTitle("testSharedFolder");
         appointmentObj.setStartDate(new Date(startTime));
         appointmentObj.setEndDate(new Date(endTime));
-        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
+        appointmentObj.setOrganizer(getClient2().getValues().getDefaultAddress());
+        appointmentObj.setPrincipal(getClient().getValues().getDefaultAddress());
         appointmentObj.setShownAs(Appointment.ABSENT);
         appointmentObj.setParentFolderID(targetFolder);
         appointmentObj.setIgnoreConflicts(true);
