@@ -182,7 +182,7 @@ public final class ThreadSorts {
      * @throws OXException If parsing fails
      * @throws MessagingException If acquiring the THREAD response fails
      */
-    public static List<List<MailMessage>> getConversations(IMAPFolder imapFolder, String sortRange, boolean isRev1, IMAPServerInfo serverInfo, SearchTerm<?> searchTerm, MailConfig mailConfig, MailField... fields) throws OXException, MessagingException {
+    public static List<List<MailMessage>> getConversations(IMAPFolder imapFolder, String sortRange, boolean isRev1, boolean examineHasAttachmentUserFlags, IMAPServerInfo serverInfo, SearchTerm<?> searchTerm, MailConfig mailConfig, MailField... fields) throws OXException, MessagingException {
         if (null == fields || fields.length == 0 || (fields.length == 1 && MailField.RECEIVED_DATE.equals(fields[0]))) {
             return parseConversations(getThreadResponse(imapFolder, sortRange, true, searchTerm), imapFolder.getFullName());
         }
@@ -190,7 +190,7 @@ public final class ThreadSorts {
         // Its fetch profile...
         FetchProfile fp = new FetchProfile();
         for (MailField field : fields) {
-            MimeStorageUtility.addFetchItem(fp, field);
+            MimeStorageUtility.addFetchItem(fp, field, examineHasAttachmentUserFlags);
         }
         return getConversations(imapFolder, sortRange, isRev1, fp, serverInfo, mailConfig.getCapabilities().hasAttachmentMarker(), searchTerm);
     }
