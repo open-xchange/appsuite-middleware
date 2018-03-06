@@ -377,6 +377,7 @@ public class EventManager extends AbstractManager {
      * @param until The ending date
      * @param expand Flag to expand occurrences
      * @param folder The folder identifier
+     * @param sortOrder The sortOder of the events
      * @return A {@link List} with {@link EventData}
      * @throws ApiException if an API error occurs
      */
@@ -384,14 +385,30 @@ public class EventManager extends AbstractManager {
         return getAllEvents(from, until, expand, folder, sortOrder, null);
     }
 
+    /**
+     * Retrieves all events within the specified interval in the specified folder
+     *
+     * @param from The starting date
+     * @param until The ending date
+     * @param expand Flag to expand occurrences
+     * @param folder The folder identifier
+     * @param sortOrder The sortOder of the events
+     * @param fields The considered event fields
+     * @return A {@link List} with {@link EventData}
+     * @throws ApiException if an API error occurs
+     */
     public List<EventData> getAllEvents(Date from, Date until, boolean expand, String folder, SortOrder sortOrder, String fields) throws ApiException {
+        return getAllEvents(from, until, expand, folder, sortOrder, fields, true);
+    }
+
+    public List<EventData> getAllEvents(Date from, Date until, boolean expand, String folder, SortOrder sortOrder, String fields, boolean extendedEntities) throws ApiException {
         String sort = null;
         String order = null;
         if (sortOrder != null) {
             sort = sortOrder.getBy().name();
             order = sortOrder.isDescending() ? SortOrder.Order.DESC.name() : SortOrder.Order.ASC.name();
         }
-        EventsResponse eventsResponse = userApi.getChronosApi().getAllEvents(userApi.getSession(), DateTimeUtil.getZuluDateTime(from.getTime()).getValue(), DateTimeUtil.getZuluDateTime(until.getTime()).getValue(), folder, fields, order, sort, expand, true, false);
+        EventsResponse eventsResponse = userApi.getChronosApi().getAllEvents(userApi.getSession(), DateTimeUtil.getZuluDateTime(from.getTime()).getValue(), DateTimeUtil.getZuluDateTime(until.getTime()).getValue(), folder, fields, order, sort, expand, extendedEntities, false);
         return checkResponse(eventsResponse.getErrorDesc(), eventsResponse.getError(), eventsResponse.getData());
     }
 
