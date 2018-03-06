@@ -80,11 +80,7 @@ public class Transparency implements ChangeDescriptionGenerator {
     }
 
     private Object string(Transp transparency) {
-        if (transparency.equals(Transp.TRANSPARENT)) {
-            return Messages.FREE;
-        } else {
-            return Messages.RESERVERD;
-        }
+        return null != transparency && Transp.TRANSPARENT.equals(transparency.getValue()) ? Messages.FREE : Messages.RESERVERD;
     }
 
 }
