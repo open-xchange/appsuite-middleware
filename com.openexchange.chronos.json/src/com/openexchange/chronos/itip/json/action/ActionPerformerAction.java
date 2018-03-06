@@ -67,6 +67,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipActionPerformer;
 import com.openexchange.chronos.itip.ITipActionPerformerFactoryService;
@@ -128,6 +129,7 @@ public class ActionPerformerAction extends AbstractITipAction {
         if (list != null) {
             JSONArray array = new JSONArray(list.size());
             for (Event event : list) {
+                event.setFolderId(CalendarUtils.prependDefaultAccount(event.getFolderId()));
                 JSONObject object = EventMapper.getInstance().serialize(event, EventMapper.getInstance().getAssignedFields(event), tz, session);
                 array.put(object);
             }
