@@ -194,16 +194,16 @@ public abstract class AbstractQueryPerformer {
      *
      * @param events The events to post-process
      * @param inFolder The parent folder representing the view on the event
-     * @param includeClassified <code>true</code> to include <i>confidential</i> events in shared folders, <code>false</code>, otherwise
+     * @param skipClassified <code>true</code> to skip <i>confidential</i> events in shared folders, <code>false</code>, otherwise
      * @param fields The event fields to consider, or <code>null</code> if not specified
      * @return The processed events
      */
-    protected List<Event> postProcess(List<Event> events, CalendarFolder inFolder, boolean includeClassified, EventField[] fields) throws OXException {
+    protected List<Event> postProcess(List<Event> events, CalendarFolder inFolder, boolean skipClassified, EventField[] fields) throws OXException {
         EventField[] requestedFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
         List<Event> processedEvents = new ArrayList<Event>(events.size());
         int calendarUserId = getCalendarUserId(inFolder);
         for (Event event : events) {
-            if (isExcluded(event, session, includeClassified)) {
+            if (isExcluded(event, session, skipClassified)) {
                 continue;
             }
             event.setFolderId(inFolder.getId());
@@ -238,15 +238,15 @@ public abstract class AbstractQueryPerformer {
      *
      * @param events The events to post-process
      * @param forUser The identifier of the user to apply the parent folder identifier for
-     * @param includePrivate <code>true</code> to include private or confidential events in non-private folders, <code>false</code>, otherwise
+     * @param skipClassified <code>true</code> to skip private or confidential events in non-private folders, <code>false</code>, otherwise
      * @param fields The event fields to consider, or <code>null</code> if not specified
      * @return The processed events
      */
-    protected List<Event> postProcess(List<Event> events, int forUser, boolean includePrivate, EventField[] fields) throws OXException {
+    protected List<Event> postProcess(List<Event> events, int forUser, boolean skipClassified, EventField[] fields) throws OXException {
         EventField[] requestedFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
         List<Event> processedEvents = new ArrayList<Event>(events.size());
         for (Event event : events) {
-            if (isExcluded(event, session, includePrivate)) {
+            if (isExcluded(event, session, skipClassified)) {
                 continue;
             }
             event.setFolderId(getFolderView(event, forUser));

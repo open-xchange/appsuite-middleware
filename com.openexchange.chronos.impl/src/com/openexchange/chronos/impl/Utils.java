@@ -552,15 +552,15 @@ public class Utils {
      *
      * @param event The event to check
      * @param session The calendar session
-     * @param includeClassified <code>true</code> to include <i>confidential</i> events in shared folders, <code>false</code>, otherwise
+     * @param skipClassified <code>true</code> to skip <i>confidential</i> events in shared folders, <code>false</code>, otherwise
      * @return <code>true</code> if the event should be excluded, <code>false</code>, otherwise
      */
-    public static boolean isExcluded(Event event, CalendarSession session, boolean includeClassified) throws OXException {
+    public static boolean isExcluded(Event event, CalendarSession session, boolean skipClassified) throws OXException {
         /*
          * excluded if "classified" for user (and such events are requested to be excluded)
          */
         if (isClassifiedFor(event, session.getUserId())) {
-            if (false == includeClassified || false == Classification.CONFIDENTIAL.equals(event.getClassification())) {
+            if (skipClassified || false == Classification.CONFIDENTIAL.equals(event.getClassification())) {
                 // only include 'confidential' events if requested
                 return true;
             }
@@ -593,11 +593,11 @@ public class Utils {
      * attending itself).
      *
      * @param parameters The calendar parameters to evaluate
-     * @return <code>true</code> if classified events should be included, <code>false</code>, otherwise
+     * @return <code>true</code> if classified events should be skipped, <code>false</code>, otherwise
      * @see CalendarParameters#PARAMETER_SKIP_CLASSIFIED
      */
-    public static boolean isIncludeClassifiedEvents(CalendarParameters parameters) {
-        return false == parameters.get(CalendarParameters.PARAMETER_SKIP_CLASSIFIED, Boolean.class, Boolean.FALSE).booleanValue();
+    public static boolean isSkipClassifiedEvents(CalendarParameters parameters) {
+        return parameters.get(CalendarParameters.PARAMETER_SKIP_CLASSIFIED, Boolean.class, Boolean.FALSE).booleanValue();
     }
 
     /**
