@@ -131,13 +131,13 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "changed")) {
             List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
             storage.getUtilities().loadAdditionalEventData(session.getUserId(), events, fields);
-            newAndModifiedEvents = postProcess(events, session.getUserId(), true, fields);
+            newAndModifiedEvents = postProcess(events, session.getUserId(), false, fields);
         }
         List<Event> deletedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "deleted")) {
             List<Event> events = storage.getEventStorage().searchEventTombstones(searchTerm, new SearchOptions(session), fields);
             storage.getUtilities().loadAdditionalEventTombstoneData(events, fields);
-            deletedEvents = postProcess(events, session.getUserId(), true, fields);
+            deletedEvents = postProcess(events, session.getUserId(), false, fields);
         }
         return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents);
     }

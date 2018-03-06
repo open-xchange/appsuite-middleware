@@ -289,7 +289,7 @@ public class AllPerformer extends AbstractQueryPerformer {
         EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
         events = storage.getUtilities().loadAdditionalEventData(session.getUserId(), events, fields);
-        return postProcess(events, session.getUserId(), true, fields);
+        return postProcess(events, session.getUserId(), false, fields);
     }
 
     /**

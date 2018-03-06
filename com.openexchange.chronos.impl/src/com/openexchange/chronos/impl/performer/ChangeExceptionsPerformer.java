@@ -128,7 +128,7 @@ public class ChangeExceptionsPerformer extends AbstractQueryPerformer {
                 iterator.remove();
             }
         }
-        return postProcess(changeExceptions, folder, true, fields);
+        return postProcess(changeExceptions, folder, false, fields);
     }
 
 }
