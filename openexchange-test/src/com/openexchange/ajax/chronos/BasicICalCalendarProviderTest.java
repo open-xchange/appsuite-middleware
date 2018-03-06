@@ -729,7 +729,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
     // =====================================================================================
     // ============================== dealing with exceptions ==============================
     // =====================================================================================
-    private static final int RETRY_INTERVAL = 1;
+    private static final int RETRY_INTERVAL = 4;
     private static final Map<String, String> CONFIG = new HashMap<>();
     static {
         CONFIG.put("com.openexchange.calendar.ical.retryAfterErrorInterval", "" + RETRY_INTERVAL);
@@ -787,7 +787,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         assertNotNull(initialAllEventResponse.getCategories());
 
         try {
-            Thread.sleep(TimeUnit.MINUTES.toMillis(RETRY_INTERVAL) + 1000);
+            Thread.sleep(TimeUnit.SECONDS.toMillis(RETRY_INTERVAL) + 1000);
         } catch (InterruptedException e) {
             //
         }
@@ -824,7 +824,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         assertEquals("ICAL-PROV-5001", initialAllEventResponse.getCode());
 
         try {
-            Thread.sleep(61000);
+            Thread.sleep(TimeUnit.SECONDS.toMillis(RETRY_INTERVAL) + 1000);
         } catch (InterruptedException e) {
             //
         }
@@ -894,7 +894,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         assertNotNull(initialResponseError.getCategories());
 
         try {
-            Thread.sleep(TimeUnit.MINUTES.toMillis(RETRY_INTERVAL) + 1000);
+            Thread.sleep(TimeUnit.SECONDS.toMillis(RETRY_INTERVAL) + 1000);
         } catch (InterruptedException e) {
             //
         }
@@ -932,7 +932,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         assertEquals("ICAL-PROV-5001", initialResponseError.getCode());
 
         try {
-            Thread.sleep(61000);
+            Thread.sleep(TimeUnit.SECONDS.toMillis(RETRY_INTERVAL) + 1000);
         } catch (InterruptedException e) {
             //
         }
