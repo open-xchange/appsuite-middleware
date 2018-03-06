@@ -104,6 +104,9 @@ public final class AllAction extends AppointmentAction {
         if (false == session.contains(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES)) {
             session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.TRUE);
         }
+        if (false == session.contains(CalendarParameters.PARAMETER_SKIP_CLASSIFIED)) {
+            session.set(CalendarParameters.PARAMETER_SKIP_CLASSIFIED, Boolean.TRUE);
+        }
         List<Event> events;
         String folderId = request.getParameter(AJAXServlet.PARAMETER_FOLDERID);
         if (null == folderId || "0".equals(folderId)) {

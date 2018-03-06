@@ -52,7 +52,6 @@ package com.openexchange.chronos.json.action;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_CHECK_CONFLICTS;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_EXPAND_OCCURRENCES;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_INCLUDE_PRIVATE;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_MASK_ID;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_NOTIFICATION;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER;
@@ -249,8 +248,6 @@ public abstract class AbstractChronosAction implements AJAXActionService {
                 return new AbstractMap.SimpleEntry<String, SortOrder.Order>(PARAMETER_ORDER, SortOrder.Order.parse(value, SortOrder.Order.ASC));
             case PARAMETER_FIELDS:
                 return new AbstractMap.SimpleEntry<String, EventField[]>(PARAMETER_FIELDS, parseFields(value));
-            case PARAMETER_INCLUDE_PRIVATE:
-                return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_INCLUDE_PRIVATE, Boolean.valueOf(value));
             case PARAM_SEND_INTERNAL_NOTIFICATIONS:
                 return new AbstractMap.SimpleEntry<String, Boolean>(PARAMETER_NOTIFICATION, Boolean.valueOf(value));
             case PARAMETER_MASK_ID:

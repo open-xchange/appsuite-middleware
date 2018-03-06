@@ -175,7 +175,7 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
      * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
      * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
-     * <li>{@link CalendarParameters#PARAMETER_INCLUDE_PRIVATE}</li>
+     * <li>{@link CalendarParameters#PARAMETER_SKIP_CLASSIFIED}</li>
      * </ul>
      *
      * @param folderId The fully qualified identifier of the folder to get the events from
@@ -203,7 +203,7 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
      * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
      * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
-     * <li>{@link CalendarParameters#PARAMETER_INCLUDE_PRIVATE}</li>
+     * <li>{@link CalendarParameters#PARAMETER_SKIP_CLASSIFIED}</li>
      * </ul>
      *
      * @param folderId The fully qualified identifiers of the folders to get the events from
@@ -307,7 +307,7 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <li>{@link CalendarParameters#PARAMETER_RANGE_END}</li>
      * <li>{@link CalendarParameters#PARAMETER_IGNORE} ("changed" and "deleted")</li>
      * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
-     * <li>{@link CalendarParameters#PARAMETER_INCLUDE_PRIVATE}</li>
+     * <li>{@link CalendarParameters#PARAMETER_SKIP_CLASSIFIED}</li>
      * </ul>
      *
      * @param folderId The fully qualified identifier of the folder to get the updated events from

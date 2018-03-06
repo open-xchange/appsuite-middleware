@@ -50,7 +50,6 @@
 package com.openexchange.chronos.json.action;
 
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_FIELDS;
-import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_INCLUDE_PRIVATE;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_ORDER_BY;
 import static com.openexchange.chronos.service.CalendarParameters.PARAMETER_UPDATE_CACHE;
@@ -89,7 +88,7 @@ public class AllAction extends ChronosAction {
 
     private static final Set<String> REQUIRED_PARAMETERS = unmodifiableSet(PARAM_RANGE_START, PARAM_RANGE_END);
 
-    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_EXPAND, PARAMETER_ORDER_BY, PARAMETER_ORDER, PARAMETER_FIELDS, PARAMETER_INCLUDE_PRIVATE, PARAMETER_UPDATE_CACHE);
+    private static final Set<String> OPTIONAL_PARAMETERS = unmodifiableSet(PARAM_EXPAND, PARAMETER_ORDER_BY, PARAMETER_ORDER, PARAMETER_FIELDS, PARAMETER_UPDATE_CACHE);
 
     private static final String PARAMETER_FOLDERS = "folders";
 

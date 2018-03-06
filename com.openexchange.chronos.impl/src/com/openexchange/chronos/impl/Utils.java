@@ -589,15 +589,15 @@ public class Utils {
     /**
      * Gets a value indicating whether events in foreign folders classified as {@link Classification#CONFIDENTIAL} are to be included in
      * the results or not. <p/>
-     * <b>Note:</b>Events the marked as {@link Classification#PRIVATE} are always excluded in shared folders (in case the user is not
+     * <b>Note:</b> Events that are marked as {@link Classification#PRIVATE} are always excluded in shared folders (in case the user is not
      * attending itself).
      *
      * @param parameters The calendar parameters to evaluate
      * @return <code>true</code> if classified events should be included, <code>false</code>, otherwise
-     * @see CalendarParameters#PARAMETER_INCLUDE_PRIVATE
+     * @see CalendarParameters#PARAMETER_SKIP_CLASSIFIED
      */
     public static boolean isIncludeClassifiedEvents(CalendarParameters parameters) {
-        return parameters.get(CalendarParameters.PARAMETER_INCLUDE_PRIVATE, Boolean.class, Boolean.FALSE).booleanValue();
+        return false == parameters.get(CalendarParameters.PARAMETER_SKIP_CLASSIFIED, Boolean.class, Boolean.FALSE).booleanValue();
     }
 
     /**

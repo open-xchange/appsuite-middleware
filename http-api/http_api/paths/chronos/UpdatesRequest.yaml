@@ -29,7 +29,6 @@
       - $ref: "#/parameters/QueryParamChronosOrder"
       - $ref: "#/parameters/QueryParamChronosSort"
       - $ref: "#/parameters/QueryParamChronosExpand"
-      - $ref: "#/parameters/QueryParamChronosIncludePrivate"
       - $ref: "#/parameters/QueryParamChronosExtendedEntities"
     responses:
       200:
