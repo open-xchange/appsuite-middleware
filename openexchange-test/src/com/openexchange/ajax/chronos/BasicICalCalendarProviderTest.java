@@ -843,11 +843,6 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
     }
 
     @Test
-    public void testGet_authFailed() throws ApiException, OXException, IOException, JSONException {
-
-    }
-
-    @Test
     public void testMultipleGet_forbidden_returnExceptionWhenReadFromDB() throws ApiException, OXException, IOException, JSONException {
         String externalUri = "http://example.com/files/testMultipleGet_forbidden_returnExceptionWhenReadFromDB.ics";
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_FORBIDDEN);
