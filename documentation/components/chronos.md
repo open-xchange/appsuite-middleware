@@ -749,3 +749,35 @@ As noted above in "Migration of legacy data", the database will work temporarily
 - https://bugs.open-xchange.com/show_bug.cgi?id=54504
 - https://confluence.open-xchange.com/display/MID/MySql+charsets+and+collations
 
+
+## Import and Export
+
+When importing or exporting calendar the data is truncated. This chapter describes under which circumstances the data is truncated.
+
+### Import
+
+During the import attendees and the organizer will be replaced by the user importing the event or the calendar. This is mainly done to avoid conflicts and unwanted invite or accept mails. There are three cases that lead to this discission:
+
+#### No organizer set
+The event that is beeing imported doesn't have an organizer. Therefore the user importing the event becomes the new organizer. To be formally correct the organizer must inform all attendees with an invitaion mail to the new event. This generates mails to an event that already exists and hosted somewhere.
+
+#### External orgainzer
+The event to be imported is organized by an external. To notify the organizer of the users status a mail must be sent, letting the user automatically become a party crasher. 
+
+#### Internal organizer
+The event to import is organized by another internal user. Therefore the event should already be created and the user should be added to this existing event. This operation can't be performed because only the organizer is allowed to modify an event.
+
+
+### Export
+
+Due privacy concerns and the above sketched problems with importing data, exporting a calendar or a single event will truncate some of the data. There a three different cases handled.
+
+#### Calendar user is the organizer
+The user is the organizer of the event but not an attendee. The user migth have no relationship to the attendees and only created the event on behalf of someone else. Therefore the attendees aren't added to the exported event. 
+
+#### Calendar user is attendee
+Besides optional others attendees the user is an attendee of the event. To not expose other attendees those optinal other attendees are removed on the exported event.
+
+#### Calendar user isn't attendee
+This case can happen in shared or public calendars. The user can at least see the event but isn't part of the event in any other way. Therefore neither the attendees nor the organizer is added to the exported event.
+
