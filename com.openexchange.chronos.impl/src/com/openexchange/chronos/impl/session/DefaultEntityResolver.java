@@ -559,7 +559,14 @@ public class DefaultEntityResolver implements EntityResolver {
             }
         }
         if (null == fields || Arrays.contains(fields, AttendeeField.EMAIL)) {
-            attendee.setEMail(getEMail(user));
+            try {
+                String email = extractEMailAddress(attendee.getUri());
+                new InternetAddress(email);
+                attendee.setEMail(email);
+            } catch (AddressException e) {
+                LOG.debug("Unable to extract valid e-mail address from {}: {}. falling back to user's default e-mail address.", attendee.getUri(), e.getMessage(), e);
+                attendee.setEMail(getEMail(user));
+            }
         }
         return attendee;
     }

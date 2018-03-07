@@ -65,6 +65,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
@@ -1330,11 +1331,14 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         return maxPerm;
     }
 
-    private final EffectivePermission calcEffectiveUserPermission(final int userId, final UserConfiguration userConfig) {
+    private final EffectivePermission calcEffectiveUserPermission(final int userId, final UserConfiguration userConfig) throws OXException {
         final EffectivePermission maxPerm = new EffectivePermission(userId, getObjectID(), getType(userId), getModule(), getCreatedBy(), userConfig);
         final int[] idArr;
         {
-            final int[] groups = userConfig.getGroups();
+            int[] groups = userConfig.getGroups();
+            if (null == groups) {
+                groups = UserStorage.getInstance().getUser(userId, userConfig.getContext()).getGroups();
+            }
             idArr = new int[groups.length + 1];
             idArr[0] = userId;
             System.arraycopy(groups, 0, idArr, 1, groups.length);

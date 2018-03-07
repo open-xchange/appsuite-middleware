@@ -293,15 +293,22 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
     @Override
     public AuthenticationInfo resolveAuthenticationResponse(HttpServletRequest request, OIDCTokenResponse tokenResponse) throws OXException {
         JWT idToken = tokenResponse.getOIDCTokens().getIDToken();
+        if (null == idToken) {
+            throw OXException.general("Missing IDToken");
+        }
+        
         String subject = "";
         try {
             JWTClaimsSet jwtClaimsSet = idToken.getJWTClaimsSet();
+            if (null == jwtClaimsSet) {
+                throw OIDCExceptionCode.UNABLE_TO_LOAD_USERINFO.create("Failed to get the JWTClaimSet from idToken.");
+            }
             subject = jwtClaimsSet.getSubject();
         } catch (java.text.ParseException e) {
             throw OIDCExceptionCode.UNABLE_TO_LOAD_USERINFO.create(e, "Failed to get the JWTClaimSet from idToken.");
         }
 
-        if (subject.isEmpty()) {
+        if (Strings.isEmpty(subject)) {
             throw OIDCExceptionCode.UNABLE_TO_LOAD_USERINFO.create("unable to get a valid subject.");
         }
         AuthenticationInfo resultInfo = this.loadUserFromServer(subject);

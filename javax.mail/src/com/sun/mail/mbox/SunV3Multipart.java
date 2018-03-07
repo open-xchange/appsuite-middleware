@@ -224,6 +224,9 @@ public class SunV3Multipart extends MimeMultipart {
 	} catch (IOException e) {
 	    throw new MessagingException("IO Error");	// XXX
 	} finally {
+	    if (null != in) {
+            try { in.close(); } catch (Exception e) {/*ignore*/}
+        }
 	    parsing = false;
 	}
 

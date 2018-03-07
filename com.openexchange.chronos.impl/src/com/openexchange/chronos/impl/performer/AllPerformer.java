@@ -56,7 +56,7 @@ import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.chronos.impl.Utils.isEnforceDefaultAttendee;
-import static com.openexchange.chronos.impl.Utils.isIncludeClassifiedEvents;
+import static com.openexchange.chronos.impl.Utils.isSkipClassifiedEvents;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
@@ -203,9 +203,9 @@ public class AllPerformer extends AbstractQueryPerformer {
         /*
          * post process events, based on each requested folder's perspective
          */
-        boolean includeClassifiedEvents = isIncludeClassifiedEvents(session);
+        boolean skipClassified = isSkipClassifiedEvents(session);
         for (Entry<CalendarFolder, List<Event>> entry : eventsPerFolder.entrySet()) {
-            resultsPerFolderId.put(entry.getKey().getId(), new DefaultEventsResult(postProcess(entry.getValue(), entry.getKey(), includeClassifiedEvents, fields)));
+            resultsPerFolderId.put(entry.getKey().getId(), new DefaultEventsResult(postProcess(entry.getValue(), entry.getKey(), skipClassified, fields)));
             getSelfProtection().checkResultMap(resultsPerFolderId);
         }
         return resultsPerFolderId;
@@ -289,7 +289,7 @@ public class AllPerformer extends AbstractQueryPerformer {
         EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
         events = storage.getUtilities().loadAdditionalEventData(session.getUserId(), events, fields);
-        return postProcess(events, session.getUserId(), true, fields);
+        return postProcess(events, session.getUserId(), false, fields);
     }
 
     /**
@@ -311,7 +311,7 @@ public class AllPerformer extends AbstractQueryPerformer {
          */
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
         events = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), events, fields);
-        return postProcess(events, folder, isIncludeClassifiedEvents(session), fields);
+        return postProcess(events, folder, isSkipClassifiedEvents(session), fields);
     }
 
     private static Map<Integer, List<CalendarFolder>> getFoldersPerCalendarUserId(List<CalendarFolder> folders) {

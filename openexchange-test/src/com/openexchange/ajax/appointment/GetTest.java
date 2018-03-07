@@ -72,7 +72,7 @@ public class GetTest extends AppointmentTest {
     @Test
     public void testGet() throws Exception {
         final Appointment appointmentObj = createAppointmentObject("testGet");
-        appointmentObj.setOrganizer(testUser.getUser());
+        appointmentObj.setOrganizer(getClient().getValues().getDefaultAddress());
         final int objectId = catm.insert(appointmentObj).getObjectID();
 
         final Appointment loadAppointment = catm.get(appointmentFolderId, objectId);

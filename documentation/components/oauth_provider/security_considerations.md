@@ -17,7 +17,7 @@ title: Security Considerations
   * A user may grant access to at most 50 different clients.
   * A user may allow the generation of at most 10 refresh/access token pairs per application. Every further requests leads to a deletion of the oldest token pair.
   * An application may request access to every available scope. However the granted scope is always limited by the users permissions. If the client requests permissions the user doesn't have, the according scope token will be ignored. The finally granted scope is part of the token response.
-  * It is possible to deny OAuth access at all for certain users via a config-cascade enabled property [com.openexchange.oauth.provider.enabled](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.oauth.provider.enabled).
+  * It is possible to deny OAuth access at all for certain users via a config-cascade enabled property [com.openexchange.oauth.provider.enabled](/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.oauth.provider.enabled).
 
 
 # Data Storage

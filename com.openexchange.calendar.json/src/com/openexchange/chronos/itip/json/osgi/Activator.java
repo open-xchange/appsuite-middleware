@@ -53,7 +53,7 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 
 /**
- * 
+ *
  * {@link Activator}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
@@ -69,11 +69,6 @@ public class Activator extends AJAXModuleActivator {
     @Override
     protected void startBundle() throws Exception {
         registerModule(new AppointmentActionFactory(this), "calendar/itip");
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-
     }
 
 }

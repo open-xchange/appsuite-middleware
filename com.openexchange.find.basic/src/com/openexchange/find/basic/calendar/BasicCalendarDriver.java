@@ -106,6 +106,7 @@ import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.util.DisplayItems;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
 
@@ -435,7 +436,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
             if (null != filter) {
                 String valueId = prepareFacetValueId("contact", session.getContextId(), Integer.toString(contact.getObjectID()));
                 contactFacets.add(FacetValue.newBuilder(valueId)
-                    .withDisplayItem(DisplayItems.convert(contact, session.getUser().getLocale()))
+                    .withDisplayItem(DisplayItems.convert(contact, session.getUser().getLocale(), Services.optionalService(I18nServiceRegistry.class)))
                     .withFilter(filter)
                     .build());
             }

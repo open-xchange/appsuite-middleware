@@ -55,6 +55,7 @@ import com.openexchange.dataretention.RetentionData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.Streams;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -100,7 +101,7 @@ public final class MailLoginHandler implements LoginHandlerService {
                  */
                 retentionService.storeOnAccess(retentionData);
             } finally {
-                MailAccess.closeInstance(mailAccess);
+                Streams.close(mailAccess);
             }
         }
     }

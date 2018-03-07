@@ -67,7 +67,6 @@ import org.jdom2.Document;
 import org.jdom2.JDOMException;
 import com.google.common.net.HttpHeaders;
 import com.openexchange.ajax.AJAXUtility;
-import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
@@ -349,7 +348,7 @@ public abstract class OXServlet extends WebDavServlet {
             }
         }
         if (null == session) {
-            AuthorizationHeader authHeader = AuthorizationHeader.parseSafe(req.getHeader(Header.AUTH_HEADER));
+            AuthorizationHeader authHeader = AuthorizationHeader.parseSafe(req.getHeader(HttpHeaders.AUTHORIZATION));
             if (authHeader == null) {
                 addUnauthorizedHeader(req, resp);
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
@@ -626,10 +625,10 @@ public abstract class OXServlet extends WebDavServlet {
      */
     private void addUnauthorizedHeader(final HttpServletRequest req, final HttpServletResponse resp) {
         if (useHttpAuth()) {
-            resp.addHeader("WWW-Authenticate", "Basic realm=\"" + basicRealm + "\", encoding=\"UTF-8\"");
+            resp.addHeader(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"" + basicRealm + "\", encoding=\"UTF-8\"");
             if (allowOAuthAccess()) {
                 if (getOAuthResourceService() != null) {
-                    resp.addHeader("WWW-Authenticate", "Bearer");
+                    resp.addHeader(HttpHeaders.WWW_AUTHENTICATE, "Bearer");
                 }
             }
         }
@@ -641,7 +640,7 @@ public abstract class OXServlet extends WebDavServlet {
      * @param resp the response to that the header should be added.
      */
     private static void addBasicAuthenticateHeader(HttpServletResponse resp) {
-        resp.addHeader("WWW-Authenticate", "Basic realm=\"" + basicRealm + "\", encoding=\"UTF-8\"");
+        resp.addHeader(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"" + basicRealm + "\", encoding=\"UTF-8\"");
     }
 
     /**
@@ -654,7 +653,7 @@ public abstract class OXServlet extends WebDavServlet {
      * @throws OXException If the request contains no valid <code>Authorization</code> header with Basic Auth scheme
      */
     private static LoginRequest parseLogin(final HttpServletRequest req, final Interface face) throws OXException {
-        final String auth = req.getHeader(Header.AUTH_HEADER);
+        final String auth = req.getHeader(HttpHeaders.AUTHORIZATION);
         if (null == auth) {
             LOG.debug("Authorization header missing.");
             throw WebdavExceptionCode.MISSING_HEADER_FIELD.create("Authorization");

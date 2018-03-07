@@ -126,10 +126,12 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             boolean fallbackOnFailedSORT;
             boolean useMultipleAddresses;
             boolean useMultipleAddressesUserHash;
+            int useMultipleAddressesMaxRetryAttempts;
             boolean ignoreDeletedMails;
 
             Params() {
                 super();
+                useMultipleAddressesMaxRetryAttempts = -1;
             }
         }
 
@@ -146,6 +148,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         final boolean fallbackOnFailedSORT;
         final boolean useMultipleAddresses;
         final boolean useMultipleAddressesUserHash;
+        final int useMultipleAddressesMaxRetryAttempts;
         final boolean ignoreDeletedMails;
 
         PrimaryIMAPProperties(Params params) {
@@ -161,6 +164,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             this.fallbackOnFailedSORT = params.fallbackOnFailedSORT;
             this.useMultipleAddresses = params.useMultipleAddresses;
             this.useMultipleAddressesUserHash = params.useMultipleAddressesUserHash;
+            this.useMultipleAddressesMaxRetryAttempts = params.useMultipleAddressesMaxRetryAttempts;
             this.ignoreDeletedMails = params.ignoreDeletedMails;
         }
     }
@@ -330,6 +334,14 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
             logMessageBuilder.append("  Use User Hash for Multiple IP addresses: {}{}");
             args.add(Autoboxing.valueOf(params.useMultipleAddressesUserHash));
+            args.add(Strings.getLineSeparator());
+        }
+
+        if (params.useMultipleAddresses) {
+            params.useMultipleAddressesMaxRetryAttempts = ConfigViews.getDefinedIntPropertyFrom("com.openexchange.imap.useMultipleAddressesMaxRetries", 3, view);
+
+            logMessageBuilder.append("  Use max. retry attempts for Multiple IP addresses: {}{}");
+            args.add(Autoboxing.valueOf(params.useMultipleAddressesMaxRetryAttempts));
             args.add(Strings.getLineSeparator());
         }
 
@@ -949,7 +961,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
             return primaryIMAPProps.useMultipleAddresses;
         } catch (Exception e) {
-            LOG.error("Failed to get host name expression for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), Boolean.FALSE.toString(), e);
+            LOG.error("Failed to check for usage of multiple addresses for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), Boolean.FALSE.toString(), e);
             return false;
         }
     }
@@ -970,8 +982,29 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
             return primaryIMAPProps.useMultipleAddressesUserHash;
         } catch (Exception e) {
-            LOG.error("Failed to get host name expression for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), Boolean.FALSE.toString(), e);
+            LOG.error("Failed to get hash for multiple addresses for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), Boolean.FALSE.toString(), e);
             return false;
+        }
+    }
+
+    /**
+     * Gets the max. number of retry attempts when failing over to another IP address-
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
+     * Only effective if {@link #isUseMultipleAddresses(int, int)} returns <code>true</code>!
+     * </div>
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The max. wait timeout or <code>-1</code>
+     */
+    public int getMultipleAddressesMaxRetryAttempts(int userId, int contextId) {
+        try {
+            PrimaryIMAPProperties primaryIMAPProps = getPrimaryIMAPProps(userId, contextId);
+            return primaryIMAPProps.useMultipleAddressesMaxRetryAttempts;
+        } catch (Exception e) {
+            LOG.error("Failed to get max. retry attempts for multiple addresses for user {} in context {}. Using default default {} instead.", I(userId), I(contextId), Integer.valueOf(-1), e);
+            return -1;
         }
     }
 

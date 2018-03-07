@@ -245,9 +245,9 @@ public class SearchAdapter {
 
     private void appendAttachments(List<String> queries) throws OXException {
         for (String query : queries) {
-            stringBuilder.append(" AND EXISTS (SELECT 1 FROM prg_attachment WHERE prg_attachment.cid = ");
+            stringBuilder.append(" AND EXISTS (SELECT 1 FROM prg_attachment WHERE prg_attachment.cid=");
             appendConstantOperand(Integer.valueOf(contextID), Types.INTEGER);
-            stringBuilder.append(" AND prg_attachment.attached = ").append(prefixEvents).append("intfield01 AND prg_attachment.filename = ");
+            stringBuilder.append(" AND 0=").append(prefixEvents).append("account AND prg_attachment.attached=").append(prefixEvents).append("id AND prg_attachment.filename = ");
             appendConstantOperand(query, Types.VARCHAR);
             stringBuilder.append(')');
         }

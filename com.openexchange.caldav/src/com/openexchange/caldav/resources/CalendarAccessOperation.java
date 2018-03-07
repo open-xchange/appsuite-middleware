@@ -109,7 +109,6 @@ public abstract class CalendarAccessOperation<T> {
      */
     protected IDBasedCalendarAccess initCalendarAccess(Session session) throws OXException {
         IDBasedCalendarAccess calendarAccess = requireService(IDBasedCalendarAccessFactory.class, services).createAccess(session);
-        calendarAccess.set(CalendarParameters.PARAMETER_INCLUDE_PRIVATE, Boolean.TRUE);
         calendarAccess.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
         calendarAccess.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.FALSE);
         calendarAccess.set(CalendarParameters.PARAMETER_AUTO_HANDLE_DATA_TRUNCATIONS, Boolean.TRUE);

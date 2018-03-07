@@ -49,6 +49,7 @@
 
 package com.openexchange.filestore.s3.metrics;
 
+import java.util.concurrent.atomic.AtomicReference;
 import com.amazonaws.metrics.MetricCollector;
 import com.amazonaws.metrics.RequestMetricCollector;
 import com.amazonaws.metrics.ServiceMetricCollector;
@@ -67,8 +68,8 @@ public class S3FileStorageMetricCollector extends MetricCollector {
     private boolean started;
     private final MetricService metrics;
     private final LeanConfigurationService config;
-    private RequestMetricCollector s3FileStorageRequestMetricCollector;
-    private ServiceMetricCollector s3FileStorageServiceMetricCollector;
+    private final AtomicReference<RequestMetricCollector> s3FileStorageRequestMetricCollector;
+    private final AtomicReference<ServiceMetricCollector> s3FileStorageServiceMetricCollector;
 
     /**
      * Initialises a new {@link S3FileStorageMetricCollector}.
@@ -77,6 +78,8 @@ public class S3FileStorageMetricCollector extends MetricCollector {
      */
     public S3FileStorageMetricCollector(MetricService metrics, LeanConfigurationService config) {
         super();
+        s3FileStorageRequestMetricCollector = new AtomicReference<RequestMetricCollector>(RequestMetricCollector.NONE);
+        s3FileStorageServiceMetricCollector = new AtomicReference<ServiceMetricCollector>(ServiceMetricCollector.NONE);
         this.metrics = metrics;
         this.config = config;
         start();
@@ -94,8 +97,8 @@ public class S3FileStorageMetricCollector extends MetricCollector {
         }
 
         // Not started? Initialise the request and service metric collectors
-        s3FileStorageRequestMetricCollector = new S3FileStorageRequestMetricCollector(metrics);
-        s3FileStorageServiceMetricCollector = new S3FileStorageServiceMetricCollector(metrics);
+        s3FileStorageRequestMetricCollector.set(new S3FileStorageRequestMetricCollector(metrics));
+        s3FileStorageServiceMetricCollector.set(new S3FileStorageServiceMetricCollector(metrics));
         started = true;
         return true;
     }
@@ -112,14 +115,17 @@ public class S3FileStorageMetricCollector extends MetricCollector {
         }
 
         // Was started? Replace the request and service metric collectors
-        S3FileStorageRequestMetricCollector tmpReqCollector = (S3FileStorageRequestMetricCollector) s3FileStorageRequestMetricCollector;
-        S3FileStorageServiceMetricCollector tmpServCollector = (S3FileStorageServiceMetricCollector) s3FileStorageServiceMetricCollector;
-
-        s3FileStorageRequestMetricCollector = RequestMetricCollector.NONE;
-        s3FileStorageServiceMetricCollector = ServiceMetricCollector.NONE;
-
-        tmpReqCollector.stop();
-        tmpServCollector.stop();
+        S3FileStorageRequestMetricCollector tmpReqCollector = (S3FileStorageRequestMetricCollector) s3FileStorageRequestMetricCollector.get();
+        if (tmpReqCollector != RequestMetricCollector.NONE) {
+            tmpReqCollector.stop();            
+            s3FileStorageRequestMetricCollector.set(RequestMetricCollector.NONE);
+        }
+        
+        S3FileStorageServiceMetricCollector tmpServCollector = (S3FileStorageServiceMetricCollector) s3FileStorageServiceMetricCollector.get();
+        if (tmpServCollector != ServiceMetricCollector.NONE) {
+            tmpServCollector.stop();            
+            s3FileStorageServiceMetricCollector.set(ServiceMetricCollector.NONE);
+        }
 
         started = false;
         return true;
@@ -142,7 +148,7 @@ public class S3FileStorageMetricCollector extends MetricCollector {
      */
     @Override
     public RequestMetricCollector getRequestMetricCollector() {
-        return s3FileStorageRequestMetricCollector;
+        return s3FileStorageRequestMetricCollector.get();
     }
 
     /*
@@ -152,6 +158,6 @@ public class S3FileStorageMetricCollector extends MetricCollector {
      */
     @Override
     public ServiceMetricCollector getServiceMetricCollector() {
-        return s3FileStorageServiceMetricCollector;
+        return s3FileStorageServiceMetricCollector.get();
     }
 }

@@ -170,7 +170,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         AssertUtil.assertEventsEqual(event, actualEvent);
 
         // Get all events
-        List<EventData> events = eventManager.getAllEvents(today, tomorrow);
+        List<EventData> events = eventManager.getAllEvents(today, tomorrow, false, folderId, null, null, false);
         assertEquals(1, events.size());
         AssertUtil.assertEventsEqual(event, events.get(0));
 

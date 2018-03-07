@@ -122,12 +122,12 @@ public final class Conversations {
      * @param fields The fields to add
      * @return The <i>"by envelope"</i> fetch profile
      */
-    public static FetchProfile getFetchProfileConversationByEnvelope(MailField... fields) {
+    public static FetchProfile getFetchProfileConversationByEnvelope(boolean considerUserFlags, MailField... fields) {
         FetchProfile fp = newFetchProfile(true);
         if (null != fields) {
             for (MailField field : fields) {
                 if (!MimeStorageUtility.isEnvelopeField(field)) {
-                    MimeStorageUtility.addFetchItem(fp, field);
+                    MimeStorageUtility.addFetchItem(fp, field, considerUserFlags);
                 }
             }
         }
@@ -140,14 +140,14 @@ public final class Conversations {
      * @param fields The fields to add
      * @return The <i>"by headers"</i> fetch profile
      */
-    public static FetchProfile getFetchProfileConversationByHeaders(MailField... fields) {
+    public static FetchProfile getFetchProfileConversationByHeaders(boolean considerUserFlags, MailField... fields) {
         FetchProfile fp = newFetchProfile(false);
         if (null != fields) {
             for (MailField field : fields) {
                 if (MailField.RECEIVED_DATE.equals(field)) {
                     fp.add(MailMessageFetchIMAPCommand.INTERNALDATE);
                 } else {
-                    MimeStorageUtility.addFetchItem(fp, field);
+                    MimeStorageUtility.addFetchItem(fp, field, considerUserFlags);
                 }
             }
         }

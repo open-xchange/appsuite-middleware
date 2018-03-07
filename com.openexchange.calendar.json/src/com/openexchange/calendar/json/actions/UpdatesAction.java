@@ -106,6 +106,9 @@ public final class UpdatesAction extends AppointmentAction {
         if (false == session.contains(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES)) {
             session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.TRUE);
         }
+        if (false == session.contains(CalendarParameters.PARAMETER_SKIP_CLASSIFIED)) {
+            session.set(CalendarParameters.PARAMETER_SKIP_CLASSIFIED, Boolean.TRUE);
+        }
         Date since = request.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
         String folderId = request.getParameter(AJAXServlet.PARAMETER_FOLDERID);
         UpdatesResult result;

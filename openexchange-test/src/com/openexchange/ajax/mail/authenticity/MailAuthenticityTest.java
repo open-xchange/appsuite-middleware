@@ -108,7 +108,7 @@ public class MailAuthenticityTest extends AbstractConfigAwareAPIClientSession {
         // trusted domain config
         CONFIG.put("com.openexchange.mail.authenticity.trusted.config", "support@open-xchange.com:1");
 
-        String testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR) + SUBFOLDER;
+        String testMailDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR) + SUBFOLDER;
         String imgName = "ox.jpg";
         File f = new File(testMailDir, imgName);
         if (f.exists()) {

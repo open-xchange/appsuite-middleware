@@ -64,6 +64,7 @@ import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -86,8 +87,11 @@ public class RestoreAction extends AbstractWriteAction {
     @Override
     protected AJAXRequestResult handle(InfostoreRequest request) throws OXException {
         // Determine user's default Drive folder
-        ServerSession session = request.getSession();
         FolderService folderService = Services.getFolderService();
+        if (null == folderService) {
+            throw ServiceExceptionCode.absentService(FolderService.class);
+        }
+        ServerSession session = request.getSession();
         String folderId = folderService.getDefaultFolder(session.getUser(), "1", InfostoreContentType.getInstance(), null, session, new FolderServiceDecorator()).getID();
         folderId = new FolderID(folderId).getFolderId();
 

@@ -99,7 +99,7 @@ public final class MimeStorageUtility {
         // CACHE_FETCH_PROFILE.add(IMAPFolder.FetchProfileItem.HEADERS);
 
         // Cache fields
-        final Collection<MailField> fields = fetchProfile2MailListFields(CACHE_FETCH_PROFILE);
+        final Collection<MailField> fields = fetchProfile2MailListFields(CACHE_FETCH_PROFILE, false);
         fields.add(MailField.ACCOUNT_NAME);
         CACHE_FIELDS = fields;
         CACHE_FIELDS_ARR = CACHE_FIELDS.toArray(new MailField[CACHE_FIELDS.size()]);
@@ -177,7 +177,7 @@ public final class MimeStorageUtility {
      * @param fetchProfile The fetch profile
      * @return An appropriate collection of {@link MailField} enumeration constants
      */
-    public static Collection<MailField> fetchProfile2MailListFields(final FetchProfile fetchProfile) {
+    public static Collection<MailField> fetchProfile2MailListFields(final FetchProfile fetchProfile, final boolean considerUserFlags) {
         final EnumSet<MailField> set = EnumSet.noneOf(MailField.class);
         /*
          * Folder is always set
@@ -212,12 +212,16 @@ public final class MimeStorageUtility {
         }
         if (fetchProfile.contains(FetchProfile.Item.CONTENT_INFO)) {
             set.add(MailField.CONTENT_TYPE);
-            set.add(MailField.ATTACHMENT);
+            if (false == considerUserFlags) {
+                set.add(MailField.ATTACHMENT);
+            }
         }
         if (fetchProfile.contains(FetchProfile.Item.FLAGS)) {
             set.add(MailField.FLAGS);
             set.add(MailField.COLOR_LABEL);
-            set.add(MailField.ATTACHMENT); // for imap attachment search enabled
+            if (considerUserFlags) {
+                set.add(MailField.ATTACHMENT); // for imap attachment search enabled
+            }
         }
         if (fetchProfile.contains(IMAPFolder.FetchProfileItem.HEADERS)) {
             set.add(MailField.HEADERS);
@@ -468,7 +472,7 @@ public final class MimeStorageUtility {
              * Iterate fields
              */
             for (MailField mailField : set) {
-                addFetchItem(fetchProfile, mailField);
+                addFetchItem(fetchProfile, mailField, forceAddFlags);
             }
             /*
              * Iterate header names
@@ -524,7 +528,7 @@ public final class MimeStorageUtility {
         field2item.put(MailField.HEADERS, IMAPFolder.FetchProfileItem.HEADERS);
         field2item.put(MailField.ID, UIDFolder.FetchProfileItem.UID);
         field2item.put(MailField.CONTENT_TYPE, FetchProfile.Item.CONTENT_INFO);
-        field2item.put(MailField.ATTACHMENT, FetchProfile.Item.FLAGS); // or has_attachment?!
+        field2item.put(MailField.ATTACHMENT, FetchProfile.Item.CONTENT_INFO);
         field2item.put(MailField.MIME_TYPE, FetchProfile.Item.CONTENT_INFO);
         field2item.put(MailField.SIZE, FetchProfile.Item.SIZE);
         field2item.put(MailField.FLAGS, FetchProfile.Item.FLAGS);
@@ -557,7 +561,12 @@ public final class MimeStorageUtility {
      * @param fp The fetch profile to add to
      * @param field The field to add
      */
-    public static void addFetchItem(final FetchProfile fp, final MailField field) {
+    public static void addFetchItem(final FetchProfile fp, final MailField field, final boolean considerUserFlags) {
+        if (considerUserFlags && MailField.ATTACHMENT == field) {
+            fp.add(FetchProfile.Item.FLAGS);
+            return;
+        }
+
         Item item = FIELD2ITEM.get(field);
         if (null != item) {
             fp.add(item);

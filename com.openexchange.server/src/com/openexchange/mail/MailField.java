@@ -60,7 +60,7 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
- * {@link MailField} - An enumeration of mail fields to define which fields to prefill.
+ * {@link MailField} - An enumeration of mail fields to define which fields to pre-fill.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -72,7 +72,7 @@ public enum MailField {
      */
     ID(MailListField.ID),
     /**
-     * The folder ID or fullname<br>
+     * The folder ID or full name<br>
      * <b>[low cost]</b>
      */
     FOLDER_ID(MailListField.FOLDER_ID),
@@ -84,7 +84,7 @@ public enum MailField {
      * The Content-Type
      * <b>[low cost]</b>
      */
-    CONTENT_TYPE(MailListField.CONTENT_TYPE),
+    CONTENT_TYPE(MailListField.MIME_TYPE),
     /**
      * The MIME type<br>
      * <b>[low cost]</b>

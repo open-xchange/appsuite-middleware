@@ -91,6 +91,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.SpecialAlphanumSortContactComparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.i18n.I18nServiceRegistry;
 import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -285,7 +286,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
                     String id = ContactsFacetType.CONTACT.getId();
                     Filter filter = Filter.of(id, String.valueOf(contact.getObjectID()));
                     String valueId = prepareFacetValueId(id, session.getContextId(), Integer.toString(contact.getObjectID()));
-                    builder.addValue(FacetValue.newBuilder(valueId).withDisplayItem(DisplayItems.convert(contact, session.getUser().getLocale())).withFilter(filter).build());
+                    builder.addValue(FacetValue.newBuilder(valueId).withDisplayItem(DisplayItems.convert(contact, session.getUser().getLocale(), Services.optionalService(I18nServiceRegistry.class))).withFilter(filter).build());
                 }
                 facets.add(builder.build());
             }

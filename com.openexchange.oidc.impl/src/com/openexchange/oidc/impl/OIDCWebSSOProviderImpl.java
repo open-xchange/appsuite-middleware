@@ -61,6 +61,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.nimbusds.jwt.JWT;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
 import com.nimbusds.oauth2.sdk.AuthorizationGrant;
@@ -106,6 +107,7 @@ import com.openexchange.oidc.tools.OIDCTools;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.session.reservation.SessionReservationService;
+import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -260,7 +262,11 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         try {
             TokenRequest tokenReq = this.createTokenRequest(request);
             OIDCTokenResponse tokenResponse = this.getTokenResponse(tokenReq);
-            IDTokenClaimsSet validTokenResponse = this.backend.validateIdToken(tokenResponse.getOIDCTokens().getIDToken(), storedRequestInformation.getNonce());
+            JWT idToken = tokenResponse.getOIDCTokens().getIDToken();
+            if (null == idToken) {
+                throw OXException.general("Missing IDToken");
+            }
+            IDTokenClaimsSet validTokenResponse = this.backend.validateIdToken(idToken, storedRequestInformation.getNonce());
             if (validTokenResponse == null) {
                 throw OIDCExceptionCode.IDTOKEN_GATHERING_ERROR.create("IDToken validation failed, no claim set could be extracted");
             }
@@ -429,7 +435,11 @@ public class OIDCWebSSOProviderImpl implements OIDCWebSSOProvider {
         String sessionId = logoutRequestInfo.getSessionId();
         LOG.trace("Try to logout user, via OP with sessionId: {}", sessionId);
         //logout user
-        return this.getRedirectForLogoutFromOXServer(this.getSessionFromId(sessionId), request, response, logoutRequestInfo);
+        Session session = this.getSessionFromId(sessionId);
+        if (null == session) {
+            throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+        }
+        return this.getRedirectForLogoutFromOXServer(session, request, response, logoutRequestInfo);
     }
 
     private String getRedirectForLogoutFromOXServer(Session session, HttpServletRequest request, HttpServletResponse response, LogoutRequestInfo logoutRequestInfo) throws OXException {

@@ -56,6 +56,8 @@ import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.Date;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.http.Header;
+import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -187,7 +189,7 @@ public class ICalFeedClient {
         ICalProviderUtils.verifyURI(this.iCalFeedConfig.getFeedUrl());
         HttpGet request = prepareGet();
 
-        try (CloseableHttpResponse response = ICalFeedHttpClient.getInstance().execute(request)){
+        try (CloseableHttpResponse response = ICalFeedHttpClient.getInstance().execute(request)) {
             int statusCode = assertStatusCode(response);
             if (statusCode == HttpStatus.SC_NOT_MODIFIED) {
                 // OK, nothing was modified, no response body, return as is
@@ -241,6 +243,16 @@ public class ICalFeedClient {
         // Assert the 4xx codes
         switch (statusCode) {
             case HttpStatus.SC_UNAUTHORIZED:
+                if (httpResponse.containsHeader(HttpHeaders.WWW_AUTHENTICATE)) {
+                    Header[] headers = httpResponse.getHeaders(HttpHeaders.WWW_AUTHENTICATE);
+                    for (Header header : headers) {
+                        for (HeaderElement element : header.getElements()) {
+                            if (element.getName().equalsIgnoreCase("Basic realm") && element.getValue().contains("Share/Guest")) {
+                                throw CalendarExceptionCodes.AUTH_FAILED_FOR_SHARE.create(iCalFeedConfig.getFeedUrl());
+                            }
+                        }
+                    }
+                }
                 throw CalendarExceptionCodes.AUTH_FAILED.create(iCalFeedConfig.getFeedUrl());
             case HttpStatus.SC_NOT_FOUND:
                 throw ICalProviderExceptionCodes.NO_FEED.create(iCalFeedConfig.getFeedUrl());
@@ -302,20 +314,23 @@ public class ICalFeedClient {
 
     private static class ICalFeedHttpClient {
 
-        private static CloseableHttpClient httpClient;
+        private static volatile CloseableHttpClient httpClient;
 
         static CloseableHttpClient getInstance() {
-            if (httpClient == null) {
+            CloseableHttpClient tmp = httpClient;
+            if (tmp == null) {
                 synchronized (ICalFeedHttpClient.class) {
-                    if (httpClient == null) {
+                    tmp = httpClient;
+                    if (tmp == null) {
                         ClientConfig config = ClientConfig.newInstance();
                         config.setUserAgent("Open-Xchange Calendar Feed Client");
                         init(config);
-                        httpClient = HttpClients.getHttpClient(config, Services.getService(SSLSocketFactoryProvider.class), Services.getService(SSLConfigurationService.class));
+                        tmp = HttpClients.getHttpClient(config, Services.getService(SSLSocketFactoryProvider.class), Services.getService(SSLConfigurationService.class));
+                        httpClient = tmp;
                     }
                 }
             }
-            return httpClient;
+            return tmp;
         }
 
         static void init(ClientConfig config) {
@@ -334,7 +349,11 @@ public class ICalFeedClient {
         }
 
         static void reset() {
-            httpClient = null;
+            CloseableHttpClient tmp = httpClient;
+            if (tmp != null) {
+                httpClient = null;
+                HttpClients.shutDown(tmp);
+            }
         }
     }
 }

@@ -110,7 +110,7 @@ public class MultipleGetTest extends AbstractMailTest {
     }
 
     private void importMail(String emlName) throws OXException, IOException, JSONException {
-        InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_MAIL_DIR), emlName)), com.openexchange.java.Charsets.UTF_8);
+        InputStreamReader streamReader = new InputStreamReader(new FileInputStream(new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), emlName)), com.openexchange.java.Charsets.UTF_8);
         char[] buf = new char[512];
         int length;
         StringBuilder sb = new StringBuilder();

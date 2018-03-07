@@ -163,16 +163,16 @@ public class SearchPerformer extends AbstractQueryPerformer {
             if (foldersForEvent.isEmpty() && null != event.getFolderId()) {
                 CalendarFolder invisibleFolder = Utils.getFolder(session, event.getFolderId(), false);
                 if (Utils.isVisible(invisibleFolder, event)) {
-                    List<Event> processedEvents = postProcess(Collections.singletonList(event), invisibleFolder, false, fields);
+                    List<Event> processedEvents = postProcess(Collections.singletonList(event), invisibleFolder, true, fields);
                     com.openexchange.tools.arrays.Collections.put(eventsPerFolderId, invisibleFolder.getId(), processedEvents);
                 }
             } else if (1 == foldersForEvent.size()) {
-                List<Event> processedEvents = postProcess(Collections.singletonList(event), foldersForEvent.get(0), false, fields);
+                List<Event> processedEvents = postProcess(Collections.singletonList(event), foldersForEvent.get(0), true, fields);
                 com.openexchange.tools.arrays.Collections.put(eventsPerFolderId, foldersForEvent.get(0).getId(), processedEvents);
             } else {
                 for (CalendarFolder folder : foldersForEvent) {
                     Event copiedEvent = EventMapper.getInstance().copy(event, new Event(), (EventField[]) null);
-                    List<Event> processedEvents = postProcess(Collections.singletonList(copiedEvent), folder, false, fields);
+                    List<Event> processedEvents = postProcess(Collections.singletonList(copiedEvent), folder, true, fields);
                     com.openexchange.tools.arrays.Collections.put(eventsPerFolderId, folder.getId(), processedEvents);
                 }
             }

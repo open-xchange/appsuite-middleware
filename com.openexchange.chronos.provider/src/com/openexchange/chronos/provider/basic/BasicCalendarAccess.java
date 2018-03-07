@@ -102,7 +102,6 @@ public interface BasicCalendarAccess extends CalendarAccess {
      * <li>{@link CalendarParameters#PARAMETER_ORDER}</li>
      * <li>{@link CalendarParameters#PARAMETER_ORDER_BY}</li>
      * <li>{@link CalendarParameters#PARAMETER_EXPAND_OCCURRENCES}</li>
-     * <li>{@link CalendarParameters#PARAMETER_INCLUDE_PRIVATE}</li>
      * </ul>
      *
      * @return The events

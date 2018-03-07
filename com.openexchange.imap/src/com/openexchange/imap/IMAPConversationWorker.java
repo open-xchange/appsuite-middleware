@@ -335,9 +335,9 @@ public final class IMAPConversationWorker {
             long uidNext = imapMessageStorage.getImapFolder().getUIDNext();
             FetchProfile fp;
             if (byEnvelope) {
-                fp = Conversations.getFetchProfileConversationByEnvelope(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
+                fp = Conversations.getFetchProfileConversationByEnvelope(imapMessageStorage.examineHasAttachmentUserFlags, null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
             } else {
-                fp = Conversations.getFetchProfileConversationByHeaders(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
+                fp = Conversations.getFetchProfileConversationByHeaders(imapMessageStorage.examineHasAttachmentUserFlags, null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
             }
             conversations = Conversations.conversationsFor(imapMessageStorage.getImapFolder(), lookAhead, order, fp, imapMessageStorage.getImapServerInfo(), byEnvelope, imapMessageStorage.examineHasAttachmentUserFlags);
             if (conversations.isEmpty()) {
@@ -708,9 +708,9 @@ public final class IMAPConversationWorker {
         if (mergeWithSent) {
             FetchProfile fp;
             if (byEnvelope) {
-                fp = Conversations.getFetchProfileConversationByEnvelope(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
+                fp = Conversations.getFetchProfileConversationByEnvelope(imapMessageStorage.examineHasAttachmentUserFlags, null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
             } else {
-                fp = Conversations.getFetchProfileConversationByHeaders(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
+                fp = Conversations.getFetchProfileConversationByHeaders(imapMessageStorage.examineHasAttachmentUserFlags, null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
             }
             List<Conversation> conversations = ThreadSorts.getConversationList(imapMessageStorage.getImapFolder(), getSortRange(lookAhead, messageCount, order), isRev1, fp, imapMessageStorage.getImapServerInfo(), imapMessageStorage.examineHasAttachmentUserFlags, searchTerm);
             // Merge with sent folder
@@ -778,7 +778,7 @@ public final class IMAPConversationWorker {
                 }
             }
         } else {
-            list = ThreadSorts.getConversations(imapMessageStorage.getImapFolder(), getSortRange(lookAhead, messageCount, order), isRev1, imapMessageStorage.getImapServerInfo(), searchTerm, imapFolderStorage.getImapConfig(), null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
+            list = ThreadSorts.getConversations(imapMessageStorage.getImapFolder(), getSortRange(lookAhead, messageCount, order), isRev1, imapMessageStorage.examineHasAttachmentUserFlags, imapMessageStorage.getImapServerInfo(), searchTerm, imapFolderStorage.getImapConfig(), null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
             // Sort root elements
             {
                 final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;

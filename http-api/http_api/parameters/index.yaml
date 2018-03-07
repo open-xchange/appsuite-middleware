@@ -399,13 +399,6 @@ QueryParamChronosExpand:
   default: false
   description: Defines if event series should be extended or not.
   required: false
-QueryParamChronosIncludePrivate:
-  name: showPrivate
-  in: query
-  type: boolean
-  default: false
-  description: Defines whether "private" events of the calendar owner, i.e. events whose classification is PRIVATE or CONFIDENTIAL should be included when fetching events from a shared folder or not.
-  required: false
 QueryParamChronosNotification:
   name: sendInternalNotifications
   in: query

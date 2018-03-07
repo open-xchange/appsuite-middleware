@@ -133,7 +133,18 @@ public class ContentTypeTest {
         try {
             String hdr = "t/@,image/svg+xml";
             com.openexchange.mail.mime.ContentType contentType = new com.openexchange.mail.mime.ContentType(hdr, true);
-            fail("Content-Type string \"t,text/html\" should no pass strict parsing");
+            fail("Content-Type string \"t/@,image/svg+xml\" should no pass strict parsing");
+            contentType.setBaseType("foo/bar"); // To keep IDE happy
+        } catch (Exception e) {
+            assertTrue(e instanceof OXException);
+            OXException oxe = (OXException) e;
+            assertTrue(oxe.equalsCode(20, "MSG"));
+        }
+
+        try {
+            String hdr = "text/plain;,text/html";
+            com.openexchange.mail.mime.ContentType contentType = new com.openexchange.mail.mime.ContentType(hdr, true);
+            fail("Content-Type string \"text/plain;,text/html\" should no pass strict parsing");
             contentType.setBaseType("foo/bar"); // To keep IDE happy
         } catch (Exception e) {
             assertTrue(e instanceof OXException);

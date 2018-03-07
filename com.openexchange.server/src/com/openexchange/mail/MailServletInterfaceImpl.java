@@ -2497,6 +2497,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 case CONTENT_TYPE:
                     contained = candidate.containsContentType();
                     break;
+                case ATTACHMENT:
+                    contained = candidate.containsHasAttachment() || candidate.containsAlternativeHasAttachment();
+                    break;
                 case DISPOSITION_NOTIFICATION_TO:
                     contained = candidate.containsDispositionNotification();
                     break;

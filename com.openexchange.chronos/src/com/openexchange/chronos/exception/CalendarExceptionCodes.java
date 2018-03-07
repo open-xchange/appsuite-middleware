@@ -371,8 +371,17 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     BAD_AUTH_CONFIGURATION("Account cannot be created. Too many auth mechanisms provided by client: %1$s", BAD_AUTH_CONFIGURATION_MSG, Category.CATEGORY_USER_INPUT, 4046),
 
-    //TODO: check if needed/useful, check code
+    /**
+     * <li>Authentication failed.</li>
+     * <li>Authentication failed to access the resource at %1$s</li>
+     */
     AUTH_FAILED("Authentication failed to access the resource at %1$s", AUTH_FAILED_MSG, Category.CATEGORY_USER_INPUT, 4010),
+
+    /**
+     * <li>Authentication failed.</li>
+     * <li>Authentication failed to access a shared calendar at %1$s</li>
+     */
+    AUTH_FAILED_FOR_SHARE("Authentication failed to access a shared calendar at %1$s", AUTH_FAILED_MSG, Category.CATEGORY_USER_INPUT, 4011),
 
     ;
 

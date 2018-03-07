@@ -376,7 +376,7 @@ public abstract class AppointmentAction implements AJAXActionService {
                 case AJAXServlet.PARAMETER_ORDER:
                     return new AbstractMap.SimpleEntry<String, SortOrder.Order>(CalendarParameters.PARAMETER_ORDER, SortOrder.Order.parse(value, SortOrder.Order.ASC));
                 case AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS:
-                    return new AbstractMap.SimpleEntry<String, Boolean>(CalendarParameters.PARAMETER_INCLUDE_PRIVATE, Boolean.valueOf(value));
+                    return new AbstractMap.SimpleEntry<String, Boolean>(CalendarParameters.PARAMETER_SKIP_CLASSIFIED, Boolean.valueOf(false == Boolean.parseBoolean(value)));
                 case AJAXServlet.PARAMETER_RECURRENCE_MASTER:
                     return new AbstractMap.SimpleEntry<String, Boolean>(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.valueOf(false == Boolean.parseBoolean(value)));
                 case AJAXServlet.PARAMETER_TIMEZONE:

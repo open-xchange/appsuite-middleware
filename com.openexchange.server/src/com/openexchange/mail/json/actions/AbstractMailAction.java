@@ -588,8 +588,8 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         return uid;
     }
 
-    protected Boolean getIgnoreDeleted(MailRequest mailRequest) {
+    protected boolean getIgnoreDeleted(MailRequest mailRequest, boolean defaultValue) {
         String parameter = mailRequest.getParameter("deleted");
-        return parameter == null ? null : !AJAXRequestDataTools.parseBoolParameter(parameter);
+        return parameter == null ? defaultValue : !AJAXRequestDataTools.parseBoolParameter(parameter);
     }
 }

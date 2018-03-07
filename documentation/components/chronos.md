@@ -699,13 +699,12 @@ As stated above, within *group-scheduled* events with multiple attendees, a cale
 
 Considering the role, a user that is attendee or organizer of a group-scheduled event is able to read event data. Also, an attendee is always allowed to modify his own attendee property (especially his participation status), as well as he has control over his own alarms. Additionally, he may still delete himself from the attendee list. However, whenever event data should be manipulated in way beyond the allowed attendee changes (see above), the calendar user needs to be the organizer of the event.
 
-The access rights that are implicitly given by the user's role in an event are always valid, even if the event is statically located in a calendar folder that is not visible for the user. For example, the API allows to create an event in a *public* calendar folder and invite attendees that do not have access to this folder. Interaction with such events would still be possible (e.g. by using the corresponding links from the invitation mail, by looking up the events via search, or by querying virtual event collections for the user ("all my events").
-
+The access rights that are implicitly given by the user's role in an event are always valid, even if the event is statically located in a (public) calendar folder that is not visible for the user. For example, the API allows to create an event in a *public* calendar folder and invite attendees that do not have access to this folder. Interaction with such events would still be possible (e.g. by using the corresponding links from the invitation mail, by looking up the events via search, or by querying virtual event collections for the user ("all my events").
 Note that the *role* is always interpreted for the actual calendar user based on the folder that represents the current view on an event, which means that this calendar user may be different from the current session user in case of a *shared* calendar folder, while the calendar user equals the current session user in *private* and *public* folders. See chapter "Relation of Organizer / Principal / Folder-Owner / Creator" for further details. 
 
 ### Folder Permissions
 
-For calendar folders, the same set of permissions can be applied as for folders in other groupware modules, i.e. users and groups can be added to the permission lists; each entity with an individual set of folder-/read-/write- and delete-permission. the effective folder permission of a specific user is the calculated maximum permission (based on the users own and/or any group entity permissions that are defined). 
+For calendar folders, the same set of permissions can be applied as for folders in other groupware modules, i.e. users and groups can be added to the permission lists; each entity with an individual set of folder-/read-/write- and delete-permission. The effective folder permission of a specific user is the calculated maximum permission (based on the users own and/or any group entity permissions that are defined). 
 
 In the calendar module, the folder permissions are primarily considered for *create* operations, since modifications and deletions of group-scheduled events are rather restricted based on the calendar user's particular role in the event once it has been created, see above. Additionally, in *shared* folders, where a user acts on behalf the calendar owner, the folder permissions determine which actions are allowed for the proxy user (besides of the restrictions based on the calendar user's role). 
 
@@ -749,4 +748,36 @@ As noted above in "Migration of legacy data", the database will work temporarily
 - https://dev.mysql.com/doc/connector-j/en/connector-j-reference-charsets.html
 - https://bugs.open-xchange.com/show_bug.cgi?id=54504
 - https://confluence.open-xchange.com/display/MID/MySql+charsets+and+collations
+
+
+## Import and Export
+
+When importing or exporting calendar the data is truncated. This chapter describes under which circumstances the data is truncated.
+
+### Import
+
+During the import attendees and the organizer will be replaced by the user importing the event or the calendar. This is mainly done to avoid conflicts and unwanted invite or accept mails. There are three cases that lead to this discission:
+
+#### No organizer set
+The event that is beeing imported doesn't have an organizer. Therefore the user importing the event becomes the new organizer. To be formally correct the organizer must inform all attendees with an invitaion mail to the new event. This generates mails to an event that already exists and hosted somewhere.
+
+#### External orgainzer
+The event to be imported is organized by an external. To notify the organizer of the users status a mail must be sent, letting the user automatically become a party crasher. 
+
+#### Internal organizer
+The event to import is organized by another internal user. Therefore the event should already be created and the user should be added to this existing event. This operation can't be performed because only the organizer is allowed to modify an event.
+
+
+### Export
+
+Due privacy concerns and the above sketched problems with importing data, exporting a calendar or a single event will truncate some of the data. There a three different cases handled.
+
+#### Calendar user is the organizer
+The user is the organizer of the event but not an attendee. The user migth have no relationship to the attendees and only created the event on behalf of someone else. Therefore the attendees aren't added to the exported event. 
+
+#### Calendar user is attendee
+Besides optional others attendees the user is an attendee of the event. To not expose other attendees those optinal other attendees are removed on the exported event.
+
+#### Calendar user isn't attendee
+This case can happen in shared or public calendars. The user can at least see the event but isn't part of the event in any other way. Therefore neither the attendees nor the organizer is added to the exported event.
 

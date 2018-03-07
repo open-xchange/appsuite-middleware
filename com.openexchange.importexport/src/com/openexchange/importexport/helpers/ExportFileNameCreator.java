@@ -291,7 +291,7 @@ public class ExportFileNameCreator {
      */
     public static String appendFileNameParameter(AJAXRequestData requestData, String fileName) {
         final StringBuilder sb = new StringBuilder();
-        DownloadUtility.appendFilenameParameter(fileName, requestData.getUserAgent(), sb);
+        DownloadUtility.appendFilenameParameter(fileName, null == requestData ? "unknown" : requestData.getUserAgent(), sb);
         return sb.toString();
     }
 

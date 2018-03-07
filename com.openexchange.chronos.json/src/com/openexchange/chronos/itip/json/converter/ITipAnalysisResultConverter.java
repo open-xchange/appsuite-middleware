@@ -62,6 +62,7 @@ import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.itip.ITipAction;
 import com.openexchange.chronos.itip.ITipAnalysis;
 import com.openexchange.chronos.itip.ITipAnnotation;
@@ -189,21 +190,25 @@ public class ITipAnalysisResultConverter implements ResultConverter {
         changeObject.put("exception", change.isException());
 
         Event newEvent = change.getNewEvent();
+        adjustFolderIdForClient(newEvent);
         if (newEvent != null) {
             changeObject.put("newEvent", EventMapper.getInstance().serialize(newEvent, EventMapper.getInstance().getAssignedFields(newEvent), tz, session));
         }
 
         Event currentEvent = change.getCurrentEvent();
+        adjustFolderIdForClient(currentEvent);
         if (currentEvent != null) {
             changeObject.put("currentEvent", EventMapper.getInstance().serialize(currentEvent, EventMapper.getInstance().getAssignedFields(currentEvent), tz, session));
         }
 
         Event masterEvent = change.getMasterEvent();
+        adjustFolderIdForClient(masterEvent);
         if (masterEvent != null) {
             changeObject.put("masterEvent", EventMapper.getInstance().serialize(masterEvent, EventMapper.getInstance().getAssignedFields(masterEvent), tz, session));
         }
 
         Event deletedEvent = change.getDeletedEvent();
+        adjustFolderIdForClient(deletedEvent);
         if (deletedEvent != null) {
             changeObject.put("deletedEvent", EventMapper.getInstance().serialize(deletedEvent, EventMapper.getInstance().getAssignedFields(deletedEvent), tz, session));
         }
@@ -231,10 +236,15 @@ public class ITipAnalysisResultConverter implements ResultConverter {
         }
     }
 
+    private void adjustFolderIdForClient(Event event) {
+        if (event != null) {
+            event.setFolderId(CalendarUtils.prependDefaultAccount(event.getFolderId()));
+        }
+    }
+
     private JSONArray convertAttendees(List<Attendee> attendees) throws JSONException {
         JSONArray result = new JSONArray(attendees.size());
         for (Attendee attendee : attendees) {
-            EventMapper.getInstance();
             result.put(EventMapper.serializeCalendarUser(attendee));
         }
         return result;

@@ -458,11 +458,9 @@ public class AlarmTrigger implements Comparable<AlarmTrigger> {
 
     @Override
     public int compareTo(AlarmTrigger o) {
-        if (this.getTime() == o.getTime()) {
-            return 0;
-        }
-
-        return this.getTime() > o.getTime() ? 1 : 0;
+        long thisTime = this.getTime().longValue();
+        long otherTime = o.getTime().longValue();
+        return thisTime == otherTime ? 0 : thisTime > otherTime ? 1 : 0;
     }
 
 }

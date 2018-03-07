@@ -437,7 +437,7 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
                     return cl2 <= 0 ? 0 : 1;
                 }
                 if (cl2 <= 0) {
-                    return cl1 <= 0 ? 0 : -1;
+                    return -1;
                 }
                 return (cl1 < cl2 ? 1 : (cl1 == cl2 ? 0 : -1));
             }
@@ -448,16 +448,15 @@ public final class MailMessageComparator implements Comparator<MailMessage> {
             }
 
             private int getColorLabel(MailMessage msg) {
-
-                if(msg.getColorLabel() > 0) {
+                if (msg.getColorLabel() > 0) {
                     return msg.getColorLabel();
-                } else {
-                    if(flaggingColor != null) {
-                        return msg.isFlagged() ? flaggingColor : 0;
-                    } else {
-                        return 0;
-                    }
                 }
+                
+                if (flaggingColor == null) {
+                    return 0;
+                }
+                
+                return msg.isFlagged() ? flaggingColor : 0;
             }
         });
     }

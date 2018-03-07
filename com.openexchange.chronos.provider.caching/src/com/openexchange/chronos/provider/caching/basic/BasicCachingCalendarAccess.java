@@ -177,7 +177,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      * Defines how long should be wait for the next request to the external calendar provider in case an error occurred.
      *
      * @param e The {@link OXException} occurred
-     * @return The time in {@link TimeUnit#MINUTES} that should be wait for contacting the external calendar provider for updates.
+     * @return The time in {@link TimeUnit#SECONDS} that should be wait for contacting the external calendar provider for updates.
      * @see {@link BasicCachingCalendarConstants.MINIMUM_DEFAULT_RETRY_AFTER_ERROR_INTERVAL}
      */
     public abstract long getRetryAfterErrorInterval(OXException e);
@@ -485,7 +485,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         if (retryAfterErrorInterval < BasicCachingCalendarConstants.MINIMUM_DEFAULT_RETRY_AFTER_ERROR_INTERVAL) { // prevent wrong configuration that will allow ongoing external requests
             retryAfterErrorInterval = BasicCachingCalendarConstants.MINIMUM_DEFAULT_RETRY_AFTER_ERROR_INTERVAL;
         }
-        long timeoutInMillis = TimeUnit.MINUTES.toMillis(retryAfterErrorInterval);
+        long timeoutInMillis = TimeUnit.SECONDS.toMillis(retryAfterErrorInterval);
         long nextProcessingAfter = System.currentTimeMillis() + timeoutInMillis;
         cachingHandler.updateLastUpdated(nextProcessingAfter);
 

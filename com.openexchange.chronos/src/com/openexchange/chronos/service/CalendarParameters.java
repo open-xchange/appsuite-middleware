@@ -68,11 +68,11 @@ public interface CalendarParameters {
     /**
      * {@link Boolean}
      * <p/>
-     * Indicates whether "private" events of the calendar owner, i.e. events whose classification is {@link Classification#PRIVATE} or
-     * {@link Classification#CONFIDENTIAL} should be included when fetching events from a shared folder or not. Such events are
-     * anonymized by stripping away all information except start date, end date and recurrence information.
+     * Indicates whether "private" events of the calendar owner, i.e. events whose classification is {@link Classification#CONFIDENTIAL}
+     * should be excluded when fetching events from a shared folder or not. If included, such events are <i>anonymized</i> by stripping
+     * away all information except start date, end date and recurrence information.
      */
-    static final String PARAMETER_INCLUDE_PRIVATE = "showPrivate";
+    static final String PARAMETER_SKIP_CLASSIFIED = "skipClassified";
 
     /**
      * {@link Boolean}

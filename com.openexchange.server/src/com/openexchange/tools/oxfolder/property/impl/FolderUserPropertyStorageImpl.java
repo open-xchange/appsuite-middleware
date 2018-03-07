@@ -144,6 +144,7 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
         if (null == connection) {
             // Get connection an re-call this function
             deleteFolderProperties(contextId, folderId, userId, propertyKeys);
+            return;
         }
 
         PreparedStatement stmt = null;
@@ -199,20 +200,17 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
         dbService = getService(DatabaseService.class);
         connection = dbService.getReadOnly(contextId);
         try {
-            exists(contextId, folderId, userId, connection);
+            return exists(contextId, folderId, userId, connection);
         } finally {
-            if (null != dbService) {
-                dbService.backReadOnly(contextId, connection);
-            }
+            dbService.backReadOnly(contextId, connection);
         }
-        return false;
     }
 
     @Override
     public boolean exists(int contextId, int folderId, int userId, Connection connection) throws OXException {
         if (null == connection) {
             // Get connection an re-call this function
-            exists(contextId, folderId, userId);
+            return exists(contextId, folderId, userId);
         }
 
         PreparedStatement stmt = null;
@@ -258,7 +256,7 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
     public Map<String, String> getFolderProperties(int contextId, int folderId, int userId, Connection connection) throws OXException {
         if (null == connection) {
             // Get connection an re-call this function
-            getFolderProperties(contextId, folderId, userId);
+            return getFolderProperties(contextId, folderId, userId);
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -313,8 +311,9 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
         }
         if (null == connection) {
             // Get connection an re-call this function
-            getFolderProperties(contextId, folderIds, userId);
+            return getFolderProperties(contextId, folderIds, userId);
         }
+
         Map<Integer, Map<String, String>> properties = new HashMap<>(folderIds.length);
 
         // Prepare statement
@@ -344,8 +343,9 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
     public String getFolderProperty(int contextId, int folderId, int userId, String key, Connection connection) throws OXException {
         if (null == connection) {
             // Get connection an re-call this function
-            getFolderProperty(contextId, folderId, userId, key);
+            return getFolderProperty(contextId, folderId, userId, key);
         }
+
         PreparedStatement stmt = null;
         ResultSet rs = null;
 
@@ -424,7 +424,9 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
         if (null == connection) {
             // Get connection an re-call this function
             insertFolderProperties(contextId, folderId, userId, properties);
+            return;
         }
+
         PreparedStatement stmt = null;
         try {
             for (String propertyName : properties.keySet()) {
@@ -436,8 +438,9 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
                 stmt.setString(4, propertyName);
                 stmt.setString(5, properties.get(propertyName));
 
-                // Execute
+                // Execute & close
                 stmt.executeUpdate();
+                Databases.closeSQLStuff(stmt);
             }
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -515,6 +518,7 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
         if (null == connection) {
             // Get connection an re-call this function
             setFolderProperties(contextId, folderId, userId, properties);
+            return;
         }
 
         PreparedStatement stmt = null;
@@ -593,6 +597,7 @@ public class FolderUserPropertyStorageImpl implements FolderUserPropertyStorage 
         if (null == connection) {
             // Get connection an re-call this function
             updateFolderProperties(contextId, folderId, userId, properties);
+            return;
         }
 
         PreparedStatement stmt = null;

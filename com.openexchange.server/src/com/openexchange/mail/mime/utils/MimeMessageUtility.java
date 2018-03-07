@@ -810,8 +810,10 @@ public final class MimeMessageUtility {
 
         if (part.getContentType().toLowerCase().startsWith("multipart/")) {
             Multipart multipart = getMultipartContentFrom(part);
-            int count = multipart.getCount();
-            return hasAttachments0(multipart, count);
+            if (null != multipart) {                
+                int count = multipart.getCount();
+                return hasAttachments0(multipart, count);
+            }
         }
         return hasAttachmentInMetadata(part);
     }

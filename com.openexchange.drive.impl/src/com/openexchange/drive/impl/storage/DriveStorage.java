@@ -1292,7 +1292,7 @@ public class DriveStorage {
         StringBuilder StringBuilder = session.isTraceEnabled() ? new StringBuilder() : null;
         do {
             File file = documents.next();
-            if (files.contains(file.getFileName())) {
+            if (null != file && files.contains(file.getFileName())) {
                 fileIdsToDelete.add(file.getId());
                 if (null != StringBuilder) {
                     StringBuilder.append(' ').append(combine(getPath(file.getFolderId()), file.getFileName()));
@@ -1452,7 +1452,7 @@ public class DriveStorage {
         Map<String, File> ID2FileMapping = new HashMap<>();
         do {
             File file = documents.next();
-            if (files.contains(file.getFileName())) {
+            if (null != file && files.contains(file.getFileName())) {
                 String fileId = file.getId();
                 ID2FileMapping.put(fileId, file);
             }

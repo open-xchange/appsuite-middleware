@@ -56,7 +56,7 @@ import static com.openexchange.chronos.impl.Utils.getCalendarUserId;
 import static com.openexchange.chronos.impl.Utils.getFolder;
 import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
 import static com.openexchange.chronos.impl.Utils.isEnforceDefaultAttendee;
-import static com.openexchange.chronos.impl.Utils.isIncludeClassifiedEvents;
+import static com.openexchange.chronos.impl.Utils.isSkipClassifiedEvents;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
@@ -131,13 +131,13 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "changed")) {
             List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
             storage.getUtilities().loadAdditionalEventData(session.getUserId(), events, fields);
-            newAndModifiedEvents = postProcess(events, session.getUserId(), true, fields);
+            newAndModifiedEvents = postProcess(events, session.getUserId(), false, fields);
         }
         List<Event> deletedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "deleted")) {
             List<Event> events = storage.getEventStorage().searchEventTombstones(searchTerm, new SearchOptions(session), fields);
             storage.getUtilities().loadAdditionalEventTombstoneData(events, fields);
-            deletedEvents = postProcess(events, session.getUserId(), true, fields);
+            deletedEvents = postProcess(events, session.getUserId(), false, fields);
         }
         return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents);
     }
@@ -168,7 +168,7 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "changed")) {
             List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
             storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), events, fields);
-            newAndModifiedEvents = postProcess(events, folder, isIncludeClassifiedEvents(session), fields);
+            newAndModifiedEvents = postProcess(events, folder, isSkipClassifiedEvents(session), fields);
         }
         List<Event> deletedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "deleted")) {
@@ -177,7 +177,7 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
             Boolean oldExpandOccurrences = session.get(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.class);
             try {
                 session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
-                deletedEvents = postProcess(events, folder, isIncludeClassifiedEvents(session), fields);
+                deletedEvents = postProcess(events, folder, isSkipClassifiedEvents(session), fields);
             } finally {
                 session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, oldExpandOccurrences);
             }

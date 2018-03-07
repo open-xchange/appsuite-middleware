@@ -106,30 +106,34 @@ public abstract class AttendeesMapping<O> extends ListItemMapping<Attendee, O, J
     public Attendee deserialize(JSONObject from, TimeZone timeZone) throws JSONException {
         Attendee attendee = EventMapper.deserializeCalendarUser(from, Attendee.class);
         if (from.has(ChronosJsonFields.Attendee.CU_TYPE)) {
-            attendee.setCuType(new CalendarUserType(from.getString(ChronosJsonFields.Attendee.CU_TYPE)));
+            attendee.setCuType(from.isNull(ChronosJsonFields.Attendee.CU_TYPE) ? null : new CalendarUserType(from.getString(ChronosJsonFields.Attendee.CU_TYPE)));
         }
         if (from.has(ChronosJsonFields.Attendee.ROLE)) {
-            attendee.setRole(new ParticipantRole(from.getString(ChronosJsonFields.Attendee.ROLE)));
+            attendee.setRole(from.isNull(ChronosJsonFields.Attendee.ROLE) ? null : new ParticipantRole(from.getString(ChronosJsonFields.Attendee.ROLE)));
         }
         if (from.has(ChronosJsonFields.Attendee.PARTICIPATION_STATUS)) {
-            attendee.setPartStat(new ParticipationStatus(from.getString(ChronosJsonFields.Attendee.PARTICIPATION_STATUS)));
+            attendee.setPartStat(from.isNull(ChronosJsonFields.Attendee.PARTICIPATION_STATUS) ? null : new ParticipationStatus(from.getString(ChronosJsonFields.Attendee.PARTICIPATION_STATUS)));
         }
         if (from.has(ChronosJsonFields.Attendee.COMMENT)) {
-            attendee.setComment(from.getString(ChronosJsonFields.Attendee.COMMENT));
+            attendee.setComment(from.isNull(ChronosJsonFields.Attendee.COMMENT) ? null : from.getString(ChronosJsonFields.Attendee.COMMENT));
         }
         if (from.has(ChronosJsonFields.Attendee.RSVP)) {
-            attendee.setRsvp(from.getBoolean(ChronosJsonFields.Attendee.RSVP));
+            attendee.setRsvp(from.isNull(ChronosJsonFields.Attendee.RSVP) ? null : from.getBoolean(ChronosJsonFields.Attendee.RSVP));
         }
         if (from.has(ChronosJsonFields.Attendee.FOLDER)) {
-            attendee.setFolderId(from.getString(ChronosJsonFields.Attendee.FOLDER));
+            attendee.setFolderId(from.isNull(ChronosJsonFields.Attendee.FOLDER) ? null : from.getString(ChronosJsonFields.Attendee.FOLDER));
         }
         if (from.has(ChronosJsonFields.Attendee.MEMBER)) {
-            JSONArray array = from.getJSONArray(ChronosJsonFields.Attendee.MEMBER);
-            List<String> list = new ArrayList<>(array.length());
-            for (Object o : array.asList()) {
-                list.add(o.toString());
+            if (from.isNull(ChronosJsonFields.Attendee.MEMBER)) {
+                attendee.setMember(null);
+            } else {
+                JSONArray array = from.getJSONArray(ChronosJsonFields.Attendee.MEMBER);
+                List<String> list = new ArrayList<>(array.length());
+                for (Object o : array.asList()) {
+                    list.add(o.toString());
+                }
+                attendee.setMember(list);
             }
-            attendee.setMember(list);
         }
 
         return attendee;

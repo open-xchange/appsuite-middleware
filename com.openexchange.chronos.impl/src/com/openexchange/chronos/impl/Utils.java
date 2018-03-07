@@ -552,15 +552,15 @@ public class Utils {
      *
      * @param event The event to check
      * @param session The calendar session
-     * @param includeClassified <code>true</code> to include <i>confidential</i> events in shared folders, <code>false</code>, otherwise
+     * @param skipClassified <code>true</code> to skip <i>confidential</i> events in shared folders, <code>false</code>, otherwise
      * @return <code>true</code> if the event should be excluded, <code>false</code>, otherwise
      */
-    public static boolean isExcluded(Event event, CalendarSession session, boolean includeClassified) throws OXException {
+    public static boolean isExcluded(Event event, CalendarSession session, boolean skipClassified) throws OXException {
         /*
          * excluded if "classified" for user (and such events are requested to be excluded)
          */
         if (isClassifiedFor(event, session.getUserId())) {
-            if (false == includeClassified || false == Classification.CONFIDENTIAL.equals(event.getClassification())) {
+            if (skipClassified || false == Classification.CONFIDENTIAL.equals(event.getClassification())) {
                 // only include 'confidential' events if requested
                 return true;
             }
@@ -589,15 +589,15 @@ public class Utils {
     /**
      * Gets a value indicating whether events in foreign folders classified as {@link Classification#CONFIDENTIAL} are to be included in
      * the results or not. <p/>
-     * <b>Note:</b>Events the marked as {@link Classification#PRIVATE} are always excluded in shared folders (in case the user is not
+     * <b>Note:</b> Events that are marked as {@link Classification#PRIVATE} are always excluded in shared folders (in case the user is not
      * attending itself).
      *
      * @param parameters The calendar parameters to evaluate
-     * @return <code>true</code> if classified events should be included, <code>false</code>, otherwise
-     * @see CalendarParameters#PARAMETER_INCLUDE_PRIVATE
+     * @return <code>true</code> if classified events should be skipped, <code>false</code>, otherwise
+     * @see CalendarParameters#PARAMETER_SKIP_CLASSIFIED
      */
-    public static boolean isIncludeClassifiedEvents(CalendarParameters parameters) {
-        return parameters.get(CalendarParameters.PARAMETER_INCLUDE_PRIVATE, Boolean.class, Boolean.FALSE).booleanValue();
+    public static boolean isSkipClassifiedEvents(CalendarParameters parameters) {
+        return parameters.get(CalendarParameters.PARAMETER_SKIP_CLASSIFIED, Boolean.class, Boolean.FALSE).booleanValue();
     }
 
     /**
@@ -687,7 +687,8 @@ public class Utils {
         if (ownPermission.getReadPermission() == Permission.READ_OWN_OBJECTS && matches(event.getCreatedBy(), userId)) {
             return true;
         }
-        if (matches(event.getCalendarUser(), userId) || isAttendee(event, userId) || isOrganizer(event, userId)) {
+        if ((PublicType.getInstance().equals(folder.getType()) || PrivateType.getInstance().equals(folder.getType())) && 
+            (matches(event.getCalendarUser(), userId) || isAttendee(event, userId) || isOrganizer(event, userId))) {
             return true;
         }
         return false;

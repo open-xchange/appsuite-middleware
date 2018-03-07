@@ -28,7 +28,7 @@ public class UploadActionTest extends InfostoreApiClientTest {
 
     @Test
     public void testUpload() throws Exception {
-        final File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_INFOSTORE_DIR), "ox.jpg");
+        final File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "ox.jpg");
         String id = uploadInfoItem(file, "image/jpeg");
 
         InfoItemData item = getItem(id);
@@ -82,7 +82,7 @@ public class UploadActionTest extends InfostoreApiClientTest {
     @Test
     public void testVersionCommentForNewDocument() throws Exception {
 
-        final File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_INFOSTORE_DIR), "ox.jpg");
+        final File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "ox.jpg");
         String id = uploadInfoItem(null, file, "image/jpeg", "my comment");
 
         InfoItemData item = getItem(id);
@@ -98,7 +98,7 @@ public class UploadActionTest extends InfostoreApiClientTest {
     @Test
     public void testUniqueFilenamesOnUpload() throws Exception {
 
-        final File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_INFOSTORE_DIR), "ox.jpg");
+        final File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "ox.jpg");
         String id = uploadInfoItem(file, "image/jpeg");
 
         InfoItemData item = getItem(id);
@@ -114,7 +114,9 @@ public class UploadActionTest extends InfostoreApiClientTest {
 
     @Test
     public void testChunkWiseUpload() throws Exception {
-        final File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_INFOSTORE_DIR), "ox.jpg");
+        String testDir = AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR);
+        System.out.println("Going to use file from directory '" + testDir + "'.");
+        final File file = new File(testDir, "ox.jpg");
         byte[] all = IOTools.getBytes(new FileInputStream(file));
         int numOfChunks = 3;
         byte[][] chunks = new byte[numOfChunks][];
@@ -146,7 +148,7 @@ public class UploadActionTest extends InfostoreApiClientTest {
     @Test
     public void testBasicUpdate() throws Exception {
 
-        final File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_INFOSTORE_DIR), "ox.jpg");
+        final File file = new File(AJAXConfig.getProperty(AJAXConfig.Property.TEST_DIR), "ox.jpg");
         String id = uploadInfoItem(file, "image/jpeg");
 
         InfoItemData item = getItem(id);

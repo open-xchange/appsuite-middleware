@@ -70,11 +70,7 @@ public final class RecurringResults implements RecurringResultsInterface {
      */
     public RecurringResults() {
         super();
-        if (DEFAULT_SIZE < 1) {
-            recurringResults = new RecurringResult[DEFAULT_SIZE];
-        } else {
-            recurringResults = new RecurringResult[DEFAULT_SIZE];
-        }
+        recurringResults = new RecurringResult[DEFAULT_SIZE];
     }
 
     /* (non-Javadoc)

@@ -52,7 +52,6 @@ package com.openexchange.find.util;
 import java.util.Locale;
 import com.openexchange.find.facet.ComplexDisplayItem;
 import com.openexchange.find.facet.DisplayItem;
-import com.openexchange.find.osgi.Services;
 import com.openexchange.groupware.contact.ContactUtil;
 import com.openexchange.groupware.contact.helpers.ContactDisplayNameHelper;
 import com.openexchange.groupware.container.Contact;
@@ -76,10 +75,11 @@ public class DisplayItems {
      *
      * @param contact the {@link Contact} to convert
      * @param locale the user's {@link Locale}
+     * @param i18nServiceRegistry The instance of the {@link I18nServiceRegistry}
      * @return The {@link ComplexDisplayItem}
      */
-    public static ComplexDisplayItem convert(Contact contact, Locale locale) {
-        String displayName = ContactDisplayNameHelper.formatDisplayName(Services.optService(I18nServiceRegistry.class), contact, locale);
+    public static ComplexDisplayItem convert(Contact contact, Locale locale, I18nServiceRegistry i18nServiceRegistry) {
+        String displayName = ContactDisplayNameHelper.formatDisplayName(i18nServiceRegistry, contact, locale);
         String primaryAddress = extractPrimaryMailAddress(contact);
         if (Strings.isEmpty(displayName)) {
             displayName = Strings.isEmpty(primaryAddress) ? "" : primaryAddress;

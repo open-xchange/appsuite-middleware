@@ -377,21 +377,38 @@ public class EventManager extends AbstractManager {
      * @param until The ending date
      * @param expand Flag to expand occurrences
      * @param folder The folder identifier
+     * @param sortOrder The sortOder of the events
      * @return A {@link List} with {@link EventData}
      * @throws ApiException if an API error occurs
      */
     public List<EventData> getAllEvents(Date from, Date until, boolean expand, String folder, SortOrder sortOrder) throws ApiException {
-        return getAllEvents(from, until, expand, false, folder, sortOrder, null);
+        return getAllEvents(from, until, expand, folder, sortOrder, null);
     }
 
-    public List<EventData> getAllEvents(Date from, Date until, boolean expand, boolean showPrivate, String folder, SortOrder sortOrder, String fields) throws ApiException {
+    /**
+     * Retrieves all events within the specified interval in the specified folder
+     *
+     * @param from The starting date
+     * @param until The ending date
+     * @param expand Flag to expand occurrences
+     * @param folder The folder identifier
+     * @param sortOrder The sortOder of the events
+     * @param fields The considered event fields
+     * @return A {@link List} with {@link EventData}
+     * @throws ApiException if an API error occurs
+     */
+    public List<EventData> getAllEvents(Date from, Date until, boolean expand, String folder, SortOrder sortOrder, String fields) throws ApiException {
+        return getAllEvents(from, until, expand, folder, sortOrder, fields, true);
+    }
+
+    public List<EventData> getAllEvents(Date from, Date until, boolean expand, String folder, SortOrder sortOrder, String fields, boolean extendedEntities) throws ApiException {
         String sort = null;
         String order = null;
         if (sortOrder != null) {
             sort = sortOrder.getBy().name();
             order = sortOrder.isDescending() ? SortOrder.Order.DESC.name() : SortOrder.Order.ASC.name();
         }
-        EventsResponse eventsResponse = userApi.getChronosApi().getAllEvents(userApi.getSession(), DateTimeUtil.getZuluDateTime(from.getTime()).getValue(), DateTimeUtil.getZuluDateTime(until.getTime()).getValue(), folder, fields, order, sort, expand, showPrivate, true, false);
+        EventsResponse eventsResponse = userApi.getChronosApi().getAllEvents(userApi.getSession(), DateTimeUtil.getZuluDateTime(from.getTime()).getValue(), DateTimeUtil.getZuluDateTime(until.getTime()).getValue(), folder, fields, order, sort, expand, extendedEntities, false);
         return checkResponse(eventsResponse.getErrorDesc(), eventsResponse.getError(), eventsResponse.getData());
     }
 
@@ -534,7 +551,7 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      */
     public UpdatesResult getUpdates(Date since, Date start, Date end, boolean expand, String folderId) throws ApiException {
-        ChronosUpdatesResponse updatesResponse = userApi.getChronosApi().getUpdates(userApi.getSession(), folderId, since.getTime(), start != null ? UTC_DATE_FORMATTER.format(start) : null, end != null ? UTC_DATE_FORMATTER.format(end) : null, null, null, null, expand, true, false);
+        ChronosUpdatesResponse updatesResponse = userApi.getChronosApi().getUpdates(userApi.getSession(), folderId, since.getTime(), start != null ? UTC_DATE_FORMATTER.format(start) : null, end != null ? UTC_DATE_FORMATTER.format(end) : null, null, null, null, expand, false);
         this.lastTimeStamp = updatesResponse.getTimestamp();
         return checkResponse(updatesResponse.getErrorDesc(), updatesResponse.getError(), updatesResponse.getData());
     }

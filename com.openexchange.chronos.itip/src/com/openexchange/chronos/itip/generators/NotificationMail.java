@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -74,7 +73,6 @@ import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.State.Type;
 import com.openexchange.mail.config.MailProperties;
-import com.openexchange.messaging.MessagingHeader;
 
 /**
  * {@link NotificationMail}
@@ -155,25 +153,6 @@ public class NotificationMail {
      */
     public Map<String, String> getAdditionalHeaders() {
         return Collections.unmodifiableMap(additionalHeaders);
-    }
-
-    public Map<String, String> getAdditionalReferences() {
-        Map<String, String> retval = new HashMap<>(3);
-        if (null != event) {
-            String contextId = String.valueOf(sender.getContext().getContextId());
-            String uid = event.getUid();
-            String serverId = "open-xchange.com";
-
-            /*
-             * Message-Id: "Appointment.<context-id>.<event-id>.<timestamp(now)>@open-xchange.com"
-             * In-Reply-To: "Appointment.<context-id>.<event-id>@open-xchange.com"
-             * References: "Appointment.<context-id>.<event-id>@open-xchange.com"
-             */
-            retval.put(MessagingHeader.KnownHeader.MESSAGE_ID.toString(), "Appointment." + contextId + "." + uid + "." + String.valueOf(System.currentTimeMillis()) + "@" + serverId);
-            retval.put(MessagingHeader.KnownHeader.IN_REPLY_TO.toString(), "Appointment." + contextId + "." + uid + "@" + serverId);
-            retval.put(MessagingHeader.KnownHeader.REFERENCES.toString(), "Appointment." + contextId + "." + uid + "@" + serverId);
-        }
-        return retval;
     }
 
     public ITipMessage getMessage() {

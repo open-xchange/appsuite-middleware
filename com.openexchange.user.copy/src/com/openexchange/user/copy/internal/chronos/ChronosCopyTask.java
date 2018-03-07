@@ -418,8 +418,9 @@ public class ChronosCopyTask implements CopyUserTaskService {
                 stmt.setInt(3, folderProperties.getUserId());
                 stmt.setString(4, folderProperties.getPropertyName());
                 stmt.setString(5, folderProperties.getPropertyValue());
-                // Execute
+                // Execute & close
                 stmt.executeUpdate();
+                Databases.closeSQLStuff(stmt);
             }
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());

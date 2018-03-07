@@ -59,12 +59,12 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.http.HttpHeaders;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.SessionServlet;
-import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -134,7 +134,7 @@ public final class KerberosTicketReload extends SessionServlet implements LoginR
             resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
             return;
         }
-        final String auth = req.getHeader(Header.AUTH_HEADER);
+        final String auth = req.getHeader(HttpHeaders.AUTHORIZATION);
         if (null == auth) {
             notAuthorized(resp, "Authorization Required!");
             return;
@@ -169,8 +169,8 @@ public final class KerberosTicketReload extends SessionServlet implements LoginR
     }
 
     private static void notAuthorized(HttpServletResponse resp, String message) throws IOException {
-        resp.addHeader("WWW-Authenticate", "NEGOTIATE");
-        resp.addHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
+        resp.addHeader(HttpHeaders.WWW_AUTHENTICATE, "NEGOTIATE");
+        resp.addHeader(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"Open-Xchange\"");
         resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, message);
     }
 }
