@@ -78,7 +78,7 @@ public class DtEndMapping extends ICalDateTimeMapping<Available, com.openexchang
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#getValue(java.lang.Object)
      */
     @Override
@@ -88,7 +88,7 @@ public class DtEndMapping extends ICalDateTimeMapping<Available, com.openexchang
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#setValue(java.lang.Object, org.dmfs.rfc5545.DateTime)
      */
     @Override
@@ -98,7 +98,7 @@ public class DtEndMapping extends ICalDateTimeMapping<Available, com.openexchang
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#createProperty()
      */
     @Override
@@ -108,7 +108,7 @@ public class DtEndMapping extends ICalDateTimeMapping<Available, com.openexchang
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.ical.ical4j.mapping.ICalDateTimeMapping#getProperty(net.fortuna.ical4j.model.Component)
      */
     @Override
@@ -119,7 +119,7 @@ public class DtEndMapping extends ICalDateTimeMapping<Available, com.openexchang
         }
         DtStart dtStart = (DtStart) component.getProperty(Property.DTSTART);
         if (dtStart == null) {
-            return dtEnd == null ? new DtEnd(new Date(0)) : dtEnd;
+            return new DtEnd(new Date(0));
         }
 
         Duration duration = (Duration) component.getProperty(Property.DURATION);
