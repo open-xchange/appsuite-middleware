@@ -62,16 +62,20 @@ import com.openexchange.session.Session;
  * @since v7.10.0
  */
 public class GoogleCalendarConfig {
+    
+    private static final Long REFRESH_INTERVAL = new Long(10);
+    
+    private static final Long REQUEST_TIMEOUT = new Long(1800);
 
-    private static final Property REFRESH_INTERVAL_PROP = DefaultProperty.valueOf("com.openexchange.chronos.provider.google.refreshInterval", new Long(10));
+    private static final Property REFRESH_INTERVAL_PROP = DefaultProperty.valueOf("com.openexchange.chronos.provider.google.refreshInterval", REFRESH_INTERVAL);
 
-    private static final Property REQUEST_TIMEOUT_PROP = DefaultProperty.valueOf("com.openexchange.chronos.provider.google.requestTimeout", new Long(1800));
+    private static final Property REQUEST_TIMEOUT_PROP = DefaultProperty.valueOf("com.openexchange.chronos.provider.google.requestTimeout", REQUEST_TIMEOUT);
 
     public static long getResfrehInterval(Session session) {
 
         LeanConfigurationService service = Services.getService(LeanConfigurationService.class);
         if (service == null) {
-            return (int) REFRESH_INTERVAL_PROP.getDefaultValue();
+            return REFRESH_INTERVAL.longValue();
         }
         return service.getLongProperty(session.getUserId(), session.getContextId(), REFRESH_INTERVAL_PROP);
 
@@ -81,7 +85,7 @@ public class GoogleCalendarConfig {
 
         LeanConfigurationService service = Services.getService(LeanConfigurationService.class);
         if (service == null) {
-            return (int) REQUEST_TIMEOUT_PROP.getDefaultValue();
+            return REQUEST_TIMEOUT.longValue();
         }
         return service.getLongProperty(session.getUserId(), session.getContextId(), REQUEST_TIMEOUT_PROP);
 
