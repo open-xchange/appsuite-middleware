@@ -201,11 +201,14 @@ public class IDMangling {
     /**
      * Gets an event equipped with unique composite identifiers representing an event from a specific calendar account.
      *
-     * @param event The event from the account
+     * @param event The event from the account, or <code>null</code> to pass through
      * @param accountId The identifier of the account
      * @return The event representation with unique identifiers
      */
     public static Event withUniqueID(Event event, int accountId) {
+        if (null == event) {
+            return null;
+        }
         String newFolderId = getUniqueFolderId(accountId, event.getFolderId());
         return new IDManglingEvent(event, newFolderId);
     }
