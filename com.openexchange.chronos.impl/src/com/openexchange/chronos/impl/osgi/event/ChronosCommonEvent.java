@@ -202,18 +202,20 @@ public class ChronosCommonEvent implements CommonEvent {
      */
     private Map<Integer, Set<Integer>> getAffected(Map<Integer, List<String>> affectedUsersWithFolders) {
         Map<Integer, Set<Integer>> retval = new LinkedHashMap<Integer, Set<Integer>>(affectedUsersWithFolders.size());
-        for (Integer user : affectedUsersWithFolders.keySet()) {
+        for (Map.Entry<Integer, List<String>> entry : affectedUsersWithFolders.entrySet()) {
             // Convert for each user
-            Set<Integer> folders = new HashSet<>();
-            for (String folder : affectedUsersWithFolders.get(user)) {
+            List<String> folderIds = entry.getValue();
+            Set<Integer> folders = new HashSet<>(folderIds.size());
+            for (String folderId : folderIds) {
                 try {
                     // Multiple folder get silently dropped
-                    folders.add(Integer.valueOf(folder));
+                    folders.add(Integer.valueOf(folderId));
                 } catch (NumberFormatException e) {
-                    LOGGER.error("Can't parse folder with ID {}. The folder won't be part of the OSGi event to be propagated.", folder, e);
+                    LOGGER.error("Can't parse folder with ID {}. The folder won't be part of the OSGi event to be propagated.", folderId, e);
                 }
             }
             // Add the user-folder-pair
+            Integer user = entry.getKey();
             retval.put(user, folders);
         }
         return retval;
