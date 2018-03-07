@@ -57,7 +57,7 @@ import java.lang.annotation.RetentionPolicy;
  * {@link OptionalService} - Annotates an <b>optional</b> OSGi service that can be tracked.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.1
+ * @since v7.10.0
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface OptionalService {
