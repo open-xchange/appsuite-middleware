@@ -175,7 +175,7 @@ namespace Virtual {
 
 # OX App Suite
 
-Open `/opt/open-xchange/etc/findbasic.properties` and configure [com.openexchange.find.basic.mail.allMessagesFolder](https://documentation.open-xchange.com/components/middleware/config/{{version}}/index.html#com.openexchange.find.basic.mail.allMessagesFolder) to `Virtual/All`.
+Open `/opt/open-xchange/etc/findbasic.properties` and configure [com.openexchange.find.basic.mail.allMessagesFolder](https://documentation.open-xchange.com/components/middleware/config{{ site.baseurl }}/index.html#com.openexchange.find.basic.mail.allMessagesFolder) to `Virtual/All`.
 
 
 Restart the server with
