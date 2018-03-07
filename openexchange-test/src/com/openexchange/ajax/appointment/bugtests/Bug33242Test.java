@@ -98,6 +98,7 @@ public class Bug33242Test extends AbstractAJAXSession {
      * 2.) User B (member of group) deletes single occurrence.
      */
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -256,6 +257,7 @@ public class Bug33242Test extends AbstractAJAXSession {
     @Test
     public void testDeleteByGroupMemberWithUpdate() throws Exception {
         exception.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
+        exception.removeNote(); // cannot change note as attendee
         catm2.update(exception);
 
         // This should fail if not possible
