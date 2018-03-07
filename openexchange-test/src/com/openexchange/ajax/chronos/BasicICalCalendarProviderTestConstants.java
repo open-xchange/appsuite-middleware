@@ -2408,5 +2408,101 @@ public class BasicICalCalendarProviderTestConstants {
         "END:VCALENDAR\n" + 
         "";
 
+    public static final String FEED_WITH_SERIES_AND_CHANGE_EXCEPTION = "BEGIN:VCALENDAR\n" + 
+        "VERSION:2.0\n" + 
+        "PRODID:-//Open-Xchange//7.10.0-Rev1//EN\n" + 
+        "BEGIN:VTIMEZONE\n" + 
+        "TZID:Europe/Berlin\n" + 
+        "TZURL:http://tzurl.org/zoneinfo-outlook/Europe/Berlin\n" + 
+        "X-LIC-LOCATION:Europe/Berlin\n" + 
+        "BEGIN:DAYLIGHT\n" + 
+        "TZOFFSETFROM:+0100\n" + 
+        "TZOFFSETTO:+0200\n" + 
+        "TZNAME:CEST\n" + 
+        "DTSTART:19700329T020000\n" + 
+        "RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU\n" + 
+        "END:DAYLIGHT\n" + 
+        "BEGIN:STANDARD\n" + 
+        "TZOFFSETFROM:+0200\n" + 
+        "TZOFFSETTO:+0100\n" + 
+        "TZNAME:CET\n" + 
+        "DTSTART:19701025T030000\n" + 
+        "RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU\n" + 
+        "END:STANDARD\n" + 
+        "END:VTIMEZONE\n" + 
+        "BEGIN:VEVENT\n" + 
+        "DTSTAMP:20180125T115944Z\n" + 
+        "ATTENDEE;CN=\"dora, dora\";PARTSTAT=ACCEPTED;CUTYPE=INDIVIDUAL:mailto:dora@co\n" + 
+        " ntext7.oxoe.int\n" + 
+        "CLASS:PUBLIC\n" + 
+        "CREATED:20180125T115835Z\n" + 
+        "DTEND;TZID=Europe/Berlin:20180123T130000\n" + 
+        "DTSTART;TZID=Europe/Berlin:20180123T123000\n" + 
+        "LAST-MODIFIED:20180125T115944Z\n" + 
+        "ORGANIZER;CN=\"dora, dora\":mailto:dora@context7.oxoe.int\n" + 
+        "RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TU\n" + 
+        "SEQUENCE:0\n" + 
+        "SUMMARY:Test-Series\n" + 
+        "TRANSP:OPAQUE\n" + 
+        "UID:da554dcc-2c4b-4e11-a360-e3b2d3ca0408\n" + 
+        "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\n" + 
+        "BEGIN:VALARM\n" + 
+        "TRIGGER:-PT15M\n" + 
+        "UID:0f9c2d0e-a005-4c9b-850e-fdb15531996a\n" + 
+        "ACTION:DISPLAY\n" + 
+        "DESCRIPTION:Reminder\n" + 
+        "END:VALARM\n" + 
+        "END:VEVENT\n" + 
+        "BEGIN:VEVENT\n" + 
+        "DTSTAMP:20180125T115934Z\n" + 
+        "ATTENDEE;CN=\"dora, dora\";PARTSTAT=ACCEPTED;CUTYPE=INDIVIDUAL:mailto:dora@co\n" + 
+        " ntext7.oxoe.int\n" + 
+        "CLASS:PUBLIC\n" + 
+        "CREATED:20180125T115934Z\n" + 
+        "DTEND;TZID=Europe/Berlin:20180131T130000\n" + 
+        "DTSTART;TZID=Europe/Berlin:20180131T123000\n" + 
+        "LAST-MODIFIED:20180125T115934Z\n" + 
+        "ORGANIZER;CN=\"dora, dora\":mailto:dora@context7.oxoe.int\n" + 
+        "RECURRENCE-ID:20180130T113000Z\n" + 
+        "RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TU\n" + 
+        "SEQUENCE:1\n" + 
+        "SUMMARY:Test-Series - shifted day\n" + 
+        "TRANSP:OPAQUE\n" + 
+        "UID:da554dcc-2c4b-4e11-a360-e3b2d3ca0408\n" + 
+        "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\n" + 
+        "BEGIN:VALARM\n" + 
+        "TRIGGER:-PT15M\n" + 
+        "UID:a5733b0f-b94c-481f-b3f0-1ba76949dd72\n" + 
+        "ACTION:DISPLAY\n" + 
+        "DESCRIPTION:Reminder\n" + 
+        "END:VALARM\n" + 
+        "END:VEVENT\n" + 
+        "BEGIN:VEVENT\n" + 
+        "DTSTAMP:20180125T115955Z\n" + 
+        "ATTENDEE;CN=\"dora, dora\";PARTSTAT=ACCEPTED;CUTYPE=INDIVIDUAL:mailto:dora@co\n" + 
+        " ntext7.oxoe.int\n" + 
+        "CLASS:PUBLIC\n" + 
+        "CREATED:20180125T115944Z\n" + 
+        "DTEND;TZID=Europe/Berlin:20180206T110000\n" + 
+        "DTSTART;TZID=Europe/Berlin:20180206T103000\n" + 
+        "LAST-MODIFIED:20180125T115955Z\n" + 
+        "ORGANIZER;CN=\"dora, dora\":mailto:dora@context7.oxoe.int\n" + 
+        "RECURRENCE-ID:20180206T113000Z\n" + 
+        "RRULE:FREQ=WEEKLY;COUNT=4;BYDAY=TU\n" + 
+        "SEQUENCE:2\n" + 
+        "SUMMARY:Test-Series - shifted time\n" + 
+        "TRANSP:OPAQUE\n" + 
+        "UID:da554dcc-2c4b-4e11-a360-e3b2d3ca0408\n" + 
+        "X-MICROSOFT-CDO-BUSYSTATUS:BUSY\n" + 
+        "BEGIN:VALARM\n" + 
+        "TRIGGER:-PT15M\n" + 
+        "UID:d13da3c9-7ea3-48d7-a468-9f985e6edfc8\n" + 
+        "ACTION:DISPLAY\n" + 
+        "DESCRIPTION:Reminder\n" + 
+        "END:VALARM\n" + 
+        "END:VEVENT\n" + 
+        "END:VCALENDAR\n" + 
+        "";
+
     // @formatter:on
 }
