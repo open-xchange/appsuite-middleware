@@ -1012,7 +1012,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     if (permissions != null && !permissions.isEmpty()) {
                         List<OCLPermission> origPermissions = storageObj.getPermissions();
 
-                        ComparedOCLFolderPermissions compPerm = new ComparedOCLFolderPermissions(session, permissions.toArray(new OCLPermission[permissions.size()]), origPermissions.toArray(new OCLPermission[origPermissions.size()]));
+                        ComparedOCLFolderPermissions compPerm = new ComparedOCLFolderPermissions(permissions.toArray(new OCLPermission[permissions.size()]), origPermissions.toArray(new OCLPermission[origPermissions.size()]));
                         handDown(fo.getObjectID(), options, compPerm, lastModified, alreadyCheckedParents, FolderCacheManager.isEnabled() ? FolderCacheManager.getInstance() : null);
                     }
                 }
