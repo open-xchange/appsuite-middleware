@@ -225,9 +225,9 @@ public class Participants implements ChangeDescriptionGenerator {
             }
         }
 
-        for (Integer id : groupChange.keySet()) {
-            Group group = groups.getGroup(ctx, i(id));
-            ChangeType changeType = groupChange.get(id);
+        for (Entry<Integer, ChangeType> change : groupChange.entrySet()) {
+            Group group = groups.getGroup(ctx, i(change.getKey()));
+            ChangeType changeType = change.getValue();
             if (changeType == null) {
                 continue;
             }
