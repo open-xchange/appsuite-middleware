@@ -244,7 +244,7 @@ public enum CalendarFolderProperty {
     /** The literal used for the {@link CalendarFolderProperty#USED_FOR_SYNC} property. */
     public static final String USED_FOR_SYNC_LITERAL = "usedForSync";
 
-    /** The literal used for the {@link CalendarFolderProperty#USED_FOR_SYNC} property. */
+    /** The literal used for the {@link CalendarFolderProperty#LAST_UPDATE} property. */
     public static final String LAST_UPDATE_LITERAL = "lastUpdate";
 
     /**
