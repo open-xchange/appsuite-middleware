@@ -50,11 +50,9 @@
 package com.openexchange.ajax.chronos;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -493,11 +491,11 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         FolderUpdateResponse updateResponse = folderManager.updateFolder(folderData);
         assertNull(updateResponse.getError());
 
-        List<EventData> allEventsAfterUpdate = eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis()), false, folderId);
+        List<EventData> allEventsAfterUpdate = eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis()), false, newFolderId);
         assertEquals(38, allEventsAfterUpdate.size());
 
         FolderData folderReload = folderManager.getFolder(newFolderId);
-        assertEquals("blue", folderReload.getComOpenexchangeCalendarExtendedProperties().getColor().getValue()); // should only pass after removing calendar account api
+        assertEquals("blue", folderReload.getComOpenexchangeCalendarExtendedProperties().getColor().getValue());
     }
 
     @Test
@@ -661,9 +659,9 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
     }
 
     @Test
-    public void testGetChangeException() throws OXException, IOException, JSONException, ApiException, ChronosApiException {
-        String externalUri = "http://example.com/files/testGetChangeException.ics";
-        mock(externalUri, BasicICalCalendarProviderTestConstants.FEED_WITH_CHANGE_EXCEPTION, HttpStatus.SC_OK);
+    public void testGetExpandedSeries() throws OXException, IOException, JSONException, ApiException {
+        String externalUri = "http://example.com/files/testGetExpandedSeries.ics";
+        mock(externalUri, BasicICalCalendarProviderTestConstants.FEED_WITH_SERIES_AND_CHANGE_EXCEPTION, HttpStatus.SC_OK);
 
         FolderDataComOpenexchangeCalendarConfig config = new FolderDataComOpenexchangeCalendarConfig();
         NewFolderBodyFolder folder = createFolder(externalUri, config);
@@ -675,15 +673,16 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         String newFolderId = createAccount(body);
 
         //get events to fill table
-        String columns = "recurrenceId, seriesId, id, summary";
-        List<EventData> allEvents = eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(365)), true, newFolderId, null, columns);
+        List<EventData> allEvents = eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(365)), true, newFolderId, null, null);
+        assertEquals(6, allEvents.size());
+
         for (Iterator<EventData> iterator = allEvents.iterator(); iterator.hasNext();) {
             EventData eventData = iterator.next();
             if (!eventData.getSummary().contains("Test-Series")) {
                 iterator.remove();
             }
         }
-        assertEquals(4, allEvents.size());
+        assertEquals(6, allEvents.size());
 
         EventData master = null;
         for (EventData event : allEvents) {
@@ -692,24 +691,13 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
                 break;
             }
         }
-        assertNotNull(master);
-
-        String seriesId = master.getId();
-        EventData recurrence = allEvents.get(2);
-        assertFalse(EventManager.isSeriesMaster(recurrence));
-
-        EventData reloadedRecurringEvent = eventManager.getRecurringEvent(seriesId, recurrence.getRecurrenceId(), false);
-
-        assertEquals(seriesId, reloadedRecurringEvent.getId());
-        assertEquals(recurrence.getRecurrenceId(), reloadedRecurringEvent.getRecurrenceId());
-        assertEquals(recurrence.getStartDate().getValue(), reloadedRecurringEvent.getStartDate().getValue());
-        assertEquals(recurrence.getEndDate().getValue(), reloadedRecurringEvent.getEndDate().getValue());
+        assertNull(master);
     }
 
     @Test
-    public void testGetSeriesMaster() throws OXException, IOException, JSONException, ApiException {
-        String externalUri = "http://example.com/files/testGetSeriesMaster.ics";
-        mock(externalUri, BasicICalCalendarProviderTestConstants.FEED_WITH_CHANGE_EXCEPTION, HttpStatus.SC_OK);
+    public void testGetNonExpandedSeries() throws OXException, IOException, JSONException, ApiException, ChronosApiException {
+        String externalUri = "http://example.com/files/testGetNonExpandedSeries.ics";
+        mock(externalUri, BasicICalCalendarProviderTestConstants.FEED_WITH_SERIES_AND_CHANGE_EXCEPTION, HttpStatus.SC_OK);
 
         FolderDataComOpenexchangeCalendarConfig config = new FolderDataComOpenexchangeCalendarConfig();
         NewFolderBodyFolder folder = createFolder(externalUri, config);
@@ -721,9 +709,37 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         String newFolderId = createAccount(body);
 
         //get events to fill table
-        List<EventData> allEvents = eventManager.getAllEvents(new Date(dateToMillis("20180123T123000Z")), new Date(dateToMillis("20180123T123000Z")), false, newFolderId);
-        assertEquals(1, allEvents.size());
-        assertTrue(EventManager.isSeriesMaster(allEvents.get(0)));
+        List<EventData> allEvents = eventManager.getAllEvents(new Date(dateToMillis("20000702T201500Z")), new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(365)), false, newFolderId, null, null);
+        assertEquals(3, allEvents.size());
+
+        for (Iterator<EventData> iterator = allEvents.iterator(); iterator.hasNext();) {
+            EventData eventData = iterator.next();
+            if (!eventData.getSummary().contains("Test-Series")) {
+                iterator.remove();
+            }
+        }
+        assertEquals(3, allEvents.size());
+
+        EventData master = null;
+        EventData recurrence = null;
+        for (EventData event : allEvents) {
+            if (EventManager.isSeriesMaster(event)) {
+                master = event;
+            } else {
+                recurrence = event;
+            }
+            
+        }
+        assertNotNull(master);
+        assertNotNull(recurrence);
+
+        String seriesId = master.getSeriesId();
+        assertEquals(seriesId, recurrence.getSeriesId());
+        EventData reloadedRecurringEvent = eventManager.getRecurringEvent(recurrence.getId(), recurrence.getRecurrenceId(), newFolderId, false);
+
+        assertEquals(recurrence.getRecurrenceId(), reloadedRecurringEvent.getRecurrenceId());
+        assertEquals(recurrence.getStartDate().getValue(), reloadedRecurringEvent.getStartDate().getValue());
+        assertEquals(recurrence.getEndDate().getValue(), reloadedRecurringEvent.getEndDate().getValue());
     }
 
     // =====================================================================================
@@ -905,7 +921,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
 
     @Test
     public void testMultipleGet_forbiddenAndSecondRequestNotFound_changeExceptionInResponse() throws ApiException, OXException, IOException, JSONException {
-        String externalUri = "http://example.com/files/testGet_forbiddenAndSecondRequestNotFound_changeExceptionInResponse.ics";
+        String externalUri = "http://example.com/files/testMultipleGet_forbiddenAndSecondRequestNotFound_changeExceptionInResponse.ics";
         clear(externalUri);
         mock(externalUri, BasicICalCalendarProviderTestConstants.GENERIC_RESPONSE, HttpStatus.SC_FORBIDDEN);
 

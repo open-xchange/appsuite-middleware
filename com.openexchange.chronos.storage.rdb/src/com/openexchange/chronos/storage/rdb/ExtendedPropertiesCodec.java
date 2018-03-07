@@ -241,7 +241,7 @@ public class ExtendedPropertiesCodec {
 
     private static JSONArray encodeJsonProperties(ExtendedProperties extendedProperties) throws JSONException {
         if (null == extendedProperties || extendedProperties.isEmpty()) {
-            return null;
+            return new JSONArray();
         }
         JSONArray jsonExtendedProperties = new JSONArray(extendedProperties.size());
         for (int i = 0; i < extendedProperties.size(); i++) {

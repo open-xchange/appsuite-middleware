@@ -258,6 +258,22 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         return null;
     }
 
+    /**
+     * Optionally gets the timestamp when the calendar data was last updated.
+     *
+     * @return The timestamp of the last update, or <code>null</code> if unknown
+     */
+    protected Long optLastUpdate() {
+        JSONObject cachingConfig = account.getInternalConfiguration().optJSONObject(CachingCalendarAccessConstants.CACHING);
+        if (null != cachingConfig) {
+            long value = cachingConfig.optLong(CachingCalendarAccessConstants.LAST_UPDATE, 0L);
+            if (0 < value) {
+                return Long.valueOf(value);
+            }
+        }
+        return null;
+    }
+
     private void cache() throws OXException {
         ProcessingType type = getProcessingType();
         if (type != ProcessingType.READ_DB) {
