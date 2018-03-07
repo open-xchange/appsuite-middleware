@@ -57,6 +57,7 @@ import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.FolderProperty;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -97,6 +98,9 @@ public class ExtendedPropertiesField extends FolderField {
     public FolderProperty parse(Object value) {
         try {
             DataHandler dataHandler = ServerServiceRegistry.getServize(ConversionService.class).getDataHandler(DataHandlers.JSON2XPROPERTIES);
+            if (null == dataHandler) {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("No such data handler: " + DataHandlers.JSON2XPROPERTIES);
+            }
             ConversionResult result = dataHandler.processData(new SimpleData<Object>(value), new DataArguments(), null);
             return new FolderProperty(getName(), result.getData());
         } catch (Exception e) {
@@ -110,6 +114,9 @@ public class ExtendedPropertiesField extends FolderField {
         if (null != property) {
             try {
                 DataHandler dataHandler = ServerServiceRegistry.getServize(ConversionService.class).getDataHandler(DataHandlers.XPROPERTIES2JSON);
+                if (null == dataHandler) {
+                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create("No such data handler: " + DataHandlers.XPROPERTIES2JSON);
+                }
                 ConversionResult result = dataHandler.processData(new SimpleData<Object>(property.getValue()), new DataArguments(), null);
                 return result.getData();
             } catch (Exception e) {
