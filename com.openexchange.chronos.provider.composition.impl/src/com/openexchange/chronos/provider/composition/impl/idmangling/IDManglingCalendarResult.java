@@ -50,6 +50,7 @@
 package com.openexchange.chronos.provider.composition.impl.idmangling;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CreateResult;
@@ -104,7 +105,7 @@ public class IDManglingCalendarResult implements CalendarResult {
     public List<DeleteResult> getDeletions() {
         List<DeleteResult> deletions = delegate.getDeletions();
         if (null == deletions) {
-            return null;
+            return Collections.emptyList();
         }
         List<DeleteResult> idManglingDeletions = new ArrayList<DeleteResult>(deletions.size());
         for (DeleteResult deletion : deletions) {
@@ -117,7 +118,7 @@ public class IDManglingCalendarResult implements CalendarResult {
     public List<UpdateResult> getUpdates() {
         List<UpdateResult> updates = delegate.getUpdates();
         if (null == updates) {
-            return null;
+            return Collections.emptyList();
         }
         List<UpdateResult> idManglingUpdates = new ArrayList<UpdateResult>(updates.size());
         for (UpdateResult update : updates) {
@@ -130,7 +131,7 @@ public class IDManglingCalendarResult implements CalendarResult {
     public List<CreateResult> getCreations() {
         List<CreateResult> creations = delegate.getCreations();
         if (null == creations) {
-            return null;
+            return Collections.emptyList();
         }
         List<CreateResult> idManglingCreations = new ArrayList<CreateResult>(creations.size());
         for (CreateResult creation : creations) {
