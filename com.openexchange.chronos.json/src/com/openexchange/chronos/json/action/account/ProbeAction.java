@@ -115,12 +115,18 @@ public class ProbeAction extends ChronosAction {
     private static CalendarSettings parseSettings(JSONObject jsonObject) throws OXException {
         CalendarSettings settings = new CalendarSettings();
         if (jsonObject.has("title")) {
-            settings.setName(jsonObject.optString("title", null));
+            try {
+                settings.setName(jsonObject.optString("title", jsonObject.getString("title")));
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
+            }
         }
         if (jsonObject.has(CALENDAR_CONFIG_FIELD.getName())) {
             try {
                 FolderProperty property = CALENDAR_CONFIG_FIELD.parse(jsonObject.get(CALENDAR_CONFIG_FIELD.getName()));
-                settings.setConfig((JSONObject) property.getValue());
+                if (null != property) {
+                    settings.setConfig((JSONObject) property.getValue());
+                }
             } catch (ClassCastException | JSONException e) {
                 throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
             }
@@ -128,7 +134,9 @@ public class ProbeAction extends ChronosAction {
         if (jsonObject.has(EXTENDED_PROPERTIES_FIELD.getName())) {
             try {
                 FolderProperty property = EXTENDED_PROPERTIES_FIELD.parse(jsonObject.get(EXTENDED_PROPERTIES_FIELD.getName()));
-                settings.setExtendedProperties((ExtendedProperties) property.getValue());
+                if (null != property) {
+                    settings.setExtendedProperties((ExtendedProperties) property.getValue());
+                }
             } catch (ClassCastException | JSONException e) {
                 throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
             }

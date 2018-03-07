@@ -133,7 +133,7 @@ public class DeleteAction extends ChronosAction {
         }
     }
 
-    public class ErrorAwareCalendarResult implements CalendarResult {
+    static class ErrorAwareCalendarResult implements CalendarResult {
 
         private final OXException error;
         private final EventID id;
