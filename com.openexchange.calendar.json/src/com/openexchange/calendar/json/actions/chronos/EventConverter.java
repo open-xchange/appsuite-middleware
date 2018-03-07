@@ -444,8 +444,12 @@ public abstract class EventConverter {
                 long timestamp;
                 if (null != appointment.getStartDate()) {
                     timestamp = appointment.getStartDate().getTime();
-                } else if (null != originalEventHolder.get()) {
-                    timestamp = originalEventHolder.get().getStartDate().getTimestamp();
+                } else if (null != originalEventHolder) {
+                    if (null != originalEventHolder.get()) {
+                        timestamp = originalEventHolder.get().getStartDate().getTimestamp();
+                    } else {
+                        throw AjaxExceptionCodes.MISSING_FIELD.create(CalendarFields.START_DATE); // no other chance
+                    }
                 } else {
                     throw AjaxExceptionCodes.MISSING_FIELD.create(CalendarFields.START_DATE); // no other chance
                 }
@@ -464,7 +468,15 @@ public abstract class EventConverter {
                 if (null != appointment.getEndDate()) {
                     timestamp = appointment.getEndDate().getTime();
                 } else {
-                    timestamp = originalEventHolder.get().getEndDate().getTimestamp();
+                    if (null != originalEventHolder) {
+                        if (null != originalEventHolder.get()) {
+                            timestamp = originalEventHolder.get().getEndDate().getTimestamp();
+                        } else {
+                            throw AjaxExceptionCodes.MISSING_FIELD.create(CalendarFields.END_DATE); // no other chance
+                        }
+                    } else {
+                        throw AjaxExceptionCodes.MISSING_FIELD.create(CalendarFields.END_DATE); // no other chance
+                    }
                 }
                 if (isAllDay(appointment, originalEventHolder)) {
                     event.setEndDate(new DateTime(timestamp).toAllDay());
@@ -483,16 +495,20 @@ public abstract class EventConverter {
             if (null == appointment.getRecurrenceDatePosition()) {
                 event.setRecurrenceId(null);
             } else {
-                RecurrenceData recurrenceData = originalEventHolder.getRecurrenceData();
-                event.setRecurrenceId(Appointment2Event.getRecurrenceID(getRecurrenceService(), recurrenceData, appointment.getRecurrenceDatePosition()));
+                if (null != originalEventHolder) {
+                    RecurrenceData recurrenceData = originalEventHolder.getRecurrenceData();
+                    event.setRecurrenceId(Appointment2Event.getRecurrenceID(getRecurrenceService(), recurrenceData, appointment.getRecurrenceDatePosition()));
+                }
             }
         }
         if (appointment.containsRecurrencePosition()) {
             if (0 >= appointment.getRecurrencePosition()) {
                 event.setRecurrenceId(null);
             } else {
-                RecurrenceData recurrenceData = originalEventHolder.getRecurrenceData();
-                event.setRecurrenceId(Appointment2Event.getRecurrenceID(getRecurrenceService(), recurrenceData, appointment.getRecurrencePosition()));
+                if (null != originalEventHolder) {
+                    RecurrenceData recurrenceData = originalEventHolder.getRecurrenceData();
+                    event.setRecurrenceId(Appointment2Event.getRecurrenceID(getRecurrenceService(), recurrenceData, appointment.getRecurrencePosition()));
+                }
             }
         }
         if (appointment.containsRecurrenceType()) {
@@ -507,16 +523,20 @@ public abstract class EventConverter {
             if (null == appointment.getChangeException()) {
                 event.setChangeExceptionDates(null);
             } else {
-                RecurrenceData recurrenceData = originalEventHolder.getRecurrenceData();
-                event.setChangeExceptionDates(Appointment2Event.getRecurrenceIDs(getRecurrenceService(), recurrenceData, Arrays.asList(appointment.getChangeException())));
+                if (null != originalEventHolder) {
+                    RecurrenceData recurrenceData = originalEventHolder.getRecurrenceData();
+                    event.setChangeExceptionDates(Appointment2Event.getRecurrenceIDs(getRecurrenceService(), recurrenceData, Arrays.asList(appointment.getChangeException())));
+                }
             }
         }
         if (appointment.containsDeleteExceptions()) {
             if (null == appointment.getDeleteException()) {
                 event.setDeleteExceptionDates(null);
             } else {
-                RecurrenceData recurrenceData = originalEventHolder.getRecurrenceData();
-                event.setDeleteExceptionDates(Appointment2Event.getRecurrenceIDs(getRecurrenceService(), recurrenceData, Arrays.asList(appointment.getDeleteException())));
+                if (null != originalEventHolder) {
+                    RecurrenceData recurrenceData = originalEventHolder.getRecurrenceData();
+                    event.setDeleteExceptionDates(Appointment2Event.getRecurrenceIDs(getRecurrenceService(), recurrenceData, Arrays.asList(appointment.getDeleteException())));
+                }
             }
         }
         //appointment.getNotification();

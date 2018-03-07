@@ -80,9 +80,9 @@ public class ChronosCommonEvent implements CommonEvent {
     private final Map<Integer, Set<Integer>> affectedUsersWithFolders;
 
     /**
-     * 
+     *
      * Initializes a new {@link ChronosCommonEvent}.
-     * 
+     *
      * @param event To get session, user ID and context ID from
      * @param actionID The actionID propagate by this event
      * @param actionEvent The new or updated {@link Event}
@@ -92,9 +92,9 @@ public class ChronosCommonEvent implements CommonEvent {
     }
 
     /**
-     * 
+     *
      * Initializes a new {@link ChronosCommonEvent}.
-     * 
+     *
      * @param event To get session, user ID and context ID from
      * @param actionID The actionID propagate by this event
      * @param actionEvent The new or updated {@link Event}
@@ -128,15 +128,6 @@ public class ChronosCommonEvent implements CommonEvent {
         return actionEvent;
     }
 
-    /**
-     * Get the actionID {@link Event}
-     * 
-     * @return The event
-     */
-    public Event getActionEvent() {
-        return actionEvent;
-    }
-
     @Override
     public Object getOldObj() {
         return oldEvent;
@@ -144,7 +135,7 @@ public class ChronosCommonEvent implements CommonEvent {
 
     /**
      * Get the old {@link Event} in case of an update
-     * 
+     *
      * @return The old event or <code>null</code>
      */
     public Event getOldEvent() {
@@ -156,27 +147,9 @@ public class ChronosCommonEvent implements CommonEvent {
         return null == oldEvent ? null : oldEvent.getFolderId();
     }
 
-    /***
-     * Get the identifier of the source folder
-     * 
-     * @return The identifier or an empty string
-     */
-    public String getSourceFolderID() {
-        return null == oldEvent ? new String() : oldEvent.getFolderId();
-    }
-
     @Override
     public Object getDestinationFolder() {
         return null == actionEvent ? null : actionEvent.getFolderId();
-    }
-
-    /**
-     * Get the identifier of the destination folder
-     * 
-     * @return The identifier or an empty string
-     */
-    public String getDestinationFolderID() {
-        return null == actionEvent ? new String() : actionEvent.getFolderId();
     }
 
     @Override
@@ -196,24 +169,26 @@ public class ChronosCommonEvent implements CommonEvent {
 
     /**
      * Converts the output from {@link CalendarEvent#getAffectedFoldersPerUser()} to a map that can be used for {@link CommonEvent#getAffectedUsersWithFolder()}
-     * 
+     *
      * @param affectedUsersWithFolders Output from {@link CalendarEvent#getAffectedFoldersPerUser()}
      * @return A {@link Map} with converted value to a {@link Set} of {@link Integer}s
      */
     private Map<Integer, Set<Integer>> getAffected(Map<Integer, List<String>> affectedUsersWithFolders) {
         Map<Integer, Set<Integer>> retval = new LinkedHashMap<Integer, Set<Integer>>(affectedUsersWithFolders.size());
-        for (Integer user : affectedUsersWithFolders.keySet()) {
+        for (Map.Entry<Integer, List<String>> entry : affectedUsersWithFolders.entrySet()) {
             // Convert for each user
-            Set<Integer> folders = new HashSet<>();
-            for (String folder : affectedUsersWithFolders.get(user)) {
+            List<String> folderIds = entry.getValue();
+            Set<Integer> folders = new HashSet<>(folderIds.size());
+            for (String folderId : folderIds) {
                 try {
                     // Multiple folder get silently dropped
-                    folders.add(Integer.valueOf(folder));
+                    folders.add(Integer.valueOf(folderId));
                 } catch (NumberFormatException e) {
-                    LOGGER.error("Can't parse folder with ID {}. The folder won't be part of the OSGi event to be propagated.", folder, e);
+                    LOGGER.error("Can't parse folder with ID {}. The folder won't be part of the OSGi event to be propagated.", folderId, e);
                 }
             }
             // Add the user-folder-pair
+            Integer user = entry.getKey();
             retval.put(user, folders);
         }
         return retval;

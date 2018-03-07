@@ -152,6 +152,13 @@ com.openexchange.calendar.extendedProperties:
       properties:
         value:
           type: string
+    lastUpdate:
+      type: object
+      description: indicates the timestamp of the last update of the contents for cached calendars
+      properties:
+        value:
+          type: integer
+          format: int64
 com.openexchange.calendar.config:
   type: object
   description: Holds arbitrary, provider-specific configuration data for calendar accounts.

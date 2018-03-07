@@ -71,10 +71,8 @@ public class AlarmTrigger implements Comparable<AlarmTrigger> {
     private Boolean pushed;
     private TimeZone timezone;
 
-    private final boolean isAccountSet = false;
     private boolean isActionSet=false;
     private boolean isAlarmSet=false;
-    private final boolean isContextIdSet = false;
     private boolean isEventIdSet=false;
     private boolean isRecurrenceIdSet = false;
     private boolean isTimeSet=false;
@@ -90,15 +88,6 @@ public class AlarmTrigger implements Comparable<AlarmTrigger> {
      */
     public AlarmTrigger() {
         super();
-    }
-
-    /**
-     * Gets the isAccountSet
-     *
-     * @return The isAccountSet
-     */
-    public boolean containsAccount() {
-        return isAccountSet;
     }
 
     /**
@@ -126,15 +115,6 @@ public class AlarmTrigger implements Comparable<AlarmTrigger> {
      */
     public boolean containsEventId() {
         return isEventIdSet;
-    }
-
-    /**
-     * Gets the isContextIdSet
-     *
-     * @return The isContextIdSet
-     */
-    public boolean containsContextId() {
-        return isContextIdSet;
     }
 
     public boolean containsPushed() {
@@ -346,7 +326,7 @@ public class AlarmTrigger implements Comparable<AlarmTrigger> {
     /**
      * Sets the pushed
      *
-     * @param processed A boolean indicating whether the alarm is pushed or not
+     * @param pushed A boolean indicating whether the alarm is pushed or not
      */
     public void setPushed(Boolean pushed) {
         this.pushed = pushed;
@@ -422,7 +402,8 @@ public class AlarmTrigger implements Comparable<AlarmTrigger> {
 
     /**
      * Checks whether the {@link AlarmTrigger} contains a timezone
-     * @return
+     * 
+     * @return <code>true</code> if a timezone is set, <code>false</code> otherwise
      */
     public boolean containsTimezone(){
         return isTimeZoneSet;
