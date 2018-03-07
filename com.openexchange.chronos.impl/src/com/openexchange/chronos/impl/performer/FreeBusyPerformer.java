@@ -409,8 +409,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      * @param timeZone The {@link TimeZone} of the user
      */
     private void expandRecurringInstances(Date from, Date until, Map<Attendee, Availability> availableTimes, TimeZone timeZone) throws OXException {
-        for (Attendee attendee : availableTimes.keySet()) {
-            Availability calendarAvailability = availableTimes.get(attendee);
+        for (Availability calendarAvailability : availableTimes.values()) {
             List<Available> auxAvailable = new ArrayList<>();
             Date endTime = new Date(CalendarUtils.getDateInTimeZone(calendarAvailability.getEndTime(), timeZone));
             for (Iterator<Available> iterator = calendarAvailability.getAvailable().iterator(); iterator.hasNext();) {
