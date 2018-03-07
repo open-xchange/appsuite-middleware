@@ -115,11 +115,7 @@ public class ProbeAction extends ChronosAction {
     private static CalendarSettings parseSettings(JSONObject jsonObject) throws OXException {
         CalendarSettings settings = new CalendarSettings();
         if (jsonObject.has("title")) {
-            try {
-                settings.setName(jsonObject.optString("title", jsonObject.getString("title")));
-            } catch (JSONException e) {
-                throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
-            }
+            settings.setName(jsonObject.optString("title", null));
         }
         if (jsonObject.has(CALENDAR_CONFIG_FIELD.getName())) {
             try {
