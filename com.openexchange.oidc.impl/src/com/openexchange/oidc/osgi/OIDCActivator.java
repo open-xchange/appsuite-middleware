@@ -94,8 +94,7 @@ public class OIDCActivator extends HousekeepingActivator{
             SessionReservationService.class,
             ContextService.class,
             UserService.class,
-            SessiondService.class,
-            SessionStorageService.class
+            SessiondService.class
         };
     }
 
@@ -114,6 +113,9 @@ public class OIDCActivator extends HousekeepingActivator{
     @Override
     protected synchronized void startBundle() throws Exception {
         Services.setServices(this);
+        trackService(SessionStorageService.class);
+        openTrackers();
+
         OIDCConfigImpl config = new OIDCConfigImpl(this);
 
         Logger logger = org.slf4j.LoggerFactory.getLogger(OIDCActivator.class);
