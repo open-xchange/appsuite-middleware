@@ -154,45 +154,6 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     }
 
     /**
-     * Updates the alarm trigger
-     *
-     * @param trigger The updated {@link AlarmTrigger}
-     * @throws OXException
-     */
-    @SuppressWarnings("unused")
-    private void updateAlarmTrigger(AlarmTrigger trigger) throws OXException {
-        Connection writeCon = dbProvider.getWriteConnection(context);
-        int updated = 0;
-        try {
-            txPolicy.setAutoCommit(writeCon, false);
-            updateAlarmTrigger(trigger, writeCon);
-            txPolicy.commit(writeCon);
-        } catch (SQLException e) {
-            throw asOXException(e);
-        } finally {
-            release(writeCon, updated);
-        }
-    };
-
-    private int updateAlarmTrigger(AlarmTrigger trigger, Connection writeCon) throws OXException {
-
-        try {
-            AlarmTriggerField[] assignedfields = MAPPER.getAssignedFields(trigger);
-            String sql = new StringBuilder().append("UPDATE calendar_alarm_trigger SET ").append(MAPPER.getAssignments(assignedfields)).append(" WHERE cid=? AND account=? AND alarm=?;").toString();
-            try (PreparedStatement stmt = writeCon.prepareStatement(sql)) {
-                int parameterIndex = 1;
-                parameterIndex = MAPPER.setParameters(stmt, parameterIndex, trigger, assignedfields);
-                stmt.setInt(parameterIndex++, context.getContextId());
-                stmt.setInt(parameterIndex++, accountId);
-                stmt.setInt(parameterIndex++, trigger.getAlarm());
-                return logExecuteUpdate(stmt);
-            }
-        } catch (SQLException e) {
-            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    /**
      * Lists alarm triggers for the given user until the given time in ascending order
      *
      * @param user The user id
