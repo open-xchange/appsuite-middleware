@@ -76,7 +76,8 @@ public abstract class AbstractOIDCExceptionHandler implements OIDCExceptionHandl
         if (isOauthFailure) {
             headTitle = "Authentication provider error";
             category += "oauth-error";
-            errorType += request.getParameter("error") != null ? request.getParameter("error") : "";
+            String error = request.getParameter("error");
+            errorType += error != null ? StringEscapeUtils.escapeHtml4(error) : "";
             String errorDesc = request.getParameter("error_description");
             errorDescription += errorDesc != null ? StringEscapeUtils.escapeHtml4(errorDesc) : "";
         } else {
