@@ -80,9 +80,9 @@ public class ChronosCommonEvent implements CommonEvent {
     private final Map<Integer, Set<Integer>> affectedUsersWithFolders;
 
     /**
-     * 
+     *
      * Initializes a new {@link ChronosCommonEvent}.
-     * 
+     *
      * @param event To get session, user ID and context ID from
      * @param actionID The actionID propagate by this event
      * @param actionEvent The new or updated {@link Event}
@@ -92,9 +92,9 @@ public class ChronosCommonEvent implements CommonEvent {
     }
 
     /**
-     * 
+     *
      * Initializes a new {@link ChronosCommonEvent}.
-     * 
+     *
      * @param event To get session, user ID and context ID from
      * @param actionID The actionID propagate by this event
      * @param actionEvent The new or updated {@link Event}
@@ -130,7 +130,7 @@ public class ChronosCommonEvent implements CommonEvent {
 
     /**
      * Get the actionID {@link Event}
-     * 
+     *
      * @return The event
      */
     public Event getActionEvent() {
@@ -144,7 +144,7 @@ public class ChronosCommonEvent implements CommonEvent {
 
     /**
      * Get the old {@link Event} in case of an update
-     * 
+     *
      * @return The old event or <code>null</code>
      */
     public Event getOldEvent() {
@@ -158,11 +158,11 @@ public class ChronosCommonEvent implements CommonEvent {
 
     /***
      * Get the identifier of the source folder
-     * 
+     *
      * @return The identifier or an empty string
      */
     public String getSourceFolderID() {
-        return null == oldEvent ? new String() : oldEvent.getFolderId();
+        return null == oldEvent ? "" : oldEvent.getFolderId();
     }
 
     @Override
@@ -172,11 +172,11 @@ public class ChronosCommonEvent implements CommonEvent {
 
     /**
      * Get the identifier of the destination folder
-     * 
+     *
      * @return The identifier or an empty string
      */
     public String getDestinationFolderID() {
-        return null == actionEvent ? new String() : actionEvent.getFolderId();
+        return null == actionEvent ? "" : actionEvent.getFolderId();
     }
 
     @Override
@@ -196,7 +196,7 @@ public class ChronosCommonEvent implements CommonEvent {
 
     /**
      * Converts the output from {@link CalendarEvent#getAffectedFoldersPerUser()} to a map that can be used for {@link CommonEvent#getAffectedUsersWithFolder()}
-     * 
+     *
      * @param affectedUsersWithFolders Output from {@link CalendarEvent#getAffectedFoldersPerUser()}
      * @return A {@link Map} with converted value to a {@link Set} of {@link Integer}s
      */
