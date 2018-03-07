@@ -284,7 +284,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             long lookAhead = req.getMax();
             boolean includeSent = req.optBool("includeSent", false);
             boolean ignoreSeen = req.optBool("unseen", false);
-            Boolean ignoreDeleted = getIgnoreDeleted(req);
+            Boolean ignoreDeleted = getIgnoreDeleted(req, false);
             boolean filterApplied = (ignoreSeen || (ignoreDeleted != null));
             if (filterApplied) {
                 // Ensure flags is contained in provided columns
