@@ -128,15 +128,6 @@ public class ChronosCommonEvent implements CommonEvent {
         return actionEvent;
     }
 
-    /**
-     * Get the actionID {@link Event}
-     *
-     * @return The event
-     */
-    public Event getActionEvent() {
-        return actionEvent;
-    }
-
     @Override
     public Object getOldObj() {
         return oldEvent;
@@ -156,27 +147,9 @@ public class ChronosCommonEvent implements CommonEvent {
         return null == oldEvent ? null : oldEvent.getFolderId();
     }
 
-    /***
-     * Get the identifier of the source folder
-     *
-     * @return The identifier or an empty string
-     */
-    public String getSourceFolderID() {
-        return null == oldEvent ? "" : oldEvent.getFolderId();
-    }
-
     @Override
     public Object getDestinationFolder() {
         return null == actionEvent ? null : actionEvent.getFolderId();
-    }
-
-    /**
-     * Get the identifier of the destination folder
-     *
-     * @return The identifier or an empty string
-     */
-    public String getDestinationFolderID() {
-        return null == actionEvent ? "" : actionEvent.getFolderId();
     }
 
     @Override
