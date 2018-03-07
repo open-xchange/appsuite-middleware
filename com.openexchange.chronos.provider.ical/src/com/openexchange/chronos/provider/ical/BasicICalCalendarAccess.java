@@ -51,6 +51,7 @@ package com.openexchange.chronos.provider.ical;
 
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.LAST_UPDATE;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
 import java.util.Collections;
@@ -115,7 +116,7 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
         extendedProperties.add(DESCRIPTION(internalConfig.optString("description", null)));
         extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
         extendedProperties.add(COLOR(internalConfig.optString("color", null), false));
-
+        extendedProperties.add(LAST_UPDATE(optLastUpdate()));
         CalendarSettings settings = new CalendarSettings();
         settings.setLastModified(account.getLastModified());
         settings.setConfig(account.getUserConfiguration());
@@ -123,7 +124,6 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
         settings.setExtendedProperties(extendedProperties);
         settings.setSubscribed(internalConfig.optBoolean("subscribed", true));
         settings.setError(optAccountError());
-
         return settings;
     }
 

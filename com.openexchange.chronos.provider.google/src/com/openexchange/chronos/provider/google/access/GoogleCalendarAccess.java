@@ -51,6 +51,7 @@ package com.openexchange.chronos.provider.google.access;
 
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.LAST_UPDATE;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
 import java.io.IOException;
@@ -359,6 +360,7 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
         extendedProperties.add(DESCRIPTION(internalConfig.optString(GoogleCalendarConfigField.DESCRIPTION, null), false));
         extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
         extendedProperties.add(COLOR(internalConfig.optString(GoogleCalendarConfigField.COLOR, null), false));
+        extendedProperties.add(LAST_UPDATE(optLastUpdate()));
         settings.setExtendedProperties(extendedProperties);
         settings.setSubscribed(true);
         settings.setError(optAccountError());
