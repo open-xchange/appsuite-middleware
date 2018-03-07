@@ -357,6 +357,7 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
         extendedProperties.add(COLOR(internalConfig.optString(GoogleCalendarConfigField.COLOR, null), false));
         settings.setExtendedProperties(extendedProperties);
         settings.setSubscribed(true);
+        settings.setError(optAccountError());
         return settings;
     }
 

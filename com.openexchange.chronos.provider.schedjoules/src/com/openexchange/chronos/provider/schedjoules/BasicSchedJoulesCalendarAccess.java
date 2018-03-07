@@ -129,6 +129,7 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
         settings.setConfig(account.getUserConfiguration());
         settings.setName(internalConfig.optString(SchedJoulesFields.NAME, DEFAULT_CALENDAR_NAME));
         settings.setExtendedProperties(extendedProperties);
+        settings.setError(optAccountError());
 
         return settings;
     }
