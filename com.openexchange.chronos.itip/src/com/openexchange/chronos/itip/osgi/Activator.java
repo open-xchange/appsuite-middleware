@@ -94,7 +94,12 @@ public class Activator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, TimerService.class, ContextService.class, CalendarStorageFactory.class, RecurrenceService.class, UserService.class, ResourceService.class, ICalService.class, CalendarService.class,
-            HtmlService.class, TemplateService.class, CalendarUtilities.class, HostnameService.class };
+            HtmlService.class, TemplateService.class, CalendarUtilities.class };
+    }
+
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class<?>[] { HostnameService.class };
     }
 
     @Override
