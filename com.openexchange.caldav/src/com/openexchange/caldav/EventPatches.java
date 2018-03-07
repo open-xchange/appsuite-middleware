@@ -723,6 +723,8 @@ public class EventPatches {
                  */
                 if (DAVUserAgent.IOS.equals(resource.getUserAgent()) || DAVUserAgent.MAC_CALENDAR.equals(resource.getUserAgent())) {
                     exportedEvent.setAlarms(Collections.singletonList(getEmptyDefaultAlarm()));
+                } else {
+                    exportedEvent.removeAlarms();
                 }
             } else {
                 List<Alarm> patchedAlarms = new ArrayList<Alarm>(exportedAlarms.size());
