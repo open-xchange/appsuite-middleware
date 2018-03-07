@@ -49,48 +49,47 @@
 
 package com.openexchange.oauth.impl.internal.groupware;
 
-import static com.openexchange.database.Databases.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.tableExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
 
 /**
  * {@link OAuthCreateTableTask} - Inserts necessary tables.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class OAuthCreateTableTask extends UpdateTaskAdapter {
+public class OAuthCreateTableTask extends AbstractOAuthUpdateTask {
 
     public OAuthCreateTableTask() {
         super();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
+     */
     @Override
     public String[] getDependencies() {
         return new String[] {};
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.internal.groupware.AbstractOAuthUpdateTask#innerPerform(java.sql.Connection, com.openexchange.groupware.update.PerformParameters)
+     */
     @Override
-    public void perform(final PerformParameters params) throws OXException {
-        Connection writeCon = params.getConnection();
-        PreparedStatement stmt = null;
-        try {
-            try {
-                if (tableExists(writeCon, "oauthAccounts")) {
-                    return;
-                }
-                stmt = writeCon.prepareStatement(CreateOAuthAccountTable.CREATE_TABLE_STATEMENT);
-                stmt.executeUpdate();
-            } catch (final SQLException e) {
-                throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-            }
-        } finally {
-            closeSQLStuff(null, stmt);
+    void innerPerform(Connection connection, PerformParameters performParameters) throws OXException, SQLException {
+        if (tableExists(connection, CreateOAuthAccountTable.TABLE_NAME)) {
+            return;
+        }
+        try (PreparedStatement stmt = connection.prepareStatement(CreateOAuthAccountTable.CREATE_TABLE_STATEMENT)) {
+            stmt.executeUpdate();
         }
     }
 }

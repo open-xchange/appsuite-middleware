@@ -57,6 +57,8 @@ import com.openexchange.database.AbstractCreateTableImpl;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CreateOAuthAccountTable extends AbstractCreateTableImpl {
+    
+    static final String TABLE_NAME = "oauthAccounts";
 
     public static final String CREATE_TABLE_STATEMENT =
         "CREATE TABLE oauthAccounts (" +
@@ -92,7 +94,7 @@ public final class CreateOAuthAccountTable extends AbstractCreateTableImpl {
 
     private static final String[] requiredTables = { "user" };
 
-    private static final String[] createdTables = { "oauthAccounts" };
+    private static final String[] createdTables = { TABLE_NAME };
 
     private static final String[] createStatements = { CREATE_TABLE_STATEMENT };
 

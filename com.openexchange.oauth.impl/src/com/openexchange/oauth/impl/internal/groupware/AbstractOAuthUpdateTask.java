@@ -51,46 +51,60 @@ package com.openexchange.oauth.impl.internal.groupware;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.tools.update.Column;
-import com.openexchange.tools.update.Tools;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
 
 /**
- * {@link OAuthAddIdentityColumnTask}
+ * {@link AbstractOAuthUpdateTask}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since 7.10.0
  */
-public class OAuthAddIdentityColumnTask extends AbstractOAuthUpdateTask {
+abstract class AbstractOAuthUpdateTask extends UpdateTaskAdapter {
 
     /**
-     * Initialises a new {@link OAuthAddIdentityColumnTask}.
+     * Initialises a new {@link AbstractOAuthUpdateTask}.
      */
-    public OAuthAddIdentityColumnTask() {
+    public AbstractOAuthUpdateTask() {
         super();
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.oauth.impl.internal.groupware.AbstractOAuthUpdateTask#innerPerform(java.sql.Connection, com.openexchange.groupware.update.PerformParameters)
+     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
      */
     @Override
-    void innerPerform(Connection connection, PerformParameters performParameters) throws OXException, SQLException {
-        if (Tools.columnExists(connection, CreateOAuthAccountTable.TABLE_NAME, "identity")) {
-            return;
+    public void perform(PerformParameters params) throws OXException {
+        Connection connection = params.getConnection();
+        boolean rollback = false;
+        try {
+            Databases.startTransaction(connection);
+            rollback = true;
+            innerPerform(connection, params);
+            connection.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                Databases.rollback(connection);
+            }
+            Databases.autocommit(connection);
         }
-        Tools.addColumns(connection, CreateOAuthAccountTable.TABLE_NAME, new Column("identity", "varchar(767)"));
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Performs the update task
      * 
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
+     * @param connection The {@link Connection} to use
+     * @param performParameters The {@link PerformParameters}
+     * @throws OXException if an error is occurred
+     * @throws SQLException if an SQL error is occurred
      */
-    @Override
-    public String[] getDependencies() {
-        return new String[] { OAuthCreateTableTask2.class.getName() };
-    }
+    abstract void innerPerform(Connection connection, PerformParameters performParameters) throws SQLException, OXException;
 }
