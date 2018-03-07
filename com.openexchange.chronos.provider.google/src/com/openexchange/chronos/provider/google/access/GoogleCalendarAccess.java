@@ -261,9 +261,11 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
     protected static JSONObject writeExtendedProperties(ConversionService conversionService, ExtendedProperties properties) throws OXException {
         if (null != properties) {
             DataHandler dataHandler = conversionService.getDataHandler(DataHandlers.XPROPERTIES2JSON);
-            ConversionResult result = dataHandler.processData(new SimpleData<ExtendedProperties>(properties), new DataArguments(), null);
-            if (null != result && null != result.getData() && JSONObject.class.isInstance(result.getData())) {
-                return (JSONObject) result.getData();
+            if (null != dataHandler) {
+                ConversionResult result = dataHandler.processData(new SimpleData<ExtendedProperties>(properties), new DataArguments(), null);
+                if (null != result && null != result.getData() && JSONObject.class.isInstance(result.getData())) {
+                    return (JSONObject) result.getData();
+                }
             }
         }
         return null;
