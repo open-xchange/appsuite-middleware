@@ -183,7 +183,7 @@ public class Executor extends Assert {
                 httpRequest = httpPut;
                 break;
             default:
-                throw AjaxExceptionCodes.IMVALID_PARAMETER.create(request.getMethod().name());
+                throw AjaxExceptionCodes.INVALID_PARAMETER.create(request.getMethod().name());
         }
         for (final Header header : request.getHeaders()) {
             if (method == Method.POST) {
@@ -316,7 +316,7 @@ public class Executor extends Assert {
                 req = put;
                 break;
             default:
-                throw AjaxExceptionCodes.IMVALID_PARAMETER.create(request.getMethod().name());
+                throw AjaxExceptionCodes.INVALID_PARAMETER.create(request.getMethod().name());
         }
         final WebConversation conv = session.getConversation();
         final WebResponse resp;
