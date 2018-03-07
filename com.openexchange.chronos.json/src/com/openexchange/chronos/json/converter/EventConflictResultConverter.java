@@ -78,6 +78,13 @@ public class EventConflictResultConverter implements ResultConverter {
 
     public static final String INPUT_FORMAT = "eventConflict";
 
+    /**
+     * Initializes a new {@link EventConflictResultConverter}.
+     */
+    public EventConflictResultConverter() {
+        super();
+    }
+
     @Override
     public String getInputFormat() {
         return INPUT_FORMAT;
@@ -97,7 +104,7 @@ public class EventConflictResultConverter implements ResultConverter {
     @Override
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         /*
-         * Determine timezone
+         * Determine time zone
          */
         String timeZoneID = requestData.getParameter(ChronosGeneralJsonFields.TIMEZONE);
         if (null == timeZoneID) {
@@ -120,11 +127,11 @@ public class EventConflictResultConverter implements ResultConverter {
     }
 
     private JSONObject convertProblematics(ProblematicAttribute[] problematics, String timeZoneID, Session session) throws OXException {
-        JSONObject result = new JSONObject(1);
-        JSONArray conflicts = new JSONArray(problematics.length);
         try {
-            for(ProblematicAttribute problematic: problematics){
-                if(problematic instanceof EventConflict){
+            JSONObject result = new JSONObject(1);
+            JSONArray conflicts = new JSONArray(problematics.length);
+            for (ProblematicAttribute problematic : problematics) {
+                if (problematic instanceof EventConflict) {
                     EventConflict conflict = (EventConflict) problematic;
                     JSONObject jsonConflict = new JSONObject(2);
                     jsonConflict.put(ChronosEventConflictJsonFields.EventConflict.HARD_CONFLICT, conflict.isHardConflict());
@@ -134,16 +141,15 @@ public class EventConflictResultConverter implements ResultConverter {
                 }
             }
             result.put(ChronosEventConflictJsonFields.CONFLICTS, conflicts);
+            return result;
         } catch (JSONException e) {
             throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
         }
-        return result;
     }
 
-    private JSONArray parseAttendees(List<Attendee> attendees) throws JSONException{
+    private JSONArray parseAttendees(List<Attendee> attendees) throws JSONException {
         JSONArray result = new JSONArray(attendees.size());
-        for(Attendee attendee: attendees){
-            EventMapper.getInstance();
+        for (Attendee attendee : attendees) {
             result.put(EventMapper.serializeCalendarUser(attendee));
         }
         return result;
