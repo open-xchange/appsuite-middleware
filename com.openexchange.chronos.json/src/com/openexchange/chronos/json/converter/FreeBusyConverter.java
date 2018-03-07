@@ -51,6 +51,7 @@ package com.openexchange.chronos.json.converter;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -117,10 +118,10 @@ public class FreeBusyConverter implements ResultConverter {
             try {
                 Map<Attendee, FreeBusyResult> map = (Map<Attendee, FreeBusyResult>) resultObject;
                 JSONArray array = new JSONArray(map.size());
-                for (Attendee att : map.keySet()) {
+                for (Entry<Attendee, FreeBusyResult> attendee : map.entrySet()) {
                     JSONObject json = new JSONObject(2);
-                    json.put(ChronosFreeBusyJsonFields.ATTENDEE, ((AttendeesMapping<?>)EventMapper.getInstance().get(EventField.ATTENDEES)).serialize(att, TimeZone.getTimeZone(timeZoneID)));
-                    FreeBusyResult freeBusyResult = map.get(att);
+                    json.put(ChronosFreeBusyJsonFields.ATTENDEE, ((AttendeesMapping<?>) EventMapper.getInstance().get(EventField.ATTENDEES)).serialize(attendee.getKey(), TimeZone.getTimeZone(timeZoneID)));
+                    FreeBusyResult freeBusyResult = attendee.getValue();
                     json.put(ChronosFreeBusyJsonFields.FREE_BUSY_TIME, parseFreeBusyTime(freeBusyResult, session, timeZoneID));
                     if(freeBusyResult.getWarnings() != null && freeBusyResult.getWarnings().size()!=0){
                         JSONArray warningsArray = new JSONArray(freeBusyResult.getWarnings().size());
