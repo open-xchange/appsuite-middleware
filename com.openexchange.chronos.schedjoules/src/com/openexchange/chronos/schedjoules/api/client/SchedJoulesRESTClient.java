@@ -335,13 +335,19 @@ public class SchedJoulesRESTClient implements Closeable {
      */
     private String prepareQuery(Map<String, String> queryParameters) {
         if (queryParameters.isEmpty()) {
-            return new String();
+            return "";
         }
-        StringBuilder stringBuilder = new StringBuilder();
-        for (String name : queryParameters.keySet()) {
-            stringBuilder.append(name).append("=").append(queryParameters.get(name)).append("&");
+
+        StringBuilder stringBuilder = new StringBuilder(64);
+        boolean first = true;
+        for (Map.Entry<String, String> queryParameter : queryParameters.entrySet()) {
+            if (first) {
+                first = false;
+            } else {
+                stringBuilder.append('&');
+            }
+            stringBuilder.append(queryParameter.getKey()).append('=').append(queryParameter.getValue());
         }
-        stringBuilder.setLength(stringBuilder.length() - 1);
         return stringBuilder.toString();
     }
 
