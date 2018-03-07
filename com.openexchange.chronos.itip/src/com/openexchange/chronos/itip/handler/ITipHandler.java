@@ -267,6 +267,6 @@ public class ITipHandler implements CalendarHandler {
      * @return <code>true</code> if the series master got only an update on its exceptions, <code>false</code> otherwise
      */
     private boolean isMasterExceptionUpdate(UpdateResult update, List<CreateResult> creations) {
-        return CalendarUtils.isSeriesMaster(update.getUpdate()) && update.containsAnyChangeOf(MASTER_EXCEPTION_UPDATE) && creations.stream().filter(c -> update.getUpdate().getId().equals(c.getCreatedEvent().getSeriesId())).findAny().isPresent();
+        return CalendarUtils.isSeriesMaster(update.getUpdate()) && update.containsAnyChangeOf(MASTER_EXCEPTION_UPDATE) && null != creations && creations.stream().filter(c -> update.getUpdate().getId().equals(c.getCreatedEvent().getSeriesId())).findAny().isPresent();
     }
 }
