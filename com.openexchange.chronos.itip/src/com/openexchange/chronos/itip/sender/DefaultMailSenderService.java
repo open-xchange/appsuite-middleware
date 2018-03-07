@@ -377,7 +377,8 @@ public class DefaultMailSenderService implements MailSenderService {
                 }
             }
         } catch (IOException e) {
-            LOG.error("Couldn't read input stream.", e);
+            LOG.debug("Couldn't read input stream.", e);
+            throw new OXException(e);
         }
 
         final String contentType = ct.toString();
