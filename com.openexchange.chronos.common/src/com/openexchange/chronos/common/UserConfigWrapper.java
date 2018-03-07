@@ -192,6 +192,9 @@ public class UserConfigWrapper {
     }
 
     private JSONObject serializeAlarm(Alarm alarm) throws OXException {
+        if (null == alarm) {
+            return null;
+        }
         DataHandler dataHandler = conversionService.getDataHandler(ALARM2JSON);
         ConversionResult result = dataHandler.processData(new SimpleData<Alarm>(alarm), new DataArguments(), null);
         return (JSONObject) result.getData();
@@ -207,6 +210,9 @@ public class UserConfigWrapper {
     }
 
     private JSONArray serializeAvailability(Available[] availability) throws OXException {
+        if (null == availability) {
+            return null;
+        }
         DataHandler dataHandler = conversionService.getDataHandler(AVAILABLE2JSON);
         ConversionResult result = dataHandler.processData(new SimpleData<Available[]>(availability), new DataArguments(), null);
         return (JSONArray) result.getData();
