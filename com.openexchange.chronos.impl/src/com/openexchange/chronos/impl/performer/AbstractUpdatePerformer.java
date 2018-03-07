@@ -722,7 +722,7 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
         /*
          * apply "sent-by" property if someone is acting on behalf of the calendar user
          */
-        if (null != organizer && calendarUserId != session.getUserId()) {
+        if (calendarUserId != session.getUserId()) {
             organizer.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUserId()));
         }
         return organizer;
