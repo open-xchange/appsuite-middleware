@@ -141,17 +141,6 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
     private String syncToken;
 
     /**
-     * Initializes a new {@link EventCollection}.
-     *
-     * @param factory The factory
-     * @param url The WebDAV path
-     * @param folder The underlying folder, or <code>null</code> if it not yet exists
-     */
-    protected EventCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder) throws OXException {
-        this(factory, url, folder, CalendarOrder.NO_ORDER);
-    }
-
-    /**
      * Initializes a new {@link CalDAVFolderCollection}.
      *
      * @param factory The factory
@@ -162,7 +151,7 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
     public EventCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder, int order) throws OXException {
         super(factory, url, folder);
         this.factory = factory;
-        this.folderID = null != folder ? folder.getID() : null;
+        this.folderID = folder.getID();
         this.minDateTime = new MinDateTime(factory);
         this.maxDateTime = new MaxDateTime(factory);
         includeProperties(

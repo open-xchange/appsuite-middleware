@@ -49,8 +49,11 @@
 
 package com.openexchange.chronos.compat.impl.attachments;
 
+import static com.openexchange.chronos.common.CalendarUtils.isAttendeeSchedulingResource;
+import static com.openexchange.chronos.common.CalendarUtils.isClassifiedFor;
+import static com.openexchange.chronos.common.CalendarUtils.matches;
+import static com.openexchange.osgi.Tools.requireService;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarService;
@@ -62,10 +65,10 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.attach.AttachmentAuthorization;
 import com.openexchange.groupware.attach.AttachmentEvent;
 import com.openexchange.groupware.attach.AttachmentListener;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -78,7 +81,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class CalendarAttachmentHandler implements AttachmentAuthorization, AttachmentListener {
 
-    private final ServiceLookup serivces;
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link CalendarAttachmentHandler}.
@@ -87,7 +90,7 @@ public class CalendarAttachmentHandler implements AttachmentAuthorization, Attac
      */
     public CalendarAttachmentHandler(ServiceLookup serivces) {
         super();
-        this.serivces = serivces;
+        this.services = serivces;
     }
 
     @Override
@@ -120,7 +123,7 @@ public class CalendarAttachmentHandler implements AttachmentAuthorization, Attac
             return -1;
         }
         EventID eventID = new EventID(String.valueOf(event.getFolderId()), String.valueOf(event.getAttachedId()));
-        CalendarSession calendarSession = requireService(CalendarService.class).init(event.getSession());
+        CalendarSession calendarSession = requireService(CalendarService.class, services).init(event.getSession());
         CalendarResult result = calendarSession.getCalendarService().touchEvent(calendarSession, eventID);
         if (0 < result.getUpdates().size()) {
             return result.getUpdates().get(0).getUpdate().getTimestamp();
@@ -135,28 +138,26 @@ public class CalendarAttachmentHandler implements AttachmentAuthorization, Attac
         /*
          * get event & check read access implicitly
          */
-        CalendarSession calendarSession = requireService(CalendarService.class).init(serverSession);
+        CalendarSession calendarSession = requireService(CalendarService.class, services).init(serverSession);
         EventID eventId = new EventID(String.valueOf(folderId), String.valueOf(objectId));
         Event event = calendarSession.getCalendarService().getEvent(calendarSession, eventId.getFolderID(), eventId);
-        if (CalendarUtils.isClassifiedFor(event, serverSession.getUserId())) {
+        if (isClassifiedFor(event, serverSession.getUserId())) {
             throw CalendarExceptionCodes.RESTRICTED_BY_CLASSIFICATION.create(String.valueOf(folderId), event.getId(), String.valueOf(event.getClassification()));
         }
         /*
-         * if write access is needed, check permissions for parent folder
+         * if write access is needed, check permissions for parent folder & require organizer role
          */
-        UserizedFolder folder = requireService(FolderService.class).getFolder(FolderStorage.REAL_TREE_ID, String.valueOf(folderId), serverSession, null);
-        int requiredWritePermission = CalendarUtils.matches(event.getCreatedBy(), serverSession.getUserId()) ? Permission.WRITE_OWN_OBJECTS : Permission.WRITE_OWN_OBJECTS;
-        if (folder.getOwnPermission().getWritePermission() < requiredWritePermission) {
-            throw CalendarExceptionCodes.NO_WRITE_PERMISSION.create(folder.getID());
+        if (write) {
+            UserizedFolder folder = requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, String.valueOf(folderId), serverSession, null);
+            int requiredWritePermission = matches(event.getCreatedBy(), serverSession.getUserId()) ? Permission.WRITE_OWN_OBJECTS : Permission.WRITE_ALL_OBJECTS;
+            if (folder.getOwnPermission().getWritePermission() < requiredWritePermission) {
+                throw CalendarExceptionCodes.NO_WRITE_PERMISSION.create(folder.getID());
+            }
+            int calendarUserId = SharedType.getInstance().equals(folder.getType()) ? folder.getCreatedBy() : serverSession.getUserId();
+            if (isAttendeeSchedulingResource(event, calendarUserId)) {
+                throw CalendarExceptionCodes.NOT_ORGANIZER.create(folder.getID(), event.getId(), event.getOrganizer().getUri(), event.getOrganizer().getSentBy());
+            }
         }
-    }
-
-    private <S extends Object> S requireService(Class<? extends S> clazz) throws OXException {
-        S service = serivces.getService(clazz);
-        if (null == service) {
-            throw ServiceExceptionCode.absentService(clazz);
-        }
-        return service;
     }
 
     private static boolean isManagedInternally(Session session) {
