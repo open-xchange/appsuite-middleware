@@ -507,16 +507,20 @@ public abstract class EventConverter {
             if (null == appointment.getChangeException()) {
                 event.setChangeExceptionDates(null);
             } else {
-                RecurrenceData recurrenceData = originalEventHolder.getRecurrenceData();
-                event.setChangeExceptionDates(Appointment2Event.getRecurrenceIDs(getRecurrenceService(), recurrenceData, Arrays.asList(appointment.getChangeException())));
+                if (null != originalEventHolder) {                    
+                    RecurrenceData recurrenceData = originalEventHolder.getRecurrenceData();
+                    event.setChangeExceptionDates(Appointment2Event.getRecurrenceIDs(getRecurrenceService(), recurrenceData, Arrays.asList(appointment.getChangeException())));
+                }
             }
         }
         if (appointment.containsDeleteExceptions()) {
             if (null == appointment.getDeleteException()) {
                 event.setDeleteExceptionDates(null);
             } else {
-                RecurrenceData recurrenceData = originalEventHolder.getRecurrenceData();
-                event.setDeleteExceptionDates(Appointment2Event.getRecurrenceIDs(getRecurrenceService(), recurrenceData, Arrays.asList(appointment.getDeleteException())));
+                if (null != originalEventHolder) {                    
+                    RecurrenceData recurrenceData = originalEventHolder.getRecurrenceData();
+                    event.setDeleteExceptionDates(Appointment2Event.getRecurrenceIDs(getRecurrenceService(), recurrenceData, Arrays.asList(appointment.getDeleteException())));
+                }
             }
         }
         //appointment.getNotification();
