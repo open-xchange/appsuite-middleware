@@ -73,7 +73,7 @@ public class OriginalEnd extends DateProperty {
      */
     @Override
     public void validate() throws ValidationException {
-        // TODO Auto-generated method stub
+        // No validation
 
     }
 
