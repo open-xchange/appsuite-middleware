@@ -172,8 +172,7 @@ public class SelfProtectionFactory {
 
         public void checkMap(Map<?, ? extends Collection<Event>> map) throws OXException {
             int sum = 0;
-            for (Object key : map.keySet()) {
-                Collection<Event> collection = map.get(key);
+            for (Collection<Event> collection : map.values()) {
                 if (collection == null) {
                     continue;
                 }
