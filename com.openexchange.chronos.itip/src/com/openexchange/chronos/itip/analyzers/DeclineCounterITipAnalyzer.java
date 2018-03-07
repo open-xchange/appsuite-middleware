@@ -97,6 +97,9 @@ public class DeclineCounterITipAnalyzer extends AbstractITipAnalyzer {
                 break;
             }
         }
+        if (null == event) {
+            throw new OXException(new IllegalArgumentException("No appointment instance given"));
+        }
         analysis.setUid(event.getUid());
 
         Event declinedFor = util.resolveUid(event.getUid(), session);

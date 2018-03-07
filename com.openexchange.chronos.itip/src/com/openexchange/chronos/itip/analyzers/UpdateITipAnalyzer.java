@@ -112,13 +112,15 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         }
         Event original = util.resolveUid(uid, session);
 
-        if (original == null && update == null && message.numberOfExceptions() > 0) {
-            analysis.addAnnotation(new ITipAnnotation(Messages.ADD_TO_UNKNOWN, locale));
-            analysis.recommendAction(ITipAction.IGNORE);
-            return analysis;
-        }
-
-        if (update == null) {
+        if (null == update) {
+            if (null == original) {
+                if (message.numberOfExceptions() > 0) {
+                    analysis.addAnnotation(new ITipAnnotation(Messages.ADD_TO_UNKNOWN, locale));
+                    analysis.recommendAction(ITipAction.IGNORE);
+                    return analysis;
+                }
+                throw new OXException(new IllegalArgumentException("No appointment instance given"));
+            }
             update = original;
         }
         analysis.setUid(update.getUid());
