@@ -59,6 +59,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TimeZone;
 import com.google.common.collect.Lists;
 import com.openexchange.chronos.Alarm;
@@ -554,16 +555,16 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                     continue;
                 }
 
-                for (Integer userId : alarmsPerAttendee.keySet()) {
+                for (Entry<Integer, List<Alarm>> user : alarmsPerAttendee.entrySet()) {
 
-                    List<Alarm> alarms = alarmsPerAttendee.get(userId);
+                    List<Alarm> alarms = user.getValue();
                     if (alarms == null || alarms.isEmpty()) {
                         // Skip user in case no alarms available
                         continue;
                     }
                     for (Alarm alarm : alarms) {
 
-                        AlarmTrigger trigger = prepareTrigger(userId, alarm, event);
+                        AlarmTrigger trigger = prepareTrigger(user.getKey(), alarm, event);
                         if (trigger == null) {
                             // Skip past and invalid triggers
                             continue;
