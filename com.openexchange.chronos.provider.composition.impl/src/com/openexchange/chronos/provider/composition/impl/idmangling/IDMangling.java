@@ -519,15 +519,19 @@ public class IDMangling {
             OXExceptionCode exceptionCode = e.getExceptionCode();
             Object[] logArgs = e.getLogArgs();
             if (null != logArgs && 0 < logArgs.length && null != exceptionCode && null != exceptionCode.getMessage()) {
+                boolean adjusted = false;
                 Matcher matcher = FOLDER_ARGUMENT_PATTERN.matcher(exceptionCode.getMessage());
                 while (matcher.find()) {
                     int argumentIndex = Integer.parseInt(matcher.group(1));
                     if (0 < argumentIndex && argumentIndex <= logArgs.length && String.class.isInstance(logArgs[argumentIndex - 1])) {
                         logArgs[argumentIndex - 1] = getUniqueFolderId(accountId, (String) logArgs[argumentIndex - 1]);
+                        adjusted = true;
                     }
                 }
+                if (adjusted) {
+                    e.setLogMessage(exceptionCode.getMessage(), logArgs);
+                }
             }
-            e.setLogMessage(exceptionCode.getMessage(), logArgs);
         } catch (Exception x) {
             LoggerFactory.getLogger(IDMangling.class).warn(
                 "Unexpected error while attempting to replace exception log arguments for {}", e.getLogMessage(), x);
