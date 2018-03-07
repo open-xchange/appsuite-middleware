@@ -89,7 +89,6 @@ public class ICalUtilitiesImpl implements ICalUtilities {
         this.mapper = mapper;
     }
 
-
     @Override
     public List<Alarm> importAlarms(InputStream inputStream, ICalParameters parameters) throws OXException {
         parameters = getParametersOrDefault(parameters);
@@ -108,8 +107,7 @@ public class ICalUtilitiesImpl implements ICalUtilities {
 
     @Override
     public List<TimeZone> importTimeZones(InputStream inputStream, ICalParameters parameters) throws OXException {
-        parameters = getParametersOrDefault(parameters);
-
+        // parameters = getParametersOrDefault(parameters);
         return null;
     }
 
@@ -156,10 +154,10 @@ public class ICalUtilitiesImpl implements ICalUtilities {
         net.fortuna.ical4j.model.TimeZone timeZone = timeZoneRegistry.getTimeZone(timeZoneID);
         if (null != timeZone) {
             return timeZone.getVTimeZone();
-        } else {
-            warnings.add(ICalExceptionCodes.CONVERSION_FAILED.create(Component.VTIMEZONE, "No timezone '" + timeZoneID + "' registered."));
-            return null;
         }
+
+        warnings.add(ICalExceptionCodes.CONVERSION_FAILED.create(Component.VTIMEZONE, "No timezone '" + timeZoneID + "' registered."));
+        return null;
     }
 
 }
