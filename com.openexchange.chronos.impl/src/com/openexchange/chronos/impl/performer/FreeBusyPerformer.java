@@ -342,10 +342,10 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         // Disabled until further notice
         if (!AVAILABILITY_ENABLED) {
             Map<Attendee, FreeBusyResult> results = new HashMap<>();
-            for (Attendee attendee : freeBusyPerAttendee.keySet()) {
+            for (Map.Entry<Attendee, List<FreeBusyTime>> attendeeEntry : freeBusyPerAttendee.entrySet()) {
                 FreeBusyResult result = new FreeBusyResult();
-                result.setFreeBusyTimes(freeBusyPerAttendee.get(attendee));
-                results.put(attendee, result);
+                result.setFreeBusyTimes(attendeeEntry.getValue());
+                results.put(attendeeEntry.getKey(), result);
             }
             return results;
         }
