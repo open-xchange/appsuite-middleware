@@ -364,6 +364,14 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     }
 
                     /*
+                     * Properly inherit permissions
+                     */
+                    if ((storageFolder.getContentType().getModule() == FolderObject.INFOSTORE && folder.getContentType() == null) || (folder.getContentType() != null && folder.getContentType().getModule() == FolderObject.INFOSTORE)) {
+                        addjustPermissionType(folder, storageFolder);
+                        addParentLinkPermission(folder, oldParentId, storage);
+                    }
+
+                    /*
                      * Check permissions of anonymous guest users
                      */
                     checkGuestPermissions(storageFolder, comparedPermissions);
@@ -378,13 +386,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                          * Switch back to false before update due to the recursive nature of FolderStorage.updateFolder in some implementations
                          */
                         decorator.put("cascadePermissions", Boolean.FALSE);
-                    }
-
-                    /*
-                     * Properly inherit permissions
-                     */
-                    if ((storageFolder.getContentType().getModule() == FolderObject.INFOSTORE && folder.getContentType() == null) || (folder.getContentType() != null && folder.getContentType().getModule() == FolderObject.INFOSTORE)) {
-                        addParentLinkPermission(folder, oldParentId, storage);
                     }
 
                     /*
@@ -522,6 +523,26 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
     } // End of doUpdate()
 
     /**
+     * Makes sure that legator permissions didn't get lost.
+     *
+     * @param updated The updated folder
+     * @param original The original folder
+     */
+    private void addjustPermissionType(Folder updated, Folder original) {
+        for(Permission origPerm : original.getPermissions()) {
+            if(FolderPermissionType.LEGATOR.equals(origPerm.getType())) {
+                // Adjust type of existing permission
+                for(Permission updatedPerm: updated.getPermissions()) {
+                    if(updatedPerm.getEntity()==origPerm.getEntity() && updatedPerm.isGroup() == origPerm.isGroup()) {
+                        updatedPerm.setType(FolderPermissionType.LEGATOR);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Add missing permissions to the folder which must be inherited from the parent folder
      *
      * @param folder The folder to check
@@ -539,7 +560,13 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             if (perm.getType() == FolderPermissionType.INHERITED || perm.getType() == FolderPermissionType.LEGATOR) {
                 boolean exists = false;
                 for (Permission tmp : folder.getPermissions()) {
-                    if (tmp.getEntity() == perm.getEntity() && tmp.isGroup() == perm.isGroup() && tmp.getType() == FolderPermissionType.INHERITED) {
+                    if (tmp.getEntity() == perm.getEntity() && tmp.isGroup() == perm.isGroup()) {
+                        tmp.setType(FolderPermissionType.INHERITED);
+                        if(perm.getType() == FolderPermissionType.LEGATOR) {
+                            tmp.setPermissionLegator(parentId);
+                        } else {
+                            tmp.setPermissionLegator(perm.getPermissionLegator());
+                        }
                         exists = true;
                         break;
                     }

@@ -93,7 +93,7 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
 
     /**
      * Initializes a new {@link BasicICalCalendarAccess}.
-     * 
+     *
      * @param services The {@link ServiceLookup} instance
      * @param session The calendar session
      * @param account The calendar account
@@ -122,6 +122,7 @@ public class BasicICalCalendarAccess extends BasicCachingCalendarAccess {
         settings.setName(internalConfig.optString("name", "Calendar"));
         settings.setExtendedProperties(extendedProperties);
         settings.setSubscribed(internalConfig.optBoolean("subscribed", true));
+        settings.setError(optAccountError());
 
         return settings;
     }

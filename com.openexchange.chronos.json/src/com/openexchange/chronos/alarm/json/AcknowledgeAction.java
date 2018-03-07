@@ -100,7 +100,7 @@ public class AcknowledgeAction extends AbstractChronosAlarmAction {
             return new AJAXRequestResult();
         }
         for (Alarm alarm : alarms) {
-            if (alarm.getId() == alarmId) {
+            if (alarm.getId() == alarmId.intValue()) {
                 alarm.setAcknowledged(now);
                 break;
             }

@@ -101,7 +101,7 @@ public class SnoozeAction extends AbstractChronosAlarmAction {
         Date now = new Date();
         Integer alarmId = (Integer) parseAlarmParameter(requestData, AlarmParameters.PARAMETER_ALARM_ID, true);
         Long snooze = (Long) parseAlarmParameter(requestData, AlarmParameters.PARAMETER_SNOOZE_DURATION, true);
-        if (snooze <= 0) {
+        if (snooze.longValue() <= 0) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(AlarmParameters.PARAMETER_SNOOZE_DURATION, "The snooze time must be greater than 0");
         }
         EventID eventID = parseIdParameter(requestData);
@@ -109,7 +109,7 @@ public class SnoozeAction extends AbstractChronosAlarmAction {
         List<Alarm> alarms = event.getAlarms();
         Alarm alarmToSnooze = null;
         for(Alarm alarm: alarms){
-            if (alarm.getId() == alarmId) {
+            if (alarm.getId() == alarmId.intValue()) {
                 alarmToSnooze = alarm;
                 alarmToSnooze.setAcknowledged(now);
             }
@@ -119,7 +119,7 @@ public class SnoozeAction extends AbstractChronosAlarmAction {
         }
 
         Alarm snoozeAlarm = AlarmMapper.getInstance().copy(alarmToSnooze, null, (AlarmField[]) null);
-        Trigger trigger = new Trigger(new Date(now.getTime() + snooze));
+        Trigger trigger = new Trigger(new Date(now.getTime() + snooze.intValue()));
         snoozeAlarm.setTrigger(trigger);
         String uid = alarmToSnooze.getUid();
         if (Strings.isEmpty(uid)) {

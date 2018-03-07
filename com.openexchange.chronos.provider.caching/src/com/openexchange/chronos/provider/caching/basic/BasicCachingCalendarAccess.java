@@ -56,7 +56,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -69,6 +68,7 @@ import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
 import com.openexchange.chronos.provider.account.CalendarAccountService;
 import com.openexchange.chronos.provider.basic.BasicCalendarAccess;
+import com.openexchange.chronos.provider.basic.CalendarSettings;
 import com.openexchange.chronos.provider.caching.DiffAwareExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.handlers.SearchHandler;
@@ -225,17 +225,37 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
      * @throws OXException
      */
     private void containsError() throws OXException {
-        if (this.account.getInternalConfiguration().hasAndNotNull("lastError")) {
-            DataHandler dataHandler = Services.getService(ConversionService.class).getDataHandler(DataHandlers.JSON2OXEXCEPTION);
-            try {
-                ConversionResult result = dataHandler.processData(new SimpleData<JSONObject>(new JSONObject(this.account.getInternalConfiguration().get("lastError").toString())), new DataArguments(), null);
-                if (null != result && null != result.getData() && OXException.class.isInstance(result.getData())) {
-                    throw (OXException) result.getData();
+        OXException accountError = optAccountError();
+        if (null != accountError) {
+            throw accountError;
+        }
+    }
+
+    /**
+     * Optionally gets a persisted account error that occurred during previous cache update operations from the underlying configuration.
+     * <p/>
+     * If there is an account error, this error should be added when constructing the account's settings object for
+     * {@link BasicCalendarAccess#getSettings()}.
+     *
+     * @return The account error, or <code>null</code> if there is none
+     * @see {@link CalendarSettings#setError(OXException)}
+     */
+    protected OXException optAccountError() {
+        if (null != account.getInternalConfiguration()) {
+            JSONObject jsonObject = account.getInternalConfiguration().optJSONObject("lastError");
+            if (null != jsonObject) {
+                DataHandler dataHandler = Services.getService(ConversionService.class).getDataHandler(DataHandlers.JSON2OXEXCEPTION);
+                try {
+                    ConversionResult result = dataHandler.processData(new SimpleData<JSONObject>(jsonObject), new DataArguments(), null);
+                    if (null != result && null != result.getData() && OXException.class.isInstance(result.getData())) {
+                        return (OXException) result.getData();
+                    }
+                } catch (OXException e) {
+                    LOG.error("Unable to process data.", e);
                 }
-            } catch (JSONException e) {
-                LOG.error("Unable to process data.", e);
             }
         }
+        return null;
     }
 
     private void cache() throws OXException {
@@ -406,7 +426,7 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             accountService.updateAccount(session.getContextId(), session.getUserId(), account.getAccountId(), internalConfig, null, account.getLastModified().getTime());
             account = accountService.getAccount(session.getContextId(), session.getUserId(), account.getAccountId());
             if (null == account) {
-                CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(account.getAccountId());
+                throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(account.getAccountId());
             }
             caching = account.getInternalConfiguration().optJSONObject(CachingCalendarAccessConstants.CACHING);
             if (null == caching) {

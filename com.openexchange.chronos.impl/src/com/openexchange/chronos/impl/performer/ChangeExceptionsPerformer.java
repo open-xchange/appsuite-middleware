@@ -105,7 +105,8 @@ public class ChangeExceptionsPerformer extends AbstractQueryPerformer {
         if (null == event) {
             throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(seriesId);
         }
-        event = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), event, fields);
+        // Dead store to "event"
+        // event = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), event, fields);
         /*
          * construct search term to lookup all change exceptions
          */

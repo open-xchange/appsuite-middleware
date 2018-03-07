@@ -73,7 +73,7 @@ public abstract class AbstractChronosAlarmAction extends ChronosAction {
         super(services);
     }
 
-    public Object parseAlarmParameter(AJAXRequestData request, String parameter, boolean required) throws IllegalArgumentException, OXException {
+    public Object parseAlarmParameter(AJAXRequestData request, String parameter, boolean required) throws OXException {
 
         String value = request.getParameter(parameter);
         if (Strings.isEmpty(value)) {
@@ -89,7 +89,10 @@ public abstract class AbstractChronosAlarmAction extends ChronosAction {
                 case AlarmParameters.PARAMETER_SNOOZE_DURATION:
                     return Long.valueOf(value);
                 default:
-                    return null;
+                    if (false == required) {
+                        return null;
+                    }
+                    throw AjaxExceptionCodes.INVALID_PARAMETER.create(parameter);
             }
         } catch (IllegalArgumentException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, parameter, value);

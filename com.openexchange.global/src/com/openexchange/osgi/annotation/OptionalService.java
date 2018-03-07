@@ -47,59 +47,19 @@
  *
  */
 
-package com.openexchange.server.impl;
+package com.openexchange.osgi.annotation;
 
-import com.openexchange.exception.OXException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 
 /**
+ * {@link OptionalService} - Annotates an <b>optional</b> OSGi service that can be tracked.
  *
- * {@link ComparedOCLFolderPermissions} is a helper class to calculate a diff of the ocl folder permissions on an update request.
- *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.10.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.1
  */
-public class ComparedOCLFolderPermissions extends ComparedOCLPermission<OCLPermission, OCLPermission> {
-
-    /**
-     * Initializes a new {@link ComparedOCLFolderPermissions}.
-     *
-     * @param newPermissions The new permissions
-     * @param originalPermissions The original permissions
-     */
-    public ComparedOCLFolderPermissions(OCLPermission[] newPermissions, OCLPermission[] originalPermissions) throws OXException {
-        super(newPermissions, originalPermissions);
-        calc();
-    }
-
-    @Override
-    protected boolean isSystemPermission(OCLPermission p) {
-        return p.getSystem() != 0;
-    }
-
-    @Override
-    protected boolean isGroupPermission(OCLPermission p) {
-        return p.isGroupPermission();
-    }
-
-    @Override
-    protected int getEntityId(OCLPermission p) {
-        return p.getEntity();
-    }
-
-    @Override
-    protected boolean areEqual(OCLPermission p1, OCLPermission p2) {
-        if (p1 == null) {
-            if (p2 == null) {
-                return true;
-            }
-
-            return false;
-        }
-
-        if (p2 == null) {
-            return false;
-        }
-
-        return p1.equals(p2);
-    }
+@Retention(RetentionPolicy.RUNTIME)
+public @interface OptionalService {
+    // marker annotation with no members
 }
