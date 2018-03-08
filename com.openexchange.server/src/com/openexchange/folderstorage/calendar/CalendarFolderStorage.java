@@ -53,6 +53,7 @@ import static com.openexchange.chronos.common.CalendarUtils.DISTANT_FUTURE;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getCalendarFolder;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getCalendarType;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getStorageFolder;
+import static com.openexchange.folderstorage.CalendarFolderConverter.getStorageFolders;
 import static com.openexchange.folderstorage.CalendarFolderConverter.optCalendarConfig;
 import static com.openexchange.folderstorage.CalendarFolderConverter.optCalendarProvider;
 import java.sql.Connection;
@@ -312,11 +313,11 @@ public class CalendarFolderStorage implements SubfolderListingFolderStorage {
 
     @Override
     public List<Folder> getFolders(String treeId, List<String> folderIds, StorageType storageType, StorageParameters storageParameters) throws OXException {
-        List<Folder> folders = new ArrayList<Folder>(folderIds.size());
-        for (String folderId : folderIds) {
-            folders.add(getFolder(treeId, folderId, storageType, storageParameters));
+        if (StorageType.BACKUP.equals(storageType)) {
+            throw FolderExceptionErrorMessage.UNSUPPORTED_STORAGE_TYPE.create(storageType);
         }
-        return folders;
+        List<AccountAwareCalendarFolder> calendarFolders = getCalendarAccess(storageParameters).getFolders(folderIds);
+        return getStorageFolders(treeId, getDefaultContentType(), calendarFolders);
     }
 
     @Override
@@ -329,8 +330,7 @@ public class CalendarFolderStorage implements SubfolderListingFolderStorage {
         if (StorageType.BACKUP.equals(storageType)) {
             throw FolderExceptionErrorMessage.UNSUPPORTED_STORAGE_TYPE.create(storageType);
         }
-        IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
-        AccountAwareCalendarFolder calendarFolder = calendarAccess.getFolder(folderId);
+        AccountAwareCalendarFolder calendarFolder = getCalendarAccess(storageParameters).getFolder(folderId);
         return getStorageFolder(treeId, getDefaultContentType(), calendarFolder, calendarFolder.getAccount());
     }
 

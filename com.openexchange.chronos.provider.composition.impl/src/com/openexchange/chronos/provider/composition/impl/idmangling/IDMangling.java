@@ -326,11 +326,11 @@ public class IDMangling {
      * @return The relative folder identifiers, mapped to their associated calendar account identifier
      * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_FOLDER} if the account identifier can't be extracted from a passed composite identifier
      */
-    public static Map<Integer, List<String>> getRelativeFolderIdsPerAccountId(String[] uniqueFolderIds) throws OXException {
+    public static Map<Integer, List<String>> getRelativeFolderIdsPerAccountId(List<String> uniqueFolderIds) throws OXException {
         if (null == uniqueFolderIds) {
             return null;
         }
-        Map<Integer, List<String>> foldersPerAccountId = new HashMap<Integer, List<String>>(uniqueFolderIds.length);
+        Map<Integer, List<String>> foldersPerAccountId = new HashMap<Integer, List<String>>(uniqueFolderIds.size());
         for (String uniqueFolderId : uniqueFolderIds) {
             try {
                 List<String> unmangledId = unmangleFolderId(uniqueFolderId);

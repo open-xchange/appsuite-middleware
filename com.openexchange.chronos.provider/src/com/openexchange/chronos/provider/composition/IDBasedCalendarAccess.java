@@ -125,10 +125,18 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
     /**
      * Gets a specific calendar folder.
      *
-     * @param folderId The fully qualified identifier of the folder to get the events from
+     * @param folderId The fully qualified identifier of the folder to get
      * @return The calendar folder (including information about the underlying account)
      */
     AccountAwareCalendarFolder getFolder(String folderId) throws OXException;
+
+    /**
+     * Gets multiple calendar folders.
+     *
+     * @param folderIds The fully qualified identifiers of the folders to get
+     * @return The calendar folders (including information about the underlying account)
+     */
+    List<AccountAwareCalendarFolder> getFolders(List<String> folderIds) throws OXException;
 
     /**
      * Create a new calendar folder.
