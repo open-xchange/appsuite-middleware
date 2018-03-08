@@ -47,47 +47,56 @@
  *
  */
 
-package com.openexchange.realtime.json.payload.converter;
+package com.openexchange.tools.ssl;
 
-import org.json.JSONObject;
-import com.openexchange.conversion.DataExceptionCodes;
-import com.openexchange.conversion.simple.SimpleConverter;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSession;
 
 /**
- * {@link JSONToStackTraceElementConverter}
+ * {@link NoopHostnameVerifier} - A NOOP <tt>HostnameVerifier</tt>, which turns host-name verification off.
+ * <p>
+ * This implementation is a no-op, and never throws an <tt>SSLException</tt>.
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-public class JSONToStackTraceElementConverter extends AbstractJSONConverter {
+public class NoopHostnameVerifier implements HostnameVerifier {
 
+    private static final NoopHostnameVerifier INSTANCE = new NoopHostnameVerifier();
+
+    /**
+     * Gets the instance.
+     *
+     * @return The instance
+     */
+    public static NoopHostnameVerifier getInstance() {
+        return INSTANCE;
+    }
+
+    // -------------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link NoopHostnameVerifier}.
+     */
+    private NoopHostnameVerifier() {
+        super();
+    }
+
+    /**
+     * Verifies that the host name is an acceptable match with the server's authentication scheme.
+     *
+     * @param hostname The host name
+     * @param sslSession The SSL session used on the connection to host
+     * @return <code>true</code> if the host name is acceptable; otherwise <code>false</code>
+     */
     @Override
-    public String getOutputFormat() {
-        return StackTraceElement.class.getSimpleName();
+    public boolean verify(String hostname, SSLSession sslSession) {
+        return true;
     }
 
     @Override
-    public Object convert(Object data, ServerSession session, SimpleConverter converter) throws OXException {
-        try {
-            JSONObject stackTraceObject = (JSONObject) data;
-            //can be null
-            String fileName = null;
-            if(stackTraceObject.hasAndNotNull("fileName")) {
-                fileName = stackTraceObject.optString("fileName");
-            }
-            String className = stackTraceObject.getString("className");
-            String methodName = stackTraceObject.getString("methodName");
-            int lineNumber = -1;
-            if (stackTraceObject.hasAndNotNull("lineNumber")) {
-                lineNumber = stackTraceObject.getInt("lineNumber");
-            }
-
-            StackTraceElement stackTraceElement = new StackTraceElement(className, methodName, fileName, lineNumber);
-            return stackTraceElement;
-        } catch (Exception e) {
-            throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create(e, data.toString());
-        }
+    public final String toString() {
+        return "NOOP";
     }
 
 }

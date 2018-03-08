@@ -70,8 +70,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
 import org.slf4j.Logger;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AJAXUtility;
@@ -1085,12 +1083,8 @@ public class AJAXRequestData {
 
         try {
             return MAPPER.readValue(getData(String.class), klazz);
-        } catch (JsonParseException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
-        } catch (JsonMappingException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
         } catch (IOException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 

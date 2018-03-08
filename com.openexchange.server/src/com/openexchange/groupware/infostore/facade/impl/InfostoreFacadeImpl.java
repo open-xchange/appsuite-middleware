@@ -1473,7 +1473,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         try {
             destinationFolderID = Long.parseLong(targetFolderID);
         } catch (NumberFormatException e) {
-            throw InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER.create(targetFolderID, e);
+            throw InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER.create(e, targetFolderID);
         }
         /*
          * get documents to move

@@ -62,6 +62,7 @@ import com.openexchange.chronos.itip.ITipChange;
 import com.openexchange.chronos.itip.ITipIntegrationUtility;
 import com.openexchange.chronos.itip.generators.ITipMailGeneratorFactory;
 import com.openexchange.chronos.itip.sender.MailSenderService;
+import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.exception.OXException;
 
@@ -85,6 +86,9 @@ public class CancelPerformer extends AbstractActionPerformer {
 
     @Override
     public List<Event> perform(ITipAction action, ITipAnalysis analysis, CalendarSession session, ITipAttributes attributes) throws OXException {
+        // Suppress iTip
+        session.<Boolean> set(CalendarParameters.PARAMETER_SUPPRESS_ITIP, Boolean.TRUE);
+
         List<ITipChange> changes = analysis.getChanges();
         List<Event> deleted = new ArrayList<Event>();
 

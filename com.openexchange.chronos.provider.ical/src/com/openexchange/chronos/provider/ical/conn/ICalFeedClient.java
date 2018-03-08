@@ -202,13 +202,13 @@ public class ICalFeedClient {
             return prepareResponse(request.getURI(), response);
         } catch (ClientProtocolException e) {
             LOG.error("Error while processing the retrieved information:{}.", e.getMessage(), e);
-            throw ICalProviderExceptionCodes.CLIENT_PROTOCOL_ERROR.create(e.getMessage(), e);
+            throw ICalProviderExceptionCodes.CLIENT_PROTOCOL_ERROR.create(e, e.getMessage());
         } catch (UnknownHostException e) {
             LOG.debug("Error while processing the retrieved information:{}.", e.getMessage(), e);
             throw ICalProviderExceptionCodes.NO_FEED.create(e, iCalFeedConfig.getFeedUrl());
         } catch (IOException e) {
             LOG.error("Error while processing the retrieved information:{}.", e.getMessage(), e);
-            throw ICalProviderExceptionCodes.IO_ERROR.create(e.getMessage(), e);
+            throw ICalProviderExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             reset(request);
         }

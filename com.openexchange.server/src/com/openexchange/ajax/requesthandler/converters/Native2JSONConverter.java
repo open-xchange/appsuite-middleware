@@ -87,7 +87,7 @@ public class Native2JSONConverter implements ResultConverter {
         try {
             result.setResultObject(JSONCoercion.coerceToJSON(result.getResultObject()), "json");
         } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.toString(), e);
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.toString());
         }
     }
 }

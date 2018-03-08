@@ -150,7 +150,7 @@ public class DAVPushUtility {
                 }
             }
         } catch (IllegalArgumentException e) {
-            throw PushExceptionCodes.INVALID_TOPIC.create(pushKey, e);
+            throw PushExceptionCodes.INVALID_TOPIC.create(e, pushKey);
         }
         throw PushExceptionCodes.INVALID_TOPIC.create(pushKey);
     }

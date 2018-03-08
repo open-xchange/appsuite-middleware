@@ -779,7 +779,9 @@ public class EventPatches {
                                     LOG.warn("Error converting snoozed alarm trigger", e);
                                 }
                             } else {
-                                addExtendedProperty(exportedEvent, new ExtendedProperty("X-MOZ-SNOOZE-TIME", Tools.formatAsUTC(snoozeTime)));
+                                if (null != snoozeTime) {
+                                    addExtendedProperty(exportedEvent, new ExtendedProperty("X-MOZ-SNOOZE-TIME", Tools.formatAsUTC(snoozeTime)));
+                                }
                             }
                         }
                     }

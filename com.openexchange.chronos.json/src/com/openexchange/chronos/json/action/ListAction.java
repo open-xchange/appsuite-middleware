@@ -111,7 +111,7 @@ public class ListAction extends ChronosAction {
             List<Event> events = calendarAccess.getEvents(eventIDs);
             return new AJAXRequestResult(events, getMaximumTimestamp(events), EventResultConverter.INPUT_FORMAT);
         } catch (JSONException e) {
-            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e.getMessage(), e);
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
         }
 
     }

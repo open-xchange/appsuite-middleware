@@ -70,7 +70,7 @@ public class GetAttachment extends ChronosAction {
 
     /**
      * Initialises a new {@link GetAttachment}.
-     * 
+     *
      * @param services
      */
     protected GetAttachment(ServiceLookup services) {
@@ -79,7 +79,7 @@ public class GetAttachment extends ChronosAction {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.json.action.ChronosAction#perform(com.openexchange.chronos.provider.composition.IDBasedCalendarAccess, com.openexchange.ajax.requesthandler.AJAXRequestData)
      */
     @Override
@@ -96,7 +96,7 @@ public class GetAttachment extends ChronosAction {
             result.setHeader("ETag", calendarAccess.getSession().getContextId() + "-" + managedId);
             return result;
         } catch (IOException e) {
-            throw AjaxExceptionCodes.IO_ERROR.create(e.getMessage(), e);
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
     }
 }

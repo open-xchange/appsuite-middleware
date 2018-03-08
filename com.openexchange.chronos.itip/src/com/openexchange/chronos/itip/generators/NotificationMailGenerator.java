@@ -51,8 +51,6 @@ package com.openexchange.chronos.itip.generators;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -603,18 +601,14 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             return;
         }
         RecurrenceService recurrenceService = Services.getService(RecurrenceService.class);
-        Calendar recurrenceId = GregorianCalendar.getInstance(newEvent.getRecurrenceId().getValue().getTimeZone());
-        recurrenceId.setTimeInMillis(newEvent.getRecurrenceId().getValue().getTimestamp());
-        int position = recurrenceService.calculateRecurrencePosition(originalOcurrence, recurrenceId);
 
         RecurrenceIterator<Event> recurrenceIterator = recurrenceService.iterateEventOccurrences(originalOcurrence, null, null);
-        int count = 0;
         while (recurrenceIterator.hasNext()) {
-            count++;
-            if (count == position) {
-                Event next = recurrenceIterator.next();
+            Event next = recurrenceIterator.next();
+            if (next.getRecurrenceId().equals(newEvent.getRecurrenceId())) {
                 originalOcurrence.setStartDate(next.getStartDate());
                 originalOcurrence.setEndDate(next.getEndDate());
+                return;
             }
         }
 
@@ -720,18 +714,14 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     private void fastForwardToConcreteOriginalOccurrence(final Event originalForRendering, final Event updateForRendering) throws OXException {
         if (originalForRendering != null && updateForRendering != null && CalendarUtils.isSeriesMaster(originalForRendering) && CalendarUtils.isSeriesException(updateForRendering)) {
             RecurrenceService recurrenceService = Services.getService(RecurrenceService.class);
-            Calendar recurrenceId = GregorianCalendar.getInstance(updateForRendering.getRecurrenceId().getValue().getTimeZone());
-            recurrenceId.setTimeInMillis(updateForRendering.getRecurrenceId().getValue().getTimestamp());
-            int position = recurrenceService.calculateRecurrencePosition(originalForRendering, recurrenceId);
 
             RecurrenceIterator<Event> recurrenceIterator = recurrenceService.iterateEventOccurrences(originalForRendering, null, null);
-            int count = 0;
             while (recurrenceIterator.hasNext()) {
-                count++;
-                if (count == position) {
-                    Event next = recurrenceIterator.next();
+                Event next = recurrenceIterator.next();
+                if (next.getRecurrenceId().equals(updateForRendering.getRecurrenceId())) {
                     originalForRendering.setStartDate(next.getStartDate());
                     originalForRendering.setEndDate(next.getEndDate());
+                    return;
                 }
             }
         }

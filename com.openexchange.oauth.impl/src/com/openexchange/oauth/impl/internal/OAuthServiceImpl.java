@@ -569,7 +569,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             new StatementBuilder().executeStatement(writeCon, command, values);
         } catch (SQLException e) {
             LOG.error(e.toString());
-            throw OAuthExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+            throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -856,7 +856,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 rollback = false;
             } catch (SQLException e) {
                 LOG.error(e.toString());
-                throw OAuthExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+                throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 if (rollback) {
                     Databases.rollback(writeCon);

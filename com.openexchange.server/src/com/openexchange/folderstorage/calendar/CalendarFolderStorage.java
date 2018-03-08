@@ -53,6 +53,7 @@ import static com.openexchange.chronos.common.CalendarUtils.DISTANT_FUTURE;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getCalendarFolder;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getCalendarType;
 import static com.openexchange.folderstorage.CalendarFolderConverter.getStorageFolder;
+import static com.openexchange.folderstorage.CalendarFolderConverter.getStorageFolders;
 import static com.openexchange.folderstorage.CalendarFolderConverter.optCalendarConfig;
 import static com.openexchange.folderstorage.CalendarFolderConverter.optCalendarProvider;
 import java.sql.Connection;
@@ -69,12 +70,12 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
-import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
+import com.openexchange.folderstorage.SubfolderListingFolderStorage;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.calendar.contentType.CalendarContentType;
 import com.openexchange.folderstorage.tx.TransactionManager;
@@ -87,7 +88,7 @@ import com.openexchange.groupware.ldap.User;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class CalendarFolderStorage implements FolderStorage {
+public class CalendarFolderStorage implements SubfolderListingFolderStorage {
 
     /** The calendar folder type */
     private static final FolderType FOLDER_TYPE = new CalendarFolderType();
@@ -210,7 +211,7 @@ public class CalendarFolderStorage implements FolderStorage {
         if (false == CalendarContentType.class.isInstance(contentType)) {
             return new SortableId[0];
         }
-        return getSortableIDs(getCalendarAccess(storageParameters).getVisibleFolders(getCalendarType(type)));
+        return getSortableIDs(getVisibleFolders(getCalendarType(type), storageParameters));
     }
 
     @Override
@@ -312,11 +313,11 @@ public class CalendarFolderStorage implements FolderStorage {
 
     @Override
     public List<Folder> getFolders(String treeId, List<String> folderIds, StorageType storageType, StorageParameters storageParameters) throws OXException {
-        List<Folder> folders = new ArrayList<Folder>(folderIds.size());
-        for (String folderId : folderIds) {
-            folders.add(getFolder(treeId, folderId, storageType, storageParameters));
+        if (StorageType.BACKUP.equals(storageType)) {
+            throw FolderExceptionErrorMessage.UNSUPPORTED_STORAGE_TYPE.create(storageType);
         }
-        return folders;
+        List<AccountAwareCalendarFolder> calendarFolders = getCalendarAccess(storageParameters).getFolders(folderIds);
+        return getStorageFolders(treeId, getDefaultContentType(), calendarFolders);
     }
 
     @Override
@@ -329,23 +330,36 @@ public class CalendarFolderStorage implements FolderStorage {
         if (StorageType.BACKUP.equals(storageType)) {
             throw FolderExceptionErrorMessage.UNSUPPORTED_STORAGE_TYPE.create(storageType);
         }
-        IDBasedCalendarAccess calendarAccess = getCalendarAccess(storageParameters);
-        AccountAwareCalendarFolder calendarFolder = calendarAccess.getFolder(folderId);
+        AccountAwareCalendarFolder calendarFolder = getCalendarAccess(storageParameters).getFolder(folderId);
         return getStorageFolder(treeId, getDefaultContentType(), calendarFolder, calendarFolder.getAccount());
     }
 
     @Override
     public SortableId[] getSubfolders(String treeId, String parentId, StorageParameters storageParameters) throws OXException {
         if (PRIVATE_ID.equals(parentId)) {
-            return getSortableIDs(getCalendarAccess(storageParameters).getVisibleFolders(GroupwareFolderType.PRIVATE));
+            return getSortableIDs(getVisibleFolders(GroupwareFolderType.PRIVATE, storageParameters));
         }
         if (SHARED_ID.equals(parentId)) {
-            return getSortableIDs(getCalendarAccess(storageParameters).getVisibleFolders(GroupwareFolderType.SHARED));
+            return getSortableIDs(getVisibleFolders(GroupwareFolderType.SHARED, storageParameters));
         }
         if (PUBLIC_ID.equals(parentId)) {
-            return getSortableIDs(getCalendarAccess(storageParameters).getVisibleFolders(GroupwareFolderType.PUBLIC));
+            return getSortableIDs(getVisibleFolders(GroupwareFolderType.PUBLIC, storageParameters));
         }
         return new SortableId[0];
+    }
+
+    @Override
+    public Folder[] getSubfolderObjects(String treeId, String parentId, StorageParameters storageParameters) throws OXException {
+        if (PRIVATE_ID.equals(parentId)) {
+            return getFolders(treeId, getVisibleFolders(GroupwareFolderType.PRIVATE, storageParameters));
+        }
+        if (SHARED_ID.equals(parentId)) {
+            return getFolders(treeId, getVisibleFolders(GroupwareFolderType.SHARED, storageParameters));
+        }
+        if (PUBLIC_ID.equals(parentId)) {
+            return getFolders(treeId, getVisibleFolders(GroupwareFolderType.PUBLIC, storageParameters));
+        }
+        return new Folder[0];
     }
 
     @Override
@@ -371,6 +385,10 @@ public class CalendarFolderStorage implements FolderStorage {
         return new String[0];
     }
 
+    private List<AccountAwareCalendarFolder> getVisibleFolders(GroupwareFolderType type, StorageParameters storageParameters) throws OXException {
+        return getCalendarAccess(storageParameters).getVisibleFolders(type);
+    }
+
     /**
      * Gets the ID based calendar access reference from the supplied storage parameters, throwing an appropriate exception in case it is
      * absent.
@@ -386,7 +404,18 @@ public class CalendarFolderStorage implements FolderStorage {
         return calendarAccess;
     }
 
-    private static SortableId[] getSortableIDs(List<CalendarFolder> folders) {
+    private Folder[] getFolders(String treeId, List<AccountAwareCalendarFolder> calendarFolders) {
+        if (null == calendarFolders || 0 == calendarFolders.size()) {
+            return new Folder[0];
+        }
+        Folder[] folders = new Folder[calendarFolders.size()];
+        for (int i = 0; i < calendarFolders.size(); i++) {
+            folders[i] = getStorageFolder(treeId, getDefaultContentType(), calendarFolders.get(i));
+        }
+        return folders;
+    }
+
+    private static SortableId[] getSortableIDs(List<? extends CalendarFolder> folders) {
         if (null == folders || 0 == folders.size()) {
             return new SortableId[0];
         }

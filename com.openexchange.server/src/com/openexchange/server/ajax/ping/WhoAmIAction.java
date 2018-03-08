@@ -81,7 +81,7 @@ public class WhoAmIAction implements AJAXActionService {
             LoginWriter.write(session, json);
             return new AJAXRequestResult(json, "json");
         } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 

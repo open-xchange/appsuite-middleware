@@ -207,14 +207,19 @@ public abstract class FolderCollection<T> extends DAVCollection {
     public AbstractResource getChild(String name) throws WebdavProtocolException {
         try {
             String resourceName = Tools.extractResourceName(name, getFileExtension());
+            if (null == resourceName) {
+                LOG.debug("{}: child resource '{}' not found, creating placeholder resource", this.getUrl(), name);
+                return createResource(null, constructPathForChildResource(name));
+            }
+
             T object = this.getObject(resourceName);
             if (null != object) {
                 LOG.debug("{}: found child resource by name '{}'", this.getUrl(), name);
                 return createResource(object, constructPathForChildResource(object));
-            } else {
-                LOG.debug("{}: child resource '{}' not found, creating placeholder resource", this.getUrl(), name);
-                return createResource(null, constructPathForChildResource(name));
             }
+
+            LOG.debug("{}: child resource '{}' not found, creating placeholder resource", this.getUrl(), name);
+            return createResource(null, constructPathForChildResource(name));
         } catch (OXException e) {
             throw protocolException(getUrl(), e);
         }

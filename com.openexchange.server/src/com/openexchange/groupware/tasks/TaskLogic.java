@@ -435,7 +435,7 @@ public final class TaskLogic {
             if (!task.containsRecurrenceType()) {
                 task.setRecurrenceType(oldTask.getRecurrenceType());
             }
-            if (CalendarObject.DAILY == task.getRecurrenceType() || CalendarObject.WEEKLY == task.getRecurrenceType() || CalendarObject.MONTHLY == task.getRecurrenceType()) {
+            if (CalendarObject.DAILY == task.getRecurrenceType() || CalendarObject.WEEKLY == task.getRecurrenceType() || CalendarObject.MONTHLY == task.getRecurrenceType() || CalendarObject.YEARLY == task.getRecurrenceType()) {
                 if (!task.containsInterval() && oldTask.containsInterval()) {
                     task.setInterval(oldTask.getInterval());
                 }

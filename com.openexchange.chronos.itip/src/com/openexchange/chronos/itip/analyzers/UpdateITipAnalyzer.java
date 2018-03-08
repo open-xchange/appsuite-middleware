@@ -244,7 +244,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
                         analysis.recommendActions(ITipAction.CREATE);
                     } else {
                         if (change.isException()) {
-                            analysis.recommendActions(ITipAction.ACCEPT, ITipAction.DECLINE, ITipAction.TENTATIVE);
+                            analysis.recommendActions(ITipAction.ACCEPT, ITipAction.DECLINE, ITipAction.TENTATIVE, ITipAction.UPDATE);
                         } else {
                             analysis.recommendActions(ITipAction.ACCEPT, ITipAction.DECLINE, ITipAction.TENTATIVE, ITipAction.DELEGATE, ITipAction.COUNTER);
                         }

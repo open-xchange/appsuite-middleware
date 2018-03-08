@@ -175,7 +175,7 @@ public class DavPushGateway implements PushNotificationTransport {
                 }
             }
         } catch (JSONException e) {
-            throw PushExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+            throw PushExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -315,7 +315,7 @@ public class DavPushGateway implements PushNotificationTransport {
             subscribeData.put("push-subscribe", pushSubscribeObject);
             return subscribeData;
         } catch (JSONException e) {
-            throw PushExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+            throw PushExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -325,7 +325,7 @@ public class DavPushGateway implements PushNotificationTransport {
             pushObject.put("messages", jsonMessages);
             return new JSONObject().put("push", pushObject);
         } catch (JSONException e) {
-            throw PushExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+            throw PushExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -348,7 +348,7 @@ public class DavPushGateway implements PushNotificationTransport {
             pushObject.put("messages", createPushMessageData(notification.getMessageData(), matches));
             return pushData;
         } catch (JSONException e) {
-            throw PushExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+            throw PushExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -390,7 +390,7 @@ public class DavPushGateway implements PushNotificationTransport {
             }
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(String.valueOf(statusLine));
         } catch (IOException e) {
-            throw PushExceptionCodes.IO_ERROR.create(e.getMessage(), e);
+            throw PushExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             close(post, response);
             Streams.close(response);
@@ -406,9 +406,9 @@ public class DavPushGateway implements PushNotificationTransport {
                     return new JSONObject(reader);
                 }
             } catch (UnsupportedOperationException | IOException e) {
-                throw PushExceptionCodes.IO_ERROR.create(e.getMessage(), e);
+                throw PushExceptionCodes.IO_ERROR.create(e, e.getMessage());
             } catch (JSONException e) {
-                throw PushExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+                throw PushExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             } finally {
                 Streams.close(inputStream);
             }

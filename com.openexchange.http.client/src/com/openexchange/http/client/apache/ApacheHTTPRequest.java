@@ -100,9 +100,9 @@ public class ApacheHTTPRequest implements HTTPRequest {
 			}
 			return new ApacheHTTPResponse(method, client, coreBuilder, status);
 		} catch (HttpException e) {
-			throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e.getMessage(), e);
+            throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e, e.getMessage());
 		} catch (IOException e) {
-			throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e.getMessage(), e);
+            throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create(e, e.getMessage());
 		} finally {
 			reqBuilder.done();
 		}

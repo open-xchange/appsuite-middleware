@@ -245,7 +245,7 @@ public class FeedbackServiceImpl implements FeedbackService {
 
             return feedBackType.getFeedbacks(filteredFeedback, readCon, configuration);
         } catch (SQLException e) {
-            throw FeedbackExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
+            throw FeedbackExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             dbService.backReadOnlyForGlobal(ctxGroup, readCon);
         }
@@ -304,7 +304,7 @@ public class FeedbackServiceImpl implements FeedbackService {
             writeCon.commit();
             rollback = false;
         } catch (SQLException e) {
-            throw FeedbackExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+            throw FeedbackExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             if (rollback) {
                 Databases.rollback(writeCon);

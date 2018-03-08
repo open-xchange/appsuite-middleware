@@ -155,7 +155,7 @@ public abstract class AbstractGoogleDriveAccess {
             if (hasInvalidGrant(e)) {
                 return createInvalidAccessTokenException();
             }
-            return OAuthExceptionCodes.OAUTH_ERROR.create(e.getMessage(), e);
+            return OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
         }
 
         if (SC_UNAUTHORIZED == e.getStatusCode()) {

@@ -428,8 +428,8 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     }
 
     @Override
-    public List<CalendarFolder> getVisibleFolders(GroupwareFolderType type) throws OXException {
-        List<CalendarFolder> folders = new ArrayList<CalendarFolder>();
+    public List<AccountAwareCalendarFolder> getVisibleFolders(GroupwareFolderType type) throws OXException {
+        List<AccountAwareCalendarFolder> folders = new ArrayList<AccountAwareCalendarFolder>();
         for (CalendarAccount account : getAccounts()) {
             try {
                 folders.addAll(withUniqueID(getVisibleFolders(account, type), account));
@@ -448,6 +448,26 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
         } catch (OXException e) {
             throw withUniqueIDs(e, account.getAccountId());
         }
+    }
+
+    @Override
+    public List<AccountAwareCalendarFolder> getFolders(List<String> folderIds) throws OXException {
+        Map<CalendarAccount, List<String>> foldersPerAccount = getRelativeFolderIdsPerAccount(folderIds);
+        if (foldersPerAccount.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<AccountAwareCalendarFolder> folders = new ArrayList<AccountAwareCalendarFolder>(folderIds.size());
+        for (Map.Entry<CalendarAccount, List<String>> entry : foldersPerAccount.entrySet()) {
+            CalendarAccount account = entry.getKey();
+            try {
+                for (String folderId : entry.getValue()) {
+                    folders.add(withUniqueID(getFolder(account, folderId), account));
+                }
+            } catch (OXException e) {
+                throw withUniqueIDs(e, account.getAccountId());
+            }
+        }
+        return folders;
     }
 
     @Override

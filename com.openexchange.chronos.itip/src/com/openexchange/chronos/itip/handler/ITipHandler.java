@@ -50,6 +50,7 @@
 package com.openexchange.chronos.itip.handler;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -60,11 +61,14 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.itip.generators.ITipMailGenerator;
 import com.openexchange.chronos.itip.generators.NotificationMail;
 import com.openexchange.chronos.itip.generators.NotificationMailGeneratorFactory;
 import com.openexchange.chronos.itip.generators.NotificationParticipant;
+import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.sender.MailSenderService;
 import com.openexchange.chronos.itip.tools.ITipUtils;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -73,6 +77,8 @@ import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
+import com.openexchange.chronos.service.RecurrenceIterator;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.State;
@@ -90,14 +96,19 @@ public class ITipHandler implements CalendarHandler {
     private final static Logger LOG = LoggerFactory.getLogger(ITipHandler.class);
 
     /**
-     * Contains the three fields that are updated if a series is updated
+     * Contains the fields that are updated if a series is updated
      */
     private final static EventField[] SERIES_UPDATE = new EventField[] { EventField.SEQUENCE };
 
     /**
-     * Contains the three fields that are updated if a master event has a new change/delete exception
+     * Contains the fields that are updated if a master event has a new change exception
      */
     private final static EventField[] MASTER_EXCEPTION_UPDATE = new EventField[] { EventField.CHANGE_EXCEPTION_DATES };
+
+    /**
+     * Contains the fields that are updated if a master event has a new delete exception
+     */
+    private final static EventField[] EXCEPTION_DELETE = new EventField[] { EventField.DELETE_EXCEPTION_DATES };
 
     private NotificationMailGeneratorFactory generators;
     private MailSenderService                sender;
@@ -118,23 +129,22 @@ public class ITipHandler implements CalendarHandler {
         }
 
         try {
-            List<CreateResult> creations = event.getCreations();
-            if (creations != null && creations.size() > 0) {
+            List<CreateResult> creations = new LinkedList<>(event.getCreations());
+            List<UpdateResult> updates = new LinkedList<>(event.getUpdates());
+            List<DeleteResult> deletions = new LinkedList<>(event.getDeletions());
+
+            if (creations.size() > 0) {
                 for (CreateResult create : creations) {
-                    handleCreate(create, event);
+                    handleCreate(create, creations, updates, event);
                 }
             }
 
-            List<UpdateResult> updates = new LinkedList<>(event.getUpdates());
             if (updates.size() > 0) {
                 for (UpdateResult update : updates) {
-                    if (false == isMasterExceptionUpdate(update, creations)) {
-                        handleUpdate(update, updates, event);
-                    }
+                    handleUpdate(update, updates, event);
                 }
             }
 
-            List<DeleteResult> deletions = new LinkedList<>(event.getDeletions());
             if (deletions.size() > 0) {
                 for (DeleteResult delete : deletions) {
                     handleDelete(delete, deletions, event);
@@ -145,15 +155,53 @@ public class ITipHandler implements CalendarHandler {
         }
     }
 
-    private void handleCreate(CreateResult create, CalendarEvent event) throws OXException {
-        handle(event, State.Type.NEW, null, create.getCreatedEvent(), null);
+    private void handleCreate(CreateResult create, List<CreateResult> creations, List<UpdateResult> updates, CalendarEvent event) throws OXException {
+        UpdateResult master = getExceptionMaster(create, updates);
+        if (null != master) {
+            // Gather other creations to this series
+            List<CreateResult> group = creations.stream().filter(c -> master.getUpdate().getId().equals(c.getCreatedEvent().getSeriesId())).collect(Collectors.toList());
+            // Handle as update
+            for (CreateResult c : group) {
+                handle(event, State.Type.MODIFIED, master.getOriginal(), c.getCreatedEvent(), null);
+            }
+            // Remove master to avoid additional mail
+            updates.remove(master);
+        } else {
+            handle(event, State.Type.NEW, null, create.getCreatedEvent(), null);
+        }
     }
 
     private void handleUpdate(UpdateResult update, List<UpdateResult> updates, CalendarEvent event) throws OXException {
         List<UpdateResult> exceptions = Collections.emptyList();
 
-        // Check for series update
-        if (update.getUpdate().containsSeriesId()) {
+        if (CalendarUtils.isSeriesMaster(update.getUpdate()) && update.containsAnyChangeOf(EXCEPTION_DELETE)) {
+            // Handle as delete 
+            RecurrenceService service = Services.getService(RecurrenceService.class, true);
+            RecurrenceIterator<Event> recurrenceIterator = service.iterateEventOccurrences(update.getOriginal(), null, null);
+
+            // Get delete exceptions
+            List<RecurrenceId> newDeletions = new LinkedList<>(update.getUpdate().getDeleteExceptionDates());
+            if (null != update.getOriginal().getDeleteExceptionDates() && false == update.getOriginal().getDeleteExceptionDates().isEmpty()) {
+                newDeletions.removeAll(update.getOriginal().getDeleteExceptionDates());
+            }
+
+            // Iterate over all occurrences until all new deletions are consumed
+            while (recurrenceIterator.hasNext() && false == newDeletions.isEmpty()) {
+                Event next = recurrenceIterator.next();
+                Iterator<RecurrenceId> iterator = newDeletions.iterator();
+                Inner: while (iterator.hasNext()) {
+                    RecurrenceId recurrenceId = iterator.next();
+                    if (next.getRecurrenceId().equals(recurrenceId)) {
+                        handle(event, State.Type.DELETED, null, EventMapper.getInstance().copy(next, new Event(), (EventField[]) null), null);
+                        // Consume element from above list
+                        iterator.remove();
+                        break Inner;
+                    }
+                }
+            }
+            return;
+        } else if (update.getUpdate().containsSeriesId()) {
+            // Check for series update
             // Get all events of the series
             String seriesId = update.getUpdate().getSeriesId();
             List<UpdateResult> eventGroup = updates.stream().filter(u -> seriesId.equals(u.getUpdate().getSeriesId())).collect(Collectors.toList());
@@ -176,7 +224,7 @@ public class ITipHandler implements CalendarHandler {
                         Set<EventField> fields = masterUpdate.getUpdatedFields();
                         fields.remove(EventField.TIMESTAMP);
                         fields.remove(EventField.LAST_MODIFIED);
-                        if(fields.isEmpty()) {
+                        if (fields.isEmpty()) {
                             // Exception update, no update on master
                             updates.remove(masterUpdate);
                         }
@@ -222,7 +270,11 @@ public class ITipHandler implements CalendarHandler {
         int onBehalfOf = onBehalfOf(event.getCalendarUser(), session);
         CalendarUser principal = ITipUtils.getPrincipal(event.getCalendarParameters());
 
-        ITipMailGenerator generator = generators.create(original, update, session, onBehalfOf, principal);
+        // Copy event to avoid UOE due UnmodifieableEvent
+        if (null != original) {
+            original = EventMapper.getInstance().copy(original, new Event(), (EventField[]) null);
+        }
+        ITipMailGenerator generator = generators.create(original, EventMapper.getInstance().copy(update, new Event(), (EventField[]) null), session, onBehalfOf, principal);
         List<NotificationParticipant> recipients = generator.getRecipients();
         for (NotificationParticipant notificationParticipant : recipients) {
             NotificationMail mail;
@@ -231,7 +283,11 @@ public class ITipHandler implements CalendarHandler {
                     mail = generator.generateCreateMailFor(notificationParticipant);
                     break;
                 case MODIFIED:
-                    mail = generator.generateUpdateMailFor(notificationParticipant);
+                    if (CalendarUtils.isSeriesMaster(original) && CalendarUtils.isSeriesException(update)) {
+                        mail = generator.generateCreateExceptionMailFor(notificationParticipant);
+                    } else {
+                        mail = generator.generateUpdateMailFor(notificationParticipant);
+                    }
                     break;
                 case DELETED:
                     mail = generator.generateDeleteMailFor(notificationParticipant);
@@ -258,15 +314,10 @@ public class ITipHandler implements CalendarHandler {
         return calendarUser == session.getUserId() ? -1 : calendarUser;
     }
 
-    /**
-     * Checks if the given {@link UpdateResult} is an update on a series master that has a new
-     * event exception and checks if such a exception was created
-     * 
-     * @param update The {@link UpdateResult} an potentially master event
-     * @param creations The {@link List} of {@link CreateResult}s
-     * @return <code>true</code> if the series master got only an update on its exceptions, <code>false</code> otherwise
-     */
-    private boolean isMasterExceptionUpdate(UpdateResult update, List<CreateResult> creations) {
-        return CalendarUtils.isSeriesMaster(update.getUpdate()) && update.containsAnyChangeOf(MASTER_EXCEPTION_UPDATE) && null != creations && creations.stream().filter(c -> update.getUpdate().getId().equals(c.getCreatedEvent().getSeriesId())).findAny().isPresent();
+    private UpdateResult getExceptionMaster(CreateResult create, List<UpdateResult> updates) {
+        if (CalendarUtils.isSeriesException(create.getCreatedEvent())) {
+            return updates.stream().filter(u -> CalendarUtils.isSeriesMaster(u.getUpdate()) && create.getCreatedEvent().getSeriesId().equals(u.getUpdate().getId()) && u.containsAnyChangeOf(MASTER_EXCEPTION_UPDATE)).findAny().orElse(null);
+        }
+        return null;
     }
 }

@@ -192,7 +192,7 @@ public class JsoupParser {
             document.traverse(new InterruptibleJsoupNodeVisitor(handler));
             handler.finished(document);
         } catch (InterruptedParsingException e) {
-            throw HtmlExceptionCodes.PARSING_FAILED.create("Parser timeout.", e);
+            throw HtmlExceptionCodes.PARSING_FAILED.create(e, "Parser timeout.");
         } catch (StackOverflowError parserOverflow) {
             throw HtmlExceptionCodes.PARSING_FAILED.create("Parser overflow detected.", parserOverflow);
         }

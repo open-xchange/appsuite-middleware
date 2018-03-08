@@ -164,9 +164,9 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
 
             return new ExternalCalendarResult(true, calendar.getEvents());
         } catch (JSONException e) {
-            throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+            throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (MalformedURLException e) {
-            throw SchedJoulesProviderExceptionCodes.INVALID_URL.create(itemId, e);
+            throw SchedJoulesProviderExceptionCodes.INVALID_URL.create(e, itemId);
         }
     }
 
