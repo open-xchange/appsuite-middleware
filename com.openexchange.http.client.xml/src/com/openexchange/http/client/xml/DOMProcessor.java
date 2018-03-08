@@ -58,15 +58,17 @@ import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;
 
 public class DOMProcessor implements HTTPResponseProcessor {
 
-	public Class<?>[] getTypes() {
+	@Override
+    public Class<?>[] getTypes() {
 		return new Class[]{InputStream.class, Document.class};
 	}
 
-	public Object process(Object response) throws OXException {
+	@Override
+    public Object process(Object response) throws OXException {
 		try {
 			return DocumentBuilderFactory.newInstance().newDocumentBuilder().parse((InputStream) response, "UTF-8");
 		} catch (Exception e) {
-			throw OxHttpClientExceptionCodes.CATCH_ALL.create(e.getMessage(), e);
+            throw OxHttpClientExceptionCodes.CATCH_ALL.create(e, e.getMessage());
 		}
 	}
 

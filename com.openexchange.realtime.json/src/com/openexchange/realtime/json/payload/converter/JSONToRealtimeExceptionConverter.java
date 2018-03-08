@@ -37,7 +37,7 @@ public class JSONToRealtimeExceptionConverter extends AbstractJSONConverter {
             outgoing.setStackTrace(stackTrace);
             return outgoing;
         } catch (Exception e) {
-            throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create(data.toString(), e);
+            throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create(e, data.toString());
         }
     }
 

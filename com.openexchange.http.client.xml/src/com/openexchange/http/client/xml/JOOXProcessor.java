@@ -60,11 +60,13 @@ import com.openexchange.http.client.builder.HTTPResponseProcessor;
 import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;
 
 public class JOOXProcessor implements HTTPResponseProcessor {
-	public Class<?>[] getTypes() {
+	@Override
+    public Class<?>[] getTypes() {
 		return new Class[]{InputStream.class, Match.class};
 	}
 
-	public Object process(Object response) throws OXException {
+	@Override
+    public Object process(Object response) throws OXException {
 		try {
 			Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse((InputStream) response, "UTF-8");
 			return JOOX.$(document);
@@ -72,9 +74,9 @@ public class JOOXProcessor implements HTTPResponseProcessor {
 			if (x.getMessage().contains("Premature end of file.")) {
 				return null;
 			}
-			throw OxHttpClientExceptionCodes.SAX_ERROR.create(x.getMessage(), x);
+            throw OxHttpClientExceptionCodes.SAX_ERROR.create(x, x.getMessage());
 		} catch (Exception e) {
-			throw OxHttpClientExceptionCodes.CATCH_ALL.create(e.getMessage(), e);
+            throw OxHttpClientExceptionCodes.CATCH_ALL.create(e, e.getMessage());
 		}
 	}
 }

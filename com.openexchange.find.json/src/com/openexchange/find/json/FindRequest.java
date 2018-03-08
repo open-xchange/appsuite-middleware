@@ -347,7 +347,7 @@ public class FindRequest {
             try {
                 options.put(key, jOptions.getString(key));
             } catch (JSONException e) {
-                throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             }
         }
 
