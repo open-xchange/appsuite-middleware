@@ -1171,7 +1171,7 @@ public class DefaultShareService implements ShareService {
                 }
                 return ShareTool.jsonToTarget(new JSONObject(targetAttr));
             } catch (JSONException e) {
-                throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Could not compile or resolve share target", e);
+                throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, "Could not compile or resolve share target");
             }
         }
         return null;

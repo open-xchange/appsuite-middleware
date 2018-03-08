@@ -263,7 +263,7 @@ public class RdbSettingStorage extends SettingStorage {
             if (null == name) {
                 name = Integer.toString(setting.getId());
             }
-            throw SettingExceptionCodes.DATA_TRUNCATION.create(name, e);
+            throw SettingExceptionCodes.DATA_TRUNCATION.create(e, name);
         } catch (SQLException e) {
             throw SettingExceptionCodes.SQL_ERROR.create(e);
         }

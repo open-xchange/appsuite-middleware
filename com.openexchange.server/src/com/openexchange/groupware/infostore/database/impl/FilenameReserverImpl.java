@@ -199,7 +199,7 @@ public class FilenameReserverImpl implements FilenameReserver {
         } catch (IncorrectStringSQLException e) {
             throw AbstractInfostoreAction.handleIncorrectStringError(e, null);
         } catch (SQLException e) {
-            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e.getMessage(), e);
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             if (startedTransaction) {
                 if (false == committed) {

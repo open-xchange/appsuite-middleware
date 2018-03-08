@@ -348,6 +348,24 @@ public class CalendarFolderStorage implements FolderStorage {
         return new SortableId[0];
     }
 
+    public Folder[] getSubfolderObjects(String treeId, String parentId, StorageParameters storageParameters) throws OXException {
+
+        return null;
+    }
+
+    private List<CalendarFolder> getVisibleFolders(String treeId, String parentId, StorageParameters storageParameters) throws OXException {
+        if (PRIVATE_ID.equals(parentId)) {
+            return getCalendarAccess(storageParameters).getVisibleFolders(GroupwareFolderType.PRIVATE);
+        }
+        if (SHARED_ID.equals(parentId)) {
+            return getCalendarAccess(storageParameters).getVisibleFolders(GroupwareFolderType.SHARED);
+        }
+        if (PUBLIC_ID.equals(parentId)) {
+            return getCalendarAccess(storageParameters).getVisibleFolders(GroupwareFolderType.PUBLIC);
+        }
+        return null;
+    }
+
     @Override
     public boolean containsFolder(String treeId, String folderId, StorageParameters storageParameters) throws OXException {
         return containsFolder(treeId, folderId, StorageType.WORKING, storageParameters);
