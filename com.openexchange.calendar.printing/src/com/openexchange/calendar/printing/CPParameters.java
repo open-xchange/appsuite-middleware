@@ -278,8 +278,14 @@ public class CPParameters {
             return false;
         }
 
-        char sep = File.pathSeparatorChar;
-        return templateName.indexOf(sep) < 0 && templateName.indexOf("://") < 0;
+        char[] seps = new char[] { '/', '\\', File.pathSeparatorChar };
+        for (char sep : seps) {
+            if (templateName.indexOf(sep) >= 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private Date extractOptionalDateParam(HttpServletRequest req, String parameter, TimeZone zone) {
