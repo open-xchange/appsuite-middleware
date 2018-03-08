@@ -50,6 +50,7 @@
 package com.openexchange.chronos.itip.handler;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -60,12 +61,14 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.itip.generators.ITipMailGenerator;
 import com.openexchange.chronos.itip.generators.NotificationMail;
 import com.openexchange.chronos.itip.generators.NotificationMailGeneratorFactory;
 import com.openexchange.chronos.itip.generators.NotificationParticipant;
+import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.sender.MailSenderService;
 import com.openexchange.chronos.itip.tools.ITipUtils;
 import com.openexchange.chronos.provider.CalendarAccount;
@@ -74,6 +77,8 @@ import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
+import com.openexchange.chronos.service.RecurrenceIterator;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.State;
@@ -91,14 +96,19 @@ public class ITipHandler implements CalendarHandler {
     private final static Logger LOG = LoggerFactory.getLogger(ITipHandler.class);
 
     /**
-     * Contains the three fields that are updated if a series is updated
+     * Contains the fields that are updated if a series is updated
      */
     private final static EventField[] SERIES_UPDATE = new EventField[] { EventField.SEQUENCE };
 
     /**
-     * Contains the three fields that are updated if a master event has a new change/delete exception
+     * Contains the fields that are updated if a master event has a new change exception
      */
     private final static EventField[] MASTER_EXCEPTION_UPDATE = new EventField[] { EventField.CHANGE_EXCEPTION_DATES };
+
+    /**
+     * Contains the fields that are updated if a master event has a new delete exception
+     */
+    private final static EventField[] EXCEPTION_DELETE = new EventField[] { EventField.DELETE_EXCEPTION_DATES };
 
     private NotificationMailGeneratorFactory generators;
     private MailSenderService                sender;
@@ -164,8 +174,34 @@ public class ITipHandler implements CalendarHandler {
     private void handleUpdate(UpdateResult update, List<UpdateResult> updates, CalendarEvent event) throws OXException {
         List<UpdateResult> exceptions = Collections.emptyList();
 
-        // Check for series update
-        if (update.getUpdate().containsSeriesId()) {
+        if (CalendarUtils.isSeriesMaster(update.getUpdate()) && update.containsAnyChangeOf(EXCEPTION_DELETE)) {
+            // Handle as delete 
+            RecurrenceService service = Services.getService(RecurrenceService.class, true);
+            RecurrenceIterator<Event> recurrenceIterator = service.iterateEventOccurrences(update.getOriginal(), null, null);
+
+            // Get delete exceptions
+            List<RecurrenceId> newDeletions = new LinkedList<>(update.getUpdate().getDeleteExceptionDates());
+            if (null != update.getOriginal().getDeleteExceptionDates() && false == update.getOriginal().getDeleteExceptionDates().isEmpty()) {
+                newDeletions.removeAll(update.getOriginal().getDeleteExceptionDates());
+            }
+
+            // Iterate over all occurrences until all new deletions are consumed
+            while (recurrenceIterator.hasNext() && false == newDeletions.isEmpty()) {
+                Event next = recurrenceIterator.next();
+                Iterator<RecurrenceId> iterator = newDeletions.iterator();
+                Inner: while (iterator.hasNext()) {
+                    RecurrenceId recurrenceId = iterator.next();
+                    if (next.getRecurrenceId().equals(recurrenceId)) {
+                        handle(event, State.Type.DELETED, null, EventMapper.getInstance().copy(next, new Event(), (EventField[]) null), null);
+                        // Consume element from above list
+                        iterator.remove();
+                        break Inner;
+                    }
+                }
+            }
+            return;
+        } else if (update.getUpdate().containsSeriesId()) {
+            // Check for series update
             // Get all events of the series
             String seriesId = update.getUpdate().getSeriesId();
             List<UpdateResult> eventGroup = updates.stream().filter(u -> seriesId.equals(u.getUpdate().getSeriesId())).collect(Collectors.toList());
