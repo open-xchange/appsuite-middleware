@@ -116,7 +116,7 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
 
             return updateTimestamp(clusterTask, timeNow, timeThen, connection);
         } catch (SQLException e) {
-            throw ClusterLockExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+            throw ClusterLockExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeResources(resultSet, statement, connection, false, contextId);
         }
@@ -315,7 +315,7 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
 
             statement.executeUpdate();
         } catch (SQLException e) {
-            throw ClusterLockExceptionCodes.SQL_ERROR.create(e.getMessage(), e);
+            throw ClusterLockExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(statement);
         }

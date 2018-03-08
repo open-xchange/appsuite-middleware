@@ -210,7 +210,7 @@ public abstract class ChronosAction extends AbstractChronosAction {
             processAttachments(uploads, event);
             return event;
         } catch (JSONException e) {
-            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e.getMessage(), e);
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
         }
     }
 

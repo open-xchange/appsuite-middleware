@@ -232,7 +232,7 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
             internalConfig.put(SchedJoulesFields.USER_KEY, generateUserKey(session));
 
         } catch (JSONException e) {
-            throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+            throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
 
         return internalConfig;
@@ -302,9 +302,9 @@ public class BasicSchedJoulesCalendarProvider extends BasicCachingCalendarProvid
                 return true;
             }
         } catch (MalformedURLException e) {
-            throw SchedJoulesProviderExceptionCodes.INVALID_URL.create(account.getAccountId(), e);
+            throw SchedJoulesProviderExceptionCodes.INVALID_URL.create(e, account.getAccountId());
         } catch (JSONException e) {
-            throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+            throw SchedJoulesProviderExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
         return false;
     }
