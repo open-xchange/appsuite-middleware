@@ -64,6 +64,8 @@ import com.openexchange.tools.update.Tools;
  */
 public class OAuthAddIdentityColumnTask extends AbstractOAuthUpdateTask {
 
+    private static final String IDENTITY_COLUMN_NAME = "identity";
+
     /**
      * Initialises a new {@link OAuthAddIdentityColumnTask}.
      */
@@ -78,11 +80,11 @@ public class OAuthAddIdentityColumnTask extends AbstractOAuthUpdateTask {
      */
     @Override
     void innerPerform(Connection connection, PerformParameters performParameters) throws OXException, SQLException {
-        if (Tools.columnExists(connection, CreateOAuthAccountTable.TABLE_NAME, "identity")) {
+        if (Tools.columnExists(connection, CreateOAuthAccountTable.TABLE_NAME, IDENTITY_COLUMN_NAME)) {
             return;
         }
-        Tools.addColumns(connection, CreateOAuthAccountTable.TABLE_NAME, new Column("identity", "varchar(767)"));
-        Tools.createIndex(connection, CreateOAuthAccountTable.TABLE_NAME, new String[] { "identity" });
+        Tools.addColumns(connection, CreateOAuthAccountTable.TABLE_NAME, new Column(IDENTITY_COLUMN_NAME, "varchar(767)"));
+        Tools.createIndex(connection, CreateOAuthAccountTable.TABLE_NAME, new String[] { IDENTITY_COLUMN_NAME });
     }
 
     /*
