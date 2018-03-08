@@ -58,6 +58,7 @@ import java.security.cert.CertPathValidatorException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -303,29 +304,30 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      * @throws CertificateEncodingException if the fingerprint of a certificate cannot be generated
      */
     private void logChain(X509Certificate[] chain) throws CertificateEncodingException {
-        if (!LOG.isDebugEnabled()) {
-            return;
+        if (LOG.isDebugEnabled()) {
+            StringBuilder builder = new StringBuilder(512);
+            List<Object> args = new ArrayList<>(32);
+            String sep = Strings.getLineSeparator();
+            for (int i = 0; i < chain.length; i++) {
+                X509Certificate cert = chain[i];
+                builder.append("{}Certificate ").append((i + 1)); args.add(sep);
+                builder.append("{}     Common Name......: ").append(cert.getSubjectDN()); args.add(sep);
+                builder.append("{}     Issued by........: ").append(cert.getIssuerDN()); args.add(sep);
+                builder.append("{}     Issued on........: ").append(cert.getNotBefore()); args.add(sep);
+                builder.append("{}     Expiration Date..: ").append(cert.getNotAfter()); args.add(sep);
+                builder.append("{}     Serial Number....: ").append(cert.getSerialNumber().toString(16)); args.add(sep);
+                builder.append("{}     Signature........: ").append(toHex(cert.getSignature())); args.add(sep);
+                builder.append("{}  Public Key Info"); args.add(sep);
+                PublicKey pk = cert.getPublicKey();
+                builder.append("{}     Algorithm........: ").append(pk.getAlgorithm()); args.add(sep);
+                builder.append("{}     Format...........: ").append(pk.getFormat()); args.add(sep);
+                builder.append("{}   ").append(pk); args.add(sep);
+                builder.append("{}  Fingerprint"); args.add(sep);
+                builder.append("{}     SHA-256..........: ").append(getFingerprint(cert)); args.add(sep);
+                builder.append("{}"); args.add(sep);
+            }
+            LOG.debug(builder.toString(), args.toArray(new Object[args.size()]));
         }
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < chain.length; i++) {
-            X509Certificate cert = chain[i];
-            builder.append("\nCertificate ").append((i + 1));
-            builder.append("\n     Common Name......: ").append(cert.getSubjectDN());
-            builder.append("\n     Issued by........: ").append(cert.getIssuerDN());
-            builder.append("\n     Issued on........: ").append(cert.getNotBefore());
-            builder.append("\n     Expiration Date..: ").append(cert.getNotAfter());
-            builder.append("\n     Serial Number....: ").append(cert.getSerialNumber().toString(16));
-            builder.append("\n     Signature........: ").append(toHex(cert.getSignature()));
-            builder.append("\n  Public Key Info");
-            PublicKey pk = cert.getPublicKey();
-            builder.append("\n     Algorithm........: ").append(pk.getAlgorithm());
-            builder.append("\n     Format...........: ").append(pk.getFormat());
-            builder.append("\n   ").append(pk);
-            builder.append("\n  Fingerprint");
-            builder.append("\n     SHA-256..........: ").append(getFingerprint(cert));
-            builder.append("\n");
-        }
-        LOG.debug(builder.toString());
     }
 
     /**
@@ -482,7 +484,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             }
         }
 
-        // Check for possible SubjectAlternativeNames 
+        // Check for possible SubjectAlternativeNames
         Collection<List<?>> subjectAlternativeNames = certificate.getSubjectAlternativeNames();
         if (subjectAlternativeNames != null) {
             for (List<?> list : subjectAlternativeNames) {
