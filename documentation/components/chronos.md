@@ -276,7 +276,7 @@ Therefore, some information might currently get lost when converting a recurrenc
 
 ## Reset of Participation Status
 
-Whenever an existing event with attendees is *rescheduled*, each attendee's participation status is reset to ``NEEDS-INFO``. A reschedule occurs, when any ``DTSTART``, ``DTEND``, ``DURATION``, ``RRULE``, ``RDATE``, or ``EXDATE`` property changes such that existing recurrence instances are impacted by the changes (RFC 6638, 3.2.8) - i.e., whenever the period of an event changes. 
+Whenever an existing event with attendees is *rescheduled*, each attendee's participation status is reset to ``NEEDS-ACTION``. A reschedule occurs, when any ``DTSTART``, ``DTEND``, ``DURATION``, ``RRULE``, ``RDATE``, or ``EXDATE`` property changes such that existing recurrence instances are impacted by the changes (RFC 6638, 3.2.8) - i.e., whenever the period of an event changes. 
 
 ### Internal Handling
 
@@ -567,8 +567,6 @@ Doing so, the actual progress of each context is printed out regularly, as well 
 Especially in larger setups or installation with heavy calendar usage, it's recommended to test the migration in a lab or staging environment prior moving forward to the upgrade of the productive system. Ideally, some tests can be executed against a backed up dump or clone of the productive data, in order to get a feeling about the expected runtime and impact. 
 
 The following list gives an overview about the necessary preparations before performing a test migration - the actual list depends on the concrete setup.
-
-"Prepare an isolated database with the backed up dump or clone of the data to migrate", wollen wir da auf die Dinge hinweisen, über die wir selbst gestolpert waren. Ich hatte folgendes mitgeschrieben:
 
 * Prepare an isolated database with the backed up dump or clone of the data to migrate
    - **Important:** the ``db_pool`` table in ConfigDB must be changed to reference the cloned UserDBs

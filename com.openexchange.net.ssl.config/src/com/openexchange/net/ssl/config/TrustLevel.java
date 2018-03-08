@@ -58,7 +58,7 @@ package com.openexchange.net.ssl.config;
 public enum TrustLevel {
 
     /**
-     * The "trust-all" trust level
+     * The "trust-all" trust level (default).
      */
     TRUST_ALL("all"),
     /**

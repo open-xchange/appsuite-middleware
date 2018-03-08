@@ -87,7 +87,6 @@ public class Bug53690Test {
         contact.setSurName("SurName");
         contact.setGivenName("GivenName");
         assertFalse("No sort name", Strings.isEmpty(contact.getSortName()));
-        assertTrue("Yomi names not first", contact.getSortName().startsWith("YomiLastNameYomiFirstName"));
+        assertTrue("Yomi names not first", contact.getSortName().startsWith("YomiLastName_YomiFirstName"));
     }
-
 }

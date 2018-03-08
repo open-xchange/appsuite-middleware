@@ -218,12 +218,12 @@ public class DefaultNotificationParticipantResolverTest {
         List<NotificationParticipant> participants = resolver.resolveAllRecipients(null, updated, user, onBehalfOf, context, session, null);
         Assert.assertFalse("No participants resolved", participants.isEmpty());
         NotificationParticipant participant = participants.stream().filter(p -> p.isExternal()).findFirst().get();
-        Assert.assertThat("EMail souhld not differ!", participant.getEmail(), is(external.getEMail())); //  ChronosTestTools.convertToUser mocks users mail with attendee.getEmail
+        Assert.assertThat("EMail should not differ!", participant.getEmail(), is(external.getEMail())); //  ChronosTestTools.convertToUser mocks users mail with attendee.getEmail
         Assert.assertThat("Display name should be equal to the transmitted common name!", participant.getDisplayName(), is(external.getCn()));
-        Assert.assertThat("TimeZone souhld not differ!", participant.getTimeZone(), is(updated.getStartDate().getTimeZone()));
-        Assert.assertThat("Locale souhld not differ!", participant.getLocale(), is(Locale.CANADA_FRENCH));
-        Assert.assertThat("Comment souhld not differ!", participant.getComment(), is(external.getComment()));
-        Assert.assertThat("Confirm status souhld not differ!", participant.getConfirmStatus(), is(external.getPartStat()));
+        Assert.assertThat("TimeZone should not differ!", participant.getTimeZone(), is(updated.getStartDate().getTimeZone()));
+        Assert.assertThat("Locale should not differ!", participant.getLocale(), is(Locale.CANADA_FRENCH));
+        Assert.assertThat("Comment should not differ!", participant.getComment(), is(external.getComment()));
+        Assert.assertThat("Confirm status should not differ!", participant.getConfirmStatus(), is(external.getPartStat()));
     }
 
     @Test(expected = NoSuchElementException.class)
@@ -257,9 +257,9 @@ public class DefaultNotificationParticipantResolverTest {
         User onBehalfOf = user = ChronosTestTools.convertToUser(updated.getCreatedBy());
 
         Attendee resource = ChronosTestTools.createResource(CONTEXT_ID, null);
-        List<Attendee> extenedAttendees = new LinkedList<>(updated.getAttendees());
-        extenedAttendees.add(resource);
-        updated.setAttendees(extenedAttendees);
+        List<Attendee> extendedAttendees = new LinkedList<>(updated.getAttendees());
+        extendedAttendees.add(resource);
+        updated.setAttendees(extendedAttendees);
 
         prepareServices(updated, onBehalfOf);
         PowerMockito.when(resources.getResource(Matchers.anyInt(), Matchers.any(Context.class))).thenReturn(ChronosTestTools.convertToResource(resource));
@@ -268,10 +268,10 @@ public class DefaultNotificationParticipantResolverTest {
         Assert.assertFalse("No participants resolved", participants.isEmpty());
         // Should throw exception
         NotificationParticipant participant = participants.stream().filter(p -> p.isResource()).findFirst().get();
-        Assert.assertThat("EMail souhld not differ!", participant.getEmail(), is(resource.getEMail())); //  ChronosTestTools.convertToUser mocks users mail with attendee.getEmail
-        Assert.assertThat("Display name shouldn't be set.", participant.getDisplayName(), is(resource.getEMail())); // NotificationParticipant return mail on empty display name
-        Assert.assertThat("TimeZone souhld not differ!", participant.getTimeZone(), is(TimeZone.getDefault()));
-        Assert.assertThat("Locale souhld not differ!", participant.getLocale(), is(Locale.CANADA_FRENCH));
+        Assert.assertThat("EMail should not differ!", participant.getEmail(), is(resource.getEMail())); //  ChronosTestTools.convertToUser mocks users mail with attendee.getEmail
+        Assert.assertThat("Display name should not differ.", participant.getDisplayName(), is(resource.getCn()));
+        Assert.assertThat("TimeZone should not differ!", participant.getTimeZone(), is(TimeZone.getDefault()));
+        Assert.assertThat("Locale should not differ!", participant.getLocale(), is(Locale.CANADA_FRENCH));
         Assert.assertThat("Comment should not be set!", participant.getComment(), nullValue());
         Assert.assertThat("Confirm status should not be set!", participant.getConfirmStatus(), is(ParticipationStatus.NEEDS_ACTION)); // NotificationParticipant default
         Assert.assertFalse("Shouldn't be external!", participant.isExternal());
