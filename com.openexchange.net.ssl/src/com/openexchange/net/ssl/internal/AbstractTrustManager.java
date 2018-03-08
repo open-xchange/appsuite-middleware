@@ -127,7 +127,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         }
 
         try {
-            checkCommonName(getUseId(), getContextId(), chain, socket);
+            checkCommonName(getUserId(), getContextId(), chain, socket);
             this.trustManager.checkServerTrusted(chain, authType, socket);
         } catch (CertificateException e) {
             handleCertificateException(chain, socket, e);
@@ -274,7 +274,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
         logChain(chain);
 
         // Fetch user details
-        int user = getUseId();
+        int user = getUserId();
         if (user < 0) {
             // Missing user information
             throw e;
@@ -591,8 +591,8 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      *
      * @return the context identifier from the LogProperties
      */
-    private int getContextId() {
-        return getLogPropertyValue(LogProperties.Name.SESSION_CONTEXT_ID);
+    private static int getContextId() {
+        return getLogPropertyIntValue(LogProperties.Name.SESSION_CONTEXT_ID);
     }
 
     /**
@@ -600,8 +600,8 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      *
      * @return the user identifier from the {@link LogProperties}
      */
-    private int getUseId() {
-        return getLogPropertyValue(LogProperties.Name.SESSION_USER_ID);
+    private static int getUserId() {
+        return getLogPropertyIntValue(LogProperties.Name.SESSION_USER_ID);
     }
 
     /**
@@ -610,7 +610,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
      * @param name The log property's name
      * @return the property's value
      */
-    private int getLogPropertyValue(LogProperties.Name name) {
+    private static int getLogPropertyIntValue(LogProperties.Name name) {
         return Tools.getUnsignedInteger(LogProperties.get(name));
     }
 }
