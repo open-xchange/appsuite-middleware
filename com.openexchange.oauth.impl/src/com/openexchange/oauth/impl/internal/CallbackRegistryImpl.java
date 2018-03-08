@@ -128,10 +128,6 @@ public class CallbackRegistryImpl implements CustomRedirectURLDetermination, Run
 
     @Override
     public String getURL(final HttpServletRequest req) {
-        if (tokenMap.isEmpty()) {
-            return null;
-        }
-
         String token = req.getParameter("oauth_token");
         if (null != token) {
             // By OAuth token
