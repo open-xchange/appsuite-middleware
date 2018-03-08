@@ -52,9 +52,10 @@ package com.openexchange.chronos.itip;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
-import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.itip.analyzers.AbstractITipAnalyzer;
 import com.openexchange.chronos.itip.osgi.Services;
 import com.openexchange.chronos.itip.tools.ITipEventUpdate;
@@ -115,19 +116,12 @@ public class ITipChange {
     public Event getCurrentEvent() throws OXException {
         if (currentEvent == null) {
             if (isException && master != null && newEvent != null && newEvent.getRecurrenceId() != null) {
-                // TODO: Calculate original ocurrence time for diff
                 RecurrenceService recurrenceService = Services.getService(RecurrenceService.class);
-                DateTime value = newEvent.getRecurrenceId().getValue();
-                Calendar recurrenceId = GregorianCalendar.getInstance(value.getTimeZone());
-                recurrenceId.setTimeInMillis(value.getTimestamp());
-                int position = recurrenceService.calculateRecurrencePosition(master, recurrenceId);
-                if (position > 0) {
-                    RecurrenceIterator<Event> recurrenceIterator = recurrenceService.iterateEventOccurrences(master, CalendarUtils.asDate(newEvent.getStartDate()), CalendarUtils.asDate(newEvent.getEndDate()));
-                    while (recurrenceIterator.hasNext() && position >= recurrenceIterator.getPosition()) {
-                        Event next = recurrenceIterator.next();
-                        if (position == recurrenceIterator.getPosition()) {
-                            return next;
-                        }
+                RecurrenceIterator<Event> recurrenceIterator = recurrenceService.iterateEventOccurrences(master, CalendarUtils.asDate(newEvent.getStartDate()), CalendarUtils.asDate(newEvent.getEndDate()));
+                while (recurrenceIterator.hasNext()) {
+                    Event next = recurrenceIterator.next();
+                    if (next.getRecurrenceId().equals(newEvent.getRecurrenceId())) {
+                        return EventMapper.getInstance().copy(next, new Event(), (EventField[]) null);
                     }
                 }
             }
