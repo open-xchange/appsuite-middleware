@@ -82,6 +82,7 @@ public class OAuthAddIdentityColumnTask extends AbstractOAuthUpdateTask {
             return;
         }
         Tools.addColumns(connection, CreateOAuthAccountTable.TABLE_NAME, new Column("identity", "varchar(767)"));
+        Tools.createIndex(connection, CreateOAuthAccountTable.TABLE_NAME, new String[] { "identity" });
     }
 
     /*
