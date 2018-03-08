@@ -91,7 +91,7 @@ public class SSLActivator extends HousekeepingActivator {
             if (sslConfigurationService.isVerifyHostname()) {
                 HttpsURLConnection.setDefaultHostnameVerifier(new com.openexchange.net.ssl.apache.DefaultHostnameVerifier());
             } else {
-                HttpsURLConnection.setDefaultHostnameVerifier(new org.apache.http.conn.ssl.NoopHostnameVerifier());
+                HttpsURLConnection.setDefaultHostnameVerifier(org.apache.http.conn.ssl.NoopHostnameVerifier.INSTANCE);
             }
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(SSLActivator.class).error("", e);
