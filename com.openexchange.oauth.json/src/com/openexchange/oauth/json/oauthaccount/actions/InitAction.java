@@ -151,7 +151,7 @@ public final class InitAction extends AbstractOAuthTokenAction {
             // Get the scopes
             Set<OAuthScope> scopes = getScopes(request, serviceId);
 
-            return invokeInteraction(request, session, "create", -1, serviceId, scopes);
+            return invokeInteraction(request, session, "callback", -1, serviceId, scopes);
         } catch (OXException e) {
             if (Client.OX6_UI.getClientId().equals(session.getClient())) {
                 throw e;

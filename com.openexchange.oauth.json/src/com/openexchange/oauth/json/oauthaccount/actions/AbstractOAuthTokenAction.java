@@ -123,11 +123,11 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
          */
         {
             String oauth_problem = request.getParameter(OAuthConstants.URLPARAM_OAUTH_PROBLEM);
-            if(!Strings.isEmpty(oauth_problem)) {
+            if (!Strings.isEmpty(oauth_problem)) {
                 throw fromOauthProblem(oauth_problem, request, service);
             }
             oauth_problem = request.getParameter(OAuthConstants.URLPARAM_ERROR);
-            if(!Strings.isEmpty(oauth_problem)) {
+            if (!Strings.isEmpty(oauth_problem)) {
                 throw fromOauthProblem(oauth_problem, request, service);
             }
         }
@@ -137,7 +137,7 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
             oauthToken = request.getParameter("access_token");
         }
         if (oauthToken != null) {
-        	oauthToken = stripExpireParam(oauthToken);
+            oauthToken = stripExpireParam(oauthToken);
         }
         final String uuid = request.getParameter(OAuthConstants.SESSION_PARAM_UUID);
         if (uuid == null) {
@@ -147,8 +147,7 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         /*
          * Get request token secret from session parameters
          */
-        @SuppressWarnings("unchecked")
-        final Map<String, Object> state = (Map<String, Object>) session.getParameter(uuid); //request.getParameter("oauth_token_secret");
+        @SuppressWarnings("unchecked") final Map<String, Object> state = (Map<String, Object>) session.getParameter(uuid); //request.getParameter("oauth_token_secret");
         if (null == state) {
             throw OAuthExceptionCodes.CANCELED_BY_USER.create();
         }
@@ -201,7 +200,7 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         }
         m.appendTail(sb);
         return sb.toString();
-	}
+    }
 
     /**
      * Create the correct {@link OAuthExceptionCode} by mapping the incoming problem against the known problems in {@link OAuthConstants}
@@ -283,7 +282,6 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         return OAuthExceptionCodes.OAUTH_PROBLEM_UNEXPECTED.create(oauth_problem);
     }
 
-
     /**
      * Gets the scopes from the request and converts them to {@link OAuthScope}s using the {@link OAuthScopeRegistry}
      *
@@ -296,6 +294,13 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
         // Get the scope parameter
         String scope = request.getParameter("scopes");
+
+        //   /!\ FIXME: remove when UI implements their part /!\   //
+        if (!scope.contains("me")) {
+            scope += " me";
+        }
+        ////////////////////////////////////////////////////////////
+
         OAuthAPIRegistry service = Services.getService(OAuthAPIRegistry.class);
         if (service == null) {
             throw ServiceExceptionCode.absentService(OAuthAPIRegistry.class);

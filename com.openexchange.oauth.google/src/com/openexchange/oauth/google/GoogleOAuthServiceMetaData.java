@@ -124,7 +124,7 @@ public final class GoogleOAuthServiceMetaData extends AbstractExtendedScribeAwar
         // GET https://www.googleapis.com/oauth2/v1/userinfo
         //  Authorization: bearer oauthToken.getAccessToken();
         try {
-            HttpURLConnection connection = (HttpURLConnection) new URL(GoogleOAuthScope.me.getProviderScopes()).openConnection();
+            HttpURLConnection connection = (HttpURLConnection) new URL("https://www.googleapis.com/oauth2/v1/userinfo").openConnection();
             connection.setInstanceFollowRedirects(true);
             connection.setRequestMethod("GET");
             connection.setRequestProperty("Authorization", "Bearer " + accessToken);

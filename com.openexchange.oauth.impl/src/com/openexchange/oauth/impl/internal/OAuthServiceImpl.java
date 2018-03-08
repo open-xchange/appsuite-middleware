@@ -484,7 +484,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
      */
     @Override
     public OAuthAccount upsertAccount(String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId, Set<OAuthScope> scopes) throws OXException {
-        final DefaultOAuthAccount account = new DefaultOAuthAccount();
+        DefaultOAuthAccount account = new DefaultOAuthAccount();
         final OAuthServiceMetaData service = registry.getService(serviceMetaData, user, contextId);
         account.setMetaData(service);
         // Obtain & apply the access token
@@ -493,9 +493,16 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         String userIdentity = service.getUserIdentity(account.getToken());
         if (Strings.isNotEmpty(userIdentity)) {
             // TODO: search in db for an account matching that id
-            //        + if nothing found then try and find a match with the display name of the account
-            //        |--+ if nothing found then add the account
-            //        |--+ if found then update that account
+            account = (DefaultOAuthAccount) findByUserIdentity(userIdentity, user, contextId, serviceMetaData);
+            if (account == null) {
+                //        + if nothing found then try and find a match with the display name of the account
+            }
+
+            if (account == null) {
+                //        |--+ if nothing found then add the account
+            } else {
+                //        |--+ if found then update that account
+            }
         }
 
         // TODO: if the userIdentity if null examine the cause for that state
@@ -738,6 +745,64 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
+            provider.releaseReadConnection(context, con);
+        }
+    }
+
+    /**
+     * 
+     * @param userIdentity
+     * @param userId
+     * @param contextId
+     * @param serviceId
+     * @return
+     * @throws OXException
+     */
+    private OAuthAccount findByUserIdentity(String userIdentity, int userId, int contextId, String serviceId) throws OXException {
+        final SecretEncryptionService<PWUpdate> encryptionService = Services.getService(SecretEncryptionFactoryService.class).createService(this);
+        final OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
+        final Context context = getContext(contextId);
+        final Connection con = getConnection(true, context);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT accountId, displayName, accessToken, accessSecret, serviceId, scope, identity FROM oauthAccounts WHERE cid = ? AND user = ? AND serviceId = ? AND identity = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setString(3, serviceId);
+            stmt.setString(4, userIdentity);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return null; //TODO: throw exception
+            }
+
+            int accountId = rs.getInt(1);
+            DefaultOAuthAccount account = new DefaultOAuthAccount();
+            account.setId(accountId);
+            String displayName = rs.getString(2);
+            account.setDisplayName(displayName);
+            try {
+                Session session = getUserSession(userId, contextId);
+                account.setToken(encryptionService.decrypt(session, rs.getString(3), new PWUpdate("accessToken", contextId, accountId)));
+                account.setSecret(encryptionService.decrypt(session, rs.getString(4), new PWUpdate("accessSecret", contextId, accountId)));
+            } catch (OXException e) {
+                if (false == CryptoErrorMessage.BadPassword.equals(e)) {
+                    throw e;
+                }
+
+                throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e.getCause(), displayName, accountId);
+            }
+
+            account.setMetaData(registry.getService(rs.getString(5), userId, contextId));
+            String scopes = rs.getString(6);
+            Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), OXScope.valuesOf(scopes));
+            account.setEnabledScopes(enabledScopes);
+            account.setUserIdentity(rs.getString(7));
+            return account;
+        } catch (final SQLException e) {
+            throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
             provider.releaseReadConnection(context, con);
         }
     }
