@@ -108,21 +108,7 @@ public final class InitAction extends AbstractOAuthTokenAction {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-        try {
-            String accountId = request.getParameter("id");
-            if (null == accountId) {
-                /*
-                 * Call-back with action=create
-                 */
-                return createCallbackAction(request, session);
-            }
-            /*
-             * Call-back with action=reauthorize
-             */
-            return reauthorizeCallbackAction(accountId, request, session);
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        }
+        return createCallbackAction(request, session);
     }
 
     /**
@@ -172,12 +158,13 @@ public final class InitAction extends AbstractOAuthTokenAction {
 
     /**
      * Creates an <code>init?action=reauthorize</code> call-back action
-     *
+     * 
      * @param request The {@link AJAXRequestData}
      * @param session The server session
      * @return the {@link AJAXRequestResult} containing the {@link OAuthInteraction} as a {@link JSONObject}
      * @throws OXException if the call-back action cannot be created
      */
+    //TODO: move logic to OAuthService.upsert method
     private AJAXRequestResult reauthorizeCallbackAction(final String accountId, final AJAXRequestData request, final ServerSession session) throws OXException, JSONException {
         final OAuthService oAuthService = getOAuthService();
         /*
