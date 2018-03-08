@@ -54,6 +54,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.Header;
@@ -144,7 +145,7 @@ public class ICalFeedClient {
                 }
 
                 byte[] encodedAuth = Base64.encodeBase64(auth.toString().getBytes(Charset.forName("ISO-8859-1")));
-                String authHeader = "Basic " + new String(encodedAuth);
+                String authHeader = "Basic " + new String(encodedAuth, StandardCharsets.US_ASCII);
 
                 method.addHeader(HttpHeaders.AUTHORIZATION, authHeader);
             }

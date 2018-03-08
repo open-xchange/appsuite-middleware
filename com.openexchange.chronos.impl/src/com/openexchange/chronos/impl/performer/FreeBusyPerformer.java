@@ -342,10 +342,10 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
         // Disabled until further notice
         if (!AVAILABILITY_ENABLED) {
             Map<Attendee, FreeBusyResult> results = new HashMap<>();
-            for (Attendee attendee : freeBusyPerAttendee.keySet()) {
+            for (Map.Entry<Attendee, List<FreeBusyTime>> attendeeEntry : freeBusyPerAttendee.entrySet()) {
                 FreeBusyResult result = new FreeBusyResult();
-                result.setFreeBusyTimes(freeBusyPerAttendee.get(attendee));
-                results.put(attendee, result);
+                result.setFreeBusyTimes(attendeeEntry.getValue());
+                results.put(attendeeEntry.getKey(), result);
             }
             return results;
         }
@@ -409,8 +409,7 @@ public class FreeBusyPerformer extends AbstractFreeBusyPerformer {
      * @param timeZone The {@link TimeZone} of the user
      */
     private void expandRecurringInstances(Date from, Date until, Map<Attendee, Availability> availableTimes, TimeZone timeZone) throws OXException {
-        for (Attendee attendee : availableTimes.keySet()) {
-            Availability calendarAvailability = availableTimes.get(attendee);
+        for (Availability calendarAvailability : availableTimes.values()) {
             List<Available> auxAvailable = new ArrayList<>();
             Date endTime = new Date(CalendarUtils.getDateInTimeZone(calendarAvailability.getEndTime(), timeZone));
             for (Iterator<Available> iterator = calendarAvailability.getAvailable().iterator(); iterator.hasNext();) {

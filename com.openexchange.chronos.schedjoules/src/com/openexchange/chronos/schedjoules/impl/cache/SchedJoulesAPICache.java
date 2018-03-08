@@ -93,7 +93,7 @@ public class SchedJoulesAPICache {
 
     /**
      * Retrieves a {@link SchedJoulesAPI} instance. If none in cache a new one will be initialised.
-     * 
+     *
      * @param contextId The context identifier
      * @return The {@link SchedJoulesAPI}
      * @throws OXException if an error is occurred
@@ -106,14 +106,14 @@ public class SchedJoulesAPICache {
                 return new SchedJoulesAPI(getProperty(contextId, SchedJoulesProperty.scheme), getProperty(contextId, SchedJoulesProperty.host), getProperty(contextId, SchedJoulesProperty.apiKey));
             });
         } catch (ExecutionException e) {
-            throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
+            throw SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     /**
      * Gets the API key for the specified context and hashes it to create
      * a unique key for the client
-     * 
+     *
      * @param contextId The context identifier
      * @return The hash
      * @throws OXException if the API key is not configured for the specified context
@@ -124,7 +124,7 @@ public class SchedJoulesAPICache {
 
     /**
      * Retrieves the desired {@link SchedJoulesProperty} for the specified context
-     * 
+     *
      * @param contextId The context identifier
      * @param property The {@link SchedJoulesProperty} to get
      * @return The API key

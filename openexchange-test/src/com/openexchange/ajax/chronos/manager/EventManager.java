@@ -266,7 +266,15 @@ public class EventManager extends AbstractManager {
      * @throws ChronosApiException if a Chronos API error is occurred
      */
     public EventData getRecurringEvent(String eventId, String reccurenceId, boolean expectException) throws ApiException, ChronosApiException {
-        return getRecurringEvent(eventId, reccurenceId, expectException, false);
+        return getRecurringEvent(eventId, reccurenceId, defaultFolder, expectException, false);
+    }
+
+    public EventData getRecurringEvent(String eventId, String reccurenceId, boolean expectException, boolean extendedEntities) throws ApiException, ChronosApiException {
+        return getRecurringEvent(eventId, reccurenceId, defaultFolder, expectException, extendedEntities);
+    }
+
+    public EventData getRecurringEvent(String eventId, String reccurenceId, String folderId, boolean expectException) throws ApiException, ChronosApiException {
+        return getRecurringEvent(eventId, reccurenceId, folderId, expectException, false);
     }
 
     /**
@@ -280,8 +288,8 @@ public class EventManager extends AbstractManager {
      * @throws ApiException if an API error is occurred
      * @throws ChronosApiException if a Chronos API error is occurred
      */
-    public EventData getRecurringEvent(String eventId, String reccurenceId, boolean expectException, boolean extendedEntities) throws ApiException, ChronosApiException {
-        EventResponse eventsResponse = userApi.getChronosApi().getEvent(userApi.getSession(), eventId, defaultFolder, reccurenceId, null, extendedEntities);
+    public EventData getRecurringEvent(String eventId, String reccurenceId, String folderId, boolean expectException, boolean extendedEntities) throws ApiException, ChronosApiException {
+        EventResponse eventsResponse = userApi.getChronosApi().getEvent(userApi.getSession(), eventId, folderId, reccurenceId, null, extendedEntities);
         if (expectException) {
             assertNotNull("An error was expected", eventsResponse.getError());
             throw new ChronosApiException(eventsResponse.getCode(), eventsResponse.getError());

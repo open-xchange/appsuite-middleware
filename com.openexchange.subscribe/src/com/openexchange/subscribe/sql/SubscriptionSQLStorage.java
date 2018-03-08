@@ -741,8 +741,9 @@ public class SubscriptionSQLStorage implements AdministrativeSubscriptionStorage
     @Override
     public List<Subscription> getSubscriptionsForContext(Context ctx, String sourceId, Connection con) throws OXException {
         if (null == con) {
-            getSubscriptionsForContext(ctx, sourceId);
+            return getSubscriptionsForContext(ctx, sourceId);
         }
+
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {

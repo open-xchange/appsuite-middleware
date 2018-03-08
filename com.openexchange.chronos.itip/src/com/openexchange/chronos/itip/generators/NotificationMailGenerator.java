@@ -1149,7 +1149,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
 
     }
 
-    protected class DoNothingState implements MailGeneratorState {
+    static protected class DoNothingState implements MailGeneratorState {
 
         @Override
         public NotificationMail generateCreateExceptionMailFor(final NotificationParticipant participant) throws OXException {

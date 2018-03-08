@@ -109,7 +109,9 @@ public class FreeBusyUtils {
             return freeBusyResults.get(0);
         }
         FreeBusyResult combinedResult = combine(freeBusyResults);
-        combinedResult.setFreeBusyTimes(mergeFreeBusy(combinedResult.getFreeBusyTimes()));
+        if (null != combinedResult) {
+            combinedResult.setFreeBusyTimes(mergeFreeBusy(combinedResult.getFreeBusyTimes()));
+        }
         return combinedResult;
     }
 

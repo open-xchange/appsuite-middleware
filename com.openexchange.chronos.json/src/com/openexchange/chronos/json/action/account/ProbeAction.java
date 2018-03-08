@@ -120,7 +120,7 @@ public class ProbeAction extends ChronosAction {
         if (jsonObject.has(CALENDAR_CONFIG_FIELD.getName())) {
             try {
                 FolderProperty property = CALENDAR_CONFIG_FIELD.parse(jsonObject.get(CALENDAR_CONFIG_FIELD.getName()));
-                settings.setConfig((JSONObject) property.getValue());
+                settings.setConfig(null == property ? null : (JSONObject) property.getValue());
             } catch (ClassCastException | JSONException e) {
                 throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
             }
@@ -128,7 +128,7 @@ public class ProbeAction extends ChronosAction {
         if (jsonObject.has(EXTENDED_PROPERTIES_FIELD.getName())) {
             try {
                 FolderProperty property = EXTENDED_PROPERTIES_FIELD.parse(jsonObject.get(EXTENDED_PROPERTIES_FIELD.getName()));
-                settings.setExtendedProperties((ExtendedProperties) property.getValue());
+                settings.setExtendedProperties(null == property ? null : (ExtendedProperties) property.getValue());
             } catch (ClassCastException | JSONException e) {
                 throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
             }

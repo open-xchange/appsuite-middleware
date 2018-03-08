@@ -469,7 +469,7 @@ public class ChronosCopyTask implements CopyUserTaskService {
         return services.getService(CalendarUtilities.class).getEntityResolver(ctx.getContextId());
     }
 
-    private class FolderProperties {
+    private static class FolderProperties {
 
         private int contextId;
         private int folderId;
@@ -478,7 +478,7 @@ public class ChronosCopyTask implements CopyUserTaskService {
         private String propertyValue;
 
         public FolderProperties() {
-
+            super();
         }
 
         public int getContextId() {
@@ -520,7 +520,6 @@ public class ChronosCopyTask implements CopyUserTaskService {
         public void setPropertyValue(String propertyValue) {
             this.propertyValue = propertyValue;
         }
-
     }
 
     /**

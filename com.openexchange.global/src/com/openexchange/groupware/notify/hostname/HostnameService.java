@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.notify.hostname;
 
+import com.openexchange.osgi.annotation.OptionalService;
 import com.openexchange.osgi.annotation.SingletonService;
 
 /**
@@ -61,6 +62,7 @@ import com.openexchange.osgi.annotation.SingletonService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @SingletonService
+@OptionalService
 public interface HostnameService {
 
     /**

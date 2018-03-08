@@ -96,7 +96,7 @@ public class SchedJoulesRESTClient implements Closeable {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.lang.ThreadLocal#initialValue()
          */
         @Override
@@ -182,7 +182,7 @@ public class SchedJoulesRESTClient implements Closeable {
     /**
      * Retrieves the value of the specified header, or <code>null</code> if no such header exists
      * or the value of the header is <code>null</code>
-     * 
+     *
      * @param httpResponse The {@link HttpResponse}
      * @param headerName The header's name
      * @return the value of the specified header, or <code>null</code> if no such header exists or
@@ -202,7 +202,7 @@ public class SchedJoulesRESTClient implements Closeable {
 
     /**
      * Prepares the 'Authorization' header
-     * 
+     *
      * @param contextId the context identifier
      * @return The authorisation header
      */
@@ -212,7 +212,7 @@ public class SchedJoulesRESTClient implements Closeable {
 
     /**
      * Prepares the 'Accept' header
-     * 
+     *
      * @return the 'Accept' header
      */
     private String prepareAcceptHeader() {
@@ -221,7 +221,7 @@ public class SchedJoulesRESTClient implements Closeable {
 
     /**
      * Initialises the HTTP client
-     * 
+     *
      * @return The initialised {@link CloseableHttpClient}
      */
     private CloseableHttpClient initializeHttpClient() {
@@ -233,7 +233,7 @@ public class SchedJoulesRESTClient implements Closeable {
 
     /**
      * Prepares the specified HTTP request and adds the Authorization header
-     * 
+     *
      * @param request The {@link HttpRequestBase} to prepare
      * @param scheme The mandatory scheme/protocol
      * @param baseUrl The mandatory base URL
@@ -248,7 +248,7 @@ public class SchedJoulesRESTClient implements Closeable {
 
     /**
      * Prepares the specified HTTP request
-     * 
+     *
      * @param request The {@link HttpRequestBase} to prepare
      * @param scheme The mandatory scheme/protocol
      * @param baseUrl The mandatory base URL
@@ -267,13 +267,13 @@ public class SchedJoulesRESTClient implements Closeable {
                 request.addHeader(HttpHeaders.IF_MODIFIED_SINCE, LAST_MODIFIED_DATE_PARSER.get().format(new Date(lastModified)));
             }
         } catch (URISyntaxException e) {
-            throw SchedJoulesAPIExceptionCodes.INVALID_URI_PATH.create(path, e);
+            throw SchedJoulesAPIExceptionCodes.INVALID_URI_PATH.create(e, path);
         }
     }
 
     /**
      * Prepares the specified {@link SchedJoulesRequest}
-     * 
+     *
      * @param request The {@link SchedJoulesRequest} to prepare
      * @return an {@link HttpUriRequest}
      * @throws OXException if an unknown HTTP method is defined in the request
@@ -290,7 +290,7 @@ public class SchedJoulesRESTClient implements Closeable {
 
     /**
      * Creates an {@link HttpRequestBase} with the specified {@link HttpMethod}
-     * 
+     *
      * @param httpMethod The {@link HttpMethod}
      * @return The new {@link HttpRequestBase}
      * @throws OXException if an unknown HTTP method is provided
@@ -312,7 +312,7 @@ public class SchedJoulesRESTClient implements Closeable {
 
     /**
      * Creates an {@link HttpUriRequest} from the specified {@link URL} and the specified {@link HttpMethod}
-     * 
+     *
      * @param url The {@link URL} to use
      * @param httpMethod The {@link HttpMethod}
      * @param eTag the optional etag
@@ -329,25 +329,31 @@ public class SchedJoulesRESTClient implements Closeable {
 
     /**
      * Prepares the query string from the specified query parameters
-     * 
+     *
      * @param queryParameters The {@link Map} containing the query parameters
      * @return The query string
      */
     private String prepareQuery(Map<String, String> queryParameters) {
         if (queryParameters.isEmpty()) {
-            return new String();
+            return "";
         }
-        StringBuilder stringBuilder = new StringBuilder();
-        for (String name : queryParameters.keySet()) {
-            stringBuilder.append(name).append("=").append(queryParameters.get(name)).append("&");
+
+        StringBuilder stringBuilder = new StringBuilder(64);
+        boolean first = true;
+        for (Map.Entry<String, String> queryParameter : queryParameters.entrySet()) {
+            if (first) {
+                first = false;
+            } else {
+                stringBuilder.append('&');
+            }
+            stringBuilder.append(queryParameter.getKey()).append('=').append(queryParameter.getValue());
         }
-        stringBuilder.setLength(stringBuilder.length() - 1);
         return stringBuilder.toString();
     }
 
     /**
      * Executes the specified {@link SchedJoulesRequest}
-     * 
+     *
      * @param request The {@link SchedJoulesRequest} to execute
      * @return The {@link SchedJoulesResponse}
      * @throws OXException if an error is occurred
@@ -358,7 +364,7 @@ public class SchedJoulesRESTClient implements Closeable {
 
     /**
      * Executes a GET request to the specified {@link URL}
-     * 
+     *
      * @param url The {@link URL}
      * @return The {@link SchedJoulesResponse}
      * @throws OXException if an error is occurred
@@ -369,7 +375,7 @@ public class SchedJoulesRESTClient implements Closeable {
 
     /**
      * Executes the specified {@link SchedJoulesRequest} with the specified method
-     * 
+     *
      * @param url The {@link URL}
      * @param httpMethod the {@link HttpMethod} to use
      * @param eTag The optional etag to use
@@ -386,7 +392,7 @@ public class SchedJoulesRESTClient implements Closeable {
 
     /**
      * Executes a request with the specified method to the specified {@link URL}
-     * 
+     *
      * @param url The {@link URL}
      * @param httpMethod the {@link HttpMethod} to use
      * @param eTag The optional etag to use
@@ -400,7 +406,7 @@ public class SchedJoulesRESTClient implements Closeable {
 
     /**
      * Executes the specified {@link HttpUriRequest} and returns a {@link SchedJoulesResponse}
-     * 
+     *
      * @param httpRequest the {@link HttpUriRequest} to execute
      * @return The {@link SchedJoulesResponse}
      * @throws OXException if an error is occurred
@@ -412,7 +418,7 @@ public class SchedJoulesRESTClient implements Closeable {
             LOGGER.debug("Executing request: '{}'", httpRequest.getURI());
             httpResponse = httpClient.execute(httpRequest);
             LOGGER.debug("Request '{}' completed with status code '{}'", httpRequest.getURI(), httpResponse.getStatusLine().getStatusCode());
-            
+
             // Get the response code and assert
             int statusCode = assertStatusCode(httpResponse);
             if (statusCode == 304) {
@@ -423,9 +429,9 @@ public class SchedJoulesRESTClient implements Closeable {
             // Prepare the response
             return prepareResponse(httpResponse);
         } catch (ClientProtocolException e) {
-            throw SchedJoulesAPIExceptionCodes.CLIENT_PROTOCOL_ERROR.create(e.getMessage(), e);
+            throw SchedJoulesAPIExceptionCodes.CLIENT_PROTOCOL_ERROR.create(e, e.getMessage());
         } catch (IOException e) {
-            throw SchedJoulesAPIExceptionCodes.IO_ERROR.create(e.getMessage(), e);
+            throw SchedJoulesAPIExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             consume(httpResponse);
             reset(httpRequest);
@@ -435,7 +441,7 @@ public class SchedJoulesRESTClient implements Closeable {
 
     /**
      * Consumes the specified {@link HttpResponse}
-     * 
+     *
      * @param response the {@link HttpResponse} to consume
      */
     private void consume(HttpResponse response) {
@@ -455,7 +461,7 @@ public class SchedJoulesRESTClient implements Closeable {
 
     /**
      * Resets the specified {@link HttpRequestBase}
-     * 
+     *
      * @param httpRequest The {@link HttpRequestBase} to reset
      */
     private void reset(HttpRequestBase httpRequest) {
@@ -471,7 +477,7 @@ public class SchedJoulesRESTClient implements Closeable {
 
     /**
      * Prepares the {@link SchedJoulesResponse} from the specified {@link HttpResponse}
-     * 
+     *
      * @param httpResponse The {@link HttpResponse} to extract the content from
      * @return the {@link SchedJoulesResponse}
      * @throws IOException if an I/O error is occurred
@@ -493,7 +499,7 @@ public class SchedJoulesRESTClient implements Closeable {
     /**
      * Parses from the specified {@link HttpResponse} the headers that are defined in the {@link #headerParsers}
      * and sets them to the specified {@link SchedJoulesResponse}
-     * 
+     *
      * @param httpResponse The {@link HttpResponse}
      * @param schedjoulesResponse The {@link SchedJoulesResponse}
      */
@@ -505,7 +511,7 @@ public class SchedJoulesRESTClient implements Closeable {
 
     /**
      * Asserts the status code for any errors
-     * 
+     *
      * @param httpResponse The {@link HttpResponse}'s status code to assert
      * @return The status code
      * @throws OXException if an HTTP error is occurred (4xx or 5xx)

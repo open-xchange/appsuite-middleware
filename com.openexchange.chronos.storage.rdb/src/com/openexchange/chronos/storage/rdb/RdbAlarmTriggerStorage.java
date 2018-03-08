@@ -59,6 +59,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TimeZone;
 import com.google.common.collect.Lists;
 import com.openexchange.chronos.Alarm;
@@ -89,7 +90,6 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerStorage {
 
-    protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbAlarmTriggerStorage.class);
     private static final AlarmTriggerDBMapper MAPPER = AlarmTriggerDBMapper.getInstance();
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
     private static final int DELETE_CHUNK_SIZE = 200;
@@ -154,45 +154,6 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     }
 
     /**
-     * Updates the alarm trigger
-     *
-     * @param trigger The updated {@link AlarmTrigger}
-     * @throws OXException
-     */
-    @SuppressWarnings("unused")
-    private void updateAlarmTrigger(AlarmTrigger trigger) throws OXException {
-        Connection writeCon = dbProvider.getWriteConnection(context);
-        int updated = 0;
-        try {
-            txPolicy.setAutoCommit(writeCon, false);
-            updateAlarmTrigger(trigger, writeCon);
-            txPolicy.commit(writeCon);
-        } catch (SQLException e) {
-            throw asOXException(e);
-        } finally {
-            release(writeCon, updated);
-        }
-    };
-
-    private int updateAlarmTrigger(AlarmTrigger trigger, Connection writeCon) throws OXException {
-
-        try {
-            AlarmTriggerField[] assignedfields = MAPPER.getAssignedFields(trigger);
-            String sql = new StringBuilder().append("UPDATE calendar_alarm_trigger SET ").append(MAPPER.getAssignments(assignedfields)).append(" WHERE cid=? AND account=? AND alarm=?;").toString();
-            try (PreparedStatement stmt = writeCon.prepareStatement(sql)) {
-                int parameterIndex = 1;
-                parameterIndex = MAPPER.setParameters(stmt, parameterIndex, trigger, assignedfields);
-                stmt.setInt(parameterIndex++, context.getContextId());
-                stmt.setInt(parameterIndex++, accountId);
-                stmt.setInt(parameterIndex++, trigger.getAlarm());
-                return logExecuteUpdate(stmt);
-            }
-        } catch (SQLException e) {
-            throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    /**
      * Lists alarm triggers for the given user until the given time in ascending order
      *
      * @param user The user id
@@ -203,7 +164,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     private List<AlarmTrigger> getAlarmTriggers(int user, Date until) throws OXException {
         Connection con = dbProvider.getReadConnection(context);
         try {
-            return getAlarmTriggers(user, until==null ? null : until.getTime(), con);
+            return getAlarmTriggers(user, until == null ? null : until.getTime(), con);
         } finally {
             dbProvider.releaseReadConnection(context, con);
         }
@@ -212,14 +173,9 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
     private List<AlarmTrigger> getAlarmTriggers(int user, Long until, Connection con) throws OXException {
         try {
             AlarmTriggerField[] mappedFields = MAPPER.getMappedFields();
-            StringBuilder stringBuilder = new StringBuilder()
-                .append("SELECT account,cid,")
-                .append(MAPPER.getColumns(mappedFields))
-                .append(" FROM ")
-                .append("calendar_alarm_trigger")
-                .append(" WHERE cid=? AND account=? AND user=?");
+            StringBuilder stringBuilder = new StringBuilder().append("SELECT account,cid,").append(MAPPER.getColumns(mappedFields)).append(" FROM ").append("calendar_alarm_trigger").append(" WHERE cid=? AND account=? AND user=?");
 
-            if(until!=null) {
+            if (until != null) {
                 stringBuilder.append(" AND triggerDate<?");
             }
             stringBuilder.append(" ORDER BY triggerDate");
@@ -231,7 +187,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                 stmt.setInt(parameterIndex++, accountId);
                 stmt.setInt(parameterIndex++, user);
 
-                if(until != null) {
+                if (until != null) {
                     stmt.setLong(parameterIndex++, until);
                 }
 
@@ -262,25 +218,23 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
 
     @Override
     public void insertTriggers(Event event, Map<Integer, List<Alarm>> alarmsPerUserId) throws OXException {
-        for (Integer userId : alarmsPerUserId.keySet()) {
-
-            List<Alarm> alarms = alarmsPerUserId.get(userId);
+        for (Map.Entry<Integer, List<Alarm>> entry : alarmsPerUserId.entrySet()) {
+            List<Alarm> alarms = entry.getValue();
             if (alarms == null || alarms.isEmpty()) {
                 // Skip user in case no alarms are available
                 continue;
             }
 
+            Integer userId = entry.getKey();
             for (Alarm alarm : alarms) {
                 AlarmTrigger trigger = prepareTrigger(userId, alarm, event);
-                if(trigger==null){
+                if (trigger == null) {
                     // Skip invalid and past alarm triggers
                     continue;
                 }
                 insertAlarmTrigger(trigger);
             }
-
         }
-
     }
 
     private static String getFolderId(Event event, int userId) throws OXException {
@@ -291,8 +245,8 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         return folderId;
     }
 
-    private void addRelatedDate(Alarm alarm, Event event, AlarmTrigger trigger){
-        if(alarm.getTrigger().getDateTime()==null){
+    private void addRelatedDate(Alarm alarm, Event event, AlarmTrigger trigger) {
+        if (alarm.getTrigger().getDateTime() == null) {
             trigger.setRelatedTime(AlarmUtils.getRelatedDate(alarm.getTrigger().getRelated(), event).getTimestamp());
         }
     }
@@ -387,10 +341,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         if (null == eventIds || 0 == eventIds.length) {
             return Collections.emptyMap();
         }
-        StringBuilder stringBuilder = new StringBuilder()
-            .append("SELECT DISTINCT(eventId) FROM calendar_alarm_trigger WHERE cid=? AND account=? AND user=? AND eventId")
-            .append(getPlaceholders(eventIds.length)).append(';')
-        ;
+        StringBuilder stringBuilder = new StringBuilder().append("SELECT DISTINCT(eventId) FROM calendar_alarm_trigger WHERE cid=? AND account=? AND user=? AND eventId").append(getPlaceholders(eventIds.length)).append(';');
         Map<String, Boolean> triggersById = new HashMap<String, Boolean>();
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
@@ -423,10 +374,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         if (null == ids || 0 == ids.size()) {
             return 0;
         }
-        StringBuilder stringBuilder = new StringBuilder()
-            .append("DELETE FROM calendar_alarm_trigger WHERE cid=? AND account=? AND eventId")
-            .append(getPlaceholders(ids.size())).append(';')
-        ;
+        StringBuilder stringBuilder = new StringBuilder().append("DELETE FROM calendar_alarm_trigger WHERE cid=? AND account=? AND eventId").append(getPlaceholders(ids.size())).append(';');
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, context.getContextId());
@@ -442,10 +390,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         if (null == ids || 0 == ids.size()) {
             return 0;
         }
-        StringBuilder stringBuilder = new StringBuilder()
-            .append("DELETE FROM calendar_alarm_trigger WHERE cid=? AND account=? AND user=? AND eventId")
-            .append(getPlaceholders(ids.size())).append(';')
-        ;
+        StringBuilder stringBuilder = new StringBuilder().append("DELETE FROM calendar_alarm_trigger WHERE cid=? AND account=? AND user=? AND eventId").append(getPlaceholders(ids.size())).append(';');
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, context.getContextId());
@@ -536,8 +481,8 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
 
             int[] executeBatch = stmt.executeBatch();
             int result = 0;
-            for(int x: executeBatch){
-                result+=x;
+            for (int x : executeBatch) {
+                result += x;
             }
             return result;
         } finally {
@@ -560,7 +505,6 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             release(writeCon, updated);
         }
 
-
     }
 
     private int insertTrigger(Map<String, Map<Integer, List<Alarm>>> alarmMap, List<Event> events, Connection writeCon) throws OXException, SQLException {
@@ -572,16 +516,16 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                     continue;
                 }
 
-                for (Integer userId : alarmsPerAttendee.keySet()) {
+                for (Entry<Integer, List<Alarm>> user : alarmsPerAttendee.entrySet()) {
 
-                    List<Alarm> alarms = alarmsPerAttendee.get(userId);
+                    List<Alarm> alarms = user.getValue();
                     if (alarms == null || alarms.isEmpty()) {
                         // Skip user in case no alarms available
                         continue;
                     }
                     for (Alarm alarm : alarms) {
 
-                        AlarmTrigger trigger = prepareTrigger(userId, alarm, event);
+                        AlarmTrigger trigger = prepareTrigger(user.getKey(), alarm, event);
                         if (trigger == null) {
                             // Skip past and invalid triggers
                             continue;
@@ -627,7 +571,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         if (event.containsRecurrenceRule() && event.getRecurrenceRule() != null && event.getRecurrenceId() == null && event.getId().equals(event.getSeriesId())) {
             Event nextTriggerEvent = AlarmUtils.getNextTriggerEvent(event, alarm, new Date(), tz, recurrenceService);
             Date triggerTime = nextTriggerEvent == null ? null : AlarmUtils.getTriggerTime(alarm.getTrigger(), nextTriggerEvent, tz);
-            if(triggerTime == null || triggerTime.before(new Date())){
+            if (triggerTime == null || triggerTime.before(new Date())) {
                 return null;
             }
             addRelatedDate(alarm, event, trigger);
@@ -635,7 +579,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             trigger.setTime(triggerTime.getTime());
         } else {
             Date triggerTime = AlarmUtils.getTriggerTime(alarm.getTrigger(), event, tz);
-            if(triggerTime == null || triggerTime.before(new Date()) || (alarm.containsAcknowledged() && !alarm.getAcknowledged().before(triggerTime))) {
+            if (triggerTime == null || triggerTime.before(new Date()) || (alarm.containsAcknowledged() && !alarm.getAcknowledged().before(triggerTime))) {
                 return null;
             }
             trigger.setTime(triggerTime.getTime());
@@ -658,6 +602,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
 
     /**
      * Retrieves an {@link PreparedStatement} for batch operations.
+     *
      * @param writeCon The write {@link Connection}
      * @return The {@link PreparedStatement}
      * @throws OXException
@@ -674,6 +619,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
 
     /**
      * Adds another batch to the given statement
+     *
      * @param trigger The trigger to add
      * @param stmt The statement
      * @throws OXException
@@ -689,6 +635,5 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         }
     }
-
 
 }

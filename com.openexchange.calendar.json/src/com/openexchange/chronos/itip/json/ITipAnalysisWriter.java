@@ -78,11 +78,11 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ITipAnalysisWriter {
-    
+
     private final static Logger LOGGER = LoggerFactory.getLogger(ITipAnalysisWriter.class);
 
     private final AppointmentWriter appointmentWriter;
-    private DefaultEventConverter   eventConverter;
+    private final DefaultEventConverter   eventConverter;
 
     public ITipAnalysisWriter(final TimeZone timezone, final CalendarSession session, ServiceLookup services) throws OXException {
         super();
@@ -209,15 +209,18 @@ public class ITipAnalysisWriter {
         for (int column : Appointment.ALL_COLUMNS) {
             try {
                 if (original.contains(column) || updated.contains(column)) {
-                    JSONObject difference = new JSONObject();
-                    String fieldName = CalendarField.getByColumn(column).getJsonName();
-                    Object originalValue = original.get(column);
-                    Object updatedValue = updated.get(column);
-                    if (null == originalValue ? null != updatedValue : false == originalValue.equals(updatedValue)) {
-                        writeField("old", originalValue, column, fieldName, difference);
-                        writeField("new", updatedValue, column, fieldName, difference);
+                    CalendarField calendarField = CalendarField.getByColumn(column);
+                    if (null != calendarField) {
+                        String fieldName = calendarField.getJsonName();
+                        Object originalValue = original.get(column);
+                        Object updatedValue = updated.get(column);
+                        if (null == originalValue ? null != updatedValue : false == originalValue.equals(updatedValue)) {
+                            JSONObject jDifference = new JSONObject(4);
+                            writeField("old", originalValue, column, fieldName, jDifference);
+                            writeField("new", updatedValue, column, fieldName, jDifference);
 
-                        diffObject.put(fieldName, difference);
+                            diffObject.put(fieldName, jDifference);
+                        }
                     }
                 }
             } catch (UnsupportedOperationException e) {
@@ -227,14 +230,14 @@ public class ITipAnalysisWriter {
         }
     }
 
-    private void writeField(final String key, final Object value, final int fieldNumber, final String fieldName, final JSONObject difference) throws JSONException {
+    private void writeField(final String key, final Object value, final int fieldNumber, final String fieldName, final JSONObject jDifference) throws JSONException {
         final Appointment appointment = new Appointment();
         appointment.set(fieldNumber, value);
         final JSONObject json = new JSONObject();
         appointmentWriter.writeAppointment(appointment, json);
         final Object opt = json.opt(fieldName);
         if (opt != null) {
-            difference.put(key, opt);
+            jDifference.put(key, opt);
         }
     }
 

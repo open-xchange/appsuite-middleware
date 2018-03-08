@@ -47,47 +47,19 @@
  *
  */
 
-package com.openexchange.chronos.provider.google.config;
+package com.openexchange.osgi.annotation;
 
-import com.openexchange.chronos.provider.google.osgi.Services;
-import com.openexchange.config.lean.DefaultProperty;
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.config.lean.Property;
-import com.openexchange.session.Session;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 
 /**
- * {@link GoogleCalendarConfig}
+ * {@link OptionalService} - Annotates an <b>optional</b> OSGi service that can be tracked.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.10.0
  */
-public class GoogleCalendarConfig {
-    
-    private static final Long REFRESH_INTERVAL = new Long(10);
-    
-    private static final Long REQUEST_TIMEOUT = new Long(1800);
-
-    private static final Property REFRESH_INTERVAL_PROP = DefaultProperty.valueOf("com.openexchange.chronos.provider.google.refreshInterval", REFRESH_INTERVAL);
-
-    private static final Property REQUEST_TIMEOUT_PROP = DefaultProperty.valueOf("com.openexchange.chronos.provider.google.requestTimeout", REQUEST_TIMEOUT);
-
-    public static long getResfrehInterval(Session session) {
-
-        LeanConfigurationService service = Services.getService(LeanConfigurationService.class);
-        if (service == null) {
-            return REFRESH_INTERVAL.longValue();
-        }
-        return service.getLongProperty(session.getUserId(), session.getContextId(), REFRESH_INTERVAL_PROP);
-
-    }
-
-    public static long getRequestTimeout(Session session) {
-
-        LeanConfigurationService service = Services.getService(LeanConfigurationService.class);
-        if (service == null) {
-            return REQUEST_TIMEOUT.longValue();
-        }
-        return service.getLongProperty(session.getUserId(), session.getContextId(), REQUEST_TIMEOUT_PROP);
-
-    }
+@Retention(RetentionPolicy.RUNTIME)
+public @interface OptionalService {
+    // marker annotation with no members
 }

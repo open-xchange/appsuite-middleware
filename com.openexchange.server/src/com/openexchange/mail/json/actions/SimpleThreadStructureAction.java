@@ -284,8 +284,8 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             long lookAhead = req.getMax();
             boolean includeSent = req.optBool("includeSent", false);
             boolean ignoreSeen = req.optBool("unseen", false);
-            Boolean ignoreDeleted = getIgnoreDeleted(req);
-            boolean filterApplied = (ignoreSeen || (ignoreDeleted != null));
+            boolean ignoreDeleted = getIgnoreDeleted(req, false);
+            boolean filterApplied = (ignoreSeen || ignoreDeleted);
             if (filterApplied) {
                 // Ensure flags is contained in provided columns
                 int fieldFlags = MailListField.FLAGS.getField();
@@ -376,8 +376,8 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                     }
                 }
 
-                if (ignoreDeleted != null) {
-                    SearchTerm<?> deleteTerm = new FlagTerm(MailMessage.FLAG_DELETED, false == ignoreDeleted.booleanValue());
+                if (ignoreDeleted) {
+                    SearchTerm<?> deleteTerm = new FlagTerm(MailMessage.FLAG_DELETED, !ignoreDeleted);
                     searchTerm = searchTerm == null ? deleteTerm : new ANDTerm(deleteTerm, searchTerm);
                 }
             }

@@ -89,9 +89,9 @@ public enum SchedJoulesResponseParser {
                         throw SchedJoulesAPIExceptionCodes.JSON_ERROR.create("Unexpected start token detected '" + c + "'");
                 }
             } catch (IOException e) {
-                throw SchedJoulesAPIExceptionCodes.IO_ERROR.create(e.getMessage(), e);
+                throw SchedJoulesAPIExceptionCodes.IO_ERROR.create(e, e.getMessage());
             } catch (JSONException e) {
-                throw SchedJoulesAPIExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+                throw SchedJoulesAPIExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             }
         }
     },
@@ -110,7 +110,7 @@ public enum SchedJoulesResponseParser {
                 Calendar calendar = iCalService.importICal(inputStream, parameters);
                 return new SchedJoulesCalendar(calendar.getName(), calendar.getEvents(), response.getETag(), response.getLastModified());
             } catch (IOException e) {
-                throw SchedJoulesAPIExceptionCodes.IO_ERROR.create(e.getMessage(), e);
+                throw SchedJoulesAPIExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
         }
     };
@@ -121,7 +121,7 @@ public enum SchedJoulesResponseParser {
 
     /**
      * Initialises a new {@link SchedJoulesResponseParser}.
-     * 
+     *
      * @param contentType The content type of the stream parser
      */
     private SchedJoulesResponseParser(String contentType) {
@@ -139,7 +139,7 @@ public enum SchedJoulesResponseParser {
 
     /**
      * Parses the {@link InputStream} from the specified {@link SchedJoulesResponse}
-     * 
+     *
      * @param response The {@link SchedJoulesResponse}
      * @return The parsed {@link R} object
      * @throws OXException if a parsing error occurs
@@ -159,7 +159,7 @@ public enum SchedJoulesResponseParser {
 
     /**
      * Parses the {@link InputStream} from the specified {@link SchedJoulesResponse}
-     * 
+     *
      * @param response The {@link SchedJoulesResponse}
      * @return The parsed {@link R} object
      * @throws OXException if a parsing error occurs

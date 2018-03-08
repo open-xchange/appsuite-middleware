@@ -52,6 +52,8 @@ package com.openexchange.chronos.itip.sender;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Locale;
 import javax.activation.DataHandler;
@@ -377,7 +379,8 @@ public class DefaultMailSenderService implements MailSenderService {
                 }
             }
         } catch (IOException e) {
-            LOG.error("Couldn't read input stream.", e);
+            LOG.debug("Couldn't read input stream.", e);
+            throw new OXException(e);
         }
 
         final String contentType = ct.toString();
@@ -445,7 +448,8 @@ public class DefaultMailSenderService implements MailSenderService {
                 }
             }
         } catch (IOException e) {
-            LOG.error("Couldn't read input stream.", e);
+            LOG.debug("Couldn't read input stream.", e);
+            throw new OXException(e);
         }
 
         final String contentType = ct.toString();
@@ -537,8 +541,14 @@ public class DefaultMailSenderService implements MailSenderService {
      * @throws OXException In case the {@link HostnameService} can't be loaded
      */
     private String generateHeaderValue(Session session, String uid, boolean timestamp) throws OXException {
-        HostnameService hostnameService = Services.getService(HostnameService.class, true);
-        String hostname = hostnameService.getHostname(session.getUserId(), session.getContextId());
+        HostnameService hostnameService = Services.getOptionalService(HostnameService.class);
+        String hostname;
+        try {
+            hostname = null == hostnameService ? InetAddress.getLocalHost().getCanonicalHostName() : hostnameService.getHostname(session.getUserId(), session.getContextId());
+        } catch (UnknownHostException e) {
+            LOG.warn("Could not get hostname. Fall back to 'open-xchange.com'.");
+            hostname = "open-xchange.com";
+        }
         StringBuilder builder = new StringBuilder("<Appointment.");
         builder.append(uid);
         builder.append(".");

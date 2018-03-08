@@ -201,11 +201,14 @@ public class IDMangling {
     /**
      * Gets an event equipped with unique composite identifiers representing an event from a specific calendar account.
      *
-     * @param event The event from the account
+     * @param event The event from the account, or <code>null</code> to pass through
      * @param accountId The identifier of the account
      * @return The event representation with unique identifiers
      */
     public static Event withUniqueID(Event event, int accountId) {
+        if (null == event) {
+            return null;
+        }
         String newFolderId = getUniqueFolderId(accountId, event.getFolderId());
         return new IDManglingEvent(event, newFolderId);
     }
@@ -519,15 +522,19 @@ public class IDMangling {
             OXExceptionCode exceptionCode = e.getExceptionCode();
             Object[] logArgs = e.getLogArgs();
             if (null != logArgs && 0 < logArgs.length && null != exceptionCode && null != exceptionCode.getMessage()) {
+                boolean adjusted = false;
                 Matcher matcher = FOLDER_ARGUMENT_PATTERN.matcher(exceptionCode.getMessage());
                 while (matcher.find()) {
                     int argumentIndex = Integer.parseInt(matcher.group(1));
                     if (0 < argumentIndex && argumentIndex <= logArgs.length && String.class.isInstance(logArgs[argumentIndex - 1])) {
                         logArgs[argumentIndex - 1] = getUniqueFolderId(accountId, (String) logArgs[argumentIndex - 1]);
+                        adjusted = true;
                     }
                 }
+                if (adjusted) {
+                    e.setLogMessage(exceptionCode.getMessage(), logArgs);
+                }
             }
-            e.setLogMessage(exceptionCode.getMessage(), logArgs);
         } catch (Exception x) {
             LoggerFactory.getLogger(IDMangling.class).warn(
                 "Unexpected error while attempting to replace exception log arguments for {}", e.getLogMessage(), x);

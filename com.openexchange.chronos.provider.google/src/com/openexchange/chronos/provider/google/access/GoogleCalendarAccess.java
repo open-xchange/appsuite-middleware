@@ -51,6 +51,7 @@ package com.openexchange.chronos.provider.google.access;
 
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.LAST_UPDATE;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
 import java.io.IOException;
@@ -261,9 +262,11 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
     protected static JSONObject writeExtendedProperties(ConversionService conversionService, ExtendedProperties properties) throws OXException {
         if (null != properties) {
             DataHandler dataHandler = conversionService.getDataHandler(DataHandlers.XPROPERTIES2JSON);
-            ConversionResult result = dataHandler.processData(new SimpleData<ExtendedProperties>(properties), new DataArguments(), null);
-            if (null != result && null != result.getData() && JSONObject.class.isInstance(result.getData())) {
-                return (JSONObject) result.getData();
+            if (null != dataHandler) {
+                ConversionResult result = dataHandler.processData(new SimpleData<ExtendedProperties>(properties), new DataArguments(), null);
+                if (null != result && null != result.getData() && JSONObject.class.isInstance(result.getData())) {
+                    return (JSONObject) result.getData();
+                }
             }
         }
         return null;
@@ -324,9 +327,11 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
     protected static ExtendedProperties parseExtendedProperties(ConversionService conversionService, JSONObject jsonObject) throws OXException {
         if (null != jsonObject) {
             DataHandler dataHandler = conversionService.getDataHandler(DataHandlers.JSON2XPROPERTIES);
-            ConversionResult result = dataHandler.processData(new SimpleData<JSONObject>(jsonObject), new DataArguments(), null);
-            if (null != result && null != result.getData() && ExtendedProperties.class.isInstance(result.getData())) {
-                return (ExtendedProperties) result.getData();
+            if (null != dataHandler) {
+                ConversionResult result = dataHandler.processData(new SimpleData<JSONObject>(jsonObject), new DataArguments(), null);
+                if (null != result && null != result.getData() && ExtendedProperties.class.isInstance(result.getData())) {
+                    return (ExtendedProperties) result.getData();
+                }
             }
         }
         return null;
@@ -355,8 +360,10 @@ public class GoogleCalendarAccess extends BasicCachingCalendarAccess {
         extendedProperties.add(DESCRIPTION(internalConfig.optString(GoogleCalendarConfigField.DESCRIPTION, null), false));
         extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
         extendedProperties.add(COLOR(internalConfig.optString(GoogleCalendarConfigField.COLOR, null), false));
+        extendedProperties.add(LAST_UPDATE(optLastUpdate()));
         settings.setExtendedProperties(extendedProperties);
         settings.setSubscribed(true);
+        settings.setError(optAccountError());
         return settings;
     }
 

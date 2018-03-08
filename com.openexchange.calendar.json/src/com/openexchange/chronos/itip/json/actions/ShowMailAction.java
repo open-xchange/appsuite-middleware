@@ -80,7 +80,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * 
+ *
  * {@link ShowMailAction}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
@@ -90,7 +90,7 @@ public class ShowMailAction extends AppointmentAction {
 
     /**
      * Initializes a new {@link ShowMailAction}.
-     * 
+     *
      * @param services
      */
     public ShowMailAction(ServiceLookup services) {
@@ -113,6 +113,9 @@ public class ShowMailAction extends AppointmentAction {
             }
             // Generate Mail
             final NotificationMail mail = generateMail(appointments, request, session);
+            if (null == mail) {
+                throw OXException.general("Mail could not be generated");
+            }
 
             // Put text and html into the response
             final JSONObject object = new JSONObject();

@@ -728,12 +728,13 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             }
             ExtendedPropertyParameter valueParameter = attachmentProperty.getParameter("VALUE");
             if (null != valueParameter && "BINARY".equals(valueParameter.getValue())) {
+                ThresholdFileHolder fileHolder = new ThresholdFileHolder();
                 try {
-                    ThresholdFileHolder fileHolder = new ThresholdFileHolder();
                     fileHolder.write(BaseEncoding.base64().decode((String) attachmentProperty.getValue()));
                     attachment.setData(fileHolder);
                 } catch (IllegalArgumentException | OXException e) {
                     addInvalidDataWaring(eventId, EventField.ALARMS, ProblemSeverity.NORMAL, "Error processing binary alarm data", e);
+                    Streams.close(fileHolder);
                 }
             } else {
                 attachment.setUri((String) attachmentProperty.getValue());

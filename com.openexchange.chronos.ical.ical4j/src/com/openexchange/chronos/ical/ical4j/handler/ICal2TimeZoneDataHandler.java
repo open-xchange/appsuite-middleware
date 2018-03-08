@@ -79,7 +79,12 @@ public class ICal2TimeZoneDataHandler extends ICal2ObjectDataHandler<TimeZone> {
         if (null == components || components.isEmpty()) {
             return null;
         }
-        return new net.fortuna.ical4j.model.TimeZone((VTimeZone) components.getComponent(Component.VTIMEZONE));
+
+        VTimeZone component = (VTimeZone) components.getComponent(Component.VTIMEZONE);
+        if (null == component) {
+            return null;
+        }
+        return new net.fortuna.ical4j.model.TimeZone(component);
     }
 
 }

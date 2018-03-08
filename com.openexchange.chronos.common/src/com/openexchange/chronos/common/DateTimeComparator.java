@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.common;
 
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
@@ -60,7 +61,9 @@ import com.openexchange.java.util.TimeZones;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class DateTimeComparator implements Comparator<DateTime> {
+public class DateTimeComparator implements Comparator<DateTime>, Serializable {
+
+    private static final long serialVersionUID = -291107087424182767L;
 
     private final TimeZone timeZone;
 

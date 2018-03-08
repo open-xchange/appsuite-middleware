@@ -316,7 +316,7 @@ public class Compat {
             }
         }
         if (event.containsChangeExceptionDates() && null != event.getChangeExceptionDates()) {
-            if (null == recurrenceData) {
+            if (null == recurrenceData && null != event.getSeriesId()) {
                 recurrenceData = eventStorage.selectRecurrenceData(connection, asInt(event.getSeriesId()), false);
             }
             if (null != recurrenceData) {

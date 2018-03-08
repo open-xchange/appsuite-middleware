@@ -94,7 +94,7 @@ public class EmailAddressSet extends SingleXMLPropertyMixin {
         }
         StringBuilder stringBuilder = new StringBuilder();
         for (String address : addresses) {
-            stringBuilder.append("<email-address>").append(address).append("</D:email-address>");
+            stringBuilder.append("<D:email-address>").append(address).append("</D:email-address>");
         }
         return stringBuilder.toString();
     }

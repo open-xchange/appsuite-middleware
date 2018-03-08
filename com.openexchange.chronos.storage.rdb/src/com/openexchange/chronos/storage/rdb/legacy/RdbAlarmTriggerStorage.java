@@ -67,6 +67,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.chronos.Alarm;
@@ -140,14 +141,15 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
                 return;
             }
         }
-        for (Integer userId : alarmsPerUserId.keySet()) {
+        for (Entry<Integer, List<Alarm>> user : alarmsPerUserId.entrySet()) {
             String userFolder = null;
+            int userId = user.getKey().intValue();
             for(Attendee att : event.getAttendees()) {
-                if(att.getEntity()==userId && att.getCuType().equals(CalendarUserType.INDIVIDUAL)) {
+                if (att.getEntity() == userId && att.getCuType().equals(CalendarUserType.INDIVIDUAL)) {
                     userFolder = att.getFolderId();
                 }
             }
-            List<Alarm> alarms = alarmsPerUserId.get(userId);
+            List<Alarm> alarms = user.getValue();
             if (alarms == null || alarms.isEmpty()) {
                 // Skip user in case no alarms are available
                 continue;

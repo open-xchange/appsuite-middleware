@@ -84,7 +84,7 @@ public class GetPerformer extends AbstractGetPerformer {
 
     /**
      * Retrieves a {@link List} with all {@link Availability} blocks of the current user
-     * 
+     *
      * @return a {@link List} with all {@link Availability} blocks of the current user
      * @throws OXException if the list cannot be retrieved
      */
@@ -95,7 +95,7 @@ public class GetPerformer extends AbstractGetPerformer {
 
     /**
      * Retrieves a {@link Map} of {@link Availability} blocks for the specified {@link Attendee}s in the specified interval
-     * 
+     *
      * @param attendees the {@link List} of {@link Attendee}s to fetch the availability for
      * @param from The starting point in the interval
      * @param until The ending point in the interval
@@ -121,7 +121,7 @@ public class GetPerformer extends AbstractGetPerformer {
 
     /**
      * Retrieves a {@link Map} of {@link Availability} blocks for the specified {@link CalendarUser}s in the specified interval
-     * 
+     *
      * @param attendees the {@link List} of {@link CalendarUser}s to fetch the availability for
      * @param from The starting point in the interval
      * @param until The ending point in the interval
@@ -144,7 +144,7 @@ public class GetPerformer extends AbstractGetPerformer {
 
     /**
      * Retrieves the the combined {@link Availability} blocks for the current user.
-     * 
+     *
      * @return A {@link List} with the combined {@link Availability} blocks for the user
      * @throws OXException if an error is occurred
      */
@@ -157,7 +157,7 @@ public class GetPerformer extends AbstractGetPerformer {
 
     /**
      * Retrieves the {@link Availability} blocks for the specified {@link Attendee}s in the specified time interval
-     * 
+     *
      * @param attendees The {@link List} with the {@link Attendee}s to retrieve the {@link Availability} blocks for
      * @param from The start point in the time interval
      * @param until The end point in the time interval
@@ -179,7 +179,7 @@ public class GetPerformer extends AbstractGetPerformer {
 
     /**
      * Retrieves the {@link Availability} blocks for the specified users
-     * 
+     *
      * @param reverseLookup The reverse lookup map for the entities
      * @param from The starting point of the interval
      * @param until The ending point of the interval
@@ -190,19 +190,19 @@ public class GetPerformer extends AbstractGetPerformer {
         List<Available> available = getStorage().loadAvailable(new ArrayList<>(reverseLookup.keySet()));
         Map<T, List<Available>> map = new HashMap<>();
         for (Available a : available) {
-            T type = reverseLookup.get(a.getCalendarUser());
+            T type = reverseLookup.get(Integer.valueOf(a.getCalendarUser()));
             Collections.put(map, type, a);
         }
         Map<T, Availability> availabilities = new HashMap<>();
-        for (T t : map.keySet()) {
-            availabilities.put(t, prepareForDelivery(map.get(t)));
+        for (Map.Entry<T, List<Available>> entry : map.entrySet()) {
+            availabilities.put(entry.getKey(), prepareForDelivery(entry.getValue()));
         }
         return availabilities;
     }
 
     /**
      * Combines the specified {@link Available}s
-     * 
+     *
      * @param available The {@link Available}s to combine
      */
     private List<Available> combine(List<Available> available) {

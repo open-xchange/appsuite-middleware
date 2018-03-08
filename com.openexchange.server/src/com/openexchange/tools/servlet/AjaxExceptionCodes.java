@@ -77,7 +77,7 @@ public enum AjaxExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Invalid parameter: %s
      */
-    IMVALID_PARAMETER("Invalid parameter: %s", MESSAGE, Category.CATEGORY_USER_INPUT, 4),
+    INVALID_PARAMETER("Invalid parameter: %s", MESSAGE, Category.CATEGORY_USER_INPUT, 4),
     /**
      * I/O error while writing to Writer object: %s
      */

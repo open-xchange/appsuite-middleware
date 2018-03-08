@@ -63,6 +63,7 @@ import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
+import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
@@ -110,6 +111,10 @@ public class ContactJSONDataHandler implements DataHandler {
 
     @Override
     public ConversionResult processData(Data<? extends Object> data, DataArguments dataArguments, Session session) throws OXException {
+        if (null == session) {
+            throw DataExceptionCodes.MISSING_ARGUMENT.create("session");
+        }
+
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         InputStream inputStream = (InputStream) data.getData();
         int folderID = optIntProperty(data.getDataProperties(), DataProperties.PROPERTY_FOLDER_ID);

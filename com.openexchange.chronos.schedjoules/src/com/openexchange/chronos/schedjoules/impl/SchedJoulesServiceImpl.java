@@ -285,7 +285,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, Reloadable {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.chronos.schedjoules.SchedJoulesService#isAvailable(int)
      */
     @Override
@@ -326,7 +326,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, Reloadable {
 
     /**
      * Removes any black-listed items from the content
-     * 
+     *
      * @param content The content from which to remove the black-listed items
      */
     private void removeBlackListedItems(JSONObject content) {
@@ -416,12 +416,12 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, Reloadable {
         if (e.getCause() != null && e.getCause() instanceof OXException) {
             return (OXException) e.getCause();
         }
-        return SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
+        return SchedJoulesAPIExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
      */
     @Override
@@ -431,7 +431,7 @@ public class SchedJoulesServiceImpl implements SchedJoulesService, Reloadable {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.config.Reloadable#getInterests()
      */
     @Override

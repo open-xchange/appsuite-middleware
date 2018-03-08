@@ -277,26 +277,6 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
     }
 
     /**
-     * Gets all calendar accesses implementing a specific extension. The underlying accounts are connected implicitly and
-     * remembered to be closed during {@link #finish()} implicitly, if not already done.
-     *
-     * @param extensionClass The targeted extension class
-     * @return The calendar accesses for all accounts supporting the extension, or an empty list if there are none
-     */
-    protected <T extends CalendarAccess> List<T> getAccesses(Class<T> extensionClass) throws OXException {
-        List<T> accesses = new ArrayList<T>();
-        for (CalendarAccount account : getAccounts()) {
-            CalendarProvider provider = providerRegistry.getCalendarProvider(account.getProviderId());
-            for (CalendarCapability capability : provider.getCapabilities()) {
-                if (capability.getAccessInterface().isAssignableFrom(extensionClass)) {
-                    accesses.add(getAccess(account, extensionClass));
-                }
-            }
-        }
-        return accesses;
-    }
-
-    /**
      * Gets a value indicating whether a specific calendar account is auto-provisioned, i.e. it was created automatically and the user
      * cannot delete it.
      *

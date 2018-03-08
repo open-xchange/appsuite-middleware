@@ -220,6 +220,18 @@ public enum CalendarFolderProperty {
         return USED_FOR_SYNC(null == value ? null : value.toString(), protekted);
     }
 
+    /**
+     * Initializes a new calendar folder property for the <code>lastUpdate</code> property, implicitly <i>protected</i>.
+     * <p/>
+     * The value indicates the timestamp of the last update of the calendar contents.
+     *
+     * @param value The value to take over
+     * @return The extended property
+     */
+    public static ExtendedProperty LAST_UPDATE(Long value) {
+        return new ExtendedProperty(LAST_UPDATE_LITERAL, value, Collections.singletonList(PROTECTED_PARAMETER));
+    }
+
     /** The literal used for the {@link CalendarFolderProperty#COLOR} property. */
     public static final String COLOR_LITERAL = "color";
 
@@ -231,6 +243,9 @@ public enum CalendarFolderProperty {
 
     /** The literal used for the {@link CalendarFolderProperty#USED_FOR_SYNC} property. */
     public static final String USED_FOR_SYNC_LITERAL = "usedForSync";
+
+    /** The literal used for the {@link CalendarFolderProperty#LAST_UPDATE} property. */
+    public static final String LAST_UPDATE_LITERAL = "lastUpdate";
 
     /**
      * Gets a value indicating whether a specific property is marked as <i>protected</i> or not.

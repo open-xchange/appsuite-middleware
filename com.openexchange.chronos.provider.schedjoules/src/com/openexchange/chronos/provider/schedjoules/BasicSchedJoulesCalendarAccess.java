@@ -51,6 +51,7 @@ package com.openexchange.chronos.provider.schedjoules;
 
 import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
+import static com.openexchange.chronos.provider.CalendarFolderProperty.LAST_UPDATE;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
 import java.net.MalformedURLException;
@@ -123,12 +124,14 @@ public class BasicSchedJoulesCalendarAccess extends BasicCachingCalendarAccess {
         extendedProperties.add(DESCRIPTION(internalConfig.optString(SchedJoulesFields.DESCRIPTION, null)));
         extendedProperties.add(USED_FOR_SYNC(Boolean.FALSE, true));
         extendedProperties.add(COLOR(internalConfig.optString(SchedJoulesFields.COLOR, null), false));
+        extendedProperties.add(LAST_UPDATE(optLastUpdate()));
 
         CalendarSettings settings = new CalendarSettings();
         settings.setLastModified(account.getLastModified());
         settings.setConfig(account.getUserConfiguration());
         settings.setName(internalConfig.optString(SchedJoulesFields.NAME, DEFAULT_CALENDAR_NAME));
         settings.setExtendedProperties(extendedProperties);
+        settings.setError(optAccountError());
 
         return settings;
     }

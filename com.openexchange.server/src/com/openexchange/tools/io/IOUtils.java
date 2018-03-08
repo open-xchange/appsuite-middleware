@@ -116,9 +116,8 @@ public final class IOUtils {
      * @throws IOException if some problem occurs.
      */
     public static void transfer(final InputStream in, final OutputStream out) throws IOException {
-        final byte[] buffer = new byte[4096];
-        int length = -1;
-        while ((length = in.read(buffer)) > 0) {
+        byte[] buffer = new byte[65536];
+        for (int length; (length = in.read(buffer)) > 0;) {
             out.write(buffer, 0, length);
         }
         out.flush();

@@ -430,10 +430,10 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
     }
 
     private String determineOrganizer(Event original, Event update, final Context ctx) throws OXException {
-        final Organizer organizer;
-        if (update.getOrganizer() != null) {
+        Organizer organizer = null;
+        if (null != update.getOrganizer()) {
             organizer = update.getOrganizer();
-        } else {
+        } else if (null != original && null != original.getOrganizer()) {
             organizer = original.getOrganizer();
         }
         if (organizer == null) {

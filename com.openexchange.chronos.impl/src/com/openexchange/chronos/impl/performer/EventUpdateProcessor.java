@@ -719,7 +719,7 @@ public class EventUpdateProcessor implements EventUpdate {
         /*
          * apply "sent-by" property if someone is acting on behalf of the calendar user
          */
-        if (null != organizer && calendarUser.getEntity() != session.getUserId()) {
+        if (calendarUser.getEntity() != session.getUserId()) {
             organizer.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUserId()));
         }
         return organizer;

@@ -245,7 +245,7 @@ public abstract class AbstractOIDCBackend implements OIDCBackend {
 
     @Override
     public Scope getScope() {
-        String scopes = this.getBackendConfig().getScope();
+        String scopes = this.getBackendConfig().getScope().toLowerCase();
         String[] scopeArray = Strings.splitBySemiColon(scopes);
         return new Scope(scopeArray);
     }

@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl;
 
+import java.io.Serializable;
 import java.util.Comparator;
 import com.openexchange.chronos.Availability;
 import com.openexchange.chronos.Available;
@@ -81,7 +82,7 @@ public class Comparators {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
          */
         @Override
@@ -110,7 +111,7 @@ public class Comparators {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
          */
         @Override
@@ -140,12 +141,12 @@ public class Comparators {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
          */
         @Override
         public int compare(Availability o1, Availability o2) {
-            // Use '10' for '0' as '0' has a lower priority than '9' 
+            // Use '10' for '0' as '0' has a lower priority than '9'
             int o1Priority = o1.getPriority() == 0 ? 10 : o1.getPriority();
             int o2Priority = o2.getPriority() == 0 ? 10 : o2.getPriority();
 
@@ -164,7 +165,9 @@ public class Comparators {
      * {@link FreeBusyTime} - DateTime comparator. Orders {@link FreeBusyTime} items
      * by start date (ascending)
      */
-    public static class FreeBusyTimeDateTimeComparator implements Comparator<FreeBusyTime> {
+    public static class FreeBusyTimeDateTimeComparator implements Comparator<FreeBusyTime>, Serializable {
+
+        private static final long serialVersionUID = 8548997917793298868L;
 
         /**
          * Initialises a new {@link GetPerformer.DateTimeComparator}.
@@ -175,7 +178,7 @@ public class Comparators {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
          */
         @Override

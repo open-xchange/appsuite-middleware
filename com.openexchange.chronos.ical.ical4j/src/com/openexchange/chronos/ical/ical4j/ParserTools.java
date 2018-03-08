@@ -187,7 +187,7 @@ public final class ParserTools {
         boolean mustRecalculate = true;
         if (property.getParameter("TZID") != null) {
             mustRecalculate = false;
-        } else if (DateTime.class.isAssignableFrom(icaldate.getClass())) {
+        } else if (DateTime.class.isInstance(icaldate)) {
             final DateTime dateTime = (DateTime) icaldate;
             mustRecalculate = !dateTime.isUtc();
         }

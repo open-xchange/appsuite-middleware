@@ -50,6 +50,7 @@
 package com.openexchange.chronos.common;
 
 import static com.openexchange.chronos.common.CalendarUtils.combine;
+import java.util.Arrays;
 import org.dmfs.rfc5545.DateTime;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.RecurrenceData;
@@ -110,7 +111,11 @@ public class DefaultRecurrenceData implements RecurrenceData {
 
     @Override
     public String toString() {
-        return "DefaultRecurrenceData [rrule=" + rrule + ", seriesStart=" + seriesStart + ", exceptionDates=" + exceptionDates + "]";
+        StringBuilder sb = new StringBuilder("DefaultRecurrenceData [rrule=").append(rrule);
+        sb.append(", seriesStart=").append(seriesStart);
+        sb.append(", exceptionDates=").append((null == exceptionDates ? "null" : Arrays.toString(exceptionDates)));
+        sb.append(']');
+        return sb.toString();
     }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2017-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,47 +47,31 @@
  *
  */
 
-package com.openexchange.chronos.provider.google.config;
+package com.openexchange.mailfilter.json.ajax.json.mapper.parser.action;
 
-import com.openexchange.chronos.provider.google.osgi.Services;
-import com.openexchange.config.lean.DefaultProperty;
-import com.openexchange.config.lean.LeanConfigurationService;
-import com.openexchange.config.lean.Property;
-import com.openexchange.session.Session;
+import javax.mail.internet.AddressException;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 
 /**
- * {@link GoogleCalendarConfig}
+ * {@link InternetAddressUtil}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.10.0
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class GoogleCalendarConfig {
-    
-    private static final Long REFRESH_INTERVAL = new Long(10);
-    
-    private static final Long REQUEST_TIMEOUT = new Long(1800);
+final class InternetAddressUtil {
 
-    private static final Property REFRESH_INTERVAL_PROP = DefaultProperty.valueOf("com.openexchange.chronos.provider.google.refreshInterval", REFRESH_INTERVAL);
-
-    private static final Property REQUEST_TIMEOUT_PROP = DefaultProperty.valueOf("com.openexchange.chronos.provider.google.requestTimeout", REQUEST_TIMEOUT);
-
-    public static long getResfrehInterval(Session session) {
-
-        LeanConfigurationService service = Services.getService(LeanConfigurationService.class);
-        if (service == null) {
-            return REFRESH_INTERVAL.longValue();
+    /**
+     * Validates the specified address
+     * 
+     * @param address The Internet address to validate
+     * @param strict Whether or not to use strict mode
+     * @throws AddressException If parsing the address fails
+     */
+    @SuppressWarnings("unused")
+    static void validateInternetAddress(String address, boolean strict) throws AddressException {
+        if (Strings.isEmpty(address)) {
+            throw new AddressException("The address can neither be empty nor 'null'");
         }
-        return service.getLongProperty(session.getUserId(), session.getContextId(), REFRESH_INTERVAL_PROP);
-
-    }
-
-    public static long getRequestTimeout(Session session) {
-
-        LeanConfigurationService service = Services.getService(LeanConfigurationService.class);
-        if (service == null) {
-            return REQUEST_TIMEOUT.longValue();
-        }
-        return service.getLongProperty(session.getUserId(), session.getContextId(), REQUEST_TIMEOUT_PROP);
-
+        new QuotedInternetAddress(address, true);
     }
 }
