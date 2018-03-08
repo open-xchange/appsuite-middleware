@@ -392,7 +392,7 @@ public class RoundtripTest extends AbstractRMITest {
         final AJAXSession session = new AJAXSession();
         final LoginRequest loginRequest = new LoginRequest(login, password, LoginTools.generateAuthId(), "Usermovetest", "6.20");
         String protocol = AJAXConfig.getProperty(Property.PROTOCOL);
-        String hostname = AJAXConfig.getProperty(Property.HOSTNAME);
+        String hostname = getRMIHost();
         org.slf4j.LoggerFactory.getLogger(RoundtripTest.class).info("Try to login to {} with user '{}' and password '{}'", protocol + "://" + hostname, login, password);
         final LoginResponse loginResponse = Executor.execute(session, loginRequest, protocol, hostname);
         session.setId(loginResponse.getSessionId());
