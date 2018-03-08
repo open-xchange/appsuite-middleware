@@ -54,7 +54,6 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import com.openexchange.database.internal.GlobalDatabaseServiceImplTest;
 import com.openexchange.database.internal.ReplicationMonitorTest;
-import com.openexchange.database.internal.wrapping.JDBC4ConnectionReturnerTest;
 import com.openexchange.database.internal.wrapping.UpdateFlagTest;
 
 /**
@@ -64,7 +63,6 @@ import com.openexchange.database.internal.wrapping.UpdateFlagTest;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    JDBC4ConnectionReturnerTest.class,
     UpdateFlagTest.class,
     ReplicationMonitorTest.class,
     GlobalDatabaseServiceImplTest.class,
