@@ -3299,16 +3299,18 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                                     filestoreId = context2filestore.get(Integer.valueOf(contextId));
                                 }
 
-                                Usage fsUsage = id2usage.get(filestoreId);
-                                if (null == fsUsage) {
-                                    Usage newUsage = new Usage(usage, forContext);
-                                    fsUsage = id2usage.putIfAbsent(filestoreId, newUsage);
-                                    if (null != fsUsage) {
-                                        // Another thread inserted usage in the meantime
+                                if (null != filestoreId) {
+                                    Usage fsUsage = id2usage.get(filestoreId);
+                                    if (null == fsUsage) {
+                                        Usage newUsage = new Usage(usage, forContext);
+                                        fsUsage = id2usage.putIfAbsent(filestoreId, newUsage);
+                                        if (null != fsUsage) {
+                                            // Another thread inserted usage in the meantime
+                                            fsUsage.addForEntity(usage, forContext);
+                                        }
+                                    } else {
                                         fsUsage.addForEntity(usage, forContext);
                                     }
-                                } else {
-                                    fsUsage.addForEntity(usage, forContext);
                                 }
                             }
                         } catch (SQLException e) {
