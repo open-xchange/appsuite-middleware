@@ -79,7 +79,7 @@ public class ImmutablePermission implements Permission {
         private int entity = -1;
         private boolean group;
         private int system;
-        private FolderPermissionType type;
+        private FolderPermissionType type = FolderPermissionType.NORMAL;
         private String legator;
         private boolean admin;
         private int folderPermission;
@@ -274,7 +274,7 @@ public class ImmutablePermission implements Permission {
         result = prime * result + writePermission;
         result = prime * result + deletePermission;
         result = prime * result + system;
-        result = prime * result + type.getTypeNumber();
+        result = prime * result + (type==null ? 0 : type.getTypeNumber());
         result = prime * result + (legator==null ? 0 : legator.hashCode());
         hash = result;
     }
