@@ -120,7 +120,7 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * @param type The type to get the visible folders for
      * @return A list of all visible calendar folders of the type
      */
-    List<CalendarFolder> getVisibleFolders(GroupwareFolderType type) throws OXException;
+    List<AccountAwareCalendarFolder> getVisibleFolders(GroupwareFolderType type) throws OXException;
 
     /**
      * Gets a specific calendar folder.

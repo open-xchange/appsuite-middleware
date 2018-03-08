@@ -428,8 +428,8 @@ public class CompositingIDBasedCalendarAccess extends AbstractCompositingIDBased
     }
 
     @Override
-    public List<CalendarFolder> getVisibleFolders(GroupwareFolderType type) throws OXException {
-        List<CalendarFolder> folders = new ArrayList<CalendarFolder>();
+    public List<AccountAwareCalendarFolder> getVisibleFolders(GroupwareFolderType type) throws OXException {
+        List<AccountAwareCalendarFolder> folders = new ArrayList<AccountAwareCalendarFolder>();
         for (CalendarAccount account : getAccounts()) {
             try {
                 folders.addAll(withUniqueID(getVisibleFolders(account, type), account));

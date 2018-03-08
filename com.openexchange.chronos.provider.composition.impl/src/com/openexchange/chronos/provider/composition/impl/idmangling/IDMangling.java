@@ -171,11 +171,11 @@ public class IDMangling {
      * @param account The calendar account
      * @return The calendar folder representations with unique identifiers
      */
-    public static List<CalendarFolder> withUniqueID(List<? extends CalendarFolder> folders, CalendarAccount account) {
+    public static List<AccountAwareCalendarFolder> withUniqueID(List<? extends CalendarFolder> folders, CalendarAccount account) {
         if (null == folders) {
             return null;
         }
-        List<CalendarFolder> foldersWithUniqueIDs = new ArrayList<CalendarFolder>(folders.size());
+        List<AccountAwareCalendarFolder> foldersWithUniqueIDs = new ArrayList<AccountAwareCalendarFolder>(folders.size());
         for (CalendarFolder folder : folders) {
             foldersWithUniqueIDs.add(withUniqueID(folder, account));
         }

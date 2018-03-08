@@ -57,6 +57,7 @@ import java.util.Map;
 import org.json.JSONObject;
 import com.openexchange.chronos.ExtendedProperties;
 import com.openexchange.chronos.ExtendedProperty;
+import com.openexchange.chronos.provider.AccountAwareCalendarFolder;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.CalendarFolder;
 import com.openexchange.chronos.provider.CalendarPermission;
@@ -128,6 +129,37 @@ public class CalendarFolderConverter {
             folder.setType(PrivateType.getInstance());
         }
         return folder;
+    }
+
+    /**
+     * Converts multiple calendar folders into folder storage compatible folders.
+     *
+     * @param treeId The identifier of the folder tree to take over
+     * @param contentType The context type to take over
+     * @param calendarFolders The calendar folders to convert
+     * @return The folder-storage compatible folders
+     */
+    public static List<Folder> getStorageFolders(String treeId, ContentType contentType, List<AccountAwareCalendarFolder> calendarFolders) {
+        if (null == calendarFolders) {
+            return null;
+        }
+        List<Folder> folders = new ArrayList<Folder>(calendarFolders.size());
+        for (AccountAwareCalendarFolder calendarFolder : calendarFolders) {
+            folders.add(getStorageFolder(treeId, contentType, calendarFolder));
+        }
+        return folders;
+    }
+
+    /**
+     * Converts a calendar folder into a folder storage compatible folder.
+     *
+     * @param treeId The identifier of the folder tree to take over
+     * @param contentType The context type to take over
+     * @param calendarFolder The calendar folder to convert
+     * @return The folder-storage compatible folder
+     */
+    public static ParameterizedFolder getStorageFolder(String treeId, ContentType contentType, AccountAwareCalendarFolder calendarFolder) {
+        return getStorageFolder(treeId, contentType, calendarFolder, calendarFolder.getAccount());
     }
 
     /**
