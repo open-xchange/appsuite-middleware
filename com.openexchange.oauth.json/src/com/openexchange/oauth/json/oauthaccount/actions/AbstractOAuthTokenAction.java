@@ -297,7 +297,7 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         // Get the scope parameter
         String scope = request.getParameter("scopes");
         OAuthAPIRegistry service = Services.getService(OAuthAPIRegistry.class);
-        if(service==null){
+        if (service == null) {
             throw ServiceExceptionCode.absentService(OAuthAPIRegistry.class);
         }
         if (isEmpty(scope)) {

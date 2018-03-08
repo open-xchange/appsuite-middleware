@@ -185,7 +185,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT id, displayName, accessToken, accessSecret, serviceId, scope FROM oauthAccounts WHERE cid = ? AND user = ?");
+            stmt = con.prepareStatement("SELECT id, displayName, accessToken, accessSecret, serviceId, scope, identity FROM oauthAccounts WHERE cid = ? AND user = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, user);
             rs = stmt.executeQuery();
@@ -211,6 +211,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                         Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), OXScope.valuesOf(scopes));
                         account.setEnabledScopes(enabledScopes);
                     }
+                    account.setUserIdentity(rs.getString(7));
                     accounts.add(account);
                 } catch (final OXException e) {
                     if (!OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA.equals(e)) {
@@ -238,7 +239,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT id, displayName, accessToken, accessSecret, scope FROM oauthAccounts WHERE cid = ? AND user = ? AND serviceId = ?");
+            stmt = con.prepareStatement("SELECT id, displayName, accessToken, accessSecret, scope, identity FROM oauthAccounts WHERE cid = ? AND user = ? AND serviceId = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, user);
             stmt.setString(3, serviceMetaData);
@@ -264,7 +265,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                     String scopes = rs.getString(5);
                     Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), OXScope.valuesOf(scopes));
                     account.setEnabledScopes(enabledScopes);
-
+                    account.setUserIdentity(rs.getString(6));
                     accounts.add(account);
                 } catch (final OXException e) {
                     if (!OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA.equals(e)) {
@@ -474,6 +475,35 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         } catch (final OXException x) {
             throw x;
         }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.OAuthService#upsertAccount(java.lang.String, java.util.Map, int, int, java.util.Set)
+     */
+    @Override
+    public OAuthAccount upsertAccount(String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId, Set<OAuthScope> scopes) throws OXException {
+        final DefaultOAuthAccount account = new DefaultOAuthAccount();
+        final OAuthServiceMetaData service = registry.getService(serviceMetaData, user, contextId);
+        account.setMetaData(service);
+        // Obtain & apply the access token
+        HttpsURLConnection.setDefaultSSLSocketFactory(Services.getService(SSLSocketFactoryProvider.class).getDefault());
+        obtainToken(type, arguments, account, scopes);
+        String userIdentity = service.getUserIdentity(account.getToken());
+        if (Strings.isNotEmpty(userIdentity)) {
+            // TODO: search in db for an account matching that id
+            //        + if nothing found then try and find a match with the display name of the account
+            //        |--+ if nothing found then add the account
+            //        |--+ if found then update that account
+        }
+
+        // TODO: if the userIdentity if null examine the cause for that state
+        //       |--+ Not authorised? 
+        //          |--+ Token valid but scope 'me' not set? Throw appropriate exception and indicate that to the client
+        //          |--+ Token invalid? throw appropriate exception and indicate that to the client
+        //       |--+ No exception but still no user identity? huh?
+        return account;
     }
 
     @Override
@@ -721,7 +751,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT displayName, accessToken, accessSecret, serviceId, scope FROM oauthAccounts WHERE cid = ? AND user = ? and id = ?");
+            stmt = con.prepareStatement("SELECT displayName, accessToken, accessSecret, serviceId, scope, identity FROM oauthAccounts WHERE cid = ? AND user = ? and id = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, user);
             stmt.setInt(3, accountId);
@@ -749,6 +779,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             String scopes = rs.getString(5);
             Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), OXScope.valuesOf(scopes));
             account.setEnabledScopes(enabledScopes);
+            account.setUserIdentity(rs.getString(6));
             return account;
         } catch (final SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());

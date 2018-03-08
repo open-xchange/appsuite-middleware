@@ -66,6 +66,7 @@ public enum OXScope {
     calendar("Calendars", false),
     contacts("Contacts", false),
     drive("Drive", true),
+    me("", false),
     generic("", true);
 
     private static final String modules = Strings.concat(", ", (Object[]) OXScope.values());

@@ -112,6 +112,21 @@ public interface OAuthService {
     OAuthInteraction initOAuth(String serviceMetaData, String callbackUrl, HostInfo currentHost, Session session, Set<OAuthScope> scopes) throws OXException;
 
     /**
+     * Upserts an OAuth account.
+     * 
+     * TODO
+     * 
+     * @param serviceMetaData
+     * @param arguments
+     * @param user
+     * @param contextId
+     * @param scopes
+     * @return
+     * @throws OXException
+     */
+    OAuthAccount upsertAccount(String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId, Set<OAuthScope> scopes) throws OXException;
+
+    /**
      * Creates a new OAuth account completely from specified arguments.
      *
      * @param serviceMetaData The identifier of service meta data

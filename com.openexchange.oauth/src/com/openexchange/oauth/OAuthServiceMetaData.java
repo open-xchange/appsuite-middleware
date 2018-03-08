@@ -239,4 +239,15 @@ public interface OAuthServiceMetaData {
      * @throws OXException if available scopes couldn't be retrieved
      */
     Set<OAuthScope> getAvailableScopes(int userId, int ctxId) throws OXException;
+
+    /**
+     * Issues a request to the respective OAuth provider and fetches the identity of the current user.
+     * 
+     * Some providers need the 'profile user' scope enabled before they can return the user identity.
+     * 
+     * @param the access token
+     * @return the user's identity or <code>null</code> if none can be retrieved.
+     * @throws OXException if an error is occurred
+     */
+    String getUserIdentity(String accessToken) throws OXException;
 }
