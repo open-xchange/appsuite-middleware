@@ -491,137 +491,133 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         HttpsURLConnection.setDefaultSSLSocketFactory(Services.getService(SSLSocketFactoryProvider.class).getDefault());
         obtainToken(type, arguments, account, scopes);
         String userIdentity = service.getUserIdentity(account.getToken());
-        if (Strings.isNotEmpty(userIdentity)) {
-            account.setUserIdentity(userIdentity);
-            // TODO: search in db for an account matching that id
-            DefaultOAuthAccount existingAccount = (DefaultOAuthAccount) findByUserIdentity(userIdentity, user, contextId, serviceMetaData);
-            if (existingAccount == null) {
-                //        + if nothing found then try and find a match with the display name of the account
-            }
+        if (Strings.isEmpty(userIdentity)) {
 
-            if (existingAccount == null) {
-                //        |--+ if nothing found then add the account
-                /*
-                 * Set display name & identifier
-                 */
-                final String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
-                if (Strings.isEmpty(displayName)) {
-                    throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_DISPLAY_NAME);
-                }
-                account.setDisplayName(displayName);
-                account.setId(idGenerator.getId(OAuthConstants.TYPE_ACCOUNT, contextId));
-                // TOKEN WAS ALREADY OBTAINED
-                /*
-                 * Encrypt token & secret
-                 */
-                final Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
-                if (null == session) {
-                    throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_SESSION);
-                }
-                if (Strings.isEmpty(account.getToken())) {
-                    throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_TOKEN);
-                }
-                account.setToken(encrypt(account.getToken(), session));
-                if (null == account.getSecret()) {
-                    throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_SECRET);
-                }
-                account.setSecret(encrypt(account.getSecret(), session));
-                account.setEnabledScopes(scopes);
-                /*
-                 * Create INSERT command
-                 */
-                final ArrayList<Object> values = new ArrayList<Object>(SQLStructure.OAUTH_COLUMN.values().length);
-                final INSERT insert = SQLStructure.insertAccount(account, contextId, user, values);
-                /*
-                 * Execute INSERT command
-                 */
-                executeUpdate(contextId, insert, values);
-                // TODO: Decide whether we want the scopes in the following info log entry
-                LOG.info("Created new {} account with ID {} for user {} in context {}", serviceMetaData, account.getId(), user, contextId);
-                /*
-                 * Return newly created account
-                 */
-                return account;
-            } else {
-                //        |--+ if found then update that account
-                /*
-                 * Crypt tokens
-                 */
-                final Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
-                if (null == session) {
-                    throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_SESSION);
-                }
-                existingAccount.setToken(encrypt(account.getToken(), session));
-                existingAccount.setSecret(encrypt(account.getSecret(), session));
-                existingAccount.setEnabledScopes(scopes);
-                existingAccount.setUserIdentity(userIdentity);
-                /*
-                 * Create UPDATE command
-                 */
-                final ArrayList<Object> values = new ArrayList<Object>(SQLStructure.OAUTH_COLUMN.values().length);
-                final UPDATE update = SQLStructure.updateAccount(existingAccount, contextId, user, values);
-                /*
-                 * Get connection
-                 */
-                Context ctx = getContext(contextId);
-                Connection writeCon = getConnection(false, ctx);
-                boolean rollback = false;
-                try {
-                    Databases.startTransaction(writeCon);
-                    rollback = true;
-                    /*
-                     * Execute UPDATE command
-                     */
-                    executeUpdate(update, values, writeCon);
-                    /*
-                     * Re-authorise
-                     */
-                    OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
-                    OAuthAccessRegistry oAuthAccessRegistry = registryService.get(serviceMetaData);
-                    /*
-                     * Signal re-authorized event
-                     */
-                    {
-                        Map<String, Object> properties = Collections.<String, Object> emptyMap();
-                        ReauthorizeListenerRegistry.getInstance().onAfterOAuthAccountReauthorized(existingAccount.getId(), properties, user, contextId, writeCon);
-                    }
-                    /*
-                     * Commit
-                     */
-                    writeCon.commit();
-
-                    // No need to re-authorise if access not present
-                    OAuthAccess access = oAuthAccessRegistry.get(contextId, user, existingAccount.getId());
-                    if (access != null) {
-                        // Initialise the access with the new access token
-                        access.initialize();
-                    }
-                    rollback = false;
-                } catch (SQLException e) {
-                    LOG.error(e.toString());
-                    throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-                } finally {
-                    if (rollback) {
-                        Databases.rollback(writeCon);
-                    }
-                    Databases.autocommit(writeCon);
-                    if (writeCon != null) {
-                        provider.releaseWriteConnection(ctx, writeCon);
-                    }
-                }
-                /*
-                 * Return the account
-                 */
-                return account;
-            }
+            // TODO: if the userIdentity if null examine the cause for that state
+            //       |--+ Not authorised? 
+            //          |--+ Token valid but scope 'me' not set? Throw appropriate exception and indicate that to the client
+            //          |--+ Token invalid? throw appropriate exception and indicate that to the client
+            //       |--+ No exception but still no user identity? huh?
+            // throw Exception
         }
 
-        // TODO: if the userIdentity if null examine the cause for that state
-        //       |--+ Not authorised? 
-        //          |--+ Token valid but scope 'me' not set? Throw appropriate exception and indicate that to the client
-        //          |--+ Token invalid? throw appropriate exception and indicate that to the client
-        //       |--+ No exception but still no user identity? huh?
-        return account;
+        account.setUserIdentity(userIdentity);
+        // Search in db for an account matching that id
+        DefaultOAuthAccount existingAccount = (DefaultOAuthAccount) findByUserIdentity(userIdentity, user, contextId, serviceMetaData);
+        if (existingAccount == null) {
+            //        |--+ if nothing found then add the account
+            /*
+             * Set display name & identifier
+             */
+            final String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
+            if (Strings.isEmpty(displayName)) {
+                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_DISPLAY_NAME);
+            }
+            account.setDisplayName(displayName);
+            account.setId(idGenerator.getId(OAuthConstants.TYPE_ACCOUNT, contextId));
+            /*
+             * Encrypt token & secret
+             */
+            final Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
+            if (null == session) {
+                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_SESSION);
+            }
+            if (Strings.isEmpty(account.getToken())) {
+                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_TOKEN);
+            }
+            account.setToken(encrypt(account.getToken(), session));
+            if (null == account.getSecret()) {
+                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_SECRET);
+            }
+            account.setSecret(encrypt(account.getSecret(), session));
+            account.setEnabledScopes(scopes);
+            /*
+             * Create INSERT command
+             */
+            final ArrayList<Object> values = new ArrayList<Object>(SQLStructure.OAUTH_COLUMN.values().length);
+            final INSERT insert = SQLStructure.insertAccount(account, contextId, user, values);
+            /*
+             * Execute INSERT command
+             */
+            executeUpdate(contextId, insert, values);
+            // TODO: Decide whether we want the scopes in the following info log entry
+            LOG.info("Created new {} account with ID {} for user {} in context {}", serviceMetaData, account.getId(), user, contextId);
+            /*
+             * Return newly created account
+             */
+            return account;
+        } else {
+            //        |--+ if found then update that account
+            /*
+             * Crypt tokens
+             */
+            final Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
+            if (null == session) {
+                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_SESSION);
+            }
+            existingAccount.setToken(encrypt(account.getToken(), session));
+            existingAccount.setSecret(encrypt(account.getSecret(), session));
+            existingAccount.setEnabledScopes(scopes);
+            existingAccount.setUserIdentity(userIdentity);
+            /*
+             * Create UPDATE command
+             */
+            final ArrayList<Object> values = new ArrayList<Object>(SQLStructure.OAUTH_COLUMN.values().length);
+            final UPDATE update = SQLStructure.updateAccount(existingAccount, contextId, user, values);
+            /*
+             * Get connection
+             */
+            Context ctx = getContext(contextId);
+            Connection writeCon = getConnection(false, ctx);
+            boolean rollback = false;
+            try {
+                Databases.startTransaction(writeCon);
+                rollback = true;
+                /*
+                 * Execute UPDATE command
+                 */
+                executeUpdate(update, values, writeCon);
+                /*
+                 * Re-authorise
+                 */
+                OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
+                OAuthAccessRegistry oAuthAccessRegistry = registryService.get(serviceMetaData);
+                /*
+                 * Signal re-authorized event
+                 */
+                {
+                    Map<String, Object> properties = Collections.<String, Object> emptyMap();
+                    ReauthorizeListenerRegistry.getInstance().onAfterOAuthAccountReauthorized(existingAccount.getId(), properties, user, contextId, writeCon);
+                }
+                /*
+                 * Commit
+                 */
+                writeCon.commit();
+
+                // No need to re-authorise if access not present
+                OAuthAccess access = oAuthAccessRegistry.get(contextId, user, existingAccount.getId());
+                if (access != null) {
+                    // Initialise the access with the new access token
+                    access.initialize();
+                }
+                rollback = false;
+            } catch (SQLException e) {
+                LOG.error(e.toString());
+                throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                if (rollback) {
+                    Databases.rollback(writeCon);
+                }
+                Databases.autocommit(writeCon);
+                if (writeCon != null) {
+                    provider.releaseWriteConnection(ctx, writeCon);
+                }
+            }
+            /*
+             * Return the account
+             */
+            return existingAccount;
+        }
     }
 
     @Override
