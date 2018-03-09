@@ -52,6 +52,7 @@ package com.openexchange.chronos.impl.performer;
 import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
 import static com.openexchange.chronos.common.CalendarUtils.isAllDay;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
+import static com.openexchange.chronos.impl.Utils.prepareOrganizer;
 import static com.openexchange.folderstorage.Permission.CREATE_OBJECTS_IN_FOLDER;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
@@ -123,7 +124,7 @@ public class CreatePerformer extends AbstractUpdatePerformer {
             /*
              * group-scheduled event, assign organizer, sequence number and dynamic parent-folder identifier (for non-public folders)
              */
-            newEvent.setOrganizer(prepareOrganizer(event.getOrganizer()));
+            newEvent.setOrganizer(prepareOrganizer(session, folder, event.getOrganizer()));
             newEvent.setSequence(event.containsSequence() ? event.getSequence() : 0);
             newEvent.setFolderId(PublicType.getInstance().equals(folder.getType()) ? folder.getId() : null);
         }
