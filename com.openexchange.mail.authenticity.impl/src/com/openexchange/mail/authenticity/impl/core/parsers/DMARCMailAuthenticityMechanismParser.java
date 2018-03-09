@@ -78,7 +78,11 @@ public class DMARCMailAuthenticityMechanismParser extends AbstractMailAuthentici
      */
     @Override
     AuthenticityMechanismResult parseMechanismResult(String value) {
-        return DMARCResult.valueOf(value);
+        try {
+            return DMARCResult.valueOf(value);
+        } catch (IllegalArgumentException e) {
+            return DMARCResult.FAIL;
+        }
     }
 
     /*
