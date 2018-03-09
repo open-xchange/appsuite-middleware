@@ -51,7 +51,6 @@ package com.openexchange.drive.impl.internal;
 
 import com.openexchange.drive.impl.management.DriveConfig;
 
-
 /**
  * {@link JumpLinkGenerator}
  *
@@ -62,11 +61,20 @@ public class JumpLinkGenerator {
 
     private static final String[] OFFICE_TEXT_MIMETYPES = { "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/rtf",
         "application/vnd.oasis.opendocument.text", "application/vnd.openxmlformats-officedocument.wordprocessingml.template", "application/msword",
-        "application/vnd.oasis.opendocument.text-master", "application/vnd.oasis.opendocument.text-template", "application/vnd.oasis.opendocument.text-web" };
+        "application/vnd.oasis.opendocument.text-master", "application/vnd.oasis.opendocument.text-template", "application/vnd.oasis.opendocument.text-web" 
+    };
 
     private static final String[] OFFICE_SPREADSHEET_MIMETYPES = { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "application/vnd.oasis.opendocument.spreadsheet", "application/vnd.openxmlformats-officedocument.spreadsheetml.template",
-        "application/vnd.ms-excel", "application/vnd.oasis.opendocument.spreadsheet-template" };
+        "application/vnd.ms-excel", "application/vnd.oasis.opendocument.spreadsheet-template" 
+    };
+
+    private static final String[] OFFICE_PRESENTATION_MIMETYPES = { "application/vnd.openxmlformats-officedocument.presentationml.template",
+        "application/vnd.openxmlformats-officedocument.presentationml.slideshow", "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "application/vnd.openxmlformats-officedocument.presentationml.slide", "application/vnd.ms-powerpoint", 
+        "application/vnd.ms-powerpoint.presentation.macroEnabled.12", "application/vnd.oasis.opendocument.presentation",
+        "application/vnd.oasis.opendocument.presentation-template"
+    };
 
     private final static String APP_FILES = "app=io.ox/files";
     private final static String APP_EDITOR = "app=io.ox/editor";
@@ -74,6 +82,7 @@ public class JumpLinkGenerator {
     private final static String APP_HISTORY = "app=io.ox/files/history";
     private final static String APP_OFFICE_TEXT = "app=io.ox/office/text";
     private final static String APP_OFFICE_SPREADSHEET = "app=io.ox/office/spreadsheet";
+    private final static String APP_OFFICE_PRESENTATION = "app=io.ox/office/presentation";
 
     private final SyncSession session;
 
@@ -99,6 +108,8 @@ public class JumpLinkGenerator {
                     redirectUrl = redirectUrl.replaceAll("\\[app\\]", APP_OFFICE_TEXT);
                 } else if (inArray(OFFICE_SPREADSHEET_MIMETYPES, mimeType) && session.hasCapability("spreadsheet")) {
                     redirectUrl = redirectUrl.replaceAll("\\[app\\]", APP_OFFICE_SPREADSHEET);
+                } else if (inArray(OFFICE_PRESENTATION_MIMETYPES, mimeType) && session.hasCapability("presentation")) {
+                    redirectUrl = redirectUrl.replaceAll("\\[app\\]", APP_OFFICE_PRESENTATION);
                 } else if (mimeType.startsWith("text/")){
                     redirectUrl = redirectUrl.replaceAll("\\[app\\]", APP_EDITOR);
                 } else {
