@@ -138,6 +138,8 @@ import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.FlaggingMode;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailFetchListener;
+import com.openexchange.mail.MailFetchListenerRegistry;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
@@ -4170,16 +4172,7 @@ public class Mail extends PermissionServlet {
                 MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailInterface.getMailAccess();
                 FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folder);
                 MailMessage[] messages = mailAccess.getMessageStorage().getMessages(fa.getFullName(), mailIDs, new MailField[] { MailField.FULL });
-
-                // Check if mail authenticity handler is available
-                MailAuthenticityHandler handler = null;
-                if (mailAccess.getAccountId() == MailAccount.DEFAULT_ID) {
-                    MailAuthenticityHandlerRegistry authenticityHandlerRegistry = ServerServiceRegistry.getInstance().getService(MailAuthenticityHandlerRegistry.class);
-                    if (null != authenticityHandlerRegistry) {
-                        handler = authenticityHandlerRegistry.getHighestRankedHandlerFor(session);
-                    }
-                }
-
+                List<MailFetchListener> fetchListeners = MailFetchListenerRegistry.getFetchListeners();
                 int length = messages.length;
                 for (int i = 0; i < length; i++) {
                     MailMessage m = messages[i];
@@ -4205,10 +4198,13 @@ public class Mail extends PermissionServlet {
                             }
                         }
 
-                        // Check for mail authenticity
-                        if (null != handler) {
-                            handler.handle(session, m);
+                        // Check for mail fetch listeners
+                        if (null != fetchListeners) {
+                            for (MailFetchListener listener : fetchListeners) {
+                                m = listener.onSingleMailFetch(m, mailAccess);
+                            }
                         }
+
                         JSONObject jMail = MailConverter.getInstance().convertSingle4Get(m, containers[i], warnings, session, mailInterface);
                         response = new Response(session);
                         response.setData(jMail);
