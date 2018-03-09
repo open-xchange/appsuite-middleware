@@ -4171,27 +4171,6 @@ public class Mail extends PermissionServlet {
                 FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folder);
                 MailMessage[] messages = mailAccess.getMessageStorage().getMessages(fa.getFullName(), mailIDs, new MailField[] { MailField.FULL });
 
-                for (MailMessage mail : messages) {
-                    /*
-                     * Check color label vs. \Flagged flag
-                     */
-                    if (mail.getColorLabel() == 0) {
-                        // No color label set; check if \Flagged
-                        if (mail.isFlagged()) {
-                            FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
-                            if (mode.equals(FlaggingMode.FLAGGED_IMPLICIT)) {
-                                mail.setColorLabel(FlaggingMode.getFlaggingColor(session));
-                            }
-                        }
-                    } else {
-                        // Color label set. Check whether to swallow that information in case only \Flagged should be advertised
-                        FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
-                        if (mode.equals(FlaggingMode.FLAGGED_ONLY)) {
-                            mail.setColorLabel(0);
-                        }
-                    }
-                }
-
                 // Check if mail authenticity handler is available
                 MailAuthenticityHandler handler = null;
                 if (mailAccess.getAccountId() == MailAccount.DEFAULT_ID) {
@@ -4209,6 +4188,23 @@ public class Mail extends PermissionServlet {
                         response = new Response(session);
                         response.setException(MailExceptionCode.MAIL_NOT_FOUND.create(mailIDs[i], folder));
                     } else {
+                        // Check color label vs. \Flagged flag
+                        if (m.getColorLabel() == 0) {
+                            // No color label set; check if \Flagged
+                            if (m.isFlagged()) {
+                                FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
+                                if (mode.equals(FlaggingMode.FLAGGED_IMPLICIT)) {
+                                    m.setColorLabel(FlaggingMode.getFlaggingColor(session));
+                                }
+                            }
+                        } else {
+                            // Color label set. Check whether to swallow that information in case only \Flagged should be advertised
+                            FlaggingMode mode = FlaggingMode.getFlaggingMode(session);
+                            if (mode.equals(FlaggingMode.FLAGGED_ONLY)) {
+                                m.setColorLabel(0);
+                            }
+                        }
+
                         // Check for mail authenticity
                         if (null != handler) {
                             handler.handle(session, m);
