@@ -105,14 +105,15 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
     private final TrustedMailService trustedMailService;
     private final Collection<MailField> requiredMailFields;
     private final Cache<UserAndContext, List<AllowedAuthServId>> authServIdsCache;
+    private final CustomRuleChecker checker;
 
     /**
      * Initializes a new {@link MailAuthenticityHandlerImpl} with ranking of <code>0</code> (zero).
      *
      * @param services The service look-up
      */
-    public MailAuthenticityHandlerImpl(final TrustedMailService trustedMailService, final ServiceLookup services) {
-        this(0, trustedMailService, services);
+    public MailAuthenticityHandlerImpl(final TrustedMailService trustedMailService, final ServiceLookup services, CustomRuleChecker checker) {
+        this(0, trustedMailService, services, checker);
     }
 
     /**
@@ -121,13 +122,14 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
      * @param ranking The ranking of this handler; a higher value means higher priority
      * @param services The service look-up
      */
-    public MailAuthenticityHandlerImpl(final int ranking, final TrustedMailService trustedMailService, final ServiceLookup services) {
+    public MailAuthenticityHandlerImpl(final int ranking, final TrustedMailService trustedMailService, final ServiceLookup services, CustomRuleChecker checker) {
         super();
         this.services = services;
         this.trustedMailService = trustedMailService;
         this.ranking = ranking;
         authServIdsCache = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
         requiredMailFields = ImmutableList.of(MailField.FROM);
+        this.checker = checker;
     }
 
     /**
@@ -180,6 +182,12 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         }
         mailMessage.setAuthenticityResult(authenticityResult);
         logMetrics(mailMessage.getMessageId(), headers, mailMessage.getAuthenticityResult());
+
+        try {
+            checker.check(session, authenticityResult);
+        } catch (OXException e) {
+            LOGGER.error("An error occurred while checking custom mail authenticity rules: {}", e.getMessage(), e);
+        }
 
         trustedMailService.handle(session, mailMessage);
     }

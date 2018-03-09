@@ -57,6 +57,8 @@ import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
@@ -101,7 +103,7 @@ public class ICal4JITipParser {
                     message.setOwner(owner);
                 }
             }
-            resolveAttendees(event, session);
+            resolveAttendees(event, session, methodValue);
             resolveOrganizer(event, session);
             event.setFlags(CalendarUtils.getFlags(event, session.getUserId()));
             
@@ -110,19 +112,29 @@ public class ICal4JITipParser {
             } else {
                 message.setEvent(event);
             }
-            // TODO: Comment
         }
         messages.addAll(messagesPerUID.values());
 
         return messages;
     }
 
-    private void resolveAttendees(Event event, CalendarSession session) throws OXException {
+    private void resolveAttendees(Event event, CalendarSession session, ITipMethod methodValue) throws OXException {
         if (event.getAttendees() == null || event.getAttendees().isEmpty()) {
             return;
         }
-
         session.getEntityResolver().prepare(event.getAttendees());
+        if (ITipMethod.REPLY.equals(methodValue) && event.containsAttendees() && null != event.getAttendees() && event.getAttendees().size() == 1 && event.containsExtendedProperties() && null != event.getExtendedProperties()) {
+            // Set attendee comment that is stored in the extended properties
+            ExtendedProperties extendedProperties = event.getExtendedProperties();
+            ExtendedProperty property = extendedProperties.get("COMMENT");
+            if (null != property) {
+                event.getAttendees().get(0).setComment(String.valueOf(property.getValue()));
+                extendedProperties.remove(property);
+                if (extendedProperties.isEmpty()) {
+                    event.removeExtendedProperties();
+                }
+            }
+        }
     }
 
     private void resolveOrganizer(Event event, CalendarSession session) throws OXException {

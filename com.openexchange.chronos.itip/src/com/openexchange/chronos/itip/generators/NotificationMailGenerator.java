@@ -435,6 +435,7 @@ public class NotificationMailGenerator implements ITipMailGenerator {
         attendee.setUri(CalendarUtils.getURI(mail.getSender().getEmail()));
         attendee.setCuType(CalendarUserType.INDIVIDUAL);
         attendee.setCn(notificationParticipant.getDisplayName());
+        attendee.setComment(notificationParticipant.getComment());
         reply.setAttendees(Arrays.asList(attendee));
         if (CalendarUtils.isSeriesException(reply)) {
             message.addException(reply);

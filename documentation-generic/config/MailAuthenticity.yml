@@ -141,6 +141,52 @@ properties:
       file: mailAuthenticity.properties
       packageName: open-xchange-mail-authenticity
       tags: ["Mail Authenticity","Mail"]
+    - key: com.openexchange.mail.authenticity.custom.rules.filename
+      description: |
+        Defines the name of a yml file containing custom rules to apply after the normal processing. 
+        This can for example be used to create a white-listing for known wrong configured mail environments.
+        
+        The yaml file must be placed next to this property. 
+        For example in case the name of the yml file is <code>myCustomRules.yml</code> then the value of this property should be <code>myCustomRules</code>
+        
+        The yml file must follow the following structure:
+        <pre>
+        custom_rules:
+          rule_name1:
+            spf_status: PASS | FAIL | NEUTRAL | NONE
+            spf_domain: <domain>
+            dkim_status: PASS | FAIL | NEUTRAL | NONE
+            dkim_domain: <domain>
+            from_domain: <domain>
+            result: PASS | FAIL | NEUTRAL | NONE
+          rule_name2:
+            [...]
+        </pre>
+        
+        All fields are optional but either a spf or dkim field pair must be present. The result field can also be omitted, it then falls back to <code>PASS</code>.
+        If a status field is set, then the corresponding domain field must also be set.
+        
+        For example a config that set the overall result to <code>PASS</code> for a result which only has a domain mismatch (e.g. because of a bad configuration) could look like this:
+        
+        <pre>
+        custom_rules:
+          rule_for_domain_xyz:
+            spf_status: PASS
+            spf_domain: xyz.com
+            dkim_status: PASS
+            dkim_domain: xyz.com
+            from_domain: other.com
+            result: PASS
+        </pre>
+        
+        Please note that custom rules should be used with care, because they overrule the mail authenticity definitions and could open attack vectors for phishing attacks.
+      defaultValue:
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      file: mailAuthenticity.properties
+      packageName: open-xchange-mail-authenticity
+      tags: ["Mail Authenticity","Mail"]      
 
 
 

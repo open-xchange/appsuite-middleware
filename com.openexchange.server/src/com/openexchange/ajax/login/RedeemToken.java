@@ -129,19 +129,19 @@ public class RedeemToken implements LoginRequestHandler {
         TokenLoginSecret tokenLoginSecret = service.getTokenLoginSecret(appSecret);
         Boolean writePassword = (Boolean) tokenLoginSecret.getParameters().get("accessPassword");
         try {
-            final Context context = ContextStorage.getInstance().getContext(session.getContextId());
-            final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
+            Context context = ContextStorage.getInstance().getContext(session.getContextId());
+            User user = UserStorage.getInstance().getUser(session.getUserId(), context);
             if (!context.isEnabled() || !user.isMailEnabled()) {
-                LOG.info("Either context {} or user {} not enabled", context.getContextId(), user.getId());
+                LOG.info("Either context {} or user {} not enabled", Integer.valueOf(context.getContextId()), Integer.valueOf(user.getId()));
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
-        } catch (final java.lang.RuntimeException e) {
-            LOG.info("Unexpected error occurred during login", e);
+        } catch (OXException e) {
+            LOG.info("Couldn't resolve context/user by identifier: {}/{}", Integer.valueOf(session.getContextId()), Integer.valueOf(session.getUserId()), e);
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
-        } catch (final OXException e) {
-            LOG.info("Couldn't resolve context/user by identifier: {}/{}", session.getContextId(), session.getUserId(), e);
+        } catch (Exception e) {
+            LOG.info("Unexpected error occurred during login", e);
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }

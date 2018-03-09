@@ -65,6 +65,7 @@ import com.openexchange.mail.MailFetchListener;
 import com.openexchange.mail.authenticity.MailAuthenticityHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityHandlerRegistry;
 import com.openexchange.mail.authenticity.MailAuthenticityProperty;
+import com.openexchange.mail.authenticity.impl.core.CustomRuleChecker;
 import com.openexchange.mail.authenticity.impl.core.MailAuthenticityFetchListener;
 import com.openexchange.mail.authenticity.impl.core.MailAuthenticityHandlerImpl;
 import com.openexchange.mail.authenticity.impl.core.MailAuthenticityHandlerRegistryImpl;
@@ -121,8 +122,9 @@ public class MailAuthenticityActivator extends HousekeepingActivator {
         ConfigurationService configurationService = getService(ConfigurationService.class);
         TrustedMailServiceImpl authenticationHandler = new TrustedMailServiceImpl(configurationService);
         registerService(ForcedReloadable.class, authenticationHandler);
-
-        final MailAuthenticityHandlerImpl handlerImpl = new MailAuthenticityHandlerImpl(authenticationHandler, this);
+        CustomRuleChecker ruleChecker = new CustomRuleChecker(leanConfigService);
+        registerService(Reloadable.class, ruleChecker);
+        final MailAuthenticityHandlerImpl handlerImpl = new MailAuthenticityHandlerImpl(authenticationHandler, this, ruleChecker);
         registerService(MailAuthenticityHandler.class, handlerImpl);
         registerService(Reloadable.class, new ConfigReloader(registry, handlerImpl));
 

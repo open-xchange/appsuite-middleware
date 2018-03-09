@@ -500,7 +500,7 @@ public final class Init {
         startTestServices = System.currentTimeMillis();
         startAndInjectAliasService();
         System.out.println("startAndInjectAliasService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
-        
+
         startTestServices = System.currentTimeMillis();
         startAndInjectPasswordChangeService();
         System.out.println("startAndInjectAliasService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
@@ -672,20 +672,9 @@ public final class Init {
         }
     }
 
-    private static void startAndInjectImportExportServices() throws OXException {
+    private static void startAndInjectImportExportServices() {
         if (null == com.openexchange.importexport.osgi.ImportExportServices.LOOKUP.get()) {
-            com.openexchange.importexport.osgi.ImportExportServices.LOOKUP.set(new ServiceLookup() {
-
-                @Override
-                public <S> S getService(final Class<? extends S> clazz) {
-                    return TestServiceRegistry.getInstance().getService(clazz);
-                }
-
-                @Override
-                public <S> S getOptionalService(final Class<? extends S> clazz) {
-                    return null;
-                }
-            });
+            com.openexchange.importexport.osgi.ImportExportServices.LOOKUP.set(TestServiceRegistry.getInstance());
             SubscriptionServiceRegistry.getInstance().addService(ContactService.class, services.get(ContactService.class));
         }
     }
@@ -914,6 +903,11 @@ public final class Init {
             services.put(FolderService.class, fs);
             TestServiceRegistry.getInstance().addService(FolderService.class, fs);
         }
+        if (null == TestServiceRegistry.getInstance().getService(com.openexchange.folderstorage.FolderService.class)) {
+            final com.openexchange.folderstorage.FolderService fs = new com.openexchange.folderstorage.internal.FolderServiceImpl();
+            services.put(com.openexchange.folderstorage.FolderService.class, fs);
+            TestServiceRegistry.getInstance().addService(com.openexchange.folderstorage.FolderService.class, fs);
+        }
     }
 
     private static void startAndInjectContextService() {
@@ -944,7 +938,7 @@ public final class Init {
     private static void startAndInjectEventBundle() throws Exception {
         if (null == TestServiceRegistry.getInstance().getService(EventAdmin.class)) {
             EventQueue.setNewEventDispatcher(new EventDispatcher() {
-                
+
                 @Override
                 public void addListener(final TaskEventInterface listener) {
                     // Do nothing.
@@ -1038,13 +1032,13 @@ public final class Init {
             TestServiceRegistry.getInstance().addService(PhoneNumberParserService.class, service);
         }
     }
-    
+
     public static void startAndInjectPasswordChangeService() {
         if (null == TestServiceRegistry.getInstance().getService(BasicPasswordChangeService.class)) {
-            BasicPasswordChangeService service =  new DefaultBasicPasswordChangeService();
+            BasicPasswordChangeService service = new DefaultBasicPasswordChangeService();
             services.put(BasicPasswordChangeService.class, service);
             TestServiceRegistry.getInstance().addService(BasicPasswordChangeService.class, service);
-        }   
+        }
     }
 
     public static void stopServer() throws Exception {

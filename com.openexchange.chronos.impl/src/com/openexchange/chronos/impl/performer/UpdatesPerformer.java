@@ -131,13 +131,13 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "changed")) {
             List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
             storage.getUtilities().loadAdditionalEventData(session.getUserId(), events, fields);
-            newAndModifiedEvents = postProcess(events, session.getUserId(), false, fields);
+            newAndModifiedEvents = new EventPostProcessor(session, storage, false).process(events, session.getUserId()).getEvents();
         }
         List<Event> deletedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "deleted")) {
             List<Event> events = storage.getEventStorage().searchEventTombstones(searchTerm, new SearchOptions(session), fields);
             storage.getUtilities().loadAdditionalEventTombstoneData(events, fields);
-            deletedEvents = postProcess(events, session.getUserId(), false, fields);
+            deletedEvents = new EventPostProcessor(session, storage, false).process(events, session.getUserId()).getEvents();
         }
         return new DefaultUpdatesResult(newAndModifiedEvents, deletedEvents);
     }
@@ -168,7 +168,7 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "changed")) {
             List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
             storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), events, fields);
-            newAndModifiedEvents = postProcess(events, folder, isSkipClassifiedEvents(session), fields);
+            newAndModifiedEvents = new EventPostProcessor(session, storage, isSkipClassifiedEvents(session)).process(events, folder).getEvents();
         }
         List<Event> deletedEvents = null;
         if (false == com.openexchange.tools.arrays.Arrays.contains(ignore, "deleted")) {
@@ -177,7 +177,7 @@ public class UpdatesPerformer extends AbstractQueryPerformer {
             Boolean oldExpandOccurrences = session.get(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.class);
             try {
                 session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, Boolean.FALSE);
-                deletedEvents = postProcess(events, folder, isSkipClassifiedEvents(session), fields);
+                deletedEvents = new EventPostProcessor(session, storage, isSkipClassifiedEvents(session)).process(events, folder).getEvents();
             } finally {
                 session.set(CalendarParameters.PARAMETER_EXPAND_OCCURRENCES, oldExpandOccurrences);
             }
