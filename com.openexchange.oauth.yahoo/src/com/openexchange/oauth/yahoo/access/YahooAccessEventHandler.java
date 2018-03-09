@@ -87,7 +87,7 @@ public final class YahooAccessEventHandler implements EventHandler {
                     if (null != userId) {
                         OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
                         OAuthAccessRegistry registry = registryService.get(KnownApi.YAHOO.getFullName());
-                        if (registry.removeIfLast(contextId, userId, 0)) { //FIXME: find a way to get hold of the accountId...
+                        if (registry.removeIfLast(contextId, userId)) {
                             LOG.debug("Yahoo session removed for user {} in context {}", userId, contextId);
                         }
                     }

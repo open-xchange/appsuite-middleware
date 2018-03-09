@@ -58,7 +58,6 @@ final class OAuthAccessKey {
 
     private final int contextId;
     private final int userId;
-    private final int accountId;
     private final int hash;
 
     /**
@@ -67,18 +66,16 @@ final class OAuthAccessKey {
      * @param contextId The context identifier
      * @param userId The user identifier
      */
-    OAuthAccessKey(final int contextId, final int userId, final int accountId) {
+    OAuthAccessKey(final int contextId, final int userId) {
         super();
         this.contextId = contextId;
         this.userId = userId;
-        this.accountId = accountId;
 
         // Pre-build hash code
         final int prime = 31;
         int result = 1;
         result = prime * result + contextId;
         result = prime * result + userId;
-        result = prime * result + accountId;
         hash = result;
     }
 
@@ -103,9 +100,6 @@ final class OAuthAccessKey {
             return false;
         }
         if (userId != other.userId) {
-            return false;
-        }
-        if (accountId != other.accountId) {
             return false;
         }
         return true;

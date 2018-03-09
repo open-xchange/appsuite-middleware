@@ -112,7 +112,7 @@ public interface OAuthAccessRegistry {
      * @param userId The user identifier
      * @return <code>true</code> if an {@link OAuthAccess} for the specified tuple was found and removed; <code>false</code> otherwise
      */
-    boolean removeIfLast(int contextId, int userId, int oauthAccountId);
+    boolean removeIfLast(int contextId, int userId);
 
     /**
      * Purges the {@link OAuthAccess} associated with the specified user/context/account tuple.
