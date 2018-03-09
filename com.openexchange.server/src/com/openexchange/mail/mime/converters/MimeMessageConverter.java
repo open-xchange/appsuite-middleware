@@ -2140,7 +2140,7 @@ public final class MimeMessageConverter {
      * @throws OXException If conversion fails
      */
     public static MailMessage convertMessage(final MimeMessage msg, final String uid, final String fullname, final char separator, final MailField[] fields) throws OXException {
-        return convertMessage(msg, uid, fullname, separator, fields, null);
+        return convertMessage(msg, uid, fullname, separator, fields, DummyMailConfig.getInstance());
     }
 
     /**
