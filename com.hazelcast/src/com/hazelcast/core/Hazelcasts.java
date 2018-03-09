@@ -49,25 +49,19 @@
 
 package com.hazelcast.core;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import com.hazelcast.nio.serialization.Portable;
 
 /**
@@ -270,29 +264,18 @@ public class Hazelcasts {
         }
 
         // Use ExecutorService to obtain results from submitted tasks to remote members
-        Lock lock = new ReentrantLock();
-        Condition fetchCompleted = lock.newCondition();
-        AtomicReference<Object> resultReference = new AtomicReference<>();
-        AtomicInteger counter = new AtomicInteger(size);
-        List<Submitted> toClean = new ArrayList<>(size);
-        for (Iterator<Entry<Member, Future<R>>> it = futureMap.entrySet().iterator(); it.hasNext();) {
-            Future<R> future = it.next().getValue();
-            RemoteFetch<R, F> remoteFetch = new RemoteFetch<>(resultReference, future, filter, counter, lock, fetchCompleted);
+        BlockingQueue<Object> resultReference = new ArrayBlockingQueue<Object>(1);
+        Map<Future<Void>, RemoteFetch<R, F>> submittedLookups = new LinkedHashMap<Future<Void>, Hazelcasts.RemoteFetch<R,F>>(size);
+        for (Future<R> future : futureMap.values()) {
+            RemoteFetch<R, F> remoteFetch = new RemoteFetch<>(resultReference, future, filter);
             Future<Void> remoteFetchFuture = fetcher.submit(remoteFetch);
-            toClean.add(new Submitted(remoteFetchFuture, remoteFetch));
+            submittedLookups.put(remoteFetchFuture, remoteFetch);
         }
 
         // Await result
         Object result;
         try {
-            lock.lockInterruptibly();
-            try {
-                while ((result = resultReference.get()) == null && counter.get() > 0) {
-                    fetchCompleted.await();
-                }
-            } finally {
-                lock.unlock();
-            }
+            result = resultReference.take();
         } catch (InterruptedException e) {
             // Interrupted - Keep interrupted state
             Thread.currentThread().interrupt();
@@ -300,8 +283,9 @@ public class Hazelcasts {
         }
 
         // Abort rest (if any)
-        for (Submitted submitted : toClean) {
-            submitted.abort();
+        for (Map.Entry<Future<Void>, RemoteFetch<R, F>> submitted : submittedLookups.entrySet()) {
+            submitted.getValue().abortRemoteFetch();
+            submitted.getKey().cancel(true);
         }
 
         // Return result
@@ -331,88 +315,55 @@ public class Hazelcasts {
         }
     }
 
-    private static class Submitted {
-
-        private final Future<Void> submitted;
-        private final RemoteFetch<?, ?> remoteFetch;
-
-        Submitted(Future<Void> submitted, RemoteFetch<?, ?> fetch) {
-            super();
-            this.submitted = submitted;
-            this.remoteFetch = fetch;
-        }
-
-        public void abort() {
-            remoteFetch.abortRemoteFetch();
-            submitted.cancel(true);
-        }
-    }
-
     private static class RemoteFetch<R, F> implements Callable<Void> {
 
-        private final AtomicReference<Object> resultReference;
+        private final BlockingQueue<Object> resultReference;
         private final Future<R> toTakeFrom;
         private final Filter<R, F> filter;
-        private final AtomicInteger counter;
-        private final Lock lock;
-        private final Condition fetchCompleted;
 
-        RemoteFetch(AtomicReference<Object> resultReference, Future<R> toTakeFrom, Filter<R, F> filter, AtomicInteger counter, Lock lock, Condition fetchCompleted) {
+        RemoteFetch(BlockingQueue<Object> resultReference, Future<R> toTakeFrom, Filter<R, F> filter) {
             super();
             this.resultReference = resultReference;
             this.toTakeFrom = toTakeFrom;
             this.filter = filter;
-            this.counter = counter;
-            this.lock = lock;
-            this.fetchCompleted = fetchCompleted;
         }
 
         @Override
         public Void call() throws Exception {
-            try {
-                int retryCount = 3;
-                Thread currentThread = Thread.currentThread();
-                while (retryCount-- > 0 && !currentThread.isInterrupted()) {
-                    try {
-                        R result = toTakeFrom.get();
-                        retryCount = 0;
-                        F accepted = filter.accept(result);
-                        if (null != accepted) {
-                            resultReference.set(accepted);
-                        }
-                    } catch (InterruptedException e) {
-                        // Interrupted - Keep interrupted state
-                        currentThread.interrupt();
-                        retryCount = 0;
-                    } catch (CancellationException e) {
-                        // Canceled
-                        retryCount = 0;
-                    } catch (ExecutionException e) {
-                        Throwable cause = e.getCause();
+            int retryCount = 3;
+            Thread currentThread = Thread.currentThread();
+            while (retryCount-- > 0 && !currentThread.isInterrupted()) {
+                try {
+                    R result = toTakeFrom.get();
+                    retryCount = 0;
+                    F accepted = filter.accept(result);
+                    if (null != accepted) {
+                        resultReference.offer(accepted);
+                    }
+                } catch (InterruptedException e) {
+                    // Interrupted - Keep interrupted state
+                    currentThread.interrupt();
+                    retryCount = 0;
+                } catch (CancellationException e) {
+                    // Canceled
+                    retryCount = 0;
+                } catch (ExecutionException e) {
+                    Throwable cause = e.getCause();
 
-                        // Check for Hazelcast timeout
-                        if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
-                            resultReference.set(cause);
-                            return null;
-                        }
+                    // Check for Hazelcast timeout
+                    if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
+                        resultReference.offer(cause);
+                        return null;
+                    }
 
-                        // Timeout while awaiting remote result
-                        if (retryCount <= 0) {
-                            // No further retry
-                            cancelFutureSafe(toTakeFrom);
-                        }
+                    // Timeout while awaiting remote result
+                    if (retryCount <= 0) {
+                        // No further retry
+                        cancelFutureSafe(toTakeFrom);
                     }
                 }
-                return null;
-            } finally {
-                counter.decrementAndGet();
-                lock.lock();
-                try {
-                    fetchCompleted.signal();
-                } finally {
-                    lock.unlock();
-                }
             }
+            return null;
         }
 
         public void abortRemoteFetch() {
