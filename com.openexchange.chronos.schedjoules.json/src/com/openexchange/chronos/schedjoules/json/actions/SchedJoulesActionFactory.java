@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.schedjoules.json.actions;
 
-import java.util.Collection;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
@@ -90,13 +89,4 @@ public class SchedJoulesActionFactory implements AJAXActionServiceFactory {
         return actions.get(action);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.documentation.AnnotatedServices#getSupportedServices()
-     */
-    @Override
-    public Collection<?> getSupportedServices() {
-        return actions.values();
-    }
 }

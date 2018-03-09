@@ -49,7 +49,6 @@
 
 package com.openexchange.oauth.json.oauthaccount.actions;
 
-import java.util.Collection;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -98,11 +97,6 @@ public final class AccountActionFactory implements AJAXActionServiceFactory {
         tmp.put("reauthorize", new ReauthorizeAction());
         tmp.put("status", new StatusAction());
         return tmp.build();
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
 }

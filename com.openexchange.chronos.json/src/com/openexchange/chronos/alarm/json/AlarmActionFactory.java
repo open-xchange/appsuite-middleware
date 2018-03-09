@@ -49,8 +49,6 @@
 
 package com.openexchange.chronos.alarm.json;
 
-import java.util.Collection;
-import java.util.Collections;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
@@ -78,11 +76,6 @@ public class AlarmActionFactory implements AJAXActionServiceFactory {
         actions.put("snooze", new SnoozeAction(services));
         actions.put("updateAlarms", new UpdateAlarmsAction(services));
         this.actions = actions.build();
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return Collections.unmodifiableCollection(actions.values());
     }
 
     @Override

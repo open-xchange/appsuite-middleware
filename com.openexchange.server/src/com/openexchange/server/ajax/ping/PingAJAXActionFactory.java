@@ -49,7 +49,6 @@
 
 package com.openexchange.server.ajax.ping;
 
-import java.util.Collection;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -73,11 +72,6 @@ public class PingAJAXActionFactory implements AJAXActionServiceFactory {
     public PingAJAXActionFactory() {
         super();
         actions = ImmutableMap.of("ping", new PingAction(), "time", new TimeAction(), "whoami", new WhoAmIAction());
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return actions.keySet();
     }
 
     @Override

@@ -49,9 +49,7 @@
 
 package com.openexchange.ajax.requesthandler;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -141,14 +139,4 @@ public final class CombinedActionFactory implements AJAXActionServiceFactory {
         }
         return null;
     }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        final Collection<Object> supportedServices = new ArrayList<Object>();
-        for (final AJAXActionServiceFactory factory : facs.keySet()) {
-            supportedServices.addAll(factory.getSupportedServices());
-        }
-        return supportedServices;
-    }
-
 }

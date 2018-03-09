@@ -49,7 +49,6 @@
 
 package com.openexchange.mailaccount.json.factory;
 
-import java.util.Collection;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -110,11 +109,6 @@ public class MailAccountActionFactory implements AJAXActionServiceFactory {
             throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(action, Constants.getModule());
         }
         return actionService;
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return actions.values();
     }
 
 }
