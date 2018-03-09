@@ -172,7 +172,7 @@ public class KerberosAuthentication implements AuthenticationService {
         if (tmp instanceof Map<?, ?>) {
             @SuppressWarnings("unchecked") Map<String, List<String>> headers = (Map<String, List<String>>) tmp;
             List<String> values = headers.get(HttpHeaders.AUTHORIZATION);
-            if (values.size() > 0) {
+            if (values != null && values.size() > 0) {
                 retval = values.get(0);
             }
         }
