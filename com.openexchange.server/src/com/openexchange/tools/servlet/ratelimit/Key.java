@@ -141,7 +141,7 @@ public final class Key {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
+        if (obj == null || !(obj instanceof Key)) {
             return false;
         }
         final Key other = (Key) obj;

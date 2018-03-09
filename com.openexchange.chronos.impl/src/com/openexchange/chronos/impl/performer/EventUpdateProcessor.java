@@ -64,7 +64,7 @@ import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.CalendarUtils.shiftRecurrenceId;
 import static com.openexchange.chronos.common.CalendarUtils.shiftRecurrenceIds;
 import static com.openexchange.chronos.impl.Utils.asList;
-import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.chronos.impl.Utils.prepareOrganizer;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
@@ -421,7 +421,7 @@ public class EventUpdateProcessor implements EventUpdate {
          * group-scheduled event, ensure to take over an appropriate organizer & reset common calendar folder (unless public)
          */
         if (null == originalEvent.getOrganizer()) {
-            updatedEvent.setOrganizer(prepareOrganizer(updatedEvent.getOrganizer()));
+            updatedEvent.setOrganizer(prepareOrganizer(session, folder, updatedEvent.getOrganizer()));
         } else if (updatedEvent.containsOrganizer()) {
             Organizer organizer = session.getEntityResolver().prepare(updatedEvent.getOrganizer(), CalendarUserType.INDIVIDUAL);
             if (null != organizer && false == matches(originalEvent.getOrganizer(), organizer)) {
@@ -685,44 +685,6 @@ public class EventUpdateProcessor implements EventUpdate {
             }
             attendee.setPartStat(ParticipationStatus.NEEDS_ACTION); //TODO: or reset to initial partstat based on folder type?
         }
-    }
-
-    /**
-     * Prepares the organizer for an event, taking over an external organizer if specified.
-     *
-     * @param organizerData The organizer as defined by the client, or <code>null</code> to prepare the current calendar user as organizer
-     * @return The prepared organizer
-     */
-    private Organizer prepareOrganizer(Organizer organizerData) throws OXException {
-        Organizer organizer;
-        if (null != organizerData) {
-            organizer = session.getEntityResolver().prepare(organizerData, CalendarUserType.INDIVIDUAL);
-            if (0 < organizer.getEntity()) {
-                /*
-                 * internal organizer must match the actual calendar user if specified
-                 */
-                if (organizer.getEntity() != calendarUser.getEntity()) {
-                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(organizer.getUri(), I(organizer.getEntity()), CalendarUserType.INDIVIDUAL);
-                }
-            } else {
-                /*
-                 * take over external organizer as-is
-                 */
-                return session.getConfig().isSkipExternalAttendeeURIChecks() ? organizer : Check.requireValidEMail(organizer);
-            }
-        } else {
-            /*
-             * prepare a default organizer for calendar user
-             */
-            organizer = session.getEntityResolver().applyEntityData(new Organizer(), calendarUser.getEntity());
-        }
-        /*
-         * apply "sent-by" property if someone is acting on behalf of the calendar user
-         */
-        if (calendarUser.getEntity() != session.getUserId()) {
-            organizer.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUserId()));
-        }
-        return organizer;
     }
 
     /**

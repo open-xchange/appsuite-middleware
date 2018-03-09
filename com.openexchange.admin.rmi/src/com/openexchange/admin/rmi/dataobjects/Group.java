@@ -52,7 +52,7 @@ package com.openexchange.admin.rmi.dataobjects;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
-import com.openexchange.admin.rmi.extensions.OXCommonExtension;
+import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
 import com.openexchange.admin.rmi.extensions.OXGroupExtensionInterface;
 
 /**
@@ -259,7 +259,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
      */
     @Deprecated
     public final void addExtension(final OXGroupExtensionInterface extension) {
-        getAllExtensionsAsHash().put(extension.getClass().getName(), (OXCommonExtension) extension);
+        getAllExtensionsAsHash().put(extension.getClass().getName(), extension);
     }
 
     /**
@@ -269,7 +269,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
     @Deprecated
     public final ArrayList<OXGroupExtensionInterface> getExtensions() {
         final ArrayList<OXGroupExtensionInterface> retval = new ArrayList<OXGroupExtensionInterface>();
-        for (final OXCommonExtension commoninterface : getAllExtensionsAsHash().values()) {
+        for (final OXCommonExtensionInterface commoninterface : getAllExtensionsAsHash().values()) {
             retval.add((OXGroupExtensionInterface) commoninterface);
         }
         return retval;
@@ -300,7 +300,7 @@ public class Group extends ExtendableDataObject implements NameAndIdObject {
      */
     @Deprecated
     public final OXGroupExtensionInterface getExtensionbyName(final String extname) {
-        for (final OXCommonExtension ext : getAllExtensionsAsHash().values()) {
+        for (final OXCommonExtensionInterface ext : getAllExtensionsAsHash().values()) {
             if (extname.equals(ext.getClass().getName())) {
                 return (OXGroupExtensionInterface) ext;
             }

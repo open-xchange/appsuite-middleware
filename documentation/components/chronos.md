@@ -220,9 +220,9 @@ Whenever events are moved between different folders, some special handling appli
 
 The user performing the move must be equipped with appropriate permissions for the source- and target folder. For the source folder, these are at least *Read folder*, *Read own/all objects*, *Write own/all objects* and *Delete own/all objects*. *All* or *own* depends on the event being created by a different user or not. In the target folder, at least the following permissions must be granted: *Create objects in folder*. 
 
-Additionally, recurring event series (or change exception events) cannot be moved. And finally, there's a limitation towards moving events with a classification of ``PRIVATE`` or ``CONFIDENTIAL`` (which correlates to the legacy *private* flag). In this case, events must not be moved to a *public* folder, or moved between personal folders of different user (~ *shared* to *private* and vice versa).
+In *group-scheduled* events with multiple attendees, the calendar user's *role* in the event is checked as well, i.e. it's required to be the organizer of the event (see "Permissions" below. Additionally, recurring event series (or change exception events) cannot be moved. And finally, there's a limitation towards moving events with a classification of ``PRIVATE`` or ``CONFIDENTIAL`` (which correlates to the legacy *private* flag). In this case, events must not be moved to a *public* folder, or moved between personal folders of different users (~ *shared* to *private* and vice versa).
 
-After the general restrictions have been checked and are fulfilled, the following happens depending on the source- and target folder type. Implicitly, this also includes triggering of further updates, like updating the folder informations for stored alarm triggers or inserting tombstone objects in the database so that the deletion from the source folder can be successfully tracked by differential synchronization algorithms.    
+After the general restrictions have been checked and are fulfilled, the following happens depending on the source- and target folder type. Implicitly, this also includes triggering of further updates, like updating the folder informations for stored alarm triggers or inserting tombstone objects in the database so that the deletion from the source folder can be successfully tracked by differential synchronization protocols.    
 
 ### Public calendar folder 1 -> Public calendar folder 2
 - Update the common public folder identifier of the event
@@ -230,14 +230,15 @@ After the general restrictions have been checked and are fulfilled, the followin
 ### Personal calendar folder 1 of User A -> Personal calendar folder 2 of same User A
 - Update attendee A's parent folder identifier
 
-### Personal calendar folder of User A -> Personal calendar folder of other User B (executed by user A, *"re-assign" event*)
-- Remove the original calendar user attendee A 
-- Ensure that calendar user B becomes attendee and set take over his parent folder identifier
-- Reset the parent folder identifier of all other attendee's to their default calendar
+### Personal calendar folder of User A -> Personal calendar folder of other User B (non *group-scheduled* event)
+- Update the common folder identifier of the event
+- Update the calendar user of the event to user B
 
-### Personal calendar folder of User A -> Personal calendar folder of other User B (not executed by user A)
-- Ensure that calendar user B becomes attendee and set take over his parent folder identifier
-- Reset the parent folder identifier of all other attendee's to their default calendar
+### Personal calendar folder of User A -> Personal calendar folder of other User B ("pseudo" *group-scheduled* event with one attendee/organizer)
+- Update the original calendar user attendee A to user attendee B and take over his target folder identifier
+
+### Personal calendar folder of User A -> Personal calendar folder of other User B (*group-scheduled* event with multiple attendees)
+- Not allowed to avoid ambiguities
   
 ### References / further reading
 - com.openexchange.chronos.impl.performer.MovePerformer

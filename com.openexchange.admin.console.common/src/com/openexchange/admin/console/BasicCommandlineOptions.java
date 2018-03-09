@@ -59,7 +59,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.ExtendableDataObject;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.MissingOptionException;
-import com.openexchange.admin.rmi.extensions.OXCommonExtension;
+import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
 
 /**
  * This abstract class contains all the common options between all command line tools
@@ -697,7 +697,7 @@ public abstract class BasicCommandlineOptions {
     protected final void printExtensionsError(final ExtendableDataObject obj) {
         //+ loop through extensions and check for errors
         if (obj != null && obj.getAllExtensionsAsHash() != null) {
-            for (final OXCommonExtension obj_extension : obj.getAllExtensionsAsHash().values()) {
+            for (final OXCommonExtensionInterface obj_extension : obj.getAllExtensionsAsHash().values()) {
                 if (obj_extension.getExtensionError() != null) {
                     printServerResponse(obj_extension.getExtensionError());
                 }

@@ -92,6 +92,7 @@ import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
@@ -687,7 +688,7 @@ public class Utils {
         if (ownPermission.getReadPermission() == Permission.READ_OWN_OBJECTS && matches(event.getCreatedBy(), userId)) {
             return true;
         }
-        if ((PublicType.getInstance().equals(folder.getType()) || PrivateType.getInstance().equals(folder.getType())) && 
+        if ((PublicType.getInstance().equals(folder.getType()) || PrivateType.getInstance().equals(folder.getType())) &&
             (matches(event.getCalendarUser(), userId) || isAttendee(event, userId) || isOrganizer(event, userId))) {
             return true;
         }
@@ -1134,6 +1135,47 @@ public class Utils {
      */
     public static Iterator<RecurrenceId> getRecurrenceIterator(CalendarSession session, Event masterEvent, Date from, Date until) throws OXException {
         return session.getRecurrenceService().iterateRecurrenceIds(new DefaultRecurrenceData(masterEvent), from, until);
+    }
+
+    /**
+     * Prepares the organizer for an event, taking over an external organizer if specified.
+     *
+     * @param session The calendar session
+     * @param folder The target calendar folder of the event
+     * @param organizerData The organizer as defined by the client, or <code>null</code> to prepare the default organizer for the target folder
+     * @return The prepared organizer
+     */
+    public static Organizer prepareOrganizer(CalendarSession session, CalendarFolder folder, Organizer organizerData) throws OXException {
+        CalendarUser calendarUser = getCalendarUser(session, folder);
+        Organizer organizer;
+        if (null != organizerData) {
+            organizer = session.getEntityResolver().prepare(organizerData, CalendarUserType.INDIVIDUAL);
+            if (0 < organizer.getEntity()) {
+                /*
+                 * internal organizer must match the actual calendar user if specified
+                 */
+                if (organizer.getEntity() != calendarUser.getEntity()) {
+                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(organizer.getUri(), I(organizer.getEntity()), CalendarUserType.INDIVIDUAL);
+                }
+            } else {
+                /*
+                 * take over external organizer as-is
+                 */
+                return session.getConfig().isSkipExternalAttendeeURIChecks() ? organizer : Check.requireValidEMail(organizer);
+            }
+        } else {
+            /*
+             * prepare a default organizer for calendar user
+             */
+            organizer = session.getEntityResolver().applyEntityData(new Organizer(), calendarUser.getEntity());
+        }
+        /*
+         * apply "sent-by" property if someone is acting on behalf of the calendar user
+         */
+        if (calendarUser.getEntity() != session.getUserId()) {
+            organizer.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUserId()));
+        }
+        return organizer;
     }
 
     private static FolderServiceDecorator initDecorator(CalendarSession session) throws OXException {

@@ -53,22 +53,16 @@ import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
+import static com.openexchange.chronos.common.CalendarUtils.isPseudoGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
+import static com.openexchange.chronos.impl.Utils.prepareOrganizer;
 import static com.openexchange.folderstorage.Permission.CREATE_OBJECTS_IN_FOLDER;
-import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
-import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
-import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
-import static com.openexchange.folderstorage.Permission.READ_FOLDER;
-import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
-import static com.openexchange.folderstorage.Permission.WRITE_ALL_OBJECTS;
-import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -79,6 +73,7 @@ import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.AttendeeHelper;
@@ -124,12 +119,8 @@ public class MovePerformer extends AbstractUpdatePerformer {
          */
         Event originalEvent = loadEventData(objectId);
         Check.eventIsInFolder(originalEvent, folder);
+        requireWritePermissions(originalEvent);
         requireCalendarPermission(targetFolder, CREATE_OBJECTS_IN_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
-        if (false == matches(originalEvent.getCreatedBy(), session.getUserId())) {
-            requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, WRITE_OWN_OBJECTS, DELETE_OWN_OBJECTS);
-        } else {
-            requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, DELETE_ALL_OBJECTS);
-        }
         /*
          * check if move is supported
          */
@@ -146,7 +137,11 @@ public class MovePerformer extends AbstractUpdatePerformer {
         if (PublicType.getInstance().equals(folder.getType()) && PublicType.getInstance().equals(targetFolder.getType())) {
             moveBetweenPublicFolders(originalEvent, targetFolder);
         } else if (false == PublicType.getInstance().equals(folder.getType()) && false == PublicType.getInstance().equals(targetFolder.getType())) {
-            moveBetweenPersonalFolders(originalEvent, targetFolder);
+            if (matches(calendarUser, getCalendarUser(session, targetFolder))) {
+                moveBetweenPersonalFoldersOfSameUser(originalEvent, targetFolder);
+            } else {
+                moveBetweenPersonalFoldersOfDifferentUsers(originalEvent, targetFolder);
+            }
         } else if (PublicType.getInstance().equals(folder.getType()) && false == PublicType.getInstance().equals(targetFolder.getType())) {
             moveFromPublicToPersonalFolder(originalEvent, targetFolder);
         } else if (false == PublicType.getInstance().equals(folder.getType()) && PublicType.getInstance().equals(targetFolder.getType())) {
@@ -180,7 +175,17 @@ public class MovePerformer extends AbstractUpdatePerformer {
 
     private void moveFromPublicToPersonalFolder(Event originalEvent, CalendarFolder targetFolder) throws OXException {
         /*
-         * move from public to personal folder, take over default personal folders for user attendees & update any existing alarms
+         * move from public to personal folder, require same organizer for group-scheduled events
+         */
+        if (isGroupScheduled(originalEvent)) {
+            CalendarUser targetCalendarUser = getCalendarUser(session, targetFolder);
+            if (false == matches(targetCalendarUser, originalEvent.getOrganizer())) {
+                throw CalendarExceptionCodes.NOT_ORGANIZER.create(
+                    targetFolder.getId(), originalEvent.getId(), targetCalendarUser.getUri(), targetCalendarUser.getSentBy());
+            }
+        }
+        /*
+         * take over default personal folders for user attendees & update any existing alarms
          */
         Map<Integer, List<Alarm>> originalAlarms = storage.getAlarmStorage().loadAlarms(originalEvent);
         CalendarUser targetCalendarUser = getCalendarUser(session, targetFolder);
@@ -208,113 +213,68 @@ public class MovePerformer extends AbstractUpdatePerformer {
          * move from one public folder to another, update event's common folder & update any existing alarms
          */
         Map<Integer, List<Alarm>> originalAlarms = storage.getAlarmStorage().loadAlarms(originalEvent);
-        updateCommonFolderId(originalEvent, targetFolder.getId());
         for (Map.Entry<Integer, List<Alarm>> entry : originalAlarms.entrySet()) {
             updateAttendeeAlarms(originalEvent, entry.getValue(), entry.getKey().intValue(), targetFolder.getId());
         }
+        updateCommonFolderId(originalEvent, targetFolder.getId());
     }
 
-    private void moveBetweenPersonalFolders(Event originalEvent, CalendarFolder targetFolder) throws OXException {
+    private void moveBetweenPersonalFoldersOfSameUser(Event originalEvent, CalendarFolder targetFolder) throws OXException {
+        /*
+         * move from one personal folder to another of the same user
+         */
+        if (isGroupScheduled(originalEvent)) {
+            /*
+             * update attendee's folder in a group-scheduled event
+             */
+            Attendee originalAttendee = find(originalEvent.getAttendees(), calendarUserId);
+            if (null == originalAttendee) {
+                throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(String.valueOf(calendarUserId), originalEvent.getId());
+            }
+            updateAttendeeFolderId(originalEvent.getId(), originalAttendee, targetFolder.getId());
+            touch(originalEvent.getId());
+        } else {
+            /*
+             * update event's common folder id, otherwise
+             */
+            updateCommonFolderId(originalEvent, targetFolder.getId());
+        }
+        Map<Integer, List<Alarm>> originalAlarms = storage.getAlarmStorage().loadAlarms(originalEvent);
+        updateAttendeeAlarms(originalEvent, originalAlarms.get(I(calendarUserId)), calendarUserId, targetFolder.getId());
+    }
+
+    private void moveBetweenPersonalFoldersOfDifferentUsers(Event originalEvent, CalendarFolder targetFolder) throws OXException {
         /*
          * move between personal calendar folders
          */
-        Map<Integer, List<Alarm>> originalAlarms = storage.getAlarmStorage().loadAlarms(originalEvent);
-        CalendarUser targetCalendarUser = getCalendarUser(session, targetFolder);
-        if (matches(calendarUser, targetCalendarUser)) {
+        if (false == isGroupScheduled(originalEvent)) {
             /*
-             * move from one personal folder to another of the same user
+             * update event's common folder id, assign new calendar user & remove alarms of previous calendar user
              */
-            if (isGroupScheduled(originalEvent)) {
-                /*
-                 * update attendee's folder in a group-scheduled event
-                 */
-                Attendee originalAttendee = find(originalEvent.getAttendees(), calendarUserId);
-                if (null == originalAttendee) {
-                    throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(String.valueOf(calendarUserId), originalEvent.getId());
-                }
-                updateAttendeeFolderId(originalEvent.getId(), originalAttendee, targetFolder.getId());
-            } else {
-                /*
-                 * update event's common folder id
-                 */
-                updateCommonFolderId(originalEvent, targetFolder.getId());
-            }
-            updateAttendeeAlarms(originalEvent, originalAlarms.get(I(calendarUserId)), calendarUserId, targetFolder.getId());
-        } else if (calendarUserId == session.getUserId()) {
+            updateCommonFolderId(originalEvent, targetFolder.getId());
+            updateCalendarUser(originalEvent, getCalendarUser(session, targetFolder));
+            storage.getAlarmStorage().deleteAlarms(originalEvent.getId(), calendarUserId);
+        } else if (isPseudoGroupScheduled(originalEvent)) {
             /*
-             * move from user's own calendar to another one ("reassign")
+             * exchange default attendee & organizer, remove alarms of previous calendar user
              */
-            if (isGroupScheduled(originalEvent)) {
-                /*
-                 * remove the original default user and ensure that the target calendar user becomes attendee
-                 */
-                Attendee defaultAttendee = find(originalEvent.getAttendees(), targetCalendarUser);
-                if (null == defaultAttendee) {
-                    defaultAttendee = AttendeeHelper.getDefaultAttendee(session, targetFolder, null);
-                    storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), Collections.singletonList(defaultAttendee));
-                }
-                for (Attendee originalAttendee : filter(originalEvent.getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
-                    if (calendarUserId == originalAttendee.getEntity()) {
-                        storage.getAttendeeStorage().insertAttendeeTombstone(originalEvent.getId(), storage.getUtilities().getTombstone(originalAttendee));
-                        storage.getAttendeeStorage().deleteAttendees(originalEvent.getId(), Collections.singletonList(originalAttendee));
-                        storage.getAlarmStorage().deleteAlarms(originalEvent.getId(), originalAttendee.getEntity());
-                    } else {
-                        String folderId = matches(targetCalendarUser, originalAttendee) ? targetFolder.getId() : getDefaultCalendarId(originalAttendee.getEntity());
-                        updateAttendeeFolderId(originalEvent.getId(), originalAttendee, folderId);
-                        updateAttendeeAlarms(originalEvent, originalAlarms.get(I(originalAttendee.getEntity())), originalAttendee.getEntity(), folderId);
-                    }
-                }
-                updateCalendarUser(originalEvent, targetCalendarUser);
-            } else {
-                /*
-                 * update event's common folder id, assign new calendar user & remove alarms of previous calendar user
-                 */
-                updateCommonFolderId(originalEvent, targetFolder.getId());
-                updateCalendarUser(originalEvent, targetCalendarUser);
-                storage.getAlarmStorage().deleteAlarms(originalEvent.getId(), calendarUserId);
+            Attendee originalAttendee = find(originalEvent.getAttendees(), calendarUserId);
+            if (null == originalAttendee) {
+                throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(String.valueOf(calendarUserId), originalEvent.getId());
             }
+            storage.getAttendeeStorage().insertAttendeeTombstone(originalEvent.getId(), storage.getUtilities().getTombstone(originalAttendee));
+            storage.getEventStorage().insertEventTombstone(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUser));
+            storage.getAttendeeStorage().deleteAttendees(originalEvent.getId(), Collections.singletonList(originalAttendee));
+            storage.getAlarmStorage().deleteAlarms(originalEvent.getId(), originalAttendee.getEntity());
+            Attendee newDefaultAttendee = AttendeeHelper.getDefaultAttendee(session, targetFolder, null);
+            storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), Collections.singletonList(newDefaultAttendee));
+            updateOrganizer(originalEvent, targetFolder);
         } else {
             /*
-             * move from one personal folder to another user's personal folder
+             * not allowed/supported, otherwise
              */
-            if (isGroupScheduled(originalEvent)) {
-                /*
-                 * take over target folder for new default attendee and reset personal calendar folders of further user attendees
-                 */
-                for (Attendee originalAttendee : filter(originalEvent.getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
-                    String folderId = matches(targetCalendarUser, originalAttendee) ? targetFolder.getId() : getDefaultCalendarId(originalAttendee.getEntity());
-                    updateAttendeeFolderId(originalEvent.getId(), originalAttendee, folderId);
-                    updateAttendeeAlarms(originalEvent, originalAlarms.get(I(originalAttendee.getEntity())), originalAttendee.getEntity(), folderId);
-                }
-                if (false == contains(originalEvent.getAttendees(), targetCalendarUser)) {
-                    Attendee defaultAttendee = AttendeeHelper.getDefaultAttendee(session, targetFolder, null);
-                    storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), Collections.singletonList(defaultAttendee));
-                }
-            } else {
-                /*
-                 * add previous and new calendar users as attendee (to match expectations of com.openexchange.ajax.appointment.MoveTestNew)
-                 */
-                List<Attendee> attendees = new ArrayList<Attendee>(2);
-                Attendee previousDefaultAttendee = AttendeeHelper.getDefaultAttendee(session, folder, null);
-                previousDefaultAttendee.setFolderId(getDefaultCalendarId(previousDefaultAttendee.getEntity()));
-                attendees.add(previousDefaultAttendee);
-                attendees.add(AttendeeHelper.getDefaultAttendee(session, targetFolder, null));
-                storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), attendees);
-
-                //TODO: it would make more sense to just move the event as-is:
-                /*
-                 * update event's common folder id & remove alarms of previous calendar user
-                 */
-                //                updateCommonFolderId(originalEvent, targetFolder.getID());
-                //                storage.getAlarmStorage().deleteAlarms(originalEvent.getId(), calendarUserId);
-            }
-            updateCalendarUser(originalEvent, targetCalendarUser);
+            throw CalendarExceptionCodes.UNSUPPORTED_FOLDER.create(targetFolder.getId(), targetFolder.getType());
         }
-        /*
-         * insert corresponding tombstone & also 'touch' parent event
-         */
-        storage.getEventStorage().insertEventTombstone(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUser));
-        touch(originalEvent.getId());
     }
 
     private void updateAttendeeFolderId(String eventId, Attendee originalAttendee, String folderId) throws OXException {
@@ -331,7 +291,7 @@ public class MovePerformer extends AbstractUpdatePerformer {
             Event eventUpdate = new Event();
             eventUpdate.setId(originalEvent.getId());
             eventUpdate.setFolderId(folderId);
-            Consistency.setModified(timestamp, eventUpdate, calendarUser);
+            Consistency.setModified(session, timestamp, eventUpdate, session.getUserId());
             storage.getEventStorage().insertEventTombstone(storage.getUtilities().getTombstone(originalEvent, timestamp, calendarUser));
             storage.getEventStorage().updateEvent(eventUpdate);
         }
@@ -342,7 +302,18 @@ public class MovePerformer extends AbstractUpdatePerformer {
             Event eventUpdate = new Event();
             eventUpdate.setId(originalEvent.getId());
             eventUpdate.setCalendarUser(newCalendarUser);
-            Consistency.setModified(timestamp, eventUpdate, calendarUser);
+            Consistency.setModified(session, timestamp, eventUpdate, session.getUserId());
+            storage.getEventStorage().updateEvent(eventUpdate);
+        }
+    }
+
+    private void updateOrganizer(Event originalEvent, CalendarFolder targetFolder) throws OXException {
+        if (false == matches(getCalendarUser(session, targetFolder), originalEvent.getOrganizer())) {
+            Event eventUpdate = new Event();
+            eventUpdate.setId(originalEvent.getId());
+            Organizer organizer = prepareOrganizer(session, targetFolder, null);
+            eventUpdate.setOrganizer(organizer);
+            Consistency.setModified(session, timestamp, eventUpdate, session.getUserId());
             storage.getEventStorage().updateEvent(eventUpdate);
         }
     }

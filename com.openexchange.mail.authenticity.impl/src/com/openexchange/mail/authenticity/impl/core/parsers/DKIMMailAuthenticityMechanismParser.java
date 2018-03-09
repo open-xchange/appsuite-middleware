@@ -79,7 +79,11 @@ public class DKIMMailAuthenticityMechanismParser extends AbstractMailAuthenticit
      */
     @Override
     AuthenticityMechanismResult parseMechanismResult(String value) {
-        return DKIMResult.valueOf(value);
+        try {
+            return DKIMResult.valueOf(value);
+        } catch (IllegalArgumentException e) {
+            return DKIMResult.FAIL;
+        }
     }
 
     /*
