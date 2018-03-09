@@ -75,7 +75,7 @@ import com.openexchange.test.OXTestToolkit;
 public class CSVContactExportTest extends AbstractContactTest {
 
     public static Exporter exp = new CSVContactExporter();
-    public static String TEST1_RESULT = "\"Object id\"," + "\"Folder id\"," + "\"Given name\"\n";
+    public static String TEST1_RESULT = "\"Object id\"," + "\"Folder id\"," + "\"Given name\"" + com.openexchange.importexport.formats.csv.CSVLibrary.ROW_DELIMITER;
     public static int[] TEST1_BASE = { ContactField.OBJECT_ID.getNumber(), ContactField.FOLDER_ID.getNumber(), ContactField.GIVEN_NAME.getNumber(), 7000 };
     public static String TEST2_RESULT = "Given name, " + "Email 1\n" + "Prinz, tobias.prinz@open-xchange.com\n" + "Laguna, francisco.laguna@open-xchange.com";
     public static int[] TEST2_BASE = { ContactField.GIVEN_NAME.getNumber(), ContactField.EMAIL1.getNumber() };
@@ -89,7 +89,7 @@ public class CSVContactExportTest extends AbstractContactTest {
     }
 
     @Test
-    public void canExport() throws OXException, IOException {
+    public void canExport() throws OXException {
         assertTrue("Can export?", exp.canExport(sessObj, Format.CSV, Integer.toString(folderId), null));
     }
 
