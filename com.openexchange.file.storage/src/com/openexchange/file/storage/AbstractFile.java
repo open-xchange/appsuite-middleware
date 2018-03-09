@@ -145,7 +145,7 @@ public abstract class AbstractFile implements File {
 
     @Override
     public boolean equals(final Object other) {
-        return equals((File) other, File.Field.ID, File.Field.values());
+        return other instanceof File ? equals((File) other, File.Field.ID, File.Field.values()) : false;
     }
 
     @Override
