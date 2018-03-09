@@ -977,18 +977,10 @@ public class DocumentMetadataResource extends AbstractResource implements
 	}
 
 	@Override
-	public void removedParent() throws WebdavProtocolException {
-		try {
-			exists = false;
-			factory.removed(this);
-		} catch (final OXException e) {
-			if (e instanceof WebdavProtocolException) {
-				throw (WebdavProtocolException) e;
-			}
-			throw WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(),
-					HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
-		}
-	}
+    public void removedParent() throws WebdavProtocolException {
+        exists = false;
+        factory.removed(this);
+    }
 
 	@Override
 	public void transferLock(final WebdavLock lock)
