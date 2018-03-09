@@ -205,7 +205,7 @@ public class AllPerformer extends AbstractQueryPerformer {
          */
         boolean skipClassified = isSkipClassifiedEvents(session);
         for (Entry<CalendarFolder, List<Event>> entry : eventsPerFolder.entrySet()) {
-            resultsPerFolderId.put(entry.getKey().getId(), new DefaultEventsResult(postProcess(entry.getValue(), entry.getKey(), skipClassified, fields)));
+            resultsPerFolderId.put(entry.getKey().getId(), new EventPostProcessor(session, storage, skipClassified).process(entry.getValue(), entry.getKey()).getEventsResult());
             getSelfProtection().checkResultMap(resultsPerFolderId);
         }
         return resultsPerFolderId;
@@ -289,7 +289,7 @@ public class AllPerformer extends AbstractQueryPerformer {
         EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
         events = storage.getUtilities().loadAdditionalEventData(session.getUserId(), events, fields);
-        return postProcess(events, session.getUserId(), false, fields);
+        return new EventPostProcessor(session, storage, false).process(events, session.getUserId()).getEvents();
     }
 
     /**
@@ -311,7 +311,7 @@ public class AllPerformer extends AbstractQueryPerformer {
          */
         List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SearchOptions(session), fields);
         events = storage.getUtilities().loadAdditionalEventData(getCalendarUserId(folder), events, fields);
-        return postProcess(events, folder, isSkipClassifiedEvents(session), fields);
+        return new EventPostProcessor(session, storage, isSkipClassifiedEvents(session)).process(events, folder).getEvents();
     }
 
     private static Map<Integer, List<CalendarFolder>> getFoldersPerCalendarUserId(List<CalendarFolder> folders) {
