@@ -526,7 +526,7 @@ public class MailAuthenticityFetchListener implements MailFetchListener {
                     handler.handle(session, mail);
                 } catch (Exception e) {
                     // Verifying mail authenticity failed
-                    LOGGER.warn("Error while verifying mail authenticity for mail \"{}\" in folder {}", mail.getMailId(), mail.getFolder(), e.getCause());
+                    LOGGER.warn("Error while verifying mail authenticity for mail \"{}\" in folder {}", mail.getMailId(), mail.getFolder(), e);
                     mail.setAuthenticityResult(MailAuthenticityResult.NEUTRAL_RESULT);
                 }
             }
