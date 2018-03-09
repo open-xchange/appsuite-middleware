@@ -1368,9 +1368,9 @@ public class JSONObject extends AbstractJSONValue {
         }
         try {
             if (value instanceof JSONString) {
-                final Object o = ((JSONString) value).toJSONString();
-                if (o instanceof String) {
-                    return (String) o;
+                final String result = ((JSONString) value).toJSONString();
+                if (result != null) {
+                    return result;
                 }
             }
         } catch (final Exception e) {
