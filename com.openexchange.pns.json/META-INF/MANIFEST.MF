@@ -7,8 +7,6 @@ Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Import-Package: com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,
- com.openexchange.documentation,
- com.openexchange.documentation.annotations,
  com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.osgi,
