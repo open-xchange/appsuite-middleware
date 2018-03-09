@@ -44,11 +44,11 @@ public class DiffToChangeLog {
 
     private String changeSetContext;
     private String changeSetAuthor;
-    private DiffResult diffResult;
-    private DiffOutputControl diffOutputControl;
+    private final DiffResult diffResult;
+    private final DiffOutputControl diffOutputControl;
 
 
-    private static Set<Class> loggedOrderFor = new HashSet<Class>();
+    private static Set<Class<?>> loggedOrderFor = new HashSet<Class<?>>();
 
     public DiffToChangeLog(DiffResult diffResult, DiffOutputControl diffOutputControl) {
         this.diffResult = diffResult;
@@ -245,7 +245,7 @@ public class DiffToChangeLog {
 
     private static class DependencyGraph {
 
-        private Map<Class<? extends DatabaseObject>, Node> allNodes = new HashMap<Class<? extends DatabaseObject>, Node>();
+        private final Map<Class<? extends DatabaseObject>, Node> allNodes = new HashMap<Class<? extends DatabaseObject>, Node>();
 
         private void addType(Class<? extends DatabaseObject> type) {
             allNodes.put(type, new Node(type));
@@ -370,6 +370,9 @@ public class DiffToChangeLog {
 
             @Override
             public boolean equals(Object obj) {
+                if (!(obj instanceof Edge)) {
+                    return false;
+                }
                 Edge e = (Edge) obj;
                 return e.from == from && e.to == to;
             }
