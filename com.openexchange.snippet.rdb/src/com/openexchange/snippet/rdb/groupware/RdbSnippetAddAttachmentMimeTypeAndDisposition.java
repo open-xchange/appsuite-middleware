@@ -87,6 +87,7 @@ public class RdbSnippetAddAttachmentMimeTypeAndDisposition extends UpdateTaskAda
             Databases.startTransaction(con);
             rollback = true;
 
+            // https://stackoverflow.com/questions/7599519/alter-table-add-column-takes-a-long-time
             Column columnMimeType = new Column("mimeType", "VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL");
             Column columnDisposition = new Column("disposition", "VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL");
             Tools.checkAndAddColumns(con, "snippetAttachment", columnMimeType, columnDisposition);
