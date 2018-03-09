@@ -187,24 +187,7 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
      * @throws IllegalArgumentException If the configuration is <code>null</code>, or if the account identifier is not present, or is present but cannot be parsed as an integer
      */
     protected int getAccountId(Map<String, Object> configuration) {
-        if (null == configuration) {
-            throw new IllegalArgumentException("The configuration cannot be 'null'");
-        }
-
-        Object accountId = configuration.get("account");
-        if (null == accountId) {
-            throw new IllegalArgumentException("The account identifier is missing from the configuration");
-        }
-
-        if (accountId instanceof Integer) {
-            return ((Integer) accountId).intValue();
-        }
-
-        try {
-            return Integer.parseInt(accountId.toString());
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("The account identifier '" + accountId.toString() + "' cannot be parsed as an integer.", e);
-        }
+        return OAuthUtil.getAccountId(configuration);
     }
 
     /**

@@ -591,7 +591,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                     writeCon.commit();
 
                     // No need to re-authorise if access not present
-                    OAuthAccess access = oAuthAccessRegistry.get(contextId, user);
+                    OAuthAccess access = oAuthAccessRegistry.get(contextId, user, existingAccount.getId());
                     if (access != null) {
                         // Initialise the access with the new access token
                         access.initialize();
@@ -1055,7 +1055,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 writeCon.commit();
 
                 // No need to re-authorise if access not present
-                OAuthAccess access = oAuthAccessRegistry.get(contextId, user);
+                OAuthAccess access = oAuthAccessRegistry.get(contextId, user, accountId);
                 if (access != null) {
                     // Initialise the access with the new access token
                     access.initialize();

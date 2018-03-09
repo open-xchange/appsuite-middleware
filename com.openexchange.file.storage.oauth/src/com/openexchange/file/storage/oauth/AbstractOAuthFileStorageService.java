@@ -191,7 +191,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
             for (FileStorageAccount deleteMe : toDelete) {
                 accountManager.deleteAccount(deleteMe, session);
                 LOG.info("Deleted {} file storage account with id {} as OAuth account {} was deleted for user {} in context {}", deleteMe.getId(), api.getName(), deleteMe.getId(), user, cid);
-                boolean purged = registry.purgeUserAccess(session.getContextId(), session.getUserId());
+                boolean purged = registry.purgeUserAccess(session.getContextId(), session.getUserId(), id);
                 if (purged) {
                     LOG.info("Removed {} OAuth accesses from registry for the deleted OAuth account with id '{}' for user '{}' in context '{}'", api.getName(), deleteMe.getId(), user, cid);
                 }

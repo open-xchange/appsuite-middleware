@@ -99,7 +99,7 @@ public class OAuthFileStorageAccountEventHandler implements EventHandler {
                     if (null != userId) {
                         OAuthAccessRegistryService registryService = services.getService(OAuthAccessRegistryService.class);
                         OAuthAccessRegistry registry = registryService.get(api.getFullName());
-                        if (registry.removeIfLast(contextId, userId)) {
+                        if (registry.removeIfLast(contextId, userId, 0)) { //FIXME: find a way to get hold of the accountId...
                             LOG.debug("{} access removed for user {} in context {}", api.getShortName(), userId, contextId);
                         }
                     }

@@ -105,7 +105,7 @@ public class OAuthAccessRegistryServiceImpl implements OAuthAccessRegistryServic
         }
 
         for (OAuthAccessRegistryImpl registry : map.values()) {
-            registry.removeIfLast(contextId, userId);
+            registry.removeIfLast(contextId, userId ,0); //FIXME: find a way to get hold of the accountId...
         }
     }
 

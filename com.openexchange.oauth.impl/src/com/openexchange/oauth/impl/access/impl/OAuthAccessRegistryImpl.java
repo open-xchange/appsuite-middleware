@@ -89,13 +89,13 @@ public class OAuthAccessRegistryImpl implements OAuthAccessRegistry, Iterable<OA
     }
 
     @Override
-    public OAuthAccess addIfAbsent(int contextId, int userId, OAuthAccess oauthAccess) {
-        return map.putIfAbsent(new OAuthAccessKey(contextId, userId), oauthAccess);
+    public OAuthAccess addIfAbsent(int contextId, int userId, int oauthAccountId, OAuthAccess oauthAccess) {
+        return map.putIfAbsent(new OAuthAccessKey(contextId, userId, oauthAccountId), oauthAccess);
     }
 
     @Override
-    public <V> OAuthAccess addIfAbsent(int contextId, int userId, OAuthAccess oauthAccess, Callable<V> executeIfAdded) throws OXException {
-        OAuthAccessKey key = new OAuthAccessKey(contextId, userId);
+    public <V> OAuthAccess addIfAbsent(int contextId, int userId, int oauthAccountId, OAuthAccess oauthAccess, Callable<V> executeIfAdded) throws OXException {
+        OAuthAccessKey key = new OAuthAccessKey(contextId, userId, oauthAccountId);
         OAuthAccess existing = map.putIfAbsent(key, oauthAccess);
         if (null != existing) {
             // There is already such an OAuthAccess instance
@@ -117,18 +117,18 @@ public class OAuthAccessRegistryImpl implements OAuthAccessRegistry, Iterable<OA
     }
 
     @Override
-    public boolean contains(int contextId, int userId) {
-        return map.containsKey(new OAuthAccessKey(contextId, userId));
+    public boolean contains(int contextId, int userId, int oauthAccountId) {
+        return map.containsKey(new OAuthAccessKey(contextId, userId, oauthAccountId));
     }
 
     @Override
-    public OAuthAccess get(int contextId, int userId) {
-        return map.get(new OAuthAccessKey(contextId, userId));
+    public OAuthAccess get(int contextId, int userId, int oauthAccountId) {
+        return map.get(new OAuthAccessKey(contextId, userId, oauthAccountId));
     }
 
     @Override
-    public boolean removeIfLast(int contextId, int userId) {
-        OAuthAccess access = map.remove(new OAuthAccessKey(contextId, userId));
+    public boolean removeIfLast(int contextId, int userId, int oauthAccountId) {
+        OAuthAccess access = map.remove(new OAuthAccessKey(contextId, userId, oauthAccountId));
         if (null == access) {
             return false;
         }
@@ -137,8 +137,8 @@ public class OAuthAccessRegistryImpl implements OAuthAccessRegistry, Iterable<OA
     }
 
     @Override
-    public boolean purgeUserAccess(int contextId, int userId) {
-        return map.remove(new OAuthAccessKey(contextId, userId)) != null;
+    public boolean purgeUserAccess(int contextId, int userId, int oauthAccountId) {
+        return map.remove(new OAuthAccessKey(contextId, userId, oauthAccountId)) != null;
     }
 
     @Override
