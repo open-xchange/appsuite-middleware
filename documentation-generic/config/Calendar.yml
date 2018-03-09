@@ -99,4 +99,29 @@ properties:
       file: calendar.properties
       packageName: open-xchange-core
       tags: ["Calendar","Limit"]
+
+    - key: com.openexchange.calendar.provider.google.refreshInterval
+      description: |
+        Defines the refresh interval in minutes for the google calendar provider.
+        If the value is < 0 the default of one day will be used.
+      defaultValue: 10
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Google"]
+    - key: com.openexchange.calendar.provider.google.requestTimeout
+      description: |
+        Defines the time in seconds how long should be wait for the next request to google in case an error occurred.
+        The minimum is 2 seconds.
+      defaultValue: 1800
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Google"]
       
