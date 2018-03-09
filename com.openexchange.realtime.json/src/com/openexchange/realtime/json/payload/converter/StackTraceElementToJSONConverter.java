@@ -57,7 +57,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link StackTraceElementToJSONConverter}
- * 
+ *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class StackTraceElementToJSONConverter extends AbstractPOJOConverter {
@@ -78,7 +78,7 @@ public class StackTraceElementToJSONConverter extends AbstractPOJOConverter {
             stackTraceObject.put("lineNumber", stackTraceElement.getLineNumber());
             return stackTraceObject;
         } catch (Exception e) {
-            throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create(data.toString(), e);
+            throw DataExceptionCodes.UNABLE_TO_CHANGE_DATA.create(e, data.toString());
         }
     }
 

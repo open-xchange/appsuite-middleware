@@ -142,7 +142,7 @@ public class GoogleApiClients {
 
     /**
      * Check if the OAuth token of the specified {@link OAuthAccount} was expired and re-acquire if necessary
-     * 
+     *
      * @param session The groupware {@link Session}
      * @param reacquireIfExpired perform the requisition check
      * @param oauthAccount The {@link OAuthAccount}
@@ -328,7 +328,7 @@ public class GoogleApiClients {
             }
             return OAuthExceptionCodes.INVALID_ACCOUNT.create(e, new Object[0]);
         }
-        return OAuthExceptionCodes.OAUTH_ERROR.create(exMessage, e);
+        return OAuthExceptionCodes.OAUTH_ERROR.create(e, exMessage);
     }
 
     private static String parseErrorFrom(String message) {

@@ -293,7 +293,7 @@ public class DefaultGuestService implements GuestService {
         try {
             new QuotedInternetAddress(mailAddress, true);
         } catch (final AddressException e) {
-            throw GuestExceptionCodes.INVALID_EMAIL_ADDRESS.create(mailAddress, e);
+            throw GuestExceptionCodes.INVALID_EMAIL_ADDRESS.create(e, mailAddress);
         }
     }
 

@@ -86,7 +86,7 @@ public abstract class AbstractActionPrototype<T extends Model<T>> implements AJA
         try {
             return perform(req);
         } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create( e.getMessage(), e);
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 

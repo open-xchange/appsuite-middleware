@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
 import java.nio.channels.SocketChannel;
@@ -60,7 +61,10 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.net.ssl.HandshakeCompletedListener;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLParameters;
+import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 import com.openexchange.net.utils.Strings;
@@ -74,14 +78,32 @@ import com.openexchange.net.utils.Strings;
 public class DelegatingSSLSocket extends SSLSocket {
 
     private final SSLSocket delegate;
+    private final HostnameVerifier optHostnameVerifier;
     private volatile SocketAddress endpoint;
 
     /**
-     * Initializes a new {@link DelegatingSSLSocket}.
+     * Initializes a new {@link DelegatingSSLSocket} with disabled host-name verification.
+     *
+     * @param delegate The SSL socket to delegate to
+     * @param endpoint The end-point to which the socket was initially connected or <code>null</code> if not yet connected
+     * @param optHostnameVerifier The host-name verifier to use
      */
     public DelegatingSSLSocket(javax.net.ssl.SSLSocket delegate) {
+        this(delegate, null, null);
+    }
+
+    /**
+     * Initializes a new {@link DelegatingSSLSocket}.
+     *
+     * @param delegate The SSL socket to delegate to
+     * @param endpoint The end-point to which the socket was connected (for host-name verification); otherwise <code>null</code> if not yet connected or not of interest for the host-name verifier
+     * @param hostnameVerifier The optional host-name verifier to use or <code>null</code> to disable host-name verification
+     */
+    public DelegatingSSLSocket(javax.net.ssl.SSLSocket delegate, SocketAddress endpoint, HostnameVerifier hostnameVerifier) {
         super();
         this.delegate = delegate;
+        this.endpoint = endpoint;
+        this.optHostnameVerifier = null == hostnameVerifier ? null : hostnameVerifier;
     }
 
     @Override
@@ -399,7 +421,19 @@ public class DelegatingSSLSocket extends SSLSocket {
     public void startHandshake() throws IOException {
         try {
             delegate.startHandshake();
-        } catch (javax.net.ssl.SSLException e) {
+
+            // Verify host name after hand-shake (if desired)
+            if (null != optHostnameVerifier) {
+                SSLSession session = delegate.getSession();
+                SocketAddress endpoint = this.endpoint;
+                String hostname = InetSocketAddress.class.isInstance(endpoint) ? ((InetSocketAddress) endpoint).getHostName() : session.getPeerHost();
+                if (false == optHostnameVerifier.verify(hostname, session)) {
+                    throw new SSLPeerUnverifiedException("SSL peer failed hostname validation for name: " + hostname);
+                }
+            }
+        } catch (SSLPeerUnverifiedException e) {
+            throw e;
+        } catch (SSLException e) {
             if (matchesException(e, java.security.InvalidAlgorithmParameterException.class, MATCHER_TRUST_ANCHORS_ERROR)) {
                 throw new javax.net.ssl.SSLException("The JVM cannot find the truststore required for SSL, or it does not contain the required certificates."
                     + " Please check JVM's truststore configuration; e.g. specified via \"javax.net.ssl.trustStore\" JVM argument (if \"com.openexchange.net.ssl.default.truststore.enabled\" is true)"

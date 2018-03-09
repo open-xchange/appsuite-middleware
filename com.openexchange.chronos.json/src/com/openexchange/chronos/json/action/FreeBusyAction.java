@@ -170,7 +170,7 @@ public class FreeBusyAction extends ChronosAction {
             }
             return attendees;
         } catch (JSONException e) {
-            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e.getMessage(), e);
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
         }
     }
 

@@ -195,7 +195,7 @@ public class SearchAdapter {
                 .addOperand(new ConstantOperand<Integer>(Integer.valueOf(query)))
             ;
         } catch (NumberFormatException e) {
-            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e.getMessage(), e);
+            throw CalendarExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

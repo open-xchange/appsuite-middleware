@@ -55,14 +55,17 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import java.util.List;
+import java.util.Map;
 import javax.mail.internet.InternetAddress;
 import org.junit.Before;
 import org.mockito.ArgumentCaptor;
 import com.openexchange.config.lean.LeanConfigurationService;
+import com.openexchange.config.lean.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.authenticity.MailAuthenticityProperty;
 import com.openexchange.mail.authenticity.MailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
+import com.openexchange.mail.authenticity.impl.core.CustomRuleChecker;
 import com.openexchange.mail.authenticity.impl.core.MailAuthenticityHandlerImpl;
 import com.openexchange.mail.authenticity.impl.core.metrics.MailAuthenticityMetricLogger;
 import com.openexchange.mail.authenticity.impl.trusted.Icon;
@@ -141,7 +144,107 @@ public abstract class AbstractTestMailAuthenticity {
             }
         };
 
-        handler = new MailAuthenticityHandlerImpl(doNothingService, services);
+        LeanConfigurationService doNothingLeanService = new LeanConfigurationService() {
+
+            @Override
+            public String getProperty(int userId, int contextId, Property property, Map<String, String> optionals) {
+                return null;
+            }
+
+            @Override
+            public String getProperty(Property property, Map<String, String> optionals) {
+                return null;
+            }
+
+            @Override
+            public String getProperty(int userId, int contextId, Property property) {
+                return null;
+            }
+
+            @Override
+            public String getProperty(Property property) {
+                return null;
+            }
+
+            @Override
+            public long getLongProperty(int userId, int contextId, Property property, Map<String, String> optionals) {
+                return 0;
+            }
+
+            @Override
+            public long getLongProperty(Property property, Map<String, String> optionals) {
+                return 0;
+            }
+
+            @Override
+            public long getLongProperty(int userId, int contextId, Property property) {
+                return 0;
+            }
+
+            @Override
+            public long getLongProperty(Property property) {
+                return 0;
+            }
+
+            @Override
+            public int getIntProperty(int userId, int contextId, Property property, Map<String, String> optionals) {
+                return 0;
+            }
+
+            @Override
+            public int getIntProperty(Property property, Map<String, String> optionals) {
+                return 0;
+            }
+
+            @Override
+            public int getIntProperty(int userId, int contextId, Property property) {
+                return 0;
+            }
+
+            @Override
+            public int getIntProperty(Property property) {
+                return 0;
+            }
+
+            @Override
+            public float getFloatProperty(int userId, int contextId, Property property, Map<String, String> optionals) {
+                return 0;
+            }
+
+            @Override
+            public float getFloatProperty(Property property, Map<String, String> optionals) {
+                return 0;
+            }
+
+            @Override
+            public float getFloatProperty(int userId, int contextId, Property property) {
+                return 0;
+            }
+
+            @Override
+            public float getFloatProperty(Property property) {
+                return 0;
+            }
+
+            @Override
+            public boolean getBooleanProperty(int userId, int contextId, Property property, Map<String, String> optionals) {
+                return false;
+            }
+            @Override
+            public boolean getBooleanProperty(Property property, Map<String, String> optionals) {
+                return false;
+            }
+            @Override
+            public boolean getBooleanProperty(int userId, int contextId, Property property) {
+                return false;
+            }
+            @Override
+            public boolean getBooleanProperty(Property property) {
+                return false;
+            }
+        };
+
+        handler = new MailAuthenticityHandlerImpl(doNothingService, services, new CustomRuleChecker(doNothingLeanService));
     }
 
     /**

@@ -215,6 +215,9 @@ public class ReplicationMonitor {
                 LOG.warn("", e1);
             }
         }
+        if (null == retval) {
+            throw createException(assign, write, null);
+        }
         return retval;
     }
 

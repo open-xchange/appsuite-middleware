@@ -129,7 +129,7 @@ public class DeleteAction extends ChronosAction {
             }
             return new AJAXRequestResult(results, new Date(timestamp), MultipleCalendarResultConverter.INPUT_FORMAT);
         } catch (JSONException e) {
-            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e.getMessage(), e);
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
         }
     }
 

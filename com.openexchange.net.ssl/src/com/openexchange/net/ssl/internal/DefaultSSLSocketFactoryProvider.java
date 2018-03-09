@@ -112,4 +112,5 @@ public class DefaultSSLSocketFactoryProvider implements SSLSocketFactoryProvider
 
         return userSSLConfig.isTrustAll(user, context) ? TrustAllSSLSocketFactory.getDefault() : TrustedSSLSocketFactory.getDefault();
     }
+
 }

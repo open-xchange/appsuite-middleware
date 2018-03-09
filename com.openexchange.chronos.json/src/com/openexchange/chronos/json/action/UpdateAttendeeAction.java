@@ -130,7 +130,7 @@ public class UpdateAttendeeAction extends ChronosAction {
                     attendee.setEntity(requestData.getSession().getUserId());
                 }
             } catch (JSONException e) {
-                throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e.getMessage(), e);
+                throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, e.getMessage());
             }
 
             EventID eventID = parseIdParameter(requestData);

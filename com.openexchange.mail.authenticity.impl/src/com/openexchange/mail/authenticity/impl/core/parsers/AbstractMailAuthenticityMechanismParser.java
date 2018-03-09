@@ -127,7 +127,7 @@ abstract class AbstractMailAuthenticityMechanismParser implements BiFunction<Map
      */
     private boolean checkDomainMatch(MailAuthenticityResult overallResult, String domain) {
         String fromDomain = overallResult.getAttribute(MailAuthenticityResultKey.FROM_HEADER_DOMAIN, String.class);
-        return fromDomain.equals(domain);
+        return fromDomain.equalsIgnoreCase(domain);
     }
 
     /**
@@ -189,7 +189,7 @@ abstract class AbstractMailAuthenticityMechanismParser implements BiFunction<Map
             mechResult.addProperty(key, attributes.get(key));
         }
     }
-    
+
     protected String compileReasonPhrase(AuthenticityMechanismResult mechResult, String phraseFragment, String address) {
         StringBuilder builder = new StringBuilder();
         builder.append(mechResult.getDisplayName());

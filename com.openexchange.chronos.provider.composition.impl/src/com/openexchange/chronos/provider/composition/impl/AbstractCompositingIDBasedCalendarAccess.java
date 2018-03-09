@@ -378,7 +378,7 @@ public abstract class AbstractCompositingIDBasedCalendarAccess implements Transa
         if (null == folderIds) {
             return null;
         }
-        Map<Integer, List<String>> folderIdsPerAccountId = getRelativeFolderIdsPerAccountId(folderIds.toArray(new String[folderIds.size()]));
+        Map<Integer, List<String>> folderIdsPerAccountId = getRelativeFolderIdsPerAccountId(folderIds);
         List<CalendarAccount> accounts = getAccounts(I2i(folderIdsPerAccountId.keySet()));
         Map<CalendarAccount, List<String>> folderIdsPerAccount = new HashMap<CalendarAccount, List<String>>(folderIdsPerAccountId.size());
         for (Entry<Integer, List<String>> entry : folderIdsPerAccountId.entrySet()) {

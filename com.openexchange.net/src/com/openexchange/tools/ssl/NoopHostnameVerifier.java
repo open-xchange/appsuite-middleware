@@ -47,30 +47,56 @@
  *
  */
 
-package com.openexchange.database;
+package com.openexchange.tools.ssl;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.database.internal.GlobalDatabaseServiceImplTest;
-import com.openexchange.database.internal.ReplicationMonitorTest;
-import com.openexchange.database.internal.wrapping.UpdateFlagTest;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSession;
 
 /**
- * {@link UnitTests}
+ * {@link NoopHostnameVerifier} - A NOOP <tt>HostnameVerifier</tt>, which turns host-name verification off.
+ * <p>
+ * This implementation is a no-op, and never throws an <tt>SSLException</tt>.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.10.0
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    UpdateFlagTest.class,
-    ReplicationMonitorTest.class,
-    GlobalDatabaseServiceImplTest.class,
-    DatabasesTest.class
-})
-public class UnitTests {
+public class NoopHostnameVerifier implements HostnameVerifier {
 
-    public UnitTests() {
+    private static final NoopHostnameVerifier INSTANCE = new NoopHostnameVerifier();
+
+    /**
+     * Gets the instance.
+     *
+     * @return The instance
+     */
+    public static NoopHostnameVerifier getInstance() {
+        return INSTANCE;
+    }
+
+    // -------------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link NoopHostnameVerifier}.
+     */
+    private NoopHostnameVerifier() {
         super();
     }
+
+    /**
+     * Verifies that the host name is an acceptable match with the server's authentication scheme.
+     *
+     * @param hostname The host name
+     * @param sslSession The SSL session used on the connection to host
+     * @return <code>true</code> if the host name is acceptable; otherwise <code>false</code>
+     */
+    @Override
+    public boolean verify(String hostname, SSLSession sslSession) {
+        return true;
+    }
+
+    @Override
+    public final String toString() {
+        return "NOOP";
+    }
+
 }

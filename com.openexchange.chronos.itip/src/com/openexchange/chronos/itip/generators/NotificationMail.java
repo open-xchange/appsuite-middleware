@@ -586,7 +586,7 @@ public class NotificationMail {
     }
 
     public boolean isStateChangeExceptionCreate() {
-        boolean candidate = diff.containsExactTheseChanges(new EventField[] { EventField.RECURRENCE_ID, EventField.ATTENDEES });
+        boolean candidate = diff.containsExactTheseChanges(new EventField[] { EventField.CHANGE_EXCEPTION_DATES, EventField.RECURRENCE_ID, EventField.ATTENDEES });
         if (candidate) {
             return diff.isAboutStateChanges();
         }

@@ -87,7 +87,7 @@ public class NativeConverter implements ResultConverter {
         try {
             result.setResultObject(JSONCoercion.coerceToNative(result.getResultObject()), "native");
         } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.toString(), e);
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.toString());
         }
     }
 

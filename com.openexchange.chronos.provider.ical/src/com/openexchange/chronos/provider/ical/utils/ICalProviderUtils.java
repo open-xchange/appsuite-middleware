@@ -78,7 +78,7 @@ public class ICalProviderUtils {
                 throw ICalProviderExceptionCodes.FEED_URI_NOT_ALLOWED.create(feedUrl);
             }
         } catch (URISyntaxException e) {
-            throw ICalProviderExceptionCodes.BAD_FEED_URI.create(feedUrl, e);
+            throw ICalProviderExceptionCodes.BAD_FEED_URI.create(e, feedUrl);
         }
     }
 

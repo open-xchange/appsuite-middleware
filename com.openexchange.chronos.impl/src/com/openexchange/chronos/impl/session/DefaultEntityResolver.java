@@ -726,7 +726,7 @@ public class DefaultEntityResolver implements EntityResolver {
             return services.getService(ResourceService.class).getResource(entity, context);
         } catch (OXException e) {
             if ("RES-0012".equals(e.getErrorCode())) {
-                throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(String.valueOf(entity), I(entity), CalendarUserType.RESOURCE, e);
+                throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(e, String.valueOf(entity), I(entity), CalendarUserType.RESOURCE);
             }
             throw e;
         }
@@ -737,7 +737,7 @@ public class DefaultEntityResolver implements EntityResolver {
             return services.getService(GroupService.class).getGroup(context, entity);
         } catch (OXException e) {
             if ("GRP-0017".equals(e.getErrorCode())) {
-                throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(String.valueOf(entity), I(entity), CalendarUserType.GROUP, e);
+                throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(e, String.valueOf(entity), I(entity), CalendarUserType.GROUP);
             }
             throw e;
         }
@@ -748,7 +748,7 @@ public class DefaultEntityResolver implements EntityResolver {
             return services.getService(UserService.class).getUser(entity, context);
         } catch (OXException e) {
             if ("USR-0010".equals(e.getErrorCode())) {
-                throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(String.valueOf(entity), I(entity), CalendarUserType.INDIVIDUAL, e);
+                throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(e, String.valueOf(entity), I(entity), CalendarUserType.INDIVIDUAL);
             }
             throw e;
         }
@@ -761,9 +761,9 @@ public class DefaultEntityResolver implements EntityResolver {
             if ("USR-0010".equals(e.getErrorCode())) {
                 if (null != e.getLogArgs() && 0 < e.getLogArgs().length) {
                     Object arg = e.getLogArgs()[0];
-                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(arg, arg, CalendarUserType.INDIVIDUAL, e);
+                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(e, arg, arg, CalendarUserType.INDIVIDUAL);
                 } else {
-                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(java.util.Arrays.toString(entities), I(0), CalendarUserType.INDIVIDUAL, e);
+                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(e, java.util.Arrays.toString(entities), I(0), CalendarUserType.INDIVIDUAL);
                 }
             }
             throw e;
