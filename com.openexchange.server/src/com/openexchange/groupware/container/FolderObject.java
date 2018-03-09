@@ -1630,7 +1630,7 @@ public class FolderObject extends FolderChildObject implements Cloneable {
         final int size = original.size();
         final ArrayList<Integer> copy = new ArrayList<Integer>(original.size());
         for (int i = 0; i < size; i++) {
-            copy.add(Integer.valueOf(original.get(i).intValue()));
+            copy.add(original.get(i));
         }
         return copy;
     }
