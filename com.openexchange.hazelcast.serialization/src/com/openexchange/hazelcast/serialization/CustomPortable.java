@@ -164,6 +164,7 @@ public interface CustomPortable extends Portable {
      *   &bull; 500 --> com.openexchange.sms.tools.internal.SMSBucket
      *   &bull; 600 --> com.openexchange.websockets.grizzly.remote.portable.PortableMessageDistributor
      *   &bull; 700 --> com.openexchange.oauth.impl.internal.hazelcast.PortableCallbackRegistryFetch
+     *   &bull; 701 --> com.openexchange.oauth.impl.internal.hazelcast.PortableMultipleCallbackRegistryFetch
      * </pre>
      *
      * @return The class ID

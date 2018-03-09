@@ -50,8 +50,12 @@
 package com.openexchange.oauth.impl.internal;
 
 import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_PERMISSION_DENIED;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
@@ -64,6 +68,7 @@ import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
 import com.openexchange.oauth.CallbackRegistry;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.impl.internal.hazelcast.PortableCallbackRegistryFetch;
+import com.openexchange.oauth.impl.internal.hazelcast.PortableMultipleCallbackRegistryFetch;
 import com.openexchange.oauth.impl.services.Services;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -128,15 +133,32 @@ public class CallbackRegistryImpl implements CustomRedirectURLDetermination, Run
 
     @Override
     public String getURL(final HttpServletRequest req) {
+        List<String> remoteLookUps = new ArrayList<String>(2);
+
         String token = req.getParameter("oauth_token");
         if (null != token) {
-            // By OAuth token
-            return getByToken(token);
+            UrlAndStamp urlAndStamp = tokenMap.remove(token);
+            if (null != urlAndStamp) {
+                // Local hit
+                return urlAndStamp.callbackUrl;
+            }
+            remoteLookUps.add(token);
         }
 
         token = req.getParameter("state");
         if (null != token && token.startsWith("__ox")) {
-            return getByToken(token);
+            UrlAndStamp urlAndStamp = tokenMap.remove(token);
+            if (null != urlAndStamp) {
+                // Local hit
+                return urlAndStamp.callbackUrl;
+            }
+            remoteLookUps.add(token);
+        }
+
+        if (false == remoteLookUps.isEmpty()) {
+            // Try remote look-up
+            HazelcastInstance hazelcastInstance = Services.optService(HazelcastInstance.class);
+            return null == hazelcastInstance ? null : tryGetByTokensFromRemote(remoteLookUps, hazelcastInstance);
         }
 
         token = req.getParameter("denied");
@@ -165,7 +187,7 @@ public class CallbackRegistryImpl implements CustomRedirectURLDetermination, Run
 
         // Try remote look-up
         HazelcastInstance hazelcastInstance = Services.optService(HazelcastInstance.class);
-        return null == hazelcastInstance ? null : tryGetByTokenFromRemote(token, hazelcastInstance);
+        return null == hazelcastInstance ? null : tryGetByTokensFromRemote(Collections.singletonList(token), hazelcastInstance);
     }
 
     /**
@@ -202,11 +224,16 @@ public class CallbackRegistryImpl implements CustomRedirectURLDetermination, Run
     /**
      * Tries to obtain the call-back URL associated with given token from remote nodes (if any)
      *
-     * @param token The token to look-up
+     * @param tokens The tokens to look-up
      * @param hazelcastInstance The Hazelcast instance to use
      * @return The remotely looked-up call-back URL or <code>null</code>
      */
-    private String tryGetByTokenFromRemote(String token, HazelcastInstance hazelcastInstance) {
+    private String tryGetByTokensFromRemote(List<String> tokens, HazelcastInstance hazelcastInstance) {
+        int size = tokens.size();
+        if (size <= 0) {
+            return null;
+        }
+
         // Determine other cluster members
         Set<Member> otherMembers = Hazelcasts.getRemoteMembers(hazelcastInstance);
         if (otherMembers.isEmpty()) {
@@ -217,14 +244,16 @@ public class CallbackRegistryImpl implements CustomRedirectURLDetermination, Run
 
             @Override
             public String accept(String callbackUrl) {
+                // "return null == callbackUrl ? null : callbackUrl" is simply:
                 return callbackUrl;
             }
         };
 
         ThreadPoolService threadPool = Services.optService(ThreadPoolService.class);
         IExecutorService executor = hazelcastInstance.getExecutorService("default");
+        Callable<String> remoteTask = size == 1 ? new PortableCallbackRegistryFetch(tokens.get(0)) : new PortableMultipleCallbackRegistryFetch(tokens.toArray(new String[size]));
         try {
-            return Hazelcasts.executeByMembersAndFilter(new PortableCallbackRegistryFetch(token), otherMembers, executor, filter, threadPool.getExecutor());
+            return Hazelcasts.executeByMembersAndFilter(remoteTask, otherMembers, executor, filter, threadPool.getExecutor());
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
             if (cause instanceof RuntimeException) {
