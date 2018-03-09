@@ -360,7 +360,7 @@ public class Check {
             throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(calendarUser.getUri(), I(calendarUser.getEntity()), "");
         }
         try {
-            new InternetAddress(address);
+            new InternetAddress(address).validate();
         } catch (AddressException e) {
             throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(e, calendarUser.getUri(), I(calendarUser.getEntity()), "");
         }
