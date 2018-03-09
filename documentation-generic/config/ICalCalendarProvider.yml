@@ -1,6 +1,6 @@
 feature_name: ICal Calendar Provider
 properties:
-    - key: com.openexchange.chronos.provider.ical.refreshInterval
+    - key: com.openexchange.calendar.ical.refreshInterval
       description: |
         Defines the default refresh interval of the calendar feeds.
       defaultValue: 10080
@@ -8,10 +8,21 @@ properties:
       reloadable: true
       configcascadeAware: true
       related: 
-      file: chronos.properties
+      file: calendar.properties
       packageName: open-xchange-core
-      tags: ["Chronos", "Calendar", "ICal Calendar Provider"]
-    - key: com.openexchange.chronos.provider.ical.blacklistedHosts
+      tags: ["Calendar", "ICal Calendar Provider"]
+    - key: com.openexchange.calendar.ical.retryAfterErrorInterval
+      description: |
+        Defines the default timeout interval (in seconds) for contacting the external resource after an error occurred.
+      defaultValue: 3600
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar", "ICal Calendar Provider"]
+    - key: com.openexchange.calendar.ical.blacklistedHosts
       description: |
         Defines hosts that are blacklisted which means that they are not allowed to be accessed.
       defaultValue: 127.0.0.1-127.255.255.255,localhost
@@ -19,10 +30,10 @@ properties:
       reloadable: true
       configcascadeAware: true
       related: 
-      file: chronos.properties
+      file: calendar.properties
       packageName: open-xchange-core
-      tags: ["Chronos", "Calendar", "ICal Calendar Provider"]
-    - key: com.openexchange.chronos.provider.ical.schemes
+      tags: ["Calendar", "ICal Calendar Provider"]
+    - key: com.openexchange.calendar.ical.schemes
       description: |
         Defines schemes that are allowed to access a feed. All given schemes have to support port 80 or 443.
       defaultValue: http, https, webcal
@@ -30,10 +41,10 @@ properties:
       reloadable: true
       configcascadeAware: true
       related: 
-      file: chronos.properties
+      file: calendar.properties
       packageName: open-xchange-core
-      tags: ["Chronos", "Calendar", "ICal Calendar Provider"]
-    - key: com.openexchange.chronos.provider.ical.maxFileSize
+      tags: ["Calendar", "ICal Calendar Provider"]
+    - key: com.openexchange.calendar.ical.maxFileSize
       description: |
         Defines the maximum size of an ICal file that will be allowed for processing. Feeds that exceed this limit cannot be subscribed.
       defaultValue: 5MB
@@ -41,10 +52,10 @@ properties:
       reloadable: true
       configcascadeAware: true
       related: 
-      file: chronos.properties
+      file: calendar.properties
       packageName: open-xchange-core
-      tags: ["Chronos", "Calendar", "ICal Calendar Provider"]
-    - key: com.openexchange.chronos.provider.ical.maxConnections
+      tags: ["Calendar", "ICal Calendar Provider"]
+    - key: com.openexchange.calendar.ical.maxConnections
       description: |
         Defines the maximum possible number of connections used to access the calendar feed.
       defaultValue: 1000
@@ -52,10 +63,10 @@ properties:
       reloadable: true
       configcascadeAware: true
       related: 
-      file: chronos.properties
+      file: calendar.properties
       packageName: open-xchange-core
-      tags: ["Chronos", "Calendar", "ICal Calendar Provider"]
-    - key: com.openexchange.chronos.provider.ical.maxConnectionsPerRoute
+      tags: ["Calendar", "ICal Calendar Provider"]
+    - key: com.openexchange.calendar.ical.maxConnectionsPerRoute
       description: |
         Defines the maximum possible number of connections per host used to access the calendar feed.
       defaultValue: 100
@@ -63,10 +74,10 @@ properties:
       reloadable: true
       configcascadeAware: true
       related: 
-      file: chronos.properties
+      file: calendar.properties
       packageName: open-xchange-core
-      tags: ["Chronos", "Calendar", "ICal Calendar Provider"]
-    - key: com.openexchange.chronos.provider.ical.connectionTimeout
+      tags: ["Calendar", "ICal Calendar Provider"]
+    - key: com.openexchange.calendar.ical.connectionTimeout
       description: |
         Defines the connection timeout.
       defaultValue: 5000
@@ -74,10 +85,10 @@ properties:
       reloadable: true
       configcascadeAware: true
       related: 
-      file: chronos.properties
+      file: calendar.properties
       packageName: open-xchange-core
-      tags: ["Chronos", "Calendar", "ICal Calendar Provider"]
-    - key: com.openexchange.chronos.provider.ical.socketReadTimeout
+      tags: ["Calendar", "ICal Calendar Provider"]
+    - key: com.openexchange.calendar.ical.socketReadTimeout
       description: |
         Defines the timeout on waiting to read data
       defaultValue: 30000
@@ -85,7 +96,7 @@ properties:
       reloadable: true
       configcascadeAware: true
       related: 
-      file: chronos.properties
+      file: calendar.properties
       packageName: open-xchange-core
-      tags: ["Chronos", "Calendar", "ICal Calendar Provider"]
+      tags: ["Calendar", "ICal Calendar Provider"]
       

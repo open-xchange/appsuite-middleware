@@ -8,9 +8,9 @@ properties:
       reloadable: true
       configcascadeAware: true
       related: 
-      file: chronos.properties
-      packageName: open-xchange-core
-      tags: ["Chronos", "Calendar", "SchedJoules"]
+      file: schedjoules.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar", "SchedJoules"]
     - key: com.openexchange.calendar.schedjoules.itemBlacklist
       description: |
         Defines a comma separated blacklist for itemIds of SchedJoules calendars and pages that should be hidden from the end user.
@@ -19,6 +19,17 @@ properties:
       reloadable: true
       configcascadeAware: false
       related: 
-      file: chronos.properties
-      packageName: open-xchange-core
-      tags: ["Chronos", "Calendar", "SchedJoules"]
+      file: schedjoules.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar", "SchedJoules"]
+    - key: com.openexchange.calendar.schedjoules.refreshInterval
+      description: |
+        The refresh interval of subscriptions in milliseconds.
+      defaultValue: 604800000
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: schedjoules.properties
+      packageName: open-xchange-subscribe
+      tags: ["Calendar", "SchedJoules"]

@@ -82,6 +82,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.testing.httpclient.invoker.ApiException;
 import com.openexchange.testing.httpclient.models.CalendarAccountProbeData;
 import com.openexchange.testing.httpclient.models.CalendarAccountProbeDataComOpenexchangeCalendarConfig;
+import com.openexchange.testing.httpclient.models.CalendarAccountProbeDataComOpenexchangeCalendarExtendedProperties;
 import com.openexchange.testing.httpclient.models.CalendarAccountProbeResponse;
 import com.openexchange.testing.httpclient.models.ChronosFolderBody;
 import com.openexchange.testing.httpclient.models.EventData;
@@ -132,7 +133,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         CalendarAccountProbeDataComOpenexchangeCalendarConfig config = new CalendarAccountProbeDataComOpenexchangeCalendarConfig();
         config.setUri(externalUri);
         data.setComOpenexchangeCalendarConfig(config);
-        data.setComOpenexchangeCalendarExtendedProperties(new FolderDataComOpenexchangeCalendarExtendedProperties());
+        data.setComOpenexchangeCalendarExtendedProperties(new CalendarAccountProbeDataComOpenexchangeCalendarExtendedProperties());
 
         CalendarAccountProbeResponse probe = defaultUserApi.getChronosApi().probe(defaultUserApi.getSession(), data);
 
@@ -151,7 +152,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         CalendarAccountProbeDataComOpenexchangeCalendarConfig config = new CalendarAccountProbeDataComOpenexchangeCalendarConfig();
         config.setUri(externalUri);
         data.setComOpenexchangeCalendarConfig(config);
-        data.setComOpenexchangeCalendarExtendedProperties(new FolderDataComOpenexchangeCalendarExtendedProperties());
+        data.setComOpenexchangeCalendarExtendedProperties(new CalendarAccountProbeDataComOpenexchangeCalendarExtendedProperties());
 
         CalendarAccountProbeResponse probe = defaultUserApi.getChronosApi().probe(defaultUserApi.getSession(), data);
 
@@ -172,7 +173,7 @@ public class BasicICalCalendarProviderTest extends AbstractExternalProviderChron
         data.setComOpenexchangeCalendarConfig(config);
         String title = "The awesome custom name!";
         data.setTitle(title);
-        FolderDataComOpenexchangeCalendarExtendedProperties comOpenexchangeCalendarExtendedProperties = new FolderDataComOpenexchangeCalendarExtendedProperties();
+        CalendarAccountProbeDataComOpenexchangeCalendarExtendedProperties comOpenexchangeCalendarExtendedProperties = new CalendarAccountProbeDataComOpenexchangeCalendarExtendedProperties();
         FolderDataComOpenexchangeCalendarExtendedPropertiesDescription description = new FolderDataComOpenexchangeCalendarExtendedPropertiesDescription();
         description.setValue("My custom description");
         comOpenexchangeCalendarExtendedProperties.setDescription(description);
