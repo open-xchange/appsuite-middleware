@@ -50,6 +50,7 @@
 package com.openexchange.chronos.itip.generators.changes;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -74,7 +75,11 @@ public class ChangeDescriber {
     }
 
     public List<String> getChanges(Context ctx, Event original, Event update, ITipEventUpdate diff, TypeWrapper wrapper, Locale locale, TimeZone timezone) throws OXException {
-        List<String> changeDescriptions = new ArrayList<String>();
+        if (diff == null) {
+            return Collections.emptyList();
+        }
+
+        List<String> changeDescriptions = new ArrayList<String>(generators.length);
         for (ChangeDescriptionGenerator generator : generators) {
             if (diff.containsAnyChangeOf(generator.getFields())) {
                 List<Sentence> descriptions = generator.getDescriptions(ctx, original, update, diff, locale, timezone);
@@ -83,7 +88,6 @@ public class ChangeDescriber {
                 }
             }
         }
-
         return changeDescriptions;
     }
 }
