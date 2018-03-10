@@ -74,8 +74,6 @@ import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
-import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.Collections;
 import com.openexchange.tools.exceptions.ExceptionUtils;
@@ -159,8 +157,7 @@ public final class TaskIterator2 implements TaskIterator, Runnable {
         this.additionalAttributes = Collections.toArray(tmp2);
         this.type = type;
         this.con = con;
-        final ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
-        runner = threadPool.submit(ThreadPools.trackableTask(this));
+        runner = ThreadPools.submitElseExecute(ThreadPools.trackableTask(this));
     }
 
     private void modifyAdditionalAttributes(final List<Integer> additional) {

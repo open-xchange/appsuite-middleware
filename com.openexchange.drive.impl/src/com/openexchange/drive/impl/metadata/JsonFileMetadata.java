@@ -243,6 +243,10 @@ public class JsonFileMetadata extends AbstractJsonMetadata {
                     if (session.hasCapability("spreadsheet")) {
                         jumpActions.add("edit");
                     }
+                } else if (mimeType.matches("(?i)^application\\/.*(ms-powerpoint|mspowerpoint|openxmlformats-officedocument.presentationml).*$")) {
+                    if (session.hasCapability("presentation")) {
+                        jumpActions.add("edit");
+                    }
                 } else if (mimeType.matches("(?i)^application\\/.*(ms-word|msword|openxmlformats-officedocument.wordprocessingml).*$")) {
                     if (session.hasCapability("text")) {
                         jumpActions.add("edit");

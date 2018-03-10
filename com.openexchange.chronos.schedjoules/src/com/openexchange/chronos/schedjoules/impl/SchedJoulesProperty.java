@@ -69,12 +69,14 @@ public enum SchedJoulesProperty implements Property {
     refreshInterval(TimeUnit.DAYS.toMillis(7)),
     /**
      * The host to access schedjoules.
-     * Defaults to 'api.schedjoules.com'
+     * Defaults to 'api.schedjoules.com'<br>
+     * <b>Note:</b> this property should explicitly not be published as the endpoint is fix
      */
     host("api.schedjoules.com"),
     /**
      * The scheme used to contact the SchedJoules API.
-     * Defaults to 'https'
+     * Defaults to 'https'<br>
+     * <b>Note:</b> this property should explicitly not be published as the endpoint is fix
      */
     scheme("https"),
     /**

@@ -56,6 +56,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 import javax.activation.DataHandler;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
@@ -69,6 +70,8 @@ import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ExtendedProperties;
+import com.openexchange.chronos.ExtendedProperty;
 import com.openexchange.chronos.ical.CalendarExport;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.itip.ITipMethod;
@@ -104,6 +107,8 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  */
 public class DefaultMailSenderService implements MailSenderService {
+
+    private static final String COMMENT = "COMMENT";
 
     private static final String MIXED = "mixed";
 
@@ -338,12 +343,15 @@ public class DefaultMailSenderService implements MailSenderService {
         return multipart;
     }
 
-    private BodyPart generateIcalPart(NotificationMail mail, String charset, Session session) throws MessagingException, OXException {
+    private MimeBodyPart generateIcal(NotificationMail mail, String charset, Session session, boolean checkASCII, Consumer<ContentType> processContent) throws MessagingException, OXException {
         MimeBodyPart icalPart = new MimeBodyPart();
+        /*
+         * Compose Content-Type
+         */
         final ContentType ct = new ContentType();
-        ct.setPrimaryType("text");
-        ct.setSubType("calendar");
+        processContent.accept(ct);
         String method = null;
+
         if (mail.getMessage().getMethod() != ITipMethod.NO_METHOD) {
             method = mail.getMessage().getMethod().getKeyword().toUpperCase(Locale.US);
             ct.setParameter("method", method);
@@ -359,6 +367,16 @@ public class DefaultMailSenderService implements MailSenderService {
         }
         Event event = mail.getMessage().getEvent();
         if (null != event) {
+            ITipMethod iTipMethod = mail.getMessage().getMethod();
+            if (null != iTipMethod && ITipMethod.REPLY.equals(iTipMethod) && Strings.isNotEmpty(mail.getMessage().getEvent().getAttendees().get(0).getComment())) {
+                // Add attendee comment as event comment
+                ExtendedProperties props = event.getExtendedProperties();
+                if (null == props) {
+                    props = new ExtendedProperties();
+                }
+                props.add(new ExtendedProperty(COMMENT, mail.getMessage().getEvent().getAttendees().get(0).getComment()));
+                event.setExtendedProperties(props);
+            }
             export.add(event);
         }
         for (Event excpetion : mail.getMessage().exceptions()) {
@@ -386,12 +404,24 @@ public class DefaultMailSenderService implements MailSenderService {
         final String contentType = ct.toString();
         icalPart.setDataHandler(new DataHandler(new MessageDataSource(icalFile, contentType)));
         icalPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType));
-        icalPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, isAscii ? "7bit" : "quoted-printable");
+        if (checkASCII) {
+            icalPart.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, isAscii ? "7bit" : "quoted-printable");
+        }
         return icalPart;
     }
 
+    private BodyPart generateIcalPart(NotificationMail mail, String charset, Session session) throws MessagingException, OXException {
+        return generateIcal(mail, charset, session, true, new Consumer<ContentType>() {
+
+            @Override
+            public void accept(ContentType ct) {
+                ct.setPrimaryType("text");
+                ct.setSubType("calendar");
+            }
+        });
+    }
+
     private BodyPart generateIcalAttachmentPart(NotificationMail mail, String charset, Session session) throws MessagingException, OXException {
-        MimeBodyPart icalPart = new MimeBodyPart();
         /*
          * Determine file name
          */
@@ -407,54 +437,15 @@ public class DefaultMailSenderService implements MailSenderService {
                 fileName = "response.ics";
                 break;
         }
-        /*
-         * Compose Content-Type
-         */
-        final ContentType ct = new ContentType();
-        ct.setPrimaryType("application");
-        ct.setSubType("ics");
-        ct.setNameParameter(fileName);
-        String method = null;
+        MimeBodyPart icalPart = generateIcal(mail, charset, session, false, new Consumer<ContentType>() {
 
-        if (mail.getMessage().getMethod() != ITipMethod.NO_METHOD) {
-            method = mail.getMessage().getMethod().getKeyword().toUpperCase(Locale.US);
-            ct.setParameter("method", method);
-        }
-
-        /*
-         * Generate ICal text
-         */
-        CalendarExport export = icalService.exportICal(icalService.initParameters());
-        if (method != null) {
-            export.setMethod(method);
-        }
-        Event event = mail.getMessage().getEvent();
-        if (null != event) {
-            export.add(event);
-        }
-        for (Event excpetion : mail.getMessage().exceptions()) {
-            export.add(excpetion);
-        }
-
-        byte[] icalFile = null;
-        try (InputStream inputStream = export.getClosingStream()) {
-
-            icalFile = Streams.stream2bytes(inputStream);
-
-            List<OXException> warnings = export.getWarnings();
-            if (warnings != null && !warnings.isEmpty()) {
-                for (OXException warning : warnings) {
-                    LOG.warn(warning.getMessage(), warning);
-                }
+            @Override
+            public void accept(ContentType ct) {
+                ct.setPrimaryType("application");
+                ct.setSubType("ics");
+                ct.setNameParameter(fileName);
             }
-        } catch (IOException e) {
-            LOG.debug("Couldn't read input stream.", e);
-            throw new OXException(e);
-        }
-
-        final String contentType = ct.toString();
-        icalPart.setDataHandler(new DataHandler(new MessageDataSource(icalFile, contentType)));
-        icalPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType));
+        });
         /*
          * Content-Disposition & Content-Transfer-Encoding
          */

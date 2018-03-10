@@ -132,6 +132,15 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
         return getAssignment(null, contextId, true);
     }
 
+    /**
+     * Gets the assignment for specified context.
+     *
+     * @param con The (optional) connection to use
+     * @param contextId The context identifier
+     * @param errorOnAbsence <code>true</code> to throw an error in case no such assignment exists; otherwise <code>false</code>
+     * @return The assignment or <code>null</code> (if parameter <code>errorOnAbsence</code> has been set to <code>false</code>)
+     * @throws OXException If loading the assignment fails or no such assignment exists (if parameter <code>errorOnAbsence</code> has been set to <code>true</code>)
+     */
     private AssignmentImpl getAssignment(Connection con, int contextId, boolean errorOnAbsence) throws OXException {
         CacheService myCacheService = this.cacheService;
         Cache myCache = this.cache;
@@ -353,6 +362,10 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
 
     private void deleteAssignmentDB(Connection con, int contextId) throws OXException {
         AssignmentImpl assignment = getAssignment(con, contextId, false);
+        if (null == assignment) {
+            // No such assignment, hence no need for deletion
+            return;
+        }
 
         PreparedStatement stmt = null;
         try {

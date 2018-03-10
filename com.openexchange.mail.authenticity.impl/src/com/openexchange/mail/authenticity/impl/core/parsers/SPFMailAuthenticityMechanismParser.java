@@ -80,7 +80,11 @@ public class SPFMailAuthenticityMechanismParser extends AbstractMailAuthenticity
      */
     @Override
     AuthenticityMechanismResult parseMechanismResult(String value) {
-        return SPFResult.valueOf(value);
+        try {
+            return SPFResult.valueOf(value);
+        } catch (IllegalArgumentException e) {
+            return SPFResult.FAIL;
+        }
     }
 
     /*

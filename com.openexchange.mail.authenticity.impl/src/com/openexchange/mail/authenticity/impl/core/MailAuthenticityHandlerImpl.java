@@ -178,7 +178,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
             AuthenticationResultsValidator validator = getValidator();
             authenticityResult = validator.parseHeaders(headers, from[0], getAllowedAuthServIds(session), session);
         } catch (Exception e) {
-            LOGGER.error("An error occurred during parsing the 'Authentication-Results' header: {}", e.getMessage(), e);
+            LOGGER.error("An error occurred during parsing the '{}' header of mail {} in folder {}", MessageHeaders.HDR_AUTHENTICATION_RESULTS, mailMessage.getMailId(), mailMessage.getFolder(), e);
         }
         mailMessage.setAuthenticityResult(authenticityResult);
         logMetrics(mailMessage.getMessageId(), headers, mailMessage.getAuthenticityResult());
@@ -186,7 +186,7 @@ public class MailAuthenticityHandlerImpl implements MailAuthenticityHandler {
         try {
             checker.check(session, authenticityResult);
         } catch (OXException e) {
-            LOGGER.error("An error occurred while checking custom mail authenticity rules: {}", e.getMessage(), e);
+            LOGGER.error("An error occurred while checking custom mail authenticity rules for mail {} in folder {}.", mailMessage.getMailId(), mailMessage.getFolder(), e);
         }
 
         trustedMailService.handle(session, mailMessage);

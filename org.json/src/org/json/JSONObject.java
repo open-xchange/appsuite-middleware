@@ -1330,14 +1330,14 @@ public class JSONObject extends AbstractJSONValue {
             return STR_NULL;
         }
         if (value instanceof JSONString) {
-            Object o;
+            String o;
             try {
                 o = ((JSONString) value).toJSONString();
             } catch (final Exception e) {
                 throw new JSONException(e);
             }
-            if (o instanceof String) {
-                return (String) o;
+            if (o != null) {
+                return o;
             }
             throw new JSONException("Bad value from toJSONString: " + o);
         }
@@ -1368,9 +1368,9 @@ public class JSONObject extends AbstractJSONValue {
         }
         try {
             if (value instanceof JSONString) {
-                final Object o = ((JSONString) value).toJSONString();
-                if (o instanceof String) {
-                    return (String) o;
+                final String result = ((JSONString) value).toJSONString();
+                if (result != null) {
+                    return result;
                 }
             }
         } catch (final Exception e) {

@@ -145,7 +145,7 @@ public class SearchPerformer extends AbstractQueryPerformer {
         SearchOptions sortOptions = new SearchOptions(session);
         List<Event> foundEvents = storage.getEventStorage().searchEvents(buildSearchTerm(folders, queries), filters, sortOptions, fields);
         foundEvents = storage.getUtilities().loadAdditionalEventData(-1, foundEvents, fields);
-        Map<String, List<Event>> eventsPerFolderId = getEventsPerFolderId(foundEvents, folders, fields);
+        Map<String, List<Event>> eventsPerFolderId = getEventsPerFolderId(foundEvents, folders);
         /*
          * build & return events result per folder
          */
@@ -156,23 +156,23 @@ public class SearchPerformer extends AbstractQueryPerformer {
         return resultsPerFolderId;
     }
 
-    private Map<String, List<Event>> getEventsPerFolderId(List<Event> events, List<CalendarFolder> folders, EventField[] fields) throws OXException {
+    private Map<String, List<Event>> getEventsPerFolderId(List<Event> events, List<CalendarFolder> folders) throws OXException {
         Map<String, List<Event>> eventsPerFolderId = new HashMap<String, List<Event>>();
         for (Event event : events) {
             List<CalendarFolder> foldersForEvent = getFoldersForEvent(folders, event);
             if (foldersForEvent.isEmpty() && null != event.getFolderId()) {
                 CalendarFolder invisibleFolder = Utils.getFolder(session, event.getFolderId(), false);
                 if (Utils.isVisible(invisibleFolder, event)) {
-                    List<Event> processedEvents = postProcess(Collections.singletonList(event), invisibleFolder, true, fields);
+                    List<Event> processedEvents = new EventPostProcessor(session, storage, true).process(event, invisibleFolder).getEvents();
                     com.openexchange.tools.arrays.Collections.put(eventsPerFolderId, invisibleFolder.getId(), processedEvents);
                 }
             } else if (1 == foldersForEvent.size()) {
-                List<Event> processedEvents = postProcess(Collections.singletonList(event), foldersForEvent.get(0), true, fields);
+                List<Event> processedEvents = new EventPostProcessor(session, storage, true).process(event, foldersForEvent.get(0)).getEvents();
                 com.openexchange.tools.arrays.Collections.put(eventsPerFolderId, foldersForEvent.get(0).getId(), processedEvents);
             } else {
                 for (CalendarFolder folder : foldersForEvent) {
                     Event copiedEvent = EventMapper.getInstance().copy(event, new Event(), (EventField[]) null);
-                    List<Event> processedEvents = postProcess(Collections.singletonList(copiedEvent), folder, true, fields);
+                    List<Event> processedEvents = new EventPostProcessor(session, storage, true).process(copiedEvent, folder).getEvents();
                     com.openexchange.tools.arrays.Collections.put(eventsPerFolderId, folder.getId(), processedEvents);
                 }
             }

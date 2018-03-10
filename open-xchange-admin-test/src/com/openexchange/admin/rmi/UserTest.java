@@ -83,7 +83,6 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
 import com.openexchange.java.util.TimeZones;
 
@@ -101,12 +100,12 @@ public class UserTest extends AbstractTest {
 
     // global setting for stored password
     protected final String pass = "foo-user-pass";
-  
+
     protected OXUserInterface getUserClient() throws Exception {
         return (OXUserInterface) Naming.lookup(getRMIHostUrl() + OXUserInterface.RMI_NAME);
     }
 
-    private List<User> toDeleteUsers = new ArrayList<User>();
+    private final List<User> toDeleteUsers = new ArrayList<User>();
 
     @After
     public void tearDown() throws Exception {
@@ -784,7 +783,7 @@ public class UserTest extends AbstractTest {
 
     @Test
     public void testChangeAliasTooLong() throws Exception {
-        // Try to change alias with too long name (Bug 52763) 
+        // Try to change alias with too long name (Bug 52763)
 
         // get context to create an user
         final Credentials cred = DummyCredentials();
@@ -1116,11 +1115,11 @@ public class UserTest extends AbstractTest {
         notallowed.add("setFilestoreId");
         notallowed.add("setFilestoreOwner");
         notallowed.add("setFilestore_name");
-        
+
         notallowed.add("setPrimaryAccountName");
         notallowed.add("setDriveFolderMode");
-        
-        
+
+
         // loop through methods and change each attribute per single call and load and compare
         MethodMapObject[] meth_objects = getSetableAttributeMethods(usr.getClass());
 
@@ -1819,8 +1818,8 @@ public class UserTest extends AbstractTest {
         assertEquals("Userfield18 not equal", a.getUserfield18(), b.getUserfield18());
         assertEquals("Userfield19 not equal", a.getUserfield19(), b.getUserfield19());
         assertEquals("Userfield20 not equal", a.getUserfield20(), b.getUserfield20());
-        final Hashtable<String, OXCommonExtension> aexts = a.getAllExtensionsAsHash();
-        final Hashtable<String, OXCommonExtension> bexts = b.getAllExtensionsAsHash();
+        final Hashtable<String, OXCommonExtensionInterface> aexts = a.getAllExtensionsAsHash();
+        final Hashtable<String, OXCommonExtensionInterface> bexts = b.getAllExtensionsAsHash();
         if (aexts.size() == bexts.size()) {
             assertTrue("Extensions not equal: " + aexts.toString() + ",\n" + bexts.toString(), aexts.values().containsAll(bexts.values()));
             for (int i = 0; i < aexts.size(); i++) {

@@ -691,7 +691,7 @@ public class MimeMessagingPart implements MessagingPart {
                     final MimeContentType mct = new MimeContentType(type);
                     MessageUtility.setText(((StringContent) content).getData().toString(), mct.getCharsetParameter(), mct.getSubType(), part);
                     // part.setText(((StringContent) content).getData().toString(), mct.getCharsetParameter(), mct.getSubType());
-                } else if (content instanceof SimpleContent) {
+                } else {
                     final Object data = ((SimpleContent<?>) content).getData();
                     if (data instanceof String) {
                         try {
@@ -702,8 +702,6 @@ public class MimeMessagingPart implements MessagingPart {
                     } else {
                         part.setContent(data, type);
                     }
-                } else {
-                    throw MessagingExceptionCodes.UNKNOWN_MESSAGING_CONTENT.create(content.getClass().getName());
                 }
                 part.setHeader(H_CONTENT_TYPE.toString(), type);
             } else {

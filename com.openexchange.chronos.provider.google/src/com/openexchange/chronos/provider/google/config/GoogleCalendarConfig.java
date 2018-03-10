@@ -62,14 +62,14 @@ import com.openexchange.session.Session;
  * @since v7.10.0
  */
 public class GoogleCalendarConfig {
-    
+
     private static final Long REFRESH_INTERVAL = new Long(10);
-    
+
     private static final Long REQUEST_TIMEOUT = new Long(1800);
 
-    private static final Property REFRESH_INTERVAL_PROP = DefaultProperty.valueOf("com.openexchange.chronos.provider.google.refreshInterval", REFRESH_INTERVAL);
+    private static final Property REFRESH_INTERVAL_PROP = DefaultProperty.valueOf("com.openexchange.calendar.provider.google.refreshInterval", REFRESH_INTERVAL);
 
-    private static final Property REQUEST_TIMEOUT_PROP = DefaultProperty.valueOf("com.openexchange.chronos.provider.google.requestTimeout", REQUEST_TIMEOUT);
+    private static final Property REQUEST_TIMEOUT_PROP = DefaultProperty.valueOf("com.openexchange.calendar.provider.google.requestTimeout", REQUEST_TIMEOUT);
 
     public static long getResfrehInterval(Session session) {
 
