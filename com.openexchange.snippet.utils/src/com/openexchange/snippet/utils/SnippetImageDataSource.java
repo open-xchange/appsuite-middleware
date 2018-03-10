@@ -49,9 +49,12 @@
 
 package com.openexchange.snippet.utils;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import com.drew.imaging.FileType;
+import com.drew.imaging.FileTypeDetector;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.capabilities.CapabilityService;
@@ -65,10 +68,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
+import com.openexchange.java.Reference;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceExceptionCode;
@@ -84,10 +88,14 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
  * {@link SnippetImageDataSource}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SnippetImageDataSource implements ImageDataSource {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SnippetImageDataSource.class);
+
+    private static final String MIMETYPE_IMAGE_UNKNOWN = "image/unknown";
+    private static final String MIMETYPE_APPLICATION_OCTETSTREAM = "application/octet-stream";
 
     private static final SnippetImageDataSource INSTANCE = new SnippetImageDataSource();
 
@@ -108,14 +116,20 @@ public class SnippetImageDataSource implements ImageDataSource {
         return INSTANCE;
     }
 
+    // ---------------------------------------------------------------------------------------------------------------------------
+
     private volatile ServiceListing<SnippetService> snippetServices;
+    private final ContentType unknownContentType;
 
     /**
      * Initializes a new {@link SnippetImageDataSource}.
      */
     private SnippetImageDataSource() {
         super();
-
+        ContentType ct = new ContentType();
+        ct.setPrimaryType("image");
+        ct.setSubType("unknown");
+        unknownContentType = ct;
     }
 
     /**
@@ -193,13 +207,19 @@ public class SnippetImageDataSource implements ImageDataSource {
                     ThresholdFileHolder sink = null;
                     boolean closeSink = true;
                     try {
+                        Reference<FileType> fileTypeRef = new Reference<>();
+                        ContentType contentType = determineContentType(attachment, fileTypeRef);
+                        String fileName = determineFileName(attachment, contentType, fileTypeRef, false);
+
                         sink = new ThresholdFileHolder();
                         sink.write(attachment.getInputStream());
 
                         properties.put(DataProperties.PROPERTY_ID, id);
-                        properties.put(DataProperties.PROPERTY_CONTENT_TYPE, attachment.getContentType());
+                        properties.put(DataProperties.PROPERTY_CONTENT_TYPE, contentType.toString());
                         properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(sink.getLength()));
-                        properties.put(DataProperties.PROPERTY_NAME, determineFileName(attachment));
+                        if (null != fileName) {
+                            properties.put(DataProperties.PROPERTY_NAME, fileName);
+                        }
 
                         InputStream in = sink.getClosingStream();
                         closeSink = false;
@@ -222,13 +242,48 @@ public class SnippetImageDataSource implements ImageDataSource {
         return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
     }
 
-    private String determineFileName(Attachment attachment) {
+    private ContentType determineContentType(Attachment attachment, Reference<FileType> fileTypeRef) throws IOException {
+        try {
+            String contentType = attachment.getContentType();
+            ContentType ct;
+            if (Strings.isNotEmpty(contentType) && false == (ct = new ContentType(contentType)).startsWith(MIMETYPE_APPLICATION_OCTETSTREAM)) {
+                return ct;
+            }
+
+            FileType fileType = detectFileType(attachment);
+            fileTypeRef.setValue(fileType);
+            if (FileType.Unknown == fileType) {
+                return unknownContentType;
+            }
+
+            String mimeType = fileType.getMimeType();
+            return Strings.isEmpty(mimeType) ? unknownContentType : new ContentType(mimeType);
+        } catch (OXException e) {
+            // Parsing MIME type failed
+            return unknownContentType;
+        }
+    }
+
+    private FileType detectFileType(Attachment attachment) throws IOException {
+        InputStream in = null;
+        BufferedInputStream bufferedInputStream = null;
+        try {
+            in = attachment.getInputStream();
+            bufferedInputStream = in instanceof BufferedInputStream ? (BufferedInputStream) in : new BufferedInputStream(in, 64);
+            FileType fileType = FileTypeDetector.detectFileType(bufferedInputStream);
+            return null == fileType ? FileType.Unknown : fileType;
+        } finally {
+            Streams.close(bufferedInputStream, in);
+        }
+    }
+
+    private String determineFileName(Attachment attachment, ContentType contentType, Reference<FileType> fileTypeRef, boolean createIfMissing) throws IOException {
         String str = attachment.getContentDisposition();
         if (null != str) {
             try {
                 ContentDisposition cd = new ContentDisposition(str);
                 String fileName = cd.getFilenameParameter();
-                if (null != fileName) {
+                if (Strings.isNotEmpty(fileName) && !"null".equalsIgnoreCase(fileName)) {
                     return fileName;
                 }
             } catch (OXException e) {
@@ -236,21 +291,28 @@ public class SnippetImageDataSource implements ImageDataSource {
             }
         }
 
-        str = attachment.getContentType();
-        if (null != str) {
-            try {
-                ContentType ct = new ContentType(str);
-                return ct.getNameParameter();
-            } catch (OXException e) {
-                // Invalid Content-Disposition
-            }
-
-            int pos = str.indexOf(';');
-            String ext = MimeType2ExtMap.getFileExtension((pos > 0 ? str.substring(0, pos) : str).trim());
-            return  "file." + ext;
+        String fileName = contentType.getNameParameter();
+        if (Strings.isNotEmpty(fileName) && !"null".equalsIgnoreCase(fileName)) {
+            return fileName;
         }
 
-        return "file.dat";
+        if (false == createIfMissing) {
+            return null;
+        }
+
+        // Create a file name...
+        FileType fileType = fileTypeRef.getValue();
+        if (null == fileType) {
+            fileType = detectFileType(attachment);
+            fileTypeRef.setValue(fileType);
+        }
+
+        String commonExtension = fileType.getCommonExtension();
+        if (Strings.isEmpty(commonExtension)) {
+            return "image.dat";
+        }
+
+        return commonExtension.charAt(0) == '.' ? "image" + commonExtension : "image." + commonExtension;
     }
 
     @Override
