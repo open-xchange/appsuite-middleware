@@ -119,7 +119,6 @@ public class DocumentPatchAction extends AbstractFileAction {
                     throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(RdiffService.class.getSimpleName());
                 }
                 rdiff.rebuildFile(baseFile, requestStream, patchOut);
-                patchOut.flush();
                 dropFirstFrom(closeables);
                 dropFirstFrom(closeables);
             }
