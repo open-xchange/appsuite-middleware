@@ -109,7 +109,11 @@ public class DocumentPatchAction extends AbstractFileAction {
             patchedFile = newTempFile();
             {
                 final OutputStream patchOut = gen(new FileOutputStream(patchedFile), closeables);
-                final InputStream requestStream = gen(request.getUploadStream(), closeables);
+                InputStream uploadStream = request.getUploadStream();
+                if (uploadStream == null) {
+                    throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+                }
+                final InputStream requestStream = gen(uploadStream, closeables);
                 final RdiffService rdiff = Services.getRdiffService();
                 if (rdiff == null) {
                     throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(RdiffService.class.getSimpleName());
