@@ -138,23 +138,26 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
      */
     public CalDAVFolderCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder, int order) throws OXException {
         super(factory, url, folder);
+        if (null == folder) {
+            throw new OXException(new IllegalArgumentException("folder must not be null"));
+        }
         this.factory = factory;
-        this.folderID = null != folder ? Tools.parse(folder.getID()) : 0;
+        this.folderID = Tools.parse(folder.getID());
         this.minDateTime = new MinDateTime(factory);
         this.maxDateTime = new MaxDateTime(factory);
         includeProperties(
             new CurrentUserPrivilegeSet(folder.getOwnPermission()),
-            new SupportedReportSet(), 
-            minDateTime, 
+            new SupportedReportSet(),
+            minDateTime,
             maxDateTime,
             new Invite(factory, this),
-            new AllowedSharingModes(factory.getSession()), 
-            new CalendarOwner(this), 
+            new AllowedSharingModes(factory.getSession()),
+            new CalendarOwner(this),
             new Organizer(this),
-            new ScheduleDefaultCalendarURL(factory), 
-            new ScheduleDefaultTasksURL(factory), 
+            new ScheduleDefaultCalendarURL(factory),
+            new ScheduleDefaultTasksURL(factory),
             new CalendarColor(this),
-            new ManagedAttachmentsServerURL(), 
+            new ManagedAttachmentsServerURL(),
             new CalendarTimezone(factory, this)
         );
         if (NO_ORDER != order) {
