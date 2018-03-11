@@ -94,7 +94,6 @@ public class SnippetImageDataSource implements ImageDataSource {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SnippetImageDataSource.class);
 
-    private static final String MIMETYPE_IMAGE_UNKNOWN = "image/unknown";
     private static final String MIMETYPE_APPLICATION_OCTETSTREAM = "application/octet-stream";
 
     private static final SnippetImageDataSource INSTANCE = new SnippetImageDataSource();
@@ -200,7 +199,6 @@ public class SnippetImageDataSource implements ImageDataSource {
         Snippet snippet = ssManagement.getSnippet(id);
         List<Attachment> attachments = snippet.getAttachments();
         if (!attachments.isEmpty()) {
-
             for (Attachment attachment : attachments) {
                 String contentId = attachment.getContentId();
                 if (MimeMessageUtility.equalsCID(cid, contentId) || MimeMessageUtility.equalsCID(cid, attachment.getId())) {
@@ -235,9 +233,9 @@ public class SnippetImageDataSource implements ImageDataSource {
             }
         }
 
-        LOG.warn("Requested a non-existing image in snippet: snippet-id={} context={} session-user={}\nReturning an empty image as fallback.", id, session.getContextId(), session.getUserId());
+        LOG.warn("Requested a non-existing image in snippet {} for user {} in context {}. Returning an empty image as fallback.", id, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
         properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
-        properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
+        properties.put(DataProperties.PROPERTY_SIZE, Integer.toString(0));
 
         return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
     }
