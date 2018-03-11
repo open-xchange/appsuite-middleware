@@ -149,7 +149,9 @@ final class SessionData {
         randoms.clear();
 
         longTermUserGuardian.clear();
-        longTermList.clear();
+        synchronized (longTermList) {
+            longTermList.clear();
+        }
     }
 
     /**
@@ -168,22 +170,27 @@ final class SessionData {
         if (autoLogin && false == removedSessions.isEmpty()) {
             List<SessionControl> transientSessions = null;
 
-            SessionMap first = longTermList.get(0);
-            for (Iterator<SessionControl> it = removedSessions.iterator(); it.hasNext();) {
-                final SessionControl control = it.next();
-                final SessionImpl session = control.getSession();
-                if (false == session.isTransient()) {
-                    // A regular, non-transient session
-                    first.putBySessionId(session.getSessionID(), control);
-                    longTermUserGuardian.add(session.getUserId(), session.getContextId());
-                } else {
-                    // A transient session -- do not move to long-term container
-                    it.remove();
-                    if (null == transientSessions) {
-                        transientSessions = new LinkedList<SessionControl>();
+            try {
+                SessionMap first = longTermList.get(0);
+                for (Iterator<SessionControl> it = removedSessions.iterator(); it.hasNext();) {
+                    final SessionControl control = it.next();
+                    final SessionImpl session = control.getSession();
+                    if (false == session.isTransient()) {
+                        // A regular, non-transient session
+                        first.putBySessionId(session.getSessionID(), control);
+                        longTermUserGuardian.add(session.getUserId(), session.getContextId());
+                    } else {
+                        // A transient session -- do not move to long-term container
+                        it.remove();
+                        if (null == transientSessions) {
+                            transientSessions = new LinkedList<SessionControl>();
+                        }
+                        transientSessions.add(control);
                     }
-                    transientSessions.add(control);
                 }
+            } catch (IndexOutOfBoundsException e) {
+                // About to shut-down
+                LOG.error("First long-term session container does not exist. Likely SessionD is shutting down...", e);
             }
 
             if (null != transientSessions) {
