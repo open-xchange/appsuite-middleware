@@ -142,6 +142,9 @@ public class CalendarFolderStorage implements SubfolderListingFolderStorage {
                     return true;
                 }
                 TransactionManager transactionManager = TransactionManager.getTransactionManager(parameters);
+                if (null == transactionManager) {
+                    return true;
+                }
                 calendarAccess.set(Connection.class.getName(), transactionManager.getConnection());
                 transactionManager.transactionStarted(this);
             }
