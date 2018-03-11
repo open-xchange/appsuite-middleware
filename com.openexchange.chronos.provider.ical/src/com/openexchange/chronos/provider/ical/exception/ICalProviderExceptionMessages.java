@@ -52,7 +52,7 @@ package com.openexchange.chronos.provider.ical.exception;
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * 
+ *
  * {@link ICalProviderExceptionMessages}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -81,6 +81,14 @@ public class ICalProviderExceptionMessages implements LocalizableStrings {
     public static final String REMOTE_INTERNAL_SERVER_ERROR_MSG = "An internal server error occurred on the feed provider side. There is nothing we can do about it.";
 
     public static final String REMOTE_SERVER_ERROR_MSG = "A remote server error occurred on the feed provider side. There is nothing we can do about it.";
+
+    public static final String CREDENTIALS_REQUIRED_MSG = "Access to this calendar is restricted. Please enter your credentials and try again.";
+
+    public static final String CREDENTIALS_WRONG_MSG = "Authentication failed. Please enter your credentials and try again.";
+
+    public static final String PASSWORD_REQUIRED_MSG = "Access to this calendar is restricted. Please enter your password and try again.";
+
+    public static final String PASSWORD_WRONG_MSG = "Authentication failed. Please enter your password and try again.";
 
     /**
      * Initializes a new {@link ICalProviderExceptionMessages}.
