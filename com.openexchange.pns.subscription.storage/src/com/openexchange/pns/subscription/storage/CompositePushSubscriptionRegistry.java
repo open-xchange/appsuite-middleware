@@ -193,20 +193,19 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
     @Override
     public boolean unregisterSubscription(PushSubscription subscription) throws OXException {
         PushSubscription removedSubscription = persistentRegistry.removeSubscription(subscription);
-        boolean removed = null != removedSubscription;
-
-        if (removed) {
-            PushSubscription subscriptionToUse = null == removedSubscription ? subscription : removedSubscription;
-            for (PushSubscriptionListener listener : listeners) {
-                try {
-                    listener.removedSubscription(subscriptionToUse);
-                } catch (Exception e) {
-                    LOG.error("Listener {} failed handling performed unregistration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), subscriptionToUse.getTopics(), I(subscriptionToUse.getUserId()), I(subscriptionToUse.getContextId()), e);
-                }
-            }
+        if (null == removedSubscription) {
+            // Nothing removed
+            return false;
         }
 
-        return removed;
+        for (PushSubscriptionListener listener : listeners) {
+            try {
+                listener.removedSubscription(removedSubscription);
+            } catch (Exception e) {
+                LOG.error("Listener {} failed handling performed unregistration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), removedSubscription.getTopics(), I(removedSubscription.getUserId()), I(removedSubscription.getContextId()), e);
+            }
+        }
+        return true;
     }
 
     @Override
