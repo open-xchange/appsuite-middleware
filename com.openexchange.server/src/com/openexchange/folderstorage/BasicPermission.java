@@ -56,7 +56,7 @@ package com.openexchange.folderstorage;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class BasicPermission implements Permission {
+public class BasicPermission implements Permission, Cloneable {
 
     /**
      * serialVersionUID
@@ -241,7 +241,22 @@ public class BasicPermission implements Permission {
 
     @Override
     public Object clone() {
-        return new BasicPermission(this);
+        try {
+            BasicPermission clone = (BasicPermission) super.clone();
+            clone.entity = getEntity();
+            clone.group = isGroup();
+            clone.system = getSystem();
+            clone.type = getType();
+            clone.legator = getPermissionLegator();
+            clone.admin = isAdmin();
+            clone.folderPermission = getFolderPermission();
+            clone.readPermission = getReadPermission();
+            clone.writePermission = getWritePermission();
+            clone.deletePermission = getDeletePermission();
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new InternalError("Error although Cloneable is implemented");
+        }
     }
 
     @Override
