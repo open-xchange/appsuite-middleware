@@ -67,6 +67,7 @@ import org.jdom2.Document;
 import org.jdom2.JDOMException;
 import com.google.common.net.HttpHeaders;
 import com.openexchange.ajax.AJAXUtility;
+import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
@@ -348,7 +349,7 @@ public abstract class OXServlet extends WebDavServlet {
             }
         }
         if (null == session) {
-            AuthorizationHeader authHeader = AuthorizationHeader.parseSafe(req.getHeader(HttpHeaders.AUTHORIZATION));
+            AuthorizationHeader authHeader = AuthorizationHeader.parseSafe(req.getHeader(Header.AUTH_HEADER));
             if (authHeader == null) {
                 addUnauthorizedHeader(req, resp);
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
@@ -653,7 +654,7 @@ public abstract class OXServlet extends WebDavServlet {
      * @throws OXException If the request contains no valid <code>Authorization</code> header with Basic Auth scheme
      */
     private static LoginRequest parseLogin(final HttpServletRequest req, final Interface face) throws OXException {
-        final String auth = req.getHeader(HttpHeaders.AUTHORIZATION);
+        final String auth = req.getHeader(Header.AUTH_HEADER);
         if (null == auth) {
             LOG.debug("Authorization header missing.");
             throw WebdavExceptionCode.MISSING_HEADER_FIELD.create("Authorization");
