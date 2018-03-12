@@ -66,7 +66,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.glassfish.jersey.client.ClientConfig;
 
 /**
- * 
+ *
  * {@link ExportUserFeedback}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -133,7 +133,11 @@ public class ExportUserFeedback extends AbstractUserFeedback {
 
     private void setFilePath(CommandLine cmd) {
         String pathStr = cmd.getArgs()[0];
-        String normalizedPath = FilenameUtils.normalize(pathStr).replaceFirst("^~", System.getProperty("user.home"));
+        String normalize = FilenameUtils.normalize(pathStr);
+        if(normalize == null) {
+            throw new IllegalArgumentException("Normalized destination file is null!!");
+        }
+        String normalizedPath = normalize.replaceFirst("^~", System.getProperty("user.home"));
         Path tmpPath = Paths.get(normalizedPath).normalize();
         path = Paths.get(tmpPath.toUri());
     }
