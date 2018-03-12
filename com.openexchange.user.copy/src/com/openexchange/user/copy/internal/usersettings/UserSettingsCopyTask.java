@@ -147,6 +147,9 @@ public class UserSettingsCopyTask implements CopyUserTaskService {
          */
         final UserSettingMailStorage usmStorage = UserSettingMailStorage.getInstance();
         final UserSettingMail srcMailSettings = usmStorage.getUserSettingMail(i(srcUsrId), srcCtx, srcCon);
+        if(srcMailSettings == null) {
+            throw UserCopyExceptionCodes.SAVE_MAIL_SETTINGS_PROBLEM.create();
+        }
         try {
             usmStorage.saveUserSettingMail(srcMailSettings, i(dstUsrId), dstCtx, dstCon);
         } catch (final OXException e) {
