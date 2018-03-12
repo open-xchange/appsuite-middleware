@@ -70,7 +70,7 @@ fi
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
-* Mon Mar 05 2018 Ioannis Chouklis <ioannis.chouklis@open-xchange.com>
+* Mon Mar 12 2018 Ioannis Chouklis <ioannis.chouklis@open-xchange.com>
 Build for patch 2018-03-12 (4602)
 * Mon Feb 26 2018 Ioannis Chouklis <ioannis.chouklis@open-xchange.com>
 Build for patch 2018-02-26 (4583)

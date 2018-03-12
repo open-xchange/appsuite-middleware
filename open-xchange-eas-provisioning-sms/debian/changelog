@@ -2,7 +2,7 @@ open-xchange-eas-provisioning-sms (7.8.4-24) stable; urgency=medium
 
   * Build for patch 2018-03-12 (4602)
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 05 Mar 2018 15:07:42 +0100
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 12 Mar 2018 11:20:53 +0100
 
 open-xchange-eas-provisioning-sms (7.8.4-23) stable; urgency=medium
 

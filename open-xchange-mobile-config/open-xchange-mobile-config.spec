@@ -80,7 +80,7 @@ fi
 %config(noreplace) /opt/open-xchange/etc/meta/*
 
 %changelog
-* Mon Mar 05 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>
+* Mon Mar 12 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2018-03-12 (4602)
 * Mon Feb 26 2018 Marcus Klein <jenkins@hudson-slave-1.netline.de>
 Build for patch 2018-02-26 (4583)
