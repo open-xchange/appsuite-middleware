@@ -1492,6 +1492,15 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             } else if (p.getType() == Participant.USER) {
                 final UserParticipant up = new UserParticipant(p.getIdentifier());
                 up.setDisplayName(p.getDisplayName());
+                if (UserParticipant.class.isInstance(p)) {
+                    UserParticipant userFromParticipant = (UserParticipant) p;
+                    if (userFromParticipant.containsConfirm()) {
+                        up.setConfirm(userFromParticipant.getConfirm());
+                    }
+                    if (userFromParticipant.containsConfirmMessage()) {
+                        up.setConfirmMessage(userFromParticipant.getConfirmMessage());
+                    }
+                }
                 if (!userparticipants.containsUserParticipant(up)) {
                     userparticipants.add(up, users);
                 }
