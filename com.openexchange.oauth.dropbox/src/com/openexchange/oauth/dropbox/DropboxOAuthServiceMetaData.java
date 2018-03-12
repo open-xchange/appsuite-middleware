@@ -108,7 +108,7 @@ public class DropboxOAuthServiceMetaData extends AbstractExtendedScribeAwareOAut
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
      */
     @Override
-    public String getIdentityMethod() {
+    public String getIdentityHTTPMethod() {
         return "POST";
     }
 
@@ -128,7 +128,7 @@ public class DropboxOAuthServiceMetaData extends AbstractExtendedScribeAwareOAut
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
      */
     @Override
-    public String getIdentityURL() {
+    public String getIdentityURL(String accessToken) {
         return "https://api.dropboxapi.com/2/users/get_current_account";
     }
 

@@ -57,9 +57,9 @@ import java.util.regex.Pattern;
  */
 public interface OAuthIdentityAware {
 
-    String getIdentityURL();
+    String getIdentityURL(String accessToken);
 
-    String getIdentityMethod();
+    String getIdentityHTTPMethod();
 
     boolean useBearer();
 

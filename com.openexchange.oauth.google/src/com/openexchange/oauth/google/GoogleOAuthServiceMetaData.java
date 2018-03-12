@@ -107,7 +107,7 @@ public final class GoogleOAuthServiceMetaData extends AbstractExtendedScribeAwar
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
      */
     @Override
-    public String getIdentityMethod() {
+    public String getIdentityHTTPMethod() {
         return "GET";
     }
 
@@ -127,7 +127,7 @@ public final class GoogleOAuthServiceMetaData extends AbstractExtendedScribeAwar
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
      */
     @Override
-    public String getIdentityURL() {
+    public String getIdentityURL(String accessToken) {
         return "https://www.googleapis.com/oauth2/v1/userinfo";
     }
 

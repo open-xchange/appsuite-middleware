@@ -107,7 +107,7 @@ public class OAuthServiceMetaDataYahooImpl extends AbstractExtendedScribeAwareOA
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
      */
     @Override
-    public String getIdentityURL() {
+    public String getIdentityURL(String accessToken) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -116,7 +116,7 @@ public class OAuthServiceMetaDataYahooImpl extends AbstractExtendedScribeAwareOA
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
      */
     @Override
-    public String getIdentityMethod() {
+    public String getIdentityHTTPMethod() {
         // TODO Auto-generated method stub
         return null;
     }

@@ -122,7 +122,7 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractExtendedScribeAware
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
      */
     @Override
-    public String getIdentityMethod() {
+    public String getIdentityHTTPMethod() {
         return "GET";
     }
 
@@ -142,7 +142,7 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractExtendedScribeAware
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
      */
     @Override
-    public String getIdentityURL() {
+    public String getIdentityURL(String accessToken) {
         return "https://api.twitter.com/1.1/account/verify_credentials.json";
     }
 

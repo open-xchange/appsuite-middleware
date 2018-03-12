@@ -169,9 +169,9 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
         }
         // Contact the oauth provider and fetch the identity of the current logged in user
         try {
-            HttpURLConnection connection = (HttpURLConnection) new URL(getIdentityURL()).openConnection();
+            HttpURLConnection connection = (HttpURLConnection) new URL(getIdentityURL(accessToken)).openConnection();
             connection.setInstanceFollowRedirects(true);
-            connection.setRequestMethod(getIdentityMethod());
+            connection.setRequestMethod(getIdentityHTTPMethod());
             if (useBearer()) {
                 connection.setRequestProperty("Authorization", "Bearer " + accessToken);
             }

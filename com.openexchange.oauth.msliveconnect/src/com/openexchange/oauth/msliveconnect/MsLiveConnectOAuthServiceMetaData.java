@@ -98,7 +98,7 @@ public final class MsLiveConnectOAuthServiceMetaData extends AbstractExtendedScr
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
      */
     @Override
-    public String getIdentityMethod() {
+    public String getIdentityHTTPMethod() {
         return "GET";
     }
 
@@ -118,8 +118,8 @@ public final class MsLiveConnectOAuthServiceMetaData extends AbstractExtendedScr
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
      */
     @Override
-    public String getIdentityURL() {
-        return "https://apis.live.net/v5.0/me?access_token=";// + urlEncode(accessToken);
+    public String getIdentityURL(String accessToken) {
+        return "https://apis.live.net/v5.0/me?access_token=" + urlEncode(accessToken);
     }
 
     /*

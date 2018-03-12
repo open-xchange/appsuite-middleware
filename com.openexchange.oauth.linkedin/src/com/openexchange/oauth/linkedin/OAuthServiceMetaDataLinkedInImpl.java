@@ -97,7 +97,7 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractExtendedScribeAwar
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
      */
     @Override
-    public String getIdentityURL() {
+    public String getIdentityURL(String accessToken) {
         return "https://api.linkedin.com/v1/people/~?format=json";
     }
 
@@ -105,7 +105,7 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractExtendedScribeAwar
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
      */
     @Override
-    public String getIdentityMethod() {
+    public String getIdentityHTTPMethod() {
         return "GET";
     }
 
