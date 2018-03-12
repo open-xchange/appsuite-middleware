@@ -106,10 +106,6 @@ public class CallbackAction extends AbstractOAuthTokenAction {
             service = registry.getService(serviceId, session.getUserId(), session.getContextId());
         }
         final Map<String, Object> arguments = processOAuthArguments(requestData, session, service);
-
-        // TODO: Check for already existing oauth account that matches the user identity and modify
-        //       the callback url by appending the appropriate action, i.e. 'create' for new account,
-        //       'reauthorize' for an existing one.
         OAuthAccount oauthAccount = oAuthService.upsertAccount(serviceId, OAuthInteractionType.CALLBACK, arguments, session.getUserId(), session.getContextId(), scopes);
 
         try {

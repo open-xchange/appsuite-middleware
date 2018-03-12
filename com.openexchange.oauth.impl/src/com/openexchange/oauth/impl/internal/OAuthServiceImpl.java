@@ -485,7 +485,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     @Override
     public OAuthAccount upsertAccount(String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId, Set<OAuthScope> scopes) throws OXException {
         DefaultOAuthAccount account = new DefaultOAuthAccount();
-        final OAuthServiceMetaData service = registry.getService(serviceMetaData, user, contextId);
+        OAuthServiceMetaData service = registry.getService(serviceMetaData, user, contextId);
         account.setMetaData(service);
         // Obtain & apply the access token
         HttpsURLConnection.setDefaultSSLSocketFactory(Services.getService(SSLSocketFactoryProvider.class).getDefault());
@@ -509,7 +509,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             /*
              * Set display name & identifier
              */
-            final String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
+            String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
             if (Strings.isEmpty(displayName)) {
                 throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_DISPLAY_NAME);
             }
@@ -518,7 +518,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             /*
              * Encrypt token & secret
              */
-            final Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
+            Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
             if (null == session) {
                 throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_SESSION);
             }
@@ -534,13 +534,12 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             /*
              * Create INSERT command
              */
-            final ArrayList<Object> values = new ArrayList<Object>(SQLStructure.OAUTH_COLUMN.values().length);
-            final INSERT insert = SQLStructure.insertAccount(account, contextId, user, values);
+            ArrayList<Object> values = new ArrayList<Object>(SQLStructure.OAUTH_COLUMN.values().length);
+            INSERT insert = SQLStructure.insertAccount(account, contextId, user, values);
             /*
              * Execute INSERT command
              */
             executeUpdate(contextId, insert, values);
-            // TODO: Decide whether we want the scopes in the following info log entry
             LOG.info("Created new {} account with ID {} for user {} in context {}", serviceMetaData, account.getId(), user, contextId);
             /*
              * Return newly created account
@@ -551,7 +550,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             /*
              * Crypt tokens
              */
-            final Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
+            Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
             if (null == session) {
                 throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_SESSION);
             }
