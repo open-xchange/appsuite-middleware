@@ -131,7 +131,8 @@ public class BirthdaysCalendarProvider implements BasicCalendarProvider, AutoPro
     @Override
     public boolean isAvailable(Session session) {
         try {
-            return ServerSessionAdapter.valueOf(session).getUserPermissionBits().hasContact();
+            ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+            return false == serverSession.getUser().isGuest() && serverSession.getUserPermissionBits().hasContact();
         } catch (OXException e) {
             LoggerFactory.getLogger(BirthdaysCalendarProvider.class).warn("Unexpected error while checking contacts calendar availability", e);
             return false;

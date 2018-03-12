@@ -190,7 +190,7 @@ public class PushHandler implements EventHandler {
         if (null != actionObject && clazz.isAssignableFrom(actionObject.getClass())) {
             return clazz.cast(actionObject);
         }
-        LOG.debug("Couldn't cast object {} to desired class {}.", actionObject.getClass().getName(), clazz.getName());
+        LOG.debug("Couldn't cast object {} to desired class {}.", actionObject == null ? "null" : actionObject.getClass().getName(), clazz.getName());
         return null;
     }
 }

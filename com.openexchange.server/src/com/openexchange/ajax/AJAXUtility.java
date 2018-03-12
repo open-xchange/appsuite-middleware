@@ -52,6 +52,7 @@ package com.openexchange.ajax;
 import static com.openexchange.html.HtmlServices.fullUrlDecode;
 import static com.openexchange.java.Streams.close;
 import static com.openexchange.java.Strings.isEmpty;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
@@ -70,6 +71,11 @@ import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.httpclient.URI;
 import org.apache.tika.Tika;
 import org.apache.tika.config.TikaConfig;
+import org.apache.tika.detect.CompositeDetector;
+import org.apache.tika.detect.Detector;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.mime.MediaType;
+import org.apache.tika.mime.MimeTypes;
 import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
 import com.openexchange.configuration.ServerConfig;
@@ -116,18 +122,46 @@ public final class AJAXUtility {
     /**
      * Detects the MIME type from given input stream using <a href="http://tika.apache.org/">Apache Tika - a content analysis toolkit</a>.
      *
-     * @param in The input stream
+     * @param stream The input stream
      * @return The detected input stream
      * @throws IOException If an I/O error occurs
      */
-    public static String detectMimeType(final InputStream in) throws IOException {
-        if (null == in) {
+    public static String detectMimeType(final InputStream stream) throws IOException {
+        if (null == stream) {
             return null;
         }
+
+        InputStream in = stream;
+        InputStream inToUse= null;
         try {
-            return TIKA.detect(in);
+            Detector detector = TIKA.getDetector();
+            if (false == (detector instanceof CompositeDetector)) {
+                if (in.markSupported()) {
+                    return detector.detect(in, new Metadata()).toString();
+                }
+                return detector.detect(new BufferedInputStream(in), new Metadata()).toString();
+            }
+
+            if (in.markSupported()) {
+                inToUse = in;
+                in = null;
+            } else {
+                inToUse = new BufferedInputStream(in);
+                in = null;
+            }
+            for (Detector d : ((CompositeDetector) detector).getDetectors()) {
+                if (d instanceof MimeTypes) {
+                    MediaType mediaType = d.detect(inToUse, new Metadata());
+                    if (null != mediaType && false == MediaType.OCTET_STREAM.equals(mediaType)) {
+                        return mediaType.toString();
+                    }
+                }
+            }
+
+            // As last resort
+            return TIKA.detect(inToUse);
         } finally {
-            close(in);
+            close(inToUse, in);
         }
     }
 

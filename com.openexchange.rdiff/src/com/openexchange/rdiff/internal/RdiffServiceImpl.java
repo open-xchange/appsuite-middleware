@@ -166,6 +166,7 @@ public final class RdiffServiceImpl implements RdiffService {
     public void rebuildFile(final File baseFile, final InputStream deltaIn, final OutputStream patchOut) throws OXException {
         try {
             rdiff.rebuildFile(baseFile, deltaIn, patchOut);
+            patchOut.flush();
         } catch (final IOException e) {
             throw RdiffExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
