@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -92,11 +93,16 @@ public class ListTest extends InfostoreAJAXTest {
         entries[0][1] = origId;
 
         final File upload = new File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        
+
         com.openexchange.file.storage.File org = itm.getAction(origId);
         org.setDescription("New description");
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {}, new Date(Long.MAX_VALUE));
-        assertFalse(itm.getLastResponse().hasError());
+        {
+            OXException exception = itm.getLastResponse().getException();
+            if (null != exception) {
+                fail("An unexpected exception occurred: " + exception.getMessage());
+            }
+        }
 
         itm.list(entries, new int[] { Metadata.ID, Metadata.NUMBER_OF_VERSIONS });
 
@@ -126,7 +132,7 @@ public class ListTest extends InfostoreAJAXTest {
     public void checkEntries(final String[][] infostore_ids) throws Exception {
         List<com.openexchange.file.storage.File> list = itm.list(infostore_ids, new int[] { Metadata.ID, Metadata.TITLE, Metadata.DESCRIPTION, Metadata.URL });
         assertFalse(itm.getLastResponse().hasError());
-        
+
         final Set<String> ids = itm.getCreatedEntitiesIds();
         final Set<String> descriptions = new HashSet<String>(Arrays.asList("test knowledge description", "test url description"));
         final Set<String> urls = new HashSet<String>(Arrays.asList("http://www.open-xchange.com"));

@@ -53,6 +53,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.IOException;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -90,7 +91,12 @@ public class AnotherCreateAndDeleteInfostoreTest extends AbstractInfostoreTest {
         expected.setMeta(meta);
 
         itm.newAction(expected);
-        assertFalse("Creating an entry should work", itm.getLastResponse().hasError());
+        {
+            OXException exception = itm.getLastResponse().getException();
+            if (null != exception) {
+                fail("Creating an entry should work, but failed with an unexpected exception: " + exception.getMessage());
+            }
+        }
 
         File actual = itm.getAction(expected.getId());
         assertEquals("Name should be the same", expected.getTitle(), actual.getTitle());
