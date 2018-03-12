@@ -134,6 +134,7 @@ public class ICalHandler extends HttpAuthShareHandler {
         EnumSet<EventField> fields = EnumSet.allOf(EventField.class);
         fields.remove(EventField.ATTACHMENTS);
         fields.remove(EventField.ALARMS);
+        fields.remove(EventField.FLAGS);
         EVENT_FIELDS = fields.toArray(new EventField[fields.size()]);
     }
 
