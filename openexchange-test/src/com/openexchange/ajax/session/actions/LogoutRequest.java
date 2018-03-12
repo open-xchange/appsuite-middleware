@@ -57,13 +57,20 @@ import com.openexchange.ajax.AJAXServlet;
  */
 public class LogoutRequest extends AbstractRequest<LogoutResponse> {
 
+    private final boolean ignoreMissingSession;
+
     public LogoutRequest() {
+        this(false);
+    }
+
+    public LogoutRequest(boolean ignoreMissingSession) {
         super(new Parameter[] { new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LOGOUT)
         });
+        this.ignoreMissingSession = ignoreMissingSession;
     }
 
     @Override
     public LogoutParser getParser() {
-        return new LogoutParser();
+        return new LogoutParser(ignoreMissingSession);
     }
 }
