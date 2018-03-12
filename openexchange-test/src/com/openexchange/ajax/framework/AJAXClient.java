@@ -125,7 +125,7 @@ public class AJAXClient {
 
     public void logout() throws OXException, IOException, JSONException {
         if (null != session.getId()) {
-            execute(new LogoutRequest());
+            execute(new LogoutRequest(true));
             session.setId(null);
         }
         session.getConversation().clearContents();
