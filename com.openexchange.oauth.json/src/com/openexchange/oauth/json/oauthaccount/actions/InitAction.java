@@ -291,6 +291,10 @@ public final class InitAction extends AbstractOAuthTokenAction {
         callbackUrlBuilder.append('&').append(OAuthConstants.SESSION_PARAM_UUID).append('=').append(uuid);
         callbackUrlBuilder.append('&').append(Session.PARAM_TOKEN).append('=').append(oauthSessionToken);
         callbackUrlBuilder.append('&').append("scopes").append('=').append(OAuthUtil.oxScopesToString(scopes));
+//        final String cb = request.getParameter("cb");
+//        if (!isEmpty(cb)) {
+//            callbackUrlBuilder.append("&callback=").append(cb);
+//        }
 
         return callbackUrlBuilder.toString();
     }
