@@ -76,8 +76,6 @@ public class FailoverSocket extends Socket {
         PropUtil.getBooleanSystemProperty("mail.socket.debug", false),
         System.out);
 
-    private static final int DEFAULT_CONNECT_TIMEOUT = 1000;
-
     // ----------------------------------------------------------------------------------------------------
 
     private final Socket socket;
