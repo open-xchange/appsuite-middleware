@@ -123,7 +123,7 @@ LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_
 EARLY_NEEDED_TOOLS="basename cat echo dirname java pwd tr date"
 NEEDED_TOOLS="awk bzip2 cat cut cp df du egrep find file grep gzip head mkdir mktemp rm rmdir sed sleep tail tar tr xargs"
 OX_LOG_DIR=/var/log/open-xchange
-OX_CONFIG_DIRS="/opt/open-xchange/etc /opt/open-xchange/documentconverter/etc"
+OX_CONFIG_DIRS="/opt/open-xchange/etc /opt/open-xchange/documentconverter/etc /opt/open-xchange/mobile-api-facade/etc"
 OTHER_CONFIGS="/etc/security/limits.conf /etc/*-release"
 
 ###############################################################################
