@@ -1099,6 +1099,9 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
             if (!realTreeId.equals(treeId)) {
                 StorageParameters parameters = newStorageParameters(storageParameters);
                 FolderStorage folderStorage = registry.getFolderStorage(realTreeId, folderId);
+                if(folderStorage == null) {
+                    throw new OXException(new NullPointerException("Unable to find the folder storage"));
+                }
                 boolean started = folderStorage.startTransaction(parameters, false);
                 try {
                     realParentId = folderStorage.getFolder(realTreeId, folderId, parameters).getParentID();
