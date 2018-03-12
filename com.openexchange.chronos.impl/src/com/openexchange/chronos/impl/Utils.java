@@ -403,7 +403,7 @@ public class Utils {
                 /*
                  * also match the event's common folder identifier if no default attendee is enforced
                  */
-                searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+                searchTerm = new CompositeSearchTerm(CompositeOperation.OR)
                     .addSearchTerm(getSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, folder.getId()))
                     .addSearchTerm(searchTerm);
             }
