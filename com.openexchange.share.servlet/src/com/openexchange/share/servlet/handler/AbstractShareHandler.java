@@ -49,7 +49,10 @@
 
 package com.openexchange.share.servlet.handler;
 
+import java.io.IOException;
 import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -99,6 +102,11 @@ public abstract class AbstractShareHandler implements ShareHandler {
             });
         }
         return new ShareLoginMethod(context, guest, null);
+    }
+
+    @Override
+    public ShareHandlerReply handleNotFound(HttpServletRequest request, HttpServletResponse response, String status) throws IOException {
+        return ShareHandlerReply.NEUTRAL;
     }
 
 }
