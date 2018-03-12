@@ -137,7 +137,7 @@ public final class InitAction extends AbstractOAuthTokenAction {
             // Get the scopes
             Set<OAuthScope> scopes = getScopes(request, serviceId);
 
-            return invokeInteraction(request, session, "callback", -1, serviceId, scopes);
+            return invokeInteraction(request, session, "callback", serviceId, scopes);
         } catch (OXException e) {
             if (Client.OX6_UI.getClientId().equals(session.getClient())) {
                 throw e;
@@ -179,7 +179,7 @@ public final class InitAction extends AbstractOAuthTokenAction {
         scopes.addAll(account.getEnabledScopes());
         scopes.addAll(scopesToEnable);
 
-        return invokeInteraction(request, session, "reauthorize", account.getId(), serviceId, scopes);
+        return invokeInteraction(request, session, "reauthorize", serviceId, scopes);
     }
 
     /**
@@ -195,7 +195,7 @@ public final class InitAction extends AbstractOAuthTokenAction {
      * @throws JSONException if a JSON error is occurred
      * @throws OXException if a server error is occurred
      */
-    private AJAXRequestResult invokeInteraction(AJAXRequestData request, ServerSession session, String action, int accountId, String serviceId, Set<OAuthScope> scopes) throws JSONException, OXException {
+    private AJAXRequestResult invokeInteraction(AJAXRequestData request, ServerSession session, String action, String serviceId, Set<OAuthScope> scopes) throws JSONException, OXException {
         /*
          * Generate UUID
          */
@@ -205,7 +205,7 @@ public final class InitAction extends AbstractOAuthTokenAction {
          */
         final String oauthSessionToken = UUID.randomUUID().toString();
 
-        String callbackUrl = composeCallbackURL(request, session, action, scopes, accountId, serviceId, uuid, oauthSessionToken);
+        String callbackUrl = composeCallbackURL(request, session, action, scopes, serviceId, uuid, oauthSessionToken);
         OAuthService oauthService = getOAuthService();
         /*
          * Invoke
@@ -276,12 +276,9 @@ public final class InitAction extends AbstractOAuthTokenAction {
      * @param oauthSessionToken The OAuth token for the session
      * @return The call-back URL as a String
      */
-    private String composeCallbackURL(AJAXRequestData request, Session session, String action, Set<OAuthScope> scopes, int accountId, String serviceId, String uuid, String oauthSessionToken) {
+    private String composeCallbackURL(AJAXRequestData request, Session session, String action, Set<OAuthScope> scopes, String serviceId, String uuid, String oauthSessionToken) {
         final StringBuilder callbackUrlBuilder = request.constructURL(new StringBuilder(PREFIX.get().getPrefix()).append("oauth/accounts").toString(), true);
         callbackUrlBuilder.append("?action=").append(action);
-        if (accountId >= 0) {
-            callbackUrlBuilder.append("&id=").append(accountId);
-        }
         callbackUrlBuilder.append("&respondWithHTML=true&session=").append(session.getSessionID());
         {
             final String name = AccountField.DISPLAY_NAME.getName();
@@ -294,10 +291,10 @@ public final class InitAction extends AbstractOAuthTokenAction {
         callbackUrlBuilder.append('&').append(OAuthConstants.SESSION_PARAM_UUID).append('=').append(uuid);
         callbackUrlBuilder.append('&').append(Session.PARAM_TOKEN).append('=').append(oauthSessionToken);
         callbackUrlBuilder.append('&').append("scopes").append('=').append(OAuthUtil.oxScopesToString(scopes));
-        final String cb = request.getParameter("cb");
-        if (!isEmpty(cb)) {
-            callbackUrlBuilder.append("&callback=").append(cb);
-        }
+//        final String cb = request.getParameter("cb");
+//        if (!isEmpty(cb)) {
+//            callbackUrlBuilder.append("&callback=").append(cb);
+//        }
 
         return callbackUrlBuilder.toString();
     }
