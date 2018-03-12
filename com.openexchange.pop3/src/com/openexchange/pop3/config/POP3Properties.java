@@ -269,6 +269,11 @@ public final class POP3Properties extends AbstractProtocolProperties implements 
     }
 
     @Override
+    public boolean hideInlineImages() {
+        return mailProperties.hideInlineImages();
+    }
+
+    @Override
     public boolean isAllowNestedDefaultFolderOnAltNamespace() {
         return mailProperties.isAllowNestedDefaultFolderOnAltNamespace();
     }
