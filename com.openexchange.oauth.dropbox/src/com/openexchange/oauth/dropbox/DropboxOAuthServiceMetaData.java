@@ -52,6 +52,7 @@ package com.openexchange.oauth.dropbox;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.regex.Pattern;
 import org.scribe.builder.api.Api;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.KnownApi;
@@ -99,4 +100,45 @@ public class DropboxOAuthServiceMetaData extends AbstractExtendedScribeAwareOAut
         return propertyNames;
     }
 
+    private Pattern identityPattern = Pattern.compile("\"account_id\":\\s*\"(\\S*?)\"");
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
+     */
+    @Override
+    public String getIdentityMethod() {
+        return "POST";
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#useBearer()
+     */
+    @Override
+    public boolean useBearer() {
+        return true;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
+     */
+    @Override
+    public String getIdentityURL() {
+        return "https://api.dropboxapi.com/2/users/get_current_account";
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
+     */
+    @Override
+    public Pattern getIdentityPattern() {
+        return identityPattern;
+    }
 }

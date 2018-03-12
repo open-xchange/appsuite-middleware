@@ -127,6 +127,15 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
                 return Collections.emptySet();
             }
 
+            /*
+             * (non-Javadoc)
+             * 
+             * @see com.openexchange.oauth.OAuthServiceMetaData#getUserIdentity(java.lang.String)
+             */
+            @Override
+            public String getUserIdentity(String accessToken) throws OXException {
+                return null;
+            }
         });
 
         oauth = new OAuthServiceImpl(getDBProvider(), new SimIDGenerator(), registry, new SimContextService(), null) {

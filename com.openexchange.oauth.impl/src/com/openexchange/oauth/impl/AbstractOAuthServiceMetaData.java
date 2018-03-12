@@ -337,15 +337,4 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
             return s;
         }
     }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.OAuthServiceMetaData#getUserIdentity(java.lang.String)
-     */
-    @Override
-    public String getUserIdentity(String accessToken) throws OXException {
-        // Override to define a concrete implementation for each provider
-        return null;
-    }
 }

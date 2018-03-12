@@ -51,6 +51,7 @@ package com.openexchange.oauth.linkedin;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.regex.Pattern;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.LinkedInApi20;
 import com.openexchange.oauth.KnownApi;
@@ -65,6 +66,8 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class OAuthServiceMetaDataLinkedInImpl extends AbstractExtendedScribeAwareOAuthServiceMetaData {
+    
+    private Pattern identityPattern = Pattern.compile("\"id\":\\s*\"(\\S*?)\"");
 
     public OAuthServiceMetaDataLinkedInImpl(ServiceLookup services) {
         super(services, KnownApi.LINKEDIN, LinkedInOAuthScope.values());
@@ -88,5 +91,37 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractExtendedScribeAwar
     @Override
     public Class<? extends Api> getScribeService() {
         return LinkedInApi20.class;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
+     */
+    @Override
+    public String getIdentityURL() {
+        return "https://api.linkedin.com/v1/people/~?format=json";
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
+     */
+    @Override
+    public String getIdentityMethod() {
+        return "GET";
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#useBearer()
+     */
+    @Override
+    public boolean useBearer() {
+        return true;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
+     */
+    @Override
+    public Pattern getIdentityPattern() {
+        return identityPattern;
     }
 }

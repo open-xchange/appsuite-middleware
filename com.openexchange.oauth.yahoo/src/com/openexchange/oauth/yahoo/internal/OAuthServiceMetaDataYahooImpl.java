@@ -51,6 +51,7 @@ package com.openexchange.oauth.yahoo.internal;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.regex.Pattern;
 import org.scribe.builder.api.Api;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.HostInfo;
@@ -100,5 +101,41 @@ public class OAuthServiceMetaDataYahooImpl extends AbstractExtendedScribeAwareOA
     @Override
     protected Collection<OAuthPropertyID> getExtraPropertyNames() {
         return Collections.singletonList(OAuthPropertyID.redirectUrl);
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
+     */
+    @Override
+    public String getIdentityURL() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
+     */
+    @Override
+    public String getIdentityMethod() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#useBearer()
+     */
+    @Override
+    public boolean useBearer() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
+     */
+    @Override
+    public Pattern getIdentityPattern() {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

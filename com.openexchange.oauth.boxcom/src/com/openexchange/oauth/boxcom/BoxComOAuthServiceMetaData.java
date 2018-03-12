@@ -51,6 +51,7 @@ package com.openexchange.oauth.boxcom;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.regex.Pattern;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.BoxApi;
 import com.openexchange.oauth.KnownApi;
@@ -87,5 +88,47 @@ public final class BoxComOAuthServiceMetaData extends AbstractExtendedScribeAwar
     @Override
     public Class<? extends Api> getScribeService() {
         return BoxApi.class;
+    }
+
+    private Pattern identityPattern = Pattern.compile("\"id\":\\s*\"(\\S*?)\"");
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
+     */
+    @Override
+    public String getIdentityMethod() {
+        return "GET";
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#useBearer()
+     */
+    @Override
+    public boolean useBearer() {
+        return true;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
+     */
+    @Override
+    public String getIdentityURL() {
+        return "https://api.box.com/2.0/users/me";
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
+     */
+    @Override
+    public Pattern getIdentityPattern() {
+        return identityPattern;
     }
 }

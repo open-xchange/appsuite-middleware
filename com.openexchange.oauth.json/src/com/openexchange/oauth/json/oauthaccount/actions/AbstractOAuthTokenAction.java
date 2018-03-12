@@ -296,7 +296,7 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         String scope = request.getParameter("scopes");
 
         //   /!\ FIXME: remove when UI implements their part /!\   //
-        if (Strings.isNotEmpty(scope) && !scope.contains("me")) {
+        if ((serviceId.contains("google") || serviceId.contains("ms")) && Strings.isNotEmpty(scope) && !scope.contains("me")) {
             scope += " me";
         }
         ////////////////////////////////////////////////////////////

@@ -74,6 +74,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.HostInfo;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
@@ -291,10 +292,10 @@ public final class InitAction extends AbstractOAuthTokenAction {
         callbackUrlBuilder.append('&').append(OAuthConstants.SESSION_PARAM_UUID).append('=').append(uuid);
         callbackUrlBuilder.append('&').append(Session.PARAM_TOKEN).append('=').append(oauthSessionToken);
         callbackUrlBuilder.append('&').append("scopes").append('=').append(OAuthUtil.oxScopesToString(scopes));
-//        final String cb = request.getParameter("cb");
-//        if (!isEmpty(cb)) {
-//            callbackUrlBuilder.append("&callback=").append(cb);
-//        }
+        final String cb = request.getParameter("cb");
+        if (Strings.isNotEmpty(cb)) {
+            callbackUrlBuilder.append("&callback=").append(cb);
+        }
 
         return callbackUrlBuilder.toString();
     }

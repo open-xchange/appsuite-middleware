@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.TwitterApi;
 import com.openexchange.exception.OXException;
@@ -112,4 +113,47 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractExtendedScribeAware
     public OAuthToken getOAuthToken(final Map<String, Object> arguments, Set<OAuthScope> scopes) throws OXException {
         return null;
     }
+
+    private Pattern identityPattern = Pattern.compile("\"id_str\":\\s*\"(\\S*?)\"");
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
+     */
+    @Override
+    public String getIdentityMethod() {
+        return "GET";
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#useBearer()
+     */
+    @Override
+    public boolean useBearer() {
+        return true;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
+     */
+    @Override
+    public String getIdentityURL() {
+        return "https://api.twitter.com/1.1/account/verify_credentials.json";
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
+     */
+    @Override
+    public Pattern getIdentityPattern() {
+        return identityPattern;
+    }
+
 }

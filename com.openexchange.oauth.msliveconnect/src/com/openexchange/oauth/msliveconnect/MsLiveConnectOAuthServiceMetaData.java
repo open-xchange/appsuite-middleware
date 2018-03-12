@@ -51,6 +51,7 @@ package com.openexchange.oauth.msliveconnect;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.regex.Pattern;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.MsLiveConnectApi;
 import com.openexchange.oauth.KnownApi;
@@ -87,5 +88,47 @@ public final class MsLiveConnectOAuthServiceMetaData extends AbstractExtendedScr
     @Override
     public Class<? extends Api> getScribeService() {
         return MsLiveConnectApi.class;
+    }
+
+    private Pattern identityPattern = Pattern.compile("\"id\":\\s*\"(\\S*?)\"");
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
+     */
+    @Override
+    public String getIdentityMethod() {
+        return "GET";
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#useBearer()
+     */
+    @Override
+    public boolean useBearer() {
+        return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
+     */
+    @Override
+    public String getIdentityURL() {
+        return "https://apis.live.net/v5.0/me?access_token=";// + urlEncode(accessToken);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
+     */
+    @Override
+    public Pattern getIdentityPattern() {
+        return identityPattern;
     }
 }

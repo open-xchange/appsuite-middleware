@@ -1,3 +1,6 @@
+package com.openexchange.oauth.impl;
+import java.util.regex.Pattern;
+
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -28,7 +31,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2018-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,83 +50,18 @@
  *
  */
 
-package com.openexchange.oauth.vkontakte;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.regex.Pattern;
-import org.scribe.builder.api.Api;
-import org.scribe.builder.api.VkontakteApi;
-import com.openexchange.oauth.KnownApi;
-import com.openexchange.oauth.impl.AbstractScribeAwareOAuthServiceMetaData;
-import com.openexchange.server.ServiceLookup;
-
 /**
- * {@link VkontakteOAuthServiceMetaData} - See <a href="http://vk.com/developers.php#devstep2">Vkontakte API</a>.
+ * {@link OAuthIdentityAware}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class VkontakteOAuthServiceMetaData extends AbstractScribeAwareOAuthServiceMetaData {
+public interface OAuthIdentityAware {
 
-    /**
-     * Initializes a new {@link VkontakteOAuthServiceMetaData}.
-     *
-     * @param configService The configuration service
-     */
-    public VkontakteOAuthServiceMetaData(ServiceLookup services) {
-        super(services, KnownApi.VKONTAKTE, VkontakteOAuthScope.values());
-    }
+    String getIdentityURL();
 
-    @Override
-    public Class<? extends Api> getScribeService() {
-        return VkontakteApi.class;
-    }
+    String getIdentityMethod();
 
-    @Override
-    protected String getPropertyId() {
-        return "vkontakte";
-    }
+    boolean useBearer();
 
-    @Override
-    protected Collection<OAuthPropertyID> getExtraPropertyNames() {
-        return Collections.emptyList();
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
-     */
-    @Override
-    public String getIdentityURL() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
-     */
-    @Override
-    public String getIdentityMethod() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.oauth.impl.OAuthIdentityAware#useBearer()
-     */
-    @Override
-    public boolean useBearer() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
-     */
-    @Override
-    public Pattern getIdentityPattern() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
+    Pattern getIdentityPattern();
 }

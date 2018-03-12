@@ -49,14 +49,22 @@
 
 package com.openexchange.oauth.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.regex.Matcher;
 import javax.xml.ws.handler.MessageContext.Scope;
+import org.scribe.utils.StreamUtils;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.KnownApi;
@@ -69,7 +77,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOAuthServiceMetaData implements ScribeAware, Reloadable {
+public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOAuthServiceMetaData implements ScribeAware, OAuthIdentityAware, Reloadable {
 
     protected final ServiceLookup services;
 
@@ -146,6 +154,43 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
     @Override
     public API getAPI() {
         return api;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.OAuthServiceMetaData#getUserIdentity(java.lang.String)
+     */
+    @Override
+    public String getUserIdentity(String accessToken) throws OXException {
+        // Reference implementation (WIP)
+        if (Strings.isEmpty(accessToken)) {
+            return null;  //TODO: or throw exception token not found/invalid token/whatever?
+        }
+        // Contact the oauth provider and fetch the identity of the current logged in user
+        try {
+            HttpURLConnection connection = (HttpURLConnection) new URL(getIdentityURL()).openConnection();
+            connection.setInstanceFollowRedirects(true);
+            connection.setRequestMethod(getIdentityMethod());
+            if (useBearer()) {
+                connection.setRequestProperty("Authorization", "Bearer " + accessToken);
+            }
+            connection.connect();
+
+            int responseCode = connection.getResponseCode();
+            InputStream stream = responseCode >= 200 && responseCode < 400 ? connection.getInputStream() : connection.getErrorStream();
+            String body = StreamUtils.getStreamContents(stream); //TODO: replace with in-house stream reader
+            Matcher matcher = getIdentityPattern().matcher(body);
+            if (matcher.find()) {
+                return matcher.group(1);
+            } else {
+                throw new OXException(31145, "No user identity can be retrieved");
+            }
+        } catch (MalformedURLException e) {
+            throw new OXException(31145, "Malformed URL", e);
+        } catch (IOException e) {
+            throw new OXException(31145, "I/O error", e);
+        }
     }
 
     /**
