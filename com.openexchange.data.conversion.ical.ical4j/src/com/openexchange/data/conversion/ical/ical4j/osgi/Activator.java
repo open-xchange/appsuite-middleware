@@ -56,15 +56,11 @@ import com.openexchange.config.Reloadables;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JEmitter;
-import com.openexchange.data.conversion.ical.ical4j.ICal4JITipEmitter;
-import com.openexchange.data.conversion.ical.ical4j.ICal4JITipParser;
 import com.openexchange.data.conversion.ical.ical4j.ICal4JParser;
 import com.openexchange.data.conversion.ical.ical4j.internal.OXResourceResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.OXUserResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedBy;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
-import com.openexchange.data.conversion.ical.itip.ITipEmitter;
-import com.openexchange.data.conversion.ical.itip.ITipParser;
 import com.openexchange.group.GroupService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.resource.ResourceService;
@@ -119,7 +115,5 @@ public class Activator extends HousekeepingActivator {
         parser.setLimit(configurationService.getIntProperty("com.openexchange.import.ical.limit", -1));
 		registerService(ICalParser.class, parser, null);
         registerService(ICalEmitter.class, new ICal4JEmitter(), null);
-        registerService(ITipParser.class, new ICal4JITipParser(), null);
-        registerService(ITipEmitter.class, new ICal4JITipEmitter(), null);
     }
 }

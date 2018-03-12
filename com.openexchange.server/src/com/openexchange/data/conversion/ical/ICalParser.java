@@ -52,7 +52,6 @@ package com.openexchange.data.conversion.ical;
 import java.io.InputStream;
 import java.util.List;
 import java.util.TimeZone;
-import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.osgi.annotation.SingletonService;
@@ -63,11 +62,7 @@ import com.openexchange.osgi.annotation.SingletonService;
 @SingletonService
 public interface ICalParser {
 
-    ParseResult<CalendarDataObject> parseAppointments(String icalText, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
-
     ParseResult<Task> parseTasks(String icalText, TimeZone defaultTZ, Context context, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
-
-    ParseResult<CalendarDataObject> parseAppointments(InputStream ical, TimeZone defaultTZ, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
 
     ParseResult<Task> parseTasks(InputStream ical, TimeZone defaultTZ, Context context, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
 
