@@ -72,6 +72,10 @@ public class YamlChangeLogParser implements ChangeLogParser {
                 throw new ChangeLogParseException("Syntax error in "+getSupportedFileExtension()+": " + e.getMessage(), e);
             }
 
+            if(changeLogAsMap == null) {
+                throw new ChangeLogParseException("Unable to parse changelog.");
+            }
+
             DatabaseChangeLog changeLog = new DatabaseChangeLog(physicalChangeLogLocation);
             changeLog.setChangeLogParameters(changeLogParameters);
             List<?> rootList = (List<?>) changeLogAsMap.get("databaseChangeLog");
