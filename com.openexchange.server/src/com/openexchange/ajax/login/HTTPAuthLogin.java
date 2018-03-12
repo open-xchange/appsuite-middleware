@@ -113,8 +113,8 @@ public final class HTTPAuthLogin implements LoginRequestHandler {
             doAuthHeaderLogin(req, resp);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-            resp.addHeader(HttpHeaders.WWW_AUTHENTICATE, "NEGOTIATE");
-            resp.addHeader(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"Open-Xchange\"");
+            resp.addHeader("WWW-Authenticate", "NEGOTIATE");
+            resp.addHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
             resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
         }
     }
