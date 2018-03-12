@@ -467,12 +467,7 @@ public final class MailMessageParser {
                  */
                 LOG.error("Multipart mail could not be parsed", rte);
                 warnings.add(MailExceptionCode.UNPARSEABLE_MESSAGE.create(rte, new Object[0]));
-                if (!handler.handleInlinePlainText(
-                    "",
-                    ContentType.DEFAULT_CONTENT_TYPE,
-                    0,
-                    fileName,
-                    MailMessageParser.getSequenceId(prefix, partCount))) {
+                if (!handler.handleInlinePlainText("", ContentType.DEFAULT_CONTENT_TYPE, 0, fileName, MailMessageParser.getSequenceId(prefix, partCount))) {
                     stop = true;
                     return;
                 }
@@ -1144,14 +1139,8 @@ public final class MailMessageParser {
     private static String getFileName(String rawFileName, ContentType contentType, String sequenceId, String baseMimeType) {
         String filename = rawFileName;
         if (Strings.isEmpty(filename)) {
-            List<String> exts = MimeType2ExtMap.getFileExtensions(baseMimeType.toLowerCase(Locale.ENGLISH));
-            StringBuilder sb = new StringBuilder(16).append(PREFIX).append(sequenceId).append('.');
-            if (exts == null) {
-                sb.append("dat");
-            } else {
-                sb.append(exts.get(0));
-            }
-            filename = sb.toString();
+            List<String> exts = MimeType2ExtMap.getFileExtensions(Strings.asciiLowerCase(baseMimeType));
+            filename = new StringBuilder(16).append(PREFIX).append(sequenceId).append('.').append(exts == null ? "dat" : exts.get(0)).toString();
         } else {
             filename = MimeMessageUtility.decodeMultiEncodedHeader(filename);
             if (filename.indexOf('.') < 0) {

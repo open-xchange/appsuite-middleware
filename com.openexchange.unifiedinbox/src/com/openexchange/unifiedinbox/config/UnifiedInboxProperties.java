@@ -101,6 +101,11 @@ public final class UnifiedInboxProperties extends AbstractProtocolProperties imp
     }
 
     @Override
+    public boolean hideInlineImages() {
+        return mailProperties.hideInlineImages();
+    }
+
+    @Override
     public boolean isAllowNestedDefaultFolderOnAltNamespace() {
         return mailProperties.isAllowNestedDefaultFolderOnAltNamespace();
     }
