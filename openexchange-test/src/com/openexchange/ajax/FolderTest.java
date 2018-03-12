@@ -142,20 +142,20 @@ public class FolderTest extends AbstractAJAXSession {
             FolderObject newFolder = FolderTestManager.createNewFolderObject("NewPrivateFolder" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), FolderObject.PRIVATE, userId, FolderObject.SYSTEM_PRIVATE_FOLDER_ID);
             fuid = ftm.insertFolderOnServer(newFolder).getObjectID();
             assertFalse(fuid == -1);
-            final Calendar cal = GregorianCalendar.getInstance();
+
             FolderObject folder = ftm.getFolderFromServer(fuid);
             folder.setFolderName("ChangedPrivateFolderName" + System.currentTimeMillis());
-            folder.setLastModified(new Date(cal.getTimeInMillis()));
+            folder.setLastModified(new Date(System.currentTimeMillis()));
             ftm.updateFolderOnServer(folder);
             ftm.getFolderFromServer(fuid);
-            ftm.deleteFolderOnServer(fuid, new Date(cal.getTimeInMillis()));
+            ftm.deleteFolderOnServer(fuid, new Date(System.currentTimeMillis()));
             assertFalse(ftm.getLastResponse().hasError());
 
             FolderObject newPublicFolder = FolderTestManager.createNewFolderObject("NewPublicFolder" + UUID.randomUUID().toString(), Module.CALENDAR.getFolderConstant(), FolderObject.PRIVATE, userId, FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
             fuid = ftm.insertFolderOnServer(newPublicFolder).getObjectID();
             assertFalse(fuid == -1);
             ftm.getFolderFromServer(fuid);
-            ftm.deleteFolderOnServer(fuid, new Date(cal.getTimeInMillis()));
+            ftm.deleteFolderOnServer(fuid, new Date(System.currentTimeMillis()));
             assertFalse(ftm.getLastResponse().hasError());
             fuid = -1;
 
@@ -169,7 +169,7 @@ public class FolderTest extends AbstractAJAXSession {
 
             ftm.getFolderFromServer(fuid);
             assertFalse(ftm.getLastResponse().hasError());
-            ftm.deleteFolderOnServer(fuid, new Date(cal.getTimeInMillis()));
+            ftm.deleteFolderOnServer(fuid, new Date(System.currentTimeMillis()));
             assertFalse(ftm.getLastResponse().hasError());
             fuid = -1;
         } finally {
