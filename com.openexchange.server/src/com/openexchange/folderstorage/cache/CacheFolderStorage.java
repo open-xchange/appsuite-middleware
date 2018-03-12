@@ -1767,7 +1767,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
                 int userId = storageParameters.getUserId();
                 int contextId = storageParameters.getContextId();
                 {
-                    Collection<String> ids = isMove ? ImmutableSet.of(oldFolderId, oldParentId, f.getParentID()) : ImmutableSet.of(oldFolderId, oldParentId);
+                    Collection<String> ids = ImmutableSet.of(oldFolderId, oldParentId);
                     FolderMapManagement.getInstance().dropHierarchyFor(ids, realTreeId, userId, contextId);
                 }
             }

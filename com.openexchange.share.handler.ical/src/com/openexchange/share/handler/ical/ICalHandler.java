@@ -95,6 +95,7 @@ import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.handler.AccessShareRequest;
 import com.openexchange.share.servlet.handler.HttpAuthShareHandler;
@@ -175,13 +176,29 @@ public class ICalHandler extends HttpAuthShareHandler {
          */
         ShareTarget target = resolvedShare.getShareRequest().getTarget();
         int module = target.getModule();
-        if (Module.CALENDAR.getFolderConstant() == module) {
-            writeEvents(resolvedShare, target);
-        } else if (Module.TASK.getFolderConstant() == module) {
-            writeTasks(resolvedShare, target);
-        } else {
-            throw new UnsupportedOperationException("Unsupported module: " + module);
+        try {
+            if (Module.CALENDAR.getFolderConstant() == module) {
+                writeEvents(resolvedShare, target);
+            } else if (Module.TASK.getFolderConstant() == module) {
+                writeTasks(resolvedShare, target);
+            } else {
+                throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Unsupported module: " + module);
+            }
+        } catch (OXException e) {
+            writeError(resolvedShare, e);
         }
+    }
+
+    private void writeError(ResolvedShare share, OXException e) throws IOException {
+        /*
+         * write error response
+         */
+        HttpServletResponse response = share.getResponse();
+        if (null == response || response.isCommitted()) {
+            LOG.debug("Unable to send error response after exception", e);
+            return;
+        }
+        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getSoleMessage());
     }
 
     /**

@@ -133,7 +133,7 @@ public enum DefaultMailAuthenticityMechanism implements MailAuthenticityMechanis
     public static DefaultMailAuthenticityMechanism parse(String s) {
         int index = s.indexOf(' ');
         if (index > 0) {
-            s.substring(0, index);
+            s = s.substring(0, index);
         }
         try {
             return DefaultMailAuthenticityMechanism.valueOf(s.toUpperCase());

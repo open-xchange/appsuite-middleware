@@ -1,5 +1,6 @@
 /*
  *
+
  *    OPEN-XCHANGE legal information
  *
  *    All intellectual property rights in the Software are protected by
@@ -99,7 +100,7 @@ public class PGPKeySignatureVerifier {
                         final Iterator<PGPSignature> signatures = publicKey.getSignaturesForID(userId);
                         if(signatures != null) {
                             final ArrayList<PGPSignature> list = new ArrayList<>();
-                            publicKey.getSignaturesForID(userId).forEachRemaining(list::add);
+                            signatures.forEachRemaining(list::add);
                             //Check if the signature is for the current user-id
                             final boolean isForUserId = list.stream().anyMatch(s -> s.getCreationTime().equals(signature.getCreationTime()));
                             if (isForUserId) {

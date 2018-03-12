@@ -1372,6 +1372,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
 
             int CONTEXTS_PER_SCHEMA = Integer.parseInt(prop.getProp("CONTEXTS_PER_SCHEMA", "1"));
+            if (CONTEXTS_PER_SCHEMA <= 0) {
+                CONTEXTS_PER_SCHEMA = 1;
+            }
             int maxNumberOfSchemas;
             {
                 float quotient = maxUnits / (float) CONTEXTS_PER_SCHEMA;
@@ -1483,6 +1486,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 }
 
                 int CONTEXTS_PER_SCHEMA = Integer.parseInt(prop.getProp("CONTEXTS_PER_SCHEMA", "1"));
+                if (CONTEXTS_PER_SCHEMA <= 0) {
+                    CONTEXTS_PER_SCHEMA = 1;
+                }
                 {
                     float quotient = maxUnits / (float) CONTEXTS_PER_SCHEMA;
                     numberOfSchemas = (int) quotient;

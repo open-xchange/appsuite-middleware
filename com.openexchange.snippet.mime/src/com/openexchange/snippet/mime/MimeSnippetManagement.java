@@ -309,7 +309,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
     @Override
     public int getOwnSnippetsCount() throws OXException {
         AccountQuota quota = getQuota();
-        return (int) quota.getQuota(QuotaType.AMOUNT).getUsage();
+        return null == quota ? 0 : (int) quota.getQuota(QuotaType.AMOUNT).getUsage();
     }
 
     @Override

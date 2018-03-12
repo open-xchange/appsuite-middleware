@@ -137,17 +137,15 @@ public class ICalExporter extends AbstractExporter {
         return getExporter(getUserizedFolder(session, batchIds.keySet().stream().findFirst().get()), batchIds, fieldsToBeExported);
     }
 
-    private ICalExport getExporter(UserizedFolder userizedFolder, Map<String, List<String>> batchIds, int[] fieldsToBeExported) throws OXException {
+    private ICalExport getExporter(UserizedFolder userizedFolder, Map<String, List<String>> batchIds, int[] fieldsToBeExported) {
         ICalExport exporter;
-        String folderId = null == userizedFolder ? null : userizedFolder.getID();
+        String folderId = userizedFolder.getID();
         if (TaskContentType.getInstance().equals(userizedFolder.getContentType())) {
             exporter = new ICalTaskExporter(folderId, batchIds, fieldsToBeExported);
         } else if (null == userizedFolder.getAccountID()) {
             exporter = new ICalEventExporter(folderId, batchIds);
-        } else if (null != userizedFolder.getAccountID()) {
-            exporter = new ICalCompositeEventExporter(folderId, batchIds);
         } else {
-            throw ImportExportExceptionCodes.ICAL_CONVERSION_FAILED.create();
+            exporter = new ICalCompositeEventExporter(folderId, batchIds);
         }
         return exporter;
     }

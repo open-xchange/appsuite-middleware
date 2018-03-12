@@ -70,8 +70,8 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.DateUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
+import com.openexchange.auth.info.AuthInfo;
 import com.openexchange.auth.info.AuthType;
-import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.chronos.ical.ImportedCalendar;
@@ -244,17 +244,7 @@ public class ICalFeedClient {
         // Assert the 4xx codes
         switch (statusCode) {
             case HttpStatus.SC_UNAUTHORIZED:
-                if (httpResponse.containsHeader(HttpHeaders.WWW_AUTHENTICATE)) {
-                    Header[] headers = httpResponse.getHeaders(HttpHeaders.WWW_AUTHENTICATE);
-                    for (Header header : headers) {
-                        for (HeaderElement element : header.getElements()) {
-                            if (element.getName().equalsIgnoreCase("Basic realm") && element.getValue().contains("Share/Guest")) {
-                                throw CalendarExceptionCodes.AUTH_FAILED_FOR_SHARE.create(iCalFeedConfig.getFeedUrl());
-                            }
-                        }
-                    }
-                }
-                throw CalendarExceptionCodes.AUTH_FAILED.create(iCalFeedConfig.getFeedUrl());
+                throw unauthorizedException(httpResponse, iCalFeedConfig.getFeedUrl(), iCalFeedConfig.getAuthInfo());
             case HttpStatus.SC_NOT_FOUND:
                 throw ICalProviderExceptionCodes.NO_FEED.create(iCalFeedConfig.getFeedUrl());
         }
@@ -275,6 +265,7 @@ public class ICalFeedClient {
         }
         return statusCode;
     }
+
 
     /**
      * Resets given HTTP request
@@ -357,4 +348,49 @@ public class ICalFeedClient {
             }
         }
     }
+
+    /**
+     * Prepares an appropriate exception for a response with status <code>401 Unauthorized</code>.
+     *
+     * @param response The HTTP response to generate the exception for
+     * @param feedUrl The requested feed URL
+     * @param authInfo The authentication info used for the feed
+     * @return An appropriate {@link OXException}
+     */
+    private static OXException unauthorizedException(HttpResponse response, String feedUrl, AuthInfo authInfo) {
+        boolean hadCredentials = null != authInfo && (Strings.isNotEmpty(authInfo.getPassword()) || Strings.isNotEmpty(authInfo.getToken()));
+        String realm = getFirstHeaderElement(response, HttpHeaders.WWW_AUTHENTICATE, "Basic realm");
+        if (null != realm && realm.contains("Share/Anonymous/")) {
+            /*
+             * anonymous, password-protected share
+             */
+            if (hadCredentials) {
+                return ICalProviderExceptionCodes.PASSWORD_WRONG.create(feedUrl, response.getStatusLine(), realm);
+            }
+            return ICalProviderExceptionCodes.PASSWORD_REQUIRED.create(feedUrl, response.getStatusLine(), realm);
+        }
+        /*
+         * generic credentials required, otherwise
+         */
+        if (hadCredentials) {
+            return ICalProviderExceptionCodes.CREDENTIALS_WRONG.create(feedUrl, response.getStatusLine(), realm);
+        }
+        return ICalProviderExceptionCodes.CREDENTIALS_REQUIRED.create(feedUrl, response.getStatusLine(), realm);
+    }
+
+    private static String getFirstHeaderElement(HttpResponse response, String headerName, String elementName) {
+        Header header = response.getFirstHeader(headerName);
+        if (null != header) {
+            HeaderElement[] elements = header.getElements();
+            if (null != elements && 0 < elements.length) {
+                for (HeaderElement element : elements) {
+                    if (elementName.equalsIgnoreCase(element.getName())) {
+                        return element.getValue();
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
 }

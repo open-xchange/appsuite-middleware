@@ -111,7 +111,7 @@ public class CalendarProviderTracker extends RankingAwareNearRegistryServiceTrac
             @Override
             public boolean isEnabled(String capability, Session session) throws OXException {
                 ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-                if (serverSession.isAnonymous() || serverSession.getUser().isGuest()) {
+                if (serverSession.isAnonymous()) {
                     return false;
                 }
                 if (false == serverSession.getUserPermissionBits().hasCalendar()) {

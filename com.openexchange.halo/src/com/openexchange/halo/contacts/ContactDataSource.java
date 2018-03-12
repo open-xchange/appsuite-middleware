@@ -115,6 +115,9 @@ public class ContactDataSource implements HaloContactDataSource, HaloContactImag
 
     private Picture getPicture0(HaloContactQuery contactQuery, ServerSession session, boolean withBytes) throws OXException {
         List<Contact> mergedContacts = contactQuery.getCopyOfMergedContacts();
+        if (mergedContacts == null) {
+            mergedContacts = new ArrayList<>(0);
+        }
         Collections.sort(mergedContacts,  new ImagePrecedence());
 
         for (final Contact contact : mergedContacts) {

@@ -159,17 +159,18 @@ public class ConfigMailFilterAction extends AbstractMailFilterAction {
         final JSONArray testarray = new JSONArray();
         Map<String, TestCommandParser<TestCommand>> map = service.getCommandParsers();
         for (Map.Entry<String, TestCommandParser<TestCommand>> entry : map.entrySet()) {
+            String id = entry.getKey();
             TestCommandParser<TestCommand> parser = entry.getValue();
-            if (!blacklists.isBlacklisted(BasicGroup.tests, entry.getKey()) && parser.isCommandSupported(capabilities)) {
+            if (!blacklists.isBlacklisted(BasicGroup.tests, id) && parser.isCommandSupported(capabilities)) {
                 ITestCommand command = parser.getCommand();
                 final JSONObject object = new JSONObject();
                 final JSONArray comparison = new JSONArray();
-                object.put("id", entry.getKey());
+                object.put("id", id);
                 final List<JSONMatchType> jsonMatchTypes = command.getJsonMatchTypes();
                 if (null != jsonMatchTypes) {
                     for (final JSONMatchType matchtype : jsonMatchTypes) {
                         final String value = matchtype.getRequired();
-                        if (!blacklists.isBlacklisted(BasicGroup.tests, entry.getKey(), Field.comparisons, matchtype.getJsonName()) && !blacklists.isBlacklisted(BasicGroup.comparisons, matchtype.getJsonName())) {
+                        if (!blacklists.isBlacklisted(BasicGroup.tests, id, Field.comparisons, matchtype.getJsonName()) && !blacklists.isBlacklisted(BasicGroup.comparisons, matchtype.getJsonName())) {
                             if (matchtype.getVersionRequirement() <= 2 && ("".equals(value) || capabilities.contains(value))) {
                                 comparison.put(matchtype.getJsonName());
                             }
@@ -184,13 +185,17 @@ public class ConfigMailFilterAction extends AbstractMailFilterAction {
                 if (parser instanceof ExtendedFieldTestCommandParser) {
 
                     Map<String, Set<String>> addtionalFields = ((ExtendedFieldTestCommandParser) parser).getAddtionalFields(capabilities);
-                    for (String key : addtionalFields.keySet()) {
+                    for (Map.Entry<String, Set<String>> e2 : addtionalFields.entrySet()) {
+                        String key = e2.getKey();
+                        Set<String> listToAdd = e2.getValue();
                         Field ele = Field.getFieldByName(key);
-                        Set<String> listToAdd = addtionalFields.get(key);
-                        Set<String> eleBlacklist = blacklists.get(BasicGroup.tests, entry.getKey(), ele);
-                        if (eleBlacklist != null) {
-                            listToAdd.removeAll(eleBlacklist);
+                        if (ele != null) {
+                            Set<String> eleBlacklist = blacklists.get(BasicGroup.tests, id, ele);
+                            if (eleBlacklist != null) {
+                                listToAdd.removeAll(eleBlacklist);
+                            }
                         }
+
                         if (!listToAdd.isEmpty()) {
                             object.put(key, listToAdd);
                         }
@@ -211,7 +216,7 @@ public class ConfigMailFilterAction extends AbstractMailFilterAction {
         for (Map.Entry<String, ActionCommandParser<ActionCommand>> entry : map.entrySet()) {
             ActionCommandParser<ActionCommand> parser = entry.getValue();
 
-            // Check if the tag arguments of the simplified action command contains any 
+            // Check if the tag arguments of the simplified action command contains any
             // of the sieve announced capabilities
             try {
                 SimplifiedAction simplifiedAction = SimplifiedAction.valueOf(entry.getKey().toUpperCase());

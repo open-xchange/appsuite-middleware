@@ -60,6 +60,7 @@ import java.sql.Statement;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
@@ -82,18 +83,18 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
      */
     private static final String TEST_SELECT = "SELECT 1 AS test";
 
-    private static volatile Field openStatementsField;
+    private static final AtomicReference<Field> openStatementsField = new AtomicReference<Field>(null);
 
     private static Field getOpenStatementsField() {
-        Field openStatementsField = ConnectionLifecycle.openStatementsField;
+        Field openStatementsField = ConnectionLifecycle.openStatementsField.get();
         if (null == openStatementsField) {
             synchronized (ConnectionLifecycle.class) {
-                openStatementsField = ConnectionLifecycle.openStatementsField;
+                openStatementsField = ConnectionLifecycle.openStatementsField.get();
                 if (null == openStatementsField) {
                     try {
                         openStatementsField = com.mysql.jdbc.ConnectionImpl.class.getDeclaredField("openStatements");
                         openStatementsField.setAccessible(true);
-                        ConnectionLifecycle.openStatementsField = openStatementsField;
+                        ConnectionLifecycle.openStatementsField.set(openStatementsField);
                     } catch (NoSuchFieldException e) {
                         // Unable to retrieve openStatements content.
                         return null;
