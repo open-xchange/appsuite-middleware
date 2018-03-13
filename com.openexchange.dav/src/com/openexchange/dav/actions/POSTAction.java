@@ -184,8 +184,10 @@ public class POSTAction extends DAVAction {
             inputStream = resource.getBody();
             outputStream = response.getOutputStream();
             int length;
-            while ((length = inputStream.read(buffer)) > 0) {
-                outputStream.write(buffer, 0, length);
+            if (inputStream != null) {
+                while ((length = inputStream.read(buffer)) > 0) {
+                    outputStream.write(buffer, 0, length);
+                }
             }
             response.setStatus(HttpServletResponse.SC_OK);
         } catch (IOException e) {

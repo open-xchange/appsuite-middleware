@@ -52,6 +52,7 @@ package com.openexchange.ajax.framework;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import org.junit.After;
 import org.junit.Assert;
@@ -135,10 +136,18 @@ public abstract class AbstractAPIClientSession {
 
     @After
     public void tearDown() throws Exception {
-        for (ApiClient client : apiClients) {
+        Iterator<ApiClient> iterator = apiClients.iterator();
+        while (iterator.hasNext()) {
+            ApiClient client = iterator.next();
             if (client.getSession() != null) {
                 logoutClient(client, true);
             }
+            iterator.remove();
+        }
+        try {
+            client.logout();
+        } catch (Throwable t) {
+            // Ignore
         }
         TestContextPool.backContext(testContext);
     }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,77 +47,54 @@
  *
  */
 
-package com.openexchange.data.conversion.ical.itip;
+package com.openexchange.chronos.recurrence.service;
 
-import java.util.HashSet;
-import java.util.Set;
-
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
 
 /**
- * {@link ITipMessage}
+ * {@link RecurrenceConfig}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.10.0
  */
-public class ITipMessage extends AppointmentWithExceptions {
+public class RecurrenceConfig implements Reloadable {
 
-    private ITipMethod method;
+    private volatile int calculationLimit;
 
-    private String comment;
-
-    private final Set<Object> features = new HashSet<Object>();
-
-    private int owner;
-
-    public ITipMethod getMethod() {
-        return method;
-    }
-
-    public void setMethod(ITipMethod method) {
-        this.method = method;
+    /**
+     * Initializes a new {@link RecurrenceConfig}.
+     *
+     * @param configService A reference to the configuration service for initialization
+     */
+    public RecurrenceConfig(ConfigurationService configService) {
+        super();
+        calculationLimit = readCalculationLimit(configService);
     }
 
     /**
-     * Gets the comment
+     * Gets the internal calculation limit, i.e. the maximum number of calculated recurrences.
      *
-     * @return The comment
+     * @return The calculation limit
      */
-    public String getComment() {
-        return comment;
+    public int getCalculationLimit() {
+        return calculationLimit;
     }
 
-    /**
-     * Sets the comment
-     *
-     * @param comment The comment to set
-     */
-    public void setComment(String comment) {
-        this.comment = comment;
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        calculationLimit = readCalculationLimit(configService);
     }
 
-	public void addFeature(Object feature) {
-		features.add(feature);
-	}
-
-	public boolean hasFeature(Object feature) {
-		return features.contains(feature);
-	}
-
-    /**
-     * Gets the owner
-     *
-     * @return The owner
-     */
-    public int getOwner() {
-        return owner;
+    @Override
+    public Interests getInterests() {
+        return DefaultInterests.builder().propertiesOfInterest("com.openexchange.calendar.maxEventResults").build();
     }
 
-    /**
-     * Sets the owner
-     *
-     * @param owner The owner to set
-     */
-    public void setOwner(int owner) {
-        this.owner = owner;
+    private static int readCalculationLimit(ConfigurationService configService) {
+        return 1 + configService.getIntProperty("com.openexchange.calendar.maxEventResults", 1000);
     }
 
 }

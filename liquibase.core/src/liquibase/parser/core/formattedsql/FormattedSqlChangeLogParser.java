@@ -31,8 +31,8 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     return false;
                 }
                 reader = new BufferedReader(new UtfBomAwareReader(fileStream));
-
-                return reader.readLine().matches("\\-\\-\\s*liquibase formatted.*");
+                String readLine = reader.readLine();
+                return readLine == null ? false : readLine.matches("\\-\\-\\s*liquibase formatted.*");
             } else {
                 return false;
             }

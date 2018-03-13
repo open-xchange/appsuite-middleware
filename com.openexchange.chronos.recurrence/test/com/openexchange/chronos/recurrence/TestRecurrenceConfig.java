@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,48 +47,40 @@
  *
  */
 
-package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
+package com.openexchange.chronos.recurrence;
 
-import java.net.URISyntaxException;
-import com.openexchange.data.conversion.ical.ConversionError;
-import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.UserParticipant;
-import com.openexchange.groupware.contexts.Context;
-import net.fortuna.ical4j.model.ParameterList;
-import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.model.parameter.CuType;
-import net.fortuna.ical4j.model.parameter.PartStat;
-import net.fortuna.ical4j.model.parameter.Role;
-import net.fortuna.ical4j.model.parameter.Rsvp;
-import net.fortuna.ical4j.model.property.Attendee;
+import com.openexchange.chronos.recurrence.service.RecurrenceConfig;
 
 /**
- * {@link RequestParticipants}
+ * {@link TestRecurrenceConfig}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.10.0
  */
-public class RequestParticipants<T extends CalendarComponent, U extends CalendarObject> extends Participants<T, U> {
+public class TestRecurrenceConfig extends RecurrenceConfig {
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RequestParticipants.class);
+    private final int calculationLimit;
+
+    /**
+     * Initializes a new {@link TestRecurrenceConfig}.
+     */
+    public TestRecurrenceConfig() {
+        this(1001);
+    }
+
+    /**
+     * Initializes a new {@link TestRecurrenceConfig}.
+     *
+     * @param calculationLimit The calculation limit to use
+     */
+    public TestRecurrenceConfig(int calculationLimit) {
+        super(null);
+        this.calculationLimit = calculationLimit;
+    }
 
     @Override
-    protected void addUserAttendee(final int index, final UserParticipant userParticipant, final Context ctx, final T component, final U cObj) throws ConversionError {
-        if (userParticipant.getIdentifier() == cObj.getCreatedBy()) {
-            super.addUserAttendee(index, userParticipant, ctx, component, cObj);
-        } else {
-            final Attendee attendee = new Attendee();
-            try {
-                attendee.setValue("mailto:" + resolveUserMail(index, userParticipant, ctx));
-                final ParameterList parameters = attendee.getParameters();
-                parameters.add(CuType.INDIVIDUAL);
-                parameters.add(PartStat.NEEDS_ACTION);
-                parameters.add(Role.REQ_PARTICIPANT);
-                parameters.add(Rsvp.TRUE);
-                component.getProperties().add(attendee);
-            } catch (final URISyntaxException e) {
-                LOG.error("", e);
-            }
-        }
+    public int getCalculationLimit() {
+        return calculationLimit;
     }
 
 }

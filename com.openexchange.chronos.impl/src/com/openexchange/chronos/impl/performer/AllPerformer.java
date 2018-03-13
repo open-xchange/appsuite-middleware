@@ -272,15 +272,20 @@ public class AllPerformer extends AbstractQueryPerformer {
              * only include events in public folders (that have a common folder identifier assigned)
              */
             searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-                .addSearchTerm(new CompositeSearchTerm(CompositeOperation.NOT)
-                    .addSearchTerm(getSearchTerm(EventField.FOLDER_ID, SingleOperation.ISNULL)
-            ));
+                // arithmetic comparison with 'NULL' will also return false
+                .addSearchTerm(searchTerm)
+                .addSearchTerm(getSearchTerm(AttendeeField.FOLDER_ID, SingleOperation.LESS_OR_EQUAL, I(0)))
+                .addSearchTerm(getSearchTerm(EventField.FOLDER_ID, SingleOperation.GREATER_THAN, I(0)))
+            ;
         } else if (false == includePublic && includePrivate) {
             /*
              * only include events in non-public folders (that have no common folder identifier assigned)
              */
             searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-                .addSearchTerm(getSearchTerm(EventField.FOLDER_ID, SingleOperation.ISNULL)
+                .addSearchTerm(searchTerm)
+                .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
+                    .addSearchTerm(getSearchTerm(EventField.FOLDER_ID, SingleOperation.ISNULL))
+                    .addSearchTerm(getSearchTerm(EventField.FOLDER_ID, SingleOperation.EQUALS, I(0)))
             );
         }
         /*

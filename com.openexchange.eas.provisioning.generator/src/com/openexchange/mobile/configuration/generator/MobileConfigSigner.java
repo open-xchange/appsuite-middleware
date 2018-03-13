@@ -84,7 +84,7 @@ public class MobileConfigSigner extends Writer {
 
     private final OutputStream writer;
     private final ProcessBuilder pb;
-    private Process process;
+    Process process;
     private Writer output;
     private InputStream input;
 
@@ -155,7 +155,10 @@ public class MobileConfigSigner extends Writer {
 
         });
         try {
-            final Integer property = MobileConfigProperties.getProperty(Property.OpensslTimeout);
+            Integer property = MobileConfigProperties.getProperty(Property.OpensslTimeout);
+            if (property == null) {
+                property = 3000;
+            }
             submit.get(property, TimeUnit.MILLISECONDS);
         } catch (final InterruptedException e) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html

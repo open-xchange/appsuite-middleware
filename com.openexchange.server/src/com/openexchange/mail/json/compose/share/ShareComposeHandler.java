@@ -711,13 +711,18 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         }
 
         private ThresholdFileHolder transformImage(InputStream image, String mimeType) throws OXException {
+            ThresholdFileHolder transformedImage = null;
             try {
                 ImageTransformations transformed = transformationService.transfom(image).rotate().scale(200, 150, ScaleType.COVER_AND_CROP, true);
-                ThresholdFileHolder transformedImage = new ThresholdFileHolder(false);
+                transformedImage = new ThresholdFileHolder(false);
                 transformedImage.write(transformed.getFullTransformedImage(mimeType).getImageStream());
-                return transformedImage;
+                ThresholdFileHolder retval = transformedImage;
+                transformedImage = null;
+                return retval;
             } catch (IOException e) {
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+            } finally {
+                Streams.close(transformedImage);
             }
         }
 
@@ -730,13 +735,8 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 fileHolder.setContentType("audio/mpeg");
                 fileHolder.setName(id + ".mp3");
                 return mp3CoverExtractor.extractCover(fileHolder);
-            } catch (OXException e) {
-                throw e;
-            }
-            finally {
-                if (null != fileHolder) {
-                    fileHolder.close();
-                }
+            } finally {
+                Streams.close(fileHolder);
             }
         }
 

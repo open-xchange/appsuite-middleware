@@ -49,10 +49,14 @@
 
 package com.openexchange.mail.authenticity.impl.core;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
@@ -69,6 +73,7 @@ import com.openexchange.mail.authenticity.mechanism.DefaultMailAuthenticityMecha
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link CustomRuleChecker}
@@ -78,10 +83,10 @@ import com.openexchange.session.Session;
  */
 public class CustomRuleChecker implements Reloadable{
 
-    private final Map<String, List<Rule>> rulesMap = new ConcurrentHashMap<>();
-    private final LeanConfigurationService leanConfigurationService;
     private static final Property YML_FILE_NAME_PROP = DefaultProperty.valueOf("com.openexchange.mail.authenticity.custom.rules.filename", null);
 
+    private final ConcurrentMap<String, Future<List<Rule>>> rulesMap;
+    private final LeanConfigurationService leanConfigurationService;
 
     /**
      * Initializes a new {@link CustomRuleChecker}.
@@ -89,20 +94,23 @@ public class CustomRuleChecker implements Reloadable{
     public CustomRuleChecker(LeanConfigurationService leanService) {
         super();
         this.leanConfigurationService = leanService;
+        rulesMap = new ConcurrentHashMap<>(32, 0.9F, 1);
     }
 
     /**
-     * Loads the rule from the given yml file and adds it to the rulesMap
-     * @param yml The name of the yml file
-     * @throws OXException In case an error occurs during the initialization. E.g. because of a syntax error in the yml file.
+     * Loads the rule from the given YAML file
+     *
+     * @param yml The name of the YAML file
+     * @return The loaded rules
+     * @throws OXException In case an error occurs during the initialization. E.g. because of a syntax error in the YAML file.
      */
     @SuppressWarnings("unchecked")
-    private void init(String yml) throws OXException {
+    protected List<Rule> load(String yml) throws OXException {
         ConfigurationService configService = Services.getService(ConfigurationService.class);
         Map<String, Object> map = get(configService.getYaml(yml), Map.class, yml);
         map = get(map.get("custom_rules"), Map.class, yml);
-        List<Rule> rules = new ArrayList<>(map.size());
-        for(Object o: map.values()) {
+        ImmutableList.Builder<Rule> rules = ImmutableList.builder();
+        for (Object o : map.values()) {
             Map<String, String> ruleMap = get(o, Map.class, yml);
             rules.add(new Rule( ruleMap.get("spf_status"),
                                 ruleMap.get("spf_domain"),
@@ -110,20 +118,18 @@ public class CustomRuleChecker implements Reloadable{
                                 ruleMap.get("dkim_domain"),
                                 ruleMap.get("result"),
                                 ruleMap.get("from_domain")));
-
         }
-        rulesMap.put(yml, rules);
+        return rules.build();
     }
 
 
     @SuppressWarnings("unchecked")
     private <T> T get(Object o, Class<T> clazz, String ymlName) throws OXException {
-        if(clazz.isInstance(o)) {
-            return (T) o;
-        } else {
-            throw MailAuthenticityExceptionCodes.UNEXPECTED_ERROR.create("The yml structure of file "+ymlName+" is invalid.");
+        if (false == clazz.isInstance(o)) {
+            throw MailAuthenticityExceptionCodes.UNEXPECTED_ERROR.create("The YAML structure of file " + ymlName + " is invalid.");
         }
 
+        return (T) o;
     }
 
     /**
@@ -134,34 +140,41 @@ public class CustomRuleChecker implements Reloadable{
      * @throws OXException
      */
     public void check(Session session, MailAuthenticityResult result) throws OXException {
-        String ymlName = getYmlFile(session);
-        if(ymlName == null) {
+        final String ymlName = getYmlFile(session);
+        if (ymlName == null) {
             return;
         }
-        List<Rule> rules = rulesMap.get(ymlName);
-        if(rules == null) {
-            synchronized (rulesMap) {
-                rules = rulesMap.get(ymlName);
-                if(rules == null) {
-                    init(ymlName);
-                    rules = rulesMap.get(ymlName);
+
+        Future<List<Rule>> f = rulesMap.get(ymlName);
+        if (f == null) {
+            FutureTask<List<Rule>> ft = new FutureTask<List<Rule>>(new Callable<List<Rule>>() {
+
+                @Override
+                public List<Rule> call() throws Exception {
+                    return load(ymlName);
                 }
+            });
+            f = rulesMap.putIfAbsent(ymlName, ft);
+            if (null == f) {
+                f = ft;
+                ft.run();
             }
         }
-        for(Rule r: rules) {
-            if(r.match(result)) {
+
+        List<Rule> rules = ThreadPools.getFrom(f);
+        for (Rule r : rules) {
+            if (r.match(result)) {
                 result.setStatus(MailAuthenticityStatus.valueOf(r.getResult().toUpperCase()));
                 return;
             }
         }
     }
 
-
     /**
-     * Gets the name of the yml file for this user.
+     * Gets the name of the YAML file for session-associated user.
      *
-     * @param session The user session
-     * @return The yml filename
+     * @param session The session providing user data
+     * @return The YAML file name
      */
     private String getYmlFile(Session session) {
         return leanConfigurationService.getProperty(session.getUserId(), session.getContextId(), YML_FILE_NAME_PROP);
@@ -177,6 +190,8 @@ public class CustomRuleChecker implements Reloadable{
         return Reloadables.getInterestsForAll();
     }
 
+    // --------------------------------------------------------------------------------------------------------------------------------------------------------------
+
     /**
      *
      * {@link Rule} defines a custom mail authenticity rule
@@ -184,7 +199,7 @@ public class CustomRuleChecker implements Reloadable{
      * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
      * @since v7.10.0
      */
-    private class Rule {
+    private static class Rule {
 
         private final String spfStatus;
         private final String spfDomain;
@@ -204,7 +219,7 @@ public class CustomRuleChecker implements Reloadable{
          * @param result The new result in case of match or null to fall-back to 'PASS'
          * @throws OXException
          */
-        public Rule(String spfStatus, String spfDomain, String dkimStatus, String dkimDomain, String fromDomain, String result) throws OXException {
+        Rule(String spfStatus, String spfDomain, String dkimStatus, String dkimDomain, String fromDomain, String result) throws OXException {
             super();
             this.spfStatus = spfStatus;
             this.spfDomain = spfDomain;
@@ -213,11 +228,11 @@ public class CustomRuleChecker implements Reloadable{
             this.fromDomain = fromDomain;
             this.result = result;
 
-            if((spfStatus != null && spfDomain == null) || (dkimStatus!=null && dkimDomain==null)) {
+            if ((spfStatus != null && spfDomain == null) || (dkimStatus != null && dkimDomain == null)) {
                 throw MailAuthenticityExceptionCodes.UNEXPECTED_ERROR.create("The mail authenticity custom rule is invalid.");
             }
 
-            if(spfStatus == null && dkimStatus==null) {
+            if (spfStatus == null && dkimStatus == null) {
                 throw MailAuthenticityExceptionCodes.UNEXPECTED_ERROR.create("The mail authenticity custom rule is invalid. Missing either a spf value or a dkim value.");
             }
         }
@@ -229,7 +244,7 @@ public class CustomRuleChecker implements Reloadable{
         @SuppressWarnings("unchecked")
         public boolean match(MailAuthenticityResult result) {
             List<MailAuthenticityMechanismResult> results = result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
-            if(results.isEmpty()) {
+            if (null == results || results.isEmpty()) {
                 return false;
             }
 
@@ -237,7 +252,7 @@ public class CustomRuleChecker implements Reloadable{
                 boolean spfFound = false;
                 for (MailAuthenticityMechanismResult mechResult : results) {
 
-                   if (DefaultMailAuthenticityMechanism.SPF.equals(mechResult.getMechanism())) {
+                    if (DefaultMailAuthenticityMechanism.SPF.equals(mechResult.getMechanism())) {
                         if (spfStatus != null && !mechResult.getResult().getDisplayName().equalsIgnoreCase(spfStatus)) {
                             return false;
                         }
@@ -248,7 +263,7 @@ public class CustomRuleChecker implements Reloadable{
                         break;
                     }
                 }
-                if(!spfFound) {
+                if (!spfFound) {
                     return false;
                 }
             }
@@ -256,29 +271,29 @@ public class CustomRuleChecker implements Reloadable{
             if (dkimStatus != null) {
                 boolean skimFound = false;
                 for (MailAuthenticityMechanismResult mechResult : results) {
-                   if (DefaultMailAuthenticityMechanism.DKIM.equals(mechResult.getMechanism())) {
-                       if (dkimStatus != null && !mechResult.getResult().getDisplayName().equalsIgnoreCase(dkimStatus)) {
-                           return false;
-                       }
-                       if (dkimDomain != null && !mechResult.getDomain().equalsIgnoreCase(dkimDomain)) {
-                           return false;
-                       }
+                    if (DefaultMailAuthenticityMechanism.DKIM.equals(mechResult.getMechanism())) {
+                        if (dkimStatus != null && !mechResult.getResult().getDisplayName().equalsIgnoreCase(dkimStatus)) {
+                            return false;
+                        }
+                        if (dkimDomain != null && !mechResult.getDomain().equalsIgnoreCase(dkimDomain)) {
+                            return false;
+                        }
                         skimFound = true;
                         break;
                     }
                 }
-                if(!skimFound) {
+                if (!skimFound) {
                     return false;
                 }
             }
             Object attribute = result.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN);
-            if(attribute != null && fromDomain!=null && !attribute.toString().equalsIgnoreCase(fromDomain)) {
+            if (attribute != null && fromDomain != null && !attribute.toString().equalsIgnoreCase(fromDomain)) {
                 return false;
             }
             return true;
 
         }
+    } // End of class Rule
 
-    }
 }
 

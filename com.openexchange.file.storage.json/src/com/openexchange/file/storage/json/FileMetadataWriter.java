@@ -225,10 +225,10 @@ public class FileMetadataWriter {
                     List<Object> fieldValues = null != additionalFieldValues ? additionalFieldValues.get(Integer.valueOf(column)) : null;
                     if (null != fieldValues) {
                         AdditionalFileField additionalFileField = fieldCollector.getField(column);
-                        if (null != additionalFieldValues) {                            
+                        if (null != additionalFileField) {
                             fileArray.put(additionalFileField.renderJSON(request.getRequestData(), fieldValues.get(i)));
                         } else {
-                            fileArray.put(JSONObject.NULL);    
+                            fileArray.put(JSONObject.NULL);
                         }
                     } else {
                         fileArray.put(JSONObject.NULL);

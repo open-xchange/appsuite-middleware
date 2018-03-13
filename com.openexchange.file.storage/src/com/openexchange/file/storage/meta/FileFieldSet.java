@@ -89,7 +89,10 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
 
     @Override
     public Object created(final Object... args) {
-        md(args).setCreated(date(1, args));
+        Date date = date(1, args);
+        if (date != null) {
+            md(args).setCreated(date);
+        }
         return ret(args);
     }
 

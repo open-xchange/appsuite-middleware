@@ -56,6 +56,7 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.session.actions.ChangeIPRequest;
 import com.openexchange.ajax.session.actions.ChangeIPResponse;
 import com.openexchange.ajax.session.actions.RefreshSecretRequest;
+import com.openexchange.ajax.session.actions.RefreshSecretResponse;
 
 /**
  * {@link ChangeIPTest}
@@ -67,12 +68,12 @@ public final class ChangeIPTest extends AbstractAJAXSession {
     /**
      * Through noipcheck.cnf a whitelist for localhost is set. The server and the tests are run on the same machine.
      * Therefore the RefreshSecret request should 'reset' the ip address and should not fail.
-     * 
+     *
      * A 'negative' test can not be done. If you change the config for noipcheck.cnf the client can no longer log out.
      * After changing the IP the client needs to provide the new IP to log itself out or change the IP anew.
      * We can not set the IP of the AJAXClient. So there would be a resource leak that could interact with other tests.
      * So no 'negative' case testing ...
-     * 
+     *
      * @throws Throwable In case of failed test
      */
     @Test
@@ -83,6 +84,7 @@ public final class ChangeIPTest extends AbstractAJAXSession {
         assertFalse("Change IP response contains an exception.", response1.hasError());
         assertTrue("Change IP response contains wrong data.", response1.hasCorrectResponse());
         final RefreshSecretRequest request2 = new RefreshSecretRequest(true);
-        getClient().execute(request2);
+        final RefreshSecretResponse response2 = getClient().execute(request2);
+        assertTrue("Refresh request should be denied because of wrong IP.", response2.hasError());
     }
 }

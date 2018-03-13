@@ -584,6 +584,8 @@ public final class MailProperties implements IMailProperties {
 
     private boolean allowNestedDefaultFolderOnAltNamespace;
 
+    private boolean hideInlineImages;
+
     private String defaultMimeCharset;
 
     private boolean ignoreSubscription;
@@ -651,6 +653,7 @@ public final class MailProperties implements IMailProperties {
         loaded = new AtomicBoolean();
         defaultSeparator = '/';
         ranges = HostList.EMPTY;
+        hideInlineImages = true;
     }
 
     /**
@@ -713,6 +716,7 @@ public final class MailProperties implements IMailProperties {
         bodyDisplaySize = 10485760; // 10 MB
         userFlagsEnabled = false;
         allowNestedDefaultFolderOnAltNamespace = false;
+        hideInlineImages = true;
         defaultMimeCharset = null;
         ignoreSubscription = false;
         hidePOP3StorageFolders = false;
@@ -745,7 +749,11 @@ public final class MailProperties implements IMailProperties {
 
     private void loadProperties0() throws OXException {
         final StringBuilder logBuilder = new StringBuilder(1024);
-        logBuilder.append("\nLoading global mail properties...\n");
+        List<Object> args = new ArrayList<>(16);
+
+        logBuilder.append("{}Loading global mail properties...{}");
+        args.add(Strings.getLineSeparator());
+        args.add(Strings.getLineSeparator());
 
         final ConfigurationService configuration = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
 
@@ -760,7 +768,9 @@ public final class MailProperties implements IMailProperties {
                     "Unknown value in property \"com.openexchange.mail.loginSource\": ").append(loginStr).toString());
             }
             this.loginSource = loginSource;
-            logBuilder.append("\tLogin Source: ").append(this.loginSource.toString()).append('\n');
+            logBuilder.append("\tLogin Source: {}{}");
+            args.add(this.loginSource.toString());
+            args.add(Strings.getLineSeparator());
         }
 
         {
@@ -774,7 +784,9 @@ public final class MailProperties implements IMailProperties {
                     "Unknown value in property \"com.openexchange.mail.passwordSource\": ").append(pwStr).toString());
             }
             passwordSource = pwSource;
-            logBuilder.append("\tPassword Source: ").append(passwordSource.toString()).append('\n');
+            logBuilder.append("\tPassword Source: {}{}");
+            args.add(this.passwordSource.toString());
+            args.add(Strings.getLineSeparator());
         }
 
         {
@@ -788,7 +800,9 @@ public final class MailProperties implements IMailProperties {
                     "Unknown value in property \"com.openexchange.mail.mailServerSource\": ").append(mailSrcStr).toString());
             }
             this.mailServerSource = mailServerSource;
-            logBuilder.append("\tMail Server Source: ").append(this.mailServerSource.toString()).append('\n');
+            logBuilder.append("\tMail Server Source: {}{}");
+            args.add(this.mailServerSource.toString());
+            args.add(Strings.getLineSeparator());
         }
 
         {
@@ -802,7 +816,9 @@ public final class MailProperties implements IMailProperties {
                     "Unknown value in property \"com.openexchange.mail.transportServerSource\": ").append(transSrcStr).toString());
             }
             this.transportServerSource = transportServerSource;
-            logBuilder.append("\tTransport Server Source: ").append(this.transportServerSource.toString()).append('\n');
+            logBuilder.append("\tTransport Server Source: {}{}");
+            args.add(this.transportServerSource.toString());
+            args.add(Strings.getLineSeparator());
         }
 
         {
@@ -828,17 +844,20 @@ public final class MailProperties implements IMailProperties {
             }
         }
 
-        final String fallbackPrefix = "\". Setting to fallback: ";
         {
             final String mailFetchLimitStr = configuration.getProperty("com.openexchange.mail.mailFetchLimit", "1000").trim();
             try {
                 mailFetchLimit = Integer.parseInt(mailFetchLimitStr);
-                logBuilder.append("\tMail Fetch Limit: ").append(mailFetchLimit).append('\n');
+                logBuilder.append("\tMail Fetch Limit: {}{}");
+                args.add(mailFetchLimit);
+                args.add(Strings.getLineSeparator());
             } catch (final NumberFormatException e) {
                 LOG.debug("", e);
                 mailFetchLimit = 1000;
-                logBuilder.append("\tMail Fetch Limit: Non parseable value \"").append(mailFetchLimitStr).append(fallbackPrefix).append(
-                    mailFetchLimit).append('\n');
+                logBuilder.append("\tMail Fetch Limit: Non parseable value \"{}\". Setting to fallback: {}{}");
+                args.add(mailFetchLimitStr);
+                args.add(mailFetchLimit);
+                args.add(Strings.getLineSeparator());
             }
         }
 
@@ -846,12 +865,16 @@ public final class MailProperties implements IMailProperties {
             final String bodyDisplaySizeStr = configuration.getProperty("com.openexchange.mail.bodyDisplaySizeLimit", "10485760").trim();
             try {
                 bodyDisplaySize = Integer.parseInt(bodyDisplaySizeStr);
-                logBuilder.append("\tBody Display Size Limit: ").append(bodyDisplaySize).append('\n');
+                logBuilder.append("\tBody Display Size Limit: {}{}");
+                args.add(bodyDisplaySize);
+                args.add(Strings.getLineSeparator());
             } catch (final NumberFormatException e) {
                 LOG.debug("", e);
                 bodyDisplaySize = 10485760;
-                logBuilder.append("\tBody Display Size Limit: Non parseable value \"").append(bodyDisplaySizeStr).append(
-                    fallbackPrefix).append(bodyDisplaySize).append('\n');
+                logBuilder.append("\tBody Display Size Limit: Non parseable value \"{}\". Setting to fallback: {}{}");
+                args.add(bodyDisplaySizeStr);
+                args.add(bodyDisplaySize);
+                args.add(Strings.getLineSeparator());
             }
         }
 
@@ -859,12 +882,16 @@ public final class MailProperties implements IMailProperties {
             final String tmp = configuration.getProperty("com.openexchange.mail.mailAccessCacheShrinkerSeconds", "3").trim();
             try {
                 mailAccessCacheShrinkerSeconds = Integer.parseInt(tmp);
-                logBuilder.append("\tMail Access Cache shrinker-interval seconds: ").append(mailAccessCacheShrinkerSeconds).append('\n');
+                logBuilder.append("\tMail Access Cache shrinker-interval seconds: {}{}");
+                args.add(mailAccessCacheShrinkerSeconds);
+                args.add(Strings.getLineSeparator());
             } catch (final NumberFormatException e) {
                 LOG.debug("", e);
                 mailAccessCacheShrinkerSeconds = 3;
-                logBuilder.append("\tMail Access Cache shrinker-interval seconds: Non parseable value \"").append(tmp).append(
-                    fallbackPrefix).append(mailAccessCacheShrinkerSeconds).append('\n');
+                logBuilder.append("\tMail Access Cache shrinker-interval seconds: Non parseable value \"{}\". Setting to fallback: {}{}");
+                args.add(tmp);
+                args.add(mailAccessCacheShrinkerSeconds);
+                args.add(Strings.getLineSeparator());
             }
         }
 
@@ -872,26 +899,41 @@ public final class MailProperties implements IMailProperties {
             final String tmp = configuration.getProperty("com.openexchange.mail.mailAccessCacheIdleSeconds", "4").trim();
             try {
                 mailAccessCacheIdleSeconds = Integer.parseInt(tmp);
-                logBuilder.append("\tMail Access Cache idle seconds: ").append(mailAccessCacheIdleSeconds).append('\n');
+                logBuilder.append("\tMail Access Cache idle seconds: {}{}");
+                args.add(mailAccessCacheIdleSeconds);
+                args.add(Strings.getLineSeparator());
             } catch (final NumberFormatException e) {
                 LOG.debug("", e);
                 mailAccessCacheIdleSeconds = 4;
-                logBuilder.append("\tMail Access Cache idle seconds: Non parseable value \"").append(tmp).append(fallbackPrefix).append(
-                    mailAccessCacheIdleSeconds).append('\n');
+                logBuilder.append("\tMail Access Cache idle seconds: Non parseable value \"{}\". Setting to fallback: {}{}");
+                args.add(tmp);
+                args.add(mailAccessCacheIdleSeconds);
+                args.add(Strings.getLineSeparator());
             }
         }
 
         {
             final String userFlagsStr = configuration.getProperty("com.openexchange.mail.userFlagsEnabled", "false").trim();
             userFlagsEnabled = Boolean.parseBoolean(userFlagsStr);
-            logBuilder.append("\tUser Flags Enabled: ").append(userFlagsEnabled).append('\n');
+            logBuilder.append("\tUser Flags Enabled: {}{}");
+            args.add(userFlagsEnabled);
+            args.add(Strings.getLineSeparator());
         }
 
         {
             final String allowNestedStr = configuration.getProperty("com.openexchange.mail.allowNestedDefaultFolderOnAltNamespace", "false").trim();
             allowNestedDefaultFolderOnAltNamespace = Boolean.parseBoolean(allowNestedStr);
-            logBuilder.append("\tAllow Nested Default Folders on AltNamespace: ").append(allowNestedDefaultFolderOnAltNamespace).append(
-                '\n');
+            logBuilder.append("\tAllow Nested Default Folders on AltNamespace: {}{}");
+            args.add(allowNestedDefaultFolderOnAltNamespace);
+            args.add(Strings.getLineSeparator());
+        }
+
+        {
+            final String hideInlineImagesStr = configuration.getProperty("com.openexchange.mail.hideInlineImages", "true").trim();
+            hideInlineImages = Boolean.parseBoolean(hideInlineImagesStr);
+            logBuilder.append("\tHide Inline Images: {}{}");
+            args.add(hideInlineImages);
+            args.add(Strings.getLineSeparator());
         }
 
         {
@@ -902,13 +944,17 @@ public final class MailProperties implements IMailProperties {
             try {
                 Charset.forName(defaultMimeCharsetStr);
                 defaultMimeCharset = defaultMimeCharsetStr;
-                logBuilder.append("\tDefault MIME Charset: ").append(defaultMimeCharset).append('\n');
+                logBuilder.append("\tDefault MIME Charset: {}{}");
+                args.add(defaultMimeCharset);
+                args.add(Strings.getLineSeparator());
             } catch (final Throwable t) {
                 ExceptionUtils.handleThrowable(t);
                 LOG.debug("", t);
                 defaultMimeCharset = "UTF-8";
-                logBuilder.append("\tDefault MIME Charset: Unsupported charset \"").append(defaultMimeCharsetStr).append(fallbackPrefix).append(
-                    defaultMimeCharset).append('\n');
+                logBuilder.append("\tDefault MIME Charset: Unsupported charset \"{}\". Setting to fallback: {}{}");
+                args.add(defaultMimeCharsetStr);
+                args.add(defaultMimeCharset);
+                args.add(Strings.getLineSeparator());
             }
             /*
              * Add to system properties, too
@@ -919,43 +965,57 @@ public final class MailProperties implements IMailProperties {
         {
             final String defaultMailProviderStr = configuration.getProperty("com.openexchange.mail.defaultMailProvider", "imap").trim();
             defaultMailProvider = defaultMailProviderStr;
-            logBuilder.append("\tDefault Mail Provider: ").append(defaultMailProvider).append('\n');
+            logBuilder.append("\tDefault Mail Provider: {}{}");
+            args.add(defaultMailProvider);
+            args.add(Strings.getLineSeparator());
         }
 
         {
             final String adminMailLoginEnabledStr = configuration.getProperty("com.openexchange.mail.adminMailLoginEnabled", "false").trim();
             adminMailLoginEnabled = Boolean.parseBoolean(adminMailLoginEnabledStr);
-            logBuilder.append("\tAdmin Mail Login Enabled: ").append(adminMailLoginEnabled).append('\n');
+            logBuilder.append("\tAdmin Mail Login Enabled: {}{}");
+            args.add(adminMailLoginEnabled);
+            args.add(Strings.getLineSeparator());
         }
 
         {
             final String ignoreSubsStr = configuration.getProperty("com.openexchange.mail.ignoreSubscription", "false").trim();
             ignoreSubscription = Boolean.parseBoolean(ignoreSubsStr);
-            logBuilder.append("\tIgnore Folder Subscription: ").append(ignoreSubscription).append('\n');
+            logBuilder.append("\tIgnore Folder Subscription: {}{}");
+            args.add(ignoreSubscription);
+            args.add(Strings.getLineSeparator());
         }
 
         {
             final String preferSentDateStr = configuration.getProperty("com.openexchange.mail.preferSentDate", "false").trim();
             preferSentDate = Boolean.parseBoolean(preferSentDateStr);
-            logBuilder.append("\tPrefer Sent Date: ").append(preferSentDate).append('\n');
+            logBuilder.append("\tPrefer Sent Date: {}{}");
+            args.add(preferSentDate);
+            args.add(Strings.getLineSeparator());
         }
 
         {
             final String tmp = configuration.getProperty("com.openexchange.mail.hidePOP3StorageFolders", "false").trim();
             hidePOP3StorageFolders = Boolean.parseBoolean(tmp);
-            logBuilder.append("\tHide POP3 Storage Folders: ").append(hidePOP3StorageFolders).append('\n');
+            logBuilder.append("\tHide POP3 Storage Folders: {}{}");
+            args.add(hidePOP3StorageFolders);
+            args.add(Strings.getLineSeparator());
         }
 
         {
             final String supSubsStr = configuration.getProperty("com.openexchange.mail.supportSubscription", "true").trim();
             supportSubscription = Boolean.parseBoolean(supSubsStr);
-            logBuilder.append("\tSupport Subscription: ").append(supportSubscription).append('\n');
+            logBuilder.append("\tSupport Subscription: {}{}");
+            args.add(supportSubscription);
+            args.add(Strings.getLineSeparator());
         }
 
         {
             String tmp = configuration.getProperty("com.openexchange.mail.addClientIPAddress", "false").trim();
             addClientIPAddress = Boolean.parseBoolean(tmp);
-            logBuilder.append("\tAdd Client IP Address: ").append(addClientIPAddress).append('\n');
+            logBuilder.append("\tAdd Client IP Address: {}{}");
+            args.add(addClientIPAddress);
+            args.add(Strings.getLineSeparator());
 
             if (addClientIPAddress) {
                 tmp = configuration.getProperty("com.openexchange.mail.clientIPAddressPattern");
@@ -965,10 +1025,14 @@ public final class MailProperties implements IMailProperties {
                     tmp = tmp.trim();
                     try {
                         ipAddressRenderer = IpAddressRenderer.createRendererFor(tmp);
-                        logBuilder.append("\tIP Address Pattern: Pattern syntax \u0060\u0060").append(tmp).append("\u00b4\u00b4 accepted.").append('\n');
+                        logBuilder.append("\tIP Address Pattern: Pattern syntax \"{}\" accepted.{}");
+                        args.add(tmp);
+                        args.add(Strings.getLineSeparator());
                     } catch (Exception e) {
                         LOG.debug("", e);
-                        logBuilder.append("\tIP Address Pattern: Unsupported pattern syntax \"").append(tmp).append("\". Using simple renderer.").append('\n');
+                        logBuilder.append("\tIP Address Pattern: Unsupported pattern syntax \"{}\". Using simple renderer.{}");
+                        args.add(tmp);
+                        args.add(Strings.getLineSeparator());
                     }
                 }
             }
@@ -978,11 +1042,14 @@ public final class MailProperties implements IMailProperties {
             final char defaultSep = configuration.getProperty("com.openexchange.mail.defaultSeparator", "/").trim().charAt(0);
             if (defaultSep <= 32) {
                 defaultSeparator = '/';
-                logBuilder.append("\tDefault Separator: Invalid separator (decimal ascii value=").append((int) defaultSep).append(
-                    "). Setting to fallback: ").append(defaultSeparator).append('\n');
+                logBuilder.append("\tDefault Separator: Invalid separator (decimal ascii value={}). Setting to fallback: {}{}");
+                args.add((int) defaultSep);
+                args.add(Strings.getLineSeparator());
             } else {
                 defaultSeparator = defaultSep;
-                logBuilder.append("\tDefault Separator: ").append(defaultSeparator).append('\n');
+                logBuilder.append("\tDefault Separator: {}{}");
+                args.add(defaultSeparator);
+                args.add(Strings.getLineSeparator());
             }
         }
 
@@ -990,30 +1057,39 @@ public final class MailProperties implements IMailProperties {
             final String quoteColors = configuration.getProperty("com.openexchange.mail.quoteLineColors", "#666666").trim();
             if (Pattern.matches("((#[0-9a-fA-F&&[^,]]{6})(?:\r?\n|\\z|\\s*,\\s*))+", quoteColors)) {
                 quoteLineColors = quoteColors.split("\\s*,\\s*");
-                logBuilder.append("\tHTML Quote Colors: ").append(quoteColors).append('\n');
+                logBuilder.append("\tHTML Quote Colors: {}{}");
+                args.add(quoteColors);
+                args.add(Strings.getLineSeparator());
             } else {
                 quoteLineColors = new String[] { "#666666" };
-                logBuilder.append("\tHTML Quote Colors: Invalid sequence of colors \"").append(quoteColors).append(
-                    "\". Setting to fallback: #666666").append('\n');
+                logBuilder.append("\tHTML Quote Colors: Invalid sequence of colors \"{}\". Setting to fallback: #666666{}");
+                args.add(quoteColors);
+                args.add(Strings.getLineSeparator());
             }
         }
 
         {
             final String watcherEnabledStr = configuration.getProperty("com.openexchange.mail.watcherEnabled", "false").trim();
             watcherEnabled = Boolean.parseBoolean(watcherEnabledStr);
-            logBuilder.append("\tWatcher Enabled: ").append(watcherEnabled).append('\n');
+            logBuilder.append("\tWatcher Enabled: {}{}");
+            args.add(watcherEnabled);
+            args.add(Strings.getLineSeparator());
         }
 
         {
             final String watcherTimeStr = configuration.getProperty("com.openexchange.mail.watcherTime", "60000").trim();
             try {
                 watcherTime = Integer.parseInt(watcherTimeStr);
-                logBuilder.append("\tWatcher Time: ").append(watcherTime).append('\n');
+                logBuilder.append("\tWatcher Time: {}{}");
+                args.add(watcherTime);
+                args.add(Strings.getLineSeparator());
             } catch (final NumberFormatException e) {
                 LOG.debug("", e);
                 watcherTime = 60000;
-                logBuilder.append("\tWatcher Time: Invalid value \"").append(watcherTimeStr).append(fallbackPrefix).append(watcherTime).append(
-                    '\n');
+                logBuilder.append("\tWatcher Time: Invalid value \"{}\". Setting to fallback: {}{}");
+                args.add(watcherTimeStr);
+                args.add(watcherTime);
+                args.add(Strings.getLineSeparator());
             }
         }
 
@@ -1021,19 +1097,25 @@ public final class MailProperties implements IMailProperties {
             final String watcherFeqStr = configuration.getProperty("com.openexchange.mail.watcherFrequency", "10000").trim();
             try {
                 watcherFrequency = Integer.parseInt(watcherFeqStr);
-                logBuilder.append("\tWatcher Frequency: ").append(watcherFrequency).append('\n');
+                logBuilder.append("\tWatcher Frequency: {}{}");
+                args.add(watcherFrequency);
+                args.add(Strings.getLineSeparator());
             } catch (final NumberFormatException e) {
                 LOG.debug("", e);
                 watcherFrequency = 10000;
-                logBuilder.append("\tWatcher Frequency: Invalid value \"").append(watcherFeqStr).append(fallbackPrefix).append(
-                    watcherFrequency).append('\n');
+                logBuilder.append("\tWatcher Frequency: Invalid value \"{}\". Setting to fallback: {}{}");
+                args.add(watcherFeqStr);
+                args.add(watcherFrequency);
+                args.add(Strings.getLineSeparator());
             }
         }
 
         {
             final String watcherShallCloseStr = configuration.getProperty("com.openexchange.mail.watcherShallClose", "false").trim();
             watcherShallClose = Boolean.parseBoolean(watcherShallCloseStr);
-            logBuilder.append("\tWatcher Shall Close: ").append(watcherShallClose).append('\n');
+            logBuilder.append("\tWatcher Shall Close: {}{}");
+            args.add(watcherShallClose);
+            args.add(Strings.getLineSeparator());
         }
 
         {
@@ -1048,19 +1130,25 @@ public final class MailProperties implements IMailProperties {
         {
             final String rateLimitPrimaryOnlyStr = configuration.getProperty("com.openexchange.mail.rateLimitPrimaryOnly", "true").trim();
             rateLimitPrimaryOnly = Boolean.parseBoolean(rateLimitPrimaryOnlyStr);
-            logBuilder.append("\tRate limit primary only: ").append(rateLimitPrimaryOnly).append('\n');
+            logBuilder.append("\tRate limit primary only: {}{}");
+            args.add(rateLimitPrimaryOnly);
+            args.add(Strings.getLineSeparator());
         }
 
         {
             final String rateLimitStr = configuration.getProperty("com.openexchange.mail.rateLimit", "0").trim();
             try {
                 rateLimit = Integer.parseInt(rateLimitStr);
-                logBuilder.append("\tSent Rate limit: ").append(rateLimit).append('\n');
+                logBuilder.append("\tSent Rate limit: {}{}");
+                args.add(rateLimit);
+                args.add(Strings.getLineSeparator());
             } catch (final NumberFormatException e) {
                 LOG.debug("", e);
                 rateLimit = 0;
-                logBuilder.append("\tSend Rate limit: Invalid value \"").append(rateLimitStr).append("\". Setting to fallback ").append(
-                    rateLimit).append('\n');
+                logBuilder.append("\tSend Rate limit: Invalid value \"{}\". Setting to fallback {}{}");
+                args.add(rateLimitStr);
+                args.add(rateLimit);
+                args.add(Strings.getLineSeparator());
 
             }
         }
@@ -1072,19 +1160,25 @@ public final class MailProperties implements IMailProperties {
                 ranges = HostList.valueOf(tmp);
             }
             this.ranges = ranges;
-            logBuilder.append("\tWhite-listed from send rate limit: ").append(ranges).append('\n');
+            logBuilder.append("\tWhite-listed from send rate limit: {}{}");
+            args.add(ranges);
+            args.add(Strings.getLineSeparator());
         }
 
         {
             final String tmp = configuration.getProperty("com.openexchange.mail.archive.defaultDays", "90").trim();
             try {
                 defaultArchiveDays = Strings.parseInt(tmp);
-                logBuilder.append("\tDefault archive days: ").append(defaultArchiveDays).append('\n');
+                logBuilder.append("\tDefault archive days: {}{}");
+                args.add(defaultArchiveDays);
+                args.add(Strings.getLineSeparator());
             } catch (final NumberFormatException e) {
                 LOG.debug("", e);
                 defaultArchiveDays = 90;
-                logBuilder.append("\tDefault archive days: Invalid value \"").append(tmp).append("\". Setting to fallback ").append(
-                    defaultArchiveDays).append('\n');
+                logBuilder.append("\tDefault archive days: Invalid value \"{}\". Setting to fallback {}{}");
+                args.add(tmp);
+                args.add(defaultArchiveDays);
+                args.add(Strings.getLineSeparator());
 
             }
         }
@@ -1093,12 +1187,16 @@ public final class MailProperties implements IMailProperties {
             final String maxToCcBccStr = configuration.getProperty("com.openexchange.mail.maxToCcBcc", "0").trim();
             try {
                 maxToCcBcc = Integer.parseInt(maxToCcBccStr);
-                logBuilder.append("\tmaxToCcBcc: ").append(maxToCcBcc).append('\n');
+                logBuilder.append("\tmaxToCcBcc: {}{}");
+                args.add(maxToCcBcc);
+                args.add(Strings.getLineSeparator());
             } catch (final NumberFormatException e) {
                 LOG.debug("", e);
                 maxToCcBcc = 0;
-                logBuilder.append("\tmaxToCcBcc: Invalid value \"").append(maxToCcBccStr).append("\". Setting to fallback ").append(
-                    maxToCcBcc).append('\n');
+                logBuilder.append("\tmaxToCcBcc: Invalid value \"{}\". Setting to fallback {}{}");
+                args.add(maxToCcBccStr);
+                args.add(maxToCcBcc);
+                args.add(Strings.getLineSeparator());
 
             }
         }
@@ -1107,12 +1205,16 @@ public final class MailProperties implements IMailProperties {
             final String maxDriveAttachmentsStr = configuration.getProperty("com.openexchange.mail.maxDriveAttachments", "20").trim();
             try {
                 maxDriveAttachments = Integer.parseInt(maxDriveAttachmentsStr);
-                logBuilder.append("\tmaxDriveAttachments: ").append(maxDriveAttachments).append('\n');
+                logBuilder.append("\tmaxDriveAttachments: {}{}");
+                args.add(maxDriveAttachments);
+                args.add(Strings.getLineSeparator());
             } catch (final NumberFormatException e) {
                 LOG.debug("", e);
                 maxDriveAttachments = 20;
-                logBuilder.append("\tmaxDriveAttachments: Invalid value \"").append(maxDriveAttachmentsStr).append("\". Setting to fallback ").append(
-                    maxDriveAttachments).append('\n');
+                logBuilder.append("\tmaxDriveAttachments: Invalid value \"{}\". Setting to fallback {}{}");
+                args.add(maxDriveAttachmentsStr);
+                args.add(maxDriveAttachments);
+                args.add(Strings.getLineSeparator());
 
             }
         }
@@ -1132,7 +1234,9 @@ public final class MailProperties implements IMailProperties {
                     javaMailProperties = null;
                 }
             }
-            logBuilder.append("\tJavaMail Properties loaded: ").append(javaMailProperties != null).append('\n');
+            logBuilder.append("\tJavaMail Properties loaded: {}{}");
+            args.add(javaMailProperties != null);
+            args.add(Strings.getLineSeparator());
         }
 
         {
@@ -1148,7 +1252,9 @@ public final class MailProperties implements IMailProperties {
         {
             final String supportMsisdnAddressesStr = configuration.getProperty("com.openexchange.mail.supportMsisdnAddresses", "false").trim();
             supportMsisdnAddresses = Boolean.parseBoolean(supportMsisdnAddressesStr);
-            logBuilder.append("\tSupports MSISDN addresses: ").append(supportMsisdnAddresses).append('\n');
+            logBuilder.append("\tSupports MSISDN addresses: {}{}");
+            args.add(supportMsisdnAddresses);
+            args.add(Strings.getLineSeparator());
         }
 
         {
@@ -1157,7 +1263,7 @@ public final class MailProperties implements IMailProperties {
         }
 
         logBuilder.append("Global mail properties successfully loaded!");
-        LOG.info(logBuilder.toString());
+        LOG.info(logBuilder.toString(), args.toArray(new Object[args.size()]));
     }
 
     /**
@@ -1207,6 +1313,11 @@ public final class MailProperties implements IMailProperties {
         } finally {
             Streams.close(in);
         }
+    }
+
+    @Override
+    public boolean hideInlineImages() {
+        return hideInlineImages;
     }
 
     @Override

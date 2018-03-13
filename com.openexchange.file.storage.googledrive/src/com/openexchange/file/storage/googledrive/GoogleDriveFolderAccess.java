@@ -77,6 +77,7 @@ import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.googledrive.access.GoogleDriveOAuthAccess;
 import com.openexchange.file.storage.googledrive.osgi.Services;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 
 /**
@@ -102,6 +103,9 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
         userId = session.getUserId();
         accountDisplayName = account.getDisplayName();
         ConfigViewFactory viewFactory = Services.optService(ConfigViewFactory.class);
+        if (null == viewFactory) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
         useOptimisticSubfolderDetection = ConfigViews.getDefinedBoolPropertyFrom("com.openexchange.file.storage.googledrive.useOptimisticSubfolderDetection", true, view);
 

@@ -154,7 +154,6 @@ import com.openexchange.groupware.contact.datasource.ContactDataSource;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.delete.contextgroup.DeleteContextGroupListener;
 import com.openexchange.groupware.impl.id.CreateIDSequenceTable;
-import com.openexchange.groupware.importexport.importers.ExtraneousSeriesMasterRecoveryParser;
 import com.openexchange.groupware.infostore.EventFiringInfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
@@ -491,19 +490,8 @@ public final class ServerActivator extends HousekeepingActivator {
         // Reminder Service
         track(ReminderService.class, new RegistryCustomizer<>(context, ReminderService.class));
 
-
-
-        // ICal Parser
-        track(ICalParser.class, new RegistryCustomizer<ICalParser>(context, ICalParser.class) {
-
-            @Override
-            protected ICalParser customize(final ICalParser service) {
-                return new ExtraneousSeriesMasterRecoveryParser(service, ServerServiceRegistry.getInstance());
-            }
-
-        });
-
-        // ICal Emitter
+        // ICal Parser & Emitter
+        track(ICalParser.class, new RegistryCustomizer<ICalParser>(context, ICalParser.class));
         track(ICalEmitter.class, new RegistryCustomizer<ICalEmitter>(context, ICalEmitter.class));
 
         // vCard service & storage
@@ -676,7 +664,7 @@ public final class ServerActivator extends HousekeepingActivator {
         track(ObjectUseCountService.class, new ObjectUseCountServiceTracker(context));
         track(CalendarService.class, new RegistryCustomizer<CalendarService>(context, CalendarService.class));
         track(ICalService.class, new RegistryCustomizer<ICalService>(context, ICalService.class));
-        
+
         CommonResultConverterRegistry resultConverterRegistry = new CommonResultConverterRegistry(context);
         track(ResultConverter.class, resultConverterRegistry);
 
@@ -805,10 +793,10 @@ public final class ServerActivator extends HousekeepingActivator {
         // registerService(DataSource.class, dataSource, props);
         // ImageServlet.addMapping(dataSource.getRegistrationName(), dataSource.getAlias());
         // }
-        
+
         registerService(ResultConverterRegistry.class, resultConverterRegistry);
         ServerServiceRegistry.getInstance().addService(ResultConverterRegistry.class, resultConverterRegistry);
-        
+
         // Register DBProvider
         registerService(DBProvider.class, new DBPoolProvider());
 

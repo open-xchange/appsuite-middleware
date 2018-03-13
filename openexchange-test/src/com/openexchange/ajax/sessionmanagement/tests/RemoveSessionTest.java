@@ -50,17 +50,15 @@
 package com.openexchange.ajax.sessionmanagement.tests;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import org.junit.Test;
 import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
-import com.openexchange.ajax.sessionmanagement.actions.AllRequest;
-import com.openexchange.ajax.sessionmanagement.actions.AllResponse;
-import com.openexchange.ajax.sessionmanagement.actions.DeleteRequest;
-import com.openexchange.ajax.sessionmanagement.actions.DeleteResponse;
-import com.openexchange.session.management.ManagedSession;
+import com.openexchange.testing.httpclient.models.AllSessionsResponse;
+import com.openexchange.testing.httpclient.models.SessionManagementData;
 
 /**
  * {@link RemoveSessionTest}
@@ -72,36 +70,30 @@ public class RemoveSessionTest extends AbstractSessionManagementTest {
 
     @Test
     public void testRemoveSession() throws Exception {
-        String sessionId = getSecondClient().getSession().getId();
-        DeleteRequest req = new DeleteRequest(sessionId);
-        DeleteResponse resp = getSecondClient().execute(req);
-        assertFalse(resp.hasError());
+        String sessionId = apiClient2.getSession();
+        getApi().delete(apiClient.getSession(), Collections.singletonList(sessionId));
 
-        AllRequest getReq = new AllRequest();
-        AllResponse getResp = getClient().execute(getReq);
-        assertFalse(getResp.hasError());
-        Collection<ManagedSession> sessions = getResp.getSessions();
+        AllSessionsResponse response = getApi().all(apiClient.getSession());
+        List<SessionManagementData> sessions = response.getData();
         assertEquals(1, sessions.size());
-        for (ManagedSession session : sessions) {
-            assertEquals(getClient().getSession().getId(), session.getSessionId());
+        for (SessionManagementData session : sessions) {
+            assertEquals(apiClient.getSession(), session.getSessionId());
             assertNotEquals(sessionId, session.getSessionId());
         }
     }
 
     @Test
     public void testRemoveSession_WrongSessionId() throws Exception {
-        DeleteRequest req = new DeleteRequest("thisWillFail", false);
-        getClient().execute(req);
-
-        AllRequest getReq = new AllRequest();
-        AllResponse getResp = getClient().execute(getReq);
-        assertFalse(getResp.hasError());
-        Collection<ManagedSession> sessions = getResp.getSessions();
+        String sessionId = apiClient.getSession();
+        getApi().delete(sessionId, Collections.singletonList("thisWillFail"));
+        AllSessionsResponse response = getApi().all(sessionId);
+        Collection<SessionManagementData> sessions = response.getData();
         assertEquals(2, sessions.size());
-        for (ManagedSession session : sessions) {
-            assertTrue(getClient().getSession().getId().equals(session.getSessionId()) || getSecondClient().getSession().getId().equals(session.getSessionId()));
+        for (SessionManagementData session : sessions) {
+            assertTrue(apiClient.getSession().equals(session.getSessionId()) || apiClient2.getSession().equals(session.getSessionId()));
         }
-        saveLogout(getClient2());
+        // Let super.tearDown clean up
+        rememberClient(apiClient2);
     }
 
 }

@@ -62,7 +62,7 @@ import com.sun.mail.util.ASCIIUtility;
  * @author Bill Shannon
  */
 public class OAuth2SaslClient implements SaslClient {
-    private CallbackHandler cbh;
+    private final CallbackHandler cbh;
     //private Map<String,?> props;	// XXX - not currently used
     private boolean complete = false;
 
@@ -83,8 +83,9 @@ public class OAuth2SaslClient implements SaslClient {
 
     @Override
     public byte[] evaluateChallenge(byte[] challenge) throws SaslException {
-	if (complete)
-	    return new byte[0];
+	if (complete) {
+        return new byte[0];
+    }
 
 	NameCallback ncb = new NameCallback("User name:");
 	PasswordCallback pcb = new PasswordCallback("OAuth token:", false);
@@ -102,7 +103,7 @@ public class OAuth2SaslClient implements SaslClient {
 	 * token in strings.
 	 */
 	String user = ncb.getName();
-	String token = new String(pcb.getPassword());
+	String token = new String(pcb.getPassword() == null ? new char[0] : pcb.getPassword());
 	pcb.clearPassword();
 	String resp = "user=" + user + "\001auth=Bearer " + token + "\001\001";
 	byte[] response;
@@ -135,8 +136,9 @@ public class OAuth2SaslClient implements SaslClient {
 
     @Override
     public Object getNegotiatedProperty(String propName) {
-	if (!complete)
-	    throw new IllegalStateException("OAUTH2 getNegotiatedProperty");
+	if (!complete) {
+        throw new IllegalStateException("OAUTH2 getNegotiatedProperty");
+    }
 	return null;
     }
 

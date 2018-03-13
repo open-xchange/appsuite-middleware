@@ -89,6 +89,7 @@ public class ICalUtilitiesImpl implements ICalUtilities {
         this.mapper = mapper;
     }
 
+
     @Override
     public List<Alarm> importAlarms(InputStream inputStream, ICalParameters parameters) throws OXException {
         parameters = getParametersOrDefault(parameters);

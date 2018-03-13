@@ -440,9 +440,12 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         AdministrativeCalendarAccountService accountService = Services.getService(AdministrativeCalendarAccountService.class);
         try {
             accountService.updateAccount(session.getContextId(), session.getUserId(), account.getAccountId(), internalConfig, null, account.getLastModified().getTime());
-            account = accountService.getAccount(session.getContextId(), session.getUserId(), account.getAccountId());
-            if (null == account) {
-                throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(account.getAccountId());
+            {
+                int accountId = account.getAccountId();
+                account = accountService.getAccount(session.getContextId(), session.getUserId(), accountId);
+                if (null == account) {
+                    throw CalendarExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId);
+                }
             }
             caching = account.getInternalConfiguration().optJSONObject(CachingCalendarAccessConstants.CACHING);
             if (null == caching) {
