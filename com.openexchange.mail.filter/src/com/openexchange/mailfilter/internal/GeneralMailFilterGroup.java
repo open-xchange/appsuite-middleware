@@ -55,7 +55,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.Rule;
 
 /**
- * {@link GeneralMailFilterGroup} is the general / fallback MailFilterGroup which removes all Rules and orders them according to the given uid array. 
+ * {@link GeneralMailFilterGroup} is the general / fallback MailFilterGroup which removes all Rules and orders them according to the given uid array.
  *  Rules which don't match any uid in the uid array are appended at the end of the list.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
@@ -64,7 +64,7 @@ import com.openexchange.jsieve.commands.Rule;
 public class GeneralMailFilterGroup implements MailFilterGroup {
 
     private final int[] userOrder;
-    
+
     /**
      * Initializes a new {@link MailFilterGroup}.
      */
@@ -80,18 +80,22 @@ public class GeneralMailFilterGroup implements MailFilterGroup {
         for (int i = 0; i < userOrder.length; i++) {
             int uniqueid = userOrder[i];
             RuleAndPosition rightRule = getRightRuleForUniqueId(result, uniqueid);
+            if(rightRule == null) {
+                // skip unknown rules
+                continue;
+            }
             int position = rightRule.position;
             result.remove(position);
             result.add(i, rightRule.rule);
         }
         return result;
     }
-    
+
 
     /**
      * Search within the given List of Rules for the one matching the specified UID
      */
-    private RuleAndPosition getRightRuleForUniqueId(List<Rule> clientrules, int uniqueid) throws OXException {
+    private RuleAndPosition getRightRuleForUniqueId(List<Rule> clientrules, int uniqueid) {
         for (int i = 0; i < clientrules.size(); i++) {
             Rule rule = clientrules.get(i);
             if (uniqueid == rule.getUniqueId()) {
@@ -100,7 +104,7 @@ public class GeneralMailFilterGroup implements MailFilterGroup {
         }
         return null;
     }
-    
+
     private static final class RuleAndPosition {
 
         final int position;
