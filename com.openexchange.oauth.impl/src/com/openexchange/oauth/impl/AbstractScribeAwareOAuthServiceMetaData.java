@@ -63,7 +63,6 @@ import org.scribe.model.Request;
 import org.scribe.model.RequestTuner;
 import org.scribe.model.Response;
 import org.scribe.model.Token;
-import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
@@ -202,6 +201,13 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
         return DEFAULT_CONTENT_TYPE;
     }
 
+    /**
+     * Compiles the pattern that will be used to extract the identity of the user
+     * from the identity response.
+     * 
+     * @param fieldName The field name that contains the identity of the user in the identity response
+     * @return The compiled {@link Pattern}
+     */
     private Pattern compileIdentityPattern(String fieldName) {
         return Pattern.compile("\"" + fieldName + " \":\\s*\"(\\S*?)\"");
     }
@@ -215,14 +221,7 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
      */
     private Response execute(OAuthRequest request) throws OXException {
         try {
-            return request.send(new RequestTuner() {
-
-                @Override
-                public void tune(Request request) {
-                    request.setConnectTimeout(5, TimeUnit.SECONDS);
-                    request.setReadTimeout(30, TimeUnit.SECONDS);
-                }
-            });
+            return request.send(RequestTunerExtension.getInstance());
         } catch (org.scribe.exceptions.OAuthException e) {
             // Handle Scribe's org.scribe.exceptions.OAuthException (inherits from RuntimeException)
             if (ExceptionUtils.isEitherOf(e, SSLHandshakeException.class)) {
@@ -255,4 +254,34 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
      * @return A collection with extra property names
      */
     protected abstract Collection<OAuthPropertyID> getExtraPropertyNames();
+
+    /**
+     * {@link RequestTunerExtension}
+     */
+    private static final class RequestTunerExtension extends RequestTuner {
+
+        private static final RequestTunerExtension INSTANCE = new RequestTunerExtension();
+
+        /**
+         * Returns the instance of the {@link RequestTuner}
+         * 
+         * @return the instance of the {@link RequestTuner}
+         */
+        static final RequestTuner getInstance() {
+            return INSTANCE;
+        }
+
+        /**
+         * Initialises a new {@link AbstractScribeAwareOAuthServiceMetaData.RequestTunerExtension}.
+         */
+        public RequestTunerExtension() {
+            super();
+        }
+
+        @Override
+        public void tune(Request request) {
+            request.setConnectTimeout(5, TimeUnit.SECONDS);
+            request.setReadTimeout(30, TimeUnit.SECONDS);
+        }
+    }
 }
