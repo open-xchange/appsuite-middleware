@@ -244,7 +244,7 @@ public class CustomRuleChecker implements Reloadable{
         @SuppressWarnings("unchecked")
         public boolean match(MailAuthenticityResult result) {
             List<MailAuthenticityMechanismResult> results = result.getAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, List.class);
-            if (results.isEmpty()) {
+            if (null == results || results.isEmpty()) {
                 return false;
             }
 
