@@ -64,11 +64,9 @@ import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.SimpleMode;
 import com.openexchange.data.conversion.ical.ZoneInfo;
-import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverters;
 import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
 import com.openexchange.data.conversion.ical.ical4j.internal.TaskConverters;
-import com.openexchange.data.conversion.ical.itip.ITipContainer;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
@@ -81,7 +79,6 @@ import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.TimeZone;
 import net.fortuna.ical4j.model.ValidationException;
-import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VTimeZone;
 import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.CalScale;
@@ -92,20 +89,6 @@ import net.fortuna.ical4j.model.property.ProdId;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class ICal4JEmitter implements ICalEmitter {
-
-    @Override
-    public String writeAppointments(final List<Appointment> appointmentObjects, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) {
-        final Mode mode = new SimpleMode(ZoneInfo.FULL);
-        final Calendar calendar = new Calendar();
-        initCalendar(calendar, mode.getMethod());
-        int i = 0;
-        for(final Appointment appointment : appointmentObjects) {
-            final VEvent event = createEvent(mode, i++, appointment, ctx, errors, warnings);
-            calendar.getComponents().add(event);
-            addVTimeZone(mode.getZoneInfo(), calendar, appointment);
-        }
-        return calendar.toString();
-    }
 
     @Override
     public String writeTasks(final List<Task> tasks,
@@ -126,30 +109,6 @@ public class ICal4JEmitter implements ICalEmitter {
         }
         return calendar.toString();
     }
-
-    protected VEvent createEvent(final Mode mode, final int index, final Appointment appointment, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) {
-        return createEvent(mode, index, appointment, ctx, errors, warnings, null);
-    }
-
-    protected VEvent createEvent(final Mode mode, final int index, final Appointment appointment, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings, final ITipContainer iTip) {
-
-        final VEvent vevent = new VEvent();
-        List<AttributeConverter<VEvent,Appointment>> converters = iTip == null ? AppointmentConverters.ALL : AppointmentConverters.getConverters(iTip.getMethod());
-
-        for (final AttributeConverter<VEvent, Appointment> converter : converters) {
-            if (converter.isSet(appointment)) {
-                try {
-                    converter.emit(mode, index, appointment, vevent, warnings, ctx, iTip);
-                } catch (final ConversionError conversionError) {
-                    errors.add( conversionError );
-                }
-            }
-        }
-
-        return vevent;
-    }
-
-    //protected VEvent createEvent(Mode mode, int index, Appointment appointment, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings, )
 
     /**
      * Converts a task object into an iCal event.
@@ -179,36 +138,6 @@ public class ICal4JEmitter implements ICalEmitter {
         return createSession(new SimpleMode(ZoneInfo.FULL));
     }
 
-    @Override
-    public ICalItem writeAppointment(final ICalSession session, final Appointment appointment, final Context ctx, final ITipContainer iTip, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
-        final Calendar calendar = getCalendar(session);
-
-        switch (iTip.getMethod()) {
-        case REPLY:
-            calendar.getProperties().remove(Method.REQUEST);
-            calendar.getProperties().add(Method.REPLY);
-            break;
-        case CANCEL:
-            calendar.getProperties().remove(Method.REQUEST);
-            calendar.getProperties().add(Method.CANCEL);
-            appointment.setSequence(appointment.getSequence() + 1);
-            break;
-        default:
-            break;
-        }
-
-        final VEvent event = createEvent(session.getMode(), getAndIncreaseIndex(session),appointment, ctx, errors, warnings, iTip);
-        calendar.getComponents().add(event);
-        addVTimeZone(session.getZoneInfo(), calendar, appointment);
-        return new ICal4jItem(event);
-    }
-
-    @Override
-    public boolean writeTimeZone(ICalSession session, String timeZoneID, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
-        Calendar calendar = getCalendar(session);
-        return addVTimeZone(session.getZoneInfo(), calendar, timeZoneID);
-    }
-
     protected boolean addVTimeZone(ZoneInfo zoneInfo, Calendar calendar, Appointment appointment) {
         return addVTimeZone(zoneInfo, calendar, appointment.getTimezone());
     }
@@ -230,15 +159,6 @@ public class ICal4JEmitter implements ICalEmitter {
             }
         }
         return false;
-    }
-
-    @Override
-    public ICalItem writeAppointment(final ICalSession session, final Appointment appointment, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
-        final Calendar calendar = getCalendar(session);
-        final VEvent event = createEvent(session.getMode(), getAndIncreaseIndex(session),appointment, ctx, errors, warnings);
-        calendar.getComponents().add(event);
-        addVTimeZone(session.getZoneInfo(), calendar, appointment);
-        return new ICal4jItem(event);
     }
 
     @Override

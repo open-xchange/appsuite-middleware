@@ -503,7 +503,7 @@ public final class Init {
 
         startTestServices = System.currentTimeMillis();
         startAndInjectPasswordChangeService();
-        System.out.println("startAndInjectAliasService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+        System.out.println("startAndInjectPasswordChangeService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
     }
 
     /**

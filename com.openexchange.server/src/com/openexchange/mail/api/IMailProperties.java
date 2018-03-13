@@ -95,6 +95,15 @@ public interface IMailProperties {
     boolean isUserFlagsEnabled();
 
     /**
+     * Checks whether inline images are supposed to be hidden when outputting the display version for a mail message.
+     * <p>
+     * An image is considered as inline if Content-Disposition header is simply set to <tt>"inline"</tt> and headers provide no file name information.
+     *
+     * @return <code>true</code> to hide; otherwise <code>false</code>
+     */
+    boolean hideInlineImages();
+
+    /**
      * Waits for loading this properties.
      *
      * @throws InterruptedException If another thread interrupted the current thread before or while the current thread was waiting for loading the properties.

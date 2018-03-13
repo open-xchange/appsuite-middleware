@@ -66,6 +66,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
@@ -93,6 +94,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mail.attachment.AttachmentToken;
 import com.openexchange.mail.attachment.AttachmentTokenConstants;
 import com.openexchange.mail.attachment.AttachmentTokenService;
@@ -100,6 +102,7 @@ import com.openexchange.mail.authenticity.CustomPropertyJsonHandler;
 import com.openexchange.mail.authenticity.MailAuthenticityResultKey;
 import com.openexchange.mail.authenticity.MailAuthenticityStatus;
 import com.openexchange.mail.authenticity.mechanism.MailAuthenticityMechanismResult;
+import com.openexchange.mail.config.MailAccountProperties;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
 import com.openexchange.mail.dataobjects.MailAuthenticityResult;
@@ -239,6 +242,19 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     } // End of class MultipartInfo
 
+    private static final AtomicReference<Boolean> hideInlineImages = new AtomicReference<Boolean>(null);
+    private static boolean hideInlineImages(int userId, int contextId) {
+        Boolean tmp = hideInlineImages.get();
+        if (null == tmp) {
+            synchronized (tmp) {
+
+            }
+        }
+        return tmp.booleanValue();
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+
     private final List<OXException> warnings;
     private final Session session;
     private final Context ctx;
@@ -272,6 +288,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private int currentNestingLevel = 0;
     private final int maxNestedMessageLevels;
     private String initialiserSequenceId;
+    private final IMailProperties mailProperties;
 
     /**
      * Initializes a new {@link JsonMessageHandler}
@@ -390,6 +407,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         this.accountId = accountId;
         this.modified = new boolean[1];
         this.session = session;
+        this.mailProperties = new MailAccountProperties(null, session.getUserId(), session.getContextId());
         this.ctx = ctx;
         this.usm = usm;
         this.displayMode = displayMode;
@@ -994,11 +1012,18 @@ public final class JsonMessageHandler implements MailMessageHandler {
                             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
                         }
                     }
-
-                    return handleAttachment0(part, considerAsInline, considerAsInline ? Part.INLINE : Part.ATTACHMENT, baseContentType, fileName, id, considerAsInline);
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
+            }
+        }
+
+        // Swallow images with Content-Disposition simply set to "inline" having no file name
+        if (mailProperties.hideInlineImages()) {
+            String disposition = part.containsContentDisposition() ? part.getContentDisposition().getDisposition() : null;
+            boolean hideImage = Part.INLINE.equalsIgnoreCase(disposition) && null == part.getFileName();
+            if (hideImage && DisplayMode.DISPLAY.getMode() <= displayMode.getMode()) {
+                return true;
             }
         }
 

@@ -1259,6 +1259,11 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     }
 
     @Override
+    public boolean hideInlineImages() {
+        return mailProperties.hideInlineImages();
+    }
+
+    @Override
     public boolean isAllowNestedDefaultFolderOnAltNamespace() {
         return mailProperties.isAllowNestedDefaultFolderOnAltNamespace();
     }

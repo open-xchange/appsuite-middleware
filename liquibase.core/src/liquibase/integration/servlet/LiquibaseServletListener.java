@@ -1,5 +1,6 @@
 package liquibase.integration.servlet;
 
+import java.net.InetAddress;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Enumeration;
@@ -83,7 +84,12 @@ public class LiquibaseServletListener implements ServletContextListener {
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         ServletContext servletContext = servletContextEvent.getServletContext();
         try {
-            this.hostName = NetUtil.getLocalHost().getHostName();
+            InetAddress localHost = NetUtil.getLocalHost();
+            if(localHost == null) {
+                servletContext.log("Cannot find hostname: No localhost available.");
+                return;
+            }
+            this.hostName = localHost.getHostName();
         }
         catch (Exception e) {
             servletContext.log("Cannot find hostname: " + e.getMessage());
