@@ -99,7 +99,6 @@ properties:
       file: calendar.properties
       packageName: open-xchange-core
       tags: ["Calendar","Limit"]
-
     - key: com.openexchange.calendar.provider.google.refreshInterval
       description: |
         Defines the refresh interval in minutes for the google calendar provider.
@@ -124,4 +123,102 @@ properties:
       file: calendar.properties
       packageName: open-xchange-core
       tags: ["Calendar","Google"]
-      
+    - key: com.openexchange.calendar.migration.batchSize
+      description: |
+        Configures the batch size used when performing the update task com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask. 
+      defaultValue: 500
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Database"]
+    - key: com.openexchange.calendar.migration.maxTombstoneAgeInMonths
+      description: |
+        Configures the maximum age of 'tombstone' calendar data that is considered when performing the update task com.openexchange.chronos.storage.rdb.migration.ChronosStorageMigrationTask. 
+      defaultValue: 12
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Database"]
+    - key: com.openexchange.calendar.useLegacyStorage
+      description: |
+        Forcibly re-enables usage of the 'legacy' tables for the calendar storage. 
+      defaultValue: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Database"]
+    - key: com.openexchange.calendar.replayToLegacyStorage
+      description: |
+        Enables or disables the 'replaying' mode for the calendar storage that is entered automatically after migration. 
+      defaultValue: true
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: false
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Database"]
+    - key: com.openexchange.calendar.resolveGroupAttendees
+      description: |
+         Defines whether newly added group attendees should be resolved to their individual members implicitly, without preserving the group reference, or not. 
+      defaultValue: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Group"]
+    - key: com.openexchange.calendar.maxConflictsPerRecurrence
+      description: |
+         Defines the maximum number of calculated conflicts between two recurring event series. 
+      defaultValue: 5
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Limit"]
+    - key: com.openexchange.calendar.maxAttendeesPerConflict
+      description: |
+         Defines the maximum number of attendees to indicate per conflict. 
+      defaultValue: 5
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Limit"]
+    - key: com.openexchange.calendar.maxConflicts
+      description: |
+         Configures the overall maximum number of conflicts to return. 
+      defaultValue: 100
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar","Limit"]
+    - key: com.openexchange.calendar.skipExternalAttendeeURIChecks
+      description: |
+         Controls whether checks of (external) attendee URIs are disabled or not. 
+      defaultValue: false
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related: 
+      file: calendar.properties
+      packageName: open-xchange-core
+      tags: ["Calendar"]

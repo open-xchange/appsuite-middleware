@@ -131,7 +131,7 @@ public class CalendarConfigImpl implements CalendarConfig {
 
     @Override
     public boolean isResolveGroupAttendees() {
-        return getConfigValue("com.openexchange.chronos.resolveGroupAttendees", Boolean.class, Boolean.FALSE).booleanValue();
+        return getConfigValue("com.openexchange.calendar.resolveGroupAttendees", Boolean.class, Boolean.FALSE).booleanValue();
     }
 
     @Override
@@ -140,28 +140,23 @@ public class CalendarConfigImpl implements CalendarConfig {
     }
 
     @Override
-    public int getRecurrenceCalculationLimit() {
-        return getConfigValue("com.openexchange.chronos.recurrenceCalculationLimit", Integer.class, I(1000)).intValue();
-    }
-
-    @Override
     public int getMaxConflictsPerRecurrence() {
-        return getConfigValue("com.openexchange.chronos.maxConflictsPerRecurrence", Integer.class, I(5)).intValue();
+        return getConfigValue("com.openexchange.calendar.maxConflictsPerRecurrence", Integer.class, I(5)).intValue();
     }
 
     @Override
     public int getMaxAttendeesPerConflict() {
-        return getConfigValue("com.openexchange.chronos.maxAttendeesPerConflict", Integer.class, I(5)).intValue();
+        return getConfigValue("com.openexchange.calendar.maxAttendeesPerConflict", Integer.class, I(5)).intValue();
     }
 
     @Override
     public int getMaxConflicts() {
-        return getConfigValue("com.openexchange.chronos.maxConflicts", Integer.class, I(999)).intValue();
+        return getConfigValue("com.openexchange.calendar.maxConflicts", Integer.class, I(100)).intValue();
     }
 
     @Override
     public boolean isSkipExternalAttendeeURIChecks() {
-        return getConfigValue("com.openexchange.chronos.skipExternalAttendeeURIChecks", Boolean.class, Boolean.FALSE).booleanValue();
+        return getConfigValue("com.openexchange.calendar.skipExternalAttendeeURIChecks", Boolean.class, Boolean.FALSE).booleanValue();
     }
 
     private CalendarUserSettings getUserSettings(int userId) {
