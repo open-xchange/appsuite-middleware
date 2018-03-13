@@ -150,7 +150,12 @@ public class DropboxOAuthServiceMetaData extends AbstractExtendedScribeAwareOAut
     @Override
     public String getContentType() {
         // Empty content-type otherwise the getUserIdentity call will fail.
-        // TODO: elaborate on that choice
+        // 
+        // The scribe library it tries to append a body when the request verb is
+        // set to POST. The Dropbox API is picky and if the 'Content-Type' is
+        // set to 'application/json', it then tries to interpret the body that is send
+        // with the request. However, when getting the user's identity via the getIdentityURL link
+        // no body is required... and none is sent... hence the fail on Dropbox's side.
         return " ";
     }
 }

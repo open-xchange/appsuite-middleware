@@ -119,7 +119,7 @@ public final class MsLiveConnectOAuthServiceMetaData extends AbstractExtendedScr
      */
     @Override
     public String getIdentityURL(String accessToken) {
-        return "https://apis.live.net/v5.0/me?access_token=" + urlEncode(accessToken);
+        return "https://apis.live.net/v5.0/me";//?access_token=" + urlEncode(accessToken);
     }
 
     /*
@@ -130,5 +130,16 @@ public final class MsLiveConnectOAuthServiceMetaData extends AbstractExtendedScr
     @Override
     public Pattern getIdentityPattern() {
         return identityPattern;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.AbstractScribeAwareOAuthServiceMetaData#getContentType()
+     */
+    @Override
+    public String getContentType() {
+        // No 'Content-Type' is expected for the GET /me call
+        return " ";
     }
 }
