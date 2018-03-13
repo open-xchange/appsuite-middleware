@@ -49,11 +49,9 @@
 
 package com.openexchange.ajax.sessionmanagement;
 
-import java.io.IOException;
-import org.json.JSONException;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.exception.OXException;
+import com.openexchange.ajax.framework.AbstractAPIClientSession;
+import com.openexchange.testing.httpclient.invoker.ApiClient;
+import com.openexchange.testing.httpclient.modules.SessionmanagementApi;
 
 /**
  * {@link AbstractSessionManagementTest}
@@ -61,31 +59,32 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.10.0
  */
-public class AbstractSessionManagementTest extends AbstractAJAXSession {
+public class AbstractSessionManagementTest extends AbstractAPIClientSession {
 
-    public static final String SERVLET_PATH = "/ajax/sessionmanagement";
-    private AJAXClient         secondClient;
+    protected ApiClient apiClient2;
+
+    private SessionmanagementApi api;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        secondClient = generateClient("secondClient", testUser);
+
+        client.logout();
+        apiClient.login(testUser.getLogin(), testUser.getPassword());
+
+        // For the same user
+        apiClient2 = generateClient(testUser);
+        apiClient2.login(testUser.getLogin(), testUser.getPassword());
+
+        api = new SessionmanagementApi(apiClient);
     }
 
-    /**
-     * Gets the secondClient for the testUser
-     *
-     * @return The secondClient
-     */
-    public AJAXClient getSecondClient() {
-        return secondClient;
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
     }
 
-    protected void saveLogout(AJAXClient client) throws OXException, IOException, JSONException {
-        // Try logout blacklisted
-        if (null != client && null != client.getSession() && null != client.getSession().getId()) {
-            client.logout();
-        }
+    protected SessionmanagementApi getApi() {
+        return api;
     }
-
 }

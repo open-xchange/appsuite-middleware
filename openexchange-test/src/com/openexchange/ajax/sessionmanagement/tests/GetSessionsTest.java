@@ -52,13 +52,10 @@ package com.openexchange.ajax.sessionmanagement.tests;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import java.util.Collection;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
-import com.openexchange.ajax.sessionmanagement.actions.AllRequest;
-import com.openexchange.ajax.sessionmanagement.actions.AllResponse;
-import com.openexchange.session.management.ManagedSession;
+import com.openexchange.testing.httpclient.models.AllSessionsResponse;
+import com.openexchange.testing.httpclient.models.SessionManagementData;
 
 /**
  * {@link GetSessionsTest}
@@ -68,29 +65,25 @@ import com.openexchange.session.management.ManagedSession;
  */
 public class GetSessionsTest extends AbstractSessionManagementTest {
 
-    @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
-    }
-
     @Test
     public void testGetSessions() throws Exception {
-        AllRequest req = new AllRequest();
-        AllResponse resp = getClient().execute(req);
-        Collection<ManagedSession> sessions = resp.getSessions();
+        AllSessionsResponse response = getApi().all(apiClient.getSession());
+        Collection<SessionManagementData> sessions = response.getData();
         assertEquals(2, sessions.size());
-        for (ManagedSession session : sessions) {
+        for (SessionManagementData session : sessions) {
             String sessionId = session.getSessionId();
-            assertTrue(sessionId.equals(getClient().getSession().getId()) || sessionId.equals(getSecondClient().getSession().getId()));
+            assertTrue(sessionId.equals(apiClient.getSession()) || sessionId.equals(apiClient2.getSession()));
         }
-        saveLogout(getClient2());
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        // Logout client2
+        if (null != apiClient2) {
+            // Let the super.teardown do the logout stuff
+            rememberClient(apiClient2);
+        }
+        super.tearDown();
     }
 
 }
