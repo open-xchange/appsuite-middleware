@@ -171,20 +171,17 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
      */
     @Override
     public String getUserIdentity(Session session, String accessToken, String accessSecret) throws OXException {
-        if (Strings.isEmpty(accessToken)) {
-            return null;  //TODO: or throw exception token not found/invalid token/whatever?
-        }
-        // Contact the oauth provider and fetch the identity of the current logged in user
+        // Contact the OAuth provider and fetch the identity of the current logged in user
         OAuthService scribeService = new ServiceBuilder().provider(getScribeService()).apiKey(getAPIKey(session)).apiSecret(getAPISecret(session)).build();
         OAuthRequest request = new OAuthRequest(getIdentityHTTPMethod(), getIdentityURL(accessToken));
         request.addHeader("Content-Type", getContentType());
         scribeService.signRequest(new Token(accessToken, accessSecret), request);
-        Response guidResponse = execute(request);
+        Response response = execute(request);
 
-        int responseCode = guidResponse.getCode();
-        String body = guidResponse.getBody();
-        if (responseCode >= 400) {
-            throw new OXException(31145, "No user identity can be retrieved: " + body);
+        int responseCode = response.getCode();
+        String body = response.getBody();
+        if (responseCode >= 400 && responseCode <= 499) {
+            throw OAuthExceptionCodes.DENIED_BY_PROVIDER.create(body);
         }
 
         final Matcher matcher = compileIdentityPattern(getIdentityFieldName()).matcher(body);
