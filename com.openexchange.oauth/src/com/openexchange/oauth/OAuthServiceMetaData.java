@@ -244,11 +244,12 @@ public interface OAuthServiceMetaData {
      * Issues a request to the respective OAuth provider and fetches the identity of the current user.
      * 
      * Some providers need the 'profile user' scope enabled before they can return the user identity.
-     * @param accessSecret TODO
-     * @param the access token
      * 
+     * @param session The {@link Session}
+     * @param accessToken access token
+     * @param accessSecret The access secret
      * @return the user's identity or <code>null</code> if none can be retrieved.
      * @throws OXException if an error is occurred
      */
-    String getUserIdentity(String accessToken, String accessSecret) throws OXException;
+    String getUserIdentity(Session session, String accessToken, String accessSecret) throws OXException;
 }

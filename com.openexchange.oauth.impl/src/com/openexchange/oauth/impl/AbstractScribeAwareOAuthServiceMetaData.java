@@ -78,6 +78,7 @@ import com.openexchange.oauth.OAuthConfigurationProperty;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 
 /**
  * {@link AbstractScribeAwareOAuthServiceMetaData}
@@ -169,12 +170,12 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
      * @see com.openexchange.oauth.OAuthServiceMetaData#getUserIdentity(java.lang.String)
      */
     @Override
-    public String getUserIdentity(String accessToken, String accessSecret) throws OXException {
+    public String getUserIdentity(Session session, String accessToken, String accessSecret) throws OXException {
         if (Strings.isEmpty(accessToken)) {
             return null;  //TODO: or throw exception token not found/invalid token/whatever?
         }
         // Contact the oauth provider and fetch the identity of the current logged in user
-        OAuthService scribeService = new ServiceBuilder().provider(getScribeService()).apiKey(getAPIKey(null)).apiSecret(getAPISecret(null)).build();
+        OAuthService scribeService = new ServiceBuilder().provider(getScribeService()).apiKey(getAPIKey(session)).apiSecret(getAPISecret(session)).build();
         OAuthRequest request = new OAuthRequest(getIdentityHTTPMethod(), getIdentityURL(accessToken));
         request.addHeader("Content-Type", getContentType());
         scribeService.signRequest(new Token(accessToken, accessSecret), request);

@@ -490,7 +490,11 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         // Obtain & apply the access token
         HttpsURLConnection.setDefaultSSLSocketFactory(Services.getService(SSLSocketFactoryProvider.class).getDefault());
         obtainToken(type, arguments, account, scopes);
-        String userIdentity = service.getUserIdentity(account.getToken(), account.getSecret());
+        Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
+        if (null == session) {
+            throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_SESSION);
+        }
+        String userIdentity = service.getUserIdentity(session, account.getToken(), account.getSecret());
         if (Strings.isEmpty(userIdentity)) {
 
             // TODO: if the userIdentity if null examine the cause for that state
@@ -518,10 +522,6 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             /*
              * Encrypt token & secret
              */
-            Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
-            if (null == session) {
-                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_SESSION);
-            }
             if (Strings.isEmpty(account.getToken())) {
                 throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_TOKEN);
             }
@@ -550,10 +550,6 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             /*
              * Crypt tokens
              */
-            Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
-            if (null == session) {
-                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_SESSION);
-            }
             existingAccount.setToken(encrypt(account.getToken(), session));
             existingAccount.setSecret(encrypt(account.getSecret(), session));
             existingAccount.setEnabledScopes(scopes);
@@ -1004,8 +1000,6 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              * Obtain & apply the access token
              */
             obtainToken(type, arguments, account, scopes);
-            // Set the user identity
-            account.setUserIdentity(service.getUserIdentity(account.getToken(), account.getSecret()));
             /*
              * Crypt tokens
              */
@@ -1013,6 +1007,8 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             if (null == session) {
                 throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_SESSION);
             }
+            // Set the user identity
+            account.setUserIdentity(service.getUserIdentity(session, account.getToken(), account.getSecret()));
             account.setToken(encrypt(account.getToken(), session));
             account.setSecret(encrypt(account.getSecret(), session));
             account.setEnabledScopes(scopes);
