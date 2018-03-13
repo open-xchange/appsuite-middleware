@@ -57,7 +57,6 @@ import com.openexchange.chronos.service.CalendarUtilities;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Enums;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -71,8 +70,7 @@ public class MigrationConfig {
     private final ServiceLookup services;
     private final int batchSize;
     private final int maxTombstoneAgeInMonths;
-    private final ProblemSeverity severityThreshold;
-    private final Set<String> allowedProblemSeverities;
+    private final Set<String> nonSevereSeverities;
     private final boolean uncommitted;
 
 
@@ -87,9 +85,7 @@ public class MigrationConfig {
         ConfigurationService configService = services.getService(ConfigurationService.class);
         batchSize = configService.getIntProperty("com.openexchange.calendar.migration.batchSize", 500);
         maxTombstoneAgeInMonths = configService.getIntProperty("com.openexchange.calendar.migration.maxTombstoneAgeInMonths", 12);
-        severityThreshold = Enums.parse(ProblemSeverity.class,
-            configService.getProperty("com.openexchange.calendar.migration.severityThreshold"), ProblemSeverity.MAJOR);
-        allowedProblemSeverities = getAllowedProblemSeverities(severityThreshold);
+        nonSevereSeverities = getNoneSevereSeverities(ProblemSeverity.MAJOR);
         uncommitted = configService.getBoolProperty("com.openexchange.calendar.migration.uncommitted", false);
     }
 
@@ -120,10 +116,6 @@ public class MigrationConfig {
         return maxTombstoneAgeInMonths;
     }
 
-    public ProblemSeverity getSeverityThreshold() {
-        return severityThreshold;
-    }
-
     public boolean isUncommitted() {
         return uncommitted;
     }
@@ -140,20 +132,20 @@ public class MigrationConfig {
      * @return <code>true</code> in case of a problem with a higher severity than the configured threshold, <code>false</code>, otherwise
      */
     public boolean isSevere(OXException warning) {
-        if (0 < allowedProblemSeverities.size() && "CAL-1990".equals(warning.getErrorCode())) {
+        if (0 < nonSevereSeverities.size() && "CAL-1990".equals(warning.getErrorCode())) {
             String severityProperty = warning.getProperty(ProblemSeverity.class.getName());
             if (null != severityProperty) {
-                return false == allowedProblemSeverities.contains(severityProperty);
+                return false == nonSevereSeverities.contains(severityProperty);
             }
             Object[] logArgs = warning.getLogArgs();
-            if (null != logArgs && 2 < logArgs.length && null != logArgs[2] && allowedProblemSeverities.contains(String.valueOf(logArgs[2]))) {
+            if (null != logArgs && 2 < logArgs.length && null != logArgs[2] && nonSevereSeverities.contains(String.valueOf(logArgs[2]))) {
                 return false;
             }
         }
         return true;
     }
 
-    private static Set<String> getAllowedProblemSeverities(ProblemSeverity severityThreshold) {
+    private static Set<String> getNoneSevereSeverities(ProblemSeverity severityThreshold) {
         Set<String> allowedSeverities = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
         for (ProblemSeverity severity : ProblemSeverity.values()) {
             if (severity.equals(severityThreshold)) {
@@ -166,7 +158,7 @@ public class MigrationConfig {
 
     @Override
     public String toString() {
-        return "MigrationConfig [batchSize=" + batchSize + ", maxTombstoneAgeInMonths=" + maxTombstoneAgeInMonths + ", severityThreshold=" + severityThreshold + ", uncommitted=" + uncommitted + "]";
+        return "MigrationConfig [batchSize=" + batchSize + ", maxTombstoneAgeInMonths=" + maxTombstoneAgeInMonths + ", uncommitted=" + uncommitted + "]";
     }
 
 }
