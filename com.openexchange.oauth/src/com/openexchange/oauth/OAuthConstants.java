@@ -121,6 +121,11 @@ public final class OAuthConstants {
      * The argument name for enabled scopes. <code>java.util.Set&lt;com.openexchange.oauth.scope.OAuthScope&gt;</code>
      */
     public static final String ARGUMENT_SCOPES = "scopes";
+    
+    /**
+     * The argument name for the identity. <code>java.lang.String</code>
+     */
+    public static final String ARGUMENT_IDENTITY = "identity";
 
     /*-
      * ------------------- URL parameters -------------------

@@ -184,7 +184,7 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
             if (matcher.find()) {
                 return matcher.group(1);
             } else {
-                throw new OXException(31145, "No user identity can be retrieved");
+                throw new OXException(31145, "No user identity can be retrieved: " + body);
             }
         } catch (MalformedURLException e) {
             throw new OXException(31145, "Malformed URL", e);

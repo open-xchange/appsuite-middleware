@@ -85,7 +85,7 @@ public class YahooOAuthAccess extends AbstractOAuthAccess {
         synchronized (this) {
             OAuthService oauthService = Services.getService(OAuthService.class);
             OAuthAccount oauthAccount = oauthService.getAccount(accountId, getSession(), getSession().getUserId(), getSession().getContextId());
-            verifyAccount(oauthAccount);
+            verifyAccount(oauthAccount, oauthService);
             setOAuthAccount(oauthAccount);
             setOAuthClient(new OAuthClient<YahooClient>(new YahooClient(oauthAccount, getSession()), oauthAccount.getToken()));
         }

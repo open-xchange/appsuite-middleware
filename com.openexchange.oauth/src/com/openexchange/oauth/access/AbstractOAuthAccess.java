@@ -49,13 +49,17 @@
 
 package com.openexchange.oauth.access;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
+import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.session.Session;
@@ -107,20 +111,31 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
      * Verifies the specified {@link OAuthAccount} over validity:
      * <ul>
      * <li>accessToken exists?</li>
+     * <li>specified scopes are both available and enabled?</li>
+     * <li>the user identity is set? (lazy update)</li>
      * </ul>
      *
      * @param account The {@link OAuthAccount} to check for validity
+     * @param oauthService The {@link OAuthService}
      * @param scopes The scopes that are required to be available and enabled as well
      * @throws OXException if the account is not valid
      */
-    protected void verifyAccount(OAuthAccount account, OXScope... scopes) throws OXException {
+    protected void verifyAccount(OAuthAccount account, OAuthService oauthService, OXScope... scopes) throws OXException {
         // Verify that the account has an access token
         if (Strings.isEmpty(account.getToken())) {
             API api = account.getAPI();
             throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getName(), account.getId(), session.getUserId(), session.getContextId());
         }
 
+        // Verify that scopes are available and enabled
         OAuthUtil.checkScopesAvailableAndEnabled(account, session, scopes);
+
+        // Verify if the account has the user identity set, lazy update
+        if (Strings.isEmpty(account.getUserIdentity())) {
+            String userIdentity = account.getMetaData().getUserIdentity(account.getToken());
+            ((DefaultOAuthAccount) account).setUserIdentity(userIdentity);
+            oauthService.updateAccount(account.getId(), Collections.singletonMap(OAuthConstants.ARGUMENT_IDENTITY, userIdentity), session.getUserId(), session.getContextId());
+        }
 
         // Other checks?
     }

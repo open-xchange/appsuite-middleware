@@ -1004,6 +1004,8 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              * Obtain & apply the access token
              */
             obtainToken(type, arguments, account, scopes);
+            // Set the user identity
+            account.setUserIdentity(service.getUserIdentity(account.getToken()));
             /*
              * Crypt tokens
              */
@@ -1268,6 +1270,25 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                     String scope = Strings.concat(" ", scopes.toArray());
                     stmt.setString(pos, scope);
                     return pos + 1;
+                }
+            });
+        }
+        /*
+         * Check for display name
+         */
+        final String identity = (String) arguments.get(OAuthConstants.ARGUMENT_IDENTITY);
+        if (null != identity) {
+            ret.add(new Setter() {
+
+                @Override
+                public int set(final int pos, final PreparedStatement stmt) throws SQLException {
+                    stmt.setString(pos, identity);
+                    return pos + 1;
+                }
+
+                @Override
+                public void appendTo(final StringBuilder stmtBuilder) {
+                    stmtBuilder.append("identity = ?");
                 }
             });
         }

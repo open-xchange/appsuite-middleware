@@ -108,7 +108,7 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
             int oauthAccountId = getAccountId();
             OAuthService oAuthService = Services.getService(OAuthService.class);
             OAuthAccount boxOAuthAccount = oAuthService.getAccount(oauthAccountId, getSession(), getSession().getUserId(), getSession().getContextId());
-            verifyAccount(boxOAuthAccount, OXScope.drive);
+            verifyAccount(boxOAuthAccount, oAuthService, OXScope.drive);
             setOAuthAccount(boxOAuthAccount);
             createOAuthClient(boxOAuthAccount);
         }
