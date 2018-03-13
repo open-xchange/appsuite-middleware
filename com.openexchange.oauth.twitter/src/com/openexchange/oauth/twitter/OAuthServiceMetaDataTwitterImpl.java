@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.Set;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.TwitterApi;
+import org.scribe.model.Verb;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthToken;
@@ -71,9 +72,6 @@ import com.openexchange.session.Session;
  */
 public class OAuthServiceMetaDataTwitterImpl extends AbstractExtendedScribeAwareOAuthServiceMetaData {
 
-    /**
-     * HTTPS_API_TWITTER_COM_1_1_ACCOUNT_VERIFY_CREDENTIALS_JSON
-     */
     private static final String IDENTITY_URL = "https://api.twitter.com/1.1/account/verify_credentials.json";
     private static final String IDENTITY_FIELD_NAME = "id_str";
 
@@ -125,8 +123,8 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractExtendedScribeAware
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
      */
     @Override
-    public String getIdentityHTTPMethod() {
-        return "GET";
+    public Verb getIdentityHTTPMethod() {
+        return Verb.GET;
     }
 
     /*

@@ -177,7 +177,7 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
         }
         // Contact the oauth provider and fetch the identity of the current logged in user
         OAuthService scribeService = new ServiceBuilder().provider(getScribeService()).apiKey(getAPIKey(null)).apiSecret(getAPISecret(null)).build();
-        OAuthRequest request = new OAuthRequest(Verb.valueOf(getIdentityHTTPMethod()), getIdentityURL(accessToken));
+        OAuthRequest request = new OAuthRequest(getIdentityHTTPMethod(), getIdentityURL(accessToken));
         request.addHeader("Content-Type", getContentType());
         scribeService.signRequest(new Token(accessToken, accessSecret), request);
         Response guidResponse = execute(request);

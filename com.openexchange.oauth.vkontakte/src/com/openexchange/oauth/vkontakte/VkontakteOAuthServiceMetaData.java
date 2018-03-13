@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.Collections;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.VkontakteApi;
+import org.scribe.model.Verb;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.impl.AbstractScribeAwareOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
@@ -108,8 +109,8 @@ public final class VkontakteOAuthServiceMetaData extends AbstractScribeAwareOAut
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
      */
     @Override
-    public String getIdentityHTTPMethod() {
-        return "GET";
+    public Verb getIdentityHTTPMethod() {
+        return Verb.GET;
     }
 
     /*

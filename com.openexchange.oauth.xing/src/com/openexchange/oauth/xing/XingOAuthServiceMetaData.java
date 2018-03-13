@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.Set;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.XingApi;
+import org.scribe.model.Verb;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthToken;
@@ -138,8 +139,8 @@ public final class XingOAuthServiceMetaData extends AbstractExtendedScribeAwareO
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
      */
     @Override
-    public String getIdentityHTTPMethod() {
-        return "GET";
+    public Verb getIdentityHTTPMethod() {
+        return Verb.GET;
     }
 
     /*

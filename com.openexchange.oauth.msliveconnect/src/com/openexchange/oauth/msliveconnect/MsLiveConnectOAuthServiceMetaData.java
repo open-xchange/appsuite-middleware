@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.Collections;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.MsLiveConnectApi;
+import org.scribe.model.Verb;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
@@ -98,8 +99,8 @@ public final class MsLiveConnectOAuthServiceMetaData extends AbstractExtendedScr
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
      */
     @Override
-    public String getIdentityHTTPMethod() {
-        return "GET";
+    public Verb getIdentityHTTPMethod() {
+        return Verb.GET;
     }
 
     /*

@@ -1,5 +1,7 @@
 package com.openexchange.oauth.impl;
 
+import org.scribe.model.Verb;
+
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -58,7 +60,7 @@ public interface OAuthIdentityAware {
 
     String getIdentityURL(String accessToken);
 
-    String getIdentityHTTPMethod();
+    Verb getIdentityHTTPMethod();
 
     String getIdentityFieldName();
     

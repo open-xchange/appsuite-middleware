@@ -52,6 +52,7 @@ package com.openexchange.oauth.yahoo.internal;
 import java.util.Collection;
 import java.util.Collections;
 import org.scribe.builder.api.Api;
+import org.scribe.model.Verb;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.HostInfo;
 import com.openexchange.oauth.KnownApi;
@@ -105,7 +106,9 @@ public class OAuthServiceMetaDataYahooImpl extends AbstractExtendedScribeAwareOA
         return Collections.singletonList(OAuthPropertyID.redirectUrl);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
      */
     @Override
@@ -113,15 +116,19 @@ public class OAuthServiceMetaDataYahooImpl extends AbstractExtendedScribeAwareOA
         return IDENTITY_URL;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
      */
     @Override
-    public String getIdentityHTTPMethod() {
-        return "GET";
+    public Verb getIdentityHTTPMethod() {
+        return Verb.GET;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
      */
     @Override

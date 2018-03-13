@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import org.scribe.builder.api.Api;
+import org.scribe.model.Verb;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
@@ -108,8 +109,8 @@ public class DropboxOAuthServiceMetaData extends AbstractExtendedScribeAwareOAut
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
      */
     @Override
-    public String getIdentityHTTPMethod() {
-        return "POST";
+    public Verb getIdentityHTTPMethod() {
+        return Verb.POST;
     }
 
     /*
