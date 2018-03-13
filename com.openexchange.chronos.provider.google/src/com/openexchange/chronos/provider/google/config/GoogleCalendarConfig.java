@@ -69,7 +69,7 @@ public class GoogleCalendarConfig {
 
     private static final Property REFRESH_INTERVAL_PROP = DefaultProperty.valueOf("com.openexchange.calendar.provider.google.refreshInterval", REFRESH_INTERVAL);
 
-    private static final Property REQUEST_TIMEOUT_PROP = DefaultProperty.valueOf("com.openexchange.calendar.provider.google.requestTimeout", REQUEST_TIMEOUT);
+    private static final Property REQUEST_TIMEOUT_PROP = DefaultProperty.valueOf("com.openexchange.calendar.provider.google.retryOnErrorInterval", REQUEST_TIMEOUT);
 
     public static long getResfrehInterval(Session session) {
 

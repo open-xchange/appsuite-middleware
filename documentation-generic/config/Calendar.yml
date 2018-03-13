@@ -111,9 +111,9 @@ properties:
       file: calendar.properties
       packageName: open-xchange-core
       tags: ["Calendar","Google"]
-    - key: com.openexchange.calendar.provider.google.requestTimeout
+    - key: com.openexchange.calendar.provider.google.retryOnErrorInterval
       description: |
-        Defines the time in seconds how long should be wait for the next request to google in case an error occurred.
+        Defines the time in seconds to wait for the next request to google in case an error occurred.
         The minimum is 2 seconds.
       defaultValue: 1800
       version: 7.10.0
