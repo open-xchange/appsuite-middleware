@@ -65,11 +65,11 @@ public class GoogleCalendarConfig {
 
     private static final Long REFRESH_INTERVAL = new Long(10);
 
-    private static final Long REQUEST_TIMEOUT = new Long(1800);
+    private static final Long RETRY_ON_ERROR_INTERVAL = new Long(1800);
 
     private static final Property REFRESH_INTERVAL_PROP = DefaultProperty.valueOf("com.openexchange.calendar.provider.google.refreshInterval", REFRESH_INTERVAL);
 
-    private static final Property REQUEST_TIMEOUT_PROP = DefaultProperty.valueOf("com.openexchange.calendar.provider.google.retryOnErrorInterval", REQUEST_TIMEOUT);
+    private static final Property RETRY_ON_ERROR_INTERVAL_PROP = DefaultProperty.valueOf("com.openexchange.calendar.provider.google.retryOnErrorInterval", RETRY_ON_ERROR_INTERVAL);
 
     public static long getResfrehInterval(Session session) {
 
@@ -81,13 +81,13 @@ public class GoogleCalendarConfig {
 
     }
 
-    public static long getRequestTimeout(Session session) {
+    public static long getRetryOnErrorInterval(Session session) {
 
         LeanConfigurationService service = Services.getService(LeanConfigurationService.class);
         if (service == null) {
-            return REQUEST_TIMEOUT.longValue();
+            return RETRY_ON_ERROR_INTERVAL.longValue();
         }
-        return service.getLongProperty(session.getUserId(), session.getContextId(), REQUEST_TIMEOUT_PROP);
+        return service.getLongProperty(session.getUserId(), session.getContextId(), RETRY_ON_ERROR_INTERVAL_PROP);
 
     }
 }
