@@ -53,7 +53,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.TwitterApi;
 import com.openexchange.exception.OXException;
@@ -71,6 +70,12 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class OAuthServiceMetaDataTwitterImpl extends AbstractExtendedScribeAwareOAuthServiceMetaData {
+
+    /**
+     * HTTPS_API_TWITTER_COM_1_1_ACCOUNT_VERIFY_CREDENTIALS_JSON
+     */
+    private static final String IDENTITY_URL = "https://api.twitter.com/1.1/account/verify_credentials.json";
+    private static final String IDENTITY_FIELD_NAME = "id_str";
 
     /**
      * Initializes a new {@link OAuthServiceMetaDataTwitterImpl}.
@@ -114,8 +119,6 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractExtendedScribeAware
         return null;
     }
 
-    private Pattern identityPattern = Pattern.compile("\"id_str\":\\s*\"(\\S*?)\"");
-
     /*
      * (non-Javadoc)
      * 
@@ -129,21 +132,11 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractExtendedScribeAware
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.oauth.impl.OAuthIdentityAware#useBearer()
-     */
-    @Override
-    public boolean useBearer() {
-        return true;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
      */
     @Override
     public String getIdentityURL(String accessToken) {
-        return "https://api.twitter.com/1.1/account/verify_credentials.json";
+        return IDENTITY_URL;
     }
 
     /*
@@ -152,8 +145,8 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractExtendedScribeAware
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
      */
     @Override
-    public Pattern getIdentityPattern() {
-        return identityPattern;
+    public String getIdentityFieldName() {
+        return IDENTITY_FIELD_NAME;
     }
 
 }

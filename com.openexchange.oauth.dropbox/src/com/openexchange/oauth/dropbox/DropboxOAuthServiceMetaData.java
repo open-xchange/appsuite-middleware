@@ -52,7 +52,6 @@ package com.openexchange.oauth.dropbox;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.regex.Pattern;
 import org.scribe.builder.api.Api;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.KnownApi;
@@ -65,6 +64,9 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class DropboxOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
+
+    private static final String IDENTITY_URL = "https://api.dropboxapi.com/2/users/get_current_account";
+    private static final String IDENTITY_FIELD_NAME = "account_id";
 
     /**
      * Initializes a new {@link DropboxOAuthServiceMetaData}.
@@ -100,8 +102,6 @@ public class DropboxOAuthServiceMetaData extends AbstractExtendedScribeAwareOAut
         return propertyNames;
     }
 
-    private Pattern identityPattern = Pattern.compile("\"account_id\":\\s*\"(\\S*?)\"");
-
     /*
      * (non-Javadoc)
      * 
@@ -115,21 +115,11 @@ public class DropboxOAuthServiceMetaData extends AbstractExtendedScribeAwareOAut
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.oauth.impl.OAuthIdentityAware#useBearer()
-     */
-    @Override
-    public boolean useBearer() {
-        return true;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
      */
     @Override
     public String getIdentityURL(String accessToken) {
-        return "https://api.dropboxapi.com/2/users/get_current_account";
+        return IDENTITY_URL;
     }
 
     /*
@@ -138,8 +128,8 @@ public class DropboxOAuthServiceMetaData extends AbstractExtendedScribeAwareOAut
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
      */
     @Override
-    public Pattern getIdentityPattern() {
-        return identityPattern;
+    public String getIdentityFieldName() {
+        return IDENTITY_FIELD_NAME;
     }
 
     /*

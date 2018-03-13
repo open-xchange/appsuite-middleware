@@ -51,7 +51,6 @@ package com.openexchange.oauth.msliveconnect;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.regex.Pattern;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.MsLiveConnectApi;
 import com.openexchange.oauth.KnownApi;
@@ -65,6 +64,9 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public final class MsLiveConnectOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
+
+    private static final String IDENTITY_URL = "https://apis.live.net/v5.0/me";
+    private static final String IDENTITY_FIELD_NAME = "id";
 
     /**
      * Initialises a new {@link MsLiveConnectOAuthServiceMetaData}.
@@ -90,8 +92,6 @@ public final class MsLiveConnectOAuthServiceMetaData extends AbstractExtendedScr
         return MsLiveConnectApi.class;
     }
 
-    private Pattern identityPattern = Pattern.compile("\"id\":\\s*\"(\\S*?)\"");
-
     /*
      * (non-Javadoc)
      * 
@@ -105,21 +105,11 @@ public final class MsLiveConnectOAuthServiceMetaData extends AbstractExtendedScr
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.oauth.impl.OAuthIdentityAware#useBearer()
-     */
-    @Override
-    public boolean useBearer() {
-        return false;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
      */
     @Override
     public String getIdentityURL(String accessToken) {
-        return "https://apis.live.net/v5.0/me";//?access_token=" + urlEncode(accessToken);
+        return IDENTITY_URL;
     }
 
     /*
@@ -128,8 +118,8 @@ public final class MsLiveConnectOAuthServiceMetaData extends AbstractExtendedScr
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
      */
     @Override
-    public Pattern getIdentityPattern() {
-        return identityPattern;
+    public String getIdentityFieldName() {
+        return IDENTITY_FIELD_NAME;
     }
 
     /*

@@ -51,7 +51,6 @@ package com.openexchange.oauth.google;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.regex.Pattern;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.Google2Api;
 import com.openexchange.exception.OXException;
@@ -67,6 +66,9 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public final class GoogleOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
+
+    private static final String IDENTITY_URL = "https://www.googleapis.com/oauth2/v1/userinfo";
+    private static final String IDENTITY_FIELD_NAME = "id";
 
     /**
      * Initializes a new {@link GoogleOAuthServiceMetaData}.
@@ -99,8 +101,6 @@ public final class GoogleOAuthServiceMetaData extends AbstractExtendedScribeAwar
         return authUrlBuilder.append("&approval_prompt=force").append("&access_type=offline").toString();
     }
 
-    private Pattern identityPattern = Pattern.compile("\"id\":\\s*\"(\\S*?)\"");
-
     /*
      * (non-Javadoc)
      * 
@@ -114,21 +114,11 @@ public final class GoogleOAuthServiceMetaData extends AbstractExtendedScribeAwar
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.oauth.impl.OAuthIdentityAware#useBearer()
-     */
-    @Override
-    public boolean useBearer() {
-        return true;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
      */
     @Override
     public String getIdentityURL(String accessToken) {
-        return "https://www.googleapis.com/oauth2/v1/userinfo";
+        return IDENTITY_URL;
     }
 
     /*
@@ -137,7 +127,7 @@ public final class GoogleOAuthServiceMetaData extends AbstractExtendedScribeAwar
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
      */
     @Override
-    public Pattern getIdentityPattern() {
-        return identityPattern;
+    public String getIdentityFieldName() {
+        return IDENTITY_FIELD_NAME;
     }
 }

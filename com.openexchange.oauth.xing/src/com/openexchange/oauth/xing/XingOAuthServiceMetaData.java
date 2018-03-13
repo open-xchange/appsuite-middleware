@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.XingApi;
 import com.openexchange.exception.OXException;
@@ -71,6 +70,9 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public final class XingOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
+
+    private static final String IDENTITY_URL = "https://api.xing.com/v1/users/me";
+    private static final String IDENTITY_FIELD_NAME = "id";
 
     /**
      * Initializes a new {@link XingOAuthServiceMetaData}.
@@ -119,8 +121,6 @@ public final class XingOAuthServiceMetaData extends AbstractExtendedScribeAwareO
     public OAuthToken getOAuthToken(final Map<String, Object> arguments, Set<OAuthScope> scopes) throws OXException {
         return null;
     }
-    
-    private Pattern identityPattern = Pattern.compile("\"id\":\\s*\"(\\S*?)\"");
 
     /*
      * (non-Javadoc)
@@ -129,7 +129,7 @@ public final class XingOAuthServiceMetaData extends AbstractExtendedScribeAwareO
      */
     @Override
     public String getIdentityURL(String accessToken) {
-        return "https://api.xing.com/v1/users/me";
+        return IDENTITY_URL;
     }
 
     /*
@@ -145,20 +145,10 @@ public final class XingOAuthServiceMetaData extends AbstractExtendedScribeAwareO
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.oauth.impl.OAuthIdentityAware#useBearer()
-     */
-    @Override
-    public boolean useBearer() {
-        return true;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
      */
     @Override
-    public Pattern getIdentityPattern() {
-        return identityPattern;
+    public String getIdentityFieldName() {
+        return IDENTITY_FIELD_NAME;
     }
 }

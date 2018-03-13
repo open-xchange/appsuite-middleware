@@ -54,6 +54,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.net.ssl.SSLHandshakeException;
 import javax.xml.ws.handler.MessageContext.Scope;
 import org.scribe.builder.ServiceBuilder;
@@ -87,7 +88,7 @@ import com.openexchange.server.ServiceLookup;
 public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOAuthServiceMetaData implements ScribeAware, OAuthIdentityAware, Reloadable {
 
     private static final String DEFAULT_CONTENT_TYPE = "application/json";
-    protected static final String EMPTY_CONTENT_TYPE = " "; 
+    protected static final String EMPTY_CONTENT_TYPE = " ";
 
     protected final ServiceLookup services;
     private final List<OAuthPropertyID> propertyNames;
@@ -187,7 +188,7 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
             throw new OXException(31145, "No user identity can be retrieved: " + body);
         }
 
-        final Matcher matcher = getIdentityPattern().matcher(body);
+        final Matcher matcher = compileIdentityPattern(getIdentityFieldName()).matcher(body);
         return matcher.find() ? matcher.group(1) : "";
     }
 
@@ -199,6 +200,10 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
     @Override
     public String getContentType() {
         return DEFAULT_CONTENT_TYPE;
+    }
+
+    private Pattern compileIdentityPattern(String fieldName) {
+        return Pattern.compile("\"" + fieldName + " \":\\s*\"(\\S*?)\"");
     }
 
     /**

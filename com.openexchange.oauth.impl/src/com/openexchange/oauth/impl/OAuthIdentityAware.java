@@ -1,5 +1,4 @@
 package com.openexchange.oauth.impl;
-import java.util.regex.Pattern;
 
 /*
  *
@@ -61,9 +60,7 @@ public interface OAuthIdentityAware {
 
     String getIdentityHTTPMethod();
 
-    boolean useBearer();
-
-    Pattern getIdentityPattern();
+    String getIdentityFieldName();
     
     String getContentType();
 }

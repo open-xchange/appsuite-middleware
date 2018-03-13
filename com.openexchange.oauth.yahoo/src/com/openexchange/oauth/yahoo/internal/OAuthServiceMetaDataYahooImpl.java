@@ -51,7 +51,6 @@ package com.openexchange.oauth.yahoo.internal;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.regex.Pattern;
 import org.scribe.builder.api.Api;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.HostInfo;
@@ -69,6 +68,9 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class OAuthServiceMetaDataYahooImpl extends AbstractExtendedScribeAwareOAuthServiceMetaData {
+
+    private static final String IDENTITY_URL = "https://social.yahooapis.com/v1/me/guid?format=json";
+    private static final String IDENTITY_FIELD_NAME = "value";
 
     public OAuthServiceMetaDataYahooImpl(ServiceLookup services) {
         super(services, KnownApi.YAHOO, YahooOAuthScope.values());
@@ -108,7 +110,7 @@ public class OAuthServiceMetaDataYahooImpl extends AbstractExtendedScribeAwareOA
      */
     @Override
     public String getIdentityURL(String accessToken) {
-        return "https://social.yahooapis.com/v1/me/guid?format=json";
+        return IDENTITY_URL;
     }
 
     /* (non-Javadoc)
@@ -120,18 +122,10 @@ public class OAuthServiceMetaDataYahooImpl extends AbstractExtendedScribeAwareOA
     }
 
     /* (non-Javadoc)
-     * @see com.openexchange.oauth.impl.OAuthIdentityAware#useBearer()
-     */
-    @Override
-    public boolean useBearer() {
-        return false;
-    }
-
-    /* (non-Javadoc)
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
      */
     @Override
-    public Pattern getIdentityPattern() {
-        return Pattern.compile("\"value\":\\s*\"(\\S*?)\"");
+    public String getIdentityFieldName() {
+        return IDENTITY_FIELD_NAME;
     }
 }

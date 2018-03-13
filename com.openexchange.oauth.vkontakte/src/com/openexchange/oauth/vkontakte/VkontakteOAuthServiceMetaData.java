@@ -51,7 +51,6 @@ package com.openexchange.oauth.vkontakte;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.regex.Pattern;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.VkontakteApi;
 import com.openexchange.oauth.KnownApi;
@@ -65,6 +64,9 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public final class VkontakteOAuthServiceMetaData extends AbstractScribeAwareOAuthServiceMetaData {
+
+    private static final String IDENTITY_URL = "https://api.vk.com/method/account.getInfo"; // FIXME: Best guess....
+    private static final String IDENTITY_FIELD_NAME = "id"; // FIXME: Best guess....
 
     /**
      * Initializes a new {@link VkontakteOAuthServiceMetaData}.
@@ -90,40 +92,34 @@ public final class VkontakteOAuthServiceMetaData extends AbstractScribeAwareOAut
         return Collections.emptyList();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
      */
     @Override
     public String getIdentityURL(String accessToken) {
-        // TODO Auto-generated method stub
-        return null;
+        return IDENTITY_URL;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
      */
     @Override
     public String getIdentityHTTPMethod() {
-        // TODO Auto-generated method stub
-        return null;
+        return "GET";
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.oauth.impl.OAuthIdentityAware#useBearer()
-     */
-    @Override
-    public boolean useBearer() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
      */
     @Override
-    public Pattern getIdentityPattern() {
-        // TODO Auto-generated method stub
-        return null;
+    public String getIdentityFieldName() {
+        return IDENTITY_FIELD_NAME;
     }
 
 }

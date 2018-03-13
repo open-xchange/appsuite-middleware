@@ -51,7 +51,6 @@ package com.openexchange.oauth.linkedin;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.regex.Pattern;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.LinkedInApi20;
 import com.openexchange.oauth.KnownApi;
@@ -66,8 +65,9 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class OAuthServiceMetaDataLinkedInImpl extends AbstractExtendedScribeAwareOAuthServiceMetaData {
-    
-    private Pattern identityPattern = Pattern.compile("\"id\":\\s*\"(\\S*?)\"");
+
+    private static final String IDENTITY_URL = "https://api.linkedin.com/v1/people/~?format=json&oauth2_access_token=";
+    private static final String IDENTITY_FIELD_NAME = "id";
 
     public OAuthServiceMetaDataLinkedInImpl(ServiceLookup services) {
         super(services, KnownApi.LINKEDIN, LinkedInOAuthScope.values());
@@ -93,15 +93,19 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractExtendedScribeAwar
         return LinkedInApi20.class;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityURL()
      */
     @Override
     public String getIdentityURL(String accessToken) {
-        return "https://api.linkedin.com/v1/people/~?format=json&oauth2_access_token=" + accessToken;
+        return IDENTITY_URL + urlEncode(accessToken);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityMethod()
      */
     @Override
@@ -109,19 +113,13 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractExtendedScribeAwar
         return "GET";
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.oauth.impl.OAuthIdentityAware#useBearer()
-     */
-    @Override
-    public boolean useBearer() {
-        return true;
-    }
-
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.oauth.impl.OAuthIdentityAware#getIdentityPattern()
      */
     @Override
-    public Pattern getIdentityPattern() {
-        return identityPattern;
+    public String getIdentityFieldName() {
+        return IDENTITY_FIELD_NAME;
     }
 }
