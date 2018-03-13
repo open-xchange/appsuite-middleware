@@ -392,7 +392,6 @@ public class ConflictCheckPerformer extends AbstractFreeBusyPerformer {
         if (0 == eventsInPeriod.size()) {
             return Collections.emptyList();
         }
-        getSelfProtection().checkEventCollection(eventsInPeriod);
         return readAttendeeData(eventsInPeriod, Boolean.TRUE);
     }
 
