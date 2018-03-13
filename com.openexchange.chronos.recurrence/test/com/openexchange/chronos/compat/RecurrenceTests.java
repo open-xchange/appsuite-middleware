@@ -55,6 +55,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.recurrence.TestRecurrenceConfig;
 import com.openexchange.chronos.recurrence.service.RecurrenceServiceImpl;
 import com.openexchange.chronos.service.RecurrenceService;
 
@@ -66,7 +67,7 @@ import com.openexchange.chronos.service.RecurrenceService;
  */
 public class RecurrenceTests {
 
-    private final RecurrenceService recurrenceService = new RecurrenceServiceImpl();
+    private final RecurrenceService recurrenceService = new RecurrenceServiceImpl(new TestRecurrenceConfig());
 
     private class Validator {
 

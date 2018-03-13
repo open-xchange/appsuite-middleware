@@ -139,4 +139,9 @@ public class MailAppClientInfo implements ClientInfo {
         return appVersion;
     }
 
+    @Override
+    public String getClientFamily() {
+        return "oxmailapp";
+    }
+
 }

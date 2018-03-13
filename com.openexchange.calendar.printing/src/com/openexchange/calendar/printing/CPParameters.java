@@ -265,7 +265,7 @@ public class CPParameters {
             missingMandatoryFields.add(AJAXServlet.PARAMETER_TEMPLATE);
         }
         usertemplate = extractOptionalStringParam(req, PARAMETER_USERTEMPLATE);
-        if (isInvalidTemplateName(template)) {
+        if (isInvalidTemplateName(usertemplate)) {
             usertemplate = null;
             unparseableFields.add(PARAMETER_USERTEMPLATE);
             missingOptionalFields.add(PARAMETER_USERTEMPLATE);

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,22 +47,40 @@
  *
  */
 
-package com.openexchange.ajax.sessionmanagement.actions;
+package com.openexchange.chronos.recurrence;
 
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-
+import com.openexchange.chronos.recurrence.service.RecurrenceConfig;
 
 /**
- * {@link DeleteResponse}
+ * {@link TestRecurrenceConfig}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public class DeleteResponse extends AbstractAJAXResponse {
+public class TestRecurrenceConfig extends RecurrenceConfig {
 
-    protected DeleteResponse(Response response) {
-        super(response);
+    private final int calculationLimit;
+
+    /**
+     * Initializes a new {@link TestRecurrenceConfig}.
+     */
+    public TestRecurrenceConfig() {
+        this(1001);
+    }
+
+    /**
+     * Initializes a new {@link TestRecurrenceConfig}.
+     *
+     * @param calculationLimit The calculation limit to use
+     */
+    public TestRecurrenceConfig(int calculationLimit) {
+        super(null);
+        this.calculationLimit = calculationLimit;
+    }
+
+    @Override
+    public int getCalculationLimit() {
+        return calculationLimit;
     }
 
 }

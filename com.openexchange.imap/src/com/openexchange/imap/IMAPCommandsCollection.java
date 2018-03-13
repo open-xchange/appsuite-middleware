@@ -1087,12 +1087,7 @@ public final class IMAPCommandsCollection {
      */
     public static int[] getTotalAndUnread(final IMAPStore imapStore, final String fullName, final boolean excludeDeleted) throws MessagingException {
         final DefaultFolder defaultFolder = (DefaultFolder) imapStore.getDefaultFolder();
-        if (excludeDeleted) {
-            return getTotalAndUnreadBySearch(defaultFolder, fullName);
-        } else {
-            return getTotalAndUnreadByStatus(defaultFolder, fullName);
-        }
-
+        return excludeDeleted ? getTotalAndUnreadBySearch(defaultFolder, fullName) : getTotalAndUnreadByStatus(defaultFolder, fullName);
     }
 
     private static int[] getTotalAndUnreadByStatus(DefaultFolder defaultFolder, String fullName) throws MessagingException{
@@ -1150,62 +1145,76 @@ public final class IMAPCommandsCollection {
         }));
     }
 
-    private static int[] getTotalAndUnreadBySearch(DefaultFolder defaultFolder, String fullName) throws MessagingException{
+    private static int[] getTotalAndUnreadBySearch(DefaultFolder defaultFolder, final String fullName) throws MessagingException{
        return ((int[]) defaultFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
             @Override
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
-                /*
-                 * Encode the mbox as per RFC2060
-                 */
-                final Argument sel_args = new Argument();
-                sel_args.writeString(BASE64MailboxEncoder.encode(fullName));
-                /*
-                 * Perform command
-                 */
-                Response[] selectCommand = performCommand(protocol, "EXAMINE", sel_args);
-                int total = 0;
-                final Response response = selectCommand[selectCommand.length - 1];
-                if(response.isOK()){
-                    for(Response r: selectCommand){
-                        if(r instanceof IMAPResponse && ((IMAPResponse) r).keyEquals("EXISTS")){
-                            total = ((IMAPResponse) r).getNumber();
-                            break;
+                Integer total = null;
+                {
+                    // Encode the mbox as per RFC2060
+                    final Argument args = new Argument();
+                    args.writeString(BASE64MailboxEncoder.encode(fullName));
+
+                    // Perform command
+                    Response[] r = performCommand(protocol, "EXAMINE", args);
+                    Response response = r[r.length - 1];
+                    if (response.isOK()) {
+                        for (int i = 0, len = r.length - 1; null == total && i < len; i++) {
+                            if (r[i] instanceof IMAPResponse) {
+                                IMAPResponse imapResponse = (IMAPResponse) r[i];
+                                if (imapResponse.keyEquals("EXISTS")) {
+                                    total = Integer.valueOf(imapResponse.getNumber());
+                                }
+                            } else {
+                                r[i] = null;
+                            }
                         }
+                        notifyResponseHandlers(r, protocol);
+                    } else if (response.isBAD()) {
+                        if (ImapUtility.isInvalidMessageset(response)) {
+                            total = Integer.valueOf(0);
+                        } else {
+                            LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging("EXAMINE " + fullName));
+                            throw new BadCommandException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, COMMAND_SEARCH_UNSEEN, ImapUtility.appendCommandInfo(response.toString(), defaultFolder)));
+                        }
+                    } else if (response.isNO()) {
+                        LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging("EXAMINE " + fullName));
+                        throw new CommandFailedException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, COMMAND_SEARCH_UNSEEN, ImapUtility.appendCommandInfo(response.toString(), defaultFolder)));
+                    } else {
+                        LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging("EXAMINE " + fullName));
+                        protocol.handleResult(response);
                     }
                 }
 
                 String command = COMMAND_SEARCH_UNSEEN_NOT_DELETED;
-                Response[] resp = performCommand(protocol, command);
-                int unread = handleSearchResponses(resp, protocol, command);
-                int result[] = new int[]{total, unread};
+                Response[] r = performCommand(protocol, command);
+                int unread = handleSearchResponses(r, protocol, command);
+                int result[] = new int[] { null == total ? 0 : total.intValue(), unread };
                 result[result.length - 1] = unread;
-                notifyResponseHandlers(resp, protocol);
                 return result;
             }
 
-            private int handleSearchResponses(final Response[] r, final IMAPProtocol p, String command) throws ProtocolException {
-                final Response response = r[r.length - 1];
+            private int handleSearchResponses(final Response[] r, final IMAPProtocol protocol, String command) throws ProtocolException {
                 int result = 0;
+                Response response = r[r.length - 1];
                 if (response.isOK()) {
                     for (int i = 0, len = r.length - 1; i < len; i++) {
-                        if (!(r[i] instanceof IMAPResponse)) {
-                            r[i] = null;
-                            continue;
-                        }
-                        final IMAPResponse ir = (IMAPResponse) r[i];
-                        /*
-                         * The SEARCH response from the server contains a listing of message sequence numbers corresponding to those
-                         * messages that match the searching criteria.
-                         */
-                        if (ir.keyEquals(COMMAND_SEARCH)) {
-                            while (ir.readAtomString() != null) {
-                                result++;
+                        if (r[i] instanceof IMAPResponse) {
+                            IMAPResponse ir = (IMAPResponse) r[i];
+                            /*
+                             * The SEARCH response from the server contains a listing of message sequence numbers corresponding to those
+                             * messages that match the searching criteria.
+                             */
+                            if (ir.keyEquals(COMMAND_SEARCH)) {
+                                while (ir.readAtomString() != null) {
+                                    result++;
+                                }
                             }
                         }
                         r[i] = null;
                     }
-                    notifyResponseHandlers(r, p);
+                    notifyResponseHandlers(r, protocol);
                 } else if (response.isBAD()) {
                     if (ImapUtility.isInvalidMessageset(response)) {
                         return 0;
@@ -1217,7 +1226,7 @@ public final class IMAPCommandsCollection {
                     throw new CommandFailedException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, COMMAND_SEARCH_UNSEEN, ImapUtility.appendCommandInfo(response.toString(), defaultFolder)));
                 } else {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    p.handleResult(response);
+                    protocol.handleResult(response);
                 }
                 return result;
             } // End of handleSearchResponses()

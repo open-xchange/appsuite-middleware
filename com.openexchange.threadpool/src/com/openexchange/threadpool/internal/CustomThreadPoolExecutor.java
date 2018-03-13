@@ -2590,11 +2590,10 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * Deletes tracked temporary files.
      */
     static void deleteTempFiles() {
-        String[] tempFiles = LogProperties.getAndRemoveTempFiles();
+        File[] tempFiles = LogProperties.getAndRemoveTempFiles();
         if (null != tempFiles) {
-            for (String path : tempFiles) {
-                File f = new File(path);
-                f.delete();
+            for (File path : tempFiles) {
+                path.delete();
             }
         }
     }

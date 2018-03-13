@@ -75,6 +75,23 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
 
     private final LoadingCache<String, DAVClientInfo> clientInfoCache;
 
+    private static final String MAC_CALENDAR = "macos_calendar";
+    private static final String MAC_ADDRESSBOOK = "macos_addressbook";
+    private static final String IOS_DAV = "ios_calendar/addressbook";
+    private static final String THUNDERBIRD_LIGHTNING = "thunderbird_lightning";
+    private static final String EMCLIENT = "emclient";
+    private static final String EMCLIENT_APPSUITE = "emclient_appsuite";
+    private static final String OX_SYNC = "oxsyncapp";
+    private static final String CALDAV_SYNC = "caldav_sync";
+    private static final String CARDDAV_SYNC = "carddav_sync";
+    private static final String SMOOTH_SYNC = "smooth_sync";
+    private static final String DAVDROID = "davdroid";
+    private static final String WINDOWS_PHONE = "windows_phone";
+    private static final String WINDOWS = "windows";
+    private static final String GENERIC_CALDAV = "generic_caldav";
+    private static final String GENERIC_CARDDAV = "generic_carddav";
+    private static final String UNKNOWN = "unknown";
+
     /**
      * Initializes a new {@link DAVClientInfoProvider}.
      */
@@ -85,10 +102,11 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
             @Override
             public DAVClientInfo load(String sUserAgent) throws Exception {
                 DAVUserAgent userAgent = DAVUserAgent.parse(sUserAgent);
+                String clientFamily = getClientFamily(userAgent);
                 ReadableUserAgent readableUserAgent = userAgentParser.parse(sUserAgent);
                 if (null == readableUserAgent) {
                     // Unknown User-Agent
-                    return new DAVClientInfo(userAgent.getReadableName());
+                    return new DAVClientInfo(userAgent.getReadableName(), clientFamily);
                 }
 
                 String osVersion = null;
@@ -105,8 +123,18 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
                         }
                     }
                 }
+                if (Strings.isEmpty(osFamily) || UNKNOWN.equals(osFamily)) {
+                    osFamily = getOSFamily(userAgent);
+                }
+
                 String clientVersion = null;
                 String client = readableUserAgent.getName();
+                if (EMCLIENT.equals(clientFamily)) {
+                    client = "eM Client";
+                }
+                if (EMCLIENT_APPSUITE.equals(clientFamily)) {
+                    client = "eM Client for OX App Suite";
+                }
                 String clientVersionMajor = readableUserAgent.getVersionNumber().getMajor();
                 String clientVersionMinor = readableUserAgent.getVersionNumber().getMinor();
                 if (Strings.isNotEmpty(clientVersionMajor)) {
@@ -116,7 +144,7 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
                         clientVersion = clientVersionMajor;
                     }
                 }
-                return new DAVClientInfo(userAgent.getReadableName(), osFamily, osVersion, client, clientVersion);
+                return new DAVClientInfo(userAgent.getReadableName(), osFamily, osVersion, client, clientVersion, clientFamily);
             }
         };
         clientInfoCache = CacheBuilder.newBuilder().initialCapacity(128).maximumSize(65536).expireAfterAccess(2, TimeUnit.HOURS).build(loader);
@@ -131,14 +159,14 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
         String sUserAgent = (String) session.getParameter(Session.PARAM_USER_AGENT);
         if (Strings.isEmpty(sUserAgent)) {
             // Unknown User-Agent
-            return new DAVClientInfo(DAVUserAgent.UNKNOWN.getReadableName());
+            return new DAVClientInfo(DAVUserAgent.UNKNOWN.getReadableName(), getClientFamily(DAVUserAgent.UNKNOWN));
         }
 
         try {
             return clientInfoCache.get(sUserAgent);
         } catch (ExecutionException e) {
             LOG.error("Failed to determine client info for User-Agent {}", sUserAgent, e.getCause());
-            return new DAVClientInfo(DAVUserAgent.UNKNOWN.getReadableName());
+            return new DAVClientInfo(DAVUserAgent.UNKNOWN.getReadableName(), getClientFamily(DAVUserAgent.UNKNOWN));
         }
     }
 
@@ -149,12 +177,67 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
         }
         Client client = Client.getClientByID(clientId);
         if (Client.CALDAV.equals(client)) {
-            return new DAVClientInfo(DAVUserAgent.GENERIC_CALDAV.getReadableName());
+            return new DAVClientInfo(DAVUserAgent.GENERIC_CALDAV.getReadableName(), getClientFamily(DAVUserAgent.GENERIC_CALDAV));
         }
         if (Client.CARDDAV.equals(client)) {
-            return new DAVClientInfo(DAVUserAgent.GENERIC_CARDDAV.getReadableName());
+            return new DAVClientInfo(DAVUserAgent.GENERIC_CARDDAV.getReadableName(), getClientFamily(DAVUserAgent.GENERIC_CARDDAV));
         }
         return null;
+    }
+
+    private String getClientFamily(DAVUserAgent userAgent) {
+        switch (userAgent) {
+            case MAC_CALENDAR:
+                return MAC_CALENDAR;
+            case MAC_CONTACTS:
+                return MAC_ADDRESSBOOK;
+            case IOS:
+                return IOS_DAV;
+            case THUNDERBIRD_LIGHTNING:
+                return THUNDERBIRD_LIGHTNING;
+            case EM_CLIENT:
+                return EMCLIENT;
+            case EM_CLIENT_FOR_APPSUITE:
+                return EMCLIENT_APPSUITE;
+            case OX_SYNC:
+                return OX_SYNC;
+            case CALDAV_SYNC:
+                return CALDAV_SYNC;
+            case CARDDAV_SYNC:
+                return CARDDAV_SYNC;
+            case SMOOTH_SYNC:
+                return SMOOTH_SYNC;
+            case DAVDROID:
+                return DAVDROID;
+            case WINDOWS_PHONE:
+                return WINDOWS_PHONE;
+            case WINDOWS:
+                return WINDOWS;
+            case GENERIC_CALDAV:
+                return GENERIC_CALDAV;
+            case GENERIC_CARDDAV:
+                return GENERIC_CARDDAV;
+            default:
+                return UNKNOWN;
+        }
+    }
+
+    private String getOSFamily(DAVUserAgent userAgent) {
+        switch (userAgent) {
+            case MAC_CALENDAR:
+            case MAC_CONTACTS:
+                return "macos";
+            case IOS:
+                return "ios";
+            case EM_CLIENT:
+            case EM_CLIENT_FOR_APPSUITE:
+            case WINDOWS:
+                return "windows";
+            case DAVDROID:
+                return "android";
+            default:
+                return "unknown";
+        }
     }
 
 }

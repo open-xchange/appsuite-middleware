@@ -71,7 +71,9 @@ public class Comparators {
      * {@link DateTimeComparator} - DateTime comparator. Orders {@link Available} items
      * by start date (ascending)
      */
-    public static class FreeSlotDateTimeComparator implements Comparator<Available> {
+    public static class FreeSlotDateTimeComparator implements Comparator<Available>, Serializable {
+
+        private static final long serialVersionUID = -5782820265507447924L;
 
         /**
          * Initialises a new {@link GetPerformer.DateTimeComparator}.
@@ -100,7 +102,9 @@ public class Comparators {
      * {@link DateTimeComparator} - DateTime comparator. Orders {@link Availability} items
      * by start date (ascending)
      */
-    public static class AvailabilityDateTimeComparator implements Comparator<Availability> {
+    public static class AvailabilityDateTimeComparator implements Comparator<Availability>, Serializable {
+
+        private static final long serialVersionUID = 2953299600953128028L;
 
         /**
          * Initialises a new {@link GetPerformer.DateTimeComparator}.
@@ -130,7 +134,9 @@ public class Comparators {
      * by priority (descending). We want elements with higher priority (in this context '1' > '9' > '0')
      * to be on the top of the list.
      */
-    public static class PriorityComparator implements Comparator<Availability> {
+    public static class PriorityComparator implements Comparator<Availability>, Serializable {
+
+        private static final long serialVersionUID = 1746812827168863381L;
 
         /**
          * Initialises a new {@link GetPerformer.PriorityComparator}.

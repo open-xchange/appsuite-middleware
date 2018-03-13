@@ -149,20 +149,22 @@ public class WebdavLockAction extends AbstractAction {
 
     private void configureLock(final WebdavRequest req, final WebdavLock lock) throws JDOMException, IOException {
         final Element root = req.getBodyAsDocument().getRootElement();
-        final Element lockscope = root.getChild("lockscope",DAV_NS).getChildren().get(0);
+        Element child = root.getChild("lockscope",DAV_NS);
+        if(child != null) {
+            final Element lockscope = child.getChildren().get(0);
 
-        if(lockscope.getNamespace().equals(DAV_NS)) {
-        	if(lockscope.getName().equalsIgnoreCase("shared")) {
-        		lock.setScope(Scope.SHARED_LITERAL);
-        	} else {
-        		lock.setScope(Scope.EXCLUSIVE_LITERAL);
-        	}
+            if(lockscope.getNamespace().equals(DAV_NS)) {
+            	if(lockscope.getName().equalsIgnoreCase("shared")) {
+            		lock.setScope(Scope.SHARED_LITERAL);
+            	} else {
+            		lock.setScope(Scope.EXCLUSIVE_LITERAL);
+            	}
+            }
         }
 
         lock.setType(Type.WRITE_LITERAL);
 
         final Element owner = root.getChild("owner",DAV_NS);
-
         final XMLOutputter outputter = new XMLOutputter();
 
         if(owner != null) {

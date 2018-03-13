@@ -92,4 +92,9 @@ public class USMEASClientInfo implements ClientInfo {
         return null;
     }
 
+    @Override
+    public String getClientFamily() {
+        return "usmeasclient";
+    }
+
 }

@@ -67,6 +67,7 @@ import com.openexchange.session.Session;
 import com.openexchange.uadetector.UserAgentParser;
 import net.sf.uadetector.OperatingSystem;
 import net.sf.uadetector.ReadableUserAgent;
+import net.sf.uadetector.UserAgentFamily;
 
 /**
  * {@link WebClientInfoProvider}
@@ -80,10 +81,19 @@ public class WebClientInfoProvider implements ClientInfoProvider {
     private static final String CLIENT_OX6 = "OX6 UI";
 
     private static final String OS_FAMILY_WINDOWS  = "windows";
-    private static final String OS_FAMILY_MACOS = "os x";
+    private static final String OS_FAMILY_MACOS = "macos";
     private static final String OS_FAMILY_LINUX = "linux";
     private static final String OS_FAMILY_ANDROID = "android";
     private static final String OS_FAMILY_IOS = "ios";
+
+    private static final String BROWSER_CHROME = "chrome";
+    private static final String BROWSER_SAFARI = "safari";
+    private static final String BROWSER_FIREFOX = "firefox";
+    private static final String BROWSER_EDGE = "egde";
+    private static final String BROWSER_MSIE = "msie";
+    private static final String BROWSER_OPERA = "opera";
+    private static final String BROWSER_CHROMIUM = "chromium";
+    private static final String BROWSER_UNKNOWN = "unknown";
 
     private final ServiceLookup services;
     private final Map<String, String> osMapping;
@@ -153,6 +163,7 @@ public class WebClientInfoProvider implements ClientInfoProvider {
             // ... otherwise determine client info
             ReadableUserAgent info = parser.parse(userAgent);
             OperatingSystem operatingSystem = info.getOperatingSystem();
+            String browserFamily = getBrowserFamily(info.getFamily());
             String os = null;
             String osVersion = null;
             StringBuilder osReadableName = new StringBuilder();
@@ -214,16 +225,18 @@ public class WebClientInfoProvider implements ClientInfoProvider {
                 if (userAgent.contains("Edge")) { // MS Edge
                     browser = "Edge";
                     browserVersion = null;
+                    browserFamily = BROWSER_EDGE;
                 }
             }
             if ("Mozilla".equals(browser)) {
                 if (userAgent.contains("Trident/7.0; rv:11.0")) { //MSIE 11
                     browser = "Internet Explorer";
                     browserVersion = "11";
+                    browserFamily = BROWSER_MSIE;
                 }
             }
 
-            webClientInfo = new WebClientInfo(client, osReadableName.toString(), os, osVersion, browser, browserVersion);
+            webClientInfo = new WebClientInfo(client, osReadableName.toString(), os, osVersion, browser, browserVersion, browserFamily);
             clientInfoCache.put(key, webClientInfo);
             return webClientInfo;
         }
@@ -241,13 +254,34 @@ public class WebClientInfoProvider implements ClientInfoProvider {
         } else {
             return null;
         }
-        return new WebClientInfo(client, null, null, null, null, null);
+        return new WebClientInfo(client, null, null, null, null, null, BROWSER_UNKNOWN);
     }
 
     private String getVersionNumber(OperatingSystem operatingSystem) {
         StringBuilder sb = new StringBuilder();
         sb.append(operatingSystem.getVersionNumber().getMajor()).append(".").append(operatingSystem.getVersionNumber().getMinor());
         return sb.toString();
+    }
+
+    private String getBrowserFamily(UserAgentFamily family) {
+        switch (family) {
+            case CHROME:
+            case CHROME_MOBILE:
+                return BROWSER_CHROME;
+            case CHROMIUM:
+                return BROWSER_CHROMIUM;
+            case FIREFOX:
+                return BROWSER_FIREFOX;
+            case OPERA:
+            case OPERA_MINI:
+            case OPERA_MOBILE:
+                return BROWSER_OPERA;
+            case SAFARI:
+            case SAFARI_RSS_READER:
+                return BROWSER_SAFARI;
+            default:
+                return BROWSER_UNKNOWN;
+        }
     }
 
     private static class Key {

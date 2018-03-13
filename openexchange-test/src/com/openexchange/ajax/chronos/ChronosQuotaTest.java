@@ -66,10 +66,8 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.UserProperty;
 import com.openexchange.ajax.chronos.util.DateTimeUtil;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
-import com.openexchange.testing.httpclient.invoker.ApiClient;
 import com.openexchange.testing.httpclient.models.Attendee;
 import com.openexchange.testing.httpclient.models.Attendee.CuTypeEnum;
 import com.openexchange.testing.httpclient.models.ChronosCalendarResultResponse;
@@ -92,13 +90,13 @@ public class ChronosQuotaTest extends AbstractChronosTest {
 
     private static final String MODULE = "calendar";
 
-    private AJAXClient ajaxClient;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
 
-        ajaxClient = new AJAXClient(testUser);
+        getClient().login(testUser.getLogin(), testUser.getPassword());
+
         Map<String, String> userAttributes = new HashMap<>(1);
         userAttributes.put("com.openexchange.quota.calendar", "0");
         setQuota(userAttributes);
@@ -111,12 +109,8 @@ public class ChronosQuotaTest extends AbstractChronosTest {
      */
     @Test
     public void testExeededQuota() throws Exception {
-        // Get quota info via API
-        ApiClient client = getClient();
-        client.login(testUser.getLogin(), testUser.getPassword());
-        QuotaApi api = new QuotaApi(client);
-        rememberClient(client);
-        QuotasResponse response = api.getQuotaInformation(client.getSession(), MODULE, "0");
+        QuotaApi api = new QuotaApi(getClient());
+        QuotasResponse response = api.getQuotaInformation(getClient().getSession(), MODULE, "0");
         Object data = response.getData();
 
         // Check for the right type
@@ -136,9 +130,10 @@ public class ChronosQuotaTest extends AbstractChronosTest {
          */
 
         // Try creating a new event
-        LoginResponse login = defaultUserApi.login(testUser.getLogin(), testUser.getPassword(), client);
-        // FIXME: Use the EventManager instead
-        ChronosCalendarResultResponse resultResponse = defaultUserApi.getChronosApi().createEvent(login.getSession(), getDefaultFolder(login.getSession(), client), createSingleEvent("SingleEventQuotaTest"), Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, null, false);
+        LoginResponse login = defaultUserApi.login(testUser.getLogin(), testUser.getPassword(), getClient());
+
+        // Can't use EventManager, we need to check the exception here
+        ChronosCalendarResultResponse resultResponse = defaultUserApi.getChronosApi().createEvent(login.getSession(), getDefaultFolder(login.getSession(), getClient()), createSingleEvent("SingleEventQuotaTest"), Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, null, Boolean.FALSE);
 
         // Check that creation failed
         assertThat("No response!", resultResponse, is(not(nullValue())));
@@ -152,22 +147,19 @@ public class ChronosQuotaTest extends AbstractChronosTest {
         Map<String, String> userAttributes = new HashMap<>(1);
         userAttributes.put("com.openexchange.quota.calendar", "-1");
         setQuota(userAttributes);
-        if (null != ajaxClient) {
-            ajaxClient.logout();
-        }
         super.tearDown();
     }
 
     private void setQuota(Map<String, String> props) throws Exception {
-        com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(ajaxClient.getValues().getUserId());
+        com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(getClient().getUserId().intValue());
         for (String property : props.keySet()) {
             user.setUserAttribute("config", property, props.get(property));
         }
         Credentials credentials = new Credentials(admin.getUser(), admin.getPassword());
         OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
-        iface.change(new Context(Integer.valueOf(ajaxClient.getValues().getContextId())), user, credentials);
+        iface.change(new Context(Integer.valueOf(client.getValues().getContextId())), user, credentials);
 
-        List<UserProperty> userConfigurationSource = iface.getUserConfigurationSource(new Context(Integer.valueOf(ajaxClient.getValues().getContextId())), user, "quota", credentials);
+        List<UserProperty> userConfigurationSource = iface.getUserConfigurationSource(new Context(Integer.valueOf(client.getValues().getContextId())), user, "quota", credentials);
         System.out.println("User configuration related to 'quota' after changing the following properties:");
         for (String property : props.keySet()) {
             System.out.println(property + "' to " + props.get(property));
@@ -182,9 +174,8 @@ public class ChronosQuotaTest extends AbstractChronosTest {
         EventData singleEvent = new EventData();
         singleEvent.setPropertyClass("PUBLIC");
         Attendee attendee = new Attendee();
-        attendee.entity(defaultUserApi.getCalUser());
+        attendee.entity(getClient().getUserId());
         attendee.cuType(CuTypeEnum.INDIVIDUAL);
-        attendee.setUri("mailto:" + this.testUser.getLogin());
         singleEvent.setAttendees(Collections.singletonList(attendee));
         singleEvent.setStartDate(startDate);
         singleEvent.setEndDate(endDate);

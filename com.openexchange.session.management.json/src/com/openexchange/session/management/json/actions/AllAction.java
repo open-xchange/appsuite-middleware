@@ -169,10 +169,11 @@ public class AllAction implements AJAXActionService {
                 jOS.put("name", info.getOSFamily());
                 jOS.put("version", info.getOSVersion());
                 jDeviceInfo.put("os", jOS);
-                JSONObject jClient = new JSONObject(3);
+                JSONObject jClient = new JSONObject(4);
                 jClient.put("name", info.getClientName());
                 jClient.put("version", info.getClientVersion());
                 jClient.put("type", info.getType().getName());
+                jClient.put("family", info.getClientFamily());
                 jDeviceInfo.put("client", jClient);
                 return jDeviceInfo;
             }

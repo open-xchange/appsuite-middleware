@@ -72,8 +72,7 @@ import com.openexchange.exception.OXException;
  */
 public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterator<T> {
 
-    public static final int MAX = 1001;
-
+    protected final int calculationLimit;
     protected final Calendar start;
     protected final Integer startPosition;
     protected final Calendar end;
@@ -87,11 +86,12 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
     protected RecurrenceSetIterator inner;
     protected final long[] exceptionDates;
 
-
+    private Long lookAhead;
 
     /**
      * Initializes a new {@link AbstractRecurrenceIterator}.
      *
+     * @param config The recurrence configuration to use
      * @param recurrenceData The underlying recurrence data
      * @param forwardToOccurrence <code>true</code> to fast-forward the iterator to the first occurrence if the recurrence data's start
      *            does not fall into the pattern, <code>false</code> otherwise
@@ -101,13 +101,14 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
      * @param limit The maximum number of calculated instances. Optional, can be null.
      * @param ignoreExceptions Determines if exceptions should be ignored. If true, all occurrences are calculated as if no exceptions exist. Note: This does not add change exceptions. See {@link ChangeExceptionAwareRecurrenceIterator}
      */
-    protected AbstractRecurrenceIterator(Event master, boolean forwardToOccurrence, Calendar start, Calendar end, Integer limit, boolean ignoreExceptions) throws OXException {
-        this(new DefaultRecurrenceData(master.getRecurrenceRule(), master.getStartDate(), ignoreExceptions ? null : getExceptionDates(master)), getEventDuration(master), forwardToOccurrence, start, end, null, limit);
+    protected AbstractRecurrenceIterator(RecurrenceConfig config, Event master, boolean forwardToOccurrence, Calendar start, Calendar end, Integer limit, boolean ignoreExceptions) throws OXException {
+        this(config, new DefaultRecurrenceData(master.getRecurrenceRule(), master.getStartDate(), ignoreExceptions ? null : getExceptionDates(master)), getEventDuration(master), forwardToOccurrence, start, end, null, limit);
     }
 
     /**
      * Initializes a new {@link AbstractRecurrenceIterator}.
      *
+     * @param config The recurrence configuration to use
      * @param recurrenceData The underlying recurrence data
      * @param eventDuration The duration of the underlying series master event, or <code>0</code> if not considered
      * @param forwardToOccurrence <code>true</code> to fast-forward the iterator to the first occurrence if the recurrence data's start
@@ -117,8 +118,9 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
      * @param startPosition The start recurrence position for the calculation. Optional, can be null.
      * @param limit The maximum number of calculated instances. Optional, can be null.
      */
-    protected AbstractRecurrenceIterator(RecurrenceData recurrenceData, long eventDuration, boolean forwardToOccurrence, Calendar start, Calendar end, Integer startPosition, Integer limit) throws OXException {
+    protected AbstractRecurrenceIterator(RecurrenceConfig config, RecurrenceData recurrenceData, long eventDuration, boolean forwardToOccurrence, Calendar start, Calendar end, Integer startPosition, Integer limit) throws OXException {
         super();
+        this.calculationLimit = config.getCalculationLimit();
         this.recurrenceData = recurrenceData;
         this.eventDuration = eventDuration;
         this.start = start;
@@ -136,8 +138,6 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
         count = 0;
         init();
     }
-
-    private Long lookAhead = null;
 
     private void init() {
         if (null != start || null != startPosition && 1 < startPosition.intValue()) {
@@ -180,7 +180,7 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
     protected abstract T nextInstance();
 
     private void innerNext() {
-        if (count >= MAX) {
+        if (count >= calculationLimit) {
             ChronosLogger.debug("Reached internal limit. Stop calculation.");
             next = null;
             return;
