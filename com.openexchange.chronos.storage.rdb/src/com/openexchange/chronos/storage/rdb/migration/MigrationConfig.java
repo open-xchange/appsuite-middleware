@@ -85,12 +85,12 @@ public class MigrationConfig {
         super();
         this.services = services;
         ConfigurationService configService = services.getService(ConfigurationService.class);
-        batchSize = configService.getIntProperty("com.openexchange.chronos.migration.batchSize", 500);
-        maxTombstoneAgeInMonths = configService.getIntProperty("com.openexchange.chronos.migration.maxTombstoneAgeInMonths", 12);
+        batchSize = configService.getIntProperty("com.openexchange.calendar.migration.batchSize", 500);
+        maxTombstoneAgeInMonths = configService.getIntProperty("com.openexchange.calendar.migration.maxTombstoneAgeInMonths", 12);
         severityThreshold = Enums.parse(ProblemSeverity.class,
-            configService.getProperty("com.openexchange.chronos.migration.severityThreshold"), ProblemSeverity.MAJOR);
+            configService.getProperty("com.openexchange.calendar.migration.severityThreshold"), ProblemSeverity.MAJOR);
         allowedProblemSeverities = getAllowedProblemSeverities(severityThreshold);
-        uncommitted = configService.getBoolProperty("com.openexchange.chronos.migration.uncommitted", false);
+        uncommitted = configService.getBoolProperty("com.openexchange.calendar.migration.uncommitted", false);
     }
 
     /**
