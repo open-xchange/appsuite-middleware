@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2018-02-16 14:07+0100\n"
+"PO-Revision-Date: 2018-03-12 16:36+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -107,6 +107,7 @@ msgstr "Synchronisieren Sie Ihre Kalender und Termine."
 #. - Read all your appointments.
 #. - ...
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/OAuthScopeDescription.java:58
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/oauth/OAuthScopeDescription.java:63
 msgid "Read all your appointments."
 msgstr "Alle Ihre Termine lesen."
 
@@ -114,6 +115,7 @@ msgstr "Alle Ihre Termine lesen."
 #. - Create, modify and delete appointments.
 #. - ...
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/OAuthScopeDescription.java:63
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/oauth/OAuthScopeDescription.java:65
 msgid "Create, modify and delete appointments."
 msgstr "Termine anlegen, ändern und löschen."
 
@@ -130,7 +132,11 @@ msgstr "Woche"
 msgid "All-day events"
 msgstr "Ganztägige Ereignisse"
 
+#. *
+#. * The default file name for an ical event export, when using batch data
+#.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:67
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:76
 msgid "Events"
 msgstr "Ereignisse"
 
@@ -945,7 +951,6 @@ msgstr ""
 #. * The event %s couldn't be deleted: %s
 #.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/exception/CalendarExceptionMessages.java:65
-#, fuzzy
 msgid "The event %s couldn't be deleted: %s"
 msgstr "Das Ereignis %s konnte nicht gelöscht werden: %s"
 
@@ -981,16 +986,6 @@ msgstr ""
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/exception/CalendarExceptionMessages.java:81
 msgid "The metadata of the attachment '%1$s' does not have a content-id."
 msgstr "Die Metadaten des Anhangs '%1$s' enthalten keine Inhalts-ID."
-
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/oauth/OAuthScopeDescription.java:63
-#, fuzzy
-msgid "Read all your events."
-msgstr "Alle Ereignisse anzeigen."
-
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.json/src/com/openexchange/chronos/json/oauth/OAuthScopeDescription.java:65
-#, fuzzy
-msgid "Create, modify and delete events."
-msgstr "Ereignisse erstellen, ändern und löschen."
 
 #. *
 #. * The name of the contact birthdays calendar provider.
@@ -1115,6 +1110,38 @@ msgid ""
 msgstr ""
 "Auf der Feed-Provider-Seite ist ein Remote-Server-Fehler aufgetreten. Wir "
 "haben darauf keinen Einfluss."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:85
+#, fuzzy
+msgid ""
+"Access to this calendar is restricted. Please enter your credentials and try "
+"again."
+msgstr ""
+"Der Zugriff auf diesen Kalender ist eingeschränkt. Bitte geben Sie Ihre "
+"Zugangsdaten ein und versuchen Sie es erneut."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:87
+#, fuzzy
+msgid "Authentication failed. Please enter your credentials and try again."
+msgstr ""
+"Authentifizierung fehlgeschlagen. Bitte geben Sie Ihre Zugangsdaten ein und "
+"versuchen Sie es erneut."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:89
+#, fuzzy
+msgid ""
+"Access to this calendar is restricted. Please enter your password and try "
+"again."
+msgstr ""
+"Der Zugriff auf diesen Kalender ist eingeschränkt. Bitte geben Sie Ihr "
+"Passwort ein und versuchen Sie es erneut."
+
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos.provider.ical/src/com/openexchange/chronos/provider/ical/exception/ICalProviderExceptionMessages.java:91
+#, fuzzy
+msgid "Authentication failed. Please enter your password and try again."
+msgstr ""
+"Authentifizierung fehlgeschlagen. Bitte geben Sie Ihr Passwort ein und "
+"versuchen Sie es erneut."
 
 #. *
 #. * The name of the internal calendar provider.
@@ -1252,7 +1279,8 @@ msgstr ""
 #, fuzzy
 msgid "Occurrences of appointment series must not be classified differently."
 msgstr ""
-"Einzeltermine eines Serientermins dürfen nicht anders klassifiziert werden."
+"Einzeltermine eines Serientermins dürfen nicht unterschiedlich klassifiziert "
+"werden."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:102
 msgid ""
@@ -1316,8 +1344,8 @@ msgid ""
 "The split of the appointment series cannot be performed. Please select a "
 "valid split point and try again."
 msgstr ""
-"Die Terminserie kann nicht aufgeteilt werden. Bitte wählen Sie eine gültige "
-"Aufteilung und versuchen Sie es erneut."
+"Die Terminserie kann nicht getrennt werden. Bitte wählen Sie eine gültige "
+"Trennung und versuchen Sie es erneut."
 
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:118
 msgid "Moving an appointment series into another folder is not supported."
@@ -1346,7 +1374,7 @@ msgstr ""
 #. In order to accomplish the search, %1$d or more characters are required.
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.chronos/src/com/openexchange/chronos/exception/CalendarExceptionMessages.java:126
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:80
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:81
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:84
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:135
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:122
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:138
@@ -1555,20 +1583,44 @@ msgstr "Ihre Gerätekonfiguration"
 #. %1$s, %2$s on %3$s %4$s
 #. E.g. App Suite UI, Chrome 61 on Windows 10
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:65
+msgid "%1$s, %2$s %3$s on %4$s %5$s"
+msgstr "%1$s, %2$s %3$s auf %4$s %5$s"
+
+#. %1$s, %2$s %3$s on %4$s"
+#. E.g. App Suite UI, Chrome 64 on Linux
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:69
 msgid "%1$s, %2$s %3$s on %4$s"
 msgstr "%1$s, %2$s %3$s auf %4$s"
+
+#. %1$s, %2$s %3$s
+#. E.g. App Suite UI, Chrome 64
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:73
+msgid "%1$s, %2$s %3$s"
+msgstr "%1$s, %2$s %3$s"
+
+#. %1$s, %2$s on %3$s %4$s"
+#. E.g. App Suite UI, Edge on Windows 10
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:77
+msgid "%1$s, %2$s on %3$s %4$s"
+msgstr "%1$s, %2$s auf %3$s %4$s"
+
+#. %1$s, %2$s on %3$s
+#. E.g. App Suite UI, Edge on Windows
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:81
+msgid "%1$s, %2$s on %3$s"
+msgstr "%1$s, %2$s auf %3$s"
 
 #. %1$s on %2$s %3$s
 #. E.g. App Suite UI on Windows 10
 #. %1$s on %2$s %3$s
 #. E.g. OX Mail App on Android 8.0
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:69
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:80
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:85
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:96
 msgid "%1$s on %2$s %3$s"
 msgstr "%1$s auf %2$s %3$s"
 
 #. Microsoft Exchange ActiveSync Client
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:72
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:88
 msgid "Microsoft Exchange ActiveSync Client"
 msgstr "Microsoft Exchange ActiveSync-Client"
 
@@ -1576,7 +1628,7 @@ msgstr "Microsoft Exchange ActiveSync-Client"
 #. E.g. OX Mail App 1.10 on Android 8.0
 #. %1$s %2$s on %3$s %4$s
 #. E.g. Drive Client 2.4.0 on Windows 10
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:76
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:92
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:65
 msgid "%1$s %2$s on %3$s %4$s"
 msgstr "%1$s %2$s auf %3$s %4$s"
@@ -1585,7 +1637,7 @@ msgstr "%1$s %2$s auf %3$s %4$s"
 #. E.g. OX Mail App 1.10 on Android
 #. %1$s %2$s on %3$s
 #. E.g. Drive Client 2.4.0 on Windows
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:84
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:100
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:69
 msgid "%1$s %2$s on %3$s"
 msgstr "%1$s %2$s auf %3$s"
@@ -1594,7 +1646,7 @@ msgstr "%1$s %2$s auf %3$s"
 #. E.g. OX Mail App on Android
 #. %1$s on %2$s
 #. E.g. Drive Client on Windows
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:88
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.clientinfo.impl/src/com/openexchange/clientinfo/impl/ClientInfoStrings.java:104
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveClientInfoStrings.java:73
 msgid "%1$s on %2$s"
 msgstr "%1$s auf %2$s"
@@ -2099,11 +2151,11 @@ msgstr "Alle Ihre Kontakte lesen."
 msgid "Create, modify and delete contacts."
 msgstr "Kontakte anlegen, ändern und löschen."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.conversion/src/com/openexchange/conversion/DataExceptionMessages.java:61
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.conversion/src/com/openexchange/conversion/DataExceptionMessages.java:62
 msgid "The type %1$s of the provided file is not supported."
 msgstr "Der Typ %1$s der angegebenen Datei wird nicht unterstützt."
 
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.conversion/src/com/openexchange/conversion/DataExceptionMessages.java:63
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.conversion/src/com/openexchange/conversion/DataExceptionMessages.java:64
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.textxtraction/src/com/openexchange/textxtraction/TextXtractExceptionMessages.java:62
 msgid "The following field(s) are too long: %1$s"
 msgstr "Folgende(s) Feld(er) sind zu lang: %1$s"
@@ -3094,6 +3146,14 @@ msgstr ""
 "openexchange.filestore.s3.[filestoreID].signerOverride für diesen "
 "Dateispeicher richtig konfiguriert ist."
 
+#. Failed to create a bucket for name "%1$s" using region "%2$s"
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:157
+#, fuzzy
+msgid "Failed to create a bucket for name \"%1$s\" using region \"%2$s\""
+msgstr ""
+"Fehler beim Erstellen eines Bucket für den Namen \"%1$s\" mit der Region "
+"\"%2$s\""
+
 #. No such document: %1$s
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.filestore.sproxyd/src/com/openexchange/filestore/sproxyd/SproxydExceptionMessages.java:63
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.filestore.swift/src/com/openexchange/filestore/swift/SwiftExceptionMessages.java:64
@@ -3158,28 +3218,34 @@ msgstr "Ein Suchfilter enthielt keine Suchanfrage."
 msgid "A search filter contained an unknown field: '%1$s'."
 msgstr "Ein Suchfilter enthielt ein unbekanntes Feld: '%1$s'."
 
+#. The value '%1$s' is invalid for option '%2$s'.
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:81
+#, fuzzy
+msgid "The value '%1$s' is invalid for option '%2$s'."
+msgstr "Der Wert '%1$s' ist für die Option '%2$s' ungültig. "
+
 #. The facet \"%1$s\" is mandatory and has to be set.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:84
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:87
 msgid "The facet \"%1$s\" is mandatory and has to be set."
 msgstr "Die Facette \"%1$s\" ist eine Pflichtangabe und muss gesetzt werden."
 
 #. Could not parse \"%1$s\".
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:87
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:90
 msgid "Could not parse \"%1$s\"."
 msgstr "\"%1$s\" konnte nicht analysiert werden."
 
 #. The folder id \"%1$s\" is invalid for module \"%2$s\".
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:90
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:93
 msgid "The folder id \"%1$s\" is invalid for module \"%2$s\"."
 msgstr "Die Ordner-ID \"%1$s\" ist für das Modul \"%2$s\" ungültig."
 
 #. The folder type \"%1$s\" is not supported.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:93
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:96
 msgid "The folder type \"%1$s\" is not supported."
 msgstr "Der Ordnertyp \"%1$s\" wird nicht unterstützt."
 
 #. The facet types \"%1$s\" and \"%2$s\" conflict with each other and must not be used within one request.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:96
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:99
 msgid ""
 "The facet types \"%1$s\" and \"%2$s\" conflict with each other and must not "
 "be used within one request."
@@ -3188,12 +3254,12 @@ msgstr ""
 "Anfrage verwendet werden, da dies einen Konflikt auslöst.  "
 
 #. You are not allowed to search in module \"%1$s\".
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:99
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:102
 msgid "You are not allowed to search in module \"%1$s\"."
 msgstr "Sie haben keine Berechtigung zum Suchen im Modul \"%1$s\"."
 
 #. The query yielded too many results to be displayed. Please refine your search options and try again.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:102
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:105
 msgid ""
 "The query yielded too many results to be displayed. Please refine your "
 "search options and try again."
@@ -4400,7 +4466,7 @@ msgstr "Termine"
 #. *
 #. * The default file name for an ical task export, when using batch data
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:76
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:81
 #: /home/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:92
 msgid "Tasks"
 msgstr "Aufgaben"
@@ -4408,7 +4474,7 @@ msgstr "Aufgaben"
 #. *
 #. * The default file name for an ical task export, when using batch data
 #.
-#: /home/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:81
+#: /home/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/helpers/ExportDefaultFileNames.java:86
 msgid "Export"
 msgstr "Export"
 
@@ -14116,6 +14182,14 @@ msgstr "UTC"
 msgid "Zulu"
 msgstr "Zulu"
 
+#, fuzzy
+#~ msgid "Read all your events."
+#~ msgstr "Alle Ereignisse anzeigen."
+
+#, fuzzy
+#~ msgid "Create, modify and delete events."
+#~ msgstr "Ereignisse erstellen, ändern und löschen."
+
 #~ msgctxt "verb"
 #~ msgid "accepted"
 #~ msgstr "bestätigt"
@@ -14275,10 +14349,6 @@ msgstr "Zulu"
 
 #~ msgid "Free/busy data for \"%1$s\" is not available."
 #~ msgstr "Es sind keine Frei/Gebucht-Daten für \"%1$s\" verfügbar."
-
-#, fuzzy
-#~ msgid "%1$s, %2$s %3$s on %4$s %5$s"
-#~ msgstr "%1$s, %2$s %3$s auf %4$s %5$s"
 
 #~ msgid ""
 #~ "Request rejected because file size (%1$s) exceeds the available storage "
