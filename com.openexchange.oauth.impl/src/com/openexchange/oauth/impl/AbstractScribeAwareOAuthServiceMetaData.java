@@ -224,7 +224,7 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
             if (ExceptionUtils.isEitherOf(e, SSLHandshakeException.class)) {
                 List<Object> displayArgs = new ArrayList<>(2);
                 displayArgs.add(SSLExceptionCode.extractArgument(e, "fingerprint"));
-                //displayArgs.add(_HOST_);
+                displayArgs.add(getIdentityURL("** obfuscated **"));
                 throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, displayArgs.toArray(new Object[] {}));
             }
 
