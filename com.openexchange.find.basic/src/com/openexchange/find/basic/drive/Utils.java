@@ -285,9 +285,7 @@ public final class Utils {
             return buildFileExtensionTerm(query);
         } else if (CommonConstants.FIELD_DATE.equals(field)) {
             final Pair<Comparison, Long> pair = parseDateQuery(query);
-            if (null != pair) {
-                return buildDateTerm(pair.getFirst(), pair.getSecond().longValue());
-            }
+            return buildDateTerm(pair.getFirst(), pair.getSecond().longValue());
         }
         throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
     }
@@ -468,7 +466,7 @@ public final class Utils {
             comparison = Comparison.GREATER_EQUALS;
             timestamp = cal.getTime().getTime();
         } else {
-            return null;
+            throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CommonConstants.FIELD_DATE);
         }
 
         return new Pair<Comparison, Long>(comparison, Long.valueOf(timestamp));
@@ -617,7 +615,7 @@ public final class Utils {
         if (null == patterns || 0 == patterns.length) {
             return new FileNameTerm("*"); // fall back to query
         }
-        
+
         List<SearchTerm<?>> searchTerms = new ArrayList<SearchTerm<?>>(patterns.length);
         for (String extension : patterns) {
             searchTerms.add(new FileNameTerm(extension, true, false));
