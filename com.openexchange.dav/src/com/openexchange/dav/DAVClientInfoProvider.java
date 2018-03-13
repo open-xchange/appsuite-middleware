@@ -236,6 +236,10 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
             case WINDOWS:
                 return "windows";
             case DAVDROID:
+            case OX_SYNC:
+            case CALDAV_SYNC:
+            case CARDDAV_SYNC:
+            case SMOOTH_SYNC:
                 return "android";
             default:
                 return "unknown";
