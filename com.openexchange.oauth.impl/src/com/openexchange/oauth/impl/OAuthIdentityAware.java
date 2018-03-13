@@ -1,3 +1,4 @@
+
 package com.openexchange.oauth.impl;
 
 import org.scribe.model.Verb;
@@ -55,14 +56,36 @@ import org.scribe.model.Verb;
  * {@link OAuthIdentityAware}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @since 7.10.0
  */
 public interface OAuthIdentityAware {
 
+    /**
+     * Returns the identity URL used to identity the current user
+     * 
+     * @param accessToken The accessToken in case it needs to be part of the URL
+     * @return The identity URL used to identify the current user
+     */
     String getIdentityURL(String accessToken);
 
+    /**
+     * Returns the HTTP method used for the identity request
+     * 
+     * @return HTTP method used for the identity request
+     */
     Verb getIdentityHTTPMethod();
 
+    /**
+     * Returns the field name that contains the identity of the user in the response object
+     * 
+     * @return the field name that contains the identity of the user in the response object
+     */
     String getIdentityFieldName();
-    
+
+    /**
+     * Returns the content type of the identity request
+     * 
+     * @return the content type of the identity request
+     */
     String getContentType();
 }
