@@ -98,7 +98,7 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractExtendedScribeAwar
      */
     @Override
     public String getIdentityURL(String accessToken) {
-        return "https://api.linkedin.com/v1/people/~?format=json";
+        return "https://api.linkedin.com/v1/people/~?format=json&oauth2_access_token=" + accessToken;
     }
 
     /* (non-Javadoc)

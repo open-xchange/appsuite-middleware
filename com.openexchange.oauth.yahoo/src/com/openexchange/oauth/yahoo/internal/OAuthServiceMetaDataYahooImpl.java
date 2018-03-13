@@ -108,8 +108,7 @@ public class OAuthServiceMetaDataYahooImpl extends AbstractExtendedScribeAwareOA
      */
     @Override
     public String getIdentityURL(String accessToken) {
-        // TODO Auto-generated method stub
-        return null;
+        return "https://social.yahooapis.com/v1/me/guid?format=json";
     }
 
     /* (non-Javadoc)
@@ -117,8 +116,7 @@ public class OAuthServiceMetaDataYahooImpl extends AbstractExtendedScribeAwareOA
      */
     @Override
     public String getIdentityHTTPMethod() {
-        // TODO Auto-generated method stub
-        return null;
+        return "GET";
     }
 
     /* (non-Javadoc)
@@ -126,7 +124,6 @@ public class OAuthServiceMetaDataYahooImpl extends AbstractExtendedScribeAwareOA
      */
     @Override
     public boolean useBearer() {
-        // TODO Auto-generated method stub
         return false;
     }
 
@@ -135,7 +132,6 @@ public class OAuthServiceMetaDataYahooImpl extends AbstractExtendedScribeAwareOA
      */
     @Override
     public Pattern getIdentityPattern() {
-        // TODO Auto-generated method stub
-        return null;
+        return Pattern.compile("\"value\":\\s*\"(\\S*?)\"");
     }
 }

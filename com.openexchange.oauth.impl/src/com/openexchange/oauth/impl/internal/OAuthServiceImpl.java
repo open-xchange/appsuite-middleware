@@ -490,7 +490,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         // Obtain & apply the access token
         HttpsURLConnection.setDefaultSSLSocketFactory(Services.getService(SSLSocketFactoryProvider.class).getDefault());
         obtainToken(type, arguments, account, scopes);
-        String userIdentity = service.getUserIdentity(account.getToken());
+        String userIdentity = service.getUserIdentity(account.getToken(), account.getSecret());
         if (Strings.isEmpty(userIdentity)) {
 
             // TODO: if the userIdentity if null examine the cause for that state
@@ -1005,7 +1005,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              */
             obtainToken(type, arguments, account, scopes);
             // Set the user identity
-            account.setUserIdentity(service.getUserIdentity(account.getToken()));
+            account.setUserIdentity(service.getUserIdentity(account.getToken(), account.getSecret()));
             /*
              * Crypt tokens
              */

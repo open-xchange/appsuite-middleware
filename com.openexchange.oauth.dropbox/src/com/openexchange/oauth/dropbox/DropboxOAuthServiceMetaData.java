@@ -141,4 +141,16 @@ public class DropboxOAuthServiceMetaData extends AbstractExtendedScribeAwareOAut
     public Pattern getIdentityPattern() {
         return identityPattern;
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.AbstractScribeAwareOAuthServiceMetaData#getContentType()
+     */
+    @Override
+    public String getContentType() {
+        // Empty content-type otherwise the getUserIdentity call will fail.
+        // TODO: elaborate on that choice
+        return " ";
+    }
 }

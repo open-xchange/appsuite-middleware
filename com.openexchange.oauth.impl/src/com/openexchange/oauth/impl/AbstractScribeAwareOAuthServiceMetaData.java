@@ -49,26 +49,33 @@
 
 package com.openexchange.oauth.impl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
+import javax.net.ssl.SSLHandshakeException;
 import javax.xml.ws.handler.MessageContext.Scope;
-import org.scribe.utils.StreamUtils;
+import org.scribe.builder.ServiceBuilder;
+import org.scribe.model.OAuthRequest;
+import org.scribe.model.Request;
+import org.scribe.model.RequestTuner;
+import org.scribe.model.Response;
+import org.scribe.model.Token;
+import org.scribe.model.Verb;
+import org.scribe.oauth.OAuthService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
+import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthConfigurationProperty;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.server.ServiceLookup;
 
@@ -162,34 +169,71 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
      * @see com.openexchange.oauth.OAuthServiceMetaData#getUserIdentity(java.lang.String)
      */
     @Override
-    public String getUserIdentity(String accessToken) throws OXException {
+    public String getUserIdentity(String accessToken, String accessSecret) throws OXException {
         // Reference implementation (WIP)
         if (Strings.isEmpty(accessToken)) {
             return null;  //TODO: or throw exception token not found/invalid token/whatever?
         }
         // Contact the oauth provider and fetch the identity of the current logged in user
-        try {
-            HttpURLConnection connection = (HttpURLConnection) new URL(getIdentityURL(accessToken)).openConnection();
-            connection.setInstanceFollowRedirects(true);
-            connection.setRequestMethod(getIdentityHTTPMethod());
-            if (useBearer()) {
-                connection.setRequestProperty("Authorization", "Bearer " + accessToken);
-            }
-            connection.connect();
+        OAuthService scribeService = new ServiceBuilder().provider(getScribeService()).apiKey(getAPIKey(null)).apiSecret(getAPISecret(null)).build();
+        OAuthRequest request = new OAuthRequest(Verb.valueOf(getIdentityHTTPMethod()), getIdentityURL(accessToken));
+        request.addHeader("Content-Type", getContentType());
+        scribeService.signRequest(new Token(accessToken, accessSecret), request);
+        Response guidResponse = execute(request);
 
-            int responseCode = connection.getResponseCode();
-            InputStream stream = responseCode >= 200 && responseCode < 400 ? connection.getInputStream() : connection.getErrorStream();
-            String body = StreamUtils.getStreamContents(stream); //TODO: replace with in-house stream reader
-            Matcher matcher = getIdentityPattern().matcher(body);
-            if (matcher.find()) {
-                return matcher.group(1);
-            } else {
-                throw new OXException(31145, "No user identity can be retrieved: " + body);
+        int responseCode = guidResponse.getCode();
+        String body = guidResponse.getBody();
+        if (responseCode >= 400) {
+            throw new OXException(31145, "No user identity can be retrieved: " + body);
+        }
+
+        final Matcher matcher = getIdentityPattern().matcher(body);
+        return matcher.find() ? matcher.group(1) : "";
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.impl.OAuthIdentityAware#getContentType()
+     */
+    @Override
+    public String getContentType() {
+        return "application/json";
+    }
+
+    /**
+     * Executes specified request and returns its response.
+     *
+     * @param request The request
+     * @return The response
+     * @throws OXException If executing request fails
+     */
+    private Response execute(OAuthRequest request) throws OXException {
+        try {
+            return request.send(new RequestTuner() {
+
+                @Override
+                public void tune(Request request) {
+                    request.setConnectTimeout(5, TimeUnit.SECONDS);
+                    request.setReadTimeout(30, TimeUnit.SECONDS);
+                }
+            });
+        } catch (org.scribe.exceptions.OAuthException e) {
+            // Handle Scribe's org.scribe.exceptions.OAuthException (inherits from RuntimeException)
+            if (ExceptionUtils.isEitherOf(e, SSLHandshakeException.class)) {
+                List<Object> displayArgs = new ArrayList<>(2);
+                displayArgs.add(SSLExceptionCode.extractArgument(e, "fingerprint"));
+                //displayArgs.add(_HOST_);
+                throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, displayArgs.toArray(new Object[] {}));
             }
-        } catch (MalformedURLException e) {
-            throw new OXException(31145, "Malformed URL", e);
-        } catch (IOException e) {
-            throw new OXException(31145, "I/O error", e);
+
+            Throwable cause = e.getCause();
+            if (cause instanceof java.net.SocketTimeoutException) {
+                // A socket timeout
+                throw OAuthExceptionCodes.CONNECT_ERROR.create(cause, new Object[0]);
+            }
+
+            throw OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
         }
     }
 

@@ -64,4 +64,6 @@ public interface OAuthIdentityAware {
     boolean useBearer();
 
     Pattern getIdentityPattern();
+    
+    String getContentType();
 }
