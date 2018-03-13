@@ -58,6 +58,7 @@ import com.google.common.cache.LoadingCache;
 import com.openexchange.ajax.Client;
 import com.openexchange.clientinfo.ClientInfo;
 import com.openexchange.clientinfo.ClientInfoProvider;
+import com.openexchange.clientinfo.ClientInfoType;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.uadetector.UserAgentParser;
@@ -84,7 +85,6 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
     private static final String OX_SYNC = "oxsyncapp";
     private static final String CALDAV_SYNC = "caldav_sync";
     private static final String CARDDAV_SYNC = "carddav_sync";
-    private static final String SMOOTH_SYNC = "smooth_sync";
     private static final String DAVDROID = "davdroid";
     private static final String WINDOWS_PHONE = "windows_phone";
     private static final String WINDOWS = "windows";
@@ -144,6 +144,9 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
                         clientVersion = clientVersionMajor;
                     }
                 }
+                if (userAgent.equals(DAVUserAgent.OX_SYNC) || userAgent.equals(DAVUserAgent.SMOOTH_SYNC)) {
+                    return new DAVClientInfo(userAgent.getReadableName(), osFamily, osVersion, client, clientVersion, clientFamily, ClientInfoType.OXAPP);
+                }
                 return new DAVClientInfo(userAgent.getReadableName(), osFamily, osVersion, client, clientVersion, clientFamily);
             }
         };
@@ -200,13 +203,12 @@ public class DAVClientInfoProvider implements ClientInfoProvider {
             case EM_CLIENT_FOR_APPSUITE:
                 return EMCLIENT_APPSUITE;
             case OX_SYNC:
+            case SMOOTH_SYNC:
                 return OX_SYNC;
             case CALDAV_SYNC:
                 return CALDAV_SYNC;
             case CARDDAV_SYNC:
                 return CARDDAV_SYNC;
-            case SMOOTH_SYNC:
-                return SMOOTH_SYNC;
             case DAVDROID:
                 return DAVDROID;
             case WINDOWS_PHONE:
