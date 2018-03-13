@@ -69,14 +69,16 @@ public class WebClientInfo implements ClientInfo {
     private final String platformVersion;
     private final String browser;
     private final String browserVersion;
+    private final String browserFamily;
 
-    public WebClientInfo(String client, String platform, String platformFamily, String platformVersion, String browser, String browserVersion) {
+    public WebClientInfo(String client, String platform, String platformFamily, String platformVersion, String browser, String browserVersion, String browserFamily) {
         this.client = client;
         this.platform = platform;
         this.platformFamily = platformFamily;
         this.platformVersion = platformVersion;
         this.browser = browser;
         this.browserVersion = browserVersion;
+        this.browserFamily = browserFamily;
     }
 
     @Override
@@ -135,6 +137,11 @@ public class WebClientInfo implements ClientInfo {
     @Override
     public String getClientVersion() {
         return browserVersion;
+    }
+
+    @Override
+    public String getClientFamily() {
+        return browserFamily;
     }
 
 }

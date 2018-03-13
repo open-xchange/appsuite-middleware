@@ -124,4 +124,9 @@ public class DriveClientInfo implements ClientInfo {
         return null;
     }
 
+    @Override
+    public String getClientFamily() {
+        return "oxdriveapp";
+    }
+
 }
