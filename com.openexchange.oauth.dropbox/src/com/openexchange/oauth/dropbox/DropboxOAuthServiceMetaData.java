@@ -156,6 +156,6 @@ public class DropboxOAuthServiceMetaData extends AbstractExtendedScribeAwareOAut
         // set to 'application/json', it then tries to interpret the body that is send
         // with the request. However, when getting the user's identity via the getIdentityURL link
         // no body is required... and none is sent... hence the fail on Dropbox's side.
-        return " ";
+        return EMPTY_CONTENT_TYPE;
     }
 }

@@ -86,12 +86,12 @@ import com.openexchange.server.ServiceLookup;
  */
 public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOAuthServiceMetaData implements ScribeAware, OAuthIdentityAware, Reloadable {
 
+    private static final String DEFAULT_CONTENT_TYPE = "application/json";
+    protected static final String EMPTY_CONTENT_TYPE = " "; 
+
     protected final ServiceLookup services;
-
     private final List<OAuthPropertyID> propertyNames;
-
     private static final String PROP_PREFIX = "com.openexchange.oauth";
-
     private final API api;
 
     /**
@@ -198,7 +198,7 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
      */
     @Override
     public String getContentType() {
-        return "application/json";
+        return DEFAULT_CONTENT_TYPE;
     }
 
     /**

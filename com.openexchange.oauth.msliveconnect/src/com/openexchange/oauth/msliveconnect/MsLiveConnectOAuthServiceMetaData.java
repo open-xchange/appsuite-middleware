@@ -140,6 +140,6 @@ public final class MsLiveConnectOAuthServiceMetaData extends AbstractExtendedScr
     @Override
     public String getContentType() {
         // No 'Content-Type' is expected for the GET /me call
-        return " ";
+        return EMPTY_CONTENT_TYPE;
     }
 }
