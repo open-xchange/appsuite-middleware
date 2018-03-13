@@ -59,11 +59,6 @@ Architecture: all
 Depends: open-xchange-eas, open-xchange-usm, open-xchange-help-usm-eas | open-xchange-meta-ui-appsuite, open-xchange-eas-provisioning-mail, open-xchange-eas-provisioning-gui | open-xchange-meta-ui-appsuite
 Description: The Open-Xchange Meta package for Business Mobility
 
-Package: open-xchange-meta-outlook
-Architecture: all
-Depends: open-xchange-outlook-updater, open-xchange-outlook-updater-oxtender2, open-xchange-usm, open-xchange-folder-json
-Description: The Open-Xchange Meta package for Outlook OXtender
-
 ##
 ## virtual packages
 ##
