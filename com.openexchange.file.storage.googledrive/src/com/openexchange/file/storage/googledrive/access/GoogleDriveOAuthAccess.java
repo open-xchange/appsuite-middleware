@@ -91,7 +91,6 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
             // Grab Google OAuth account
             int oauthAccountId = getAccountId();
             OAuthAccount oauthAccount = GoogleApiClients.getGoogleAccount(oauthAccountId, getSession(), false);
-            verifyAccount(oauthAccount, Services.getService(OAuthService.class), OXScope.drive);
             setOAuthAccount(oauthAccount);
 
             {
@@ -101,6 +100,7 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
                     setOAuthAccount(newAccount);
                 }
             }
+            verifyAccount(oauthAccount, Services.getService(OAuthService.class), OXScope.drive);
 
             // Generate appropriate credentials for it
             GoogleCredential credentials = GoogleApiClients.getCredentials(oauthAccount, getSession());

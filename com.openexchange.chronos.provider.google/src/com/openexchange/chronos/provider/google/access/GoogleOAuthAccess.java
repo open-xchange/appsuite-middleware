@@ -90,7 +90,6 @@ public class GoogleOAuthAccess extends AbstractOAuthAccess {
             // Grab Google OAuth account
             int oauthAccountId = getAccountId();
             OAuthAccount oauthAccount = GoogleApiClients.getGoogleAccount(oauthAccountId, getSession(), false);
-            verifyAccount(oauthAccount, Services.getService(OAuthService.class), OXScope.calendar_ro);
             setOAuthAccount(oauthAccount);
 
             {
@@ -100,6 +99,7 @@ public class GoogleOAuthAccess extends AbstractOAuthAccess {
                     setOAuthAccount(newAccount);
                 }
             }
+            verifyAccount(oauthAccount, Services.getService(OAuthService.class), OXScope.calendar_ro);
 
             // Generate appropriate credentials for it
             GoogleCredential credentials = GoogleApiClients.getCredentials(oauthAccount, getSession());
