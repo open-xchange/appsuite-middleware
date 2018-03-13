@@ -50,10 +50,14 @@
 package com.openexchange.ajax.infostore.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import java.io.IOException;
 import java.util.Date;
+import org.json.JSONException;
 import org.junit.Test;
 import com.openexchange.ajax.folder.AbstractObjectCountTest;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.folderstorage.Folder;
@@ -91,7 +95,7 @@ public final class InfostoreObjectCountTest extends AbstractObjectCountTest {
             assertEquals("Wrong object count", 0, objectsInFolder);
 
             File expected = createDocumentMetadata(folder);
-            infostoreTestManager.newAction(expected);
+            createAndTestSuccess(expected, infostoreTestManager);
 
             Folder reloaded = getFolder(client1, created.getObjectID(), DEFAULT_COLUMNS);
             objectsInFolder = reloaded.getTotal();
@@ -99,6 +103,16 @@ public final class InfostoreObjectCountTest extends AbstractObjectCountTest {
         } finally {
             infostoreTestManager.cleanUp();
             folderTestManager.cleanUp();
+        }
+    }
+
+    private void createAndTestSuccess(File fileToCreate, InfostoreTestManager infostoreTestManager) throws OXException, IOException, JSONException {
+        infostoreTestManager.newAction(fileToCreate);
+        {
+            OXException exception = infostoreTestManager.getLastResponse().getException();
+            if (null != exception) {
+                fail("Creating an entry should work, but failed with an unexpected exception: " + exception.getMessage());
+            }
         }
     }
 
@@ -113,12 +127,11 @@ public final class InfostoreObjectCountTest extends AbstractObjectCountTest {
             assertEquals("Wrong object count", 0, folder.getTotal());
 
             File expected = createDocumentMetadata(folder);
-
-            infostoreTestManager.newAction(expected);
-            infostoreTestManager.newAction(expected);
-            infostoreTestManager.newAction(expected);
-            infostoreTestManager.newAction(expected);
-            infostoreTestManager.newAction(expected);
+            createAndTestSuccess(expected, infostoreTestManager);
+            createAndTestSuccess(expected, infostoreTestManager);
+            createAndTestSuccess(expected, infostoreTestManager);
+            createAndTestSuccess(expected, infostoreTestManager);
+            createAndTestSuccess(expected, infostoreTestManager);
 
             Folder reloaded = getFolder(client1, created.getObjectID(), DEFAULT_COLUMNS);
             assertEquals("Wrong object count", 5, reloaded.getTotal());
@@ -151,11 +164,11 @@ public final class InfostoreObjectCountTest extends AbstractObjectCountTest {
             assertEquals("Wrong object count", 0, folder.getTotal());
 
             File expected = createDocumentMetadata(folder);
-            infostoreTestManager.newAction(expected);
-            infostoreTestManager.newAction(expected);
-            infostoreTestManager.newAction(expected);
-            infostoreTestManager.newAction(expected);
-            infostoreTestManager.newAction(expected);
+            createAndTestSuccess(expected, infostoreTestManager);
+            createAndTestSuccess(expected, infostoreTestManager);
+            createAndTestSuccess(expected, infostoreTestManager);
+            createAndTestSuccess(expected, infostoreTestManager);
+            createAndTestSuccess(expected, infostoreTestManager);
 
             Folder reloaded = getFolder(client1, created.getObjectID(), DEFAULT_COLUMNS);
             assertEquals("Wrong object count", 5, reloaded.getTotal());
@@ -191,11 +204,11 @@ public final class InfostoreObjectCountTest extends AbstractObjectCountTest {
             assertEquals("Wrong object count", 0, folder.getTotal());
 
             File expected = createDocumentMetadata(folder);
-            infostoreTestManager.newAction(expected);
-            infostoreTestManager.newAction(expected);
-            infostoreTestManager.newAction(expected);
-            infostoreTestManager.newAction(expected);
-            infostoreTestManager.newAction(expected);
+            createAndTestSuccess(expected, infostoreTestManager);
+            createAndTestSuccess(expected, infostoreTestManager);
+            createAndTestSuccess(expected, infostoreTestManager);
+            createAndTestSuccess(expected, infostoreTestManager);
+            createAndTestSuccess(expected, infostoreTestManager);
 
             Folder reloaded = getFolder(client2, created.getObjectID(), DEFAULT_COLUMNS);
             assertEquals("Wrong object count", 5, reloaded.getTotal());

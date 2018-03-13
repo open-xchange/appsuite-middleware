@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,30 +47,35 @@
  *
  */
 
-package com.openexchange.database;
+package com.openexchange.mail.json.compose.share.settings;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.database.internal.GlobalDatabaseServiceImplTest;
-import com.openexchange.database.internal.ReplicationMonitorTest;
-import com.openexchange.database.internal.wrapping.UpdateFlagTest;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.mail.json.compose.share.ShareComposeHandler;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link UnitTests}
+ * This setting is used to set the expiry date options. 'd' means day, 'w' means week,
+ * 'M' means month (notice the capital 'M' the small m stands for minutes) and 'y' stands for year.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.4
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    UpdateFlagTest.class,
-    ReplicationMonitorTest.class,
-    GlobalDatabaseServiceImplTest.class,
-    DatabasesTest.class
-})
-public class UnitTests {
+public class ExpiryDatesShareComposeSetting extends AbstractShareComposeSetting<String[]> {
 
-    public UnitTests() {
-        super();
+    /**
+     * Initializes a new {@link ExpiryDatesShareComposeSetting}.
+     */
+    public ExpiryDatesShareComposeSetting(ShareComposeHandler shareComposeHandler) {
+        super("expiryDates", shareComposeHandler);
     }
+
+    @Override
+    protected String[] getSettingValue(Session session, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+        return getExpiryDates(session);
+    }
+
 }

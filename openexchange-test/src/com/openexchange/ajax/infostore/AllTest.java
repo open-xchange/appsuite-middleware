@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -81,11 +82,16 @@ public class AllTest extends InfostoreAJAXTest {
         com.openexchange.file.storage.File org = itm.getAction(id);
         org.setDescription("New description");
         itm.updateAction(org, upload, new com.openexchange.file.storage.File.Field[] {com.openexchange.file.storage.File.Field.DESCRIPTION}, new Date(Long.MAX_VALUE)); // V1
-        assertFalse(itm.getLastResponse().hasError());
+        {
+            OXException exception = itm.getLastResponse().getException();
+            if (null != exception) {
+                fail("An unexpected exception occurred: " + exception.getMessage());
+            }
+        }
 
         int[] columns = new int[] { Metadata.ID, Metadata.NUMBER_OF_VERSIONS };
         itm.getAll(folderId, columns);
-        
+
         JSONArray rows = (JSONArray) itm.getLastResponse().getData();
         boolean found = false;
         for(int i = 0, size = rows.length(); i < size; i++) {

@@ -53,29 +53,55 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.json.compose.Utilities;
 import com.openexchange.mail.json.compose.share.ShareComposeHandler;
 import com.openexchange.session.Session;
+import com.openexchange.tools.arrays.Arrays;
 
 
 /**
- * {@link ForceAutoDeleteShareComposeSetting}
+ * This setting is used to announce the default expiry date for new Drive Mails to clients.
+ * If not set explicitly, no expiry date is pre-selected except if com.openexchange.mail.compose.share.requiredExpiration
+ * is true. In that case the last (highest) value of com.openexchange.mail.compose.share.expiryDates is chosen.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.4
  */
-public class ForceAutoDeleteShareComposeSetting extends AbstractShareComposeSetting<Boolean> {
+public class DefaultExpiryDateShareComposeSetting extends AbstractShareComposeSetting<String> {
 
     /**
-     * Initializes a new {@link ForceAutoDeleteShareComposeSetting}.
+     * Initializes a new {@link DefaultExpiryDateShareComposeSetting}.
      */
-    public ForceAutoDeleteShareComposeSetting(ShareComposeHandler shareComposeHandler) {
-        super("forceAutoDelete", shareComposeHandler);
+    public DefaultExpiryDateShareComposeSetting(ShareComposeHandler shareComposeHandler) {
+        super("defaultExpiryDate", shareComposeHandler);
     }
 
     @Override
-    protected Boolean getSettingValue(Session session, Context ctx, User user, UserConfiguration userConfig) throws OXException {
-        return Boolean.valueOf(Utilities.getBoolFromProperty(PROPERTY_FORCE_AUTO_DELETE, false, session));
+    protected String getSettingValue(Session session, Context ctx, User user, UserConfiguration userConfig) throws OXException {
+        String[] expiryDates = getExpiryDates(session);
+        String defaultExpiryDate = Utilities.getValueFromProperty(PROPERTY_DEFAULT_EXPIRY_DATE, null, session);
+        boolean requiresExpiration = Boolean.valueOf(Utilities.getBoolFromProperty(PROPERTY_REQUIRED_EXPIRATION, false, session)).booleanValue();
+        if (requiresExpiration && Strings.isEmpty(defaultExpiryDate)) {
+            defaultExpiryDate = getHighestExpiryDate(expiryDates);
+        }
+
+        if (Strings.isNotEmpty(defaultExpiryDate) && !Arrays.contains(expiryDates, defaultExpiryDate)) {
+            String tmp = null;
+            if (requiresExpiration) {
+                tmp = getHighestExpiryDate(expiryDates);
+            }
+
+            LOG.warn("Value '{}' for property '{}' is not defined in '{}'. Falling back to default: {}", defaultExpiryDate, PROPERTY_DEFAULT_EXPIRY_DATE, PROPERTY_EXPIRY_DATES, tmp);
+            defaultExpiryDate = tmp;
+        }
+
+        return defaultExpiryDate;
+    }
+
+    private static String getHighestExpiryDate(String[] expiryDates) {
+        // We expect ascending order of values according to the properties documentation; return the highest one here
+        return expiryDates[expiryDates.length - 1];
     }
 
 }

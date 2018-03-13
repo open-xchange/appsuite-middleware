@@ -51,9 +51,6 @@ package com.openexchange.html.internal;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.isEmpty;
-import gnu.inet.encoding.IDNAException;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,16 +74,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import net.htmlparser.jericho.Attribute;
-import net.htmlparser.jericho.Attributes;
-import net.htmlparser.jericho.Element;
-import net.htmlparser.jericho.EndTag;
-import net.htmlparser.jericho.HTMLElementName;
-import net.htmlparser.jericho.OutputDocument;
-import net.htmlparser.jericho.Renderer;
-import net.htmlparser.jericho.Segment;
-import net.htmlparser.jericho.Source;
-import net.htmlparser.jericho.StartTag;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -140,6 +127,19 @@ import com.openexchange.proxy.ProxyRegistry;
 import de.l3s.boilerpipe.BoilerpipeExtractor;
 import de.l3s.boilerpipe.BoilerpipeProcessingException;
 import de.l3s.boilerpipe.extractors.CommonExtractors;
+import gnu.inet.encoding.IDNAException;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import net.htmlparser.jericho.Attribute;
+import net.htmlparser.jericho.Attributes;
+import net.htmlparser.jericho.Element;
+import net.htmlparser.jericho.EndTag;
+import net.htmlparser.jericho.HTMLElementName;
+import net.htmlparser.jericho.OutputDocument;
+import net.htmlparser.jericho.Renderer;
+import net.htmlparser.jericho.Segment;
+import net.htmlparser.jericho.Source;
+import net.htmlparser.jericho.StartTag;
 
 /**
  * {@link HtmlServiceImpl}
@@ -557,7 +557,7 @@ public final class HtmlServiceImpl implements HtmlService {
                     }
                 }
 
-                html = removeComments(html, hasBody);
+                html = removeComments(html, hasBody, options);
 
                 // Perform one-shot sanitizing
                 html = replacePercentTags(html);
@@ -630,6 +630,7 @@ public final class HtmlServiceImpl implements HtmlService {
                     htmlSanitizeResult.setBodyReplacedWithDiv(true);
                 } else {
                     Document document = handler.getDocument();
+                    handlePrettyPrint(options, document);
                     html = hasBody ? document.outerHtml() : document.body().html();
                     htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
                 }
@@ -646,7 +647,13 @@ public final class HtmlServiceImpl implements HtmlService {
         }
     }
 
-    private static String removeComments(String html, boolean hasBody) {
+    private static void handlePrettyPrint(HtmlSanitizeOptions options, Document document) {
+        if (false == options.isPrettyPrint()) {
+            document.outputSettings(new Document.OutputSettings().prettyPrint(false));
+        }
+    }
+
+    private static String removeComments(String html, boolean hasBody, HtmlSanitizeOptions options) {
         Document document = Jsoup.parse(html);
         final Set<Node> removedNodes = new HashSet<>(16, 0.9F);
         document.traverse(new NodeVisitor() {
@@ -666,6 +673,7 @@ public final class HtmlServiceImpl implements HtmlService {
         for (Node node : removedNodes) {
             node.remove();
         }
+        handlePrettyPrint(options, document);
         return hasBody ? document.outerHtml() : document.body().html();
     }
 

@@ -94,8 +94,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
         final String paramNameRegex = "([\\p{L}\\p{ASCII}&&[^=\"\\s;]]+)";
         final String tokenRegex = "(?:[^\"][\\S&&[^\\s,;:\\\\\"/\\[\\]?()<>@]]*)";
         final String quotedStringRegex = "(?:\"(?:(?:\\\\\\\")|[^\"])+?\")"; // Grab '\"' char sequence or any non-quote character
-        PATTERN_PARAM_LIST =
-            Pattern.compile("(?:\\s*;\\s*|\\s+)" + paramNameRegex + "(?: *= *(" + tokenRegex + '|' + quotedStringRegex + "))?");
+        PATTERN_PARAM_LIST = Pattern.compile("(?:\\s*;\\s*|\\s+)" + paramNameRegex + "(?: *= *(" + tokenRegex + '|' + quotedStringRegex + "))?");
 
         PATTERN_PARAM_CORRECT = Pattern.compile("(?:\\s*;\\s*|\\s+)" + paramNameRegex + "( *= *)([^\" ][^; \t]*[ \t][^;]*)($|;)");
     }
@@ -485,8 +484,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
     /**
      * Special characters (binary sorted) that must be in quoted-string to be used within parameter values
      */
-    private static final char[] SPECIALS =
-        { '\t', '\n', '\r', ' ', '"', '(', ')', ',', '/', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']' };
+    private static final char[] SPECIALS = { '\t', '\n', '\r', ' ', '"', '(', ')', ',', '/', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']' };
 
     private static boolean containsSpecial(final String str) {
         final int length = str.length();
@@ -503,8 +501,7 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 
     static String checkQuotation(final String str) {
         if (containsSpecial(str)) {
-            return new StringBuilder(2 + str.length()).append('"').append(
-                PAT_QUOTE.matcher(PAT_BSLASH.matcher(str).replaceAll("\\\\\\\\")).replaceAll("\\\\\\\"")).append('"').toString();
+            return new StringBuilder(2 + str.length()).append('"').append(PAT_QUOTE.matcher(PAT_BSLASH.matcher(str).replaceAll("\\\\\\\\")).replaceAll("\\\\\\\"")).append('"').toString();
         }
         return str;
     }
@@ -663,7 +660,10 @@ public final class ParameterList implements Cloneable, Serializable, Comparable<
 
     } // End of class Parameter
 
-    private static abstract class Value implements Cloneable {
+    private static abstract class Value implements Cloneable, Serializable {
+
+        /** serialVersionUID */
+        private static final long serialVersionUID = 1419299271485737013L;
 
         protected Value() {
             super();

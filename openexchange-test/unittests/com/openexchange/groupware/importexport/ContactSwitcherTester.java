@@ -59,7 +59,6 @@ import java.util.TimeZone;
 import org.junit.Test;
 import com.openexchange.ajax.fields.ExtendedContactFields;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.contact.helpers.ContactGetter;
 import com.openexchange.groupware.contact.helpers.ContactSetter;
@@ -143,10 +142,10 @@ public class ContactSwitcherTester {
         // preparations
         Contact conObj = new Contact();
         final ContactField field = ContactField.BIRTHDAY;
-        final String value = "1981/03/05";
+        final String value = "1981-05-03";
 
         //setting up a proper setter for SimpleDateFormat
-        final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy");
+        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         final ContactSwitcherForSimpleDateFormat switcher = new ContactSwitcherForSimpleDateFormat();
         switcher.setDelegate(new ContactSetter());
@@ -202,7 +201,6 @@ public class ContactSwitcherTester {
 
     @Test
     public void testDateSwitchingForBug7552() throws Exception {
-        Init.startServer();
         //preparations
         Contact conObj = new Contact();
         final ContactField field = ContactField.BIRTHDAY;
@@ -210,13 +208,13 @@ public class ContactSwitcherTester {
         //setting up a proper setter for SimpleDateFormat
         final ContactSwitcherForSimpleDateFormat switcher = new ContactSwitcherForSimpleDateFormat();
         switcher.setDelegate(new ContactSetter());
-        SimpleDateFormat americanDateFormat = new SimpleDateFormat("yyyy/dd/MM");
+        SimpleDateFormat americanDateFormat = new SimpleDateFormat("yyyy-dd-MM");
         SimpleDateFormat germanDateFormat = new SimpleDateFormat("dd.MM.yyyy");
         switcher.addDateFormat(americanDateFormat);
         switcher.addDateFormat(germanDateFormat);
 
         //setting
-        String value = "1981/03/05";
+        String value = "1981-05-03";
         conObj = (Contact) field.doSwitch(switcher, conObj, value);
         assertEquals("Setting of date via Outlook-simple-date value does work", conObj.getBirthday(), americanDateFormat.parse(value));
 

@@ -67,6 +67,7 @@ import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.settings.impl.AbstractSetting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
+import com.openexchange.html.HtmlSanitizeOptions;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.HTMLDetector;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -207,7 +208,14 @@ public final class PUTAction extends AbstractConfigAction {
                     } else if (JSONObject.class.isInstance(value)) {
                         sanitizeJsonSetting(setting);
                     } else {
-                        setting.setSingleValue(value.toString());
+                        try {
+                            // Change for bug 56912: Try to interpret setting as JSON
+                            JSONObject json = new JSONObject(value.toString());
+                            setting.setSingleValue(json);
+                            sanitizeJsonSetting(setting);
+                        } catch (JSONException e) {
+                            setting.setSingleValue(value.toString());
+                        }
                     }
                 }
                 storage.save(setting);
@@ -267,7 +275,8 @@ public final class PUTAction extends AbstractConfigAction {
                         final JSONObject jSignature = jSignatures.getJSONObject(i);
                         String content = jSignature.optString("signature_text", null);
                         if (null != content && HTMLDetector.containsHTMLTags(content, true)) {
-                            content = htmlService.sanitize(content, null, false, null, null);
+                            HtmlSanitizeOptions options = HtmlSanitizeOptions.builder().setDropExternalImages(false).setMaxContentSize(-1).setPrettyPrint(false).build();
+                            content = htmlService.sanitize(content, options).getContent();
                             content = P_TAG_BODY.matcher(content).replaceAll("");
                             jSignature.put("signature_text", content);
                             saveBack = true;
