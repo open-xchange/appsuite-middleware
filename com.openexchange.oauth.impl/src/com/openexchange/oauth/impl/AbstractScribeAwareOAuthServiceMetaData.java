@@ -170,7 +170,6 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
      */
     @Override
     public String getUserIdentity(String accessToken, String accessSecret) throws OXException {
-        // Reference implementation (WIP)
         if (Strings.isEmpty(accessToken)) {
             return null;  //TODO: or throw exception token not found/invalid token/whatever?
         }

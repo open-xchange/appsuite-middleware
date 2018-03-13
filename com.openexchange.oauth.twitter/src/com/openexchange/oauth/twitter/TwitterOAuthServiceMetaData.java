@@ -65,20 +65,20 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
- * {@link OAuthServiceMetaDataTwitterImpl}
+ * {@link TwitterOAuthServiceMetaData}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class OAuthServiceMetaDataTwitterImpl extends AbstractExtendedScribeAwareOAuthServiceMetaData {
+public class TwitterOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
 
     private static final String IDENTITY_URL = "https://api.twitter.com/1.1/account/verify_credentials.json";
     private static final String IDENTITY_FIELD_NAME = "id_str";
 
     /**
-     * Initializes a new {@link OAuthServiceMetaDataTwitterImpl}.
+     * Initializes a new {@link TwitterOAuthServiceMetaData}.
      */
-    public OAuthServiceMetaDataTwitterImpl(ServiceLookup services) {
+    public TwitterOAuthServiceMetaData(ServiceLookup services) {
         super(services, KnownApi.TWITTER, true, true, TwitterOAuthScope.values());
     }
 
