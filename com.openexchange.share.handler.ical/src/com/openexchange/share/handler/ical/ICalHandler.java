@@ -134,6 +134,7 @@ public class ICalHandler extends HttpAuthShareHandler {
         EnumSet<EventField> fields = EnumSet.allOf(EventField.class);
         fields.remove(EventField.ATTACHMENTS);
         fields.remove(EventField.ALARMS);
+        fields.remove(EventField.FLAGS);
         EVENT_FIELDS = fields.toArray(new EventField[fields.size()]);
     }
 
@@ -160,45 +161,37 @@ public class ICalHandler extends HttpAuthShareHandler {
     }
 
     @Override
-    protected boolean handles(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        if (shareRequest.isInvalidTarget()) {
-            return false;
+    protected boolean handles(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response) {
+        if (acceptsICal(request) || indicatesICalClient(request) || indicatesForcedICal(request)) {
+            ShareTarget target = shareRequest.getTarget();
+            return null == target || Module.CALENDAR.getFolderConstant() == target.getModule() || Module.TASK.getFolderConstant() == target.getModule();
         }
-        ShareTarget target = shareRequest.getTarget();
-        return (Module.CALENDAR.getFolderConstant() == target.getModule() || Module.TASK.getFolderConstant() == target.getModule()) &&
-            (acceptsICal(request) || indicatesICalClient(request) || indicatesForcedICal(request));
+        return false;
     }
 
     @Override
     protected void handleResolvedShare(ResolvedShare resolvedShare) throws OXException, IOException {
-        /*
-         * export tasks or events based on share target
-         */
-        ShareTarget target = resolvedShare.getShareRequest().getTarget();
-        int module = target.getModule();
         try {
-            if (Module.CALENDAR.getFolderConstant() == module) {
+            /*
+             * get & check target
+             */
+            ShareTarget target = resolvedShare.getShareRequest().getTarget();
+            if (null == target || resolvedShare.getShareRequest().isInvalidTarget()) {
+                throw ShareExceptionCodes.UNKNOWN_SHARE.create(resolvedShare.getShareRequest().getTargetPath());
+            }
+            /*
+             * export tasks or events based on share target
+             */
+            if (Module.CALENDAR.getFolderConstant() == target.getModule()) {
                 writeEvents(resolvedShare, target);
-            } else if (Module.TASK.getFolderConstant() == module) {
+            } else if (Module.TASK.getFolderConstant() == target.getModule()) {
                 writeTasks(resolvedShare, target);
             } else {
-                throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Unsupported module: " + module);
+                throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Unsupported module: " + target.getModule());
             }
         } catch (OXException e) {
-            writeError(resolvedShare, e);
+            sendError(resolvedShare.getResponse(), e);
         }
-    }
-
-    private void writeError(ResolvedShare share, OXException e) throws IOException {
-        /*
-         * write error response
-         */
-        HttpServletResponse response = share.getResponse();
-        if (null == response || response.isCommitted()) {
-            LOG.debug("Unable to send error response after exception", e);
-            return;
-        }
-        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getSoleMessage());
     }
 
     /**

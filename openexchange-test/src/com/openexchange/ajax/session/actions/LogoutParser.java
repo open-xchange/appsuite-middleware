@@ -49,6 +49,12 @@
 
 package com.openexchange.ajax.session.actions;
 
+import java.io.IOException;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.ParseException;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
@@ -59,11 +65,14 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
  */
 public class LogoutParser extends AbstractAJAXParser<LogoutResponse> {
 
+    private final boolean ignoreMissingSession;
+
     /**
      * Default constructor.
      */
-    LogoutParser() {
+    LogoutParser(boolean ignoreMissingSession) {
         super(true);
+        this.ignoreMissingSession = ignoreMissingSession;
     }
 
     /**
@@ -81,5 +90,16 @@ public class LogoutParser extends AbstractAJAXParser<LogoutResponse> {
     @Override
     protected LogoutResponse createResponse(final Response response) throws JSONException {
         return new LogoutResponse();
+    }
+
+    @Override
+    public String checkResponse(HttpResponse resp, HttpRequest request) throws ParseException, IOException {
+        if (HttpStatus.SC_FORBIDDEN == resp.getStatusLine().getStatusCode()) {
+            // No such session
+            if (ignoreMissingSession) {
+                return EntityUtils.toString(resp.getEntity());
+            }
+        }
+        return super.checkResponse(resp, request);
     }
 }

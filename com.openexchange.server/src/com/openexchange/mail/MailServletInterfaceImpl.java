@@ -3083,7 +3083,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 /*
                  * Encrypt the draft
                  */
-                if (draftMail.getSecuritySettings() != null && draftMail.getSecuritySettings().anythingSet()) {
+                if (draftMail.getSecuritySettings() != null && draftMail.getSecuritySettings().isEncrypt()) {
                     EncryptedMailService encryptor = Services.getServiceLookup().getOptionalService(EncryptedMailService.class);
                     if (encryptor != null) {
                         filledMail = encryptor.encryptAutosaveDraftEmail(filledMail, session, draftMail.getSecuritySettings());

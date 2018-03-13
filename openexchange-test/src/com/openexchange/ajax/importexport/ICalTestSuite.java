@@ -58,7 +58,6 @@ import com.openexchange.test.concurrent.ParallelSuite;
  */
 @RunWith(ParallelSuite.class)
 @Suite.SuiteClasses({
-    ICalImportTest.class,
     ICalTaskExportTest.class,
     ICalAppointmentExportTest.class,
     ICalSeriesTests.class,

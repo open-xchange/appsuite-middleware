@@ -55,7 +55,7 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.http.HttpHeaders;
+import com.openexchange.ajax.fields.Header;
 import com.openexchange.authentication.GuestAuthenticated;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.exception.OXException;
@@ -246,7 +246,7 @@ public class ShareLoginMethod implements LoginMethodClosure {
         if (false == Strings.isEmpty(user.getMail()) || false == Strings.isEmpty(user.getPasswordMech())) {
             StringBuilder builder = appendRealm(new StringBuilder(32).append("Basic realm=\""));
             builder.append("\", encoding=\"UTF-8\"");
-            response.setHeader(HttpHeaders.WWW_AUTHENTICATE, builder.toString());
+            response.setHeader("WWW-Authenticate", builder.toString());
         }
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "401 Unauthorized");
     }
@@ -258,7 +258,7 @@ public class ShareLoginMethod implements LoginMethodClosure {
     private static String getAuthHeader(LoginResultImpl loginResult) {
         Map<String, List<String>> headers = loginResult.getRequest().getHeaders();
         if (null != headers) {
-            List<String> authHeaders = headers.get(HttpHeaders.AUTHORIZATION);
+            List<String> authHeaders = headers.get(Header.AUTH_HEADER);
             if (null != authHeaders && 0 < authHeaders.size()) {
                 return authHeaders.get(0);
             }

@@ -87,7 +87,6 @@ import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.rdb.RdbStorage;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -138,7 +137,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            Map<Integer, ReminderData> remindersByUserID = selectReminders(connection, context.getContextId(), asInt(event.getId()));
+            Map<Integer, ReminderData> remindersByUserID = selectReminders(connection, context.getContextId(), Collections.singleton(event.getId())).get(event.getId());
             for (Map.Entry<Integer, ReminderData> entry : remindersByUserID.entrySet()) {
                 List<Alarm> alarms = optAlarms(event, i(entry.getKey()), entry.getValue());
                 if (null != alarms) {
@@ -177,18 +176,12 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
 
     @Override
     public Map<String, Map<Integer, List<Alarm>>> loadAlarms(List<Event> events) throws OXException {
-        boolean avoidLeftJoins = Services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.chronos.migration.avoidLeftJoins", Boolean.FALSE);
         Map<String, Event> eventsByID = CalendarUtils.getEventsByID(events);
         Map<String, Map<Integer, List<Alarm>>> alarmsByUserByEventID = new HashMap<String, Map<Integer, List<Alarm>>>(eventsByID.size());
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            Map<String, Map<Integer, ReminderData>> remindersByUserByID;
-            if (avoidLeftJoins) {
-                remindersByUserByID = selectRemindersWithoutJoin(connection, context.getContextId(), eventsByID.keySet());
-            } else {
-                remindersByUserByID = selectReminders(connection, context.getContextId(), eventsByID.keySet());
-            }
+            Map<String, Map<Integer, ReminderData>> remindersByUserByID = selectReminders(connection, context.getContextId(), eventsByID.keySet());
             for (Entry<String, Map<Integer, ReminderData>> entry : remindersByUserByID.entrySet()) {
                 String eventID = entry.getKey();
                 for (Entry<Integer, ReminderData> reminderEntry : entry.getValue().entrySet()) {
@@ -532,63 +525,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         return remindersByID;
     }
 
-    private static Map<Integer, ReminderData> selectReminders(Connection connection, int contextID, int eventID) throws SQLException, OXException {
-        Map<Integer, ReminderData> remindersByUserID = new HashMap<Integer, ReminderData>();
-        String sql = new StringBuilder()
-            .append("SELECT m.member_uid,m.reminder,r.object_id,r.alarm,r.last_modified FROM prg_dates_members AS m ")
-            .append("LEFT JOIN reminder AS r ON m.cid=r.cid AND m.member_uid=r.userid AND m.object_id=r.target_id ")
-            .append("WHERE m.cid=? AND m.object_id=?;")
-        .toString();
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            int parameterIndex = 1;
-            stmt.setInt(parameterIndex++, contextID);
-            stmt.setInt(parameterIndex++, eventID);
-            try (ResultSet resultSet = logExecuteQuery(stmt)) {
-                while (resultSet.next()) {
-                    ReminderData reminder = readReminder(resultSet);
-                    if (null != reminder) {
-                        Integer userID = I(resultSet.getInt("m.member_uid"));
-                        remindersByUserID.put(userID, reminder);
-                    }
-                }
-            }
-        }
-        return remindersByUserID;
-    }
-
     private static Map<String, Map<Integer, ReminderData>> selectReminders(Connection connection, int contextID, Collection<String> eventIDs) throws SQLException, OXException {
-        Map<String, Map<Integer, ReminderData>> remindersByUserByID = new HashMap<String, Map<Integer, ReminderData>>();
-        String sql = new StringBuilder()
-            .append("SELECT m.object_id,m.member_uid,m.reminder,r.object_id,r.alarm,r.last_modified FROM prg_dates_members AS m ")
-            .append("LEFT JOIN reminder AS r ON m.cid=r.cid AND m.member_uid=r.userid AND m.object_id=r.target_id ")
-            .append("WHERE m.cid=? AND m.object_id IN (").append(getParameters(eventIDs.size())).append(");")
-        .toString();
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            int parameterIndex = 1;
-            stmt.setInt(parameterIndex++, contextID);
-            for (String eventID : eventIDs) {
-                stmt.setInt(parameterIndex++, asInt(eventID));
-            }
-            try (ResultSet resultSet = logExecuteQuery(stmt)) {
-                while (resultSet.next()) {
-                    ReminderData reminder = readReminder(resultSet);
-                    if (null != reminder) {
-                        String eventID = asString(resultSet.getInt("m.object_id"));
-                        Integer userID = I(resultSet.getInt("m.member_uid"));
-                        Map<Integer, ReminderData> remindersByUser = remindersByUserByID.get(eventID);
-                        if (null == remindersByUser) {
-                            remindersByUser = new HashMap<Integer, ReminderData>();
-                            remindersByUserByID.put(eventID, remindersByUser);
-                        }
-                        remindersByUser.put(userID, reminder);
-                    }
-                }
-            }
-        }
-        return remindersByUserByID;
-    }
-
-    private static Map<String, Map<Integer, ReminderData>> selectRemindersWithoutJoin(Connection connection, int contextID, Collection<String> eventIDs) throws SQLException, OXException {
         /*
          * load reminder minutes from 'prg_dates_members'
          */

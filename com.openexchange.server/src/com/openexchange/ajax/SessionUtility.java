@@ -66,9 +66,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.http.HttpHeaders;
 import org.slf4j.Logger;
 import com.google.common.collect.ImmutableSet;
+import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.ipcheck.IPCheckService;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.config.ConfigurationService;
@@ -256,7 +256,7 @@ public final class SessionUtility {
 
     private static final String PARAM_ALTERNATIVE_ID = Session.PARAM_ALTERNATIVE_ID;
     private static final String PUBLIC_SESSION_PREFIX = LoginServlet.PUBLIC_SESSION_PREFIX;
-    private static final String USER_AGENT = HttpHeaders.USER_AGENT;
+    private static final String USER_AGENT = Header.USER_AGENT;
 
     /**
      * Looks-up <code>"open-xchange-public-session"</code> cookie and remembers appropriate session if possible to validate it.

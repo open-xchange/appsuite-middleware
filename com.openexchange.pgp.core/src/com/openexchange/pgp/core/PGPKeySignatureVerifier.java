@@ -81,6 +81,7 @@ public class PGPKeySignatureVerifier {
             @Override
             public PGPSignatureVerificationResult verify(PGPSignature signature, PGPPublicKey publicKey, PGPPublicKey verificationKey) throws PGPException {
                 if (signature.getSignatureType() == PGPSignature.KEY_REVOCATION) {
+                    signature.init(new JcaPGPContentVerifierBuilderProvider(), verificationKey);
                     return new PGPSignatureVerificationResult(signature, signature.verifyCertification(publicKey))
                         .setPublicKey(publicKey)
                         .setIssuerKey(verificationKey);
@@ -104,6 +105,7 @@ public class PGPKeySignatureVerifier {
                             //Check if the signature is for the current user-id
                             final boolean isForUserId = list.stream().anyMatch(s -> s.getCreationTime().equals(signature.getCreationTime()));
                             if (isForUserId) {
+                                signature.init(new JcaPGPContentVerifierBuilderProvider(), verificationKey);
                                 return new PGPSignatureVerificationResult(signature, signature.verifyCertification(userId, publicKey))
                                     .setUserId(userId)
                                     .setPublicKey(publicKey)
@@ -123,6 +125,7 @@ public class PGPKeySignatureVerifier {
                 Iterator userAttributes = publicKey.getUserAttributes();
                 while (userAttributes.hasNext()) {
                     PGPUserAttributeSubpacketVector userAttributeVector = (PGPUserAttributeSubpacketVector) userAttributes.next();
+                    signature.init(new JcaPGPContentVerifierBuilderProvider(), verificationKey);
                     boolean verified = signature.verifyCertification(userAttributeVector, publicKey);
                     if (verified) {
                         return new PGPSignatureVerificationResult(signature, verified)
@@ -140,6 +143,7 @@ public class PGPKeySignatureVerifier {
             @Override
             public PGPSignatureVerificationResult verify(PGPSignature signature, PGPPublicKey publicKey, PGPPublicKey verificationKey) throws PGPException {
                 if (signature.getSignatureType() != PGPSignature.KEY_REVOCATION && !signature.isCertification()) {
+                    signature.init(new JcaPGPContentVerifierBuilderProvider(), verificationKey);
                     return new PGPSignatureVerificationResult(signature, signature.verifyCertification(verificationKey, publicKey))
                         .setPublicKey(publicKey)
                         .setIssuerKey(verificationKey);
@@ -193,7 +197,6 @@ public class PGPKeySignatureVerifier {
                 final boolean keyMissing = true;
                 return new PGPSignatureVerificationResult(signature, verified, keyMissing);
             } else {
-                signature.init(new JcaPGPContentVerifierBuilderProvider(), verificationKey);
                 //Passing the signature to all known handlers
                 for (SignatureHandler handler : HANDLER_LIST) {
                     PGPSignatureVerificationResult verificationResult = handler.verify(signature, publicKey, verificationKey);

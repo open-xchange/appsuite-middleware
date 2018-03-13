@@ -20,12 +20,12 @@ import liquibase.structure.core.Schema;
 
 public abstract class DatabaseSnapshot {
 
-    private SnapshotControl snapshotControl;
-    private Database database;
-    private DatabaseObjectCollection allFound;
-    private Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> knownNull = new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>();
+    private final SnapshotControl snapshotControl;
+    private final Database database;
+    private final DatabaseObjectCollection allFound;
+    private final Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> knownNull = new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>();
 
-    private Map<String, ResultSetCache> resultSetCaches = new HashMap<String, ResultSetCache>();
+    private final Map<String, ResultSetCache> resultSetCaches = new HashMap<String, ResultSetCache>();
 
     DatabaseSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
         this.database = database;
@@ -91,7 +91,10 @@ public abstract class DatabaseSnapshot {
         }
 
         SnapshotGeneratorChain chain = createGeneratorChain(example.getClass(), database);
-        T object = chain.snapshot(example, this);
+        T object = null;
+        if(chain != null) {
+            object = chain.snapshot(example, this);
+        }
 
         if (object == null) {
             Set<DatabaseObject> collection = knownNull.get(example.getClass());

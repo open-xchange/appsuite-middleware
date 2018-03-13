@@ -859,3 +859,16 @@ properties:
       file: mailresolver.properties
       packageName: open-xchange-core
       tags: ["Mail"]
+    - key: com.openexchange.mail.hideInlineImages
+      description: |
+        This option specifies whether images that are considered as inline are advertised via HTTP-API as attachment or not.
+        
+        An image is considered as inline if Content-Disposition is simply set to "inline" and there is no file name information.
+      defaultValue: true
+      version: 7.10.0
+      reloadable: true
+      configcascadeAware: true
+      related:
+      file: mail.properties
+      packageName: open-xchange-core
+      tags: ["Mail"]

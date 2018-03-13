@@ -502,10 +502,10 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         String rootFolderId = INFOSTORE_FOLDER_ID;
         String trashFolderId = null == optTrashFolderId ? getTrashFolderID() : optTrashFolderId;
         while (null != folderId) {
-            if (trashFolderId.equals(folderId)) {
+            if (folderId.equals(trashFolderId)) {
                 return true;
             }
-            if (rootFolderId.equals(folderId)) {
+            if (folderId.equals(rootFolderId)) {
                 return false;
             }
             folderId = folderAccess.getFolder(folderId).getParentId();

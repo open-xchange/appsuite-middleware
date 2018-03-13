@@ -1099,6 +1099,9 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
             if (!realTreeId.equals(treeId)) {
                 StorageParameters parameters = newStorageParameters(storageParameters);
                 FolderStorage folderStorage = registry.getFolderStorage(realTreeId, folderId);
+                if (null == folderStorage) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
+                }
                 boolean started = folderStorage.startTransaction(parameters, false);
                 try {
                     realParentId = folderStorage.getFolder(realTreeId, folderId, parameters).getParentID();
