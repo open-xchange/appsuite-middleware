@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,42 +49,52 @@
 
 package com.openexchange.chronos.recurrence.service;
 
-import java.util.Calendar;
-import java.util.Date;
-import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
-import com.openexchange.chronos.service.RecurrenceData;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.util.TimeZones;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
 
 /**
- * {@link RecurrenceIdIterator}
+ * {@link RecurrenceConfig}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class RecurrenceIdIterator extends AbstractRecurrenceIterator<RecurrenceId> {
+public class RecurrenceConfig implements Reloadable {
+
+    private volatile int calculationLimit;
 
     /**
-     * Initializes a new {@link RecurrenceIdIterator}.
+     * Initializes a new {@link RecurrenceConfig}.
      *
-     * @param config The recurrence configuration to use
-     * @param recurrenceData the recurrence data
-     * @param forwardToOccurrence <code>true</code> to fast-forward the iterator to the first occurrence if the recurrence data's start
-     *            does not fall into the pattern, <code>false</code> otherwise
-     * @param start The left side boundary for the calculation. Optional, can be null.
-     * @param end The right side boundary for the calculation. Optional, can be null.
-     * @param startPosition The 1-based position of the occurrence in the recurrence set to start with, or <code>null</code> to start with the first occurrence
-     * @param limit The maximum number of calculated instances. Optional, can be null.
+     * @param configService A reference to the configuration service for initialization
      */
-    public RecurrenceIdIterator(RecurrenceConfig config, RecurrenceData recurrenceData, boolean forwardToOccurrence, Calendar start, Calendar end, Integer startPosition, Integer limit) throws OXException {
-        super(config, recurrenceData, 0L, forwardToOccurrence, start, end, startPosition, limit);
+    public RecurrenceConfig(ConfigurationService configService) {
+        super();
+        calculationLimit = readCalculationLimit(configService);
+    }
+
+    /**
+     * Gets the internal calculation limit, i.e. the maximum number of calculated recurrences.
+     *
+     * @return The calculation limit
+     */
+    public int getCalculationLimit() {
+        return calculationLimit;
     }
 
     @Override
-    protected RecurrenceId nextInstance() {
-        return new PositionAwareRecurrenceId(recurrenceData, next, position, CalendarUtils.truncateTime(new Date(next.getTimestamp()), TimeZones.UTC));
+    public void reloadConfiguration(ConfigurationService configService) {
+        calculationLimit = readCalculationLimit(configService);
+    }
+
+    @Override
+    public Interests getInterests() {
+        return DefaultInterests.builder().propertiesOfInterest("com.openexchange.calendar.maxEventResults").build();
+    }
+
+    private static int readCalculationLimit(ConfigurationService configService) {
+        return 1 + configService.getIntProperty("com.openexchange.calendar.maxEventResults", 1000);
     }
 
 }

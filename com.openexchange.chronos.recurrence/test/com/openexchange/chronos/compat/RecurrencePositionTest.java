@@ -61,6 +61,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
+import com.openexchange.chronos.recurrence.TestRecurrenceConfig;
 import com.openexchange.chronos.recurrence.service.RecurrenceServiceImpl;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.java.util.TimeZones;
@@ -73,7 +74,7 @@ import com.openexchange.java.util.TimeZones;
  */
 public class RecurrencePositionTest {
 
-    private RecurrenceService recurrenceService = new RecurrenceServiceImpl();
+    private RecurrenceService recurrenceService = new RecurrenceServiceImpl(new TestRecurrenceConfig());
 
     @Test
     public void testPacificHonolulu() throws Exception {

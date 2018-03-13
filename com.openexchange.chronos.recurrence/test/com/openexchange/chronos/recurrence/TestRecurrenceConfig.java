@@ -47,44 +47,40 @@
  *
  */
 
-package com.openexchange.chronos.recurrence.service;
+package com.openexchange.chronos.recurrence;
 
-import java.util.Calendar;
-import java.util.Date;
-import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
-import com.openexchange.chronos.service.RecurrenceData;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.util.TimeZones;
+import com.openexchange.chronos.recurrence.service.RecurrenceConfig;
 
 /**
- * {@link RecurrenceIdIterator}
+ * {@link TestRecurrenceConfig}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public class RecurrenceIdIterator extends AbstractRecurrenceIterator<RecurrenceId> {
+public class TestRecurrenceConfig extends RecurrenceConfig {
+
+    private final int calculationLimit;
 
     /**
-     * Initializes a new {@link RecurrenceIdIterator}.
-     *
-     * @param config The recurrence configuration to use
-     * @param recurrenceData the recurrence data
-     * @param forwardToOccurrence <code>true</code> to fast-forward the iterator to the first occurrence if the recurrence data's start
-     *            does not fall into the pattern, <code>false</code> otherwise
-     * @param start The left side boundary for the calculation. Optional, can be null.
-     * @param end The right side boundary for the calculation. Optional, can be null.
-     * @param startPosition The 1-based position of the occurrence in the recurrence set to start with, or <code>null</code> to start with the first occurrence
-     * @param limit The maximum number of calculated instances. Optional, can be null.
+     * Initializes a new {@link TestRecurrenceConfig}.
      */
-    public RecurrenceIdIterator(RecurrenceConfig config, RecurrenceData recurrenceData, boolean forwardToOccurrence, Calendar start, Calendar end, Integer startPosition, Integer limit) throws OXException {
-        super(config, recurrenceData, 0L, forwardToOccurrence, start, end, startPosition, limit);
+    public TestRecurrenceConfig() {
+        this(1001);
+    }
+
+    /**
+     * Initializes a new {@link TestRecurrenceConfig}.
+     *
+     * @param calculationLimit The calculation limit to use
+     */
+    public TestRecurrenceConfig(int calculationLimit) {
+        super(null);
+        this.calculationLimit = calculationLimit;
     }
 
     @Override
-    protected RecurrenceId nextInstance() {
-        return new PositionAwareRecurrenceId(recurrenceData, next, position, CalendarUtils.truncateTime(new Date(next.getTimestamp()), TimeZones.UTC));
+    public int getCalculationLimit() {
+        return calculationLimit;
     }
 
 }
