@@ -263,9 +263,14 @@ public class EventUpdateProcessor implements EventUpdate {
          */
         changedChangeExceptions = removeInvalidRecurrenceIds(changedEvent, changedChangeExceptions);
         /*
+         * apply potential changes in exception dates (to reflect newly added delete exception dates)
+         */
+        changedChangeExceptions = adjustDeletedChangeExceptions(changedEvent, changedChangeExceptions);
+        /*
          * take over non-conflicting changes in series master to change exceptions
          */
         changedChangeExceptions = propagateToChangeExceptions(originalEvent, changedEvent, originalChangeExceptions, changedChangeExceptions);
+
         return changedChangeExceptions;
     }
 
@@ -618,6 +623,32 @@ public class EventUpdateProcessor implements EventUpdate {
             List<Event> newChangeExceptions = new ArrayList<Event>(changeExceptions);
             if (newChangeExceptions.removeIf(event -> false == possibleExceptionDates.contains(event.getRecurrenceId()))) {
                 changeExceptions = newChangeExceptions;
+            }
+        }
+        return changeExceptions;
+    }
+
+    /**
+     * Removes any change exception in case it is indicated within the series master event's set of delete exception dates. This may
+     * affect both the series master event's change exception dates, as well as the collection of actual change exception events.
+     *
+     * @param seriesMaster The series master event
+     * @param changeExceptions The change exception events
+     * @return The resulting list of (possibly adjusted) change exceptions
+     */
+    private List<Event> adjustDeletedChangeExceptions(Event seriesMaster, List<Event> changeExceptions) throws OXException {
+        if (false == isNullOrEmpty(seriesMaster.getDeleteExceptionDates())) {
+            if (false == isNullOrEmpty(changeExceptions)) {
+                List<Event> newChangeExceptions = new ArrayList<Event>(changeExceptions);
+                if (newChangeExceptions.removeIf(event -> seriesMaster.getDeleteExceptionDates().contains(event.getRecurrenceId()))) {
+                    changeExceptions = newChangeExceptions;
+                }
+            }
+            if (false == isNullOrEmpty(seriesMaster.getChangeExceptionDates())) {
+                SortedSet<RecurrenceId> newChangeExceptionDates = new TreeSet<RecurrenceId>(seriesMaster.getChangeExceptionDates());
+                if (newChangeExceptionDates.removeAll(seriesMaster.getDeleteExceptionDates())) {
+                    seriesMaster.setChangeExceptionDates(newChangeExceptionDates);
+                }
             }
         }
         return changeExceptions;
