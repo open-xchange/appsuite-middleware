@@ -328,6 +328,7 @@ public class OAuthServiceImpl implements OAuthService {
      */
     @Override
     public OAuthAccount createAccount(final String serviceMetaData, final Map<String, Object> arguments, final int user, final int contextId, Set<OAuthScope> scopes) throws OXException {
+        isNull(arguments, OAuthConstants.ARGUMENT_DISPLAY_NAME, OAuthConstants.ARGUMENT_SESSION);
         /*
          * Create appropriate OAuth account instance
          */
@@ -341,9 +342,6 @@ public class OAuthServiceImpl implements OAuthService {
          * Set display name & identifier
          */
         final String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
-        if (Strings.isEmpty(displayName)) {
-            throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_DISPLAY_NAME);
-        }
         account.setDisplayName(displayName);
         /*
          * Token & secret
@@ -354,9 +352,6 @@ public class OAuthServiceImpl implements OAuthService {
          * Crypt tokens
          */
         final Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
-        if (null == session) {
-            throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_SESSION);
-        }
         account.setEnabledScopes(scopes);
 
         int accountId = oauthAccountStorage.storeAccount(session, account);
@@ -377,10 +372,8 @@ public class OAuthServiceImpl implements OAuthService {
         // Obtain & apply the access token
         HttpsURLConnection.setDefaultSSLSocketFactory(Services.getService(SSLSocketFactoryProvider.class).getDefault());
         obtainToken(type, arguments, account, scopes);
+        isNull(arguments, OAuthConstants.ARGUMENT_SESSION);
         Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
-        if (null == session) {
-            throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_SESSION);
-        }
         String userIdentity = service.getUserIdentity(session, account.getToken(), account.getSecret());
         if (Strings.isEmpty(userIdentity)) {
 
@@ -398,24 +391,13 @@ public class OAuthServiceImpl implements OAuthService {
         // Search in db for an account matching that id
         DefaultOAuthAccount existingAccount = (DefaultOAuthAccount) oauthAccountStorage.findByUserIdentity(session, userIdentity, serviceMetaData);
         if (existingAccount == null) {
+            isNull(arguments, OAuthConstants.ARGUMENT_DISPLAY_NAME, OAuthConstants.ARGUMENT_TOKEN, OAuthConstants.ARGUMENT_SECRET);
             //        |--+ if nothing found then add the account
             /*
              * Set display name & identifier
              */
             String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
-            if (Strings.isEmpty(displayName)) {
-                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_DISPLAY_NAME);
-            }
             account.setDisplayName(displayName);
-            /*
-             * Check for token and secret
-             */
-            if (Strings.isEmpty(account.getToken())) {
-                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_TOKEN);
-            }
-            if (null == account.getSecret()) {
-                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_SECRET);
-            }
             account.setEnabledScopes(scopes);
             int accountId = oauthAccountStorage.storeAccount(session, account);
             account.setId(accountId);
@@ -434,23 +416,21 @@ public class OAuthServiceImpl implements OAuthService {
 
     @Override
     public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId, Set<OAuthScope> scopes) throws OXException {
+        isNull(arguments, OAuthConstants.ARGUMENT_DISPLAY_NAME, OAuthConstants.ARGUMENT_SESSION, OAuthConstants.ARGUMENT_TOKEN, OAuthConstants.ARGUMENT_SECRET);
         try {
             /*
              * Create appropriate OAuth account instance
              */
-            final DefaultOAuthAccount account = new DefaultOAuthAccount();
+            DefaultOAuthAccount account = new DefaultOAuthAccount();
             /*
              * Determine associated service's meta data
              */
-            final OAuthServiceMetaData service = registry.getService(serviceMetaData, user, contextId);
+            OAuthServiceMetaData service = registry.getService(serviceMetaData, user, contextId);
             account.setMetaData(service);
             /*
              * Set display name & identifier
              */
-            final String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
-            if (Strings.isEmpty(displayName)) {
-                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_DISPLAY_NAME);
-            }
+            String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
             account.setDisplayName(displayName);
             /*
              * Obtain & apply the access token
@@ -460,16 +440,7 @@ public class OAuthServiceImpl implements OAuthService {
             /*
              * Encrypt token & secret
              */
-            final Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
-            if (null == session) {
-                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_SESSION);
-            }
-            if (Strings.isEmpty(account.getToken())) {
-                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_TOKEN);
-            }
-            if (null == account.getSecret()) {
-                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_SECRET);
-            }
+            Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
             account.setEnabledScopes(scopes);
             // Get the user's identity
             String userIdentity = service.getUserIdentity(session, account.getToken(), account.getSecret());
@@ -588,29 +559,28 @@ public class OAuthServiceImpl implements OAuthService {
 
     @Override
     public OAuthAccount updateAccount(final int accountId, final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId, Set<OAuthScope> scopes) throws OXException {
+        isNull(arguments, OAuthConstants.ARGUMENT_SESSION);
         /*
          * Create appropriate OAuth account instance
          */
-        final DefaultOAuthAccount account = new DefaultOAuthAccount();
+        DefaultOAuthAccount account = new DefaultOAuthAccount();
         /*
          * Determine associated service's meta data
          */
-        final OAuthServiceMetaData service = registry.getService(serviceMetaData, user, contextId);
+        OAuthServiceMetaData service = registry.getService(serviceMetaData, user, contextId);
         account.setMetaData(service);
         /*
          * Set display name & identifier
          */
-        final String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
-        account.setDisplayName(null == displayName ? null : displayName);
+        String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
+        account.setDisplayName(displayName);
         account.setId(accountId);
         /*
          * Obtain & apply the access token
          */
         obtainToken(type, arguments, account, scopes);
-        final Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
-        if (null == session) {
-            throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_SESSION);
-        }
+
+        Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
         account.setEnabledScopes(scopes);
         // Lazy identity update
         if (!containsUserIdentity(accountId, user, contextId, serviceMetaData)) {
@@ -653,15 +623,10 @@ public class OAuthServiceImpl implements OAuthService {
             final OAuthServiceMetaData metaData = account.getMetaData();
             final OAuthToken oAuthToken = metaData.getOAuthToken(arguments, scopes);
             if (null == oAuthToken) {
-                final String pin = (String) arguments.get(OAuthConstants.ARGUMENT_PIN);
-                if (null == pin) {
-                    throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_PIN);
-                }
-                final OAuthToken requestToken = (OAuthToken) arguments.get(OAuthConstants.ARGUMENT_REQUEST_TOKEN);
-                if (null == requestToken) {
-                    throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_REQUEST_TOKEN);
-                }
+                isNull(arguments, OAuthConstants.ARGUMENT_PIN, OAuthConstants.ARGUMENT_REQUEST_TOKEN);
 
+                String pin = (String) arguments.get(OAuthConstants.ARGUMENT_PIN);
+                OAuthToken requestToken = (OAuthToken) arguments.get(OAuthConstants.ARGUMENT_REQUEST_TOKEN);
                 Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
                 /*
                  * With the request token and the verifier (which is a number) we need now to get the access token
@@ -775,5 +740,14 @@ public class OAuthServiceImpl implements OAuthService {
             }
         }
         return msg;
+    }
+
+    private void isNull(Map<String, Object> arguments, String... fields) throws OXException {
+        for (String field : fields) {
+            Object object = arguments.get(field);
+            if (null == object) {
+                throw OAuthExceptionCodes.MISSING_ARGUMENT.create(field);
+            }
+        }
     }
 }
