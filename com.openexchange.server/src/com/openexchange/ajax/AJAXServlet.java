@@ -68,6 +68,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -999,7 +1000,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     protected void unknownAction(String method, String action, HttpServletResponse res, boolean html) throws IOException, ServletException {
-        String msg = "The action " + action + " isn't even specified yet. At least not for the method: " + method;
+        String msg = "The action " + StringEscapeUtils.escapeHtml(action) + " isn't even specified yet. At least not for the method: " + StringEscapeUtils.escapeHtml(method);
         if (html) {
             sendErrorAsJSHTML(res, msg, action);
             return;
