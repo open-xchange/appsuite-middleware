@@ -67,6 +67,7 @@ import com.openexchange.oauth.API;
 import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthAccountStorage;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthToken;
@@ -87,12 +88,12 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
 
     private OAuthServiceImpl oauth;
     private SimOAuthServiceMetaDataRegistry registry;
+    private OAuthAccountStorage oauthAccountStorage;
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         registry = new SimOAuthServiceMetaDataRegistry();
-
         registry.addService(new AbstractOAuthServiceMetaData() {
 
             @Override
@@ -135,7 +136,56 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
                 return null;
             }
         });
+        oauthAccountStorage = new OAuthAccountStorage() {
 
+            @Override
+            public void updateAccount(int userId, int contextId, int accountId, Map<String, Object> arguments) throws OXException {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public void updateAccount(Session session, OAuthAccount account) throws OXException {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public int storeAccount(Session session, OAuthAccount account) throws OXException {
+                // TODO Auto-generated method stub
+                return 0;
+            }
+
+            @Override
+            public List<OAuthAccount> getAccounts(Session session, String serviceMetaData) throws OXException {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public List<OAuthAccount> getAccounts(Session session) throws OXException {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public OAuthAccount getAccount(Session session, int accountId) throws OXException {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public OAuthAccount findByUserIdentity(Session session, String userIdentity, String serviceId) throws OXException {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public void deleteAccount(int userId, int contextId, int accountId) throws OXException {
+                // TODO Auto-generated method stub
+
+            }
+        };
         oauth = new OAuthServiceImpl(registry, oauthAccountStorage, null) {
 
             @Override

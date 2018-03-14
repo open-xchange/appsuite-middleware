@@ -601,7 +601,7 @@ public class OAuthServiceImpl implements OAuthService {
      * @param scopes The {@link OAuthScope}s
      * @throws OXException if the token cannot be retrieved
      */
-    private void obtainToken(final OAuthInteractionType type, final Map<String, Object> arguments, final DefaultOAuthAccount account, Set<OAuthScope> scopes) throws OXException {
+    protected void obtainToken(final OAuthInteractionType type, final Map<String, Object> arguments, final DefaultOAuthAccount account, Set<OAuthScope> scopes) throws OXException {
         switch (type) {
             case OUT_OF_BAND:
                 obtainTokenByOutOfBand(arguments, account, scopes);
