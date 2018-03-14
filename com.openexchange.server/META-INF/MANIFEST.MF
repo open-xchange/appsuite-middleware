@@ -658,4 +658,5 @@ Bundle-ClassPath: .,
  lib/bcpkix-jdk15on-152.jar,
  lib/bcprov-jdk15on-152.jar,
  lib/jacksum.jar,
- lib/jaudiotagger-2.2.2.jar
+ lib/jaudiotagger-2.2.2.jar,
+ lib/json-sanitizer-1.2.0.jar
