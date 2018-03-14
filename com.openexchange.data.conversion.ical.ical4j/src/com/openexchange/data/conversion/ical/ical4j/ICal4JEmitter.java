@@ -67,7 +67,6 @@ import com.openexchange.data.conversion.ical.ZoneInfo;
 import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
 import com.openexchange.data.conversion.ical.ical4j.internal.TaskConverters;
-import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
@@ -220,16 +219,15 @@ public class ICal4JEmitter implements ICalEmitter {
         return new ICal4jItem(vToDo);
     }
 
-    protected void initCalendar(Calendar calendar, ITipMethod method) {
+    protected void initCalendar(Calendar calendar, String method) {
         PropertyList properties = calendar.getProperties();
         ProdId prodId = new ProdId();
         prodId.setValue(com.openexchange.version.Version.NAME);
         properties.add(prodId);
         properties.add(net.fortuna.ical4j.model.property.Version.VERSION_2_0);
         properties.add(CalScale.GREGORIAN);
-        Method iCalMethod = null != method ? getICalMethod(method) : null;
-        if (null != iCalMethod) {
-            replaceMethod(calendar, iCalMethod);
+        if (null != method) {
+            replaceMethod(calendar, new Method(method));
         }
     }
 
@@ -246,30 +244,6 @@ public class ICal4JEmitter implements ICalEmitter {
             throw new ConversionError(-1, Code.INVALID_SESSION, session.getClass().getName());
         }
         return ((ICal4jSession) session).getAndIncreaseIndex();
-    }
-
-    protected Method getICalMethod(ITipMethod m) {
-        switch (m) {
-        case ADD:
-            return Method.ADD;
-        case CANCEL:
-            return Method.CANCEL;
-        case COUNTER:
-            return Method.COUNTER;
-        case DECLINECOUNTER:
-            return Method.DECLINE_COUNTER;
-        case PUBLISH:
-            return Method.PUBLISH;
-        case REFRESH:
-            return Method.REFRESH;
-        case REPLY:
-            return Method.REPLY;
-        case REQUEST:
-            return Method.REQUEST;
-        case NO_METHOD:
-        default:
-            return null;
-        }
     }
 
     protected void replaceMethod(Calendar calendar, Method newMethod) {

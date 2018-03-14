@@ -138,13 +138,13 @@ public class ConversionWarning extends OXException {
          */
         INVALID_STATUS("Unable to convert task status \"%1$s\".", CATEGORY_USER_INPUT, 1, ConversionWarningMessage.INVALID_STATUS_MSG),
         /**
-         * Unable to convert task priority %1$d.
+         * Unable to convert task priority %1$s.
          */
-        INVALID_PRIORITY("Unable to convert task priority %d.", CATEGORY_USER_INPUT, 2, ConversionWarningMessage.INVALID_PRIORITY_MSG),
+        INVALID_PRIORITY("Unable to convert task priority %1$s.", CATEGORY_USER_INPUT, 2, ConversionWarningMessage.INVALID_PRIORITY_MSG),
         /**
-         * Can not create recurrence rule: %s
+         * Can not create recurrence rule: %1$s
          */
-        CANT_CREATE_RRULE("Can not create recurrence rule: %s", CATEGORY_ERROR, 3, null),
+        CANT_CREATE_RRULE("Can not create recurrence rule: %1$s", CATEGORY_ERROR, 3, null),
         /**
          * Invalid session given to implementation "%1$s".
          */
@@ -162,13 +162,13 @@ public class ConversionWarning extends OXException {
          */
         VALIDATION("Validation of calendar failed.", CATEGORY_ERROR, 7, null),
         /**
-         * Can not resolve user: %d
+         * Cannot resolve user: %1$s
          */
-        CANT_RESOLVE_USER("Can not resolve user: %d", CATEGORY_ERROR, 8, null),
+        CANT_RESOLVE_USER("Cannot resolve user: %1$s", CATEGORY_ERROR, 8, null),
         /**
-         * Parsing error parsing ical: %s
+         * Parsing error parsing ical: %1$s
          */
-        PARSE_EXCEPTION("Parsing error parsing ical: %s", CATEGORY_USER_INPUT, 9, ConversionWarningMessage.PARSE_EXCEPTION_MSG),
+        PARSE_EXCEPTION("Parsing error parsing ical: %1$s", CATEGORY_USER_INPUT, 9, ConversionWarningMessage.PARSE_EXCEPTION_MSG),
         /**
          * Unknown Class: %1$s
          */
@@ -183,9 +183,9 @@ public class ConversionWarning extends OXException {
          */
         MISSING_DTSTART("Missing DTSTART", CATEGORY_USER_INPUT, 12, ConversionWarningMessage.MISSING_DTSTART_MSG),
         /**
-         * Can not resolve resource: %d
+         * Cannot resolve resource: %1$s
          */
-        CANT_RESOLVE_RESOURCE("Can not resolve resource: %1$s", CATEGORY_ERROR, 13, null),
+        CANT_RESOLVE_RESOURCE("Cannot resolve resource: %1$s", CATEGORY_ERROR, 13, null),
         /**
          * Private Appointments can not have attendees. Removing attendees and accepting appointment anyway.
          */
@@ -214,13 +214,13 @@ public class ConversionWarning extends OXException {
          */
         UNEXPECTED_ERROR("An error occurred: %1$s", CATEGORY_ERROR, 19, null),
         /**
-         * Element automatically truncated: %s
+         * Element automatically truncated: %1$s
          */
-        TRUNCATION_WARNING("Element truncated: %s", CATEGORY_TRUNCATED, 20, ConversionWarningMessage.TRUNCATION_WARNING_MSG),
+        TRUNCATION_WARNING("Element truncated: %1$s", CATEGORY_TRUNCATED, 20, ConversionWarningMessage.TRUNCATION_WARNING_MSG),
         /**
-         * Can not resolve group: %d
+         * Cannot resolve group: %1$s
          */
-        CANT_RESOLVE_GROUP("Can not resolve group: %1$s", CATEGORY_ERROR, 21, null),
+        CANT_RESOLVE_GROUP("Cannot resolve group: %1$s", CATEGORY_ERROR, 21, null),
         /**
          * Invalid mail address for external participant: %1$s
          */

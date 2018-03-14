@@ -62,7 +62,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Set;
-import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServlet;
@@ -75,6 +74,7 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import org.json.JSONWriter;
 import com.google.common.collect.ImmutableSet;
+import com.google.json.JsonSanitizer;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -1008,7 +1008,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     public static String substituteJS(String json, String action) {
-        return JS_FRAGMENT.replace("**json**", json.replaceAll(Pattern.quote("</") , "<\\/")).replace("**action**", sanitizeParam(action));
+        return JS_FRAGMENT.replace("**json**", JsonSanitizer.sanitize(json)).replace("**action**", sanitizeParam(action));
     }
 
     /* --------------------- STUFF FOR UPLOAD --------------------- */
