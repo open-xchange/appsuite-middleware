@@ -115,7 +115,7 @@ public abstract class OSGiAbstractor implements ServiceLookup, BundleActivator{
 
     }
 
-    private class Logger implements org.slf4j.Logger {
+    private static class Logger implements org.slf4j.Logger {
 
         private final org.slf4j.Logger delegate;
 

@@ -113,7 +113,7 @@ public class AdminParser extends CLIParser {
 
     private final Map<String, Map<String, String>> dynamicMaps = new HashMap<String, Map<String, String>>();
 
-    private class OptionInfo {
+    private static class OptionInfo {
         public NeededQuadState needed = NeededQuadState.notneeded;
 
         public CLIOption option = null;

@@ -56,7 +56,7 @@ import java.util.ArrayList;
 
 public class ShellExecutor {
 
-    public class ArrayOutput {
+    public static class ArrayOutput {
 
         /* (non-Javadoc)
          * @see java.lang.Object#toString()

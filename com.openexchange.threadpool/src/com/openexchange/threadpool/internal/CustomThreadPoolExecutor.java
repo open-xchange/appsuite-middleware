@@ -1229,7 +1229,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         }
     }
 
-    private final class ActiveTaskWatcher implements Runnable {
+    private static final class ActiveTaskWatcher implements Runnable {
         private final ReentrantLock lock = new ReentrantLock(true);
         private final Condition notEmpty = lock.newCondition();
         private final ConcurrentMap<Long, TaskInfo> tasks;

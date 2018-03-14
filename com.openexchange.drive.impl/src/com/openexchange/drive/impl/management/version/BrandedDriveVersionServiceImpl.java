@@ -104,11 +104,11 @@ public class BrandedDriveVersionServiceImpl implements BrandedDriveVersionServic
             driveVersions.clear();
         }
     }
-    
-    private class VersionWrapper {
 
-        private String soft;
-        private String hard;
+    private static class VersionWrapper {
+
+        private final String soft;
+        private final String hard;
 
         public VersionWrapper(String soft, String hard) {
             super();
