@@ -62,11 +62,11 @@ import com.openexchange.caching.events.CacheListener;
  */
 public class StampedCacheEvent implements Delayed {
 
-    /** The special poison element */
-    static final StampedCacheEvent POISON = new StampedCacheEvent(null, null, null, false, true);
-
     private static final long MAX_NANOS = TimeUnit.NANOSECONDS.convert(10, TimeUnit.SECONDS);
     private static final long DELAY_NANOS = TimeUnit.NANOSECONDS.convert(2, TimeUnit.SECONDS);
+
+    /** The special poison element */
+    static final StampedCacheEvent POISON = new StampedCacheEvent(null, null, null, false, true);
 
     /** The cache event */
     public final CacheEvent event;
