@@ -91,6 +91,7 @@ public class message_deliverystatus implements DataContentHandler {
      */
     public Object getContent(DataSource ds) throws IOException {
 	// create a new DeliveryStatus
+    java.io.InputStream in = null;
 	try {
 	    /*
 	    Session session;
@@ -107,11 +108,16 @@ public class message_deliverystatus implements DataContentHandler {
 	    }
 	    return new DeliveryStatus(session, ds.getInputStream());
 	    */
-	    return new DeliveryStatus(ds.getInputStream());
+	    in = ds.getInputStream();
+	    return new DeliveryStatus(in);
 	} catch (MessagingException me) {
 	    throw new IOException("Exception creating DeliveryStatus in " +
 		    "message/delivery-status DataContentHandler: " +
 		    me.toString());
+	} finally {
+	    if (null != in) {
+            in.close();
+        }
 	}
     }
     

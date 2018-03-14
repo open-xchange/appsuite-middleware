@@ -589,12 +589,14 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             in = new FileInputStream(thumbnail);
             preview = new ThresholdFileHolder();
             preview.write(in);
+            ThresholdFileHolder toReturn = preview;
+            preview = null;
+            return toReturn;
         } catch (IOException e) {
             throw MimeMailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } finally {
-            Streams.close(in);
+            Streams.close(in, preview);
         }
-        return preview;
     }
 
     private Map<String, String> getCidMapping(Map<String, ThresholdFileHolder> previewImages) {

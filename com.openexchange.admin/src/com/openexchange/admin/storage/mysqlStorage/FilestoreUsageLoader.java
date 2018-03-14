@@ -165,7 +165,7 @@ public class FilestoreUsageLoader implements Filter<Context, Context> {
         return contexts.values();
     }
 
-    private class PoolIdTuple {
+    private static class PoolIdTuple {
         private final int writePoolId, readPoolId;
         PoolIdTuple(int writePoolId, int readPoolId) {
             super();

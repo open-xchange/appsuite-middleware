@@ -114,19 +114,15 @@ public class TransformImageAction implements IFileResponseRendererAction {
      * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
      * @since v7.8.1
      */
-    protected final class TransformedImageInputStreamClosure implements FileHolder.InputStreamClosure {
+    protected static final class TransformedImageInputStreamClosure implements FileHolder.InputStreamClosure {
 
         /**
          * Initializes a new {@link TransformedImageInputStreamClosure}.
-         * @param transformedImage
          */
         TransformedImageInputStreamClosure(BasicTransformedImage transformedImage) {
             m_transformedImage = transformedImage;
         }
 
-        /* (non-Javadoc)
-         * @see com.openexchange.ajax.fileholder.IFileHolder.InputStreamClosure#newStream()
-         */
         @Override
         public InputStream newStream() throws OXException, IOException {
             return m_transformedImage.getImageStream();

@@ -109,7 +109,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractMailAction.class);
 
-    private final class MailInterfacePostProcessor implements AJAXRequestResultPostProcessor {
+    private static final class MailInterfacePostProcessor implements AJAXRequestResultPostProcessor {
 
         private final MailServletInterface newMailInterface;
 

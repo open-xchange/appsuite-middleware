@@ -89,15 +89,15 @@ public abstract class ICalDataHandler implements DataHandler {
 
     /**
      * Initializes a new {@link ICalDataHandler}.
-     * 
+     *
      * @param services The {@link ServiceLookup}
-     * 
+     *
      */
     public ICalDataHandler(ServiceLookup services) {
         super();
         this.services = services;
     }
-    
+
     @Override
     public String[] getRequiredArguments() {
         return new String[0];
@@ -132,7 +132,7 @@ public abstract class ICalDataHandler implements DataHandler {
     /**
      * Closes a {@link Closeable} save. In case of an error while closing, the error will be logged instead of being thrown
      * so that possible earlier errors won't be 'overriden'
-     * 
+     *
      * @param closeable The {@link Closeable}
      */
     protected static void safeClose(Closeable closeable) {
@@ -151,10 +151,9 @@ public abstract class ICalDataHandler implements DataHandler {
      *
      * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
      */
-    protected class Confirm {
+    protected static class Confirm {
 
         private final int confirm;
-
         private final String confirmMessage;
 
         public Confirm(final int confirm, final String confirmMessage) {

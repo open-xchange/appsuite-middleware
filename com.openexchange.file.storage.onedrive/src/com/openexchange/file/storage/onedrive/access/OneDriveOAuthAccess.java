@@ -213,7 +213,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
         return scribeOAuthService.isExpired(liveconnectOAuthAccount.getToken());
     }
 
-    private class OneDriveReauthorizeClusterTask extends AbstractReauthorizeClusterTask implements ClusterTask<OAuthAccount> {
+    private static class OneDriveReauthorizeClusterTask extends AbstractReauthorizeClusterTask implements ClusterTask<OAuthAccount> {
 
         /**
          * Initialises a new {@link OneDriveOAuthAccess.OneDriveReauthorizeClusterTask}.

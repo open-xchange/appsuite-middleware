@@ -333,7 +333,7 @@ public class FileResponseRenderer extends AbstractListenerCollectingResponseRend
      *
      * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
      */
-    private class DataWrapper implements IDataWrapper {
+    private static class DataWrapper implements IDataWrapper {
 
         private String delivery = null;
         private String contentType = null;

@@ -109,6 +109,7 @@ public class PnsCreateTableTask extends UpdateTaskAdapter {
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
+            closeSQLStuff(stmt);
             if (rollback) {
                 Databases.rollback(con);
             }
