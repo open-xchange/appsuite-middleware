@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.storage.rdb;
+package com.openexchange.chronos.storage.rdb.groupware;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -68,7 +68,7 @@ import com.openexchange.tools.update.Tools;
  */
 public class ExceptionSeriesPatternConsistencyTask extends UpdateTaskAdapter {
 
-    private static final String FIND_MISSING_PATTERN = "SELECT exception.cid, exception.intfield01, master.field06 FROM prg_dates exception JOIN prg_dates master ON exception.cid = master.cid AND exception.intfield02 = master.intfield01 AND (exception.field06 != master.field06 OR exception.field06 IS NULL)";
+    private static final String FIND_MISSING_PATTERN = "SELECT exception.cid, exception.intfield01, master.field06 FROM prg_dates exception JOIN prg_dates master ON exception.cid = master.cid AND exception.intfield02 = master.intfield01 AND exception.intfield01 != exception.intfield02 AND (exception.field06 != master.field06 OR exception.field06 IS NULL)";
 
     private static final String REPAIR_MISSING_PATTERN = "UPDATE prg_dates SET field06 = ? WHERE cid = ? AND intfield01 = ?;";
 
