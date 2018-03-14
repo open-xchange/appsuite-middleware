@@ -203,6 +203,7 @@ public class SocketFetcher {
 	int cto = PropUtil.getIntProperty(props,
 					prefix + ".connectiontimeout", -1);
 	Socket socket = null;
+	try {
 	String localaddrstr = props.getProperty(prefix + ".localaddress", null);
 	InetAddress localaddr = null;
 	if (localaddrstr != null) {
@@ -298,7 +299,14 @@ public class SocketFetcher {
 	    }
 	}
 
-	return socket;
+	Socket returnMe = socket;
+	socket = null;
+    return returnMe;
+	} finally {
+	    if (null != socket) {
+            socket.close();
+        }
+	}
     }
 
     public static Socket getSocket(String host, int port, Properties props,
