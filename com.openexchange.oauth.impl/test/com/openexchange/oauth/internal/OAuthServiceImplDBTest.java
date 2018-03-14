@@ -181,6 +181,12 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             }
 
             @Override
+            public boolean hasUserIdentity(Session session, int accountId, String serviceId) throws OXException {
+                // TODO Auto-generated method stub
+                return false;
+            }
+
+            @Override
             public void deleteAccount(int userId, int contextId, int accountId) throws OXException {
                 // TODO Auto-generated method stub
 

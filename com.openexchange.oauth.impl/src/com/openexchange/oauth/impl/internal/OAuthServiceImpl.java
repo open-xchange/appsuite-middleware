@@ -576,19 +576,6 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     /**
-     * @param accountId
-     * @param user
-     * @param contextId
-     * @param serviceMetaData
-     * @param writeCon
-     */
-    private boolean containsUserIdentity(int accountId, int user, int contextId, String serviceMetaData) {
-        //TODO implement
-        return false;
-
-    }
-
-    /**
      * Obtains an OAuth {@link Token} with the specified interaction type for the specified account
      * 
      * @param type The {@link OAuthInteractionType}
