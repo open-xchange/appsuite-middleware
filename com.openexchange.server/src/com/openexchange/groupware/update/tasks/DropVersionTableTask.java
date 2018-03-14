@@ -70,12 +70,18 @@ import com.openexchange.tools.update.Tools;
  */
 public class DropVersionTableTask extends UpdateTaskAdapter {
 
-    private final String TABLE = "version";
+    /**
+     * Initializes a new {@link DropVersionTableTask}.
+     */
+    public DropVersionTableTask() {
+        super();
+    }
 
     @Override
     public void perform(PerformParameters params) throws OXException {
         Connection con = params.getConnection();
         try {
+            String TABLE = "version";
             if (Tools.tableExists(con, TABLE)) {
                 Tools.dropTable(con, TABLE);
             }

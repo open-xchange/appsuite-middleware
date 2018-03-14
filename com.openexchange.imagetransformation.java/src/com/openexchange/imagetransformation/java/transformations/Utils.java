@@ -156,17 +156,38 @@ public class Utils {
                 readerSpi = READER_SPI_BY_FORMAT_NAME.get(Strings.toLowerCase(Utility.getImageFormat(contentType)));
             }
             if (null != readerSpi) {
+                inputStream.mark();
+                boolean reset = true;
                 try {
-                    inputStream.mark();
                     if (readerSpi.canDecodeInput(inputStream)) {
                         ImageReader reader = readerSpi.createReaderInstance();
-                        LOG.trace("Using {} for indicated format \"{}\".", reader.getClass().getName(), contentType);
-                        return reader;
+                        try {
+                            LOG.trace("Using {} for indicated format \"{}\".", reader.getClass().getName(), contentType);
+
+                            // Try to reset the stream
+                            inputStream.reset();
+                            reset = false;
+
+                            // Return obtained ImageReader instance
+                            ImageReader retval = reader;
+                            reader = null;
+                            return retval;
+                        } finally {
+                            if (null != reader) {
+                                try {
+                                    reader.dispose();
+                                } catch (final Exception e) {
+                                    // Ignore
+                                }
+                            }
+                        }
                     }
                 } catch (IOException e) {
                     LOG.debug("Error probing for suitable image reader", e);
                 } finally {
-                    inputStream.reset();
+                    if (reset) {
+                        inputStream.reset();
+                    }
                 }
             }
         }

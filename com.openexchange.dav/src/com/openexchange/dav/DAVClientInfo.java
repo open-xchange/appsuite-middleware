@@ -69,12 +69,17 @@ public class DAVClientInfo implements ClientInfo {
     private final String client;
     private final String clientVersion;
     private final String clientFamily;
+    private final ClientInfoType type;
 
     public DAVClientInfo(String app, String clientFamily) {
         this(app, null, null, null, null, clientFamily);
     }
 
     public DAVClientInfo(String app, String osFamily, String osVersion, String client, String clientVersion, String clientFamily) {
+        this(app, osFamily, osVersion, client, clientVersion, clientFamily, ClientInfoType.DAV);
+    }
+
+    public DAVClientInfo(String app, String osFamily, String osVersion, String client, String clientVersion, String clientFamily, ClientInfoType type) {
         super();
         this.app = app;
         this.osFamily = osFamily;
@@ -82,11 +87,12 @@ public class DAVClientInfo implements ClientInfo {
         this.client = client;
         this.clientVersion = clientVersion;
         this.clientFamily = clientFamily;
+        this.type = type;
     }
 
     @Override
     public ClientInfoType getType() {
-        return ClientInfoType.DAV;
+        return type;
     }
 
     @Override
