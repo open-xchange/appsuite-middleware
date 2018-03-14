@@ -50,34 +50,54 @@
 package com.openexchange.oauth;
 
 import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
- * {@link OAuthStorage}
+ * {@link OAuthAccountStorage}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface OAuthStorage {
+public interface OAuthAccountStorage {
 
-    int createAccount(Session session, OAuthAccount account) throws OXException;
+    /**
+     * Stores the specified {@link OAuthAccount} in the storage
+     * 
+     * @param session The {@link Session}
+     * @param account The {@link OAuthAccount} to store
+     * @return The identifier of the stored account
+     * @throws OXException if the account cannot be stored
+     */
+    int storeAccount(Session session, OAuthAccount account) throws OXException;
 
     OAuthAccount getAccount(Session session, int accountId) throws OXException;
 
-    void deleteAccount(Session session, int accountId) throws OXException;
+    void deleteAccount(int userId, int contextId, int accountId) throws OXException;
 
     void updateAccount(Session session, OAuthAccount account) throws OXException;
 
-    void cleanUpEncryptedItems(Session session, String secret) throws OXException;
+    void updateAccount(int userId, int contextId, int accountId, Map<String, Object> arguments) throws OXException;
 
-    void removeUnrecoverableItems(Session session, String secret) throws OXException;
+    OAuthAccount findByUserIdentity(Session session, String userIdentity, String serviceId) throws OXException;
 
-    boolean hasEncryptedItems(Session session) throws OXException;
-
-    void migrate(Session session, String oldSecret, String newSecret) throws OXException;
-
+    /**
+     * Gets all accounts belonging to specified user.
+     * 
+     * @param session The {@link Session}
+     * @return A {@link List} with all {@link OAuthAccount}s, or an empty {@link List}
+     * @throws OXException if the {@link OAuthAccount}s cannot be returned
+     */
     List<OAuthAccount> getAccounts(Session session) throws OXException;
 
+    /**
+     * Gets all accounts belonging to specified user with given service identifier.
+     * 
+     * @param session The {@link Session}
+     * @param serviceMetaData The identifier of service meta data
+     * @return A {@link List} with all {@link OAuthAccount}s, or an empty {@link List}
+     * @throws OXException if the {@link OAuthAccount}s cannot be returned
+     */
     List<OAuthAccount> getAccounts(Session session, String serviceMetaData) throws OXException;
 
 }

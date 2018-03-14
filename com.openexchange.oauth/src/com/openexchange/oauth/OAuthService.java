@@ -227,5 +227,4 @@ public interface OAuthService {
      * @throws OXException if no account for the API can be found.
      */
     OAuthAccount getDefaultAccount(API api, Session session) throws OXException;
-
 }
