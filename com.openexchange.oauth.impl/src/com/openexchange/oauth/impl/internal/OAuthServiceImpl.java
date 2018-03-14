@@ -275,7 +275,7 @@ public class OAuthServiceImpl implements OAuthService {
      */
     @Override
     public OAuthAccount createAccount(final String serviceMetaData, final Map<String, Object> arguments, final int user, final int contextId, Set<OAuthScope> scopes) throws OXException {
-        isNull(arguments, OAuthConstants.ARGUMENT_DISPLAY_NAME, OAuthConstants.ARGUMENT_SESSION);
+        isNull(arguments, OAuthConstants.ARGUMENT_DISPLAY_NAME, OAuthConstants.ARGUMENT_SESSION, OAuthConstants.ARGUMENT_TOKEN, OAuthConstants.ARGUMENT_SECRET);
         // Create appropriate OAuth account instance
         DefaultOAuthAccount account = new DefaultOAuthAccount();
         // Determine associated service's meta data
@@ -290,8 +290,7 @@ public class OAuthServiceImpl implements OAuthService {
         account.setEnabledScopes(scopes);
         // Store the account
         Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
-        int accountId = oauthAccountStorage.storeAccount(session, account);
-        account.setId(accountId);
+        oauthAccountStorage.storeAccount(session, account);
         return account;
     }
 
@@ -327,13 +326,12 @@ public class OAuthServiceImpl implements OAuthService {
         // Search in db for an account matching that id
         DefaultOAuthAccount existingAccount = (DefaultOAuthAccount) oauthAccountStorage.findByUserIdentity(session, userIdentity, serviceMetaData);
         if (existingAccount == null) {
-            isNull(arguments, OAuthConstants.ARGUMENT_DISPLAY_NAME, OAuthConstants.ARGUMENT_TOKEN, OAuthConstants.ARGUMENT_SECRET);
+            isNull(arguments, OAuthConstants.ARGUMENT_DISPLAY_NAME);
             // if nothing found then add the account
             String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
             account.setDisplayName(displayName);
             account.setEnabledScopes(scopes);
-            int accountId = oauthAccountStorage.storeAccount(session, account);
-            account.setId(accountId);
+            oauthAccountStorage.storeAccount(session, account);
             return account;
         } else {
             // if found then update that account
@@ -351,7 +349,7 @@ public class OAuthServiceImpl implements OAuthService {
      */
     @Override
     public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId, Set<OAuthScope> scopes) throws OXException {
-        isNull(arguments, OAuthConstants.ARGUMENT_DISPLAY_NAME, OAuthConstants.ARGUMENT_SESSION, OAuthConstants.ARGUMENT_TOKEN, OAuthConstants.ARGUMENT_SECRET);
+        isNull(arguments, OAuthConstants.ARGUMENT_DISPLAY_NAME, OAuthConstants.ARGUMENT_SESSION);
         try {
             // Create appropriate OAuth account instance
             DefaultOAuthAccount account = new DefaultOAuthAccount();
@@ -371,12 +369,14 @@ public class OAuthServiceImpl implements OAuthService {
             account.setUserIdentity(userIdentity);
             DefaultOAuthAccount existingAccount = (DefaultOAuthAccount) oauthAccountStorage.findByUserIdentity(session, userIdentity, serviceMetaData);
             if (existingAccount == null) {
-                // TODO: go ahead and create
+                // Go ahead and create
+                oauthAccountStorage.storeAccount(session, account);
             } else {
-                // TODO: update and return already existing one 
+                existingAccount.setEnabledScopes(scopes);
+                existingAccount.setToken(account.getToken());
+                existingAccount.setSecret(account.getSecret());
+                oauthAccountStorage.updateAccount(session, existingAccount);
             }
-            int accountId = oauthAccountStorage.storeAccount(session, account);
-            account.setId(accountId);
             return account;
         } catch (final OXException x) {
             if (ExceptionUtils.isEitherOf(x, SSLHandshakeException.class)) {
