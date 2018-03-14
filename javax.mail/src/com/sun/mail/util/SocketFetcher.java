@@ -352,6 +352,7 @@ public class SocketFetcher {
 		", socket factory " + sf + ", useSSL " + useSSL);
     }
 
+	try {
     String proxyHost = props.getProperty(prefix + ".proxy.host", null);
 	int proxyPort = 80;
 	String socksHost = null;
@@ -444,9 +445,6 @@ public class SocketFetcher {
 	 * If we want an SSL connection and we didn't get an SSLSocket,
 	 * wrap our plain Socket with an SSLSocket.
 	 */
-	boolean error = true;
-	Socket closeMeOnError = socket;
-	try {
 	if ((useSSL || sf instanceof SSLSocketFactory) &&
 		!(socket instanceof SSLSocket)) {
 	    String trusted;
@@ -484,11 +482,11 @@ public class SocketFetcher {
 	/*
 	 * Apparently, everything went fine
 	 */
-	error = false;
-	return socket;
+	Socket returnMe = socket;
+	socket = null;
+    return returnMe;
 	} finally {
-	    if (error) {
-	        closeMeOnError.close();
+	    if (null != socket) {
             socket.close();
         }
 	}
