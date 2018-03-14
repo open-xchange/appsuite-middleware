@@ -133,10 +133,6 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
             }
             patterns = patterns.subList(0, 5);
         }
-        String preparedQuery = StringCollection.prepareForSearch(query, false, true, true);
-        if (false == patterns.contains(preparedQuery)) {
-            patterns.add(preparedQuery);
-        }
         appendAutocomplete(patterns, parameters, folderIDs, contextID, fields);
     }
 
