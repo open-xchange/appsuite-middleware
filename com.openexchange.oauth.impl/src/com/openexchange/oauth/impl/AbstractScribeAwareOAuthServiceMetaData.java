@@ -206,7 +206,7 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
      * @return The compiled {@link Pattern}
      */
     private Pattern compileIdentityPattern(String fieldName) {
-        return Pattern.compile("\"" + fieldName + " \":\\s*\"(\\S*?)\"");
+        return Pattern.compile("\"" + fieldName + "\":\\s*\"(\\S*?)\"");
     }
 
     /**
