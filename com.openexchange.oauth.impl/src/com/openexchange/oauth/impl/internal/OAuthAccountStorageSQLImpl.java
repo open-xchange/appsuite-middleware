@@ -416,6 +416,38 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
     /*
      * (non-Javadoc)
      * 
+     * @see com.openexchange.oauth.OAuthAccountStorage#hasUserIdentity(com.openexchange.session.Session, int, java.lang.String)
+     */
+    @Override
+    public boolean hasUserIdentity(Session session, int accountId, String serviceId) throws OXException {
+        int contextId = session.getContextId();
+        int userId = session.getUserId();
+        final Context context = getContext(contextId);
+        Connection connection = getConnection(true, context);
+
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.prepareStatement("SELECT identity FROM oauthAccounts WHERE cid = ? AND user = ? AND serviceId = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setString(3, serviceId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return false;
+            }
+            return Strings.isEmpty(rs.getString(1));
+        } catch (final SQLException e) {
+            throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+            provider.releaseReadConnection(context, connection);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.oauth.OAuthStorage#getAccounts(com.openexchange.session.Session)
      */
     @Override

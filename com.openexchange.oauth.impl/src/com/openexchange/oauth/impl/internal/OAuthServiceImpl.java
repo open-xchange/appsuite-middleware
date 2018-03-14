@@ -478,7 +478,7 @@ public class OAuthServiceImpl implements OAuthService {
         Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
         account.setEnabledScopes(scopes);
         // Lazy identity update
-        if (!containsUserIdentity(accountId, user, contextId, serviceMetaData)) {
+        if (!oauthAccountStorage.hasUserIdentity(session, accountId, serviceMetaData)) {
             // Set the user identity
             account.setUserIdentity(service.getUserIdentity(session, account.getToken(), account.getSecret()));
         }

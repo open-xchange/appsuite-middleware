@@ -80,6 +80,8 @@ public interface OAuthAccountStorage {
     void updateAccount(int userId, int contextId, int accountId, Map<String, Object> arguments) throws OXException;
 
     OAuthAccount findByUserIdentity(Session session, String userIdentity, String serviceId) throws OXException;
+    
+    boolean hasUserIdentity(Session session, int accountId, String serviceId) throws OXException;
 
     /**
      * Gets all accounts belonging to specified user.
