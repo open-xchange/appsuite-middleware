@@ -147,7 +147,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         INSERT insert = SQLStructure.insertAccount(account, contextId, user, values);
         // Execute INSERT command
         executeUpdate(contextId, insert, values);
-        LOG.info("Created new {} account with ID {} for user {} in context {}", account.getMetaData().getDisplayName(), account.getId(), user, contextId); //TODO: id or displayName?
+        LOG.info("Created new {} account with ID {} for user {} in context {}", account.getMetaData().getDisplayName(), account.getId(), user, contextId);
         return account.getId();
     }
 
@@ -292,7 +292,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
              * Re-authorise
              */
             OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
-            OAuthAccessRegistry oAuthAccessRegistry = registryService.get(account.getMetaData().getDisplayName()); //TODO: id or displayName?
+            OAuthAccessRegistry oAuthAccessRegistry = registryService.get(account.getMetaData().getId());
             // No need to re-authorise if access not present
             OAuthAccess access = oAuthAccessRegistry.get(contextId, userId, account.getId());
             if (access != null) {
@@ -380,7 +380,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             stmt.setString(4, userIdentity);
             rs = stmt.executeQuery();
             if (!rs.next()) {
-                return null; //TODO: throw exception
+                return null;
             }
 
             int accountId = rs.getInt(1);

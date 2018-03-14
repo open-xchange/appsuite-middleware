@@ -123,9 +123,11 @@ public class OAuthServiceImpl implements OAuthService {
     private final CallbackRegistryImpl callbackRegistry;
 
     /**
-     * Initializes a new {@link OAuthServiceImpl}.
+     * Initialises a new {@link OAuthServiceImpl}.
      * 
-     * @param oauthAccountStorage TODO
+     * @param registry the {@link OAuthServiceMetaDataRegistry}
+     * @param oauthAccountStorage The {@link OAuthAccountStorage}
+     * @param cbRegistry The {@link CallbackRegistryImpl}
      */
     public OAuthServiceImpl(OAuthServiceMetaDataRegistry registry, OAuthAccountStorage oauthAccountStorage, CallbackRegistryImpl cbRegistry) {
         super();
@@ -202,7 +204,7 @@ public class OAuthServiceImpl implements OAuthService {
                     // Not yet deferred, but wants to
                 }
             }
-            // Get token & authorization URL
+            // Get token & authorisation URL
             boolean tokenRegistered = false;
             Token scribeToken;
             StringBuilder authorizationURL;
@@ -240,7 +242,7 @@ public class OAuthServiceImpl implements OAuthService {
                 authorizationURL = new StringBuilder(service.getAuthorizationUrl(scribeToken));
             }
 
-            // Process authorization URL
+            // Process authorisation URL
             final String authURL = metaData.processAuthorizationURLCallbackAware(metaData.processAuthorizationURL(authorizationURL.toString(), session), cbUrl);
             // Register deferrer
             if (!tokenRegistered && metaData.registerTokenBasedDeferrer()) {
@@ -326,10 +328,7 @@ public class OAuthServiceImpl implements OAuthService {
         DefaultOAuthAccount existingAccount = (DefaultOAuthAccount) oauthAccountStorage.findByUserIdentity(session, userIdentity, serviceMetaData);
         if (existingAccount == null) {
             isNull(arguments, OAuthConstants.ARGUMENT_DISPLAY_NAME, OAuthConstants.ARGUMENT_TOKEN, OAuthConstants.ARGUMENT_SECRET);
-            //        |--+ if nothing found then add the account
-            /*
-             * Set display name & identifier
-             */
+            // if nothing found then add the account
             String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
             account.setDisplayName(displayName);
             account.setEnabledScopes(scopes);
@@ -337,10 +336,7 @@ public class OAuthServiceImpl implements OAuthService {
             account.setId(accountId);
             return account;
         } else {
-            //        |--+ if found then update that account
-            /*
-             * Crypt tokens
-             */
+            // if found then update that account
             existingAccount.setEnabledScopes(scopes);
             existingAccount.setUserIdentity(userIdentity);
             oauthAccountStorage.updateAccount(session, existingAccount);
