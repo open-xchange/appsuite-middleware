@@ -70,6 +70,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
@@ -225,16 +226,20 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
      * @throws OXException if an error is occurred
      */
     protected FileStorageAccount getAccountAccess(Session session, String accountId) throws OXException {
-        final FileStorageAccount account;
-        {
-            final CompositeFileStorageAccountManagerProvider compositeAccountManager = this.compositeAccountManager;
-            if (null == compositeAccountManager) {
-                account = getAccountManager0().getAccount(accountId, session);
-            } else {
-                account = compositeAccountManager.getAccountManager(accountId, session).getAccount(accountId, session);
+        final CompositeFileStorageAccountManagerProvider compositeAccountManager = this.compositeAccountManager;
+        if (null == compositeAccountManager) {
+            FileStorageAccountManager manager = getAccountManager0();
+            if(null == manager) {
+                throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, serviceId, session.getUserId(), session.getContextId());
             }
+            return manager.getAccount(accountId, session);
+        } else {
+            FileStorageAccountManager manager = compositeAccountManager.getAccountManager(accountId, session);
+            if(null == manager) {
+                throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, serviceId, session.getUserId(), session.getContextId());
+            }
+            return manager.getAccount(accountId, session);
         }
-        return account;
     }
 
     /**

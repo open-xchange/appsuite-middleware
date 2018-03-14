@@ -69,6 +69,7 @@ public class RecurrenceIdIterator extends AbstractRecurrenceIterator<RecurrenceI
     /**
      * Initializes a new {@link RecurrenceIdIterator}.
      *
+     * @param config The recurrence configuration to use
      * @param recurrenceData the recurrence data
      * @param forwardToOccurrence <code>true</code> to fast-forward the iterator to the first occurrence if the recurrence data's start
      *            does not fall into the pattern, <code>false</code> otherwise
@@ -77,8 +78,8 @@ public class RecurrenceIdIterator extends AbstractRecurrenceIterator<RecurrenceI
      * @param startPosition The 1-based position of the occurrence in the recurrence set to start with, or <code>null</code> to start with the first occurrence
      * @param limit The maximum number of calculated instances. Optional, can be null.
      */
-    public RecurrenceIdIterator(RecurrenceData recurrenceData, boolean forwardToOccurrence, Calendar start, Calendar end, Integer startPosition, Integer limit) throws OXException {
-        super(recurrenceData, 0L, forwardToOccurrence, start, end, startPosition, limit);
+    public RecurrenceIdIterator(RecurrenceConfig config, RecurrenceData recurrenceData, boolean forwardToOccurrence, Calendar start, Calendar end, Integer startPosition, Integer limit) throws OXException {
+        super(config, recurrenceData, 0L, forwardToOccurrence, start, end, startPosition, limit);
     }
 
     @Override

@@ -63,10 +63,9 @@ public class DeferredResolution {
 	private static final LinkedList<DeferredResolution> outstanding = new LinkedList<DeferredResolution>();
 	private static final Lock LOCK = new ReentrantLock();
 
-	public static void resolve(JSBundle bundle, DependencyResolver resolver) {
-
+	public static void resolve(DependencyResolver resolver) {
+	    LOCK.lock();
 		try {
-			LOCK.lock();
 			Context cx = Context.enter();
 			Iterator<DeferredResolution> iterator = new LinkedList<DeferredResolution>(outstanding).iterator();
 			while(iterator.hasNext()) {
@@ -76,9 +75,11 @@ public class DeferredResolution {
 				}
 			}
 		} finally {
-			Context.exit();
-			LOCK.unlock();
-
+		    try {
+		        Context.exit();
+		    } finally {
+		        LOCK.unlock();
+		    }
 		}
 	}
 

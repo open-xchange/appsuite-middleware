@@ -71,6 +71,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Properties;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -628,11 +629,11 @@ public class Datamining {
         // we want to keep the order of ranges
         final LinkedHashMap<Integer, Integer> rm = new LinkedHashMap<>(ranges.length);
         for(int r : ranges) {
-            rm.put(r, 0);
+            rm.put(Integer.valueOf(r), Integer.valueOf(0));
         }
-        rm.put(Integer.MAX_VALUE, 0);
+        rm.put(Integer.valueOf(Integer.MAX_VALUE), Integer.valueOf(0));
         for (Schema schema : allSchemata) {
-            String url = schema.getUrl().substring(0, schema.getUrl().lastIndexOf("/")) + "/" + schema.getSchemaname();
+            String url = schema.getUrl().substring(0, schema.getUrl().lastIndexOf("/")) + '/' + schema.getSchemaname();
             MySQLConnection conn = Datamining.getDBConnection(url, schema.getLogin(), schema.getPassword());
             if (conn != null) {
                 java.sql.PreparedStatement prep = null;
@@ -650,11 +651,12 @@ public class Datamining {
                             if( null != sp ) {
                                 int spsize = sp.toString().getBytes().length;
                                 int ll = 0;
-                                for(Integer rtb : rm.keySet()) {
-                                    if( spsize > ll && spsize <= rtb ) {
-                                        rm.put(rtb, (rm.get(rtb))+1);
+                                for (Map.Entry<Integer, Integer> entry : rm.entrySet()) {
+                                    Integer rtb = entry.getKey();
+                                    if (spsize > ll && spsize <= rtb.intValue()) {
+                                        rm.put(rtb, Integer.valueOf(entry.getValue().intValue() + 1));
                                     }
-                                    ll = rtb;
+                                    ll = rtb.intValue();
                                 }
                             }
                         }

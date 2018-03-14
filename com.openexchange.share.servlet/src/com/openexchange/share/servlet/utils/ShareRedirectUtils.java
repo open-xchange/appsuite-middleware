@@ -151,8 +151,17 @@ public class ShareRedirectUtils {
      */
     public static String getLoginLink() {
         ConfigurationService configService = ShareServiceLookup.getService(ConfigurationService.class);
-        String loginLink = configService.getProperty("com.openexchange.share.loginLink", "/[uiwebpath]/ui");
-        String uiWebPath = configService.getProperty("com.openexchange.UIWebPath", "/appsuite/");
+
+        String loginLink = null;
+        String uiWebPath = null;
+        if(configService == null) {
+            // If configService is not available fall back to defaults
+            loginLink = "/[uiwebpath]/ui";
+            uiWebPath = "/appsuite/";
+        } else {
+            loginLink = configService.getProperty("com.openexchange.share.loginLink", "/[uiwebpath]/ui");
+            uiWebPath = configService.getProperty("com.openexchange.UIWebPath", "/appsuite/");
+        }
         return P_UIWEBPATH.matcher(loginLink).replaceAll(Matcher.quoteReplacement(trimSlashes(uiWebPath)));
     }
 

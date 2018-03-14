@@ -104,6 +104,7 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.java.Streams;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
@@ -777,41 +778,40 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
 
     @Override
     public IDTuple copy(final IDTuple source, String version, final String destFolder, final File update, final InputStream newFile, final List<File.Field> modifiedFields) throws OXException {
-        final File orig = getFileMetadata(source.getFolder(), source.getId(), version);
         InputStream in = newFile;
-        if (in == null && orig.getFileName() != null) {
-            in = getDocument(source.getFolder(), source.getId(), version);
-        }
-        if (update != null) {
-            orig.copyFrom(update, modifiedFields.toArray(new File.Field[modifiedFields.size()]));
-            /*
-             * remove creation date of original file so that the current time will be assigned during creation
-             */
-            if (false == modifiedFields.contains(File.Field.CREATED)) {
-                orig.setCreated(null);
+        try {
+            final File orig = getFileMetadata(source.getFolder(), source.getId(), version);
+            if (in == null && orig.getFileName() != null) {
+                in = getDocument(source.getFolder(), source.getId(), version);
             }
+            if (update != null) {
+                orig.copyFrom(update, modifiedFields.toArray(new File.Field[modifiedFields.size()]));
+                /*
+                 * remove creation date of original file so that the current time will be assigned during creation
+                 */
+                if (false == modifiedFields.contains(File.Field.CREATED)) {
+                    orig.setCreated(null);
+                }
+            }
+            orig.setId(NEW);
+            orig.setFolderId(destFolder);
+            orig.setObjectPermissions(null);
+            checkUrl(orig);
+            InfostoreFacade infostoreFacade = getInfostore(destFolder);
+            FileMetadata document = new FileMetadata(orig);
+            String trashFolderId = getTrashFolderID();
+            if (isBelowTrashFolder(destFolder, trashFolderId)) {
+                document.setOriginFolderPath(generateOriginPathIfTrashed(source.getFolder(), trashFolderId, null));
+            }
+            if (in == null) {
+                infostoreFacade.saveDocumentMetadata(document, UNDEFINED_SEQUENCE_NUMBER, session);
+            } else {
+                infostoreFacade.saveDocument(document, in, UNDEFINED_SEQUENCE_NUMBER, session);
+            }
+            return new IDTuple(destFolder, orig.getId());
+        } finally {
+            Streams.close(in);
         }
-        orig.setId(NEW);
-        orig.setFolderId(destFolder);
-        orig.setObjectPermissions(null);
-
-        checkUrl(orig);
-        InfostoreFacade infostoreFacade = getInfostore(destFolder);
-
-        FileMetadata document = new FileMetadata(orig);
-
-        String trashFolderId = getTrashFolderID();
-        if (isBelowTrashFolder(destFolder, trashFolderId)) {
-            document.setOriginFolderPath(generateOriginPathIfTrashed(source.getFolder(), trashFolderId, null));
-        }
-
-        if (in == null) {
-            infostoreFacade.saveDocumentMetadata(document, UNDEFINED_SEQUENCE_NUMBER, session);
-        } else {
-            infostoreFacade.saveDocument(document, in, UNDEFINED_SEQUENCE_NUMBER, session);
-        }
-
-        return new IDTuple(destFolder, orig.getId());
     }
 
     @Override

@@ -100,7 +100,7 @@ public class RdbCalendarStorageFactory implements CalendarStorageFactory {
              * choose target storage for default account based update status and configuration overrides
              */
             ConfigurationService configService = requireService(ConfigurationService.class, services);
-            if (configService.getBoolProperty("com.openexchange.chronos.useLegacyStorage", false)) {
+            if (configService.getBoolProperty("com.openexchange.calendar.useLegacyStorage", false)) {
                 LOG.debug("Using 'legacy' calendar storage for default account '0' (overridden via configuration).");
                 return new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorage(context, entityResolver, dbProvider, txPolicy);
             }
@@ -109,7 +109,7 @@ public class RdbCalendarStorageFactory implements CalendarStorageFactory {
                 LOG.debug("ChronosStorageMigrationTask not executed successfully, falling back to 'legacy' calendar storage for account '0'.");
                 return new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorage(context, entityResolver, dbProvider, txPolicy);
             }
-            if (configService.getBoolProperty("com.openexchange.chronos.replayToLegacyStorage", true)) {
+            if (configService.getBoolProperty("com.openexchange.calendar.replayToLegacyStorage", true)) {
                 LOG.debug("Using 'replaying' calendar storage for default account '0'.");
                 CalendarStorage legacyStorage = new com.openexchange.chronos.storage.rdb.legacy.RdbCalendarStorage(context, entityResolver, dbProvider, txPolicy);
                 CalendarStorage storage = new com.openexchange.chronos.storage.rdb.RdbCalendarStorage(context, accountId, entityResolver, dbProvider, txPolicy);

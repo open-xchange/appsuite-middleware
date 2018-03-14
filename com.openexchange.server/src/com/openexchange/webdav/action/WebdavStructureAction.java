@@ -76,7 +76,7 @@ public abstract class WebdavStructureAction extends AbstractAction {
 
 			final WebdavResource dest = req.getDestination();
 
-			if(!dest.exists()) {
+			if(dest==null || !dest.exists()) {
 				return;
 			}
 

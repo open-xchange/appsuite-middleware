@@ -111,13 +111,13 @@ public class SelfProtectionFactory {
             }
 
             Property prop = DefaultProperty.valueOf(PROPERTY_EVENT_LIMIT, 1000);
-            eventLimit = leanConfigurationService.getIntProperty(session.getUserId(), session.getContextId(), prop);
+            eventLimit = leanConfigurationService.getIntProperty(prop);
 
             prop = DefaultProperty.valueOf(PROPERTY_ATTENDEE_LIMIT, 1000);
-            attendeeLimit = leanConfigurationService.getIntProperty(session.getUserId(), session.getContextId(), prop);
+            attendeeLimit = leanConfigurationService.getIntProperty(prop);
 
             prop = DefaultProperty.valueOf(PROPERTY_ALARM_LIMIT, 100);
-            alarmLimit = leanConfigurationService.getIntProperty(session.getUserId(), session.getContextId(), prop);
+            alarmLimit = leanConfigurationService.getIntProperty(prop);
         }
 
         /**

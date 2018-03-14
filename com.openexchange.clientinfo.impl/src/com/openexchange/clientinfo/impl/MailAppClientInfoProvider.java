@@ -98,9 +98,9 @@ public class MailAppClientInfoProvider implements ClientInfoProvider {
             }
         }
         if (clientId.startsWith("open-xchange-mobile-api-facade")) {
-            return new MailAppClientInfo("OX Mail App (new)", null, platform, platformVersion);
+            return new MailAppClientInfo("OX Mail App", null, platform, platformVersion);
         } else if (clientId.equals("open-xchange-mailapp")) {
-            return new MailAppClientInfo("OX Mail App (old)", null, platform, platformVersion);
+            return new MailAppClientInfo("OX Mail App", null, platform, platformVersion);
         }
         return null;
     }
@@ -112,9 +112,9 @@ public class MailAppClientInfoProvider implements ClientInfoProvider {
         }
 
         if (clientId.startsWith("open-xchange-mobile-api-facade")) {
-            return new MailAppClientInfo("OX Mail App (new)");
+            return new MailAppClientInfo("OX Mail App");
         } else if (clientId.equals("open-xchange-mailapp")) {
-            return new MailAppClientInfo("OX Mail App (old)");
+            return new MailAppClientInfo("OX Mail App");
         }
         return null;
     }

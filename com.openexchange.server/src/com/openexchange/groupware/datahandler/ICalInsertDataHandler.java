@@ -102,7 +102,7 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
 
     /**
      * Initializes a new {@link ICalInsertDataHandler}
-     * 
+     *
      * @param services The {@link ServiceLookup}
      */
     public ICalInsertDataHandler(ServiceLookup services) {
@@ -116,6 +116,10 @@ public final class ICalInsertDataHandler extends ICalDataHandler {
 
     @Override
     public ConversionResult processData(final Data<? extends Object> data, final DataArguments dataArguments, final Session session) throws OXException {
+        if (null == session) {
+            throw DataExceptionCodes.MISSING_ARGUMENT.create("session");
+        }
+
         int calendarFolder = 0;
         if (hasValue(dataArguments, ARGS[0])) {
             try {

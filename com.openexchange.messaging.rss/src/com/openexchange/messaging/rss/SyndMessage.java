@@ -227,7 +227,7 @@ public class SyndMessage implements MessagingMessage {
 
     @Override
     public Collection<String> getUserFlags() throws OXException {
-        final List categories = entry.getCategories();
+        final List<?> categories = entry.getCategories();
         if(categories == null) {
             return null;
         }

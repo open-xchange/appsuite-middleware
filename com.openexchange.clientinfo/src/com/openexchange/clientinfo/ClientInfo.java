@@ -99,4 +99,10 @@ public interface ClientInfo {
      */
     String getClientVersion();
 
+    /**
+     * Gets client family
+     * @return The client family
+     */
+    String getClientFamily();
+
 }

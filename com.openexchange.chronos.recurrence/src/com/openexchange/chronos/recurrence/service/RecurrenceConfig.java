@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,82 +47,54 @@
  *
  */
 
-package com.openexchange.ajax.sessionmanagement.actions;
+package com.openexchange.chronos.recurrence.service;
 
-import java.io.IOException;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.Header;
-import com.openexchange.ajax.framework.Params;
-import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
 
 /**
- * {@link ClearRequest}
+ * {@link RecurrenceConfig}
  *
- * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ClearRequest implements AJAXRequest<ClearResponse> {
+public class RecurrenceConfig implements Reloadable {
 
-    private boolean failOnError;
+    private volatile int calculationLimit;
 
-    public ClearRequest() {
-        this(true);
-    }
-
-    public ClearRequest(boolean failOnError) {
+    /**
+     * Initializes a new {@link RecurrenceConfig}.
+     *
+     * @param configService A reference to the configuration service for initialization
+     */
+    public RecurrenceConfig(ConfigurationService configService) {
         super();
-        this.failOnError = failOnError;
+        calculationLimit = readCalculationLimit(configService);
+    }
+
+    /**
+     * Gets the internal calculation limit, i.e. the maximum number of calculated recurrences.
+     *
+     * @return The calculation limit
+     */
+    public int getCalculationLimit() {
+        return calculationLimit;
     }
 
     @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return Method.PUT;
+    public void reloadConfiguration(ConfigurationService configService) {
+        calculationLimit = readCalculationLimit(configService);
     }
 
     @Override
-    public String getServletPath() {
-        return AbstractSessionManagementTest.SERVLET_PATH;
+    public Interests getInterests() {
+        return DefaultInterests.builder().propertiesOfInterest("com.openexchange.calendar.maxEventResults").build();
     }
 
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        return new Params(AJAXServlet.PARAMETER_ACTION, "clear").toArray();
+    private static int readCalculationLimit(ConfigurationService configService) {
+        return 1 + configService.getIntProperty("com.openexchange.calendar.maxEventResults", 1000);
     }
 
-    @Override
-    public AbstractAJAXParser<? extends ClearResponse> getParser() {
-        return new Parser(failOnError);
-    }
-
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return new JSONObject();
-    }
-
-    @Override
-    public Header[] getHeaders() {
-        return NO_HEADER;
-    }
-
-    public void setFailOnError(boolean failOnError) {
-        this.failOnError = failOnError;
-    }
-
-    private static final class Parser extends AbstractAJAXParser<ClearResponse> {
-
-        protected Parser(boolean failOnError) {
-            super(failOnError);
-        }
-
-        @Override
-        protected ClearResponse createResponse(Response response) throws JSONException {
-            return new ClearResponse(response);
-        }
-
-    }
 }

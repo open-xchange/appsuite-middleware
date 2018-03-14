@@ -651,6 +651,9 @@ public final class HtmlServiceImpl implements HtmlService {
                     // Get HTML content
                     if (options.isReplaceBodyWithDiv()) {
                         html = handler.getHtml();
+                        if (false == startsWith("<!doctype html>", html, true)) {
+                            html = "<!doctype html>\n" + html;
+                        }
                         htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
                         htmlSanitizeResult.setBodyReplacedWithDiv(true);
                     } else {
@@ -677,6 +680,9 @@ public final class HtmlServiceImpl implements HtmlService {
                     // Get HTML content
                     if (options.isReplaceBodyWithDiv()) {
                         html = handler.getHtml();
+                        if (false == startsWith("<!doctype html>", html, true)) {
+                            html = "<!doctype html>\n" + html;
+                        }
                         htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
                         htmlSanitizeResult.setBodyReplacedWithDiv(true);
                     } else {
@@ -2464,6 +2470,30 @@ public final class HtmlServiceImpl implements HtmlService {
         } finally {
             Streams.close(fos);
         }
+    }
+
+    private static boolean startsWith(String prefix, String toCheck, boolean ignoreHeadingWhitespaces) {
+        if (null == toCheck) {
+            return false;
+        }
+
+        int len = toCheck.length();
+        if (len <= 0) {
+            return false;
+        }
+
+        if (!ignoreHeadingWhitespaces) {
+            return toCheck.startsWith(prefix);
+        }
+
+        int i = 0;
+        while (i < len && Strings.isWhitespace(toCheck.charAt(i))) {
+            i++;
+        }
+        if (i >= len) {
+            return false;
+        }
+        return toCheck.startsWith(prefix, i);
     }
 
 }

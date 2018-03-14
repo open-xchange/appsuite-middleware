@@ -95,7 +95,7 @@ public class LookForScriptsListener implements BundleListener {
 			HashMap<String, Object> additionalModules = new HashMap<String, Object>();
 			additionalModules.put("osgi", new OSGiSupport(bundle.getBundleContext(), SHARED_SCOPE));
 
-			RequireSupport.initialize(serviceScope, cx, new BundleJSBundle(bundle), additionalModules);
+			RequireSupport.initialize(serviceScope, new BundleJSBundle(bundle), additionalModules);
 			Console.initialize(serviceScope, bundle.getSymbolicName());
 
 			cx.evaluateReader(serviceScope, r, bundle.getSymbolicName()+"/main.js", 1, null);

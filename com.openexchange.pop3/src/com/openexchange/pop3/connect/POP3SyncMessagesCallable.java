@@ -144,7 +144,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
              * capabilities
              */
             final int min = parseLoginDelaySeconds(capabilities);
-            if (min >= 0 && (min * 1000) > refreshRate) {
+            if (min >= 0 && (min * 1000l) > refreshRate) {
                 LOG.warn("Refresh rate of {}sec is lower than minimum allowed seconds between logins ({}sec)", refreshRate / 1000, min);
             }
         }
@@ -171,7 +171,7 @@ public final class POP3SyncMessagesCallable implements Callable<Object> {
         return null;
     }
 
-    private boolean isConnectable(final long refreshRateMillis, final Long lastAccessed) throws OXException {
+    private boolean isConnectable(final long refreshRateMillis, final Long lastAccessed) {
         return ((null == lastAccessed) || ((System.currentTimeMillis() - lastAccessed.longValue()) >= refreshRateMillis));
     }
 

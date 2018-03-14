@@ -120,13 +120,6 @@ public interface CalendarConfig {
     int getMinimumSearchPatternLength() throws OXException;
 
     /**
-     * Gets the configured limit for the maximum calculated occurrences when expanding event series.
-     *
-     * @return The recurrence calculation limit
-     */
-    int getRecurrenceCalculationLimit();
-
-    /**
      * Gets the configured maximum number of conflicts between two recurring event series.
      *
      * @return The maximum conflicts per recurrence

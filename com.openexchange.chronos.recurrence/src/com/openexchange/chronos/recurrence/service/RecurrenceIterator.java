@@ -57,7 +57,6 @@ import com.openexchange.chronos.EventFlag;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.EventOccurrence;
 import com.openexchange.chronos.compat.PositionAwareRecurrenceId;
-import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.TimeZones;
 
@@ -74,6 +73,7 @@ public class RecurrenceIterator extends AbstractRecurrenceIterator<Event> {
     /**
      * Initializes a new {@link RecurrenceIterator}.
      *
+     * @param config The recurrence configuration to use
      * @param master The master event containing all necessary information like recurrence rule, star and end date, timezones etc.
      * @param forwardToOccurrence <code>true</code> to fast-forward the iterator to the first occurrence if the series master's start
      *            does not fall into the pattern, <code>false</code> otherwise
@@ -82,24 +82,8 @@ public class RecurrenceIterator extends AbstractRecurrenceIterator<Event> {
      * @param limit The maximum number of calculated instances. Optional, can be null.
      * @param ignoreExceptions Determines if exceptions should be ignored. If true, all occurrences are calculated as if no exceptions exist. Note: This does not add change exceptions. See {@link ChangeExceptionAwareRecurrenceIterator}
      */
-    public RecurrenceIterator(Event master, boolean forwardToOccurrence, Calendar start, Calendar end, Integer limit, boolean ignoreExceptions) throws OXException {
-        super(master, forwardToOccurrence, start, end, limit, ignoreExceptions);
-        this.master = master;
-    }
-
-    /**
-     * Initializes a new {@link RecurrenceIterator}.
-     *
-     * @param recurrenceData The recurrence data
-     * @param master The master event containing all necessary information like recurrence rule, star and end date, timezones etc.
-     * @param forwardToOccurrence <code>true</code> to fast-forward the iterator to the first occurrence if the series master's start
-     *            does not fall into the pattern, <code>false</code> otherwise
-     * @param start The left side boundary for the calculation. Optional, can be null.
-     * @param end The right side boundary for the calculation. Optional, can be null.
-     * @param limit The maximum number of calculated instances. Optional, can be null.
-     */
-    public RecurrenceIterator(RecurrenceData recurrenceData, Event master, boolean forwardToOccurrence, Calendar start, Calendar end, Integer limit) throws OXException {
-        super(recurrenceData, getEventDuration(master), forwardToOccurrence, start, end, null, limit);
+    public RecurrenceIterator(RecurrenceConfig config, Event master, boolean forwardToOccurrence, Calendar start, Calendar end, Integer limit, boolean ignoreExceptions) throws OXException {
+        super(config, master, forwardToOccurrence, start, end, limit, ignoreExceptions);
         this.master = master;
     }
 
