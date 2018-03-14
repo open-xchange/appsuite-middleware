@@ -503,6 +503,8 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             //          |--+ Token invalid? throw appropriate exception and indicate that to the client
             //       |--+ No exception but still no user identity? huh?
             // throw Exception
+
+            throw new OXException(31145, "No user identity could be retrieved");
         }
 
         account.setUserIdentity(userIdentity);
@@ -657,6 +659,15 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             }
             account.setSecret(encrypt(account.getSecret(), session));
             account.setEnabledScopes(scopes);
+            // Get the user's identity
+            String userIdentity = service.getUserIdentity(session, account.getToken(), account.getSecret());
+            account.setUserIdentity(userIdentity);
+            DefaultOAuthAccount existingAccount = (DefaultOAuthAccount) findByUserIdentity(userIdentity, user, contextId, serviceMetaData);
+            if (existingAccount == null) {
+                // TODO: go ahead and create
+            } else {
+                // TODO: update and return already existing one 
+            }
             /*
              * Create INSERT command
              */
@@ -861,14 +872,33 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
      * @throws OXException
      */
     private OAuthAccount findByUserIdentity(String userIdentity, int userId, int contextId, String serviceId) throws OXException {
+        return findByUserIdentity(userIdentity, userId, contextId, serviceId, null);
+    }
+
+    /**
+     * 
+     * @param userIdentity
+     * @param userId
+     * @param contextId
+     * @param serviceId
+     * @param connection
+     * @return
+     * @throws OXException
+     */
+    private OAuthAccount findByUserIdentity(String userIdentity, int userId, int contextId, String serviceId, Connection connection) throws OXException {
         final SecretEncryptionService<PWUpdate> encryptionService = Services.getService(SecretEncryptionFactoryService.class).createService(this);
         final OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
         final Context context = getContext(contextId);
-        final Connection con = getConnection(true, context);
+        boolean closeConnection = false;
+        if (connection == null) {
+            connection = getConnection(true, context);
+            closeConnection = true;
+        }
+
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT id, displayName, accessToken, accessSecret, serviceId, scope, identity FROM oauthAccounts WHERE cid = ? AND user = ? AND serviceId = ? AND identity = ?");
+            stmt = connection.prepareStatement("SELECT id, displayName, accessToken, accessSecret, serviceId, scope, identity FROM oauthAccounts WHERE cid = ? AND user = ? AND serviceId = ? AND identity = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setString(3, serviceId);
@@ -905,7 +935,9 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
-            provider.releaseReadConnection(context, con);
+            if (closeConnection) {
+                provider.releaseReadConnection(context, connection);
+            }
         }
     }
 
@@ -1007,8 +1039,6 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             if (null == session) {
                 throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_SESSION);
             }
-            // Set the user identity
-            account.setUserIdentity(service.getUserIdentity(session, account.getToken(), account.getSecret()));
             account.setToken(encrypt(account.getToken(), session));
             account.setSecret(encrypt(account.getSecret(), session));
             account.setEnabledScopes(scopes);
@@ -1026,6 +1056,11 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             try {
                 Databases.startTransaction(writeCon);
                 rollback = true;
+                // Lazy identity update
+                if (!containsUserIdentity(accountId, user, contextId, serviceMetaData, writeCon)) {
+                    // Set the user identity
+                    account.setUserIdentity(service.getUserIdentity(session, account.getToken(), account.getSecret()));
+                }
                 /*
                  * Execute UPDATE command
                  */
@@ -1076,6 +1111,18 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     }
 
     // OAuth
+
+    /**
+     * @param accountId
+     * @param user
+     * @param contextId
+     * @param serviceMetaData
+     * @param writeCon
+     */
+    private boolean containsUserIdentity(int accountId, int user, int contextId, String serviceMetaData, Connection writeCon) {
+        return false;
+
+    }
 
     protected void obtainToken(final OAuthInteractionType type, final Map<String, Object> arguments, final DefaultOAuthAccount account, Set<OAuthScope> scopes) throws OXException {
         switch (type) {
@@ -1249,6 +1296,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 }
             });
         }
+
         /*
          * Scopes
          */
