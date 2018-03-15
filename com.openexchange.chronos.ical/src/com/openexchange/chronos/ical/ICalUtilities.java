@@ -65,6 +65,16 @@ import com.openexchange.exception.OXException;
 public interface ICalUtilities {
 
     /**
+     * Reads out the value of the first property with a specific name found in the supplied input stream.
+     *
+     * @param inputStream The input stream to read the property from
+     * @param propertyName The name of the property
+     * @param parameters Further iCal parameters, or <code>null</code> to stick with the defaults
+     * @return The value, or <code>null</code> if not found
+     */
+    String parsePropertyValue(InputStream inputStream, String propertyName, ICalParameters parameters) throws OXException;
+
+    /**
      * Imports one or more alarm components from the supplied input stream.
      * <p/>
      * Note that the data is expected to just contain <code>VALARM</code> components (<code>BEGIN:VALARM...END:VALARM</code>), i.e. syntactically the <i>alarmc</i> elements as

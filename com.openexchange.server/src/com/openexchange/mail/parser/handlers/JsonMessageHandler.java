@@ -76,7 +76,7 @@ import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.tools.JSONCoercion;
-import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -1688,10 +1688,10 @@ public final class JsonMessageHandler implements MailMessageHandler {
             /*
              * Check ICal part for a valid METHOD and its presence in Content-Type header
              */
-            final ICalParser iCalParser = ServerServiceRegistry.getInstance().getService(ICalParser.class);
-            if (iCalParser != null) {
+            final ICalService iCalService = ServerServiceRegistry.getInstance().getService(ICalService.class);
+            if (iCalService != null) {
                 try {
-                    final String method = iCalParser.parseProperty("METHOD", part.getInputStream());
+                    final String method = iCalService.getUtilities().parsePropertyValue(part.getInputStream(), "METHOD", null);
                     if (null != method) {
                         /*
                          * Assume an iTIP response or request

@@ -82,7 +82,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import com.google.common.collect.ImmutableSet;
-import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
@@ -315,10 +315,10 @@ public final class MIMEStructureHandler implements StructureHandler {
             /*
              * Check ICal part for a valid METHOD and its presence in Content-Type header
              */
-            final ICalParser iCalParser = ServerServiceRegistry.getInstance().getService(ICalParser.class);
-            if (iCalParser != null) {
+            final ICalService iCalService = ServerServiceRegistry.getInstance().getService(ICalService.class);
+            if (iCalService != null) {
                 try {
-                    final String method = iCalParser.parseProperty("METHOD", part.getInputStream());
+                    final String method = iCalService.getUtilities().parsePropertyValue(part.getInputStream(), "METHOD", null);
                     if (null != method) {
                         /*
                          * Assume an iTIP response or request
