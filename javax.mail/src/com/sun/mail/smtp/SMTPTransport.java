@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -209,19 +209,22 @@ public class SMTPTransport extends Transport {
     protected SMTPTransport(Session session, URLName urlname,
 				String name, boolean isSSL) {
 	super(session, urlname);
-	logger = new MailLogger(this.getClass(), "DEBUG SMTP", session);
-	traceLogger = logger.getSubLogger("protocol", null);
-	noauthdebug = !PropUtil.getBooleanSessionProperty(session,
-			    "mail.debug.auth", false);
-	debugusername = PropUtil.getBooleanSessionProperty(session,
-			"mail.debug.auth.username", true);
-	debugpassword = PropUtil.getBooleanSessionProperty(session,
-			"mail.debug.auth.password", false);
+	Properties props = session.getProperties();
+
+    logger = new MailLogger(this.getClass(), "DEBUG SMTP",
+                session.getDebug(), session.getDebugOut());
+    traceLogger = logger.getSubLogger("protocol", null);
+    noauthdebug = !PropUtil.getBooleanProperty(props,
+                "mail.debug.auth", false);
+    debugusername = PropUtil.getBooleanProperty(props,
+            "mail.debug.auth.username", true);
+    debugpassword = PropUtil.getBooleanProperty(props,
+            "mail.debug.auth.password", false);
 	if (urlname != null)
 	    name = urlname.getProtocol();
 	this.name = name;
 	if (!isSSL)
-	    isSSL = PropUtil.getBooleanSessionProperty(session,
+	    isSSL = PropUtil.getBooleanProperty(props,
 				"mail." + name + ".ssl.enable", false);
 	if (isSSL)
 	    this.defaultPort = 465;
@@ -231,46 +234,46 @@ public class SMTPTransport extends Transport {
 
 	// setting mail.smtp.quitwait to false causes us to not wait for the
 	// response from the QUIT command
-	quitWait = PropUtil.getBooleanSessionProperty(session,
+	quitWait = PropUtil.getBooleanProperty(props,
 				"mail." + name + ".quitwait", true);
 
 	// mail.smtp.reportsuccess causes us to throw an exception on success
-	reportSuccess = PropUtil.getBooleanSessionProperty(session,
+	reportSuccess = PropUtil.getBooleanProperty(props,
 				"mail." + name + ".reportsuccess", false);
 
 	// mail.smtp.starttls.enable enables use of STARTTLS command
-	useStartTLS = PropUtil.getBooleanSessionProperty(session,
+	useStartTLS = PropUtil.getBooleanProperty(props,
 				"mail." + name + ".starttls.enable", false);
 
 	// mail.smtp.starttls.required requires use of STARTTLS command
-	requireStartTLS = PropUtil.getBooleanSessionProperty(session,
+	requireStartTLS = PropUtil.getBooleanProperty(props,
 				"mail." + name + ".starttls.required", false);
 
 	// mail.smtp.userset causes us to use RSET instead of NOOP
 	// for isConnected
-	useRset = PropUtil.getBooleanSessionProperty(session,
+	useRset = PropUtil.getBooleanProperty(props,
 				"mail." + name + ".userset", false);
 
 	// mail.smtp.noop.strict requires 250 response to indicate success
-	noopStrict = PropUtil.getBooleanSessionProperty(session,
+	noopStrict = PropUtil.getBooleanProperty(props,
 				"mail." + name + ".noop.strict", true);
 
 	// check if SASL is enabled
-	enableSASL = PropUtil.getBooleanSessionProperty(session,
+	enableSASL = PropUtil.getBooleanProperty(props,
 	    "mail." + name + ".sasl.enable", false);
 	if (enableSASL)
 	    logger.config("enable SASL");
-	useCanonicalHostName = PropUtil.getBooleanSessionProperty(session,
+	useCanonicalHostName = PropUtil.getBooleanProperty(props,
 	    "mail." + name + ".sasl.usecanonicalhostname", false);
 	if (useCanonicalHostName)
 	    logger.config("use canonical host name");
 
-	allowutf8 = PropUtil.getBooleanSessionProperty(session,
+	allowutf8 = PropUtil.getBooleanProperty(props,
 	    "mail.mime.allowutf8", false);
 	if (allowutf8)
 	    logger.config("allow UTF-8");
 
-	chunkSize = PropUtil.getIntSessionProperty(session,
+	chunkSize = PropUtil.getIntProperty(props,
 	    "mail." + name + ".chunksize", -1);
 	if (chunkSize > 0 && logger.isLoggable(Level.CONFIG))
 	    logger.config("chunk size " + chunkSize);
@@ -710,8 +713,10 @@ public class SMTPTransport extends Transport {
     @Override
     protected synchronized boolean protocolConnect(String host, int port,
 			String user, String password) throws MessagingException {
+    Properties props = session.getProperties();
+
 	// setting mail.smtp.auth to true enables attempts to use AUTH
-	boolean useAuth = PropUtil.getBooleanSessionProperty(session,
+	boolean useAuth = PropUtil.getBooleanProperty(props,
 					"mail." + name + ".auth", false);
 
 	/*
@@ -732,7 +737,7 @@ public class SMTPTransport extends Transport {
 	}
 
 	// setting mail.smtp.ehlo to false disables attempts to use EHLO
-	boolean useEhlo =  PropUtil.getBooleanSessionProperty(session,
+	boolean useEhlo =  PropUtil.getBooleanProperty(props,
 					"mail." + name + ".ehlo", true);
 	if (logger.isLoggable(Level.FINE))
 	    logger.fine("useEhlo " + useEhlo + ", useAuth " + useAuth);
@@ -742,7 +747,7 @@ public class SMTPTransport extends Transport {
          * property if it exists, otherwise default to 25.
 	 */
         if (port == -1)
-	    port = PropUtil.getIntSessionProperty(session,
+	    port = PropUtil.getIntProperty(props,
 					"mail." + name + ".port", -1);
         if (port == -1)
 	    port = defaultPort;
@@ -883,8 +888,9 @@ public class SMTPTransport extends Transport {
 	    if (mechs == defaultAuthenticationMechanisms) {
 		String dprop = "mail." + name + ".auth." +
 				    m.toLowerCase(Locale.ENGLISH) + ".disable";
-		boolean disabled = PropUtil.getBooleanSessionProperty(
-						session, dprop, !a.enabled());
+		boolean disabled = PropUtil.getBooleanProperty(
+                            session.getProperties(),
+                            dprop, !a.enabled());
 		if (disabled) {
 		    if (logger.isLoggable(Level.FINE))
 			logger.fine("mechanism " + m +
@@ -1328,7 +1334,7 @@ public class SMTPTransport extends Transport {
 	if (message instanceof SMTPMessage)
 	    use8bit = ((SMTPMessage)message).getAllow8bitMIME();
 	if (!use8bit)
-	    use8bit = PropUtil.getBooleanSessionProperty(session,
+	    use8bit = PropUtil.getBooleanProperty(session.getProperties(),
 				"mail." + name + ".allow8bitmime", false);
 	if (logger.isLoggable(Level.FINE))
 	    logger.fine("use8bit " + use8bit);
@@ -1924,7 +1930,7 @@ public class SMTPTransport extends Transport {
 	if (message instanceof SMTPMessage)
 	    sendPartial = ((SMTPMessage)message).getSendPartial();
 	if (!sendPartial)
-	    sendPartial = PropUtil.getBooleanSessionProperty(session,
+	    sendPartial = PropUtil.getBooleanProperty(session.getProperties(),
 					"mail." + name + ".sendpartial", false);
 	if (sendPartial)
 	    logger.fine("sendPartial set");
@@ -2327,7 +2333,7 @@ public class SMTPTransport extends Transport {
 
 
     private void initStreams() throws IOException {
-	boolean quote = PropUtil.getBooleanSessionProperty(session,
+	boolean quote = PropUtil.getBooleanProperty(session.getProperties(),
 					"mail.debug.quote", false);
 
 	traceInput =

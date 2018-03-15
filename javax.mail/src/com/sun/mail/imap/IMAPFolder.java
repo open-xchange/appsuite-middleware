@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -493,7 +493,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	String fn = fullName;
 	this.separator = separator;
 	logger = new MailLogger(this.getClass(),
-				"DEBUG IMAP", store.getSession());
+				"DEBUG IMAP", store.getSession().getDebug(), store.getSession().getDebugOut());
 	connectionPoolLogger = store.getConnectionPoolLogger();
 	explicitCloseForReusedProtocol = PropUtil.getBooleanSessionProperty(store.getSession(), "mail." + store.name + ".explicitCloseForReusedProtocol", true);
 	issueNoopToKeepConnectionAlive = PropUtil.getBooleanSessionProperty(store.getSession(), "mail." + store.name + ".issueNoopToKeepConnectionAlive", true);
