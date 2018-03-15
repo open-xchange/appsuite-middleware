@@ -630,6 +630,11 @@ public class AlarmUtils extends CalendarUtils {
         if (null != originalAlarms && 1 == originalAlarms.size() && null != updatedAlarms && 1 == updatedAlarms.size()) {
             Alarm originalAlarm = originalAlarms.get(0);
             Alarm updatedAlarm = updatedAlarms.get(0);
+            Set<AlarmField> differentBehavioralFields = AlarmMapper.getInstance().getDifferentFields(
+                originalAlarm, updatedAlarm, true, AlarmField.ID, AlarmField.UID, AlarmField.DESCRIPTION, AlarmField.EXTENDED_PROPERTIES);
+            if (differentBehavioralFields.isEmpty()) {
+                return new DefaultCollectionUpdate<Alarm, AlarmField>(null, null, null);
+            }
             Set<AlarmField> differentFields = AlarmMapper.getInstance().getDifferentFields(
                 originalAlarm, updatedAlarm, true, AlarmField.TRIGGER, AlarmField.UID, AlarmField.DESCRIPTION, AlarmField.EXTENDED_PROPERTIES);
             if (differentFields.isEmpty()) {
