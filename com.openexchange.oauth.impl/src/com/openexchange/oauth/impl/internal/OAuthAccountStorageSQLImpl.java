@@ -275,6 +275,11 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
             final UPDATE update = SQLStructure.updateAccount(account, contextId, userId, values);
             Databases.startTransaction(writeCon);
             rollback = true;
+            String identity = getUserIdentity(session, account.getMetaData().getId(), account.getId(), writeCon);
+            if (Strings.isNotEmpty(identity) && Strings.isNotEmpty(account.getUserIdentity()) && !account.getUserIdentity().equals(identity)) {
+                // The user selected the wrong account
+                throw OAuthExceptionCodes.WRONG_OAUTH_ACCOUNT.create(account.getDisplayName());
+            }
             /*
              * Execute UPDATE command
              */
@@ -420,29 +425,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
      */
     @Override
     public boolean hasUserIdentity(Session session, int accountId, String serviceId) throws OXException {
-        int contextId = session.getContextId();
-        int userId = session.getUserId();
-        final Context context = getContext(contextId);
-        Connection connection = getConnection(true, context);
-
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = connection.prepareStatement("SELECT identity FROM oauthAccounts WHERE cid = ? AND user = ? AND serviceId = ?");
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, userId);
-            stmt.setString(3, serviceId);
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return false;
-            }
-            return Strings.isEmpty(rs.getString(1));
-        } catch (final SQLException e) {
-            throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            closeSQLStuff(rs, stmt);
-            provider.releaseReadConnection(context, connection);
-        }
+        return Strings.isNotEmpty(getUserIdentity(session, serviceId, accountId, null));
     }
 
     /*
@@ -834,6 +817,48 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
     }
 
     ////////////////////////////////////// HELPERS //////////////////////////////////////////
+
+    /**
+     * 
+     * @param session
+     * @param serviceId
+     * @param accountId
+     * @param connection
+     * @return
+     * @throws OXException
+     */
+    private String getUserIdentity(Session session, String serviceId, int accountId, Connection connection) throws OXException {
+        int contextId = session.getContextId();
+        int userId = session.getUserId();
+        final Context context = getContext(contextId);
+        boolean releaseConnection = false;
+        if (connection == null) {
+            connection = getConnection(true, context);
+            releaseConnection = true;
+        }
+
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.prepareStatement("SELECT identity FROM oauthAccounts WHERE cid = ? AND user = ? AND serviceId = ? AND accountId = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setString(3, serviceId);
+            stmt.setInt(4, accountId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return null;
+            }
+            return rs.getString(1);
+        } catch (final SQLException e) {
+            throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+            if (releaseConnection) {
+                provider.releaseReadConnection(context, connection);
+            }
+        }
+    }
 
     /**
      * Retrieves the {@link Context} with the specified identifier from the storage

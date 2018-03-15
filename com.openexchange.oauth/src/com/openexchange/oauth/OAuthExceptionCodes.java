@@ -273,7 +273,12 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * The user identity cannot be fetched from the '%1$s' provider
      */
-    CANNOT_GET_USER_IDENTITY("The user identity cannot be fetched from the '%1$s' provider", CATEGORY_ERROR, 45, null)
+    CANNOT_GET_USER_IDENTITY("The user identity cannot be fetched from the '%1$s' provider", CATEGORY_ERROR, 45, null),
+
+    /**
+     * The wrong account has been selected for '%1$s'
+     */
+    WRONG_OAUTH_ACCOUNT("The wrong account has been selected for '%1$s'", CATEGORY_USER_INPUT, 46, null)
 
     ;
 
