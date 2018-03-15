@@ -91,7 +91,7 @@ public class SchedJoulesRESTClient implements Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SchedJoulesRESTClient.class);
 
-    private static final String LAST_MODIFIED_DATE_PATTERN = "EEE, dd MMM yyyy HH:mm:ss 'GMT'";
+    private static final String LAST_MODIFIED_DATE_PATTERN = "EEE, dd MMM yyyy HH:mm:ss z";
     private final static ThreadLocal<SimpleDateFormat> LAST_MODIFIED_DATE_PARSER = new ThreadLocal<SimpleDateFormat>() {
 
         /*
@@ -101,7 +101,7 @@ public class SchedJoulesRESTClient implements Closeable {
          */
         @Override
         protected SimpleDateFormat initialValue() {
-            return new SimpleDateFormat(LAST_MODIFIED_DATE_PATTERN);
+            return new SimpleDateFormat(LAST_MODIFIED_DATE_PATTERN, java.util.Locale.US);
         }
     };
 
