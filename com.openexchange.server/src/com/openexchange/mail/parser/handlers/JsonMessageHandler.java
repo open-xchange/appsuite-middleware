@@ -134,6 +134,9 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.filename.FileNameTools;
 import com.openexchange.tools.session.ServerSession;
+import gnu.trove.procedure.TCharProcedure;
+import gnu.trove.set.TCharSet;
+import gnu.trove.set.hash.TCharHashSet;
 
 /**
  * {@link JsonMessageHandler} - Generates a JSON message representation considering user-sensitive data.
@@ -1399,10 +1402,25 @@ public final class JsonMessageHandler implements MailMessageHandler {
             final JSONObject jsonObject = new JSONObject(8);
             jsonObject.put(ID, id);
             String contentType = MimeTypes.MIME_APPL_OCTET;
-            final String filename = part.getFileName();
+            String filename = part.getFileName();
             try {
-                final Locale locale = UserStorage.getInstance().getUser(session.getUserId(), ctx).getLocale();
-                contentType = MimeType2ExtMap.getContentType(new File(filename.toLowerCase(locale)).getName()).toLowerCase(locale);
+                TCharSet separators = new TCharHashSet(new char[] {'/', '\\', File.separatorChar});
+                final String fn = filename;
+                boolean containsSeparatorChar = false == separators.forEach(new TCharProcedure() {
+
+                    @Override
+                    public boolean execute(char separator) {
+                        return fn.indexOf(separator) < 0;
+                    }
+                });
+
+                File file = new File(filename);
+                if (containsSeparatorChar) {
+                    filename = file.getName();
+                    file = new File(filename);
+                }
+
+                contentType = Strings.asciiLowerCase(MimeType2ExtMap.getContentType(file.getName()));
             } catch (final Exception e) {
                 final Throwable t = new Throwable(new StringBuilder("Unable to fetch content/type for '").append(filename).append("': ").append(e).toString());
                 LOG.warn("", t);

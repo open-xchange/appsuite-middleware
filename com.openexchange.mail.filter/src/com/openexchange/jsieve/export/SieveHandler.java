@@ -1278,7 +1278,7 @@ public class SieveHandler {
      * @return null, if no response code in line, the @{SIEVEResponse.Code} otherwise.
      */
     protected SieveResponse.Code parseSIEVEResponse(final String resp, final String multiline) {
-        if (!useSIEVEResponseCodes) {
+        if (!useSIEVEResponseCodes || null == resp) {
             return null;
         }
 
@@ -1447,7 +1447,7 @@ public class SieveHandler {
 
     /**
      * Parses the {@link WelcomeKeyword} and the specified value
-     * 
+     *
      * @param keyword The {@link WelcomeKeyword} to parse
      * @param value The optional value of the keyword
      */
