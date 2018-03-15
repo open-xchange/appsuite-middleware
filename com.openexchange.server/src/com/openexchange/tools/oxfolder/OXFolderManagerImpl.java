@@ -810,6 +810,9 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 Connection wc = writeCon;
                 boolean create = (wc == null);
                 try {
+                    if (create) {
+                        wc = DBPool.pickupWriteable(ctx);
+                    }
                     for (Map<Integer,List<VersionControlResult>> resultMap : results) {
                         for (Map.Entry<Integer, List<VersionControlResult>> documentEntry : resultMap.entrySet()) {
                             Integer documentId = documentEntry.getKey();
