@@ -198,7 +198,7 @@ public class PortableMessageDistributor extends AbstractCustomPortable implement
         }
 
         String[] messages = splitMessage(message);
-        if (messages.length == 0) {
+        if (messages == null || messages.length == 0) {
             WS_LOGGER.debug("Received no messages on cluster member {} for user {} in context {}", DefaultGrizzlyWebSocketApplication.getLocalHost(), I(userId), I(contextId));
             return null;
         }
