@@ -58,6 +58,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService;
+import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionServices;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageUtility;
@@ -301,7 +302,7 @@ public abstract class AbstractFileAction implements AJAXActionService, Enqueuabl
      * @throws OXException
      */
     protected Result isEnqueueable(InfostoreRequest request) throws OXException {
-        return EnqueuableAJAXActionService.resultFor(false);
+        return EnqueuableAJAXActionServices.resultFor(false);
     }
 
 

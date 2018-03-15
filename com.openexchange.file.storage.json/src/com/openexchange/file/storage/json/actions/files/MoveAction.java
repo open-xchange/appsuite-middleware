@@ -60,7 +60,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionService;
+import com.openexchange.ajax.requesthandler.EnqueuableAJAXActionServices;
 import com.openexchange.ajax.requesthandler.jobqueue.JobKey;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
@@ -214,7 +214,7 @@ public class MoveAction extends AbstractWriteAction {
             if ((warnings != null) && (!warnings.isEmpty()) && (!ignoreWarnings)) {
                 result.setException(FileStorageExceptionCodes.FILE_MOVE_ABORTED.create());
             }
-            
+
             if (ignoreWarnings) {
                 for (String fid : oldFiles) {
                     moveFile(fid, destFolder, fileAccess);
@@ -284,7 +284,7 @@ public class MoveAction extends AbstractWriteAction {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
 
-        return EnqueuableAJAXActionService.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()));
+        return EnqueuableAJAXActionServices.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()));
     }
 
     private Result isEnqueueable(InfostoreRequest request, List<IdVersionPair> pairs) throws OXException {
@@ -315,7 +315,7 @@ public class MoveAction extends AbstractWriteAction {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
 
-        return EnqueuableAJAXActionService.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()));
+        return EnqueuableAJAXActionServices.resultFor(true, new JobKey(session.getUserId(), session.getContextId(), jKeyDesc.toString()));
     }
 
 }
