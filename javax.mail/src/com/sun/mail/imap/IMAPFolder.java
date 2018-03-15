@@ -51,6 +51,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Properties;
 import java.util.logging.Level;
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
@@ -495,8 +496,9 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	logger = new MailLogger(this.getClass(),
 				"DEBUG IMAP", store.getSession().getDebug(), store.getSession().getDebugOut());
 	connectionPoolLogger = store.getConnectionPoolLogger();
-	explicitCloseForReusedProtocol = PropUtil.getBooleanSessionProperty(store.getSession(), "mail." + store.name + ".explicitCloseForReusedProtocol", true);
-	issueNoopToKeepConnectionAlive = PropUtil.getBooleanSessionProperty(store.getSession(), "mail." + store.name + ".issueNoopToKeepConnectionAlive", true);
+	Properties properties = store.getSession().getProperties();
+    explicitCloseForReusedProtocol = PropUtil.getBooleanProperty(properties, "mail." + store.name + ".explicitCloseForReusedProtocol", true);
+	issueNoopToKeepConnectionAlive = PropUtil.getBooleanProperty(properties, "mail." + store.name + ".issueNoopToKeepConnectionAlive", true);
 
 	/*
 	 * Work around apparent bug in Exchange.  Exchange
