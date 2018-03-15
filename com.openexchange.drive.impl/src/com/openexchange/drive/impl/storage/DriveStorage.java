@@ -1272,8 +1272,14 @@ public class DriveStorage {
 
         if (!files.isEmpty()) {
             SearchIterator<File> documents = getFileAccess().getDocuments(trashFolder.getId()).results();
-            if (documents != null && documents.hasNext()) {
-                deleteAllFiles(files, documents);
+            if (documents != null) {
+                try {
+                    if (documents.hasNext()) {
+                        deleteAllFiles(files, documents);
+                    }
+                } finally {
+                    SearchIterators.close(documents);
+                }
             }
         }
     }

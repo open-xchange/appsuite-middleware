@@ -164,7 +164,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
      */
     public static class Parser {
 
-        public class PoolIdSchemaAndVersionInfo {
+        public static class PoolIdSchemaAndVersionInfo {
 
             private final int poolId;
             private final int contextId;

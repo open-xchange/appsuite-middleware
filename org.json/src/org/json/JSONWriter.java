@@ -2,6 +2,7 @@ package org.json;
 
 import java.io.IOException;
 import java.io.Writer;
+import com.google.json.JsonSanitizer;
 
 /*
 Copyright (c) 2006 JSON.org
@@ -116,7 +117,7 @@ public class JSONWriter {
                 if (this.comma && this.mode == 'a') {
                     this.writer.write(',');
                 }
-                this.writer.write(s);
+                this.writer.write(JsonSanitizer.sanitize(s));
             } catch (IOException e) {
                 throw new JSONException(e);
             }

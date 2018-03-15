@@ -989,7 +989,7 @@ public final class ConditionTreeMap {
         }
     }
 
-    private final class NewTreeCallable implements Callable<ConditionTree> {
+    private static final class NewTreeCallable implements Callable<ConditionTree> {
 
         protected NewTreeCallable() {
             super();

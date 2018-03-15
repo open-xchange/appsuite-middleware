@@ -189,7 +189,7 @@ public class MetaTypeProviderImpl
         return ocd;
     }
 
-    class AttributeDefinitionImpl implements AttributeDefinition
+    static class AttributeDefinitionImpl implements AttributeDefinition
     {
 
         private final String id;

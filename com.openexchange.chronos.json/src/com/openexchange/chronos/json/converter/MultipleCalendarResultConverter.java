@@ -68,7 +68,6 @@ import com.openexchange.chronos.json.fields.ChronosCalendarResultJsonFields;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
-import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -127,41 +126,14 @@ public class MultipleCalendarResultConverter extends CalendarResultConverter {
                     errors.add(calendarResult);
                     continue;
                 }
-
                 for (CreateResult createResult : calendarResult.getCreations()) {
                     creates.add(createResult.getCreatedEvent());
                 }
-
                 for (UpdateResult updatedResult : calendarResult.getUpdates()) {
-                    boolean isCreated = false;
-                    for (Event created : creates) {
-                        if (created.getUid().equals(updatedResult.getUpdate().getUid())) {
-                            creates.remove(created);
-                            creates.add(updatedResult.getUpdate());
-                            isCreated = true;
-                            break;
-                        }
-                    }
-                    if (!isCreated) {
-                        for (Event update : updates) {
-                            if (update.getUid().equals(updatedResult.getUpdate().getUid())) {
-                                updates.remove(update);
-                                break;
-                            }
-                        }
-                        updates.add(updatedResult.getUpdate());
-                    }
+                    updates.add(updatedResult.getUpdate());
                 }
                 for (DeleteResult deleteResult : calendarResult.getDeletions()) {
-                    EventID eventID = deleteResult.getEventID();
-                    Event deletedEvent = new Event();
-                    deletedEvent.setId(eventID.getObjectID());
-                    deletedEvent.setFolderId(eventID.getFolderID());
-                    if (null != eventID.getRecurrenceID()) {
-                        deletedEvent.setRecurrenceId(eventID.getRecurrenceID());
-                    }
-                    deletedEvent.setTimestamp(deleteResult.getTimestamp());
-                    deletes.add(deletedEvent);
+                    deletes.add(deleteResult.getOriginal());
                 }
             }
 

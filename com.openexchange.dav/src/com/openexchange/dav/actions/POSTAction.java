@@ -177,15 +177,15 @@ public class POSTAction extends DAVAction {
          * write back response
          */
         response.setContentType(resource.getContentType());
-        byte[] buffer = new byte[1024];
         OutputStream outputStream = null;
         InputStream inputStream = null;
         try {
             inputStream = resource.getBody();
             outputStream = response.getOutputStream();
-            int length;
             if (inputStream != null) {
-                while ((length = inputStream.read(buffer)) > 0) {
+                int buflen = 65536;
+                byte[] buffer = new byte[buflen];
+                for (int length; (length = inputStream.read(buffer, 0, buflen)) > 0;) {
                     outputStream.write(buffer, 0, length);
                 }
             }

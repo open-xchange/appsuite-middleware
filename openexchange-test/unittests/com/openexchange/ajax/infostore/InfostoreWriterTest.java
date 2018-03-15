@@ -18,6 +18,7 @@ import org.json.JSONWriter;
 import org.junit.Test;
 import com.openexchange.ajax.writer.InfostoreWriter;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.InfostoreFolderPath;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.tools.iterator.ArrayIterator;
@@ -103,6 +104,7 @@ public class InfostoreWriterTest {
 
         final DocumentMetadata m = new DocumentMetadataImpl();
         m.setCategories("cat1, cat2, cat3");
+        m.setOriginFolderPath(InfostoreFolderPath.EMPTY_PATH);
 
         w.writeMetadata(new ArrayIterator(new DocumentMetadata[] { m }), new Metadata[] { Metadata.CATEGORIES_LITERAL }, TimeZone.getTimeZone("utc"));
         JSONArray listOfArrays = new JSONArray(results.toString());
@@ -161,6 +163,7 @@ public class InfostoreWriterTest {
         dm.setURL("http://www.google.de");
         dm.setVersion(0);
         dm.setId(1);
+        dm.setOriginFolderPath(InfostoreFolderPath.EMPTY_PATH);
 
         final StringWriter result = new StringWriter();
         final InfostoreWriter w = new InfostoreWriter(new JSONWriter(new PrintWriter(result)));
@@ -190,6 +193,7 @@ public class InfostoreWriterTest {
         dm.setVersion(0);
         dm.setId(1);
         dm.setLockedUntil(new Date(System.currentTimeMillis() - 1000));
+        dm.setOriginFolderPath(InfostoreFolderPath.EMPTY_PATH);
 
         StringWriter result = new StringWriter();
         InfostoreWriter w = new InfostoreWriter(new JSONWriter(new PrintWriter(result)));
@@ -220,6 +224,7 @@ public class InfostoreWriterTest {
         final DocumentMetadataImpl dm = new DocumentMetadataImpl();
 
         dm.setLastModified(new Date(230023));
+        dm.setOriginFolderPath(InfostoreFolderPath.EMPTY_PATH);
 
         final StringWriter result = new StringWriter();
         final InfostoreWriter w = new InfostoreWriter(new JSONWriter(new PrintWriter(result)));
