@@ -191,5 +191,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chronos.provider.ical"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chronos.provider"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.chronos.common"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.google.json"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
