@@ -112,19 +112,21 @@ public interface OAuthService {
     OAuthInteraction initOAuth(String serviceMetaData, String callbackUrl, HostInfo currentHost, Session session, Set<OAuthScope> scopes) throws OXException;
 
     /**
-     * Upserts an OAuth account.
+     * Upserts an OAuth account. Obtains the {@link OAuthToken} from the provider via the requested {@link OAuthInteractionType}
+     * and the user identity for the logged in user and either creates a new {@link OAuthAccount} or updates an already
+     * existing one. The decision is made based on whether an account with the same user identity already exists for the
+     * specified user.
      * 
-     * TODO
-     * 
-     * @param serviceMetaData
-     * @param arguments
-     * @param user
-     * @param contextId
-     * @param scopes
-     * @return
-     * @throws OXException
+     * @param serviceId the service provider id
+     * @param type the {@link OAuthInteractionType}
+     * @param arguments The arguments appropriate for interaction type
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param scopes The requested scopes
+     * @return The newly created or updated {@link OAuthAccount}
+     * @throws OXException if any error is occurred
      */
-    OAuthAccount upsertAccount(String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId, Set<OAuthScope> scopes) throws OXException;
+    OAuthAccount upsertAccount(String serviceId, OAuthInteractionType type, Map<String, Object> arguments, int userId, int contextId, Set<OAuthScope> scopes) throws OXException;
 
     /**
      * Creates a new OAuth account completely from specified arguments.
@@ -187,7 +189,7 @@ public interface OAuthService {
      * @param user The user identifier
      * @param contextId The context identifier
      * @param a {@link Set} with {@link OAuthScope}s to enable for the {@link OAuthAccount}
-     * @throws OXException If deletion fails
+     * @throws OXException If update fails
      */
     void updateAccount(int accountId, Map<String, Object> arguments, int user, int contextId) throws OXException;
 

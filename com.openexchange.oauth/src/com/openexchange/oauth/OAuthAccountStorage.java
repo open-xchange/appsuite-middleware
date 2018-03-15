@@ -71,16 +71,75 @@ public interface OAuthAccountStorage {
      */
     int storeAccount(Session session, OAuthAccount account) throws OXException;
 
+    /**
+     * Gets the specified account.
+     *
+     * @param session The session
+     * @param accountId The account identifier
+     * @return The account
+     * @throws OXException If account cannot be returned
+     */
     OAuthAccount getAccount(Session session, int accountId) throws OXException;
 
+    /**
+     * Deletes the specified account.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param accountId The account identifier
+     * @throws OXException If deletion fails
+     */
     void deleteAccount(int userId, int contextId, int accountId) throws OXException;
 
+    /**
+     * Updates the specified account
+     *
+     * @param session The {@link Session}
+     * @param account the {@link OAuthAccount} to update
+     * @throws OXException if the update fails
+     */
     void updateAccount(Session session, OAuthAccount account) throws OXException;
 
+    /**
+     * Update the specified account.
+     * <p>
+     * The arguments may provide:
+     * <ul>
+     * <li>display name; {@link OAuthConstants#ARGUMENT_DISPLAY_NAME}</li>
+     * <li>request token; {@link OAuthConstants#ARGUMENT_REQUEST_TOKEN}</li>
+     * <li>enabled scopes; {@link OAuthConstants#ARGUMENT_SCOPES}</li>
+     * <li>user password is <b>mandatory</b> if request token shall be updated; {@link OAuthConstants#ARGUMENT_PASSWORD}</li>
+     * </ul>
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param accountId The account identifier
+     * @param arguments The arguments to update
+     * @throws OXException If update fails
+     */
     void updateAccount(int userId, int contextId, int accountId, Map<String, Object> arguments) throws OXException;
 
+    /**
+     * Searches for an {@link OAuthAccount} with the specified user identity for the specified provider
+     * 
+     * @param session the {@link Session}
+     * @param userIdentity The user identity
+     * @param serviceId The service provider id
+     * @return The {@link OAuthAccount} or <code>null</code> if no account is found
+     * @throws OXException if an error is occurred
+     */
     OAuthAccount findByUserIdentity(Session session, String userIdentity, String serviceId) throws OXException;
-    
+
+    /**
+     * Returns <code>true</code> if the specified account of the specified provider has a user identity
+     * 
+     * @param session The {@link Session}
+     * @param accountId The account identifier
+     * @param serviceId The service identifier
+     * @return <code>true</code> if the specified account of the specified provider has a user identity;
+     *         <code>false</code> otherwise
+     * @throws OXException if an error is occurred
+     */
     boolean hasUserIdentity(Session session, int accountId, String serviceId) throws OXException;
 
     /**
