@@ -138,48 +138,62 @@ public class Utils {
      * Gets an image reader suitable for the supplied image input stream.
      *
      * @param inputStream The image input stream to create the reader for
-     * @param contentType The indicated content type, or <code>null</code> if no available
-     * @param fileName The indicated file name, or <code>null</code> if no available
+     * @param optContentType The indicated content type, or <code>null</code> if not available
+     * @param optFileName The indicated file name, or <code>null</code> if not available
      * @return The image reader
      */
-    public static ImageReader getImageReader(ImageInputStream inputStream, String contentType, String fileName) throws IOException {
-        if (null != contentType) {
-            /*
-             * prefer alternative image readers if possible
-             */
-            ImageReaderSpi readerSpi = null;
-            String extension = getFileExtension(fileName);
-            if (null != extension) {
-                readerSpi = READER_SPI_BY_EXTENSION.get(Strings.toLowerCase(extension));
-            }
-            if (null == readerSpi) {
-                readerSpi = READER_SPI_BY_FORMAT_NAME.get(Strings.toLowerCase(Utility.getImageFormat(contentType)));
-            }
-            if (null != readerSpi) {
-                try {
+    public static ImageReader getImageReader(ImageInputStream inputStream, String optContentType, String optFileName) throws IOException {
+        ImageReader reader = null;
+        try {
+            // Prefer alternative image reader by MIME type if possible
+            if (null != optContentType) {
+                ImageReaderSpi readerSpi = null;
+                String extension = getFileExtension(optFileName);
+                if (null != extension) {
+                    readerSpi = READER_SPI_BY_EXTENSION.get(Strings.toLowerCase(extension));
+                }
+                if (null == readerSpi) {
+                    readerSpi = READER_SPI_BY_FORMAT_NAME.get(Strings.toLowerCase(Utility.getImageFormat(optContentType)));
+                }
+                if (null != readerSpi) {
+                    // Unlike a standard InputStream, all ImageInputStreams support marking.
                     inputStream.mark();
-                    if (readerSpi.canDecodeInput(inputStream)) {
-                        ImageReader reader = readerSpi.createReaderInstance();
-                        LOG.trace("Using {} for indicated format \"{}\".", reader.getClass().getName(), contentType);
-                        return reader;
+                    try {
+                        if (readerSpi.canDecodeInput(inputStream)) {
+                            reader = readerSpi.createReaderInstance();
+                            LOG.trace("Using {} for indicated format \"{}\".", reader.getClass().getName(), optContentType);
+                        }
+                    } catch (IOException e) {
+                        LOG.debug("Error probing for suitable image reader", e);
+                    } finally {
+                        inputStream.reset();
                     }
-                } catch (IOException e) {
-                    LOG.debug("Error probing for suitable image reader", e);
-                } finally {
-                    inputStream.reset();
+                }
+            }
+
+            // Fall back to regularly registered readers in case no alternative image reader was acquired
+            if (null == reader) {
+                Iterator<ImageReader> readers = ImageIO.getImageReaders(inputStream);
+                if (false == readers.hasNext()) {
+                    throw new IOException("No image reader available for format " + optContentType);
+                }
+                reader = readers.next();
+                LOG.trace("Using {} for indicated format \"{}\".", reader.getClass().getName(), optContentType);
+            }
+
+            // Successfully obtained ImageReader instance. Return it.
+            ImageReader retval = reader;
+            reader = null; // Avoid premature disposal of ImageReader instance
+            return retval;
+        } finally {
+            if (null != reader) {
+                try {
+                    reader.dispose();
+                } catch (final Exception e) {
+                    // Ignore
                 }
             }
         }
-        /*
-         * fallback to regularly registered readers
-         */
-        Iterator<ImageReader> readers = ImageIO.getImageReaders(inputStream);
-        if (false == readers.hasNext()) {
-            throw new IOException("No image reader available for format " + contentType);
-        }
-        ImageReader reader = readers.next();
-        LOG.trace("Using {} for indicated format \"{}\".", reader.getClass().getName(), contentType);
-        return reader;
     }
 
     /**
@@ -378,12 +392,11 @@ public class Utils {
                  * both resolutions fulfill required resolution, choose closest one
                  */
                 return resolution1.width * resolution1.height > resolution2.width * resolution2.height ? 1 : -1;
-            } else {
-                /*
-                 * only first resolution fulfills required resolution
-                 */
-                return -1;
             }
+            /*
+             * only first resolution fulfills required resolution
+             */
+            return -1;
         } else if (resolution2.width >= requiredResolution.width && resolution2.height >= requiredResolution.height) {
             /*
              * only second resolution fulfills required resolution

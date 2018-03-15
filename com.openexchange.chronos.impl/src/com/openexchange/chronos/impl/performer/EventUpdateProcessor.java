@@ -64,7 +64,7 @@ import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.common.CalendarUtils.shiftRecurrenceId;
 import static com.openexchange.chronos.common.CalendarUtils.shiftRecurrenceIds;
 import static com.openexchange.chronos.impl.Utils.asList;
-import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.chronos.impl.Utils.prepareOrganizer;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.arrays.Collections.isNullOrEmpty;
 import java.util.ArrayList;
@@ -263,9 +263,14 @@ public class EventUpdateProcessor implements EventUpdate {
          */
         changedChangeExceptions = removeInvalidRecurrenceIds(changedEvent, changedChangeExceptions);
         /*
+         * apply potential changes in exception dates (to reflect newly added delete exception dates)
+         */
+        changedChangeExceptions = adjustDeletedChangeExceptions(changedEvent, changedChangeExceptions);
+        /*
          * take over non-conflicting changes in series master to change exceptions
          */
         changedChangeExceptions = propagateToChangeExceptions(originalEvent, changedEvent, originalChangeExceptions, changedChangeExceptions);
+
         return changedChangeExceptions;
     }
 
@@ -421,7 +426,7 @@ public class EventUpdateProcessor implements EventUpdate {
          * group-scheduled event, ensure to take over an appropriate organizer & reset common calendar folder (unless public)
          */
         if (null == originalEvent.getOrganizer()) {
-            updatedEvent.setOrganizer(prepareOrganizer(updatedEvent.getOrganizer()));
+            updatedEvent.setOrganizer(prepareOrganizer(session, folder, updatedEvent.getOrganizer()));
         } else if (updatedEvent.containsOrganizer()) {
             Organizer organizer = session.getEntityResolver().prepare(updatedEvent.getOrganizer(), CalendarUserType.INDIVIDUAL);
             if (null != organizer && false == matches(originalEvent.getOrganizer(), organizer)) {
@@ -624,6 +629,32 @@ public class EventUpdateProcessor implements EventUpdate {
     }
 
     /**
+     * Removes any change exception in case it is indicated within the series master event's set of delete exception dates. This may
+     * affect both the series master event's change exception dates, as well as the collection of actual change exception events.
+     *
+     * @param seriesMaster The series master event
+     * @param changeExceptions The change exception events
+     * @return The resulting list of (possibly adjusted) change exceptions
+     */
+    private List<Event> adjustDeletedChangeExceptions(Event seriesMaster, List<Event> changeExceptions) throws OXException {
+        if (false == isNullOrEmpty(seriesMaster.getDeleteExceptionDates())) {
+            if (false == isNullOrEmpty(changeExceptions)) {
+                List<Event> newChangeExceptions = new ArrayList<Event>(changeExceptions);
+                if (newChangeExceptions.removeIf(event -> seriesMaster.getDeleteExceptionDates().contains(event.getRecurrenceId()))) {
+                    changeExceptions = newChangeExceptions;
+                }
+            }
+            if (false == isNullOrEmpty(seriesMaster.getChangeExceptionDates())) {
+                SortedSet<RecurrenceId> newChangeExceptionDates = new TreeSet<RecurrenceId>(seriesMaster.getChangeExceptionDates());
+                if (newChangeExceptionDates.removeAll(seriesMaster.getDeleteExceptionDates())) {
+                    seriesMaster.setChangeExceptionDates(newChangeExceptionDates);
+                }
+            }
+        }
+        return changeExceptions;
+    }
+
+    /**
      * Adjusts the recurrence identifiers of any change- and delete-exceptions in an event series to reflect a change of the series start
      * date by applying an offset based on the difference of an original and updated series start date.
      *
@@ -685,44 +716,6 @@ public class EventUpdateProcessor implements EventUpdate {
             }
             attendee.setPartStat(ParticipationStatus.NEEDS_ACTION); //TODO: or reset to initial partstat based on folder type?
         }
-    }
-
-    /**
-     * Prepares the organizer for an event, taking over an external organizer if specified.
-     *
-     * @param organizerData The organizer as defined by the client, or <code>null</code> to prepare the current calendar user as organizer
-     * @return The prepared organizer
-     */
-    private Organizer prepareOrganizer(Organizer organizerData) throws OXException {
-        Organizer organizer;
-        if (null != organizerData) {
-            organizer = session.getEntityResolver().prepare(organizerData, CalendarUserType.INDIVIDUAL);
-            if (0 < organizer.getEntity()) {
-                /*
-                 * internal organizer must match the actual calendar user if specified
-                 */
-                if (organizer.getEntity() != calendarUser.getEntity()) {
-                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(organizer.getUri(), I(organizer.getEntity()), CalendarUserType.INDIVIDUAL);
-                }
-            } else {
-                /*
-                 * take over external organizer as-is
-                 */
-                return session.getConfig().isSkipExternalAttendeeURIChecks() ? organizer : Check.requireValidEMail(organizer);
-            }
-        } else {
-            /*
-             * prepare a default organizer for calendar user
-             */
-            organizer = session.getEntityResolver().applyEntityData(new Organizer(), calendarUser.getEntity());
-        }
-        /*
-         * apply "sent-by" property if someone is acting on behalf of the calendar user
-         */
-        if (calendarUser.getEntity() != session.getUserId()) {
-            organizer.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUserId()));
-        }
-        return organizer;
     }
 
     /**

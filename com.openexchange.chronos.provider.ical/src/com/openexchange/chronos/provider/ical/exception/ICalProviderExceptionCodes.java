@@ -51,11 +51,15 @@ package com.openexchange.chronos.provider.ical.exception;
 
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.BAD_FEED_URI_MSG;
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.BAD_PARAMETER_MSG;
+import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.CREDENTIALS_REQUIRED_MSG;
+import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.CREDENTIALS_WRONG_MSG;
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.FEED_SIZE_EXCEEDED_MSG;
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.FEED_URI_NOT_ALLOWED_MSG;
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.MISSING_FEED_URI_MSG;
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.NOT_ALLOWED_CHANGE_MSG;
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.NO_FEED_MSG;
+import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.PASSWORD_REQUIRED_MSG;
+import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.PASSWORD_WRONG_MSG;
 import static com.openexchange.chronos.provider.ical.exception.ICalProviderExceptionMessages.UNEXPECTED_FEED_ERROR_MSG;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import com.openexchange.exception.Category;
@@ -64,7 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * 
+ *
  * {@link ICalProviderExceptionCodes}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -137,6 +141,26 @@ public enum ICalProviderExceptionCodes implements DisplayableOXExceptionCode {
      * <li>A remote server error occurred: %1$s</li>
      */
     REMOTE_SERVER_ERROR("A remote server error occurred: %1$s", ICalProviderExceptionMessages.REMOTE_SERVER_ERROR_MSG, CATEGORY_ERROR, 5033),
+    /**
+     * <li>Access to this calendar is restricted. Please enter your credentials and try again.</li>
+     * <li>Credentials required [url %1$s, status %2$s, realm %3$s]</li>
+     */
+    CREDENTIALS_REQUIRED("Credentials required [url %1$s, status %2$s, realm %3$s]", CREDENTIALS_REQUIRED_MSG, Category.CATEGORY_USER_INPUT, 4010),
+    /**
+     * <li>Authentication failed. Please enter your credentials and try again.</li>
+     * <li>Credentials required [url %1$s, status %2$s, realm %3$s]</li>
+     */
+    CREDENTIALS_WRONG("Credentials wrong [url %1$s, status %2$s, realm %3$s]", CREDENTIALS_WRONG_MSG, Category.CATEGORY_USER_INPUT, 4011),
+    /**
+     * <li>Access to this calendar is restricted. Please enter your password and try again.</li>
+     * <li>Password required [url %1$s, status %2$s, realm %3$s]</li>
+     */
+    PASSWORD_REQUIRED("Password required [url %1$s, status %2$s, realm %3$s]", PASSWORD_REQUIRED_MSG, Category.CATEGORY_USER_INPUT, 4012),
+    /**
+     * <li>Authentication failed. Please enter your password and try again.</li>
+     * <li>Password required [url %1$s, status %2$s, realm %3$s]</li>
+     */
+    PASSWORD_WRONG("Password wrong [url %1$s, status %2$s, realm %3$s]", PASSWORD_WRONG_MSG, Category.CATEGORY_USER_INPUT, 4013),
 
     ;
 

@@ -338,7 +338,7 @@ public abstract class StanzaSequenceGate extends AbstractRealtimeJanitor impleme
      */
     public abstract void handleInternal(Stanza stanza, ID recipient) throws OXException;
 
-    protected final class StanzaWithCustomAction {
+    protected static final class StanzaWithCustomAction {
 
         public long sequenceNumber=0;
         public Stanza stanza;

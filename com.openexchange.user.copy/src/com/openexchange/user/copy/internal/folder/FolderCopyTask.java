@@ -289,8 +289,7 @@ public class FolderCopyTask implements CopyUserTaskService {
          * If the tree does not contain the parent already, the parent will be added first.
          */
         final Tree<FolderEqualsWrapper> folderTree = new Tree<FolderEqualsWrapper>(rootFolder);
-        for (final Integer folderId : extendedMap.keySet()) {
-            final FolderEqualsWrapper folder = extendedMap.get(folderId);
+        for (FolderEqualsWrapper folder : extendedMap.values()) {
             addFoldersRecursive(extendedMap, folderTree, folder);
         }
 

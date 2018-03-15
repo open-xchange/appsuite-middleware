@@ -101,6 +101,9 @@ public final class RdiffServiceImpl implements RdiffService {
         try {
             @SuppressWarnings("unchecked")
             final List<org.metastatic.rsync.ChecksumPair> signatures = rdiff.makeSignatures(sourceIn);
+            if(signatures == null) {
+                throw RdiffExceptionCodes.ERROR.create("Stream is empty.");
+            }
             return toChecksums(signatures);
         } catch (final NoSuchAlgorithmException e) {
             throw RdiffExceptionCodes.ERROR.create(e, e.getMessage());
@@ -166,6 +169,7 @@ public final class RdiffServiceImpl implements RdiffService {
     public void rebuildFile(final File baseFile, final InputStream deltaIn, final OutputStream patchOut) throws OXException {
         try {
             rdiff.rebuildFile(baseFile, deltaIn, patchOut);
+            patchOut.flush();
         } catch (final IOException e) {
             throw RdiffExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {

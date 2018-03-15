@@ -218,6 +218,10 @@ public class XMLModifierCLT {
             System.err.println("Error whily trying to apply Software Change Request: " + e.getMessage());
             e.printStackTrace();
             return 1;
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
+            return 1;
         }
         return 0;
     }
@@ -267,7 +271,7 @@ public class XMLModifierCLT {
         }
     }
 
-    private static void doReplace(String identifier, boolean removeDuplicates, Document document, XPathExpression expression, Document replace) throws XPathExpressionException {
+    private static void doReplace(String identifier, boolean removeDuplicates, Document document, XPathExpression expression, Document replace) throws Exception {
         NodeList toReplaceList = (NodeList) expression.evaluate(replace, XPathConstants.NODESET);
         for (int i = 0; i < toReplaceList.getLength(); i++) {
             Node toReplace = toReplaceList.item(i);
@@ -285,7 +289,7 @@ public class XMLModifierCLT {
                         parent.replaceChild(imported, original);
                         found = true;
                     } else {
-                        //already seen it, should we remove duplicates? 
+                        //already seen it, should we remove duplicates?
                         if (removeDuplicates) {
                             //indentation is a text node which has to be removed
                             Node prev = original.getPreviousSibling();
@@ -307,6 +311,9 @@ public class XMLModifierCLT {
                     parentNode = origList.item(0).getParentNode();
                 } else {
                     parentNode = findParentNode(document, expression, replace);
+                }
+                if(parentNode == null) {
+                    throw new Exception("Unable to find parent node!");
                 }
                 parentNode.appendChild(imported);
             }
@@ -337,7 +344,7 @@ public class XMLModifierCLT {
 
     /**
      * Transform a node into plain text
-     * 
+     *
      * @param tf {@link TransformerFactory} to use for transformer creation
      * @param node The {@link Node} to transform to plain text
      * @return The transformed node
@@ -363,7 +370,7 @@ public class XMLModifierCLT {
 
     /**
      * Creates a commandline option
-     * 
+     *
      * @param shortOpt The short version of the argumente e.g.: -h
      * @param longOpt The long version of the argument e.g.: --help
      * @param hasArg true If the option needs an argument or not e.g. --input /tmp/somefile
@@ -618,7 +625,7 @@ public class XMLModifierCLT {
      * configuration file as only one of FILE and FILE_COMPAT can be configured
      * as they both would use the same log file which causes error logging to
      * open-xchange-console.log
-     * 
+     *
      * @param doc The document to which the SCR should be applied
      * @throws SCRException if applying the Software Change Request fails
      */

@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.rmi;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -70,7 +71,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.rmi.extensions.OXCommonExtension;
+import com.openexchange.admin.rmi.extensions.OXCommonExtensionInterface;
 
 /**
  *
@@ -833,18 +834,13 @@ public class GroupTest extends UserTest {
 
         assertEquals("displayname not equal", a.getDisplayname(), b.getDisplayname());
         assertEquals("name not equal", a.getName(), b.getName());
-        assertEquals("members not equal", a.getMembers(), b.getMembers());
+        assertArrayEquals("members not equal", a.getMembers(), b.getMembers());
         assertEquals("id not equal", a.getId(), b.getId());
 
-        final Collection<OXCommonExtension> aexts = a.getAllExtensionsAsHash().values();
-        final Collection<OXCommonExtension> bexts = b.getAllExtensionsAsHash().values();
+        final Collection<OXCommonExtensionInterface> aexts = a.getAllExtensionsAsHash().values();
+        final Collection<OXCommonExtensionInterface> bexts = b.getAllExtensionsAsHash().values();
         if (aexts.size() == bexts.size()) {
             aexts.containsAll(bexts);
-            //            for (int i = 0; i < aexts.size(); i++) {
-            //                final OXCommonExtensionInterface aext = aexts.get(i);
-            //                final OXCommonExtensionInterface bext = bexts.get(i);
-            //                assertTrue("Extensions not equal: " + aext.toString() + ",\n" + bext.toString(), aext.equals(bext));
-            //            }
         }
     }
 }

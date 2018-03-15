@@ -269,7 +269,7 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
                 return null == status ? KnownStatus.INVALID_CREDENTIALS : status;
             }
         }
-        return validated ? KnownStatus.OK : KnownStatus.INVALID_CREDENTIALS;
+        return KnownStatus.OK ;
     }
 
     protected static KnownStatus testForCommunicationProblem(List<OXException> warnings, boolean transport, MailAccountDescription accountDescription) {

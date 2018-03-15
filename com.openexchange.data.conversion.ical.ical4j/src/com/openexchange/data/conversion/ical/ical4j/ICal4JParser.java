@@ -66,10 +66,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -79,13 +77,9 @@ import com.openexchange.data.conversion.ical.DefaultParseResult;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.data.conversion.ical.ParseResult;
 import com.openexchange.data.conversion.ical.TruncationInfo;
-import com.openexchange.data.conversion.ical.ical4j.internal.AppointmentConverters;
 import com.openexchange.data.conversion.ical.ical4j.internal.AttributeConverter;
 import com.openexchange.data.conversion.ical.ical4j.internal.ParserTools;
 import com.openexchange.data.conversion.ical.ical4j.internal.TaskConverters;
-import com.openexchange.groupware.calendar.CalendarDataObject;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.java.Charsets;
@@ -100,7 +94,6 @@ import net.fortuna.ical4j.model.ComponentList;
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VToDo;
 import net.fortuna.ical4j.model.property.DateProperty;
 import net.fortuna.ical4j.util.CompatibilityHints;
@@ -117,17 +110,6 @@ public class ICal4JParser implements ICalParser {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICal4JParser.class);
 
-    private static final Map<String, Integer> WEEKDAYS = new HashMap<String, Integer>(7);
-    static {
-        WEEKDAYS.put("MO", Integer.valueOf(CalendarObject.MONDAY));
-        WEEKDAYS.put("TU", Integer.valueOf(CalendarObject.TUESDAY));
-        WEEKDAYS.put("WE", Integer.valueOf(CalendarObject.WEDNESDAY));
-        WEEKDAYS.put("TH", Integer.valueOf(CalendarObject.THURSDAY));
-        WEEKDAYS.put("FR", Integer.valueOf(CalendarObject.FRIDAY));
-        WEEKDAYS.put("SA", Integer.valueOf(CalendarObject.SATURDAY));
-        WEEKDAYS.put("SO", Integer.valueOf(CalendarObject.SUNDAY));
-    }
-
 	private int limit = -1;
 
     public ICal4JParser() {
@@ -142,66 +124,6 @@ public class ICal4JParser implements ICalParser {
         CompatibilityHints.setHintEnabled(
               	CompatibilityHints.KEY_RELAXED_VALIDATION, true);
 
-    }
-
-    @Override
-    public ParseResult<CalendarDataObject> parseAppointments(final String icalText, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
-        try {
-            return parseAppointments(Streams.newByteArrayInputStream(icalText.getBytes(UTF8)), defaultTZ, ctx, errors, warnings);
-        } catch (final UnsupportedCharsetException e) {
-            LOG.error("", e);
-        }
-
-        return DefaultParseResult.emptyParseResult();
-    }
-
-    @Override
-    public ParseResult<CalendarDataObject> parseAppointments(final InputStream ical, final TimeZone defaultTZ, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) throws ConversionError {
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new InputStreamReader(ical, UTF8));
-
-            TruncationInfo truncationInfo = null;
-            List<CalendarDataObject> appointments = null;
-            for (net.fortuna.ical4j.model.Calendar calendar; (calendar = parse(reader)) != null;) {
-                final ComponentList vevents = calendar.getComponents("VEVENT");
-
-                int size = vevents.size();
-                int myLimit;
-                if (limit >= 0 && limit < size) {
-                    myLimit = limit;
-                    if (null == appointments) {
-                        appointments = new ArrayList<CalendarDataObject>(myLimit);
-                    }
-                    truncationInfo = new TruncationInfo(myLimit, size);
-                } else {
-                    myLimit = size;
-                    if (null == appointments) {
-                        appointments = new ArrayList<CalendarDataObject>(myLimit);
-                    }
-                }
-
-                for (int i = 0; i < myLimit; i++) {
-                    final Object componentObj = vevents.get(i);
-                    final Component vevent = (Component) componentObj;
-                    try {
-                        appointments.add(convertAppointment(i, (VEvent) vevent, defaultTZ, ctx, warnings));
-                    } catch (final ConversionError conversionError) {
-                        errors.add(conversionError);
-                    }
-                }
-            }
-
-            return DefaultParseResult.<CalendarDataObject> builder().importedObjects(appointments).truncationInfo(truncationInfo).build();
-        } catch (final UnsupportedCharsetException e) {
-            // IGNORE
-        } catch (final ConversionError e){
-        	errors.add(e);
-        } finally {
-            closeSafe(reader);
-        }
-
-        return DefaultParseResult.emptyParseResult();
     }
 
     @Override
@@ -288,35 +210,6 @@ public class ICal4JParser implements ICalParser {
         Streams.close(closeable);
     }
 
-    protected CalendarDataObject convertAppointment(int index, VEvent vevent, TimeZone defaultTZ, List<AttributeConverter<VEvent,Appointment>> all, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
-
-        final CalendarDataObject appointment = new CalendarDataObject();
-
-        final TimeZone tz = determineTimeZone(vevent, defaultTZ);
-
-        for (final AttributeConverter<VEvent, Appointment> converter : all) {
-            if (converter.hasProperty(vevent)) {
-                converter.parse(index, vevent, appointment, tz, ctx, warnings);
-            }
-            converter.verify(index, appointment, warnings);
-        }
-
-        /*
-         *  Very difficult to keep overview, which timezone has to be used here.
-         *  Last deciscion was to use the given timezone from the ical as we need to store it with the appointment
-         *  to avoid mix-ups in group-series-appointments passing the DST borders.
-         *  See bug 23586
-         */
-        appointment.setTimezone(tz.getID());
-
-        return appointment;
-    }
-
-
-    protected CalendarDataObject convertAppointment(final int index, final VEvent vevent, final TimeZone defaultTZ, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
-        return convertAppointment(index, vevent, defaultTZ, AppointmentConverters.ALL, ctx, warnings);
-    }
-
     protected Task convertTask(final int index, final VToDo vtodo, final TimeZone defaultTZ, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError{
         final TimeZone tz = determineTimeZone(vtodo, defaultTZ);
         final Task task = new Task();
@@ -368,16 +261,6 @@ public class ICal4JParser implements ICalParser {
             tz = inTZID;
         }
         return tz;
-    }
-
-	private String getTimeZoneID(final TimeZone tz) {
-        if(net.fortuna.ical4j.model.TimeZone.class.isAssignableFrom(tz.getClass())) {
-            return "UTC";
-        }
-        if(tz.getID().equals("GMT")) { // Hack for VTIMEZONE. iCal4J sets timezone to GMT, though we prefer UTC
-            return "UTC";
-        }
-        return tz.getID();
     }
 
 	protected net.fortuna.ical4j.model.Calendar parse(final BufferedReader reader) throws ConversionError {

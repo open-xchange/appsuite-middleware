@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import javax.xml.parsers.ParserConfigurationException;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -27,7 +26,6 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffResult;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.serializer.ChangeLogSerializer;
@@ -44,11 +42,11 @@ public class DiffToChangeLog {
 
     private String changeSetContext;
     private String changeSetAuthor;
-    private DiffResult diffResult;
-    private DiffOutputControl diffOutputControl;
+    private final DiffResult diffResult;
+    private final DiffOutputControl diffOutputControl;
 
 
-    private static Set<Class> loggedOrderFor = new HashSet<Class>();
+    private static Set<Class<?>> loggedOrderFor = new HashSet<Class<?>>();
 
     public DiffToChangeLog(DiffResult diffResult, DiffOutputControl diffOutputControl) {
         this.diffResult = diffResult;
@@ -59,16 +57,16 @@ public class DiffToChangeLog {
         this.changeSetContext = changeSetContext;
     }
 
-    public void print(String changeLogFile) throws ParserConfigurationException, IOException, DatabaseException {
+    public void print(String changeLogFile) throws IOException {
         ChangeLogSerializer changeLogSerializer = ChangeLogSerializerFactory.getInstance().getSerializer(changeLogFile);
         this.print(changeLogFile, changeLogSerializer);
     }
 
-    public void print(PrintStream out) throws ParserConfigurationException, IOException, DatabaseException {
+    public void print(PrintStream out) throws IOException {
         this.print(out, new XMLChangeLogSerializer());
     }
 
-    public void print(String changeLogFile, ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
+    public void print(String changeLogFile, ChangeLogSerializer changeLogSerializer) throws IOException {
         File file = new File(changeLogFile);
         if (!file.exists()) {
             LogFactory.getLogger().info(file + " does not exist, creating");
@@ -109,20 +107,16 @@ public class DiffToChangeLog {
 
             fileReader.close();
 
-            // System.out.println("resulting XML: " + xml.trim());
-
             RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
-            randomAccessFile.seek(offset);
-            randomAccessFile.writeBytes("    ");
-            randomAccessFile.write(xml.getBytes());
-            randomAccessFile.writeBytes(lineSeparator);
-            randomAccessFile.writeBytes("</databaseChangeLog>" + lineSeparator);
-            randomAccessFile.close();
-
-            // BufferedWriter fileWriter = new BufferedWriter(new
-            // FileWriter(file));
-            // fileWriter.append(xml);
-            // fileWriter.close();
+            try {
+                randomAccessFile.seek(offset);
+                randomAccessFile.writeBytes("    ");
+                randomAccessFile.write(xml.getBytes());
+                randomAccessFile.writeBytes(lineSeparator);
+                randomAccessFile.writeBytes("</databaseChangeLog>" + lineSeparator);
+            } finally {
+                randomAccessFile.close();
+            }
         }
     }
 
@@ -130,12 +124,9 @@ public class DiffToChangeLog {
      * Prints changeLog that would bring the target database to be the same as
      * the reference database
      */
-    public void print(PrintStream out, ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
-
+    public void print(PrintStream out, ChangeLogSerializer changeLogSerializer) throws IOException {
         List<ChangeSet> changeSets = generateChangeSets();
-
         changeLogSerializer.write(changeSets, out);
-
         out.flush();
     }
 
@@ -245,9 +236,16 @@ public class DiffToChangeLog {
 
     private static class DependencyGraph {
 
-        private Map<Class<? extends DatabaseObject>, Node> allNodes = new HashMap<Class<? extends DatabaseObject>, Node>();
+        private final Map<Class<? extends DatabaseObject>, Node> allNodes = new HashMap<Class<? extends DatabaseObject>, Node>();
 
-        private void addType(Class<? extends DatabaseObject> type) {
+        /**
+         * Initializes a new {@link DependencyGraph}.
+         */
+        public DependencyGraph() {
+            super();
+        }
+
+        void addType(Class<? extends DatabaseObject> type) {
             allNodes.put(type, new Node(type));
         }
 
@@ -370,6 +368,9 @@ public class DiffToChangeLog {
 
             @Override
             public boolean equals(Object obj) {
+                if (!(obj instanceof Edge)) {
+                    return false;
+                }
                 Edge e = (Edge) obj;
                 return e.from == from && e.to == to;
             }

@@ -182,7 +182,7 @@ public class Participants implements ChangeDescriptionGenerator {
                 continue;
             }
             switch (changeType) {
-                case ADD:
+                case ADD: /* fall-through */
                 case REMOVE:
                     changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT));
                     break;
@@ -307,7 +307,7 @@ public class Participants implements ChangeDescriptionGenerator {
 
     /**
      * Get the {@link ChangeType} to the corresponding {@link ParticipationStatus}
-     * 
+     *
      * @param newPartStat The status
      * @return The {@link ChangeType}
      */
@@ -322,19 +322,24 @@ public class Participants implements ChangeDescriptionGenerator {
 
     private void investigateSetOperation(CollectionUpdate<Attendee, AttendeeField> difference, Set<Integer> userIds, Set<Integer> groupIds, Set<Integer> resourceIds, Map<Integer, ChangeType> userChange, Map<Integer, ChangeType> resourceChange, Map<Integer, ChangeType> groupChange, Map<String, ChangeType> externalChange, ChangeType changeType, List<Attendee> list) {
         for (Attendee added : list) {
-            if (added.getCuType().equals(CalendarUserType.INDIVIDUAL)) {
-                if (CalendarUtils.isInternal(added)) {
-                    userIds.add(I(added.getEntity()));
-                    userChange.put(I(added.getEntity()), changeType);
-                } else {
-                    externalChange.put(added.getEMail(), changeType);
+            if (null != added) {
+                CalendarUserType cuType = added.getCuType();
+                if (null != cuType) {
+                    if (cuType.equals(CalendarUserType.INDIVIDUAL)) {
+                        if (CalendarUtils.isInternal(added)) {
+                            userIds.add(I(added.getEntity()));
+                            userChange.put(I(added.getEntity()), changeType);
+                        } else {
+                            externalChange.put(added.getEMail(), changeType);
+                        }
+                    } else if (cuType.equals(CalendarUserType.RESOURCE)) {
+                        resourceIds.add(I(added.getEntity()));
+                        resourceChange.put(I(added.getEntity()), changeType);
+                    } else if (cuType.equals(CalendarUserType.GROUP)) {
+                        groupIds.add(I(added.getEntity()));
+                        groupChange.put(I(added.getEntity()), changeType);
+                    }
                 }
-            } else if (added.getCuType().equals(CalendarUserType.RESOURCE)) {
-                resourceIds.add(I(added.getEntity()));
-                resourceChange.put(I(added.getEntity()), changeType);
-            } else if (added.getCuType().equals(CalendarUserType.GROUP)) {
-                groupIds.add(I(added.getEntity()));
-                groupChange.put(I(added.getEntity()), changeType);
             }
         }
     }

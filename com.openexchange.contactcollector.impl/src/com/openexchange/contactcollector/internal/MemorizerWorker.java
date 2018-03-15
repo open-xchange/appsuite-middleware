@@ -121,8 +121,6 @@ public final class MemorizerWorker {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MemorizerWorker.class);
 
-    private static final boolean ALL_ALIASES = true;
-
     /*-
      * Member stuff
      */
@@ -666,6 +664,11 @@ public final class MemorizerWorker {
             if (this == obj) {
                 return true;
             }
+
+            if (!(obj instanceof IntPair)) {
+                return false;
+            }
+
             IntPair other = (IntPair) obj;
             if (i1 != other.i1) {
                 return false;

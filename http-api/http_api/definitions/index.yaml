@@ -687,6 +687,8 @@ AllSessionsResponse:
   $ref: ./sessionmanagement/AllSessionsResponse.yaml
 DeviceInfo:
   $ref: ./sessionmanagement/DeviceInfo.yaml
+SessionManagementData:
+  $ref: ./sessionmanagement/SessionManagementData.yaml
 # Module: Export
 InfoItemExport:
   $ref: ./export/InfoItemExport.yaml

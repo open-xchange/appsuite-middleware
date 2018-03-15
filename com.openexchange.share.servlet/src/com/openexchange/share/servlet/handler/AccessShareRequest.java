@@ -94,7 +94,7 @@ public class AccessShareRequest {
     }
 
     public ShareTarget getTarget() {
-        return targetProxy.getTarget();
+        return null != targetProxy ? targetProxy.getTarget() : null;
     }
 
     public TargetProxy getTargetProxy() {

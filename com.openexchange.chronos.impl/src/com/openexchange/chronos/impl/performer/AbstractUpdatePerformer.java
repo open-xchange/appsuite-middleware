@@ -53,7 +53,6 @@ import static com.openexchange.chronos.common.AlarmUtils.filterRelativeTriggers;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getAlarmIDs;
 import static com.openexchange.chronos.common.CalendarUtils.getFolderView;
-import static com.openexchange.chronos.common.CalendarUtils.isAttendeeSchedulingResource;
 import static com.openexchange.chronos.common.CalendarUtils.isGroupScheduled;
 import static com.openexchange.chronos.common.CalendarUtils.isLastUserAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
@@ -89,11 +88,9 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUser;
-import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.DelegatingEvent;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.UnmodifiableEvent;
 import com.openexchange.chronos.common.AlarmUtils;
@@ -691,44 +688,6 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
     }
 
     /**
-     * Prepares the organizer for an event, taking over an external organizer if specified.
-     *
-     * @param organizerData The organizer as defined by the client, or <code>null</code> to prepare the current calendar user as organizer
-     * @return The prepared organizer
-     */
-    protected Organizer prepareOrganizer(Organizer organizerData) throws OXException {
-        Organizer organizer;
-        if (null != organizerData) {
-            organizer = session.getEntityResolver().prepare(organizerData, CalendarUserType.INDIVIDUAL);
-            if (0 < organizer.getEntity()) {
-                /*
-                 * internal organizer must match the actual calendar user if specified
-                 */
-                if (organizer.getEntity() != calendarUserId) {
-                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(organizer.getUri(), I(organizer.getEntity()), CalendarUserType.INDIVIDUAL);
-                }
-            } else {
-                /*
-                 * take over external organizer as-is
-                 */
-                return session.getConfig().isSkipExternalAttendeeURIChecks() ? organizer : Check.requireValidEMail(organizer);
-            }
-        } else {
-            /*
-             * prepare a default organizer for calendar user
-             */
-            organizer = session.getEntityResolver().applyEntityData(new Organizer(), calendarUserId);
-        }
-        /*
-         * apply "sent-by" property if someone is acting on behalf of the calendar user
-         */
-        if (calendarUserId != session.getUserId()) {
-            organizer.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUserId()));
-        }
-        return organizer;
-    }
-
-    /**
      * Checks that the current session's user is able to delete a specific event, by either requiring delete access for <i>own</i> or
      * <i>all</i> objects, based on the user being the creator of the event or not.
      * <p/>
@@ -772,8 +731,9 @@ public abstract class AbstractUpdatePerformer extends AbstractQueryPerformer {
             requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, NO_PERMISSIONS);
         }
         Check.classificationAllowsUpdate(folder, originalEvent);
-        if (isAttendeeSchedulingResource(originalEvent, calendarUserId)) {
-            throw CalendarExceptionCodes.NOT_ORGANIZER.create(folder.getId(), originalEvent.getId(), originalEvent.getOrganizer().getUri(), originalEvent.getOrganizer().getSentBy());
+        if (isGroupScheduled(originalEvent) && false == isOrganizer(originalEvent, calendarUserId)) {
+            throw CalendarExceptionCodes.NOT_ORGANIZER.create(
+                folder.getId(), originalEvent.getId(), originalEvent.getOrganizer().getUri(), originalEvent.getOrganizer().getSentBy());
         }
     }
 

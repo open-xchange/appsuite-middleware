@@ -51,12 +51,15 @@ package com.openexchange.chronos.recurrence.osgi;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.recurrence.service.RecurrenceConfig;
 import com.openexchange.chronos.recurrence.service.RecurrenceServiceImpl;
 import com.openexchange.chronos.service.RecurrenceService;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * 
+ *
  * {@link Activator}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
@@ -68,13 +71,15 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return null;
+        return new Class<?>[] { ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: \"com.openexchange.chronos.recurrence\"");
-        registerService(RecurrenceService.class, new RecurrenceServiceImpl());
+        RecurrenceConfig recurrenceConfig = new RecurrenceConfig(getService(ConfigurationService.class));
+        registerService(Reloadable.class, recurrenceConfig);
+        registerService(RecurrenceService.class, new RecurrenceServiceImpl(recurrenceConfig));
     }
 
     @Override

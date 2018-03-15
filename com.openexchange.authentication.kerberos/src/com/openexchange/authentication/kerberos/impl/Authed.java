@@ -51,7 +51,6 @@ package com.openexchange.authentication.kerberos.impl;
 
 import static com.openexchange.kerberos.KerberosUtils.SESSION_PRINCIPAL;
 import static com.openexchange.kerberos.KerberosUtils.SESSION_SUBJECT;
-import org.apache.http.HttpHeaders;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.Cookie;
 import com.openexchange.authentication.Header;
@@ -114,7 +113,7 @@ public class Authed implements Authenticated, SessionEnhancement, ResponseEnhanc
                     }
                     @Override
                     public String getName() {
-                            return HttpHeaders.WWW_AUTHENTICATE;
+                            return "WWW-Authenticate";
                     }
                 }
             };

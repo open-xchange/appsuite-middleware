@@ -77,7 +77,7 @@ public class Visitor implements SieveParserVisitor {
 
     private static final String CRLF = "\r\n";
 
-    public class OwnType {
+    public static class OwnType {
         private StringBuilder output;
 
         private int linenumber;

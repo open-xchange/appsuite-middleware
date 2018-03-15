@@ -87,7 +87,7 @@ public abstract class RecurrenceServiceTest {
 
     @Before
     public void setUp() {
-        service = new RecurrenceServiceImpl();
+        service = new RecurrenceServiceImpl(new TestRecurrenceConfig());
     }
 
     @After

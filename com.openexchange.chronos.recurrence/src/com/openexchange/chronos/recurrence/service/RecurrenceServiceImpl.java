@@ -76,14 +76,26 @@ import com.openexchange.java.util.TimeZones;
  */
 public class RecurrenceServiceImpl implements RecurrenceService {
 
+    private final RecurrenceConfig config;
+
+    /**
+     * Initializes a new {@link RecurrenceServiceImpl}.
+     *
+     * @param config The recurrence configuration to use
+     */
+    public RecurrenceServiceImpl(RecurrenceConfig config) {
+        super();
+        this.config = config;
+    }
+
     @Override
     public Iterator<Event> calculateInstances(Event master, final Calendar start, final Calendar end, Integer limit) throws OXException {
-        return new RecurrenceIterator(master, true, start, end, limit, true);
+        return new RecurrenceIterator(config, master, true, start, end, limit, true);
     }
 
     @Override
     public Iterator<Event> calculateInstancesRespectExceptions(Event master, Calendar start, Calendar end, Integer limit, List<Event> changeExceptions) throws OXException {
-        return new ChangeExceptionAwareRecurrenceIterator(master, false, start, end, limit, changeExceptions);
+        return new ChangeExceptionAwareRecurrenceIterator(config, master, false, start, end, limit, changeExceptions);
     }
 
     @Override
@@ -137,24 +149,24 @@ public class RecurrenceServiceImpl implements RecurrenceService {
     public com.openexchange.chronos.service.RecurrenceIterator<Event> iterateEventOccurrences(Event seriesMaster, Date from, Date until) throws OXException {
         Calendar fromCalendar = null != from ? initCalendar(TimeZones.UTC, from) : null;
         Calendar untilCalendar = null != until ? initCalendar(TimeZones.UTC, until) : null;
-        return new RecurrenceIterator(seriesMaster, true, fromCalendar, untilCalendar, null, false);
+        return new RecurrenceIterator(config, seriesMaster, true, fromCalendar, untilCalendar, null, false);
     }
 
     @Override
     public com.openexchange.chronos.service.RecurrenceIterator<RecurrenceId> iterateRecurrenceIds(RecurrenceData recurrenceData) throws OXException {
-        return new RecurrenceIdIterator(recurrenceData, true, null, null, null, null);
+        return new RecurrenceIdIterator(config, recurrenceData, true, null, null, null, null);
     }
 
     @Override
     public com.openexchange.chronos.service.RecurrenceIterator<RecurrenceId> iterateRecurrenceIds(RecurrenceData recurrenceData, Date from, Date until) throws OXException {
         Calendar fromCalendar = null != from ? initCalendar(TimeZones.UTC, from) : null;
         Calendar untilCalendar = null != until ? initCalendar(TimeZones.UTC, until) : null;
-        return new RecurrenceIdIterator(recurrenceData, true, fromCalendar, untilCalendar, null, null);
+        return new RecurrenceIdIterator(config, recurrenceData, true, fromCalendar, untilCalendar, null, null);
     }
 
     @Override
     public com.openexchange.chronos.service.RecurrenceIterator<RecurrenceId> iterateRecurrenceIds(RecurrenceData recurrenceData, Integer startPosition, Integer limit) throws OXException {
-        return new RecurrenceIdIterator(recurrenceData, true, null, null, startPosition, limit);
+        return new RecurrenceIdIterator(config, recurrenceData, true, null, null, startPosition, limit);
     }
 
     @Override

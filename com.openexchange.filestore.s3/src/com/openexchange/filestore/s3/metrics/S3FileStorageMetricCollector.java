@@ -85,29 +85,19 @@ public class S3FileStorageMetricCollector extends MetricCollector {
         start();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.amazonaws.metrics.MetricCollector#start()
-     */
     @Override
     public synchronized boolean start() {
         if (started) {
             return false;
         }
 
-        // Not started? Initialise the request and service metric collectors
+        // Not started? Initialize the request and service metric collectors
         s3FileStorageRequestMetricCollector.set(new S3FileStorageRequestMetricCollector(metrics));
         s3FileStorageServiceMetricCollector.set(new S3FileStorageServiceMetricCollector(metrics));
         started = true;
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.amazonaws.metrics.MetricCollector#stop()
-     */
     @Override
     public synchronized boolean stop() {
         if (false == started) {
@@ -115,49 +105,52 @@ public class S3FileStorageMetricCollector extends MetricCollector {
         }
 
         // Was started? Replace the request and service metric collectors
-        S3FileStorageRequestMetricCollector tmpReqCollector = (S3FileStorageRequestMetricCollector) s3FileStorageRequestMetricCollector.get();
-        if (tmpReqCollector != RequestMetricCollector.NONE) {
-            tmpReqCollector.stop();            
-            s3FileStorageRequestMetricCollector.set(RequestMetricCollector.NONE);
+        S3FileStorageRequestMetricCollector reqCollector = null;
+        S3FileStorageServiceMetricCollector servCollector = null;
+        {
+            RequestMetricCollector tmpReqCollector = s3FileStorageRequestMetricCollector.get();
+            if (tmpReqCollector != RequestMetricCollector.NONE) {
+                s3FileStorageRequestMetricCollector.set(RequestMetricCollector.NONE);
+                if (tmpReqCollector instanceof S3FileStorageRequestMetricCollector) {
+                    reqCollector = (S3FileStorageRequestMetricCollector) tmpReqCollector;
+                }
+            }
         }
-        
-        S3FileStorageServiceMetricCollector tmpServCollector = (S3FileStorageServiceMetricCollector) s3FileStorageServiceMetricCollector.get();
-        if (tmpServCollector != ServiceMetricCollector.NONE) {
-            tmpServCollector.stop();            
-            s3FileStorageServiceMetricCollector.set(ServiceMetricCollector.NONE);
+
+        {
+            ServiceMetricCollector tmpServCollector = s3FileStorageServiceMetricCollector.get();
+            if (tmpServCollector != ServiceMetricCollector.NONE) {
+                s3FileStorageServiceMetricCollector.set(ServiceMetricCollector.NONE);
+                if (tmpServCollector instanceof S3FileStorageServiceMetricCollector) {
+                    servCollector = (S3FileStorageServiceMetricCollector) tmpServCollector;
+                }
+            }
+        }
+
+        if (null != reqCollector) {
+            reqCollector.stop();
+        }
+        if (null != servCollector) {
+            servCollector.stop();
         }
 
         started = false;
         return true;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.amazonaws.metrics.MetricCollector#isEnabled()
-     */
     @Override
     public boolean isEnabled() {
         return config.getBooleanProperty(S3FileStoreProperty.metricCollection);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.amazonaws.metrics.MetricCollector#getRequestMetricCollector()
-     */
     @Override
     public RequestMetricCollector getRequestMetricCollector() {
         return s3FileStorageRequestMetricCollector.get();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.amazonaws.metrics.MetricCollector#getServiceMetricCollector()
-     */
     @Override
     public ServiceMetricCollector getServiceMetricCollector() {
         return s3FileStorageServiceMetricCollector.get();
     }
+
 }

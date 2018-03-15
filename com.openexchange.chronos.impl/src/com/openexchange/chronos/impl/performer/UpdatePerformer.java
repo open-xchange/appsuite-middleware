@@ -241,7 +241,7 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
         /*
          * check if folder view on event is allowed as needed
          */
-        if (needsExistenceCheckInTargetFolder(originalEvent, eventData)) {
+        if (false == assumeExternalOrganizerUpdate(originalEvent, eventData)) {
             Check.eventIsInFolder(originalEvent, folder);
         }
         /*
@@ -307,9 +307,11 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
     }
 
     /**
-     * Determines if it's allowed to skip the check if the updated event already exists in the targeted folder or not.
+     * Determines if an incoming event update can be treated as initiated by the (external) organizer of a scheduling object resource or
+     * not. If yes, certain checks may be skipped, i.e. the existence check in the calendar user's folder, or the check against allowed
+     * attendee changes.
      * <p/>
-     * The skip may be checked under certain circumstances, particularly:
+     * An update is considered as <i>organizer-update</i> under certain circumstances, particularly:
      * <ul>
      * <li>the event has an <i>external</i> organizer</li>
      * <li>the organizer matches in the original and in the updated event</li>
@@ -320,14 +322,15 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
      * @param originalEvent The original event
      * @param updatedEvent The updated event
      * @return <code>true</code> if the check should be performed, <code>false</code>, otherwise
-     * @see <a href="https://bugs.open-xchange.com/show_bug.cgi?id=29566#c12">Bug 29566</a>, <a href="https://bugs.open-xchange.com/show_bug.cgi?id=23181"/>Bug 23181</a>
+     * @see <a href="https://bugs.open-xchange.com/show_bug.cgi?id=29566#c12">Bug 29566</a>,
+     *      <a href="https://bugs.open-xchange.com/show_bug.cgi?id=23181"/>Bug 23181</a>
      */
-    public boolean needsExistenceCheckInTargetFolder(Event originalEvent, Event updatedEvent) {
+    private boolean assumeExternalOrganizerUpdate(Event originalEvent, Event updatedEvent) {
         if (hasExternalOrganizer(originalEvent) && matches(originalEvent.getOrganizer(), updatedEvent.getOrganizer()) &&
             originalEvent.getUid().equals(updatedEvent.getUid()) && updatedEvent.getSequence() >= originalEvent.getSequence()) {
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     /**

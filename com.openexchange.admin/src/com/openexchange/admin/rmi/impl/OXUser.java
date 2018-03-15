@@ -2828,7 +2828,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             LOGGER.error("", e);
             throw e;
         } catch (OXException e) {
-            LOGGER.error("Error retrieving configuration source for user {} in context {}.",user.getId().intValue(), ctx.getId(), e);
+            LOGGER.error("Error retrieving configuration source for user {} in context {}.", user.getId(), ctx.getId(), e);
         }
         return capabilitiesSource;
     }

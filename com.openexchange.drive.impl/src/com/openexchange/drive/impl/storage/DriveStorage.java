@@ -1272,8 +1272,14 @@ public class DriveStorage {
 
         if (!files.isEmpty()) {
             SearchIterator<File> documents = getFileAccess().getDocuments(trashFolder.getId()).results();
-            if (documents != null && documents.hasNext()) {
-                deleteAllFiles(files, documents);
+            if (documents != null) {
+                try {
+                    if (documents.hasNext()) {
+                        deleteAllFiles(files, documents);
+                    }
+                } finally {
+                    SearchIterators.close(documents);
+                }
             }
         }
     }
@@ -1393,8 +1399,14 @@ public class DriveStorage {
         Map<String, FileStorageFolder[]> fileRestoreResult = null;
         if (!files.isEmpty()) {
             SearchIterator<File> documents = getFileAccess().getDocuments(trashFolderId).results();
-            if (documents != null && documents.hasNext()) {
-                fileRestoreResult = restoreFilesFromTrash(files, rootId, documents);
+            if (documents != null) {
+                try {
+                    if (documents.hasNext()) {
+                        fileRestoreResult = restoreFilesFromTrash(files, rootId, documents);
+                    }
+                } finally {
+                    SearchIterators.close(documents);
+                }
             }
         }
         return new RestoreContent(folderRestoreResult, fileRestoreResult);
@@ -1440,7 +1452,7 @@ public class DriveStorage {
     }
 
     /**
-     * Maps all filenames to a {@link File} from docuemnts, if the filename is contained
+     * Maps all filenames to a {@link File} from documents, if the filename is contained
      * in the given files {@link List}.
      *
      * @param files All relevant filenames
@@ -1449,15 +1461,19 @@ public class DriveStorage {
      * @throws OXException If the next {@link File} can not be loaded
      */
     private Map<String, File> createFileMap(List<String> files, SearchIterator<File> documents) throws OXException {
-        Map<String, File> ID2FileMapping = new HashMap<>();
-        do {
-            File file = documents.next();
-            if (null != file && files.contains(file.getFileName())) {
-                String fileId = file.getId();
-                ID2FileMapping.put(fileId, file);
-            }
-        } while (documents.hasNext());
-        return ID2FileMapping;
+        try {
+            Map<String, File> ID2FileMapping = new HashMap<>();
+            do {
+                File file = documents.next();
+                if (null != file && files.contains(file.getFileName())) {
+                    String fileId = file.getId();
+                    ID2FileMapping.put(fileId, file);
+                }
+            } while (documents.hasNext());
+            return ID2FileMapping;
+        } finally {
+            SearchIterators.close(documents);
+        }
     }
 
 }

@@ -126,10 +126,16 @@ public class ReadFileFormat {
     }
 
     public String ppt2text(final String fileName) throws Exception {
-        final POIFSReader poifReader = new POIFSReader();
-        poifReader.registerListener(new ReadFileFormat.MyPOIFSReaderListener());
-        poifReader.read(new FileInputStream(fileName));
-        return sb.toString();
+        InputStream in = null;
+        try {
+            final POIFSReader poifReader = new POIFSReader();
+            poifReader.registerListener(new ReadFileFormat.MyPOIFSReaderListener());
+            in = new FileInputStream(fileName);
+            poifReader.read(in);
+            return sb.toString();
+        } finally {
+            Streams.close(in);
+        }
     }
 
     class MyPOIFSReaderListener implements POIFSReaderListener {

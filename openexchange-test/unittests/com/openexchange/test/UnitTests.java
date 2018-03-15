@@ -114,8 +114,6 @@ import org.junit.runners.Suite;
     com.openexchange.groupware.attach.AttachmentBaseTest.class,
 
     com.openexchange.data.conversion.ical.ICalParserBasicTests.class,
-    com.openexchange.data.conversion.ical.ICalParserBugTests.class,
-    com.openexchange.data.conversion.ical.bugs.UnitTests.class,
     com.openexchange.data.conversion.ical.ICalEmitterTest.class,
     com.openexchange.groupware.importexport.ImportExportStandaloneSuite.class,
 

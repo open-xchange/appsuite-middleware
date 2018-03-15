@@ -159,6 +159,9 @@ public class IdMutextMap {
 
         @Override
         public boolean equals(final Object obj) {
+            if (!(obj instanceof MutexImpl)) {
+                return false;
+            }
             final MutexImpl other = (MutexImpl) obj;
             if (id == null) {
                 if (other.id != null) {

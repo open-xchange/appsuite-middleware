@@ -95,6 +95,7 @@ import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.handler.AccessShareRequest;
 import com.openexchange.share.servlet.handler.HttpAuthShareHandler;
@@ -133,6 +134,7 @@ public class ICalHandler extends HttpAuthShareHandler {
         EnumSet<EventField> fields = EnumSet.allOf(EventField.class);
         fields.remove(EventField.ATTACHMENTS);
         fields.remove(EventField.ALARMS);
+        fields.remove(EventField.FLAGS);
         EVENT_FIELDS = fields.toArray(new EventField[fields.size()]);
     }
 
@@ -159,28 +161,36 @@ public class ICalHandler extends HttpAuthShareHandler {
     }
 
     @Override
-    protected boolean handles(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        if (shareRequest.isInvalidTarget()) {
-            return false;
+    protected boolean handles(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response) {
+        if (acceptsICal(request) || indicatesICalClient(request) || indicatesForcedICal(request)) {
+            ShareTarget target = shareRequest.getTarget();
+            return null == target || Module.CALENDAR.getFolderConstant() == target.getModule() || Module.TASK.getFolderConstant() == target.getModule();
         }
-        ShareTarget target = shareRequest.getTarget();
-        return (Module.CALENDAR.getFolderConstant() == target.getModule() || Module.TASK.getFolderConstant() == target.getModule()) &&
-            (acceptsICal(request) || indicatesICalClient(request) || indicatesForcedICal(request));
+        return false;
     }
 
     @Override
     protected void handleResolvedShare(ResolvedShare resolvedShare) throws OXException, IOException {
-        /*
-         * export tasks or events based on share target
-         */
-        ShareTarget target = resolvedShare.getShareRequest().getTarget();
-        int module = target.getModule();
-        if (Module.CALENDAR.getFolderConstant() == module) {
-            writeEvents(resolvedShare, target);
-        } else if (Module.TASK.getFolderConstant() == module) {
-            writeTasks(resolvedShare, target);
-        } else {
-            throw new UnsupportedOperationException("Unsupported module: " + module);
+        try {
+            /*
+             * get & check target
+             */
+            ShareTarget target = resolvedShare.getShareRequest().getTarget();
+            if (null == target || resolvedShare.getShareRequest().isInvalidTarget()) {
+                throw ShareExceptionCodes.UNKNOWN_SHARE.create(resolvedShare.getShareRequest().getTargetPath());
+            }
+            /*
+             * export tasks or events based on share target
+             */
+            if (Module.CALENDAR.getFolderConstant() == target.getModule()) {
+                writeEvents(resolvedShare, target);
+            } else if (Module.TASK.getFolderConstant() == target.getModule()) {
+                writeTasks(resolvedShare, target);
+            } else {
+                throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Unsupported module: " + target.getModule());
+            }
+        } catch (OXException e) {
+            sendError(resolvedShare.getResponse(), e);
         }
     }
 

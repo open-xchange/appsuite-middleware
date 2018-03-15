@@ -193,11 +193,11 @@ public class ImageTransformationUtility {
         int width = 0;
         int height = 0;
         try {
-            Directory directory = metadata.getDirectory(ExifIFD0Directory.class);
+            Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
             if (null != directory) {
                 orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
             }
-            JpegDirectory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
+            JpegDirectory jpegDirectory = metadata.getFirstDirectoryOfType(JpegDirectory.class);
             if (null != jpegDirectory) {
                 width = jpegDirectory.getImageWidth();
                 height = jpegDirectory.getImageHeight();
@@ -221,7 +221,7 @@ public class ImageTransformationUtility {
             return false;
         }
         try {
-            Metadata metadata = ImageMetadataReader.readMetadata(bufferedInputStreamFor(in), false);
+            Metadata metadata = ImageMetadataReader.readMetadata(bufferedInputStreamFor(in));
             ImageInformation imageInformation = getImageInformation(metadata);
             return null != imageInformation && 1 < imageInformation.orientation;
         } catch (ImageProcessingException e) {
@@ -251,7 +251,7 @@ public class ImageTransformationUtility {
                 // This covers all JPEG files
                 bufferedStream.mark(65536); // 64K mark limit
                 reset.setValue(true);
-                return getImageInformation(JpegMetadataReader.readMetadata(bufferedStream, false));
+                return getImageInformation(JpegMetadataReader.readMetadata(bufferedStream));
             } else if (magicNumber == INTEL_TIFF_MAGIC_NUMBER || magicNumber == MOTOROLA_TIFF_MAGIC_NUMBER) {
                 // This covers all TIFF and camera RAW files
                 // Do not read meta-data from TIFF images using 'com.drew.imaging' package as it is very inefficient
@@ -259,7 +259,7 @@ public class ImageTransformationUtility {
                 // This covers PSD files, which only need 26 bytes for extracting metadata
                 bufferedStream.mark(32);
                 reset.setValue(true);
-                return getImageInformation(PsdMetadataReader.readMetadata(bufferedStream, false));
+                return getImageInformation(PsdMetadataReader.readMetadata(bufferedStream));
             }
         } catch (ImageProcessingException e) {
             LOG.debug("Error getting metadata", e);

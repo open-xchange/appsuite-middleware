@@ -1099,6 +1099,9 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
             if (!realTreeId.equals(treeId)) {
                 StorageParameters parameters = newStorageParameters(storageParameters);
                 FolderStorage folderStorage = registry.getFolderStorage(realTreeId, folderId);
+                if (null == folderStorage) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
+                }
                 boolean started = folderStorage.startTransaction(parameters, false);
                 try {
                     realParentId = folderStorage.getFolder(realTreeId, folderId, parameters).getParentID();
@@ -1767,7 +1770,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
                 int userId = storageParameters.getUserId();
                 int contextId = storageParameters.getContextId();
                 {
-                    Collection<String> ids = isMove ? ImmutableSet.of(oldFolderId, oldParentId, f.getParentID()) : ImmutableSet.of(oldFolderId, oldParentId);
+                    Collection<String> ids = ImmutableSet.of(oldFolderId, oldParentId);
                     FolderMapManagement.getInstance().dropHierarchyFor(ids, realTreeId, userId, contextId);
                 }
             }

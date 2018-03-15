@@ -62,19 +62,20 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Set;
-import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.json.JSONWriter;
 import com.google.common.collect.ImmutableSet;
+import com.google.json.JsonSanitizer;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -999,7 +1000,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     protected void unknownAction(String method, String action, HttpServletResponse res, boolean html) throws IOException, ServletException {
-        String msg = "The action " + action + " isn't even specified yet. At least not for the method: " + method;
+        String msg = "The action " + StringEscapeUtils.escapeHtml(action) + " isn't even specified yet. At least not for the method: " + StringEscapeUtils.escapeHtml(method);
         if (html) {
             sendErrorAsJSHTML(res, msg, action);
             return;
@@ -1008,7 +1009,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     }
 
     public static String substituteJS(String json, String action) {
-        return JS_FRAGMENT.replace("**json**", json.replaceAll(Pattern.quote("</") , "<\\/")).replace("**action**", sanitizeParam(action));
+        return JS_FRAGMENT.replace("**json**", JsonSanitizer.sanitize(json)).replace("**action**", sanitizeParam(action));
     }
 
     /* --------------------- STUFF FOR UPLOAD --------------------- */

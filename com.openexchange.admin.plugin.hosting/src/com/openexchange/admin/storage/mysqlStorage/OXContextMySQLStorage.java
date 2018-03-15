@@ -1648,10 +1648,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             throw new StorageException(e.getMessage(), e);
         } finally {
             if (decrementDatabaseSchemaCount) {
-                try {
-                    contextCommon.updateContextsPerDBSchemaCount(false, db.getScheme(), db, configCon);
-                } catch (Exception e) {
-                    LOG.error("Failed to decrement contexts-per-dbschema count", e);
+                if (null != db) {
+                    try {
+                        contextCommon.updateContextsPerDBSchemaCount(false, db.getScheme(), db, configCon);
+                    } catch (Exception e) {
+                        LOG.error("Failed to decrement contexts-per-dbschema count", e);
+                    }
                 }
             }
             if (decrementDatabaseCount) {
@@ -2705,7 +2707,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             if (null != cacheService) {
                 try {
                     final Cache jcs = cacheService.getCache("CapabilitiesContext");
-                    final Serializable key = Integer.valueOf(ctx.getId().intValue());
+                    final Serializable key = ctx.getId();
                     jcs.remove(key);
                 } catch (final Exception e) {
                     LOG.error("", e);

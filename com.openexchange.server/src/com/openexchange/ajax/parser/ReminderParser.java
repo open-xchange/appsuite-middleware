@@ -118,13 +118,15 @@ public class ReminderParser extends DataParser {
         /* parseElementDataObject(reminder, json); doesn't work because
          * ReminderObject is not a subclass of DataObject */
         if (json.has(DataFields.ID)) {
-            long id = parseLong(json, DataFields.ID);
-            if (id > Integer.MAX_VALUE) {
-                // Special handling for appointment reminder
-                int alarmId = (int) (id >> 32);
-                reminder.setObjectId(alarmId);
-            } else {
-                reminder.setObjectId((int) id);
+            Long id = parseLong(json, DataFields.ID);
+            if (null != id) {
+                if (id.longValue() > Integer.MAX_VALUE) {
+                    // Special handling for appointment reminder
+                    int alarmId = (int) (id.longValue() >> 32);
+                    reminder.setObjectId(alarmId);
+                } else {
+                    reminder.setObjectId(id.intValue());
+                }
             }
         }
     }

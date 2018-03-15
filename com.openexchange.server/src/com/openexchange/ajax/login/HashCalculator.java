@@ -54,7 +54,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
-import org.apache.http.HttpHeaders;
+import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Charsets;
@@ -252,7 +252,7 @@ public class HashCalculator {
      * @return The <code>"User-Agent"</code> request header or an empty String if absent
      */
     public static String getUserAgent(final HttpServletRequest req) {
-        final String header = req.getHeader(HttpHeaders.USER_AGENT);
+        final String header = req.getHeader(Header.USER_AGENT);
         if (header == null) {
             return "";
         }

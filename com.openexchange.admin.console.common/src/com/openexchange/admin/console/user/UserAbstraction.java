@@ -147,7 +147,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     }
 
-    protected class OptionAndMethod {
+    protected static class OptionAndMethod {
 
         private Method method = null;
 

@@ -986,8 +986,16 @@ public final class IMAPConversationWorker {
 
         @Override
         public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
-            if (!protocol.hasCapability("THREAD=REFERENCES")) {
-                throw new BadCommandException("THREAD=REFERENCES not supported");
+            String algorithm;
+            if (protocol.hasCapability("THREAD=REFS")) {
+                // Prefer "REFS" algorithm, which does the threading using only References/In-Reply-To headers
+                algorithm = "REFS";
+            } else {
+                if (!protocol.hasCapability("THREAD=REFERENCES")) {
+                    throw new BadCommandException("THREAD=REFERENCES not supported");
+                }
+                // Considers both - References/In-Reply-To headers and Subject - when doing the threading
+                algorithm = "REFERENCES";
             }
             if (searchKeys == null || searchKeys.length == 0) {
                 throw new BadCommandException("Must have at least one sort term");
@@ -997,7 +1005,7 @@ public final class IMAPConversationWorker {
 
             Argument args = new Argument();
 
-            args.writeAtom("REFERENCES");    // charset specification
+            args.writeAtom(algorithm);    // algorithm specification
             args.writeAtom("UTF-8");    // charset specification
 
             // Add (sort) terms

@@ -62,13 +62,13 @@ import java.util.UUID;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.http.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionServletInterceptor;
 import com.openexchange.ajax.SessionServletInterceptorRegistry;
 import com.openexchange.ajax.SessionUtility;
+import com.openexchange.ajax.fields.Header;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -113,8 +113,8 @@ public final class HTTPAuthLogin implements LoginRequestHandler {
             doAuthHeaderLogin(req, resp);
         } catch (final OXException e) {
             LOG.error(e.getMessage(), e);
-            resp.addHeader(HttpHeaders.WWW_AUTHENTICATE, "NEGOTIATE");
-            resp.addHeader(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"Open-Xchange\"");
+            resp.addHeader("WWW-Authenticate", "NEGOTIATE");
+            resp.addHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
             resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
         }
     }
@@ -129,10 +129,10 @@ public final class HTTPAuthLogin implements LoginRequestHandler {
              * continue with auth header login
              */
 
-            final String auth = req.getHeader(HttpHeaders.AUTHORIZATION);
+            final String auth = req.getHeader(Header.AUTH_HEADER);
             if (null == auth) {
-                resp.addHeader(HttpHeaders.WWW_AUTHENTICATE, "NEGOTIATE");
-                resp.addHeader(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"Open-Xchange\"");
+                resp.addHeader("WWW-Authenticate", "NEGOTIATE");
+                resp.addHeader("WWW-Authenticate", "Basic realm=\"Open-Xchange\"");
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
                 return;
             }

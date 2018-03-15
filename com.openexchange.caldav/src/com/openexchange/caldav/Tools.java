@@ -211,7 +211,10 @@ public class Tools {
      * @throws OXException
      */
     public static int parse(String id) throws OXException {
-        if (null != id && id.startsWith(DEFAULT_ACCOUNT_PREFIX)) {
+        if (null == id) {
+            throw new OXException(new IllegalArgumentException("id must not be null"));
+        }
+        if (id.startsWith(DEFAULT_ACCOUNT_PREFIX)) {
             return parse(id.substring(DEFAULT_ACCOUNT_PREFIX.length()));
         }
         try {

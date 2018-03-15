@@ -251,7 +251,7 @@ public final class PermissionLoaderService implements Runnable {
         return permsMap.remove(newPair(folderId, contextId));
     }
 
-    private final class DelegaterTask implements Task<Object> {
+    private static final class DelegaterTask implements Task<Object> {
 
         private final TIntObjectMap<GroupedPairs> groupByContext;
         private final TObjectProcedure<GroupedPairs> proc;

@@ -696,7 +696,7 @@ public final class NewAction extends AbstractMailAction implements EnqueuableAJA
         MailMessage getMail();
     }
 
-    private class PutNewMailDataImpl implements PutNewMailData {
+    private static class PutNewMailDataImpl implements PutNewMailData {
 
         private final MailMessage mail;
         private final InternetAddress fromAddress;

@@ -49,11 +49,8 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import com.openexchange.ajax.container.TmpFileFileHolder;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.exception.OXException;
@@ -62,7 +59,6 @@ import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.java.Streams;
 import com.openexchange.rdiff.RdiffService;
 import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link DocumentSigAction}
@@ -79,7 +75,7 @@ public class DocumentSigAction extends AbstractFileAction {
         IDBasedFileAccess fileAccess = request.getFileAccess();
 
         InputStream documentStream = null;
-        OutputStream sigOut = null;
+        ThresholdFileHolder fileHolder = null;
         try {
             final RdiffService rdiff = Services.getRdiffService();
             if (rdiff == null) {
@@ -87,16 +83,14 @@ public class DocumentSigAction extends AbstractFileAction {
             }
             documentStream = fileAccess.getDocument(request.getId(), request.getVersion());
             // Make signature
-            final TmpFileFileHolder fileHolder = new TmpFileFileHolder();
-            sigOut = new FileOutputStream(fileHolder.getTmpFile());
-            rdiff.createSignatures(documentStream, sigOut);
-            sigOut.flush();
+            fileHolder = new ThresholdFileHolder();
+            rdiff.createSignatures(documentStream, fileHolder.asOutputStream());
             // Return FileHolder result
-            return new AJAXRequestResult(fileHolder, "file");
-        } catch (final IOException e) {
-            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            AJAXRequestResult requestResult = new AJAXRequestResult(fileHolder, "file");
+            fileHolder = null;
+            return requestResult;
         } finally {
-            Streams.close(documentStream, sigOut);
+            Streams.close(fileHolder, documentStream);
         }
     }
 
