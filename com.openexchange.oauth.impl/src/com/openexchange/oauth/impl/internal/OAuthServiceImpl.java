@@ -88,6 +88,7 @@ import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.HostInfo;
+import com.openexchange.oauth.KnownApi;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthAccountStorage;
 import com.openexchange.oauth.OAuthConstants;
@@ -644,8 +645,6 @@ public class OAuthServiceImpl implements OAuthService {
             }
         } catch (final org.scribe.exceptions.OAuthException e) {
             throw handleScribeOAuthException(e);
-        } catch (final OXException e) {
-            throw e;
         } catch (final Exception e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -666,30 +665,12 @@ public class OAuthServiceImpl implements OAuthService {
         if (metaData instanceof com.openexchange.oauth.impl.ScribeAware) {
             apiClass = ((com.openexchange.oauth.impl.ScribeAware) metaData).getScribeService();
         } else {
-            final String serviceId = Strings.asciiLowerCase(metaData.getId());
-            if (serviceId.indexOf("twitter") >= 0) {
-                apiClass = TwitterApi.class;
-            } else if (serviceId.indexOf("linkedin") >= 0) {
-                apiClass = LinkedInApi.class;
-            } else if (serviceId.indexOf("google") >= 0) {
-                apiClass = Google2Api.class;
-            } else if (serviceId.indexOf("yahoo") >= 0) {
-                apiClass = YahooApi.class;
-            } else if (serviceId.indexOf("foursquare") >= 0) {
-                apiClass = FoursquareApi.class;
-            } else if (serviceId.indexOf("tumblr") >= 0) {
-                apiClass = TumblrApi.class;
-            } else if (serviceId.indexOf("flickr") >= 0) {
-                apiClass = FlickrApi.class;
-            } else if (serviceId.indexOf("dropbox") >= 0) {
-                apiClass = DropBoxApi.class;
-            } else if (serviceId.indexOf("xing") >= 0) {
-                apiClass = XingApi.class;
-            } else if (serviceId.indexOf("vkontakte") >= 0) {
-                apiClass = VkontakteApi.class;
-            } else {
+            String serviceId = Strings.asciiLowerCase(metaData.getId());
+            KnownApi knownApi = KnownApi.getApiByServiceId(serviceId);
+            if (knownApi == null) {
                 throw OAuthExceptionCodes.UNSUPPORTED_SERVICE.create(serviceId);
             }
+            apiClass = knownApi.getApiClass();
         }
         final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(apiClass);
         serviceBuilder.apiKey(metaData.getAPIKey(session)).apiSecret(metaData.getAPISecret(session));
