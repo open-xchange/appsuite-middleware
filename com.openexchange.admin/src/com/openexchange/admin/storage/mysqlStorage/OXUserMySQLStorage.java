@@ -458,16 +458,18 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             }
             // Insert new ones
             if (!capsToInsert.isEmpty()) {
-                for (final String capToAdd : capsToAdd) {
-                    final String minusCap = "-" + capToAdd;
-                    if (existing.contains(minusCap)) {
-                        if (null == stmt) {
-                            stmt = con.prepareStatement("DELETE FROM capability_user WHERE cid=? AND user=? AND cap=?");
-                            stmt.setInt(1, contextId);
-                            stmt.setInt(2, user.getId().intValue());
+                if (capsToAdd != null) {
+                    for (final String capToAdd : capsToAdd) {
+                        final String minusCap = "-" + capToAdd;
+                        if (existing.contains(minusCap)) {
+                            if (null == stmt) {
+                                stmt = con.prepareStatement("DELETE FROM capability_user WHERE cid=? AND user=? AND cap=?");
+                                stmt.setInt(1, contextId);
+                                stmt.setInt(2, user.getId().intValue());
+                            }
+                            stmt.setString(3, minusCap);
+                            stmt.addBatch();
                         }
-                        stmt.setString(3, minusCap);
-                        stmt.addBatch();
                     }
                 }
                 if (null != stmt) {
