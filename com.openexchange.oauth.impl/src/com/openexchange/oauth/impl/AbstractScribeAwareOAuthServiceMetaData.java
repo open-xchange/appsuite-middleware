@@ -58,7 +58,6 @@ import java.util.regex.Pattern;
 import javax.net.ssl.SSLHandshakeException;
 import javax.xml.ws.handler.MessageContext.Scope;
 import org.scribe.builder.ServiceBuilder;
-import org.scribe.builder.api.Api;
 import org.scribe.model.OAuthRequest;
 import org.scribe.model.Request;
 import org.scribe.model.RequestTuner;
@@ -122,7 +121,7 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
         // Load configuration
         loadConfiguration();
     }
-    
+
     /**
      * Load the configuration.
      */
@@ -186,7 +185,10 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
         }
 
         final Matcher matcher = compileIdentityPattern(getIdentityFieldName()).matcher(body);
-        return matcher.find() ? matcher.group(1) : "";
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        throw OAuthExceptionCodes.CANNOT_GET_USER_IDENTITY.create(getId());
     }
 
     /*

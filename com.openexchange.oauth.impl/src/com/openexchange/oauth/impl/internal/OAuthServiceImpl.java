@@ -301,18 +301,6 @@ public class OAuthServiceImpl implements OAuthService {
         isNull(arguments, OAuthConstants.ARGUMENT_SESSION);
         Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
         String userIdentity = service.getUserIdentity(session, account.getToken(), account.getSecret());
-        if (Strings.isEmpty(userIdentity)) {
-
-            // TODO: if the userIdentity if null examine the cause for that state
-            //       |--+ Not authorised? 
-            //          |--+ Token valid but scope 'me' not set? Throw appropriate exception and indicate that to the client
-            //          |--+ Token invalid? throw appropriate exception and indicate that to the client
-            //       |--+ No exception but still no user identity? huh?
-            // throw Exception
-
-            throw new OXException(31145, "No user identity could be retrieved");
-        }
-
         account.setUserIdentity(userIdentity);
         // Search in db for an account matching that id
         DefaultOAuthAccount existingAccount = (DefaultOAuthAccount) oauthAccountStorage.findByUserIdentity(session, userIdentity, serviceMetaData);
