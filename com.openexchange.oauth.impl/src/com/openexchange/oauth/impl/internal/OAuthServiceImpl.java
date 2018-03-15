@@ -63,16 +63,6 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.Api;
-import org.scribe.builder.api.DropBoxApi;
-import org.scribe.builder.api.FlickrApi;
-import org.scribe.builder.api.FoursquareApi;
-import org.scribe.builder.api.Google2Api;
-import org.scribe.builder.api.LinkedInApi;
-import org.scribe.builder.api.TumblrApi;
-import org.scribe.builder.api.TwitterApi;
-import org.scribe.builder.api.VkontakteApi;
-import org.scribe.builder.api.XingApi;
-import org.scribe.builder.api.YahooApi;
 import org.scribe.exceptions.OAuthException;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
@@ -680,7 +670,7 @@ public class OAuthServiceImpl implements OAuthService {
 
         // Add requested scopes
         String mappings = OAuthUtil.providerScopesToString(scopes);
-        if (!Strings.isEmpty(mappings)) {
+        if (Strings.isNotEmpty(mappings)) {
             serviceBuilder.scope(mappings);
         }
 
