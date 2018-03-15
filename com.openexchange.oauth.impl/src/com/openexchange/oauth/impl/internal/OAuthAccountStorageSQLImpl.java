@@ -840,7 +840,7 @@ public class OAuthAccountStorageSQLImpl implements OAuthAccountStorage, SecretEn
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = connection.prepareStatement("SELECT identity FROM oauthAccounts WHERE cid = ? AND user = ? AND serviceId = ? AND accountId = ?");
+            stmt = connection.prepareStatement("SELECT identity FROM oauthAccounts WHERE cid = ? AND user = ? AND serviceId = ? AND id = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             stmt.setString(3, serviceId);
