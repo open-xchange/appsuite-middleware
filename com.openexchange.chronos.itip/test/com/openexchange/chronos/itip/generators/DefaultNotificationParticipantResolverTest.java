@@ -143,7 +143,7 @@ public class DefaultNotificationParticipantResolverTest {
         PowerMockito.when(userSettingMailStorage.getUserSettingMail(Matchers.anyInt(), Matchers.eq(Matchers.eq(context)))).thenReturn(null);
 
         // Mock util
-        PowerMockito.when(util.getFolderIdForUser(Matchers.any(Session.class), Matchers.anyString())).thenReturn(null);
+        PowerMockito.when(util.getFolderIdForUser(Matchers.any(Session.class), Matchers.anyString(), Matchers.anyInt())).thenReturn(null);
 
         // Create service to test
         resolver = new DefaultNotificationParticipantResolver(util);

@@ -133,7 +133,7 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
             }
         }
         if (event.getFolderId() == null) {
-            event.setFolderId(getFolderIdForUser(session.getSession(), event.getId()));
+            event.setFolderId(getFolderIdForUser(session.getSession(), event.getId(), session.getUserId()));
         }
         List<Attachment> attachments = storage.getAttachmentStorage().loadAttachments(event.getId());
         if (null != attachments && false == attachments.isEmpty()) {
@@ -160,7 +160,7 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
     }
 
     @Override
-    public String getFolderIdForUser(Session session, String eventId) throws OXException {
+    public String getFolderIdForUser(Session session, String eventId, int userId) throws OXException {
         CalendarSession calendarSession = Services.getService(CalendarService.class).init(session);
         if (eventId == null) {
             return null;
@@ -168,15 +168,15 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
 
         Event loadEvent = getStorage(calendarSession).getEventStorage().loadEvent(eventId, null);
         if (loadEvent == null) {
-            return null;
+            return getPrivateCalendarFolderId(session.getContextId(), userId);
         }
-        loadEvent = getStorage(calendarSession).getUtilities().loadAdditionalEventData(session.getUserId(), loadEvent, null);
+        loadEvent = getStorage(calendarSession).getUtilities().loadAdditionalEventData(userId, loadEvent, null);
         String retval = null;
         try {
-            retval = CalendarUtils.getFolderView(loadEvent, session.getUserId());
+            retval = CalendarUtils.getFolderView(loadEvent, userId);
         } catch (OXException e) {
             if (CalendarExceptionCodes.ATTENDEE_NOT_FOUND.equals(e)) {
-                retval = getPrivateCalendarFolderId(calendarSession);
+                retval = getPrivateCalendarFolderId(calendarSession.getContextId(), calendarSession.getUserId());
             }
         }
         return retval;
@@ -211,10 +211,10 @@ public class CalendarITipIntegrationUtility implements ITipIntegrationUtility {
     }
 
     @Override
-    public String getPrivateCalendarFolderId(CalendarSession session) throws OXException {
-        final Context ctx = contexts.getContext(session.getContextId());
+    public String getPrivateCalendarFolderId(int cid, int userId) throws OXException {
+        final Context ctx = contexts.getContext(cid);
         final OXFolderAccess acc = new OXFolderAccess(ctx);
-        return String.valueOf(acc.getDefaultFolderID(session.getUserId(), FolderObject.CALENDAR));
+        return String.valueOf(acc.getDefaultFolderID(userId, FolderObject.CALENDAR));
     }
 
     private CalendarStorage getStorage(CalendarSession session) throws OXException {
