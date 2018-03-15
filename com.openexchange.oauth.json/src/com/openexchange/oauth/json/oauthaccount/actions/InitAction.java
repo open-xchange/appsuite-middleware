@@ -50,14 +50,12 @@
 package com.openexchange.oauth.json.oauthaccount.actions;
 
 import static com.openexchange.java.Strings.isEmpty;
-import static com.openexchange.java.util.Tools.getUnsignedInteger;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -76,7 +74,6 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.HostInfo;
-import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthInteraction;
@@ -155,32 +152,6 @@ public final class InitAction extends AbstractOAuthTokenAction {
             }
             throw AjaxExceptionCodes.HTTP_ERROR.create(e, Integer.valueOf(HttpServletResponse.SC_OK), StringHelper.valueOf(locale).getString(OXExceptionStrings.MESSAGE));
         }
-    }
-
-    /**
-     * Creates an <code>init?action=reauthorize</code> call-back action
-     * 
-     * @param request The {@link AJAXRequestData}
-     * @param session The server session
-     * @return the {@link AJAXRequestResult} containing the {@link OAuthInteraction} as a {@link JSONObject}
-     * @throws OXException if the call-back action cannot be created
-     */
-    //TODO: move logic to OAuthService.upsert method
-    private AJAXRequestResult reauthorizeCallbackAction(final String accountId, final AJAXRequestData request, final ServerSession session) throws OXException, JSONException {
-        final OAuthService oAuthService = getOAuthService();
-        /*
-         * Get account by identifier
-         */
-        final OAuthAccount account = oAuthService.getAccount(getUnsignedInteger(accountId), session, session.getUserId(), session.getContextId());
-        final String serviceId = account.getMetaData().getId();
-        // Get the scopes
-        Set<OAuthScope> scopesToEnable = getScopes(request, serviceId);
-        // Merge scopes
-        Set<OAuthScope> scopes = new HashSet<>();
-        scopes.addAll(account.getEnabledScopes());
-        scopes.addAll(scopesToEnable);
-
-        return invokeInteraction(request, session, "reauthorize", serviceId, scopes);
     }
 
     /**
