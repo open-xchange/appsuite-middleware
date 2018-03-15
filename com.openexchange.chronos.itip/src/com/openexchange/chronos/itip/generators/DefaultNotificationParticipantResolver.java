@@ -156,7 +156,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
         final User[] participantUsers = userService.getUser(ctx, Coll2i(userIds.keySet()));
         String organizer = determineOrganizer(original, update, ctx);
-        if (organizer.startsWith("mailto:")) {
+        if (organizer.toLowerCase().startsWith("mailto:")) {
             organizer = organizer.substring(7);
         }
 
