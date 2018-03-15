@@ -58,6 +58,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigStorageExceptionCode;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
@@ -129,7 +130,8 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
                 try {
                     writeCon.rollback();
                 } catch (final SQLException e) {
-                    /**/ }
+                    LOG.debug("{}", e.getMessage(), e);
+                }
             }
             LOG.error("", x);
             throw GenericConfigStorageExceptionCode.SQLException.create(x, x.getMessage());
@@ -139,7 +141,8 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
                 try {
                     writeCon.setAutoCommit(true);
                 } catch (final SQLException e) {
-                    /**/ }
+                    LOG.debug("{}", e.getMessage(), e);
+                }
                 provider.releaseWriteConnection(ctx, writeCon);
             }
         }
@@ -186,19 +189,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
         } catch (final SQLException x) {
             throw GenericConfigStorageExceptionCode.SQLException.create(x, null == stmt ? x.getMessage() : stmt.toString());
         } finally {
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (final SQLException x) {
-                }
-
-            }
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (final SQLException x) {
-                }
-            }
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
@@ -229,7 +220,6 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
                 updateIterator.throwException();
                 return null;
             }
-
         });
 
     }
@@ -257,9 +247,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
                 delete.setInt(1, ctx.getContextId());
                 delete.setInt(2, id);
                 delete.executeUpdate();
-
             }
-
         });
 
     }
@@ -282,7 +270,6 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
                 delete.setInt(1, ctx.getContextId());
                 delete.executeUpdate();
             }
-
         });
 
     }
@@ -325,20 +312,7 @@ public class MySQLGenericConfigurationStorage implements GenericConfigurationSto
         } catch (final SQLException e) {
             throw GenericConfigStorageExceptionCode.SQLException.create(e, null == stmt ? e.getMessage() : stmt.toString());
         } finally {
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (final SQLException x) {
-                    // Ignore
-                }
-            }
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (final SQLException x) {
-                    // Ignore
-                }
-            }
+            Databases.closeSQLStuff(rs, stmt);
             if (releaseConnection) {
                 provider.releaseReadConnection(ctx, con);
             }
