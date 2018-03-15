@@ -101,7 +101,7 @@ public class DeliveryStatus extends Report {
 	super("delivery-status");
 	messageDSN = new InternetHeaders(is);
 	logger.fine("got messageDSN");
-	Vector v = new Vector();
+	Vector<InternetHeaders> v = new Vector<>();
 	try {
 	    while (is.available() > 0) {
 		InternetHeaders h = new InternetHeaders(is);

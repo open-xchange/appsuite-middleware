@@ -381,7 +381,7 @@ public class MultipartReport extends MimeMultipart {
     private synchronized void setBodyPart(BodyPart part, int index) 
 				throws MessagingException {
 	if (parts == null)	// XXX - can never happen?
-	    parts = new Vector();
+	    parts = new Vector<BodyPart>();
 
 	if (index < parts.size())
 	    super.removeBodyPart(index);
