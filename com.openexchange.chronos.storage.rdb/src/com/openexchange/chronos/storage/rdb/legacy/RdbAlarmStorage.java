@@ -133,11 +133,14 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
 
     @Override
     public Map<Integer, List<Alarm>> loadAlarms(Event event) throws OXException {
-        Map<Integer, List<Alarm>> alarmsByUserID = new HashMap<Integer, List<Alarm>>();
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
             Map<Integer, ReminderData> remindersByUserID = selectReminders(connection, context.getContextId(), Collections.singleton(event.getId())).get(event.getId());
+            if (null == remindersByUserID) {
+                return Collections.emptyMap();
+            }
+            Map<Integer, List<Alarm>> alarmsByUserID = new HashMap<Integer, List<Alarm>>(remindersByUserID.size());
             for (Map.Entry<Integer, ReminderData> entry : remindersByUserID.entrySet()) {
                 List<Alarm> alarms = optAlarms(event, i(entry.getKey()), entry.getValue());
                 if (null != alarms) {
