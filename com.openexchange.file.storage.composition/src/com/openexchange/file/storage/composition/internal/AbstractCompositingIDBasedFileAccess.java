@@ -1385,7 +1385,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                     listener.onBeforeCopyFile(sourceId, version, destFolderId, update, newData, fields, fileAccess, session);
                 }
             }
-            IDTuple result = fileAccess.copy(new IDTuple(sourceID.getFolderId(), sourceID.getFileId()), version, destinationID.getFolderId(), metadata, newData, fields);
+            IDTuple result = fileAccess.copy(new IDTuple(sourceID.getFolderId(), sourceID.getFileId()), version, destinationID.getFolderId(), metadata, newData, fields != null ? fields : Collections.emptyList());
             FileID newID = new FileID(sourceID.getService(), sourceID.getAccountId(), result.getFolder(), result.getId());
             FolderID newFolderID = new FolderID(sourceID.getService(), sourceID.getAccountId(), result.getFolder());
             postEvent(FileStorageEventHelper.buildCreateEvent(
