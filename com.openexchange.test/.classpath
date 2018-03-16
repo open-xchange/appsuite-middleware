@@ -4,6 +4,7 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sql"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.json"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.google.json"/>
 	<classpathentry exported="true" kind="lib" path="testlib/hamcrest-core-1.3.jar" sourcepath="testlib/source/hamcrest-core-1.3-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/hamcrest-library-1.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/awaitility-1.6.1.jar"/>
