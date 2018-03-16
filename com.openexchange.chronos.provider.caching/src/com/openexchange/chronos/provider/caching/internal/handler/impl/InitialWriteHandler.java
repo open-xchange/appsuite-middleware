@@ -52,14 +52,10 @@ package com.openexchange.chronos.provider.caching.internal.handler.impl;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
-import com.openexchange.chronos.provider.caching.internal.Services;
-import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
 import com.openexchange.exception.OXException;
 
 /**
@@ -85,19 +81,7 @@ public class InitialWriteHandler extends AbstractHandler {
     }
 
     @Override
-    public void persist(EventUpdates diff) throws OXException {
-        CalendarParameters parameters = new DefaultCalendarParameters(cachedCalendarAccess.getParameters())
-            .set(CalendarParameters.PARAMETER_AUTO_HANDLE_DATA_TRUNCATIONS, Boolean.TRUE)
-            .set(CalendarParameters.PARAMETER_AUTO_HANDLE_INCORRECT_STRINGS, Boolean.TRUE)
-        ;
-        new OSGiCalendarStorageOperation<Void>(Services.getServiceLookup(), cachedCalendarAccess.getSession().getContextId(), cachedCalendarAccess.getAccount().getAccountId(), parameters) {
-
-            @Override
-            protected Void call(CalendarStorage storage) throws OXException {
-                create(storage, diff.getAddedItems());
-                return null;
-            }
-
-        }.executeUpdate();
+    public void persist(CalendarStorage storage, EventUpdates diff) throws OXException {
+        create(storage, diff.getAddedItems());
     }
 }

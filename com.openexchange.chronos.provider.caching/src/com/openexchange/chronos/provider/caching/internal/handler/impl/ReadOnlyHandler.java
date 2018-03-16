@@ -55,6 +55,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
 import com.openexchange.chronos.service.EventUpdates;
+import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 
 /**
@@ -80,7 +81,7 @@ public class ReadOnlyHandler extends AbstractHandler {
     }
 
     @Override
-    public void persist(EventUpdates diff) throws OXException {
+    public void persist(CalendarStorage storage, EventUpdates diff) throws OXException {
         // do not persist anything
     }
 

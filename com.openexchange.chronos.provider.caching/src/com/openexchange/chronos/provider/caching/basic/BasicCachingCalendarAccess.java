@@ -63,6 +63,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.Check;
 import com.openexchange.chronos.common.DataHandlers;
+import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.CalendarAccount;
 import com.openexchange.chronos.provider.account.AdministrativeCalendarAccountService;
@@ -94,6 +95,8 @@ import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.EventUpdates;
 import com.openexchange.chronos.service.SearchFilter;
 import com.openexchange.chronos.service.UpdatesResult;
+import com.openexchange.chronos.storage.CalendarStorage;
+import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
 import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.DataArguments;
@@ -295,29 +298,23 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
         CachingHandler cachingHandler = get(type);
         try {
             ExternalCalendarResult externalCalendarResult = cachingHandler.getExternalEvents();
-            if (externalCalendarResult.isUpdated()) {
-                List<Event> existingEvents = cachingHandler.getExistingEvents();
-                EventUpdates diff = null;
-
-                if (externalCalendarResult instanceof DiffAwareExternalCalendarResult) {
-                    diff = ((DiffAwareExternalCalendarResult) externalCalendarResult).calculateDiff(existingEvents);
-                } else {
-                    List<Event> externalEvents = externalCalendarResult.getEvents();
-                    cleanupEvents(externalEvents);
-
-                    boolean containsUID = containsUid(externalEvents);
-                    if (containsUID) {
-                        diff = generateEventDiff(existingEvents, externalEvents);
-                    } else {
-                        //FIXME generate reproducible UID for upcoming refreshes
-                        diff = new EmptyUidUpdates(existingEvents, externalEvents);
-                    }
-                }
-
-                if (!diff.isEmpty()) {
-                    cachingHandler.persist(diff);
-                }
+            if (false == externalCalendarResult.isUpdated()) {
+                return;
             }
+            CalendarParameters parameters = new DefaultCalendarParameters(getParameters())
+                .set(CalendarParameters.PARAMETER_AUTO_HANDLE_DATA_TRUNCATIONS, Boolean.TRUE)
+                .set(CalendarParameters.PARAMETER_AUTO_HANDLE_INCORRECT_STRINGS, Boolean.TRUE)
+            ;
+            new OSGiCalendarStorageOperation<Void>(Services.getServiceLookup(), session.getContextId(), account.getAccountId(), parameters) {
+
+                @Override
+                protected Void call(CalendarStorage storage) throws OXException {
+                    updateCache(storage, cachingHandler, externalCalendarResult);
+                    addWarnings(collectWarnings(storage));
+                    return null;
+                }
+            }.executeUpdate();
+
             cachingHandler.updateLastUpdated(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(1));
             success();
         } catch (OXException e) {
@@ -327,6 +324,41 @@ public abstract class BasicCachingCalendarAccess implements BasicCalendarAccess,
             handleInternally(cachingHandler, e);
             throw e;
         }
+    }
+
+    /**
+     * Updates the cached calendar data in the storage based on the supplied external calendar result.
+     *
+     * @param storage The initialized calendar storage to use
+     * @param cachingHandler The responsible caching handler
+     * @param externalCalendarResult The external calendar result
+     */
+    private void updateCache(CalendarStorage storage, CachingHandler cachingHandler, ExternalCalendarResult externalCalendarResult) throws OXException {
+        List<Event> existingEvents = cachingHandler.getExistingEvents();
+        EventUpdates diff = null;
+
+        if (externalCalendarResult instanceof DiffAwareExternalCalendarResult) {
+            diff = ((DiffAwareExternalCalendarResult) externalCalendarResult).calculateDiff(existingEvents);
+        } else {
+            List<Event> externalEvents = externalCalendarResult.getEvents();
+            cleanupEvents(externalEvents);
+
+            boolean containsUID = containsUid(externalEvents);
+            if (containsUID) {
+                diff = generateEventDiff(existingEvents, externalEvents);
+            } else {
+                //FIXME generate reproducible UID for upcoming refreshes
+                diff = new EmptyUidUpdates(existingEvents, externalEvents);
+            }
+        }
+
+        if (diff.isEmpty()) {
+            /*
+             * no data modified, indicate via exception to "back writable after reading"
+             */
+            throw CalendarExceptionCodes.DB_NOT_MODIFIED.create();
+        }
+        cachingHandler.persist(storage, diff);
     }
 
     private void success() {

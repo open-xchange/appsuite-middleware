@@ -318,6 +318,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     DB_ERROR_TRY_AGAIN("Unexpected database error, try again [%1$s]", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_TRY_AGAIN, 5002),
     /**
+     * <li>Error while reading/writing data from/to the database.</li>
+     * <li>Data not modified in storage</li>
+     */
+    DB_NOT_MODIFIED("Data not modified in storage", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_WARNING, 3040),
+    /**
      * An I/O error occurred: %1$s
      */
     IO_ERROR("An I/O error occurred: %1$s", IO_ERROR_MSG, Category.CATEGORY_ERROR, 5003),

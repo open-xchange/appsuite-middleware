@@ -35,6 +35,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.type,
  com.fasterxml.jackson.core.util, 
  com.google.common.collect,
+ com.google.json,
  javax.servlet,
  javax.servlet.http,
  org.json
