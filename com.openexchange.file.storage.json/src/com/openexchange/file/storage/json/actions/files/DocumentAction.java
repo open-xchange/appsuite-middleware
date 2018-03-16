@@ -148,11 +148,15 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
                     FileHolder fileHolder = document.isRepetitive() ?
                         new FileHolder(getDocumentStream(document), size, document.getMimeType(), document.getName()) :
                         new FileHolder(bufferedInputStreamFor(document.getData()), size, document.getMimeType(), document.getName());
-
-                    if (fileAccess.supports(fileID.getService(), fileID.getAccountId(), FileStorageCapability.RANDOM_FILE_ACCESS)) {
-                        fileHolder.setRandomAccessClosure(new IDBasedFileAccessRandomAccessClosure(request.getId(), request.getVersion(), size, request.getSession()));
+                    try {
+                        if (fileAccess.supports(fileID.getService(), fileID.getAccountId(), FileStorageCapability.RANDOM_FILE_ACCESS)) {
+                            fileHolder.setRandomAccessClosure(new IDBasedFileAccessRandomAccessClosure(request.getId(), request.getVersion(), size, request.getSession()));
+                        }
+                        result = new AJAXRequestResult(fileHolder, "file");
+                        fileHolder = null;
+                    } finally {
+                        Streams.close(fileHolder);
                     }
-                    result = new AJAXRequestResult(fileHolder, "file");
                 }
 
                 if (null != document.getEtag()) {
