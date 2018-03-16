@@ -99,7 +99,7 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
     /**
      * Initializes a new {@link DriveEventServiceImpl}.
      *
-     * @throws OXException
+     * @throws OXException If services are missing
      */
     public DriveEventServiceImpl() throws OXException {
         super();
@@ -206,8 +206,8 @@ public class DriveEventServiceImpl implements org.osgi.service.event.EventHandle
                  */
                 FolderBuffer buffer = folderBuffers.get(contextID);
                 if (null == buffer) {
-                    buffer = new FolderBuffer(contextID, consolidationTime, maxDelayTime, defaultDelayTime);
-                    FolderBuffer existingBuffer = folderBuffers.putIfAbsent(Integer.valueOf(contextID), buffer);
+                    buffer = new FolderBuffer(contextID.intValue(), consolidationTime, maxDelayTime, defaultDelayTime);
+                    FolderBuffer existingBuffer = folderBuffers.putIfAbsent(contextID, buffer);
                     if (null != existingBuffer) {
                         buffer = existingBuffer;
                     }
