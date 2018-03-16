@@ -684,7 +684,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             }
         }
 
-        private synchronized InputStream getReconnectedStream() throws OXException {
+        private InputStream getReconnectedStream() throws OXException {
             ThresholdFileHolder tfh = this.tfh;
             if (null != tfh) {
                 // Already initialized
@@ -694,10 +694,10 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderPath);
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> ma = null;
             ThresholdFileHolder newTfh = null;
-            boolean error = true;
             try {
                 ma = MailAccess.getInstance(session, fa.getAccountId());
                 ma.connect(false);
+
                 newTfh = new ThresholdFileHolder();
                 if (image) {
                     newTfh.write(ma.getMessageStorage().getImageAttachment(fa.getFullName(), uid, id).getInputStream());
@@ -705,15 +705,14 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     newTfh.write(ma.getMessageStorage().getAttachment(fa.getFullName(), uid, id).getInputStream());
                 }
                 this.tfh = newTfh;
-                error = false;
-                return newTfh.getStream();
+                InputStream stream = newTfh.getStream();
+                newTfh = null;
+                return stream;
             } finally {
                 if (null != ma) {
                     ma.close(true);
                 }
-                if (error) {
-                    Streams.close(newTfh);
-                }
+                Streams.close(newTfh);
             }
         }
 
