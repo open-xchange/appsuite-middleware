@@ -65,13 +65,10 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.common.DefaultCalendarParameters;
 import com.openexchange.chronos.common.mapping.AttendeeMapper;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.provider.caching.basic.BasicCachingCalendarAccess;
-import com.openexchange.chronos.provider.caching.internal.Services;
-import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventUpdate;
 import com.openexchange.chronos.service.EventUpdates;
@@ -79,7 +76,6 @@ import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
-import com.openexchange.chronos.storage.operation.OSGiCalendarStorageOperation;
 import com.openexchange.exception.OXException;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -96,12 +92,6 @@ public class UpdateHandler extends AbstractHandler {
 
     public UpdateHandler(BasicCachingCalendarAccess cachedCalendarAccess) {
         super(cachedCalendarAccess);
-    }
-
-    private void processDiff(CalendarStorage calendarStorage, EventUpdates diff) throws OXException {
-        delete(calendarStorage, diff);
-        create(calendarStorage, diff);
-        update(calendarStorage, diff);
     }
 
     private void delete(CalendarStorage calendarStorage, EventUpdates diff) throws OXException {
@@ -250,23 +240,9 @@ public class UpdateHandler extends AbstractHandler {
     }
 
     @Override
-    public void persist(final EventUpdates diff) throws OXException {
-        if (diff.isEmpty()) {
-            return;
-        }
-        CalendarParameters parameters = new DefaultCalendarParameters(cachedCalendarAccess.getParameters())
-            .set(CalendarParameters.PARAMETER_AUTO_HANDLE_DATA_TRUNCATIONS, Boolean.TRUE)
-            .set(CalendarParameters.PARAMETER_AUTO_HANDLE_INCORRECT_STRINGS, Boolean.TRUE)
-        ;
-        new OSGiCalendarStorageOperation<Void>(Services.getServiceLookup(), cachedCalendarAccess.getSession().getContextId(), cachedCalendarAccess.getAccount().getAccountId(), parameters) {
-
-            @Override
-            protected Void call(CalendarStorage storage) throws OXException {
-                processDiff(storage, diff);
-                cachedCalendarAccess.addWarnings(collectWarnings(storage));
-                return null;
-            }
-
-        }.executeUpdate();
+    public void persist(CalendarStorage storage, EventUpdates diff) throws OXException {
+        delete(storage, diff);
+        create(storage, diff);
+        update(storage, diff);
     }
 }

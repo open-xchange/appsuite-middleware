@@ -53,6 +53,7 @@ import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.provider.caching.ExternalCalendarResult;
 import com.openexchange.chronos.service.EventUpdates;
+import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 
 /**
@@ -67,7 +68,7 @@ public interface CachingHandler {
 
     /**
      * Returns the result of querying the underlying account. This contains the {@link Event}s and additional meta information
-     * 
+     *
      * @return A list of {@link Event}s
      * @throws OXException
      */
@@ -75,7 +76,7 @@ public interface CachingHandler {
 
     /**
      * Returns the currently persisted {@link Event}s identified by the given account with all available fields.
-     * 
+     *
      * @return A list of {@link Event}s
      * @throws OXException
      */
@@ -83,15 +84,16 @@ public interface CachingHandler {
 
     /**
      * Persists the given {@link EventUpdates}
-     * 
+     *
+     * @param storage The calendar storage
      * @param diff The {@link EventUpdates} diff to persist
      * @throws OXException
      */
-    void persist(EventUpdates diff) throws OXException;
+    void persist(CalendarStorage storage, EventUpdates diff) throws OXException;
 
     /**
      * Updates the last modified timestamp of the account.
-     * 
+     *
      * @param timestamp The timestamp to set
      */
     void updateLastUpdated(long timestamp);
