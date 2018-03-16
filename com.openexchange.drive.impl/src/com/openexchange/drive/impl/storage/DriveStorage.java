@@ -176,10 +176,12 @@ public class DriveStorage {
             getFolderAccess().rollback();
             throw e;
         } finally {
-            if (t instanceof Closeable) {
-                Streams.close((Closeable) t);
-            } else if (t instanceof AutoCloseable) {
-                Streams.close((AutoCloseable) t);
+            if (null != t) {                
+                if (t instanceof Closeable) {
+                    Streams.close((Closeable) t);
+                } else if (t instanceof AutoCloseable) {
+                    Streams.close((AutoCloseable) t);
+                }
             }
             getFileAccess().finish();
             getFolderAccess().finish();
