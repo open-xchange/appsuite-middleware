@@ -92,9 +92,6 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateExceptionHandler;
-import gnu.trove.procedure.TCharProcedure;
-import gnu.trove.set.TCharSet;
-import gnu.trove.set.hash.TCharHashSet;
 
 /**
  * {@link TemplateServiceImpl} - The default implementation of {@link TemplateService}.
