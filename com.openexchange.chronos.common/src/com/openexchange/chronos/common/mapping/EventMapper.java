@@ -84,6 +84,7 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.RelatedTo;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.Transp;
+import com.openexchange.chronos.common.AlarmUtils;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.DefaultMapper;
@@ -1062,6 +1063,16 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             }
         });
         mappings.put(EventField.ALARMS, new DefaultMapping<List<Alarm>, Event>() {
+
+            @Override
+            public boolean equals(Event event1, Event event2) {
+                try {
+                    return AlarmUtils.getAlarmUpdates(event1.getAlarms(), event2.getAlarms()).isEmpty();
+                } catch (OXException e) {
+                    LoggerFactory.getLogger(EventMapper.class).warn("Unable to compare alarms from event with id {} and id {}.", event1.getId(), event2.getId(), e);
+                }
+                return false;
+            }
 
             @Override
             public void copy(Event from, Event to) throws OXException {
