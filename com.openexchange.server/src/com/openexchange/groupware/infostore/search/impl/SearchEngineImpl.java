@@ -167,10 +167,13 @@ public class SearchEngineImpl extends DBService {
         } finally {
             if (!successful) {
                 if (iter != null) {
+                    // Database resources managed/closed by InfostoreSearchIterator instance
                     SearchIterators.close(iter);
-                } else if (con != null) {
-                    releaseReadConnection(session.getContext(), con);
+                } else {
                     Databases.closeSQLStuff(stmt);
+                    if (con != null) {
+                        releaseReadConnection(session.getContext(), con);
+                    }
                 }
             }
         }
