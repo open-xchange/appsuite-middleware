@@ -53,7 +53,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.exception.OXException;
@@ -85,7 +84,6 @@ public final class MessagingGenericDeleteListener implements DeleteListener {
         if (DeleteEvent.TYPE_USER != event.getType()) {
             return;
         }
-        final DatabaseService databaseService = getService(DatabaseService.class);
         /*
          * Writable connection
          */
