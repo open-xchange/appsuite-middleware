@@ -349,7 +349,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
         FileStorageAccountManagerLookupService lookupService = services.getService(FileStorageAccountManagerLookupService.class);
         return lookupService.getAccountManagerFor(getId());
     }
-    
+
     /**
      * Retrieves a {@link Session} for the specified user in the specified context
      * 
@@ -372,6 +372,11 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
         }
         return service.getAnyActiveSessionForUser(userId, contextId);
     }
-    
+
+    /**
+     * Returns the {@link OAuthScope} for this provider
+     * 
+     * @return the {@link OAuthScope} for this provider
+     */
     protected abstract OAuthScope getScope();
 }
