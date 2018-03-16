@@ -118,7 +118,7 @@ public class TestServlet extends HttpServlet {
             }
             page.append("<br>");
         }
-        page.append("</p><p>The content: ").append(saneScriptTags(this.getBody(req)));
+        page.append("</p><p>The content: ").append(StringEscapeUtils.escapeHtml4(saneScriptTags(this.getBody(req))));
         page.append("</p></body>\n</html>");
 
         /*
