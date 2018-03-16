@@ -236,10 +236,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
     public void onAfterFileStorageAccountDeletion(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) throws OXException {
         OAuthAccountStorage storage = services.getService(OAuthAccountStorage.class);
         int accountId = Integer.parseInt((String) eventProps.get("account"));
-        Session session = (Session) eventProps.get(OAuthConstants.ARGUMENT_SESSION);
-        if (session == null) {
-            session = getUserSession(userId, contextId);
-        }
+        Session session = getUserSession(userId, contextId);
         OAuthAccount account = storage.getAccount(session, accountId);
         Set<OAuthScope> scopes = new HashSet<>();
         for (OAuthScope scope : account.getEnabledScopes()) {

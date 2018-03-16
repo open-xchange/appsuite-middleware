@@ -490,7 +490,6 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                 final FileStorageAccount account = accounts[i];
                 final int accountId = Integer.parseInt(account.getId());
                 Map<String, Object> properties = account.getConfiguration();
-                properties.put("session", session);
                 deleteListenerRegistry.triggerOnBeforeDeletion(accountId, properties, userId, contextId, wc);
                 /*
                  * Delete account configuration using generic conf

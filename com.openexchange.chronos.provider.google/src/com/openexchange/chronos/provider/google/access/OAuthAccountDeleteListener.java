@@ -70,9 +70,16 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class OAuthAccountDeleteListener implements com.openexchange.oauth.OAuthAccountDeleteListener{
+public class OAuthAccountDeleteListener implements com.openexchange.oauth.OAuthAccountDeleteListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(OAuthAccountDeleteListener.class);
+
+    /**
+     * Initialises a new {@link OAuthAccountDeleteListener}.
+     */
+    public OAuthAccountDeleteListener() {
+        super();
+    }
 
     @Override
     public void onBeforeOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
@@ -85,9 +92,9 @@ public class OAuthAccountDeleteListener implements com.openexchange.oauth.OAuthA
         List<CalendarAccount> allAccounts = administrativeCalendarAccountService.getAccounts(cid, user, GoogleCalendarProvider.PROVIDER_ID);
 
         List<CalendarAccount> accountsToDelete = new ArrayList<>(allAccounts.size());
-        for(CalendarAccount acc: allAccounts) {
+        for (CalendarAccount acc : allAccounts) {
             try {
-                if(id == acc.getUserConfiguration().getInt(GoogleCalendarConfigField.OAUTH_ID)) {
+                if (id == acc.getUserConfiguration().getInt(GoogleCalendarConfigField.OAUTH_ID)) {
                     accountsToDelete.add(acc);
                 }
             } catch (JSONException e) {
