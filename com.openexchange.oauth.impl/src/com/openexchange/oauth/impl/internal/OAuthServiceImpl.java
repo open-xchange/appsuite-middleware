@@ -303,6 +303,9 @@ public class OAuthServiceImpl implements OAuthService {
         HttpsURLConnection.setDefaultSSLSocketFactory(Services.getService(SSLSocketFactoryProvider.class).getDefault());
         obtainToken(type, arguments, account, scopes);
         isNull(arguments, OAuthConstants.ARGUMENT_SESSION);
+        String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
+        account.setDisplayName(displayName);
+        account.setEnabledScopes(scopes);
         Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
         String userIdentity = service.getUserIdentity(session, account.getToken(), account.getSecret());
         account.setUserIdentity(userIdentity);
@@ -310,14 +313,13 @@ public class OAuthServiceImpl implements OAuthService {
         DefaultOAuthAccount existingAccount = (DefaultOAuthAccount) oauthAccountStorage.findByUserIdentity(session, userIdentity, serviceMetaData);
         if (existingAccount == null) {
             isNull(arguments, OAuthConstants.ARGUMENT_DISPLAY_NAME);
-            // if nothing found then add the account
-            String displayName = (String) arguments.get(OAuthConstants.ARGUMENT_DISPLAY_NAME);
-            account.setDisplayName(displayName);
-            account.setEnabledScopes(scopes);
             oauthAccountStorage.storeAccount(session, account);
             return account;
         } else {
             // if found then update that account
+            existingAccount.setToken(account.getToken());
+            existingAccount.setSecret(account.getSecret());
+            existingAccount.setDisplayName(account.getDisplayName());
             existingAccount.setEnabledScopes(scopes);
             existingAccount.setUserIdentity(userIdentity);
             oauthAccountStorage.updateAccount(session, existingAccount);
