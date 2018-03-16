@@ -50,21 +50,23 @@
 package com.openexchange.share.groupware;
 
 /**
- * {@link DriveTargetProxyType} - Enumeration of the different types that are available in the drive module and might become available as
+ * {@link KnownTargetProxyType} - Enumeration of the different types that are available in the drive module and might become available as
  * {@link TargetProxy}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since v7.8.0
  */
-public enum DriveTargetProxyType implements TargetProxyType {
+public enum KnownTargetProxyType implements TargetProxyType {
     IMAGE("picture", TargetProxyTypeStrings.IMAGE_FILE_TYPE),
     FILE("file", TargetProxyTypeStrings.GENERAL_FILE_TYPE),
-    FOLDER("folder", TargetProxyTypeStrings.FOLDER_TYPE);
+    FOLDER("folder", TargetProxyTypeStrings.FOLDER_TYPE),
+    CALENDAR("calendar", TargetProxyTypeStrings.CALENDAR_TYPE),
+    ;
 
     private String id;
     private String displayName;
 
-    DriveTargetProxyType(String id, String displayName) {
+    KnownTargetProxyType(String id, String displayName) {
         this.id = id;
         this.displayName = displayName;
     }
