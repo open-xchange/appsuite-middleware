@@ -158,7 +158,7 @@ public class IdleManager {
      */
     public IdleManager(Session session, Executor es) throws IOException {
 	this.es = es;
-	logger = new MailLogger(this.getClass(), "DEBUG IMAP", session);
+	logger = new MailLogger(this.getClass(), "DEBUG IMAP", session.getDebug(), session.getDebugOut());
 	selector = Selector.open();
 	es.execute(new Runnable() {
 	    @Override

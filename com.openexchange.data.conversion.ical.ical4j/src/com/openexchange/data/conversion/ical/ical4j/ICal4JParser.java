@@ -67,7 +67,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -124,32 +123,6 @@ public class ICal4JParser implements ICalParser {
         CompatibilityHints.setHintEnabled(
               	CompatibilityHints.KEY_RELAXED_VALIDATION, true);
 
-    }
-
-    @Override
-    public String parseProperty(final String propertyName, final InputStream ical) {
-        if (null == propertyName || null == ical) {
-            return null;
-        }
-        BufferedReader reader = null;
-        try {
-            reader = new BufferedReader(new InputStreamReader(ical, UTF8));
-            final net.fortuna.ical4j.model.Calendar calendar = parse(reader);
-            if (calendar == null) {
-                return null;
-            }
-            final Property property = calendar.getProperty(propertyName.toUpperCase(Locale.US));
-            return null == property ? null : property.getValue();
-        } catch (final UnsupportedCharsetException e) {
-            // IGNORE
-            return null;
-        } catch (final ConversionError e){
-            return null;
-        } catch (final RuntimeException e){
-            return null;
-        } finally {
-            closeSafe(reader);
-        }
     }
 
     @Override

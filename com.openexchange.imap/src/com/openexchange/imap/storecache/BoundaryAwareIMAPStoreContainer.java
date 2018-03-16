@@ -92,7 +92,7 @@ public final class BoundaryAwareIMAPStoreContainer extends UnboundedIMAPStoreCon
 
     @Override
     public IMAPStore getStore(javax.mail.Session imapSession, String login, String pw, Session session) throws MessagingException, InterruptedException {
-        final int maxNumAuthenticated = PropUtil.getIntSessionProperty(imapSession, "mail.imap.maxNumAuthenticated", 0);
+        final int maxNumAuthenticated = PropUtil.getIntProperty(imapSession.getProperties(), "mail.imap.maxNumAuthenticated", 0);
         if (maxNumAuthenticated <= 0) {
             return super.getStore(imapSession, login, pw, session);
         }

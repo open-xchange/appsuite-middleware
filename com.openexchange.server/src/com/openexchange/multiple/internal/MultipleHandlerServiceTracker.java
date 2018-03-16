@@ -81,6 +81,8 @@ public final class MultipleHandlerServiceTracker implements ServiceTrackerCustom
         final MultipleHandlerFactoryService addedService = context.getService(reference);
         if (null == addedService) {
             LOG.warn("Added service is null!", new Throwable());
+            context.ungetService(reference);
+            return null;
         }
         final MultipleHandlerRegistry registry = ServerServiceRegistry.getInstance().getService(MultipleHandlerRegistry.class);
         if (null != registry && registry.addFactoryService(addedService)) {

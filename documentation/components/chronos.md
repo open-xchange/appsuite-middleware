@@ -239,6 +239,13 @@ After the general restrictions have been checked and are fulfilled, the followin
 
 ### Personal calendar folder of User A -> Personal calendar folder of other User B (*group-scheduled* event with multiple attendees)
 - Not allowed to avoid ambiguities
+
+### Public calendar folder -> Personal calendar folder of User A
+- Update attendee A's parent folder identifier accordingly
+- Assign default parent folder identifier for all other user attendees 
+
+### Personal calendar folder of User A -> Public calendar folder
+- Take over common public folder identifier for all user attendees 
   
 ### References / further reading
 - com.openexchange.chronos.impl.performer.MovePerformer

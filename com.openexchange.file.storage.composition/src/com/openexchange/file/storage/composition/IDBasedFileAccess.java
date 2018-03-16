@@ -149,7 +149,7 @@ public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
      * @param destFolderId The folder to copy into
      * @param update Optional updates to the copy. May be null
      * @param newData Optional new binary data. May be null
-     * @param The fields to use from the update.
+     * @param modifiedFields The fields to use from the update.
      * @return The (fully qualified) unique identifier of the copied file
      * @throws OXException If operation fails
      */

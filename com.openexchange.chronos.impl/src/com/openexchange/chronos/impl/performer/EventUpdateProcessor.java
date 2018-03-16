@@ -432,7 +432,7 @@ public class EventUpdateProcessor implements EventUpdate {
             if (null != organizer && false == matches(originalEvent.getOrganizer(), organizer)) {
                 throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), EventField.ORGANIZER);
             }
-            updatedEvent.removeOrganizer(); // ignore
+            updatedEvent.setOrganizer(originalEvent.getOrganizer()); // ignore
         }
         if (PublicType.getInstance().equals(folder.getType())) {
             if (null == originalEvent.getFolderId() || updatedEvent.containsFolderId()) {
@@ -451,7 +451,7 @@ public class EventUpdateProcessor implements EventUpdate {
                 if (false == matches(updatedEvent.getCalendarUser(), originalEvent.getCalendarUser())) {
                     throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), EventField.CALENDAR_USER);
                 }
-                updatedEvent.removeCalendarUser(); // ignore
+                updatedEvent.setCalendarUser(originalEvent.getCalendarUser()); // ignore
             }
         }
     }

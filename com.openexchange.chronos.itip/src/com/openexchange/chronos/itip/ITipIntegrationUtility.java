@@ -72,7 +72,7 @@ public interface ITipIntegrationUtility {
 
     List<Event> getExceptions(Event original, CalendarSession session) throws OXException;
 
-    String getPrivateCalendarFolderId(CalendarSession session) throws OXException;
+    String getPrivateCalendarFolderId(int cid, int userId) throws OXException;
 
     void createEvent(Event event, CalendarSession session) throws OXException;
 
@@ -84,6 +84,6 @@ public interface ITipIntegrationUtility {
 
     Event loadEvent(Event event, CalendarSession session) throws OXException;
 
-    String getFolderIdForUser(Session session, String eventId) throws OXException;
+    String getFolderIdForUser(Session session, String eventId, int userId) throws OXException;
 
 }
