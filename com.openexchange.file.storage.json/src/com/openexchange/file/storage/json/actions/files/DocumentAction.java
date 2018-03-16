@@ -132,8 +132,13 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
                 AJAXRequestResult result;
                 if (inlineIfPossible && document.getSize() > 0 && document.getSize() <= DEFAULT_IN_MEMORY_THRESHOLD) {
                     ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-                    fileHolder.write(document.getData());
-                    result = new AJAXRequestResult(fileHolder, "file");
+                    try {
+                        fileHolder.write(document.getData());
+                        result = new AJAXRequestResult(fileHolder, "file");
+                        fileHolder = null;
+                    } finally {
+                        Streams.close(fileHolder);
+                    }
                 } else {
                     long size = document.getSize();
                     if (false == document.getFile().isAccurateSize()) {
