@@ -65,6 +65,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.i18n.MailStrings;
@@ -466,31 +467,37 @@ public final class CachingUserSettingMailStorage extends UserSettingMailStorage 
     }
 
     private static PreparedStatement getUpdateStmt(final UserSettingMail usm, final int user, final Context ctx, final Connection writeCon) throws SQLException {
-        PreparedStatement stmt;
-        stmt = writeCon.prepareStatement(SQL_UPDATE);
-        stmt.setInt(1, usm.getBitsValue());
-        stmt.setString(2, usm.getSendAddr() == null ? "" : usm.getSendAddr());
-        stmt.setString(3, usm.getReplyToAddr() == null ? "" : usm.getReplyToAddr());
-        stmt.setInt(4, usm.getMsgFormat());
-        String s = getDisplayMsgHeadersString(usm);
-        if (s == null) {
-            stmt.setNull(5, Types.VARCHAR);
-        } else {
-            stmt.setString(5, s);
+        PreparedStatement stmt = null;
+        try {
+            stmt = writeCon.prepareStatement(SQL_UPDATE);
+            stmt.setInt(1, usm.getBitsValue());
+            stmt.setString(2, usm.getSendAddr() == null ? "" : usm.getSendAddr());
+            stmt.setString(3, usm.getReplyToAddr() == null ? "" : usm.getReplyToAddr());
+            stmt.setInt(4, usm.getMsgFormat());
+            String s = getDisplayMsgHeadersString(usm);
+            if (s == null) {
+                stmt.setNull(5, Types.VARCHAR);
+            } else {
+                stmt.setString(5, s);
+            }
+            s = null;
+            stmt.setInt(6, usm.getAutoLinebreak());
+            stmt.setString(7, usm.getStdTrashName() == null ? MailStrings.TRASH : usm.getStdTrashName());
+            stmt.setString(8, usm.getStdSentName() == null ? MailStrings.SENT : usm.getStdSentName());
+            stmt.setString(9, usm.getStdDraftsName() == null ? MailStrings.DRAFTS : usm.getStdDraftsName());
+            stmt.setString(10, usm.getStdSpamName() == null ? MailStrings.SPAM : usm.getStdSpamName());
+            stmt.setLong(11, usm.getUploadQuota());
+            stmt.setLong(12, usm.getUploadQuotaPerFile());
+            stmt.setString(13, usm.getConfirmedSpam() == null ? MailStrings.CONFIRMED_SPAM : usm.getConfirmedSpam());
+            stmt.setString(14, usm.getConfirmedHam() == null ? MailStrings.CONFIRMED_HAM : usm.getConfirmedHam());
+            stmt.setInt(15, ctx.getContextId());
+            stmt.setInt(16, user);
+            PreparedStatement retval = stmt;
+            stmt = null;
+            return retval;
+        } finally {
+            Databases.closeSQLStuff(stmt);
         }
-        s = null;
-        stmt.setInt(6, usm.getAutoLinebreak());
-        stmt.setString(7, usm.getStdTrashName() == null ? MailStrings.TRASH : usm.getStdTrashName());
-        stmt.setString(8, usm.getStdSentName() == null ? MailStrings.SENT : usm.getStdSentName());
-        stmt.setString(9, usm.getStdDraftsName() == null ? MailStrings.DRAFTS : usm.getStdDraftsName());
-        stmt.setString(10, usm.getStdSpamName() == null ? MailStrings.SPAM : usm.getStdSpamName());
-        stmt.setLong(11, usm.getUploadQuota());
-        stmt.setLong(12, usm.getUploadQuotaPerFile());
-        stmt.setString(13, usm.getConfirmedSpam() == null ? MailStrings.CONFIRMED_SPAM : usm.getConfirmedSpam());
-        stmt.setString(14, usm.getConfirmedHam() == null ? MailStrings.CONFIRMED_HAM : usm.getConfirmedHam());
-        stmt.setInt(15, ctx.getContextId());
-        stmt.setInt(16, user);
-        return stmt;
     }
 
     private static PreparedStatement getUpdateStmtBits(final UserSettingMail usm, final int user, final Context ctx, final Connection writeCon) throws SQLException {
