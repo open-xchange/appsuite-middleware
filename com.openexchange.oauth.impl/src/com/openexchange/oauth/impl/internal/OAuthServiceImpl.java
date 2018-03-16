@@ -315,16 +315,16 @@ public class OAuthServiceImpl implements OAuthService {
             isNull(arguments, OAuthConstants.ARGUMENT_DISPLAY_NAME);
             oauthAccountStorage.storeAccount(session, account);
             return account;
-        } else {
-            // if found then update that account
-            existingAccount.setToken(account.getToken());
-            existingAccount.setSecret(account.getSecret());
-            existingAccount.setDisplayName(account.getDisplayName());
-            existingAccount.setEnabledScopes(scopes);
-            existingAccount.setUserIdentity(userIdentity);
-            oauthAccountStorage.updateAccount(session, existingAccount);
-            return existingAccount;
         }
+
+        // if found then update that account
+        existingAccount.setToken(account.getToken());
+        existingAccount.setSecret(account.getSecret());
+        existingAccount.setDisplayName(account.getDisplayName());
+        existingAccount.setEnabledScopes(scopes);
+        existingAccount.setUserIdentity(userIdentity);
+        oauthAccountStorage.updateAccount(session, existingAccount);
+        return existingAccount;
     }
 
     /*
