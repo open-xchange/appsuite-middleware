@@ -693,12 +693,15 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                     if (documentPreviewEnabled) {
                         PreviewDocument preview = getDocumentPreview(document, this.mimeType, session);
                         InputStream in = null;
+                        ThresholdFileHolder previewSink = null;
                         try {
                             in = preview.getThumbnail();
-                            encodedThumbnail = new ThresholdFileHolder(false);
-                            encodedThumbnail.write(in);
+                            previewSink = new ThresholdFileHolder(false);
+                            previewSink.write(in);
+                            encodedThumbnail = previewSink;
+                            previewSink = null; // Avoid premature closing
                         } finally {
-                            Streams.close(in);
+                            Streams.close(in, previewSink);
                         }
                     }
                 }
