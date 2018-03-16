@@ -227,7 +227,7 @@ public class TestServlet extends HttpServlet {
                 do {
                     sb.append(c, 0, count);
                 } while ((count = isr.read(c)) > 0);
-                return sb.toString();
+                return StringEscapeUtils.escapeHtml4(sb.toString());
             }
             return "";
         } catch (final UnsupportedEncodingException e) {
