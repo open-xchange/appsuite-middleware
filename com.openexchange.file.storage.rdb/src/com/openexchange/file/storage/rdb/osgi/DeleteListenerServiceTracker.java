@@ -60,7 +60,7 @@ import com.openexchange.file.storage.rdb.internal.DeleteListenerRegistry;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class DeleteListenerServiceTracker implements ServiceTrackerCustomizer<FileStorageAccountDeleteListener,FileStorageAccountDeleteListener> {
+public final class DeleteListenerServiceTracker implements ServiceTrackerCustomizer<FileStorageAccountDeleteListener, FileStorageAccountDeleteListener> {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeleteListenerServiceTracker.class);
 
