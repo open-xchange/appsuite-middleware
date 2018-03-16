@@ -120,7 +120,7 @@ public class CalDAVURLField implements AdditionalFolderField {
 
     @Override
     public Object renderJSON(AJAXRequestData requestData, Object value) {
-        if (null == value || false == String.class.isInstance(value) || null == requestData.getHostname()) {
+        if (null == value || false == String.class.isInstance(value) || null == requestData || null == requestData.getHostname()) {
             return value;
         }
         return ((String) value).replaceAll("\\[hostname\\]", requestData.getHostname());
