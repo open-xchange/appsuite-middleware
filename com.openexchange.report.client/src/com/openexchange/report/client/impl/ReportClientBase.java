@@ -49,6 +49,7 @@
 
 package com.openexchange.report.client.impl;
 
+import static com.openexchange.java.Autoboxing.L;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -556,7 +557,7 @@ public class ReportClientBase extends AbstractJMXTools {
                     Iterator<?> keys = errors.keys();
                     while (keys.hasNext()) {
                         String key = (String) keys.next();
-                        Object object = (String) errors.get(key);
+                        Object object = errors.get(key);
                         if (object instanceof String) {
                             System.out.println(errors.get(key));
                         }
@@ -892,7 +893,7 @@ public class ReportClientBase extends AbstractJMXTools {
      * Example:
      * 0 hours, 28 minutes, 3 seconds
      * 
-     * @param interval, the time in milliseconds
+     * @param interval the time in milliseconds
      *            @return, a pretty time String
      */
     private String prettyPrintTimeInterval(long interval) {
@@ -906,8 +907,8 @@ public class ReportClientBase extends AbstractJMXTools {
         long diff[] = new long[] { 0, 0, 0 };
         /* sec */diff[2] = (diffInSeconds >= 60 ? diffInSeconds % 60 : diffInSeconds);
         /* min */diff[1] = (diffInSeconds = (diffInSeconds / 60)) >= 60 ? diffInSeconds % 60 : diffInSeconds;
-        /* hours */diff[0] = (diffInSeconds = diffInSeconds / 60);
+        /* hours */diff[0] = (diffInSeconds / 60);
 
-        return String.format("%d hour%s, %d minute%s, %d second%s", diff[0], diff[0] > 1 || diff[0] == 0 ? "s" : "", diff[1], diff[1] > 1 || diff[1] == 0 ? "s" : "", diff[2], diff[2] > 1 || diff[2] == 0 ? "s" : "");
+        return String.format("%d hour%s, %d minute%s, %d second%s", L(diff[0]), diff[0] > 1 || diff[0] == 0 ? "s" : "", L(diff[1]), diff[1] > 1 || diff[1] == 0 ? "s" : "", L(diff[2]), diff[2] > 1 || diff[2] == 0 ? "s" : "");
     }
 }
