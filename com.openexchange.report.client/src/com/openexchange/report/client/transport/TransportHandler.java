@@ -71,6 +71,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLException;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.java.Streams;
 import com.openexchange.report.client.configuration.ReportConfiguration;
 import com.openexchange.report.client.container.ClientLoginCount;
 import com.openexchange.report.client.container.ContextDetail;
@@ -268,11 +269,14 @@ public class TransportHandler {
         System.out.println("Saving report to " + tmpfile.getAbsolutePath());
         // Compose report from stored data, depending on the report-type
         DataOutputStream tfo = new DataOutputStream(new FileOutputStream(tmpfile));
-        tfo.writeBytes(reportString);
-        if (metadata.getBoolean("needsComposition")) {
-            appendStoredContentToOutputstream(metadata, tfo, false);
+        try {
+            tfo.writeBytes(reportString);
+            if (metadata.getBoolean("needsComposition")) {
+                appendStoredContentToOutputstream(metadata, tfo, false);
+            }
+        } finally {
+            Streams.close(tfo);
         }
-        tfo.close();
     }
 
     private JSONObject buildJSONObject(final List<Total> totals, final List<MacDetail> macDetails, final List<ContextDetail> contextDetails, Map<String, String> serverConfiguration, final String[] versions, final ClientLoginCount clc, final ClientLoginCount clcYear) throws JSONException {

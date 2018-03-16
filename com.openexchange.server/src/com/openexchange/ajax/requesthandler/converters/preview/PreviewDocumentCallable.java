@@ -153,7 +153,15 @@ final class PreviewDocumentCallable extends AbstractTask<PreviewDocument> {
                 String mimeType = MimeType2ExtMap.getContentType(fileHolder.getName(), null);
                 if (null == mimeType) {
                     // Unknown. Then detect MIME type by content.
-                    fileHolder = new ThresholdFileHolder().write(stream).setContentInfo(fileHolder);
+                    ThresholdFileHolder tfh = new ThresholdFileHolder();
+                    try {
+                        tfh.write(stream);
+                        tfh.setContentInfo(fileHolder);
+                        fileHolder = tfh;
+                        tfh = null;
+                    } finally {
+                        Streams.close(tfh);
+                    }
                     mimeType = AJAXUtility.detectMimeType(fileHolder.getStream());
                     this.fileHolder = fileHolder;
                     stream1 = new InterruptibleInputStream(fileHolder.getStream());
@@ -162,8 +170,9 @@ final class PreviewDocumentCallable extends AbstractTask<PreviewDocument> {
                 } else {
                     LOG.debug("Determined MIME type for file {} by name: {}", fileHolder.getName(), mimeType);
                 }
-                fileHolder = new ModifyableFileHolder(fileHolder);
-                ((ModifyableFileHolder)fileHolder).setContentType(mimeType);
+                ModifyableFileHolder modifyableFileHolder = new ModifyableFileHolder(fileHolder);
+                modifyableFileHolder.setContentType(mimeType);
+                fileHolder = modifyableFileHolder;
             }
 
             // Prepare properties for preview generation
