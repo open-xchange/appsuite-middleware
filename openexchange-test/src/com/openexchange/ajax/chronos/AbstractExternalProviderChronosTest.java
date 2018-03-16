@@ -94,12 +94,12 @@ public abstract class AbstractExternalProviderChronosTest extends AbstractChrono
     public void setUp() throws Exception {
         super.setUp();
         setUpConfiguration();
-        client.execute(new StartMockServerRequest());
+        getClient().execute(new StartMockServerRequest());
     }
     
     protected void clear(String uri) throws OXException, IOException, JSONException {
         ClearRequest clearRequest = new ClearRequest(uri);
-        client.execute(clearRequest);
+        getClient().execute(clearRequest);
     }
 
     /**
@@ -179,7 +179,7 @@ public abstract class AbstractExternalProviderChronosTest extends AbstractChrono
     protected void mock(MockRequestMethod method, String uri, String responseContent, int httpStatus, Map<String, String> responseHeaders, int delay) throws OXException, IOException, JSONException {
         InputStream stream = new ByteArrayInputStream(responseContent.getBytes(StandardCharsets.UTF_8.name()));
         MockRequest mockRequest = new MockRequest(method, uri, stream, httpStatus, responseHeaders, delay);
-        client.execute(mockRequest);
+        getClient().execute(mockRequest);
     }
 
     /**

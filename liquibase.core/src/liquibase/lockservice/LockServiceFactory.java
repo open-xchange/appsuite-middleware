@@ -16,17 +16,24 @@ import liquibase.servicelocator.ServiceLocator;
  */
 public class LockServiceFactory {
 
-	private static LockServiceFactory instance;
+	private static volatile LockServiceFactory instance;
 
 	private List<LockService> registry = new ArrayList<LockService>();
 
 	private Map<Database, LockService> openLockServices = new ConcurrentHashMap<Database, LockService>();
 
 	public static LockServiceFactory getInstance() {
-		if (instance == null) {
-			instance = new LockServiceFactory();
-		}
-		return instance;
+	    LockServiceFactory tmp = instance;
+	    if (null == tmp) {
+            synchronized (LockServiceFactory.class) {
+                tmp = instance;
+                if (null == tmp) {
+                    tmp = new LockServiceFactory();
+                    instance = tmp;
+                }
+            }
+        }
+		return tmp;
 	}
 
 	private LockServiceFactory() {

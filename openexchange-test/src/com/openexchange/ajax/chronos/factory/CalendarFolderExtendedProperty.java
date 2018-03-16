@@ -58,6 +58,7 @@ public enum CalendarFolderExtendedProperty {
     COLOR("color"),
     DESCRIPTION("description"),
     SCHEDULE_TRANSP("scheduleTransp"),
+    LAST_UPDATE("lastUpdate"),
     USED_FOR_SYNC("usedForSync");
 
     private final String fieldName;

@@ -90,7 +90,7 @@ public class SplitBirthdayFieldsSetter extends AbstractContactSwitcherWithDelega
             contact.setBirthday( calculateBirthday() );
         }
 
-        return new Boolean(true);
+        return true;
     }
 
     private Date calculateBirthday() {

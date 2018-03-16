@@ -1113,8 +1113,8 @@ public class SieveHandler {
                         if (temp.startsWith("{")) {
                             int cnt = Integer.parseInt(temp.substring(1, temp.length() - 1));
                             char[] buf = new char[cnt];
-                            bis_sieve.read(buf, 0, cnt);
-                            cont = com.openexchange.tools.encoding.Base64.decode(new String(buf));
+                            int read = bis_sieve.read(buf, 0, cnt);
+                            cont = com.openexchange.tools.encoding.Base64.decode(new String(buf, 0, read));
                         } else {
                             // dovecot managesieve sends quoted strings
                             cont = com.openexchange.tools.encoding.Base64.decode(temp.replaceAll("\"", ""));

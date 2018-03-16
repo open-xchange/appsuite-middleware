@@ -146,7 +146,7 @@ public class TaskAttributeFetcher implements SearchAttributeFetcher<Task> {
 
             @Override
             public Object getObject(final Task candidate) {
-                return Integer.valueOf(candidate.getPriority());
+                return candidate.getPriority();
             }
         });
 

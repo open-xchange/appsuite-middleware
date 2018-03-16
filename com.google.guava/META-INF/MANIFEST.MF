@@ -2,30 +2,34 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Guava: Google Core Libraries for Java
 Bundle-SymbolicName: com.google.guava
-Bundle-Version: 23.0.0
+Bundle-Version: 24.1.0
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Eclipse-BuddyPolicy: registered
-Bundle-ClassPath: lib/guava-23.0.jar,
+Bundle-ClassPath: lib/guava-24.1-jre.jar,
  lib/animal-sniffer-annotations-1.16.jar,
  lib/error_prone_annotations-2.1.0.jar,
  lib/j2objc-annotations-1.1.jar
-Export-Package: com.google.common.annotations;version="23.0.0",
- com.google.common.base;version="23.0.0",
- com.google.common.cache;version="23.0.0",
- com.google.common.collect;version="23.0.0",
- com.google.common.escape;version="23.0.0",
- com.google.common.eventbus;version="23.0.0",
- com.google.common.graph;version="23.0.0",
- com.google.common.hash;version="23.0.0",
- com.google.common.html;version="23.0.0",
- com.google.common.io;version="23.0.0",
- com.google.common.math;version="23.0.0",
- com.google.common.net;version="23.0.0",
- com.google.common.primitives;version="23.0.0",
- com.google.common.reflect;version="23.0.0",
- com.google.common.util.concurrent;version="23.0.0",
- com.google.common.xml;version="23.0.0"
+Export-Package: com.google.common.annotations;version="24.1.0",
+ com.google.common.base;version="24.1.0",
+ com.google.common.cache;version="24.1.0";uses:="com.google.common.base,com.google.common.collect,com.google.common.util.concurrent",
+ com.google.common.collect;version="24.1.0";uses:="com.google.common.base",
+ com.google.common.escape;version="24.1.0";uses:="com.google.common.base",
+ com.google.common.eventbus;version="24.1.0",
+ com.google.common.graph;version="24.1.0";uses:="com.google.common.collect",
+ com.google.common.hash;version="24.1.0";uses:="com.google.common.base",
+ com.google.common.html;version="24.1.0";uses:="com.google.common.escape",
+ com.google.common.io;version="24.1.0";
+  uses:="com.google.common.base,
+   com.google.common.collect,
+   com.google.common.graph,
+   com.google.common.hash",
+ com.google.common.math;version="24.1.0",
+ com.google.common.net;version="24.1.0";uses:="com.google.common.base,com.google.common.collect,com.google.common.escape",
+ com.google.common.primitives;version="24.1.0";uses:="com.google.common.base",
+ com.google.common.reflect;version="24.1.0";uses:="com.google.common.collect,com.google.common.io",
+ com.google.common.util.concurrent;version="24.1.0";uses:="com.google.common.base,com.google.common.collect",
+ com.google.common.xml;version="24.1.0";uses:="com.google.common.escape"
 Import-Package: javax.annotation,
  javax.annotation.concurrent,
  javax.annotation.meta,

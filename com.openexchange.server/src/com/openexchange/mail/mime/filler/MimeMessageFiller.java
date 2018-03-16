@@ -2068,33 +2068,44 @@ public class MimeMessageFiller {
     } // End of ManagedFileImageProvider
 
     static class ImageDataImageProvider implements ImageProvider {
-
-        private final Data<InputStream> data;
-
-        private final String contentType;
-
-        private final String fileName;
+        
+        private final ThresholdFileHolder fileHolder;
 
         public ImageDataImageProvider(ImageDataSource imageData, ImageLocation imageLocation, Session session) throws OXException {
             super();
-            this.data = imageData.getData(InputStream.class, imageData.generateDataArgumentsFrom(imageLocation), session);
-            final DataProperties dataProperties = data.getDataProperties();
-            fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
-            String contentType = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
-            if (null != contentType) {
-                final String lcct = toLowerCase(contentType).trim();
-                final String defaultContentType = "application/octet-stream";
-                if (!lcct.startsWith("image/") && !lcct.startsWith(defaultContentType)) {
-                    throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(imageLocation.getImageId(), imageLocation.getId(), imageLocation.getFolder());
-                }
-                if (lcct.startsWith(defaultContentType) && !Strings.isEmpty(fileName)) {
-                    final String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
-                    if (!defaultContentType.equals(contentTypeByFileName)) {
-                        contentType = contentTypeByFileName + (lcct.length() > defaultContentType.length() ? lcct.substring(defaultContentType.length()) : "");
+            ThresholdFileHolder fileHolder = null;
+            InputStream in = null;
+            try {
+                Data<InputStream> data = imageData.getData(InputStream.class, imageData.generateDataArgumentsFrom(imageLocation), session);
+                in = data.getData();
+                
+                fileHolder = new ThresholdFileHolder();
+                fileHolder.write(in);
+                in = null; // Already closed if written to ThresholdFileHolder
+                
+                DataProperties dataProperties = data.getDataProperties();
+                String fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
+                fileHolder.setName(fileName);
+                String contentType = dataProperties.get(DataProperties.PROPERTY_CONTENT_TYPE);
+                if (null != contentType) {
+                    final String lcct = toLowerCase(contentType).trim();
+                    final String defaultContentType = "application/octet-stream";
+                    if (!lcct.startsWith("image/") && !lcct.startsWith(defaultContentType)) {
+                        throw MailExceptionCode.ATTACHMENT_NOT_FOUND.create(imageLocation.getImageId(), imageLocation.getId(), imageLocation.getFolder());
+                    }
+                    if (lcct.startsWith(defaultContentType) && Strings.isNotEmpty(fileName)) {
+                        final String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
+                        if (!defaultContentType.equals(contentTypeByFileName)) {
+                            contentType = contentTypeByFileName + (lcct.length() > defaultContentType.length() ? lcct.substring(defaultContentType.length()) : "");
+                        }
                     }
                 }
+                fileHolder.setContentType(contentType);
+                this.fileHolder = fileHolder;
+                fileHolder = null; // Avoid premature closing
+            } finally {
+                Streams.close(in, fileHolder);
             }
-            this.contentType = contentType;
         }
 
         @Override
@@ -2104,24 +2115,17 @@ public class MimeMessageFiller {
 
         @Override
         public String getContentType() {
-            return contentType;
+            return fileHolder.getContentType();
         }
 
         @Override
         public DataSource getDataSource() throws OXException {
-            try {
-                return new MessageDataSource(data.getData(), contentType);
-            } catch (final IOException e) {
-                if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
-                    throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
-                }
-                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-            }
+            return new FileHolderDataSource(fileHolder, fileHolder.getContentType());
         }
 
         @Override
         public String getFileName() {
-            return fileName;
+            return fileHolder.getName();
         }
     } // End of ImageDataImageProvider
 

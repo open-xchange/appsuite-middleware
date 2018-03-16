@@ -367,6 +367,15 @@ public class DiffToChangeLog {
             }
 
             @Override
+            public int hashCode() {
+                final int prime = 31;
+                int result = 1;
+                result = prime * result + ((from == null) ? 0 : from.hashCode());
+                result = prime * result + ((to == null) ? 0 : to.hashCode());
+                return result;
+            }
+
+            @Override
             public boolean equals(Object obj) {
                 if (!(obj instanceof Edge)) {
                     return false;
@@ -374,6 +383,7 @@ public class DiffToChangeLog {
                 Edge e = (Edge) obj;
                 return e.from == from && e.to == to;
             }
+            
         }
     }
 }

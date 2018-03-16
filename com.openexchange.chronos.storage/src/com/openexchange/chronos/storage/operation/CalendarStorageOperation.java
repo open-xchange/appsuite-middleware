@@ -132,6 +132,10 @@ public abstract class CalendarStorageOperation<T> {
 
     /**
      * Performs the operation using the initialized calendar storage.
+     * <p/>
+     * During <i>write</i>-operations, may throw {@link CalendarExceptionCodes#DB_NOT_MODIFIED} to indicate that no data was actually
+     * updated by the operation, and the connection can be returned to the pool <i>after reading</i>, hence bypass the replication
+     * monitor. In this case, the operation always returns <code>null</code>.
      *
      * @param session The calendar session
      * @param storage The initialized calendar storage to use
@@ -223,6 +227,12 @@ public abstract class CalendarStorageOperation<T> {
             writeConnection.commit();
             committed = true;
             return result;
+        } catch (OXException e) {
+            if (CalendarExceptionCodes.DB_NOT_MODIFIED.equals(e)) {
+                LOG.debug("No data modified, going to back writable connection after reading.", e);
+                return null;
+            }
+            throw e;
         } catch (SQLException e) {
             throw CalendarExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {

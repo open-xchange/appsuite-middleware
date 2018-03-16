@@ -238,7 +238,8 @@ public class Protocol {
      */
     public Protocol(InputStream in, PrintStream out, Properties props,
 				boolean debug) throws IOException {
-    this.auditLogEnabled = null == props ? false : PropUtil.getBooleanProperty(props, prefix + ".auditLog.enabled", false);
+    prefix = "mail.imap";
+    this.auditLogEnabled = null == props ? false : PropUtil.getBooleanProperty(props, "mail.imap" + ".auditLog.enabled", false);
     this.host = "localhost";
 	this.port = 143;
 	this.user = null;

@@ -112,7 +112,8 @@ public class SearchEngineImpl extends DBService {
     }
 
     public SearchEngineImpl(final DBProvider provider) {
-        super(provider);
+        super();
+        setProvider(provider);
         security.setProvider(provider);
     }
 

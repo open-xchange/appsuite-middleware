@@ -77,13 +77,6 @@ public abstract class AbstractConfigAwareAPIClientSession extends AbstractAPICli
     protected AbstractConfigAwareAPIClientSession() {}
 
     JSONObject oldData;
-    private AJAXClient ajaxClient;
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        ajaxClient = new AJAXClient(testUser);
-    }
 
     /**
      * Changes the configurations given by {@link #getNeededConfigurations()}.
@@ -95,18 +88,11 @@ public abstract class AbstractConfigAwareAPIClientSession extends AbstractAPICli
         if (!map.isEmpty()) {
             // change configuration to new values
             ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<>(map, getScope(), getReloadables());
-            ChangePropertiesResponse response = getAjaxClient().execute(req);
+            ChangePropertiesResponse response = getClient().execute(req);
             if (oldData != null) {
                 oldData = ResponseWriter.getJSON(response.getResponse()).getJSONObject("data");
             }
         }
-    }
-
-    /**
-     * @return
-     */
-    private AJAXClient getAjaxClient() {
-        return ajaxClient;
     }
 
     @Override
@@ -139,7 +125,7 @@ public abstract class AbstractConfigAwareAPIClientSession extends AbstractAPICli
                 return;
             }
             ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<>(newMap, getScope(), getReloadables());
-            ChangePropertiesResponse response = getAjaxClient().execute(req);
+            ChangePropertiesResponse response = getClient().execute(req);
             oldData = ResponseWriter.getJSON(response.getResponse());
         } finally {
             super.tearDown();

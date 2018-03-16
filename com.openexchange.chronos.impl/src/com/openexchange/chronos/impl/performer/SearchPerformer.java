@@ -139,16 +139,19 @@ public class SearchPerformer extends AbstractQueryPerformer {
      * @return The found events
      */
     public Map<String, EventsResult> perform(List<String> folderIds, List<SearchFilter> filters, List<String> queries) throws OXException {
+        /*
+         * search events in folders
+         */
         Check.minimumSearchPatternLength(queries, minimumSearchPatternLength);
         List<CalendarFolder> folders = getFolders(folderIds);
+        SearchTerm<?> searchTerm = buildSearchTerm(folders, queries, null == folderIds);
         EventField[] fields = getFields(session, EventField.ORGANIZER, EventField.ATTENDEES);
-        SearchOptions sortOptions = new SearchOptions(session);
-        List<Event> foundEvents = storage.getEventStorage().searchEvents(buildSearchTerm(folders, queries), filters, sortOptions, fields);
+        List<Event> foundEvents = storage.getEventStorage().searchEvents(searchTerm, filters, new SearchOptions(session), fields);
         foundEvents = storage.getUtilities().loadAdditionalEventData(-1, foundEvents, fields);
-        Map<String, List<Event>> eventsPerFolderId = getEventsPerFolderId(foundEvents, folders);
         /*
          * build & return events result per folder
          */
+        Map<String, List<Event>> eventsPerFolderId = getEventsPerFolderId(foundEvents, folders);
         Map<String, EventsResult> resultsPerFolderId = new HashMap<String, EventsResult>(eventsPerFolderId.size());
         for (Entry<String, List<Event>> entry : eventsPerFolderId.entrySet()) {
             resultsPerFolderId.put(entry.getKey(), new DefaultEventsResult(sortEvents(entry.getValue())));
@@ -181,12 +184,28 @@ public class SearchPerformer extends AbstractQueryPerformer {
         return eventsPerFolderId;
     }
 
-    private SearchTerm<?> buildSearchTerm(List<CalendarFolder> folders, List<String> queries) throws OXException {
-        SearchTerm<?> queriesTerm = SearchUtils.buildSearchTerm(queries);
-        if (null == queriesTerm) {
-            return getFolderIdsTerm(folders);
+    private SearchTerm<?> buildSearchTerm(List<CalendarFolder> folders, List<String> queries, boolean includeUserAttendee) throws OXException {
+        /*
+         * build search term based on considered folders, including all further events of the user attendee if necessary
+         */
+        SearchTerm<?> searchTerm = getFolderIdsTerm(folders);
+        if (includeUserAttendee) {
+            searchTerm = new CompositeSearchTerm(CompositeOperation.OR)
+                .addSearchTerm(searchTerm)
+                .addSearchTerm(getSearchTerm(AttendeeField.ENTITY, SingleOperation.EQUALS, I(session.getUserId())))
+            ;
         }
-        return new CompositeSearchTerm(CompositeOperation.AND).addSearchTerm(getFolderIdsTerm(folders)).addSearchTerm(queriesTerm);
+        /*
+         * combine term with queries term as needed
+         */
+        SearchTerm<?> queriesTerm = SearchUtils.buildSearchTerm(queries);
+        if (null != queriesTerm) {
+            searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+                .addSearchTerm(searchTerm)
+                .addSearchTerm(queriesTerm)
+            ;
+        }
+        return searchTerm;
     }
 
     private static SearchTerm<?> getPublicFolderIdsTerm(Set<String> folderIDs, boolean onlyOwn, int userID) {
