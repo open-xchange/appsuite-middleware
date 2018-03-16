@@ -64,6 +64,7 @@ import org.bouncycastle.openpgp.PGPEncryptedDataGenerator;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPLiteralData;
 import org.bouncycastle.openpgp.PGPLiteralDataGenerator;
+import org.bouncycastle.openpgp.PGPPrivateKey;
 import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPSecretKey;
 import org.bouncycastle.openpgp.PGPSignature;
@@ -133,7 +134,11 @@ public class PGPEncrypter {
             signatureGenerator = new PGPSignatureGenerator(new JcaPGPContentSignerBuilder(algorithm, PGPUtil.SHA512).setProvider("BC"));
             try {
                 PBESecretKeyDecryptor extractor = new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(password);
-                signatureGenerator.init(PGPSignature.BINARY_DOCUMENT, signingKey.extractPrivateKey(extractor));
+                PGPPrivateKey extractedPrivateKey = signingKey.extractPrivateKey(extractor);
+                if (null == extractedPrivateKey) {
+                    throw new IllegalArgumentException("Could not extract private PGP key from specified signing key.");
+                }
+                signatureGenerator.init(PGPSignature.BINARY_DOCUMENT, extractedPrivateKey);
             }
             catch(Exception e) {
                 if (armored) {
