@@ -117,7 +117,6 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
     // Thrown in case OAuth for a certain provider access has been disabled for a user
     public static final String DISABLED_OAUTH_SERVICE_META_DATA = "'%1$s' OAuth service is not enabled for you.";
 
-
     /**
      * Initializes a new {@link OAuthExceptionMessages}.
      */

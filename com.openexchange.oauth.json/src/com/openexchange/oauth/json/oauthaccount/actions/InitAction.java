@@ -63,6 +63,8 @@ import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.Client;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -93,9 +95,11 @@ import com.openexchange.tools.session.ServerSession;
  * {@link InitAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a> (refactoring)
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public final class InitAction extends AbstractOAuthTokenAction {
+
+    private static final Logger LOG = LoggerFactory.getLogger(InitAction.class);
 
     /**
      * Initializes a new {@link InitAction}.
@@ -205,6 +209,9 @@ public final class InitAction extends AbstractOAuthTokenAction {
         oauthState.put(OAuthConstants.ARGUMENT_AUTH_URL, interaction.getAuthorizationURL());
         session.setParameter(uuid, oauthState);
         session.setParameter(Session.PARAM_TOKEN, oauthSessionToken);
+
+        String authorizationURL = interaction.getAuthorizationURL();
+        LOG.debug("Initialised an OAuth workflow with {}", authorizationURL);
         /*
          * Check redirect parameter
          */
@@ -213,6 +220,7 @@ public final class InitAction extends AbstractOAuthTokenAction {
             HttpServletResponse response = request.optHttpServletResponse();
             if (null != response) {
                 try {
+                    LOG.debug("Sending redirect to the '{}' provider", serviceId);
                     response.sendRedirect(interaction.getAuthorizationURL());
                     //response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
                     return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(ResultType.DIRECT);
@@ -221,6 +229,7 @@ public final class InitAction extends AbstractOAuthTokenAction {
                 }
             }
         }
+        LOG.debug("Returning the initialised OAuth interaction for '{}'", serviceId);
         /*
          * Write as JSON
          */

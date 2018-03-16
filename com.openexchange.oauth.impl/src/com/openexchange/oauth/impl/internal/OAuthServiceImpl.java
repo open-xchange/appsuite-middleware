@@ -248,6 +248,10 @@ public class OAuthServiceImpl implements OAuthService {
                 }
             }
 
+            if (LOG.isDebugEnabled()) {
+                String message = scribeToken != null ? "Acquired a request token for '{}'" : "Did not acquire a request token for '{}' (not required)";
+                LOG.debug(message, serviceMetaData);
+            }
             // Return interaction
             OAuthToken requestToken = scribeToken == null ? OAuthToken.EMPTY_TOKEN : new ScribeOAuthToken(scribeToken);
             OAuthInteractionType interactionType = cbUrl == null ? OAuthInteractionType.OUT_OF_BAND : OAuthInteractionType.CALLBACK;

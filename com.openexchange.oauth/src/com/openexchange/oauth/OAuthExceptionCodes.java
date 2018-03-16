@@ -278,7 +278,7 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * The wrong account has been selected for '%1$s'
      */
-    WRONG_OAUTH_ACCOUNT("The wrong account has been selected for '%1$s'", CATEGORY_USER_INPUT, 46, null)
+    WRONG_OAUTH_ACCOUNT("The wrong account has been selected for '%1$s'", CATEGORY_USER_INPUT, 46, null),
 
     ;
 
