@@ -72,6 +72,8 @@ import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
 import com.openexchange.file.storage.rdb.Services;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.delete.DeleteEvent;
+import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretEncryptionService;
@@ -479,14 +481,18 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
          * Writable connection
          */
         final int contextId = session.getContextId();
+        int userId = session.getUserId();
         final Connection wc = databaseService.getWritable(contextId);
         boolean rollback = false;
         try {
             Databases.startTransaction(wc); // BEGIN
             rollback = true;
+            final DeleteListenerRegistry deleteListenerRegistry = DeleteListenerRegistry.getInstance();
             for (int i = 0; i < accounts.length; i++) {
                 final FileStorageAccount account = accounts[i];
                 final int accountId = Integer.parseInt(account.getId());
+                final Map<String, Object> properties = Collections.<String, Object> emptyMap();
+                deleteListenerRegistry.triggerOnBeforeDeletion(accountId, properties, userId, contextId, wc);                
                 /*
                  * Delete account configuration using generic conf
                  */
@@ -512,6 +518,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                     stmt.setString(pos++, serviceId);
                     stmt.setInt(pos, accountId);
                     stmt.executeUpdate();
+                    deleteListenerRegistry.triggerOnAfterDeletion(accountId, properties, userId, contextId, wc);
                 } finally {
                     Databases.closeSQLStuff(stmt);
                 }
