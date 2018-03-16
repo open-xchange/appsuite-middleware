@@ -518,17 +518,17 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             String id = entry.getKey();
             try {
                 ThresholdFileHolder encodedThumbnail = entry.getValue().get(timeout, TimeUnit.MILLISECONDS);
-                if (null != encodedThumbnail) {
+                if (null == encodedThumbnail) {
+                    // No thumbnail available. Put default thumbnail.
+                    previews.put(id, getDefaultThumbnail(mimeTypes.get(id), templatePath));
+                } else {
                     encodedThumbnail.automanaged();
+                    previews.put(id, encodedThumbnail);
                 }
-                previews.put(id, encodedThumbnail);
             } catch (InterruptedException | TimeoutException e) {
                 LOG.debug(e.getMessage(), e);
             } catch (ExecutionException e) {
                 LOG.error(e.getMessage(), e);
-            }
-            if (null == previews.get(id)) {
-                previews.put(id, getDefaultThumbnail(mimeTypes.get(id), templatePath));
             }
         }
         return previews;
