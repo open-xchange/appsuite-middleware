@@ -65,22 +65,22 @@ public interface FileStorageAccountDeleteListener {
      *
      * @param id The file storage account identfier
      * @param eventProps Optional properties for delete event
-     * @param user The user idenifier
-     * @param cid The context identifier
-     * @param con The used connection <i>in transactional state</i>
+     * @param userId The user idenifier
+     * @param contextId The context identifier
+     * @param connection The used connection <i>in transactional state</i>
      * @throws OXException If a critical error occurs which should abort file storage account deletion
      */
-    public void onBeforeFileStorageAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException;
+    public void onBeforeFileStorageAccountDeletion(int id, Map<String, Object> eventProps, int userId, int contextId, Connection connection) throws OXException;
 
     /**
      * Handles the event <i>after</i> the denoted OAuth account is deleted.
      *
      * @param id The file storage account identifier
      * @param eventProps Optional properties for delete event
-     * @param user The user identifier
-     * @param cid The context identifier
-     * @param con The used connection <i>in transactional state</i>
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param connection The used connection <i>in transactional state</i>
      * @throws OXException If a critical error occurs which should abort OAuth account deletion
      */
-    public void onAfterFileStorageAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException;
+    public void onAfterFileStorageAccountDeletion(int id, Map<String, Object> eventProps, int userId, int contextId, Connection connection) throws OXException;
 }

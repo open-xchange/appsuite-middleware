@@ -72,8 +72,6 @@ import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
 import com.openexchange.file.storage.rdb.Services;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteRegistry;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretEncryptionService;
@@ -491,8 +489,9 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
             for (int i = 0; i < accounts.length; i++) {
                 final FileStorageAccount account = accounts[i];
                 final int accountId = Integer.parseInt(account.getId());
-                final Map<String, Object> properties = Collections.<String, Object> emptyMap();
-                deleteListenerRegistry.triggerOnBeforeDeletion(accountId, properties, userId, contextId, wc);                
+                Map<String, Object> properties = account.getConfiguration();
+                properties.put("session", session);
+                deleteListenerRegistry.triggerOnBeforeDeletion(accountId, properties, userId, contextId, wc);
                 /*
                  * Delete account configuration using generic conf
                  */
