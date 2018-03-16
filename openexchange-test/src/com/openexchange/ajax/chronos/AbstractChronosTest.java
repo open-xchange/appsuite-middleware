@@ -96,7 +96,7 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
     private FoldersApi foldersApi;
     protected ImportApi importApi;
     protected ExportApi exportApi;
-    protected String folderId;
+    protected String defaultFolderId;
 
     protected EventManager eventManager;
     protected AssetManager assetManager;
@@ -114,16 +114,16 @@ public class AbstractChronosTest extends AbstractEnhancedApiClientSession {
     public void setUp() throws Exception {
         super.setUp();
         LOG.info("Setup for test ...");
-        ApiClient client = getClient();
+        ApiClient client = getApiClient();
         rememberClient(client);
         EnhancedApiClient enhancedClient = getEnhancedApiClient();
         rememberClient(enhancedClient);
         defaultUserApi = new UserApi(client, enhancedClient, testUser);
         chronosApi = defaultUserApi.getChronosApi();
         foldersApi = defaultUserApi.getFoldersApi();
-        folderId = getDefaultFolder();
+        defaultFolderId = getDefaultFolder();
         assetManager = new AssetManager();
-        eventManager = new EventManager(defaultUserApi, folderId);
+        eventManager = new EventManager(defaultUserApi, defaultFolderId);
         importApi = new ImportApi(client);
         exportApi = new ExportApi(client);
         importExportManager = new ICalImportExportManager(exportApi, importApi);

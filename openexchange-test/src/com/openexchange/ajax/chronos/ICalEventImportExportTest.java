@@ -90,7 +90,7 @@ public class ICalEventImportExportTest extends AbstractChronosTest {
 
     private String importICalFile(String fileName) throws Exception {
         Asset asset = assetManager.getAsset(AssetType.ics, fileName);
-        return importExportManager.importICalFile(defaultUserApi.getSession(), folderId, new File(asset.getAbsolutePath()), true, false);
+        return importExportManager.importICalFile(defaultUserApi.getSession(), defaultFolderId, new File(asset.getAbsolutePath()), true, false);
     }
 
     @Test

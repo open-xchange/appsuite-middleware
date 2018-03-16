@@ -53,7 +53,6 @@ import static org.hamcrest.Matchers.is;
 import java.util.Collection;
 import org.junit.Assert;
 import org.junit.Test;
-import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.sessionmanagement.AbstractSessionManagementTest;
 import com.openexchange.testing.httpclient.models.AllSessionsResponse;
 import com.openexchange.testing.httpclient.models.SessionManagementData;
@@ -87,7 +86,6 @@ public class RemoveAllOtherSessionsTest extends AbstractSessionManagementTest {
     @Test
     public void testRemoveAllOtherSessionsWithoutBlacklisted() throws Exception {
         // Third client
-        client = new AJAXClient(testUser, BLACKLISTED_CLIENT);
         String sessionId = apiClient.getSession();
 
         AllSessionsResponse response = getApi().all(sessionId);

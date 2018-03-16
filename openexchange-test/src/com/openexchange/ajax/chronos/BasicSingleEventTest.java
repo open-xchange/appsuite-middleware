@@ -118,7 +118,7 @@ public class BasicSingleEventTest extends AbstractChronosTest {
 
         EventId eventId = new EventId();
         eventId.setId(expectedEventData.getId());
-        eventId.setFolder(folderId);
+        eventId.setFolder(defaultFolderId);
 
         eventManager.deleteEvent(eventId);
 
@@ -163,14 +163,14 @@ public class BasicSingleEventTest extends AbstractChronosTest {
         EventData event = eventManager.createEvent(EventFactory.createSingleTwoHourEvent(defaultUserApi.getCalUser(), "testGetEvent"));
         EventId eventId = new EventId();
         eventId.setId(event.getId());
-        eventId.setFolder(folderId);
+        eventId.setFolder(defaultFolderId);
 
         // Get event directly
         EventData actualEvent = eventManager.getEvent(event.getId());
         AssertUtil.assertEventsEqual(event, actualEvent);
 
         // Get all events
-        List<EventData> events = eventManager.getAllEvents(today, tomorrow, false, folderId, null, null, false);
+        List<EventData> events = eventManager.getAllEvents(today, tomorrow, false, defaultFolderId, null, null, false);
         assertEquals(1, events.size());
         AssertUtil.assertEventsEqual(event, events.get(0));
 

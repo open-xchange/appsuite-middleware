@@ -70,6 +70,8 @@ import com.openexchange.testing.httpclient.models.EventData;
 @RunWith(BlockJUnit4ClassRunner.class)
 public class BasicAlarmTest extends AbstractAlarmTest {
 
+    private String newFolderId;
+
     /**
      * Initializes a new {@link BasicAlarmTest}.
      */
@@ -80,7 +82,7 @@ public class BasicAlarmTest extends AbstractAlarmTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        folderId = createAndRememberNewFolder(defaultUserApi, defaultUserApi.getSession(), getDefaultFolder(), defaultUserApi.getCalUser());
+        newFolderId = createAndRememberNewFolder(defaultUserApi, defaultUserApi.getSession(), getDefaultFolder(), defaultUserApi.getCalUser());
     }
 
     /**

@@ -78,7 +78,7 @@ public class AbstractAttendeeTest extends AbstractChronosTest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        ApiClient client = generateClient(testUser2);
+        ApiClient client = generateApiClient(testUser2);
         rememberClient(client);
         EnhancedApiClient enhancedClient = generateEnhancedClient(testUser2);
         rememberClient(enhancedClient);
@@ -86,11 +86,6 @@ public class AbstractAttendeeTest extends AbstractChronosTest {
         user2 = new UserApi(client, enhancedClient, testUser2);
         folderId2 = getDefaultFolder(user2.getSession(), client);
         eventManager2 = new EventManager(user2, getDefaultFolder(user2.getSession(), client));
-    }
-
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
     }
 
     protected EventData updateAlarms(String eventId, long timestamp, List<Alarm> body, String recurrenceId) throws Exception {

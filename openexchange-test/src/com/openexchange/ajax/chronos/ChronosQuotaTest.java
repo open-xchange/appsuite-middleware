@@ -95,7 +95,7 @@ public class ChronosQuotaTest extends AbstractChronosTest {
     public void setUp() throws Exception {
         super.setUp();
 
-        getClient().login(testUser.getLogin(), testUser.getPassword());
+        getApiClient().login(testUser.getLogin(), testUser.getPassword());
 
         Map<String, String> userAttributes = new HashMap<>(1);
         userAttributes.put("com.openexchange.quota.calendar", "0");
@@ -109,8 +109,8 @@ public class ChronosQuotaTest extends AbstractChronosTest {
      */
     @Test
     public void testExeededQuota() throws Exception {
-        QuotaApi api = new QuotaApi(getClient());
-        QuotasResponse response = api.getQuotaInformation(getClient().getSession(), MODULE, "0");
+        QuotaApi api = new QuotaApi(getApiClient());
+        QuotasResponse response = api.getQuotaInformation(getApiClient().getSession(), MODULE, "0");
         Object data = response.getData();
 
         // Check for the right type
@@ -130,10 +130,10 @@ public class ChronosQuotaTest extends AbstractChronosTest {
          */
 
         // Try creating a new event
-        LoginResponse login = defaultUserApi.login(testUser.getLogin(), testUser.getPassword(), getClient());
+        LoginResponse login = defaultUserApi.login(testUser.getLogin(), testUser.getPassword(), getApiClient());
 
         // Can't use EventManager, we need to check the exception here
-        ChronosCalendarResultResponse resultResponse = defaultUserApi.getChronosApi().createEvent(login.getSession(), getDefaultFolder(login.getSession(), getClient()), createSingleEvent("SingleEventQuotaTest"), Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, null, Boolean.FALSE);
+        ChronosCalendarResultResponse resultResponse = defaultUserApi.getChronosApi().createEvent(login.getSession(), getDefaultFolder(login.getSession(), getApiClient()), createSingleEvent("SingleEventQuotaTest"), Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, null, null, Boolean.FALSE);
 
         // Check that creation failed
         assertThat("No response!", resultResponse, is(not(nullValue())));
@@ -151,15 +151,15 @@ public class ChronosQuotaTest extends AbstractChronosTest {
     }
 
     private void setQuota(Map<String, String> props) throws Exception {
-        com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(getClient().getUserId().intValue());
+        com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(getApiClient().getUserId().intValue());
         for (String property : props.keySet()) {
             user.setUserAttribute("config", property, props.get(property));
         }
         Credentials credentials = new Credentials(admin.getUser(), admin.getPassword());
         OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
-        iface.change(new Context(Integer.valueOf(client.getValues().getContextId())), user, credentials);
+        iface.change(new Context(Integer.valueOf(getClient().getValues().getContextId())), user, credentials);
 
-        List<UserProperty> userConfigurationSource = iface.getUserConfigurationSource(new Context(Integer.valueOf(client.getValues().getContextId())), user, "quota", credentials);
+        List<UserProperty> userConfigurationSource = iface.getUserConfigurationSource(new Context(Integer.valueOf(getClient().getValues().getContextId())), user, "quota", credentials);
         System.out.println("User configuration related to 'quota' after changing the following properties:");
         for (String property : props.keySet()) {
             System.out.println(property + "' to " + props.get(property));
@@ -174,7 +174,7 @@ public class ChronosQuotaTest extends AbstractChronosTest {
         EventData singleEvent = new EventData();
         singleEvent.setPropertyClass("PUBLIC");
         Attendee attendee = new Attendee();
-        attendee.entity(getClient().getUserId());
+        attendee.entity(getApiClient().getUserId());
         attendee.cuType(CuTypeEnum.INDIVIDUAL);
         singleEvent.setAttendees(Collections.singletonList(attendee));
         singleEvent.setStartDate(startDate);
