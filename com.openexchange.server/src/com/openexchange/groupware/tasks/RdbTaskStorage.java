@@ -572,26 +572,24 @@ public class RdbTaskStorage extends TaskStorage {
      */
     @Override
     public boolean containsNotSelfCreatedTasks(final Context ctx, final Connection con, final int userId, final int folderId) throws OXException {
-        final String sql = "SELECT COUNT(id) FROM task JOIN task_folder USING (cid,id) WHERE task.cid=? AND folder=? AND created_from!=?";
-        boolean retval = true;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
         try {
-            final PreparedStatement stmt = con.prepareStatement(sql);
+            stmt = con.prepareStatement("SELECT COUNT(id) FROM task JOIN task_folder USING (cid,id) WHERE task.cid=? AND folder=? AND created_from!=?");
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, folderId);
             stmt.setInt(pos++, userId);
-            final ResultSet result = stmt.executeQuery();
-            if (result.next()) {
-                retval = result.getInt(1) > 0;
-            } else {
+            result = stmt.executeQuery();
+            if (!result.next()) {
                 throw TaskExceptionCode.NO_COUNT_RESULT.create();
             }
-            result.close();
-            stmt.close();
+            return result.getInt(1) > 0;
         } catch (final SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
+        } finally {
+            Databases.closeSQLStuff(result, stmt);
         }
-        return retval;
     }
 
     /** TODO move to {@link SQL} class. */
