@@ -191,7 +191,7 @@ public class ProxyAuthenticatorActivator implements BundleActivator {
                     }
 
                     // Either invoke previous authenticator (if any) or return super implementation
-                    if (null == previousAuthenticator) {
+                    if (null == previousAuthenticator || null == getPasswordAuthenticationMethod) {
                         return super.getPasswordAuthentication();
                     }
 
