@@ -3793,9 +3793,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     LOG.error("", e);
                 }
             } else {
-                MailAccess<?, ?> otherAccess = MailAccess.getInstance(session, pathAccount);
-                otherAccess.connect(true);
+                MailAccess<?, ?> otherAccess = null;
                 try {
+                    otherAccess = MailAccess.getInstance(session, pathAccount);
+                    otherAccess.connect(true);
                     otherAccess.getMessageStorage().updateMessageFlags(path.getFolder(), ids, MailMessage.FLAG_FORWARDED, true);
                     try {
                         if (MailMessageCache.getInstance().containsFolderMessages(otherAccess.getAccountId(), path.getFolder(), session.getUserId(), contextId)) {
@@ -3808,7 +3809,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         LOG.error("", e);
                     }
                 } finally {
-                    otherAccess.close(false);
+                    if (null != otherAccess) {
+                        otherAccess.close(false);
+                    }
                 }
             }
         }
