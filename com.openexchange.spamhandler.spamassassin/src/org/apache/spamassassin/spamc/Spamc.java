@@ -458,7 +458,7 @@ public class Spamc {
      */
     public void setHosts(final String[] hosts) {
         if (this.hosts == null) {
-            this.hosts = new ArrayList();
+            this.hosts = new ArrayList<>();
         } else {
             this.hosts.clear();
         }
@@ -697,7 +697,7 @@ public class Spamc {
     }
 
     /** All supported protocol versions */
-    private final static List VALID_PROTOCOL_VERSIONS = new ArrayList();
+    private final static List<String> VALID_PROTOCOL_VERSIONS = new ArrayList<>(6);
     static {
         VALID_PROTOCOL_VERSIONS.add(ProtocolVersions.V1_0);
         VALID_PROTOCOL_VERSIONS.add(ProtocolVersions.V1_1);
@@ -874,7 +874,7 @@ public class Spamc {
         if (message == null) {
             throw new IllegalArgumentException("Message contents not set");
         }
-        return sendCommand(command, (Map) null, message);
+        return sendCommand(command, (Map<String, String>) null, message);
     }
 
     /**
@@ -889,7 +889,7 @@ public class Spamc {
      * @param message
      * @return the query
      */
-    private String constructQuery(final String command, final Map headers, final String message) {
+    private String constructQuery(final String command, final Map<String, String> headers, final String message) {
         final StringBuilder query = new StringBuilder();
         query.append(command);
         query.append(' ');
@@ -899,7 +899,7 @@ public class Spamc {
 
         // create a new Map to store all the headers the calling code passed in,
         // plus more we will add later
-        final Map newHeaders = new HashMap();
+        final Map<String, String> newHeaders = new HashMap<>();
         if (headers != null) {
             newHeaders.putAll(headers);
         }
@@ -918,13 +918,13 @@ public class Spamc {
         newHeaders.put(Headers.CONTENT_LENGTH, Long.toString(message != null ? message.getBytes().length : 0));
 
         // append all of the headers to the query;
-        final Iterator iterator = newHeaders.entrySet().iterator();
-        Map.Entry entry;
+        final Iterator<Map.Entry<String, String>> iterator = newHeaders.entrySet().iterator();
+        Map.Entry<String, String> entry;
         while (iterator.hasNext()) {
-            entry = (Map.Entry) iterator.next();
-            query.append((String) entry.getKey());
+            entry = iterator.next();
+            query.append(entry.getKey());
             query.append(": ");
-            query.append((String) entry.getValue());
+            query.append(entry.getValue());
             query.append("\r\n");
         }
 
@@ -940,10 +940,10 @@ public class Spamc {
                 contentLength = compresser.deflate(compressedMessage);
                 // query.append(compressedMessage, 0, contentLength);
                 throw new IllegalStateException("Compression is not supported");
-            } else {
-                contentLength = message.getBytes().length;
-                query.append(message);
             }
+
+            contentLength = message.getBytes().length;
+            query.append(message);
         } else {
             contentLength = 0;
         }
@@ -951,7 +951,7 @@ public class Spamc {
         return query.toString();
     }
 
-    private SpamdResponse sendCommand(final String command, final Map headers, final String message) throws UnknownHostException, IOException {
+    private SpamdResponse sendCommand(final String command, final Map<String, String> headers, final String message) throws UnknownHostException, IOException {
         final String query = constructQuery(command, headers, message);
         final String queryResponse = getQueryResponse(query);
         if (isEmpty(queryResponse)) {
@@ -971,8 +971,8 @@ public class Spamc {
      * @throws IllegalStateException
      *             if there is not at least one host set
      */
-    private List getAllHostAddresses() throws IllegalStateException, UnknownHostException {
-        final List addresses = new ArrayList();
+    private List<InetAddress> getAllHostAddresses() throws IllegalStateException, UnknownHostException {
+        final List<InetAddress> addresses = new ArrayList<>();
         if ((getHosts() == null) || (getHosts().isEmpty())) {
             setHost(DEFAULT_HOST);
         }
@@ -1023,7 +1023,7 @@ public class Spamc {
         Socket socket = null;
         try {
             IOException lastException = null;
-            final List addresses = getAllHostAddresses();
+            final List<InetAddress> addresses = getAllHostAddresses();
             if (addresses.isEmpty()) {
                 throw new IllegalStateException("No destination address");
             }
@@ -1032,7 +1032,7 @@ public class Spamc {
             InetAddress address;
             InetSocketAddress inetSocketAddress;
             do {
-                address = (InetAddress) addresses.get(addressIndex);
+                address = addresses.get(addressIndex);
                 Socket attempt = null;
                 try {
                     inetSocketAddress = new InetSocketAddress(address, getPort());
@@ -1251,7 +1251,7 @@ public class Spamc {
             throw new IllegalArgumentException("Can't both set and remove remote");
         }
 
-        final Map headers = new HashMap();
+        final Map<String, String> headers = new HashMap<>();
         if (spam) {
             headers.put(Headers.MESSAGE_CLASS, Headers.MESSAGE_CLASS_SPAM);
         } else {
@@ -1431,7 +1431,7 @@ public class Spamc {
      * @throws ConfigurationException
      */
     private static String[] combineArgs(final File userConfig, final String[] args) throws ConfigurationException {
-        final List combined = new ArrayList();
+        final List<String> combined = new ArrayList<>();
         File configFile;
         boolean userDefinedConfigFile;
         if (userConfig == null) {
@@ -1473,7 +1473,7 @@ public class Spamc {
         // we can't use the toArray() method because that returns the wrong data
         // type
         for (int i = 0; i < combined.size(); i++) {
-            combinedArray[i] = (String) combined.get(i);
+            combinedArray[i] = combined.get(i);
         }
         return combinedArray;
     }
@@ -2082,63 +2082,62 @@ public class Spamc {
         }
     }
 
-    private static Collection options = null;
+    private static Collection<AbstractOption> options = null;
 
-    private static Map shortArgumentsMap = null;
+    private static Map<String, AbstractOption> shortArgumentsMap = null;
 
-    private static Map longArgumentsMap = null;
+    private static Map<String, AbstractOption> longArgumentsMap = null;
 
-    private static void initOptions() {
+    private static synchronized void initOptions() {
         if (options == null) {
-            options = new ArrayList();
-        }
+            options = new ArrayList<AbstractOption>();
+            options.add(new DestinationOption());
+            options.add(new RandomizeOption());
+            options.add(new PortOption());
+            options.add(new SSLOption());
+            options.add(new SocketOption());
+            options.add(new ConfigOption());
+            options.add(new TimeoutOption());
+            options.add(new ConnectRetriesOption());
+            options.add(new RetrySleepOption());
+            options.add(new MaxSizeOption());
+            options.add(new UsernameOption());
+            options.add(new LearnTypeOption());
+            options.add(new ReportTypeOption());
+            options.add(new BSMTPOption());
+            options.add(new CheckOption());
+            options.add(new TestsOption());
+            options.add(new FullSpamOption());
+            options.add(new FullOption());
+            options.add(new HeadersOption());
+            options.add(new ExitCodeOption());
+            options.add(new NoSafeFallbackOption());
+            options.add(new LogToStderrOption());
+            options.add(new PipeToOption());
+            options.add(new HelpOption());
+            options.add(new VersionOption());
+            options.add(new CompressOption());
+            options.add(new KeepAliveOption());
 
-        options.add(new DestinationOption());
-        options.add(new RandomizeOption());
-        options.add(new PortOption());
-        options.add(new SSLOption());
-        options.add(new SocketOption());
-        options.add(new ConfigOption());
-        options.add(new TimeoutOption());
-        options.add(new ConnectRetriesOption());
-        options.add(new RetrySleepOption());
-        options.add(new MaxSizeOption());
-        options.add(new UsernameOption());
-        options.add(new LearnTypeOption());
-        options.add(new ReportTypeOption());
-        options.add(new BSMTPOption());
-        options.add(new CheckOption());
-        options.add(new TestsOption());
-        options.add(new FullSpamOption());
-        options.add(new FullOption());
-        options.add(new HeadersOption());
-        options.add(new ExitCodeOption());
-        options.add(new NoSafeFallbackOption());
-        options.add(new LogToStderrOption());
-        options.add(new PipeToOption());
-        options.add(new HelpOption());
-        options.add(new VersionOption());
-        options.add(new CompressOption());
-        options.add(new KeepAliveOption());
-
-        // store all short and long argument names as map keys so that
-        // we will have a fast index to them when parsing the command
-        // line
-        final Iterator iterator = options.iterator();
-        AbstractOption option;
-        if (shortArgumentsMap == null) {
-            shortArgumentsMap = new HashMap();
-        }
-        if (longArgumentsMap == null) {
-            longArgumentsMap = new HashMap();
-        }
-        while (iterator.hasNext()) {
-            option = (AbstractOption) iterator.next();
-            if (option.getShortName() != null) {
-                shortArgumentsMap.put(option.getShortName(), option);
+            // store all short and long argument names as map keys so that
+            // we will have a fast index to them when parsing the command
+            // line
+            final Iterator<AbstractOption> iterator = options.iterator();
+            AbstractOption option;
+            if (shortArgumentsMap == null) {
+                shortArgumentsMap = new HashMap<>();
             }
-            if (option.getLongName() != null) {
-                longArgumentsMap.put(option.getLongName(), option);
+            if (longArgumentsMap == null) {
+                longArgumentsMap = new HashMap<>();
+            }
+            while (iterator.hasNext()) {
+                option = iterator.next();
+                if (option.getShortName() != null) {
+                    shortArgumentsMap.put(option.getShortName(), option);
+                }
+                if (option.getLongName() != null) {
+                    longArgumentsMap.put(option.getLongName(), option);
+                }
             }
         }
     }
@@ -2340,9 +2339,9 @@ public class Spamc {
 
             option = null;
             if (shortArgumentsMap.containsKey(args[i])) {
-                option = (AbstractOption) shortArgumentsMap.get(args[i]);
+                option = shortArgumentsMap.get(args[i]);
             } else if (longArgumentsMap.containsKey(args[i])) {
-                option = (AbstractOption) longArgumentsMap.get(args[i]);
+                option = longArgumentsMap.get(args[i]);
             }
             if (option == null) {
                 throw new OptionNotFoundException(i, args[i].length(), args[i]);
