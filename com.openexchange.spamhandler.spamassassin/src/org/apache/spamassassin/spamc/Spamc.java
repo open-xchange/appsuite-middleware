@@ -25,7 +25,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -41,6 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.zip.Deflater;
+import javax.net.ssl.SSLSocketFactory;
+import com.openexchange.java.Streams;
 
 /**
  * This class provides a pure Java implementation of the <a
@@ -340,7 +341,7 @@ public class Spamc {
     private final static String DEFAULT_HOST = "localhost";
 
     /** Host names and/or network addresses of the spamd servers */
-    private List hosts;
+    private List<String> hosts;
 
     /**
      * Flag to indicate whether the order of spamd server IP addresses to
@@ -412,25 +413,15 @@ public class Spamc {
     /** Name of the user for the spamd &quot;User&quot; header */
     private String userName = System.getProperty("user.name");
 
-    /**
-     * Create a new object.
-     *
-     */
-    public Spamc() {
-        super();
-    }
+    /** The optional SSL socket factory to use */
+    private final SSLSocketFactory sslSocketFactory;
 
     /**
-     * Create a new object and set the list of spamd hosts.
-     *
-     * @see #setHosts(List)
-     * @param hosts
-     *            collection of {@link java.lang.String}} objects
-     *            containing host names and/or IP addresses
+     * Create a new object.
      */
-    public Spamc(final List hosts) {
-        this();
-        setHosts(hosts);
+    public Spamc(SSLSocketFactory sslSocketFactory) {
+        super();
+        this.sslSocketFactory = sslSocketFactory;
     }
 
     /**
@@ -441,7 +432,7 @@ public class Spamc {
      */
     public void setHost(final String host) {
         if (this.hosts == null) {
-            this.hosts = new ArrayList();
+            this.hosts = new ArrayList<>();
         } else {
             this.hosts.clear();
         }
@@ -455,7 +446,7 @@ public class Spamc {
      *            collection of {@link java.lang.String}} objects
      *            containing host names and/or IP addresses
      */
-    public void setHosts(final List hosts) {
+    public void setHosts(final List<String> hosts) {
         this.hosts = hosts;
     }
 
@@ -484,7 +475,7 @@ public class Spamc {
      * @return collection of {@link java.lang.String} objects containing
      *         host names and/or IP addresses
      */
-    public List getHosts() {
+    public List<String> getHosts() {
         return hosts;
     }
 
@@ -989,7 +980,7 @@ public class Spamc {
         // build up a list of host names in case we have to report an error
         final StringBuilder commaSeparatedHosts = new StringBuilder();
         for (int i = 0; i < getHosts().size(); i++) {
-            host = (String) getHosts().get(i);
+            host = getHosts().get(i);
             if (i > 0) {
                 commaSeparatedHosts.append(',');
             }
@@ -1028,80 +1019,91 @@ public class Spamc {
             // TODO: implement Unix socket support
             throw new IllegalStateException("Unix sockets are not supported");
         }
-        Socket socket = new Socket();
-        IOException lastException = null;
-        final List addresses = getAllHostAddresses();
-        if (addresses.isEmpty()) {
-            throw new IllegalStateException("No destination address");
-        }
-        int retryCount = 0;
-        int addressIndex = 0;
-        InetAddress address;
-        InetSocketAddress inetSocketAddress;
-        do {
-            address = (InetAddress) addresses.get(addressIndex);
-            try {
-                inetSocketAddress = new InetSocketAddress(address, getPort());
-                socket.connect(inetSocketAddress, (int) getTimeout() * MILLIS_PER_SECOND);
-            } catch (final IOException e) {
-                lastException = e;
-                retryCount++;
-                System.err.println(Socket.class.getName() + ".connect(SocketAddress, int) to spamd at " + address + " failed, retrying (#" + retryCount + " of " + getConnectRetries() + ")");
-                addressIndex++;
-                if (addressIndex >= addresses.size()) {
-                    // wrap around to the first IP address again
-                    addressIndex = 0;
-                }
-                try {
-                    Thread.sleep(getTimeout() * MILLIS_PER_SECOND);
-                } catch (final InterruptedException e1) {
-                    // this should not occur, but if it does there is
-                    // nothing we can do about it
-                    // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-                    Thread.currentThread().interrupt();
-                }
-            }
-        } while (getFailover() && (socket == null) && (retryCount < addresses.size()) && (retryCount < getConnectRetries()));
-        if (socket == null) {
-            System.err.println("connection attempt to spamd aborted after " + getConnectRetries() + " retries");
-            throw lastException;
-        }
 
-        if (getUseSSL()) {
-            // TODO: test this
-            if (sslPackage == null) {
-                throw new IllegalStateException("SSL is not available");
+        Socket socket = null;
+        try {
+            IOException lastException = null;
+            final List addresses = getAllHostAddresses();
+            if (addresses.isEmpty()) {
+                throw new IllegalStateException("No destination address");
             }
-            // negotiate an SSL connection
-            try {
-                // load the class dynamically, since it may not be available in
-                // some JVMs
-                final Class sslSocketFactory = Class.forName(SSL_PACKAGE_NAME + "." + SSL_SOCKET_FACTORY_CLASS_NAME);
-                final Method getDefault = sslSocketFactory.getMethod("getDefault", (Class) null);
-                final Object defaultSocketFactory = getDefault.invoke(null, (Object) null);
-                final Class[] parameterTypes = new Class[] { Socket.class, String.class, int.class, boolean.class };
-                final Method createSocket = sslSocketFactory.getMethod("createSocket", parameterTypes);
-                final Object[] args = new Object[] { socket, socket.getInetAddress().getHostName(), Integer.valueOf(socket.getPort()), Boolean.TRUE };
-                socket = (Socket) createSocket.invoke(defaultSocketFactory, args);
-            } catch (final ClassNotFoundException e) {
-                final IllegalStateException ise = new IllegalStateException("Class " + SSL_PACKAGE_NAME + "." + SSL_SOCKET_FACTORY_CLASS_NAME + " could not be loaded");
-                ise.initCause(e);
-                throw ise;
-            } catch (final NoSuchMethodException e) {
-                final IllegalStateException ise = new IllegalStateException(e.getMessage());
-                ise.initCause(e);
-                throw ise;
-            } catch (final InvocationTargetException e) {
-                final IllegalStateException ise = new IllegalStateException(e.getMessage());
-                ise.initCause(e);
-                throw ise;
-            } catch (final IllegalAccessException e) {
-                final IllegalStateException ise = new IllegalStateException(e.getMessage());
-                ise.initCause(e);
-                throw ise;
+            int retryCount = 0;
+            int addressIndex = 0;
+            InetAddress address;
+            InetSocketAddress inetSocketAddress;
+            do {
+                address = (InetAddress) addresses.get(addressIndex);
+                Socket attempt = null;
+                try {
+                    inetSocketAddress = new InetSocketAddress(address, getPort());
+                    if (getUseSSL() && null != sslSocketFactory) {
+                        attempt = sslSocketFactory.createSocket();
+                    } else {
+                        attempt = new Socket();
+                    }
+                    attempt.connect(inetSocketAddress, (int) getTimeout() * MILLIS_PER_SECOND);
+                    attempt.setSoTimeout((int) getTimeout() * MILLIS_PER_SECOND);
+                    socket = attempt;
+                    attempt = null;
+                } catch (final IOException e) {
+                    lastException = e;
+                    retryCount++;
+                    System.err.println(Socket.class.getName() + ".connect(SocketAddress, int) to spamd at " + address + " failed, retrying (#" + retryCount + " of " + getConnectRetries() + ")");
+                    addressIndex++;
+                    if (addressIndex >= addresses.size()) {
+                        // wrap around to the first IP address again
+                        addressIndex = 0;
+                    }
+                    try {
+                        Thread.sleep(getTimeout() * MILLIS_PER_SECOND);
+                    } catch (final InterruptedException e1) {
+                        // this should not occur, but if it does there is
+                        // nothing we can do about it
+                        // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
+                        Thread.currentThread().interrupt();
+                    }
+                } finally {
+                    Streams.close(attempt);
+                }
+            } while (getFailover() && (socket == null) && (retryCount < addresses.size()) && (retryCount < getConnectRetries()));
+
+            if (socket == null) {
+                System.err.println("connection attempt to spamd aborted after " + getConnectRetries() + " retries");
+                throw lastException;
             }
+
+            if (getUseSSL() && null == sslSocketFactory) {
+                // TODO: test this
+                if (sslPackage == null) {
+                    throw new IllegalStateException("SSL is not available");
+                }
+                // negotiate an SSL connection
+                Socket existingSocket = socket;
+                socket = null;
+                try {
+                    // load the class dynamically, since it may not be available in some JVMs
+                    final Class sslSocketFactory = Class.forName(SSL_PACKAGE_NAME + "." + SSL_SOCKET_FACTORY_CLASS_NAME);
+                    final Method getDefault = sslSocketFactory.getMethod("getDefault", (Class) null);
+                    final Object defaultSocketFactory = getDefault.invoke(null, (Object) null);
+                    final Class[] parameterTypes = new Class[] { Socket.class, String.class, int.class, boolean.class };
+                    final Method createSocket = sslSocketFactory.getMethod("createSocket", parameterTypes);
+                    final Object[] args = new Object[] { existingSocket, existingSocket.getInetAddress().getHostName(), Integer.valueOf(existingSocket.getPort()), Boolean.TRUE };
+                    socket = (Socket) createSocket.invoke(defaultSocketFactory, args);
+                    existingSocket = null;
+                } catch (ClassNotFoundException e) {
+                    throw new IllegalStateException("Class " + SSL_PACKAGE_NAME + "." + SSL_SOCKET_FACTORY_CLASS_NAME + " could not be loaded", e);
+                } catch (Exception e) {
+                    throw new IllegalStateException(e.getMessage(), e);
+                } finally {
+                    Streams.close(existingSocket);
+                }
+            }
+            Socket retval = socket;
+            socket = null;
+            return retval;
+        } finally {
+            Streams.close(socket);
         }
-        return socket;
     }
 
     /**
@@ -1312,7 +1314,7 @@ public class Spamc {
                 }
             }
             final String[] combinedArgs = Spamc.combineArgs(configFile, args);
-            final Spamc spamc = new Spamc();
+            final Spamc spamc = new Spamc(null);
             flags = Spamc.readArgs(spamc, combinedArgs);
 
             // read the message from stdin
