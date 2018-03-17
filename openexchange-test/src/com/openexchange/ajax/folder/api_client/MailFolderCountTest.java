@@ -95,16 +95,16 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
         super.setUpConfiguration();
 
         // Setup client and import mails ------------------------
-        getClient().login(testUser.getLogin(), testUser.getPassword());
-        api = new MailApi(getClient());
-        folderApi = new FoldersApi(getClient());
+        getApiClient().login(testUser.getLogin(), testUser.getPassword());
+        api = new MailApi(getApiClient());
+        folderApi = new FoldersApi(getApiClient());
 
         NewFolderBody body = new NewFolderBody();
         NewFolderBodyFolder folder = new NewFolderBodyFolder();
         folder.setTitle(this.getClass().getSimpleName() + "_" + new UID().toString());
         folder.setModule("mail");
         body.setFolder(folder);
-        FolderUpdateResponse createFolder = folderApi.createFolder(FOLDER, getClient().getSession(), body, "1", null);
+        FolderUpdateResponse createFolder = folderApi.createFolder(FOLDER, getApiClient().getSession(), body, "1", null);
         Assert.assertNull(createFolder.getError());
         Assert.assertNotNull(createFolder.getData());
 
@@ -113,7 +113,7 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
         for (int x = 0; x < 2; x++) {
             File f = new File(testMailDir, "bug.eml");
             Assert.assertTrue(f.exists());
-            MailImportResponse response = api.importMail(getClient().getSession(), folderId, f, null, true);
+            MailImportResponse response = api.importMail(getApiClient().getSession(), folderId, f, null, true);
             List<MailDestinationData> data = checkResponse(response);
             // data size should always be 1
             Assert.assertEquals(1, data.size());
@@ -124,12 +124,12 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
         // Mark first mail as unread
         MailUpdateBody mailUpdateBody = new MailUpdateBody();
         mailUpdateBody.setClearFlags(32);
-        api.updateMail(getClient().getSession(), folderId, mailUpdateBody, IMPORTED_EMAILS.get(0).getId(), null);
+        api.updateMail(getApiClient().getSession(), folderId, mailUpdateBody, IMPORTED_EMAILS.get(0).getId(), null);
         // Mark second mail as deleted and unread
         mailUpdateBody = new MailUpdateBody();
         mailUpdateBody.setSetFlags(2l);
         mailUpdateBody.setClearFlags(32);
-        api.updateMail(getClient().getSession(), folderId, mailUpdateBody, IMPORTED_EMAILS.get(1).getId(), null);
+        api.updateMail(getApiClient().getSession(), folderId, mailUpdateBody, IMPORTED_EMAILS.get(1).getId(), null);
 
     }
 
@@ -143,8 +143,8 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
                 mailListElement.setId(dest.getId());
                 body.add(mailListElement);
             }
-            api.deleteMails(getClient().getSession(), body, timestamp);
-            folderApi.deleteFolders(getClient().getSession(), Collections.singletonList(folderId), "1", timestamp, null, true, false, false);
+            api.deleteMails(getApiClient().getSession(), body, timestamp);
+            folderApi.deleteFolders(getApiClient().getSession(), Collections.singletonList(folderId), "1", timestamp, null, true, false, false);
         } finally {
             super.tearDown();
         }
@@ -152,13 +152,13 @@ public class MailFolderCountTest extends AbstractConfigAwareAPIClientSession {
 
     @Test
     public void testFolderCount() throws Exception {
-        FolderResponse resp = folderApi.getFolder(getClient().getSession(), folderId, "1", null);
+        FolderResponse resp = folderApi.getFolder(getApiClient().getSession(), folderId, "1", null);
         FolderData folder = checkResponse(resp);
         Assert.assertEquals(2, folder.getUnread().intValue());
 
         CONFIG.put("com.openexchange.imap.ignoreDeleted", Boolean.TRUE.toString());
         super.setUpConfiguration();
-        resp = folderApi.getFolder(getClient().getSession(), folderId, "1", null);
+        resp = folderApi.getFolder(getApiClient().getSession(), folderId, "1", null);
         folder = checkResponse(resp);
         Assert.assertEquals(1, folder.getUnread().intValue());
     }

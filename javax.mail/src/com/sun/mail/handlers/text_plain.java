@@ -143,6 +143,9 @@ public class text_plain extends handler_base {
 
 	try {
 	    enc = getCharset(type);
+	    if (null == enc) {
+            enc = "UTF8";
+        }
 	    osw = new OutputStreamWriter(new NoCloseOutputStream(os), enc);
 	} catch (IllegalArgumentException iex) {
 	    /*
@@ -173,8 +176,8 @@ public class text_plain extends handler_base {
 	    ContentType ct = new ContentType(type);
 	    String charset = ct.getParameter("charset");
 	    if (charset == null)
-		// If the charset parameter is absent, use US-ASCII.
-		charset = "us-ascii";
+		// If the charset parameter is absent, use UTF-8.
+		charset = "UTF8";
 	    return MimeUtility.javaCharset(charset);
 	} catch (Exception ex) {
 	    return null;

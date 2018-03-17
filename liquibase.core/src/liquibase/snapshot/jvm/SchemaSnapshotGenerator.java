@@ -29,8 +29,6 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
         Database database = snapshot.getDatabase();
         ResultSet schemas = null;
         Schema match = null;
-        boolean passedCatalog = ((Schema) example).getCatalogName() != null;
-        boolean passedSchema = ((Schema) example).getName() != null;
 
         String catalogName = ((Schema) example).getCatalogName();
         String schemaName = example.getName();

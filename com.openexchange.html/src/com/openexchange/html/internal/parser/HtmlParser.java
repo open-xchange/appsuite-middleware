@@ -49,6 +49,7 @@
 
 package com.openexchange.html.internal.parser;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -62,6 +63,7 @@ import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 
 /**
@@ -227,6 +229,10 @@ public final class HtmlParser {
         } catch (final RuntimeException e) {
             LOG.error(composeErrorMessage(e, html), e);
             handler.handleError(e.getMessage());
+        } finally {
+            if (parser instanceof Closeable) {                
+                Streams.close((Closeable) parser);
+            }
         }
     }
 

@@ -3,7 +3,6 @@ package liquibase.precondition.core;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
@@ -47,7 +46,6 @@ public class SqlPrecondition implements Precondition {
 
     @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
-        DatabaseConnection connection = database.getConnection();
         try {
             String result = (String) ExecutorService.getInstance().getExecutor(database).queryForObject(new RawSqlStatement(getSql().replaceFirst(";$","")), String.class);
             if (result == null) {

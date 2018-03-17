@@ -127,6 +127,7 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.Results;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.CallerRunsCompletionService;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
@@ -379,12 +380,17 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
          * get data from random file access & post "access" event
          */
         InputStream data = ((FileStorageRandomFileAccess) fileAccess).getDocument(fileID.getFolderId(), fileID.getFileId(), version, offset, length);
-        postEvent(FileStorageEventHelper.buildAccessEvent(
-            session, fileID.getService(), fileID.getAccountId(), fileID.getFolderId(), fileID.toUniqueID(), null, extractRemoteAddress()));
-        /*
-         * return handled stream
-         */
-        return handleInputStream(fileID, version, data);
+        try {
+            postEvent(FileStorageEventHelper.buildAccessEvent(session, fileID.getService(), fileID.getAccountId(), fileID.getFolderId(), fileID.toUniqueID(), null, extractRemoteAddress()));
+            /*
+             * return handled stream
+             */
+            InputStream retval = handleInputStream(fileID, version, data);
+            data = null;
+            return retval;
+        } finally {
+            Streams.close(data);
+        }
     }
 
     @Override

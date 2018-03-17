@@ -445,7 +445,8 @@ public class TemplateServiceImpl implements TemplateService {
         }
     }
 
-    private File getTemplateFile(final String defaultTemplateName) {
+    private File getTemplateFile(String defaultTemplateName) {
+        defaultTemplateName = new File(defaultTemplateName).getName();
         return new File(defaultTemplatePath, defaultTemplateName);
     }
 

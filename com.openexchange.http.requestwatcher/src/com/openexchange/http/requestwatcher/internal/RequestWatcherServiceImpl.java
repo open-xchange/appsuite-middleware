@@ -172,7 +172,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
         private final String propSessionId = LogProperties.Name.SESSION_SESSION_ID.getName();
 
         /**
-         * Initializes a new {@link RunnableImplementation}.
+         * Initializes a new {@link Watcher}.
          */
         Watcher(ConcurrentSkipListSet<RequestRegistryEntry> requestRegistry, int requestMaxAge) {
             super();
@@ -276,10 +276,10 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
         }
 
         private boolean interrupt(StackTraceElement[] trace, RequestRegistryEntry entry) {
-            StackTraceElement traceElement = trace[0];
-
-            // Kept in socket read and exceeded doubled max. request age
             /*-
+            StackTraceElement traceElement = trace[0];
+            
+            // Kept in socket read and exceeded doubled max. request age
             if (traceElement.isNativeMethod() && "socketRead0".equals(traceElement.getMethodName()) && entry.getAge() > (requestMaxAge << 1)) {
                 return true;
             }

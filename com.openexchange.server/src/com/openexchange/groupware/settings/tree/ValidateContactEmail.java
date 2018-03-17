@@ -92,7 +92,7 @@ public final class ValidateContactEmail implements PreferencesItemService {
 
             @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-                setting.setSingleValue(Boolean.valueOf(ContactConfig.getInstance().getBoolean(ContactConfig.Property.VALIDATE_CONTACT_EMAIL)));
+                setting.setSingleValue(ContactConfig.getInstance().getBoolean(ContactConfig.Property.VALIDATE_CONTACT_EMAIL));
             }
 
         };

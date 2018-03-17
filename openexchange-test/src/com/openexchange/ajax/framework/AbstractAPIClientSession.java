@@ -54,15 +54,8 @@ import static org.junit.Assert.assertNull;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.runner.RunWith;
-import com.google.code.tempusfugit.concurrency.ConcurrentTestRunner;
-import com.google.code.tempusfugit.concurrency.annotations.Concurrent;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
-import com.openexchange.test.pool.TestContext;
 import com.openexchange.test.pool.TestContextPool;
 import com.openexchange.test.pool.TestUser;
 import com.openexchange.testing.httpclient.invoker.ApiClient;
@@ -75,20 +68,13 @@ import com.openexchange.testing.httpclient.modules.LoginApi;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-@RunWith(ConcurrentTestRunner.class)
-@Concurrent(count = 5)
-public abstract class AbstractAPIClientSession {
+public abstract class AbstractAPIClientSession extends AbstractClientSession {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractAPIClientSession.class);
 
-    protected TestContext testContext;
-    protected TestUser admin;
-    protected TestUser testUser;
-    protected TestUser testUser2;
     protected LoginApi loginApi;
     protected ApiClient apiClient;
     private Set<ApiClient> apiClients;
-    protected AJAXClient client;
 
     /**
      * Default constructor.
@@ -99,32 +85,16 @@ public abstract class AbstractAPIClientSession {
         super();
     }
 
-    /**
-     * Gets the client identifier to use when performing a login
-     *
-     * @return The client identifier or <code>null</code> to use default one (<code>"com.openexchange.ajax.framework.AJAXClient"</code>)
-     */
-    protected String getClientId() {
-        return null;
-    }
-
-    protected ApiClient getClient() {
+    protected ApiClient getApiClient() {
         return apiClient;
     }
 
-    @Before
+    @Override
     public void setUp() throws Exception {
-        ProvisioningSetup.init();
+        super.setUp();
 
-        testContext = TestContextPool.acquireContext(this.getClass().getCanonicalName());
-        Assert.assertNotNull("Unable to retrieve a context!", testContext);
-        testUser = testContext.acquireUser();
-        testUser2 = testContext.acquireUser();
-        admin = testContext.getAdmin();
-        apiClient = generateClient(testUser);
+        apiClient = generateApiClient(testUser);
         rememberClient(apiClient);
-        
-        client = new AJAXClient(testUser);
     }
 
     protected void rememberClient(ApiClient client) {
@@ -134,22 +104,20 @@ public abstract class AbstractAPIClientSession {
         apiClients.add(client);
     }
 
-    @After
+    @Override
     public void tearDown() throws Exception {
-        Iterator<ApiClient> iterator = apiClients.iterator();
-        while (iterator.hasNext()) {
-            ApiClient client = iterator.next();
-            if (client.getSession() != null) {
-                logoutClient(client, true);
-            }
-            iterator.remove();
-        }
         try {
-            client.logout();
-        } catch (Throwable t) {
-            // Ignore
+            Iterator<ApiClient> iterator = apiClients.iterator();
+            while (iterator.hasNext()) {
+                ApiClient client = iterator.next();
+                if (client.getSession() != null) {
+                    logoutClient(client, true);
+                }
+                iterator.remove();
+            }
+        } finally {
+            TestContextPool.backContext(testContext);
         }
-        TestContextPool.backContext(testContext);
     }
 
     /**
@@ -202,8 +170,8 @@ public abstract class AbstractAPIClientSession {
      * @return The new {@link AJAXClient}
      * @throws OXException In case no client could be created
      */
-    protected final ApiClient generateDefaultClient() throws OXException {
-        return generateClient(getClientId());
+    protected final ApiClient generateDefaultApiClient() throws OXException {
+        return generateApiClient(getClientId());
     }
 
     /**
@@ -214,8 +182,8 @@ public abstract class AbstractAPIClientSession {
      * @return The new {@link AJAXClient}
      * @throws OXException In case no client could be created
      */
-    protected final ApiClient generateClient(String client) throws OXException {
-        return generateClient(client, testContext.acquireUser());
+    protected final ApiClient generateApiClient(String client) throws OXException {
+        return generateApiClient(client, testContext.acquireUser());
     }
 
     /**
@@ -226,8 +194,8 @@ public abstract class AbstractAPIClientSession {
      * @return The new {@link AJAXClient}
      * @throws OXException In case no client could be created
      */
-    protected final ApiClient generateClient(TestUser user) throws OXException {
-        return generateClient(getClientId(), user);
+    protected final ApiClient generateApiClient(TestUser user) throws OXException {
+        return generateApiClient(getClientId(), user);
     }
 
     /**
@@ -239,7 +207,7 @@ public abstract class AbstractAPIClientSession {
      * @return The new {@link AJAXClient}
      * @throws OXException In case no client could be created
      */
-    protected final ApiClient generateClient(String client, TestUser user) throws OXException {
+    protected final ApiClient generateApiClient(String client, TestUser user) throws OXException {
         if (null == user) {
             LOG.error("Can only create a client for an valid user");
             throw new OXException();

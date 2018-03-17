@@ -63,6 +63,7 @@ import com.openexchange.drive.client.windows.service.BrandingService;
 import com.openexchange.drive.client.windows.service.DriveUpdateService;
 import com.openexchange.drive.client.windows.service.internal.Utils;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -110,15 +111,16 @@ public class InstallServlet extends SessionServlet {
             Tools.removeCachingHeader(resp);
 
             InputStream is = updateService.getFile(fileName, branding);
-            OutputStream out = resp.getOutputStream();
-            byte[] buf = new byte[4096];
-            int length = -1;
-            while ((length = is.read(buf)) != -1) {
-                out.write(buf, 0, length);
+            try {
+                OutputStream out = resp.getOutputStream();
+                byte[] buf = new byte[8192];
+                for (int length; (length = is.read(buf)) > 0;) {
+                    out.write(buf, 0, length);
+                }
+                out.flush();
+            } finally {
+                Streams.close(is);
             }
-
-            out.flush();
-            is.close();
         } catch (OXException e) {
             LOG.error("", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

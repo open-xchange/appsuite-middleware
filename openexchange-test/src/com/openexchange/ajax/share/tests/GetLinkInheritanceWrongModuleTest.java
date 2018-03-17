@@ -85,7 +85,7 @@ public class GetLinkInheritanceWrongModuleTest extends AbstractAPIClientSession 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        ApiClient client = getClient();
+        ApiClient client = getApiClient();
         rememberClient(client);
         folderManager = new FolderManager(new FolderApi(client, testUser), "1");
         shareManagementApi = new ShareManagementApi(client);
