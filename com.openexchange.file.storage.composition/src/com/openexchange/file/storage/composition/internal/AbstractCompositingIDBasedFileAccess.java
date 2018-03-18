@@ -358,12 +358,17 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         FileID fileID = new FileID(id);
         FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
         InputStream data = fileAccess.getDocument(fileID.getFolderId(), fileID.getFileId(), version);
-        postEvent(FileStorageEventHelper.buildAccessEvent(
-            session, fileID.getService(), fileID.getAccountId(), fileID.getFolderId(), fileID.toUniqueID(), null, extractRemoteAddress()));
-        /*
-         * return handled stream
-         */
-        return handleInputStream(fileID, version, data);
+        try {
+            postEvent(FileStorageEventHelper.buildAccessEvent(session, fileID.getService(), fileID.getAccountId(), fileID.getFolderId(), fileID.toUniqueID(), null, extractRemoteAddress()));
+            /*
+             * return handled stream
+             */
+            InputStream retval = handleInputStream(fileID, version, data);
+            data = null;
+            return retval;
+        } finally {
+            Streams.close(data);
+        }
     }
 
     @Override
@@ -1823,10 +1828,16 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                     @Override
                     public InputStream getData() throws OXException {
                         InputStream inputStream = document.getData();
-                        for (FileStreamHandler streamHandler : handlers) {
-                            inputStream = streamHandler.handleDocumentStream(inputStream, fileID, version, session.getContextId());
+                        try {
+                            for (FileStreamHandler streamHandler : handlers) {
+                                inputStream = streamHandler.handleDocumentStream(inputStream, fileID, version, session.getContextId());
+                            }
+                            InputStream retval = inputStream;
+                            inputStream = null;
+                            return retval;
+                        } finally {
+                            Streams.close(inputStream);
                         }
-                        return inputStream;
                     }
                 };
             }
