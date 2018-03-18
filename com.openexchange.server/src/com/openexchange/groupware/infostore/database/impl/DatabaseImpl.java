@@ -904,8 +904,6 @@ public class DatabaseImpl extends DBService {
     }
 
     public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, final Metadata[] columns, final Metadata sort, final int order, final boolean onlyOwnObjects, final Context ctx, final User user) throws OXException {
-        DeltaImpl<DocumentMetadata> retval = null;
-
         String onlyOwn = "";
         final StringBuilder ORDER = new StringBuilder();
         if (sort != null) {
@@ -926,6 +924,8 @@ public class DatabaseImpl extends DBService {
         ResultSet resultNew = null;
         ResultSet resultModified = null;
         ResultSet resultDeleted = null;
+
+        boolean error = true;
         try {
             con = getReadConnection(ctx);
             if (onlyOwnObjects) {
@@ -974,20 +974,21 @@ public class DatabaseImpl extends DBService {
             final SearchIterator<DocumentMetadata> isiModified = buildIterator(resultModified, stmtModified, dbColumns, this, ctx, con, false);
             final SearchIterator<DocumentMetadata> isiDeleted = buildIterator(resultDeleted, stmtDeleted, new int[] { INFOSTORE_id }, this, ctx, con, false);
 
-            retval = new DeltaImpl<DocumentMetadata>(isiNew, isiModified, isiDeleted, System.currentTimeMillis());
+            DeltaImpl<DocumentMetadata> retval = new DeltaImpl<DocumentMetadata>(isiNew, isiModified, isiDeleted, System.currentTimeMillis());
+            error = false;
+            return retval;
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmtNew));
         } catch (final OXException e) {
             throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
         } finally {
-            if (FETCH.equals(Fetch.PREFETCH)) {
+            if (error || FETCH.equals(Fetch.PREFETCH)) {
                 close(stmtNew, resultNew);
                 close(stmtModified, resultModified);
                 close(stmtDeleted, resultDeleted);
                 releaseReadConnection(ctx, con);
             }
         }
-        return retval;
     }
 
     public int countDocuments(final long folderId, final boolean onlyOwnObjects, final Context ctx, final User user) throws OXException {
