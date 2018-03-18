@@ -3879,9 +3879,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Mark as \Answered in foreign account
              */
-            MailAccess<?, ?> otherAccess = MailAccess.getInstance(session, pathAccount);
-            otherAccess.connect(true);
+            MailAccess<?, ?> otherAccess = null;
             try {
+                otherAccess = MailAccess.getInstance(session, pathAccount);
+                otherAccess.connect(true);
                 otherAccess.getMessageStorage().updateMessageFlags(fullName, uids, MailMessage.FLAG_ANSWERED, true);
                 try {
                     /*
@@ -3897,7 +3898,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     LOG.error("", e);
                 }
             } finally {
-                otherAccess.close(false);
+                if (null != mailAccess) {
+                    otherAccess.close(false);
+                }
             }
         }
     }
