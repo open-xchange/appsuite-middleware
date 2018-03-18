@@ -395,9 +395,9 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
         // Set marker
         session.setParameter("mail-account.request", "validate");
         MailConfig mailConfig = null;
+        MailAccess<?, ?> mailAccess = null;
         try {
             // Create a mail access instance
-            MailAccess<?, ?> mailAccess;
             {
                 int accountId = accountDescription.getId();
                 mailAccess = accountId >= 0 ? mailProvider.createNewMailAccess(session, accountId) : mailProvider.createNewMailAccess(session);
@@ -443,6 +443,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
                 warnings.add(e);
             }
         } finally {
+            MailAccess.closeInstance(mailAccess);
             // Unset marker
             session.setParameter("mail-account.request", null);
         }
