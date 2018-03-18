@@ -72,6 +72,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.log.audit.AuditLogService;
 import com.openexchange.log.audit.DefaultAttribute;
@@ -249,6 +250,7 @@ public final class POP3StoreConnector {
      * @throws OXException If establishing a connected instance of {@link POP3Store} fails
      */
     public static POP3StoreResult getPOP3Store(POP3Config pop3Config, Properties pop3Properties, boolean monitorFailedAuthentication, final int accountId, final Session session, boolean errorOnMissingUIDL, boolean forceSecure) throws OXException {
+        POP3Store pop3Store = null;
         try {
             final boolean tmpDownEnabled = (POP3Properties.getInstance().getPOP3TemporaryDown() > 0);
             if (tmpDownEnabled) {
@@ -398,7 +400,7 @@ public final class POP3StoreConnector {
             /*
              * Get store
              */
-            final POP3Store pop3Store = (POP3Store) pop3Session.getStore(POP3Provider.PROTOCOL_POP3.getName());
+            pop3Store = (POP3Store) pop3Session.getStore(POP3Provider.PROTOCOL_POP3.getName());
             /*
              * ... and connect
              */
@@ -534,9 +536,12 @@ public final class POP3StoreConnector {
                 }
             }
             result.setPop3Store(pop3Store);
+            pop3Store = null;
             return result;
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e, pop3Config, session);
+        } finally {
+            Streams.close(pop3Store);
         }
     }
 
