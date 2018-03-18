@@ -316,12 +316,12 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
             LOG.error("", e);
             throw LoginExceptionCodes.COMMUNICATION.create(e);
         } finally {
-            try {
-                if( context != null ) {
+            if (context != null) {
+                try {
                     context.close();
+                } catch (NamingException e) {
+                    LOG.error("", e);
                 }
-            } catch (NamingException e) {
-                LOG.error("", e);
             }
         }
     }
