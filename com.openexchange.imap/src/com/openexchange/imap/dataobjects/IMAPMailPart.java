@@ -106,11 +106,16 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource, Conne
      */
     public IMAPMailPart(final ByteArray byteArray, final BODYSTRUCTURE body, final String fullName) throws IOException {
         super();
-        final ThresholdInputStreamProvider inProvider = new ThresholdInputStreamProvider();
-        inProvider.write(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount());
-        this.inProvider = inProvider;
-        this.body = body;
-        this.fullName = fullName;
+        ThresholdInputStreamProvider inProvider = new ThresholdInputStreamProvider();
+        try {
+            inProvider.write(byteArray.getBytes(), byteArray.getStart(), byteArray.getCount());
+            this.inProvider = inProvider;
+            inProvider = null;
+            this.body = body;
+            this.fullName = fullName;
+        } finally {
+            Streams.close(inProvider);
+        }
     }
 
     /**
