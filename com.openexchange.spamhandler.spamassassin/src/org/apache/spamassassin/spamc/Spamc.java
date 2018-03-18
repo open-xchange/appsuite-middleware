@@ -25,7 +25,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -41,6 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.zip.Deflater;
+import javax.net.ssl.SSLSocketFactory;
+import com.openexchange.java.Streams;
 
 /**
  * This class provides a pure Java implementation of the <a
@@ -340,7 +341,7 @@ public class Spamc {
     private final static String DEFAULT_HOST = "localhost";
 
     /** Host names and/or network addresses of the spamd servers */
-    private List hosts;
+    private List<String> hosts;
 
     /**
      * Flag to indicate whether the order of spamd server IP addresses to
@@ -412,25 +413,15 @@ public class Spamc {
     /** Name of the user for the spamd &quot;User&quot; header */
     private String userName = System.getProperty("user.name");
 
-    /**
-     * Create a new object.
-     *
-     */
-    public Spamc() {
-        super();
-    }
+    /** The optional SSL socket factory to use */
+    private final SSLSocketFactory sslSocketFactory;
 
     /**
-     * Create a new object and set the list of spamd hosts.
-     *
-     * @see #setHosts(List)
-     * @param hosts
-     *            collection of {@link java.lang.String}} objects
-     *            containing host names and/or IP addresses
+     * Create a new object.
      */
-    public Spamc(final List hosts) {
-        this();
-        setHosts(hosts);
+    public Spamc(SSLSocketFactory sslSocketFactory) {
+        super();
+        this.sslSocketFactory = sslSocketFactory;
     }
 
     /**
@@ -441,7 +432,7 @@ public class Spamc {
      */
     public void setHost(final String host) {
         if (this.hosts == null) {
-            this.hosts = new ArrayList();
+            this.hosts = new ArrayList<>();
         } else {
             this.hosts.clear();
         }
@@ -455,7 +446,7 @@ public class Spamc {
      *            collection of {@link java.lang.String}} objects
      *            containing host names and/or IP addresses
      */
-    public void setHosts(final List hosts) {
+    public void setHosts(final List<String> hosts) {
         this.hosts = hosts;
     }
 
@@ -467,7 +458,7 @@ public class Spamc {
      */
     public void setHosts(final String[] hosts) {
         if (this.hosts == null) {
-            this.hosts = new ArrayList();
+            this.hosts = new ArrayList<>();
         } else {
             this.hosts.clear();
         }
@@ -484,7 +475,7 @@ public class Spamc {
      * @return collection of {@link java.lang.String} objects containing
      *         host names and/or IP addresses
      */
-    public List getHosts() {
+    public List<String> getHosts() {
         return hosts;
     }
 
@@ -706,7 +697,7 @@ public class Spamc {
     }
 
     /** All supported protocol versions */
-    private final static List VALID_PROTOCOL_VERSIONS = new ArrayList();
+    private final static List<String> VALID_PROTOCOL_VERSIONS = new ArrayList<>(6);
     static {
         VALID_PROTOCOL_VERSIONS.add(ProtocolVersions.V1_0);
         VALID_PROTOCOL_VERSIONS.add(ProtocolVersions.V1_1);
@@ -883,7 +874,7 @@ public class Spamc {
         if (message == null) {
             throw new IllegalArgumentException("Message contents not set");
         }
-        return sendCommand(command, (Map) null, message);
+        return sendCommand(command, (Map<String, String>) null, message);
     }
 
     /**
@@ -898,7 +889,7 @@ public class Spamc {
      * @param message
      * @return the query
      */
-    private String constructQuery(final String command, final Map headers, final String message) {
+    private String constructQuery(final String command, final Map<String, String> headers, final String message) {
         final StringBuilder query = new StringBuilder();
         query.append(command);
         query.append(' ');
@@ -908,7 +899,7 @@ public class Spamc {
 
         // create a new Map to store all the headers the calling code passed in,
         // plus more we will add later
-        final Map newHeaders = new HashMap();
+        final Map<String, String> newHeaders = new HashMap<>();
         if (headers != null) {
             newHeaders.putAll(headers);
         }
@@ -927,13 +918,13 @@ public class Spamc {
         newHeaders.put(Headers.CONTENT_LENGTH, Long.toString(message != null ? message.getBytes().length : 0));
 
         // append all of the headers to the query;
-        final Iterator iterator = newHeaders.entrySet().iterator();
-        Map.Entry entry;
+        final Iterator<Map.Entry<String, String>> iterator = newHeaders.entrySet().iterator();
+        Map.Entry<String, String> entry;
         while (iterator.hasNext()) {
-            entry = (Map.Entry) iterator.next();
-            query.append((String) entry.getKey());
+            entry = iterator.next();
+            query.append(entry.getKey());
             query.append(": ");
-            query.append((String) entry.getValue());
+            query.append(entry.getValue());
             query.append("\r\n");
         }
 
@@ -949,10 +940,10 @@ public class Spamc {
                 contentLength = compresser.deflate(compressedMessage);
                 // query.append(compressedMessage, 0, contentLength);
                 throw new IllegalStateException("Compression is not supported");
-            } else {
-                contentLength = message.getBytes().length;
-                query.append(message);
             }
+
+            contentLength = message.getBytes().length;
+            query.append(message);
         } else {
             contentLength = 0;
         }
@@ -960,7 +951,7 @@ public class Spamc {
         return query.toString();
     }
 
-    private SpamdResponse sendCommand(final String command, final Map headers, final String message) throws UnknownHostException, IOException {
+    private SpamdResponse sendCommand(final String command, final Map<String, String> headers, final String message) throws UnknownHostException, IOException {
         final String query = constructQuery(command, headers, message);
         final String queryResponse = getQueryResponse(query);
         if (isEmpty(queryResponse)) {
@@ -980,8 +971,8 @@ public class Spamc {
      * @throws IllegalStateException
      *             if there is not at least one host set
      */
-    private List getAllHostAddresses() throws IllegalStateException, UnknownHostException {
-        final List addresses = new ArrayList();
+    private List<InetAddress> getAllHostAddresses() throws IllegalStateException, UnknownHostException {
+        final List<InetAddress> addresses = new ArrayList<>();
         if ((getHosts() == null) || (getHosts().isEmpty())) {
             setHost(DEFAULT_HOST);
         }
@@ -989,7 +980,7 @@ public class Spamc {
         // build up a list of host names in case we have to report an error
         final StringBuilder commaSeparatedHosts = new StringBuilder();
         for (int i = 0; i < getHosts().size(); i++) {
-            host = (String) getHosts().get(i);
+            host = getHosts().get(i);
             if (i > 0) {
                 commaSeparatedHosts.append(',');
             }
@@ -1028,80 +1019,91 @@ public class Spamc {
             // TODO: implement Unix socket support
             throw new IllegalStateException("Unix sockets are not supported");
         }
-        Socket socket = new Socket();
-        IOException lastException = null;
-        final List addresses = getAllHostAddresses();
-        if (addresses.isEmpty()) {
-            throw new IllegalStateException("No destination address");
-        }
-        int retryCount = 0;
-        int addressIndex = 0;
-        InetAddress address;
-        InetSocketAddress inetSocketAddress;
-        do {
-            address = (InetAddress) addresses.get(addressIndex);
-            try {
-                inetSocketAddress = new InetSocketAddress(address, getPort());
-                socket.connect(inetSocketAddress, (int) getTimeout() * MILLIS_PER_SECOND);
-            } catch (final IOException e) {
-                lastException = e;
-                retryCount++;
-                System.err.println(Socket.class.getName() + ".connect(SocketAddress, int) to spamd at " + address + " failed, retrying (#" + retryCount + " of " + getConnectRetries() + ")");
-                addressIndex++;
-                if (addressIndex >= addresses.size()) {
-                    // wrap around to the first IP address again
-                    addressIndex = 0;
-                }
-                try {
-                    Thread.sleep(getTimeout() * MILLIS_PER_SECOND);
-                } catch (final InterruptedException e1) {
-                    // this should not occur, but if it does there is
-                    // nothing we can do about it
-                    // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
-                    Thread.currentThread().interrupt();
-                }
-            }
-        } while (getFailover() && (socket == null) && (retryCount < addresses.size()) && (retryCount < getConnectRetries()));
-        if (socket == null) {
-            System.err.println("connection attempt to spamd aborted after " + getConnectRetries() + " retries");
-            throw lastException;
-        }
 
-        if (getUseSSL()) {
-            // TODO: test this
-            if (sslPackage == null) {
-                throw new IllegalStateException("SSL is not available");
+        Socket socket = null;
+        try {
+            IOException lastException = null;
+            final List<InetAddress> addresses = getAllHostAddresses();
+            if (addresses.isEmpty()) {
+                throw new IllegalStateException("No destination address");
             }
-            // negotiate an SSL connection
-            try {
-                // load the class dynamically, since it may not be available in
-                // some JVMs
-                final Class sslSocketFactory = Class.forName(SSL_PACKAGE_NAME + "." + SSL_SOCKET_FACTORY_CLASS_NAME);
-                final Method getDefault = sslSocketFactory.getMethod("getDefault", (Class) null);
-                final Object defaultSocketFactory = getDefault.invoke(null, (Object) null);
-                final Class[] parameterTypes = new Class[] { Socket.class, String.class, int.class, boolean.class };
-                final Method createSocket = sslSocketFactory.getMethod("createSocket", parameterTypes);
-                final Object[] args = new Object[] { socket, socket.getInetAddress().getHostName(), Integer.valueOf(socket.getPort()), Boolean.TRUE };
-                socket = (Socket) createSocket.invoke(defaultSocketFactory, args);
-            } catch (final ClassNotFoundException e) {
-                final IllegalStateException ise = new IllegalStateException("Class " + SSL_PACKAGE_NAME + "." + SSL_SOCKET_FACTORY_CLASS_NAME + " could not be loaded");
-                ise.initCause(e);
-                throw ise;
-            } catch (final NoSuchMethodException e) {
-                final IllegalStateException ise = new IllegalStateException(e.getMessage());
-                ise.initCause(e);
-                throw ise;
-            } catch (final InvocationTargetException e) {
-                final IllegalStateException ise = new IllegalStateException(e.getMessage());
-                ise.initCause(e);
-                throw ise;
-            } catch (final IllegalAccessException e) {
-                final IllegalStateException ise = new IllegalStateException(e.getMessage());
-                ise.initCause(e);
-                throw ise;
+            int retryCount = 0;
+            int addressIndex = 0;
+            InetAddress address;
+            InetSocketAddress inetSocketAddress;
+            do {
+                address = addresses.get(addressIndex);
+                Socket attempt = null;
+                try {
+                    inetSocketAddress = new InetSocketAddress(address, getPort());
+                    if (getUseSSL() && null != sslSocketFactory) {
+                        attempt = sslSocketFactory.createSocket();
+                    } else {
+                        attempt = new Socket();
+                    }
+                    attempt.connect(inetSocketAddress, (int) getTimeout() * MILLIS_PER_SECOND);
+                    attempt.setSoTimeout((int) getTimeout() * MILLIS_PER_SECOND);
+                    socket = attempt;
+                    attempt = null;
+                } catch (final IOException e) {
+                    lastException = e;
+                    retryCount++;
+                    System.err.println(Socket.class.getName() + ".connect(SocketAddress, int) to spamd at " + address + " failed, retrying (#" + retryCount + " of " + getConnectRetries() + ")");
+                    addressIndex++;
+                    if (addressIndex >= addresses.size()) {
+                        // wrap around to the first IP address again
+                        addressIndex = 0;
+                    }
+                    try {
+                        Thread.sleep(getTimeout() * MILLIS_PER_SECOND);
+                    } catch (final InterruptedException e1) {
+                        // this should not occur, but if it does there is
+                        // nothing we can do about it
+                        // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html
+                        Thread.currentThread().interrupt();
+                    }
+                } finally {
+                    Streams.close(attempt);
+                }
+            } while (getFailover() && (socket == null) && (retryCount < addresses.size()) && (retryCount < getConnectRetries()));
+
+            if (socket == null) {
+                System.err.println("connection attempt to spamd aborted after " + getConnectRetries() + " retries");
+                throw lastException;
             }
+
+            if (getUseSSL() && null == sslSocketFactory) {
+                // TODO: test this
+                if (sslPackage == null) {
+                    throw new IllegalStateException("SSL is not available");
+                }
+                // negotiate an SSL connection
+                Socket existingSocket = socket;
+                socket = null;
+                try {
+                    // load the class dynamically, since it may not be available in some JVMs
+                    final Class sslSocketFactory = Class.forName(SSL_PACKAGE_NAME + "." + SSL_SOCKET_FACTORY_CLASS_NAME);
+                    final Method getDefault = sslSocketFactory.getMethod("getDefault", (Class) null);
+                    final Object defaultSocketFactory = getDefault.invoke(null, (Object) null);
+                    final Class[] parameterTypes = new Class[] { Socket.class, String.class, int.class, boolean.class };
+                    final Method createSocket = sslSocketFactory.getMethod("createSocket", parameterTypes);
+                    final Object[] args = new Object[] { existingSocket, existingSocket.getInetAddress().getHostName(), Integer.valueOf(existingSocket.getPort()), Boolean.TRUE };
+                    socket = (Socket) createSocket.invoke(defaultSocketFactory, args);
+                    existingSocket = null;
+                } catch (ClassNotFoundException e) {
+                    throw new IllegalStateException("Class " + SSL_PACKAGE_NAME + "." + SSL_SOCKET_FACTORY_CLASS_NAME + " could not be loaded", e);
+                } catch (Exception e) {
+                    throw new IllegalStateException(e.getMessage(), e);
+                } finally {
+                    Streams.close(existingSocket);
+                }
+            }
+            Socket retval = socket;
+            socket = null;
+            return retval;
+        } finally {
+            Streams.close(socket);
         }
-        return socket;
     }
 
     /**
@@ -1249,7 +1251,7 @@ public class Spamc {
             throw new IllegalArgumentException("Can't both set and remove remote");
         }
 
-        final Map headers = new HashMap();
+        final Map<String, String> headers = new HashMap<>();
         if (spam) {
             headers.put(Headers.MESSAGE_CLASS, Headers.MESSAGE_CLASS_SPAM);
         } else {
@@ -1312,7 +1314,7 @@ public class Spamc {
                 }
             }
             final String[] combinedArgs = Spamc.combineArgs(configFile, args);
-            final Spamc spamc = new Spamc();
+            final Spamc spamc = new Spamc(null);
             flags = Spamc.readArgs(spamc, combinedArgs);
 
             // read the message from stdin
@@ -1429,7 +1431,7 @@ public class Spamc {
      * @throws ConfigurationException
      */
     private static String[] combineArgs(final File userConfig, final String[] args) throws ConfigurationException {
-        final List combined = new ArrayList();
+        final List<String> combined = new ArrayList<>();
         File configFile;
         boolean userDefinedConfigFile;
         if (userConfig == null) {
@@ -1471,7 +1473,7 @@ public class Spamc {
         // we can't use the toArray() method because that returns the wrong data
         // type
         for (int i = 0; i < combined.size(); i++) {
-            combinedArray[i] = (String) combined.get(i);
+            combinedArray[i] = combined.get(i);
         }
         return combinedArray;
     }
@@ -2080,63 +2082,62 @@ public class Spamc {
         }
     }
 
-    private static Collection options = null;
+    private static Collection<AbstractOption> options = null;
 
-    private static Map shortArgumentsMap = null;
+    private static Map<String, AbstractOption> shortArgumentsMap = null;
 
-    private static Map longArgumentsMap = null;
+    private static Map<String, AbstractOption> longArgumentsMap = null;
 
-    private static void initOptions() {
+    private static synchronized void initOptions() {
         if (options == null) {
-            options = new ArrayList();
-        }
+            options = new ArrayList<AbstractOption>();
+            options.add(new DestinationOption());
+            options.add(new RandomizeOption());
+            options.add(new PortOption());
+            options.add(new SSLOption());
+            options.add(new SocketOption());
+            options.add(new ConfigOption());
+            options.add(new TimeoutOption());
+            options.add(new ConnectRetriesOption());
+            options.add(new RetrySleepOption());
+            options.add(new MaxSizeOption());
+            options.add(new UsernameOption());
+            options.add(new LearnTypeOption());
+            options.add(new ReportTypeOption());
+            options.add(new BSMTPOption());
+            options.add(new CheckOption());
+            options.add(new TestsOption());
+            options.add(new FullSpamOption());
+            options.add(new FullOption());
+            options.add(new HeadersOption());
+            options.add(new ExitCodeOption());
+            options.add(new NoSafeFallbackOption());
+            options.add(new LogToStderrOption());
+            options.add(new PipeToOption());
+            options.add(new HelpOption());
+            options.add(new VersionOption());
+            options.add(new CompressOption());
+            options.add(new KeepAliveOption());
 
-        options.add(new DestinationOption());
-        options.add(new RandomizeOption());
-        options.add(new PortOption());
-        options.add(new SSLOption());
-        options.add(new SocketOption());
-        options.add(new ConfigOption());
-        options.add(new TimeoutOption());
-        options.add(new ConnectRetriesOption());
-        options.add(new RetrySleepOption());
-        options.add(new MaxSizeOption());
-        options.add(new UsernameOption());
-        options.add(new LearnTypeOption());
-        options.add(new ReportTypeOption());
-        options.add(new BSMTPOption());
-        options.add(new CheckOption());
-        options.add(new TestsOption());
-        options.add(new FullSpamOption());
-        options.add(new FullOption());
-        options.add(new HeadersOption());
-        options.add(new ExitCodeOption());
-        options.add(new NoSafeFallbackOption());
-        options.add(new LogToStderrOption());
-        options.add(new PipeToOption());
-        options.add(new HelpOption());
-        options.add(new VersionOption());
-        options.add(new CompressOption());
-        options.add(new KeepAliveOption());
-
-        // store all short and long argument names as map keys so that
-        // we will have a fast index to them when parsing the command
-        // line
-        final Iterator iterator = options.iterator();
-        AbstractOption option;
-        if (shortArgumentsMap == null) {
-            shortArgumentsMap = new HashMap();
-        }
-        if (longArgumentsMap == null) {
-            longArgumentsMap = new HashMap();
-        }
-        while (iterator.hasNext()) {
-            option = (AbstractOption) iterator.next();
-            if (option.getShortName() != null) {
-                shortArgumentsMap.put(option.getShortName(), option);
+            // store all short and long argument names as map keys so that
+            // we will have a fast index to them when parsing the command
+            // line
+            final Iterator<AbstractOption> iterator = options.iterator();
+            AbstractOption option;
+            if (shortArgumentsMap == null) {
+                shortArgumentsMap = new HashMap<>();
             }
-            if (option.getLongName() != null) {
-                longArgumentsMap.put(option.getLongName(), option);
+            if (longArgumentsMap == null) {
+                longArgumentsMap = new HashMap<>();
+            }
+            while (iterator.hasNext()) {
+                option = iterator.next();
+                if (option.getShortName() != null) {
+                    shortArgumentsMap.put(option.getShortName(), option);
+                }
+                if (option.getLongName() != null) {
+                    longArgumentsMap.put(option.getLongName(), option);
+                }
             }
         }
     }
@@ -2338,9 +2339,9 @@ public class Spamc {
 
             option = null;
             if (shortArgumentsMap.containsKey(args[i])) {
-                option = (AbstractOption) shortArgumentsMap.get(args[i]);
+                option = shortArgumentsMap.get(args[i]);
             } else if (longArgumentsMap.containsKey(args[i])) {
-                option = (AbstractOption) longArgumentsMap.get(args[i]);
+                option = longArgumentsMap.get(args[i]);
             }
             if (option == null) {
                 throw new OptionNotFoundException(i, args[i].length(), args[i]);

@@ -1021,28 +1021,21 @@ public class DatabaseImpl extends DBService {
     }
 
     public int countDocumentsperContext(final Context ctx) throws OXException {
-        int retval = 0;
-
         final Connection con = getReadConnection(ctx);
-
+        PreparedStatement stmt = null;
+        ResultSet result = null;
         try {
-            final StringBuilder SQL = new StringBuilder("SELECT count(id) from infostore where infostore.cid=?");
-            final PreparedStatement stmt = con.prepareStatement(SQL.toString());
+            stmt = con.prepareStatement("SELECT count(id) from infostore where infostore.cid=?");
             stmt.setInt(1, ctx.getContextId());
-            final ResultSet result = stmt.executeQuery();
-            if (result.next()) {
-                retval = result.getInt(1);
-            }
-            result.close();
-            stmt.close();
+            result = stmt.executeQuery();
+            return result.next() ? result.getInt(1) : 0;
         } catch (final SQLException e) {
             LOG.error("", e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, "");
         } finally {
+            close(stmt, result);
             releaseReadConnection(ctx, con);
         }
-
-        return retval;
     }
 
     /**
