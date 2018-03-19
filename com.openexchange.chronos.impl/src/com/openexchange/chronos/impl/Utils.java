@@ -63,6 +63,7 @@ import static com.openexchange.chronos.common.CalendarUtils.optTimeZone;
 import static com.openexchange.chronos.common.SearchUtils.getSearchTerm;
 import static com.openexchange.chronos.impl.AbstractStorageOperation.PARAM_CONNECTION;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.b;
 import static com.openexchange.java.Autoboxing.i2I;
 import java.sql.Connection;
 import java.util.AbstractMap;
@@ -100,7 +101,9 @@ import com.openexchange.chronos.common.mapping.EventMapper;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.osgi.Services;
+import com.openexchange.chronos.impl.performer.AttendeeUsageTracker;
 import com.openexchange.chronos.provider.CalendarAccount;
+import com.openexchange.chronos.service.CalendarEvent;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EntityResolver;
@@ -1135,6 +1138,19 @@ public class Utils {
      */
     public static Iterator<RecurrenceId> getRecurrenceIterator(CalendarSession session, Event masterEvent, Date from, Date until) throws OXException {
         return session.getRecurrenceService().iterateRecurrenceIds(new DefaultRecurrenceData(masterEvent), from, until);
+    }
+
+    /**
+     * Tracks newly added attendees from creations and updates found in the supplied calendar result, in case attendee tracking is
+     * enabled as per {@link CalendarParameters#PARAMETER_TRACK_ATTENDEE_USAGE}.
+     *
+     * @param session The calendar session
+     * @param event The calendar event to track
+     */
+    public static void trackAttendeeUsage(CalendarSession session, CalendarEvent event) {
+        if (null != event && b(session.get(CalendarParameters.PARAMETER_TRACK_ATTENDEE_USAGE, Boolean.class, Boolean.FALSE))) {
+            new AttendeeUsageTracker(session.getEntityResolver()).track(event);
+        }
     }
 
     /**

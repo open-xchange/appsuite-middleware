@@ -50,6 +50,7 @@
 package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.impl.Utils.getFolder;
+import static com.openexchange.chronos.impl.Utils.trackAttendeeUsage;
 import static com.openexchange.java.Autoboxing.L;
 import static org.slf4j.LoggerFactory.getLogger;
 import java.util.ArrayList;
@@ -298,7 +299,9 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * notify handlers & return userized result
          */
-        notifyHandlers(result, session);
+        CalendarEvent calendarEvent = result.getCalendarEvent(session);
+        trackAttendeeUsage(session, calendarEvent);
+        notifyHandlers(calendarEvent);
         return result.getUserizedResult();
     }
 
@@ -318,7 +321,9 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * notify handlers & return userized result
          */
-        notifyHandlers(result, session);
+        CalendarEvent calendarEvent = result.getCalendarEvent(session);
+        trackAttendeeUsage(session, calendarEvent);
+        notifyHandlers(calendarEvent);
         return result.getUserizedResult();
     }
 
@@ -338,7 +343,9 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * notify handlers & return userized result
          */
-        notifyHandlers(result, session);
+        CalendarEvent calendarEvent = result.getCalendarEvent(session);
+        trackAttendeeUsage(session, calendarEvent);
+        notifyHandlers(calendarEvent);
         return result.getUserizedResult();
     }
 

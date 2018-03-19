@@ -233,6 +233,16 @@ public interface CalendarParameters {
     static final String PARAMETER_UPDATE_CACHE = "updateCache";
 
     /**
+     * {@link Boolean}
+     * <p/>
+     * Configures whether newly added attendees from creations and updates should be tracked automatically, which includes adding new
+     * entries in the collected contacts folder for new external calendar users (utilizing the contact collector service), as well as
+     * incrementing the use counts for already known internal and external entities (using the object use count service). Defaults to
+     * <code>false</code>, hence needs to be enabled explicitly.
+     */
+    static final String PARAMETER_TRACK_ATTENDEE_USAGE = "trackAttendeeUsage";
+
+    /**
      * {@link Integer}
      * <p/>
      * The principal id in an itip context

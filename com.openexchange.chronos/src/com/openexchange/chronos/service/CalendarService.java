@@ -324,6 +324,7 @@ public interface CalendarService {
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}</li>
      * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
+     * <li>{@link CalendarParameters#PARAMETER_TRACK_ATTENDEE_USAGE}</li>
      * </ul>
      *
      * @param session The calendar session
@@ -340,6 +341,7 @@ public interface CalendarService {
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}</li>
      * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
+     * <li>{@link CalendarParameters#PARAMETER_TRACK_ATTENDEE_USAGE}</li>
      * </ul>
      *
      * @param session The calendar session
@@ -357,6 +359,7 @@ public interface CalendarService {
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}</li>
      * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
+     * <li>{@link CalendarParameters#PARAMETER_TRACK_ATTENDEE_USAGE}</li>
      * </ul>
      *
      * @param session The calendar session
