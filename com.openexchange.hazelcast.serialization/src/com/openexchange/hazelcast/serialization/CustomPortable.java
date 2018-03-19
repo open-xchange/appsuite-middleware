@@ -154,6 +154,10 @@ public interface CustomPortable extends Portable {
      *   &bull; 206 --> com.openexchange.office.hazelcast.serialization.document.PortableRestoreID
      *   &bull; 207 --> com.openexchange.office.hazelcast.serialization.document.PortableCleanupStatus
      *   &bull; 208 --> com.openexchange.office.hazelcast.serialization.document.PortableMemberPredicate
+     *   &bull; 209 --> com.openexchange.office.rt2.hazelcast.serialization.PortableNodeHealthState
+     *   &bull; 210 --> com.openexchange.office.rt2.hazelcast.serialization.PortableNodeHealthPredicate
+     *   &bull; 211 --> com.openexchange.office.rt2.hazelcast.serialization.PortableNodeDocsPredicate
+     *   &bull; 212 --> com.openexchange.office.rt2.hazelcast.serialization.PortableNodeHealthStatePredicate
      *   &bull; 300 --> com.openexchange.saml.impl.hz.PortableAuthnRequestInfo
      *   &bull; 301 --> com.openexchange.saml.impl.hz.PortableLogoutRequestInfo
      *   &bull; 400 --> com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionExistenceCheck
