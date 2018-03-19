@@ -46,30 +46,23 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.chronos.compat;
+package com.openexchange.chronos.provider.birthdays;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 /**
+ * 
  * {@link UnitTests}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.10.0
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    RecurrenceTests.class,
-    RecurrencePositionTest.class
+    EventConverterTest.class,
 })
 public class UnitTests {
-
-    /**
-     * Initializes a new {@link UnitTests}.
-     */
-    public UnitTests() {
-        super();
-    }
 
 }
