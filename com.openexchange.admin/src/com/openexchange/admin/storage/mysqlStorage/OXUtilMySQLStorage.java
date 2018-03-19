@@ -143,8 +143,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     private final AdminCacheExtended cache;
     private final PropertyHandlerExtended prop;
-
-    private final int CONTEXTS_PER_SCHEMA;
+    private final int maxNumberOfContextsPerSchema;
 
     /**
      * Initializes a new {@link OXUtilMySQLStorage}.
@@ -152,18 +151,16 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     public OXUtilMySQLStorage() {
         super();
         this.cache = ClientAdminThreadExtended.cache;
-
-        int CONTEXTS_PER_SCHEMA = 1;
+        int maxNumberOfContextsPerSchema = 1;
         try {
-            CONTEXTS_PER_SCHEMA = Integer.parseInt(cache.getProperties().getProp("CONTEXTS_PER_SCHEMA", "1"));
-            if (CONTEXTS_PER_SCHEMA <= 0) {
+            maxNumberOfContextsPerSchema = Integer.parseInt(cache.getProperties().getProp("CONTEXTS_PER_SCHEMA", "1"));
+            if (maxNumberOfContextsPerSchema <= 0) {
                 throw new OXContextException("CONTEXTS_PER_SCHEMA MUST BE > 0");
             }
         } catch (final OXContextException e) {
             LOG.error("Error init", e);
         }
-        this.CONTEXTS_PER_SCHEMA = CONTEXTS_PER_SCHEMA;
-
+        this.maxNumberOfContextsPerSchema = maxNumberOfContextsPerSchema;
         prop = cache.getProperties();
     }
 
@@ -1352,13 +1349,13 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 throw new StorageException("Number of schemas cannot be automatically calculated, since max. units is set to \"-1\". Please specify number of schemas explicitly.");
             }
 
-            int CONTEXTS_PER_SCHEMA = Integer.parseInt(prop.getProp("CONTEXTS_PER_SCHEMA", "1"));
-            if (CONTEXTS_PER_SCHEMA <= 0) {
-                CONTEXTS_PER_SCHEMA = 1;
+            int maxNumberOfContextsPerSchema = this.maxNumberOfContextsPerSchema;
+            if (maxNumberOfContextsPerSchema <= 0) {
+                maxNumberOfContextsPerSchema = 1;
             }
             int maxNumberOfSchemas;
             {
-                float quotient = maxUnits / (float) CONTEXTS_PER_SCHEMA;
+                float quotient = maxUnits / (float) maxNumberOfContextsPerSchema;
                 maxNumberOfSchemas = (int) quotient;
                 if (quotient != maxNumberOfSchemas) {
                     maxNumberOfSchemas++;
@@ -1466,12 +1463,12 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     throw new StorageException("Number of schemas cannot be automatically calculated, since max. units is set to \"-1\". Please specify number of schemas explicitly.");
                 }
 
-                int CONTEXTS_PER_SCHEMA = Integer.parseInt(prop.getProp("CONTEXTS_PER_SCHEMA", "1"));
-                if (CONTEXTS_PER_SCHEMA <= 0) {
-                    CONTEXTS_PER_SCHEMA = 1;
+                int maxNumberOfContextsPerSchema = this.maxNumberOfContextsPerSchema;
+                if (maxNumberOfContextsPerSchema <= 0) {
+                    maxNumberOfContextsPerSchema = 1;
                 }
                 {
-                    float quotient = maxUnits / (float) CONTEXTS_PER_SCHEMA;
+                    float quotient = maxUnits / (float) maxNumberOfContextsPerSchema;
                     numberOfSchemas = (int) quotient;
                     if (quotient != numberOfSchemas) {
                         numberOfSchemas++;
@@ -2291,7 +2288,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 return new Database[0];
             }
 
-            int CONTEXTS_PER_SCHEMA = Integer.parseInt(prop.getProp("CONTEXTS_PER_SCHEMA", "1"));
+            int maxNumberOfContextsPerSchema = this.maxNumberOfContextsPerSchema;
             List<Database> tmp = new ArrayList<>();
             do {
                 Boolean ismaster = Boolean.TRUE;
@@ -2307,7 +2304,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     db.setLogin(rs.getString("d.login"));
                     db.setMaster(ismaster);
                     db.setMasterId(I(masterid));
-                    db.setMaxUnits(I(CONTEXTS_PER_SCHEMA));
+                    db.setMaxUnits(I(maxNumberOfContextsPerSchema));
                     db.setPassword(rs.getString("d.password"));
                     db.setPoolHardLimit(I(rs.getInt("d.hardlimit")));
                     db.setPoolInitial(I(rs.getInt("d.initial")));
@@ -3915,7 +3912,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     @Override
     public Database getNextDBHandleByWeight(final Connection con, boolean forContext) throws SQLException, StorageException {
-        int CONTEXTS_PER_SCHEMA = Integer.parseInt(prop.getProp("CONTEXTS_PER_SCHEMA", "1"));
+        int maxNumberOfContextsPerSchema = this.maxNumberOfContextsPerSchema;
         int retryCount = 0;
         while (true) {
             PreparedStatement stmt = null;
@@ -3967,7 +3964,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                             String scheme = rs.getString(pos++); // if the value is SQL NULL, the value returned is null
                             if (null != scheme) {
                                 int schemaCount = rs.getInt(pos++);
-                                if (schemaCount < CONTEXTS_PER_SCHEMA && false == OXToolStorageInterface.getInstance().schemaBeingLockedOrNeedsUpdate(databaseId, scheme)) {
+                                if (schemaCount < maxNumberOfContextsPerSchema && false == OXToolStorageInterface.getInstance().schemaBeingLockedOrNeedsUpdate(databaseId, scheme)) {
                                     db.setScheme(scheme);
                                     db.setSchemaCount(schemaCount);
                                 } else {
@@ -4146,7 +4143,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
 
             // Put context identifiers into a list
-            List<Integer> contextIds = new ArrayList<>(CONTEXTS_PER_SCHEMA >> 1);
+            List<Integer> contextIds = new ArrayList<>(maxNumberOfContextsPerSchema >> 1);
             do {
                 contextIds.add(Integer.valueOf(rs.getInt(1)));
             } while (rs.next());
