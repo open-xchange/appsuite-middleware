@@ -184,7 +184,8 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
             .append(" AND cons.").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel()).append(" = ").append(Table.OBJECT_USE_COUNT).append(".object")
 
             // 3. Add where condition
-            .append(" WHERE (")
+            .append(" WHERE cons.cid=").append(contextID).append(" AND ").append(getFolderIDsClause(folderIDs))
+            .append(" AND (")
             .append("cons.").append(Mappers.CONTACT.get(PRIMARY_KEYS[0]).getColumnLabel())
             .append(",cons.").append(Mappers.CONTACT.get(PRIMARY_KEYS[1]).getColumnLabel())
             .append(",cons.").append(Mappers.CONTACT.get(PRIMARY_KEYS[2]).getColumnLabel())
