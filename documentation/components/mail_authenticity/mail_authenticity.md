@@ -1,4 +1,4 @@
-#Mail Authenticity
+# Mail Authenticity
 
 Since 7.10.0 the OX middleware provides the Mail Authenticity feature for the end user which enables her to be visually aware of the authentication status of emails that she receives and helps her identify phisihing mails from regular communication.
 
