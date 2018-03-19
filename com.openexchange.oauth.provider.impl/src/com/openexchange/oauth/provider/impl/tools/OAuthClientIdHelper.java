@@ -85,14 +85,13 @@ public class OAuthClientIdHelper {
      * --------------------------------- MEMBER SECTION ---------------------------------
      * ----------------------------------------------------------------------------------
      */
-    private final String uuidRegex = "[0-9a-fA-F]{8}[0-9a-fA-F]{4}[34][0-9a-fA-F]{3}[89ab][0-9a-fA-F]{3}[0-9a-fA-F]{12}";
+    private final static String uuidRegex = "[0-9a-fA-F]{8}[0-9a-fA-F]{4}[34][0-9a-fA-F]{3}[89ab][0-9a-fA-F]{3}[0-9a-fA-F]{12}";
 
     /**
      * Returns the client id consisting of the encoded context group identifier and the base token
      *
      * @param groupId - the group id the client is assigned to
      * @return the generated client id
-     * @throws OXException
      */
     public String generateClientId(String groupId) {
         String encodedGroupId = encode(groupId);
@@ -105,7 +104,7 @@ public class OAuthClientIdHelper {
      *
      * @param clientId - the id assigned to the client containing encoded context group id and base token
      * @return the context group id the client is assigned to
-     * @throws OXException
+     * @throws OXException See {@link #extractEncodedGroupId(String)}
      */
     public String getGroupIdFrom(String clientId) throws OXException {
         String groupId = extractEncodedGroupId(clientId);
@@ -118,7 +117,7 @@ public class OAuthClientIdHelper {
      *
      * @param clientId - the id assigned to the client containing encoded context group id and base token
      * @return the base token for that client
-     * @throws OXException
+     * @throws OXException {@link OAuthProviderExceptionCodes#BAD_BASE_TOKEN_IN_CLIENT_ID}
      */
     public String getBaseTokenFrom(String clientId) throws OXException {
         int lastIndexOfSeperator = clientId.lastIndexOf(SEPERATOR);
@@ -135,7 +134,8 @@ public class OAuthClientIdHelper {
      *
      * @param clientId - client identifier to extract the encoded group id from
      * @return String with the encoded group id
-     * @throws OXException
+     * @throws OXException {@link OXException OAuthProviderExceptionCodes#BAD_BASE_TOKEN_IN_CLIENT_ID} or
+     *             {@link OAuthProviderExceptionCodes#BAD_CONTEXT_GROUP_IN_CLIENT_ID}
      */
     protected String extractEncodedGroupId(String clientId) throws OXException {
         int lastIndexOfSeperator = clientId.lastIndexOf(SEPERATOR);
