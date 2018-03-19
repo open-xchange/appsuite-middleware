@@ -264,7 +264,7 @@ public class RdbTaskStorage extends TaskStorage {
     }
 
     /**
-     * Counts the tasks in a folder.
+     * Counts the number of tasks located in given folder.
      *
      * @param ctx Context.
      * @param folderId unique identifier of the folder.
@@ -275,8 +275,9 @@ public class RdbTaskStorage extends TaskStorage {
      * @throws OXException if an error occurs.
      */
     private int countTasks(final Context ctx, final int folderId, final boolean onlyOwn, final int userId, final boolean noPrivate) throws OXException {
-        final Connection con = DBPool.pickup(ctx);
-        int number = 0;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        Connection con = DBPool.pickup(ctx);
         try {
             final StringBuilder sql = new StringBuilder(COUNT_TASKS);
             if (onlyOwn) {
@@ -285,25 +286,22 @@ public class RdbTaskStorage extends TaskStorage {
             if (noPrivate) {
                 sql.append(NO_PRIVATE);
             }
-            final PreparedStatement stmt = con.prepareStatement(sql.toString());
+
+            stmt = con.prepareStatement(sql.toString());
             int pos = 1;
             stmt.setInt(pos++, ctx.getContextId());
             stmt.setInt(pos++, folderId);
             if (onlyOwn) {
                 stmt.setInt(pos++, userId);
             }
-            final ResultSet result = stmt.executeQuery();
-            if (result.next()) {
-                number = result.getInt(1);
-            }
-            result.close();
-            stmt.close();
+            result = stmt.executeQuery();
+            return result.next() ? result.getInt(1) : 0;
         } catch (final SQLException e) {
             throw TaskExceptionCode.SQL_ERROR.create(e);
         } finally {
+            Databases.closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(ctx, con);
         }
-        return number;
     }
 
     @Override

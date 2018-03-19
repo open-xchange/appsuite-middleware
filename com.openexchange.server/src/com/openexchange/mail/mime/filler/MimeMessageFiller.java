@@ -73,7 +73,6 @@ import javax.activation.FileDataSource;
 import javax.mail.BodyPart;
 import javax.mail.Flags;
 import javax.mail.Message.RecipientType;
-import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
@@ -1458,31 +1457,36 @@ public class MimeMessageFiller {
     }
 
     protected void addNestedMessage(final MailPart mailPart, final Boolean inline, final Multipart primaryMultipart, final StringBuilder sb) throws OXException, MessagingException {
-        final ThresholdFileHolder sink = new ThresholdFileHolder(65536, 65536);
-        sink.write(mailPart.getInputStream());
-        final String fn;
-        if (null == mailPart.getFileName()) {
-            String subject = MimeMessageUtility.checkNonAscii(new InternetHeaders(sink.getStream()).getHeader(MessageHeaders.HDR_SUBJECT, null));
-            if (null == subject || subject.length() == 0) {
-                fn = sb.append(PREFIX_PART).append(EXT_EML).toString();
+        ThresholdFileHolder sink = new ThresholdFileHolder(65536, 65536);
+        try {
+            sink.write(mailPart.getInputStream());
+
+            final String fn;
+            if (null == mailPart.getFileName()) {
+                String subject = MimeMessageUtility.checkNonAscii(new InternetHeaders(sink.getStream()).getHeader(MessageHeaders.HDR_SUBJECT, null));
+                if (null == subject || subject.length() == 0) {
+                    fn = sb.append(PREFIX_PART).append(EXT_EML).toString();
+                } else {
+                    subject = MimeMessageUtility.decodeMultiEncodedHeader(MimeMessageUtility.unfold(subject));
+                    fn = sb.append(subject.replaceAll("\\p{Blank}+", "_")).append(EXT_EML).toString();
+                    sb.setLength(0);
+                }
             } else {
-                subject = MimeMessageUtility.decodeMultiEncodedHeader(MimeMessageUtility.unfold(subject));
-                fn = sb.append(subject.replaceAll("\\p{Blank}+", "_")).append(EXT_EML).toString();
-                sb.setLength(0);
+                fn = mailPart.getFileName();
             }
-        } else {
-            fn = mailPart.getFileName();
-        }
-        final boolean bInline = null != inline ? inline.booleanValue() : (Part.INLINE.equalsIgnoreCase(mailPart.getContentDisposition().getDisposition()));
-        if (sink.isInMemory()) {
+
+            final boolean bInline = null != inline ? inline.booleanValue() : (Part.INLINE.equalsIgnoreCase(mailPart.getContentDisposition().getDisposition()));
             ByteArrayOutputStream buffer = sink.getBuffer();
-            if (null == buffer) {
-                addNestedMessage(primaryMultipart, new DataHandler(new FileHolderDataSource(sink, MIME_MESSAGE_RFC822)), fn, bInline);
-            } else {
+            if (null != buffer) {
                 addNestedMessage(primaryMultipart, new DataHandler(new ByteArrayDataSource(buffer.toByteArray(), MIME_MESSAGE_RFC822)), fn, bInline);
+            } else {
+                addNestedMessage(primaryMultipart, new DataHandler(new FileHolderDataSource(sink, MIME_MESSAGE_RFC822)), fn, bInline);
             }
-        } else {
-            addNestedMessage(primaryMultipart, new DataHandler(new FileHolderDataSource(sink, MIME_MESSAGE_RFC822)), fn, bInline);
+
+            // Everything went fine... avoid premature closing
+            sink = null;
+        } finally {
+            Streams.close(sink);
         }
     }
 
@@ -2068,7 +2072,7 @@ public class MimeMessageFiller {
     } // End of ManagedFileImageProvider
 
     static class ImageDataImageProvider implements ImageProvider {
-        
+
         private final ThresholdFileHolder fileHolder;
 
         public ImageDataImageProvider(ImageDataSource imageData, ImageLocation imageLocation, Session session) throws OXException {
@@ -2078,11 +2082,11 @@ public class MimeMessageFiller {
             try {
                 Data<InputStream> data = imageData.getData(InputStream.class, imageData.generateDataArgumentsFrom(imageLocation), session);
                 in = data.getData();
-                
+
                 fileHolder = new ThresholdFileHolder();
                 fileHolder.write(in);
                 in = null; // Already closed if written to ThresholdFileHolder
-                
+
                 DataProperties dataProperties = data.getDataProperties();
                 String fileName = dataProperties.get(DataProperties.PROPERTY_NAME);
                 fileHolder.setName(fileName);

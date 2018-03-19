@@ -128,7 +128,7 @@ public abstract class AbstractValidateMailAccountAction extends AbstractMailAcco
 
     /**
      * Checks the specified {@link OXException} for any indication about a potential SSL problem
-     * 
+     *
      * @param exception The {@link OXException} to check
      * @return <code>true</code> if the root cause indicates an SSL problem, <code>false</code> otherwise
      */
@@ -159,16 +159,20 @@ public abstract class AbstractValidateMailAccountAction extends AbstractMailAcco
         if (null == mailAccess) {
             return false;
         }
-        // Now try to connect
-        final boolean success = mailAccess.ping();
-        // Add possible warnings
-        {
-            final Collection<OXException> currentWarnings = mailAccess.getWarnings();
-            if (null != currentWarnings) {
-                warnings.addAll(currentWarnings);
+        try {
+            // Now try to connect
+            final boolean success = mailAccess.ping();
+            // Add possible warnings
+            {
+                final Collection<OXException> currentWarnings = mailAccess.getWarnings();
+                if (null != currentWarnings) {
+                    warnings.addAll(currentWarnings);
+                }
             }
+            return success;
+        } finally {
+            mailAccess.close(false);
         }
-        return success;
     }
 
     protected static boolean checkTransportServerURL(MailAccountDescription accountDescription, ServerSession session, List<OXException> warnings, boolean errorOnDenied) throws OXException {

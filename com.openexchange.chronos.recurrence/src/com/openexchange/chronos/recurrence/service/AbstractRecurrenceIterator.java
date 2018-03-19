@@ -128,15 +128,15 @@ public abstract class AbstractRecurrenceIterator<T> implements RecurrenceIterato
         this.end = end;
         this.limit = limit;
         this.exceptionDates = recurrenceData != null ? recurrenceData.getExceptionDates() : null;
-        if (limit != null && limit == 0) {
+        if (limit != null && limit.intValue() == 0) {
             ChronosLogger.debug("Occurrence limit set to 0, nothing to do.");
-            return;
+        } else {
+            inner = recurrenceData != null ? RecurrenceUtils.getRecurrenceIterator(recurrenceData, forwardToOccurrence) : null;
+            next = null;
+            position = 0;
+            count = 0;
+            init();
         }
-        inner = RecurrenceUtils.getRecurrenceIterator(recurrenceData, forwardToOccurrence);
-        next = null;
-        position = 0;
-        count = 0;
-        init();
     }
 
     private void init() {

@@ -1443,8 +1443,9 @@ public class Spamc {
         }
 
         // read the arguments in from the file first
+        BufferedReader reader = null;
         try {
-            final BufferedReader reader = new BufferedReader(new FileReader(configFile));
+            reader = new BufferedReader(new FileReader(configFile));
             String line;
             String tokens[];
             while (reader.ready()) {
@@ -1457,11 +1458,12 @@ public class Spamc {
                     combined.add(tokens[i]);
                 }
             }
-            reader.close();
         } catch (final IOException e) {
             if (userDefinedConfigFile) {
                 throw new ConfigurationException("Failed to open config file: " + configFile.getPath());
             }
+        } finally {
+            Streams.close(reader);
         }
 
         // arguments entered at the command line are processed next

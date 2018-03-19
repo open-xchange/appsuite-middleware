@@ -794,32 +794,34 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
     // FIXME Move 2 query builder
     private int getNextVersionNumberForInfostoreObject(final int cid, final int infostore_id, final Connection con) throws SQLException {
-        int retval = 0;
-
-        PreparedStatement stmt = con.prepareStatement("SELECT MAX(version_number) FROM infostore_document WHERE cid=? AND infostore_id=?");
-        stmt.setInt(1, cid);
-        stmt.setInt(2, infostore_id);
-        ResultSet result = stmt.executeQuery();
-        if (result.next()) {
-            retval = result.getInt(1);
-        }
-        result.close();
-        stmt.close();
-
-        stmt = con.prepareStatement("SELECT MAX(version_number) FROM del_infostore_document WHERE cid=? AND infostore_id=?");
-        stmt.setInt(1, cid);
-        stmt.setInt(2, infostore_id);
-        result = stmt.executeQuery();
-        if (result.next()) {
-            final int delVersion = result.getInt(1);
-            if (delVersion > retval) {
-                retval = delVersion;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            int retval = 0;
+            stmt = con.prepareStatement("SELECT MAX(version_number) FROM infostore_document WHERE cid=? AND infostore_id=?");
+            stmt.setInt(1, cid);
+            stmt.setInt(2, infostore_id);
+            result = stmt.executeQuery();
+            if (result.next()) {
+                retval = result.getInt(1);
             }
-        }
-        result.close();
-        stmt.close();
+            result.close();
+            stmt.close();
 
-        return retval + 1;
+            stmt = con.prepareStatement("SELECT MAX(version_number) FROM del_infostore_document WHERE cid=? AND infostore_id=?");
+            stmt.setInt(1, cid);
+            stmt.setInt(2, infostore_id);
+            result = stmt.executeQuery();
+            if (result.next()) {
+                final int delVersion = result.getInt(1);
+                if (delVersion > retval) {
+                    retval = delVersion;
+                }
+            }
+            return retval + 1;
+        } finally {
+            Databases.closeSQLStuff(result, stmt);
+        }
     }
 
     protected QuotaFileStorage getFileStorage(int folderOwner, int contextId) throws OXException {

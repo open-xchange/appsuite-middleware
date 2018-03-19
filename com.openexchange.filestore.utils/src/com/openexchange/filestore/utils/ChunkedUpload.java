@@ -125,8 +125,8 @@ public abstract class ChunkedUpload<I extends InputStream, C extends UploadChunk
             throw FileStorageCodes.IOERROR.create(new EOFException("End of input reached"), "End of input reached");
         }
 
+        ThresholdFileHolder fileHolder = new ThresholdFileHolder();
         try {
-            ThresholdFileHolder fileHolder = new ThresholdFileHolder();
             byte[] buffer = new byte[0xFFFF]; // 64k
             for (int read; (read = inputStream.read(buffer, 0, buffer.length)) > 0;) {
                 fileHolder.write(buffer, 0, read);
@@ -139,9 +139,13 @@ public abstract class ChunkedUpload<I extends InputStream, C extends UploadChunk
              * end of input reached
              */
             hasNext = false;
-            return createChunkWith(fileHolder, true);
+            C chunk = createChunkWith(fileHolder, true);
+            fileHolder = null;
+            return chunk;
         } catch (IOException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(fileHolder);
         }
     }
 
