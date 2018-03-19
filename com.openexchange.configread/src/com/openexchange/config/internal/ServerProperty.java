@@ -50,9 +50,10 @@
 package com.openexchange.config.internal;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.cascade.BasicProperty;
 import com.openexchange.exception.OXException;
 
@@ -64,20 +65,21 @@ import com.openexchange.exception.OXException;
  */
 public class ServerProperty implements BasicProperty {
 
-    private String value;
-    private boolean defined;
-    private final Map<String, String> metadata = new HashMap<String, String>();
+    private final AtomicReference<String> value;
+    private final Map<String, String> metadata;
 
     /**
      * Initializes a new {@link ServerProperty}.
      */
     public ServerProperty() {
         super();
+        value = new AtomicReference<String>(null);
+        metadata = new ConcurrentHashMap<String, String>(8, 0.9F, 1);
     }
 
     @Override
     public String get() {
-        return value;
+        return value.get();
     }
 
     @Override
@@ -85,18 +87,14 @@ public class ServerProperty implements BasicProperty {
         return metadata.get(metadataName);
     }
 
-    public void setDefined(boolean defined) {
-        this.defined = defined;
-    }
-
     @Override
     public boolean isDefined() {
-        return defined;
+        return value.get() != null;
     }
 
     @Override
     public void set(String value) {
-        this.value = value;
+        this.value.set(value);
     }
 
     @Override
@@ -113,10 +111,11 @@ public class ServerProperty implements BasicProperty {
     public String toString() {
         StringBuilder builder = new StringBuilder(64);
         builder.append("ServerProperty [");
+        String value = this.value.get();
         if (value != null) {
             builder.append("value=").append(value).append(", ");
         }
-        builder.append("defined=").append(defined).append(", ");
+        builder.append("defined=").append(null != value).append(", ");
         if (metadata != null) {
             builder.append("metadata=").append(metadata);
         }
