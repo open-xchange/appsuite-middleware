@@ -203,8 +203,9 @@ public class FolderCopyTask implements CopyUserTaskService {
         final SortedMap<Integer, FolderEqualsWrapper> movedFolders = loadFoldersFromDB(dstCon, i(dstCtxId), i(dstUsrId));
         final FolderMapping folderMapping = new FolderMapping();
 
-        for (final Integer fuid : originFolders.keySet()) {
-            final FolderEqualsWrapper originWrapper = originFolders.get(fuid);
+        for (final Map.Entry<Integer, FolderEqualsWrapper> entry : originFolders.entrySet()) {
+            Integer fuid = entry.getKey();
+            FolderEqualsWrapper originWrapper = entry.getValue();
             final Integer targetId = idMapping.get(fuid);
             if (targetId == null) {
                 throw UserCopyExceptionCodes.UNKNOWN_PROBLEM.create();

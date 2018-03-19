@@ -222,15 +222,19 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
                 Map<String, String> defaultFolderNames = null;
                 if (!pop3 && valid) {
                     MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-                    mailAccess = getMailAccess(accountDescription, session, warnings);
-                    mailAccess.connect(false);
-                    IMailFolderStorage storage = mailAccess.getFolderStorage();
-                    IMailFolderStorageDefaultFolderAware defaultFolderAware = storage.supports(IMailFolderStorageDefaultFolderAware.class);
-                    if (null != defaultFolderAware) {
-                        defaultFolderNames = defaultFolderAware.getSpecialUseFolder();
+                    try {
+                        mailAccess = getMailAccess(accountDescription, session, warnings);
+                        mailAccess.connect(false);
+                        IMailFolderStorage storage = mailAccess.getFolderStorage();
+                        IMailFolderStorageDefaultFolderAware defaultFolderAware = storage.supports(IMailFolderStorageDefaultFolderAware.class);
+                        if (null != defaultFolderAware) {
+                            defaultFolderNames = defaultFolderAware.getSpecialUseFolder();
+                        }
+                    } finally {
+                        if (null != mailAccess) {
+                            mailAccess.close(false);
+                        }
                     }
-                    mailAccess.close(false);
-                    mailAccess = null;
                 }
 
                 if (valid) {

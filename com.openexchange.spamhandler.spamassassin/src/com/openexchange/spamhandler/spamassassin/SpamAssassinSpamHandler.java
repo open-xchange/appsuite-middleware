@@ -79,6 +79,7 @@ import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.converters.DefaultConverterConfig;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.service.MailService;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandler;
@@ -398,7 +399,8 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
     private void sendToSpamd(final String source, final boolean spam, final SpamdSettings spamdsettings, final String mailId, final String fullName, final int accountId, final Session session) throws OXException {
         try {
             // Configure service access
-            final Spamc spamc = new Spamc();
+            SSLSocketFactoryProvider factoryProvider = services.getOptionalService(SSLSocketFactoryProvider.class);
+            final Spamc spamc = new Spamc(null == factoryProvider ? null : factoryProvider.getDefault());
             spamc.setHost(spamdsettings.getHostname());
             spamc.setPort(spamdsettings.getPort());
             spamc.setUserName(spamdsettings.getUsername());

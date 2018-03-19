@@ -138,8 +138,13 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
         StreamingDataProvider(InputStream in) throws OXException {
             super();
             ThresholdFileHolder sink = new ThresholdFileHolder();
-            sink.write(in);
-            this.sink = sink;
+            try {
+                sink.write(in);
+                this.sink = sink;
+                sink = null;
+            } finally {
+                Streams.close(sink);
+            }
         }
 
         @Override

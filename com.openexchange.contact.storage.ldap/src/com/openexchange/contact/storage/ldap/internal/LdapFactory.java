@@ -184,10 +184,22 @@ public class LdapFactory  {
     }
 
     private LdapContext createContext(Session session, AuthType authType) throws OXException {
+        InitialLdapContext ldapContext = null;
         try {
-            return authenticate(new InitialLdapContext(getEnvironment(), null), authType, session);
+            ldapContext = new InitialLdapContext(getEnvironment(), null);
+            LdapContext authenticatedLdapContext = authenticate(ldapContext, authType, session);
+            ldapContext = null;
+            return authenticatedLdapContext;
         } catch (NamingException e) {
             throw LdapExceptionCodes.INITIAL_LDAP_ERROR.create(e, e.getMessage());
+        } finally {
+            if (null != ldapContext) {
+                try {
+                    ldapContext.close();
+                } catch (Exception e) {
+                    // Ignore...
+                }
+            }
         }
     }
 
