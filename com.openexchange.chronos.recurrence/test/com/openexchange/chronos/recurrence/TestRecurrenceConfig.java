@@ -50,6 +50,7 @@
 package com.openexchange.chronos.recurrence;
 
 import com.openexchange.chronos.recurrence.service.RecurrenceConfig;
+import com.openexchange.config.SimConfigurationService;
 
 /**
  * {@link TestRecurrenceConfig}
@@ -74,7 +75,7 @@ public class TestRecurrenceConfig extends RecurrenceConfig {
      * @param calculationLimit The calculation limit to use
      */
     public TestRecurrenceConfig(int calculationLimit) {
-        super(null);
+        super(new SimConfigurationService());
         this.calculationLimit = calculationLimit;
     }
 
