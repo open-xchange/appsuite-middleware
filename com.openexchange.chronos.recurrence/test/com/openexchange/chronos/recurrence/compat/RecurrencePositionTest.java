@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.compat;
+package com.openexchange.chronos.recurrence.compat;
 
 import static com.openexchange.time.TimeTools.D;
 import static org.junit.Assert.assertEquals;
@@ -61,6 +61,8 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
+import com.openexchange.chronos.compat.Appointment2Event;
+import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.recurrence.TestRecurrenceConfig;
 import com.openexchange.chronos.recurrence.service.RecurrenceServiceImpl;
 import com.openexchange.chronos.service.RecurrenceService;

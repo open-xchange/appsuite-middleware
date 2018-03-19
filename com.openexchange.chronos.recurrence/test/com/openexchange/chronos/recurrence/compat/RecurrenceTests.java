@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.compat;
+package com.openexchange.chronos.recurrence.compat;
 
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
@@ -55,6 +55,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.compat.Recurrence;
+import com.openexchange.chronos.compat.SeriesPattern;
 import com.openexchange.chronos.recurrence.TestRecurrenceConfig;
 import com.openexchange.chronos.recurrence.service.RecurrenceServiceImpl;
 import com.openexchange.chronos.service.RecurrenceService;
