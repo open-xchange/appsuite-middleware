@@ -77,9 +77,9 @@ public enum Protocol {
     }
 
     /**
-     * Gets the protocol name
+     * Gets the protocol base name; e.g. <code>"http"</code>
      *
-     * @return The protocol name
+     * @return The protocol base name
      */
     public String getName() {
         return name;
