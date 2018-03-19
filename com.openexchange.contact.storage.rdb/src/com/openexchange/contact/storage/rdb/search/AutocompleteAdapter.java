@@ -147,7 +147,7 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
 		return Strings.trim(stringBuilder);
 	}
 
-	private static ContactField[] PRIMARY_KEYS = new ContactField[] {ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.CONTEXTID};
+	private static ContactField[] PRIMARY_KEYS = new ContactField[] {ContactField.CONTEXTID,ContactField.OBJECT_ID, ContactField.FOLDER_ID};
 
 	private void appendAutocomplete(List<String> patterns, AutocompleteParameters parameters, int[] folderIDs, int contextID, ContactField[] fields) throws OXException {
         boolean requireEmail = parameters.getBoolean(AutocompleteParameters.REQUIRE_EMAIL, true);
