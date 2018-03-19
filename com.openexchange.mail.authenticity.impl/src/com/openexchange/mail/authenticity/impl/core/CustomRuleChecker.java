@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.authenticity.impl.core;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -107,7 +108,12 @@ public class CustomRuleChecker implements Reloadable{
     @SuppressWarnings("unchecked")
     protected List<Rule> load(String yml) throws OXException {
         ConfigurationService configService = Services.getService(ConfigurationService.class);
-        Map<String, Object> map = get(configService.getYaml(yml), Map.class, yml);
+        Object yaml = configService.getYaml(yml);
+        if (null == yaml) {
+            return Collections.emptyList();
+        }
+
+        Map<String, Object> map = get(yaml, Map.class, yml);
         map = get(map.get("custom_rules"), Map.class, yml);
         ImmutableList.Builder<Rule> rules = ImmutableList.builder();
         for (Object o : map.values()) {
@@ -126,7 +132,7 @@ public class CustomRuleChecker implements Reloadable{
     @SuppressWarnings("unchecked")
     private <T> T get(Object o, Class<T> clazz, String ymlName) throws OXException {
         if (false == clazz.isInstance(o)) {
-            throw MailAuthenticityExceptionCodes.UNEXPECTED_ERROR.create("The YAML structure of file " + ymlName + " is invalid.");
+            throw MailAuthenticityExceptionCodes.UNEXPECTED_ERROR.create("The YAML structure of file \"" + ymlName + "\" is invalid.");
         }
 
         return (T) o;
