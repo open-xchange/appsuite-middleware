@@ -130,7 +130,11 @@ public class DownloadHandler extends HttpAuthShareHandler {
          * get document
          */
         ServerSession session = ServerSessionAdapter.valueOf(resolvedShare.getSession());
-        final String id = resolvedShare.getShareRequest().getTarget().getItem();
+        ShareTarget target = resolvedShare.getShareRequest().getTarget();
+        if (null == target) {
+            return;
+        }
+        final String id = target.getItem();
         final String version = null; // as per com.openexchange.file.storage.FileStorageFileAccess.CURRENT_VERSION
         IDBasedFileAccessFactory service = Services.getService(IDBasedFileAccessFactory.class);
         if (null == service) {
