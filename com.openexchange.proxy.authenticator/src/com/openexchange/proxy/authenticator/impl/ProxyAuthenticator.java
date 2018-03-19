@@ -51,11 +51,10 @@ package com.openexchange.proxy.authenticator.impl;
 
 import java.net.Authenticator;
 import java.net.PasswordAuthentication;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -73,9 +72,9 @@ import com.openexchange.proxy.authenticator.PasswordAuthenticationProvider;
 public class ProxyAuthenticator extends Authenticator implements ServiceTrackerCustomizer<PasswordAuthenticationProvider, PasswordAuthenticationProvider> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ProxyAuthenticator.class);
-    private final BundleContext context;
-    Map<String, List<PasswordAuthenticationProvider>> providers = new ConcurrentHashMap<>();
 
+    private final BundleContext context;
+    private final Map<String, Queue<PasswordAuthenticationProvider>> providers;
 
     /**
      * Initializes a new {@link ProxyAuthenticator}.
@@ -83,6 +82,7 @@ public class ProxyAuthenticator extends Authenticator implements ServiceTrackerC
     public ProxyAuthenticator(BundleContext context) {
         super();
         this.context = context;
+        providers = new ConcurrentHashMap<>(8, 0.9F, 1);
     }
 
     @Override
@@ -93,7 +93,7 @@ public class ProxyAuthenticator extends Authenticator implements ServiceTrackerC
             if (null != protocol) {
                 // Optionally followed by "/version", where version is a version number.
                 int pos = protocol.lastIndexOf('/');
-                List<PasswordAuthenticationProvider> providers = this.providers.get(pos < 0 ? protocol : protocol.substring(0, pos));
+                Queue<PasswordAuthenticationProvider> providers = this.providers.get(pos < 0 ? protocol : protocol.substring(0, pos));
                 if (providers != null) {
                     String host = getRequestingHost();
                     int port = getRequestingPort();
@@ -110,50 +110,62 @@ public class ProxyAuthenticator extends Authenticator implements ServiceTrackerC
         return super.getPasswordAuthentication();
     }
 
+    // --------------------------------------------------- ServiceTracker stuff -------------------------------------------------------------
+
     @Override
     public PasswordAuthenticationProvider addingService(ServiceReference<PasswordAuthenticationProvider> reference) {
-
-        PasswordAuthenticationProvider service = context.getService(reference);
-        if(service == null) {
+        PasswordAuthenticationProvider provider = context.getService(reference);
+        if (provider == null) {
+            context.ungetService(reference);
             return null;
         }
-        if(Strings.isEmpty(service.getProtocol())) {
+
+        String protocol = provider.getProtocol();
+        if (Strings.isEmpty(protocol)) {
             LOG.error("The returned protocol of the PasswordAuthenticationProvider with the name {} is empty and will therefore not be used.");
-            return service;
-        }
-        List<PasswordAuthenticationProvider> list = providers.get(service.getProtocol());
-        if(list == null) {
-            list = new ArrayList<>(1);
-            providers.put(service.getProtocol(), list);
+            context.ungetService(reference);
+            return null;
         }
 
-        list.add(service);
-        LOG.info("Successfully added PasswordAuthenticationProvider {} for protocol {}.", service.getClass().getName(), service.getProtocol());
-        return service;
+        Queue<PasswordAuthenticationProvider> queue = providers.get(protocol);
+        if (queue == null) {
+            Queue<PasswordAuthenticationProvider> newqueue = new ConcurrentLinkedQueue<>();
+            queue = providers.putIfAbsent(protocol, newqueue);
+            if (null == queue) {
+                queue = newqueue;
+            }
+        }
+
+        if (false == queue.offer(provider)) {
+            LOG.error("Failed to add PasswordAuthenticationProvider {} for protocol {}.", provider.getClass().getName(), protocol);
+            context.ungetService(reference);
+            return null;
+        }
+
+        LOG.info("Successfully added PasswordAuthenticationProvider {} for protocol {}.", provider.getClass().getName(), protocol);
+        return provider;
     }
 
     @Override
-    public void modifiedService(ServiceReference<PasswordAuthenticationProvider> reference, PasswordAuthenticationProvider service) {
+    public void modifiedService(ServiceReference<PasswordAuthenticationProvider> reference, PasswordAuthenticationProvider provider) {
         // ignore property modifications
     }
 
     @Override
-    public void removedService(ServiceReference<PasswordAuthenticationProvider> reference, PasswordAuthenticationProvider service) {
-        if(service == null || Strings.isEmpty(service.getProtocol())) {
+    public void removedService(ServiceReference<PasswordAuthenticationProvider> reference, PasswordAuthenticationProvider provider) {
+        if (provider == null) {
             return;
         }
-        List<PasswordAuthenticationProvider> list = providers.get(service.getProtocol());
-        if (list != null && !list.isEmpty()) {
-            Iterator<PasswordAuthenticationProvider> iterator = list.iterator();
-            while (iterator.hasNext()) {
-                if (iterator.next().equals(service)) {
-                    iterator.remove();
-                    LOG.info("Successfully removed PasswordAuthenticationProvider {} for protocol {}.", service.getClass().getName(), service.getProtocol());
-                    return;
-                }
-            }
+
+        String protocol = provider.getProtocol();
+        if (Strings.isEmpty(protocol)) {
+            return;
         }
 
+        Queue<PasswordAuthenticationProvider> queue = providers.get(protocol);
+        if (queue != null && queue.remove(provider)) {
+            LOG.info("Successfully removed PasswordAuthenticationProvider {} for protocol {}.", provider.getClass().getName(), protocol);
+        }
     }
 
 }

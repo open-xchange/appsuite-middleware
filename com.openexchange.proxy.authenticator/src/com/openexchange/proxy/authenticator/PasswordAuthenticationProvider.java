@@ -64,7 +64,7 @@ public interface PasswordAuthenticationProvider {
      *
      * @param requestingHost The requesting host
      * @param requestingPort The requesting port
-     * @return The {@link PasswordAuthentication} or null
+     * @return The {@link PasswordAuthentication} or <code>null</code>
      */
     PasswordAuthentication getPasswordAuthentication(String requestingHost, int requestingPort);
 

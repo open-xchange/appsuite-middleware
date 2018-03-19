@@ -73,6 +73,9 @@ public class ProxyAuthenticatorActivator extends HousekeepingActivator {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ProxyAuthenticatorActivator.class);
 
+    private SecurityManager oldSecurityManager = null;
+    private Authenticator previousAuthenticator = null;
+
     /**
      * Initializes a new {@link ProxyAuthenticatorActivator}.
      */
@@ -86,8 +89,7 @@ public class ProxyAuthenticatorActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
-
+    protected synchronized void startBundle() throws Exception {
         LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
 
         // Set new default Authenticator
@@ -106,7 +108,7 @@ public class ProxyAuthenticatorActivator extends HousekeepingActivator {
         // Load report client configuration which is going to be used as fallback values
         ConfigurationService service = getService(ConfigurationService.class);
         PasswordAuthenticationProvider reportProvider = null;
-        if(service == null) {
+        if (service == null) {
             LOG.error("ConfigurationService not available. Unable to properly init proxy configuration for report clients.");
         } else {
             reportProvider = ReportClientUtil.getProvider(service);
@@ -156,6 +158,7 @@ public class ProxyAuthenticatorActivator extends HousekeepingActivator {
             theAuthenticatorField.setAccessible(true);
             Authenticator previousAuthenticator = (Authenticator) theAuthenticatorField.get(null);
             if (previousAuthenticator != null) {
+                this.previousAuthenticator = previousAuthenticator;
                 LOG.warn("There is already a proxy authenticator defined with the name {}. This authenticator will be overwritten.", previousAuthenticator.getClass().getName());
             }
         } catch (NoSuchFieldException e) {
@@ -183,26 +186,31 @@ public class ProxyAuthenticatorActivator extends HousekeepingActivator {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ProxyAuthenticatorActivator.class);
         logger.info("Stopping bundle {}", this.context.getBundle().getSymbolicName());
 
-        // Restore previous default Authenticator
+        // Restore previous SecurityManager
         removeSecurityManager();
-        Authenticator.setDefault(null);
+
+        // Restore previous default Authenticator
+        Authenticator previousAuthenticator = this.previousAuthenticator;
+        if (null != previousAuthenticator) {
+            this.previousAuthenticator = null;
+            Authenticator.setDefault(previousAuthenticator);
+        }
 
         logger.info("Bundle {} successfully stopped", context.getBundle().getSymbolicName());
     }
-
-    SecurityManager oldSecurityManager = null;
 
     /**
      * Sets a java {@link SecurityManager} which prevents that the authenticator will be overwritten.
      */
     private void setSecurityManager() {
-        oldSecurityManager = System.getSecurityManager();
+        final SecurityManager oldSecurityManager = System.getSecurityManager();
+        this.oldSecurityManager = oldSecurityManager;
         System.setSecurityManager(new SecurityManager() {
 
             @Override
             public void checkPermission(Permission perm) {
                 if (perm instanceof NetPermission) {
-                    if (perm.getName().equals("setDefaultAuthenticator")) {
+                    if ("setDefaultAuthenticator".equals(perm.getName())) {
                         throw new SecurityException("Setting the default authenticator twice is not allowed.");
                     }
                 }
@@ -217,8 +225,11 @@ public class ProxyAuthenticatorActivator extends HousekeepingActivator {
      * Sets the java {@link SecurityManager} back to its previous value.
      */
     private void removeSecurityManager() {
-        System.setSecurityManager(oldSecurityManager);
-        oldSecurityManager = null;
+        final SecurityManager oldSecurityManager = this.oldSecurityManager;
+        if (null != oldSecurityManager) {
+            this.oldSecurityManager = null;
+            System.setSecurityManager(oldSecurityManager);
+        }
     }
 
 }
