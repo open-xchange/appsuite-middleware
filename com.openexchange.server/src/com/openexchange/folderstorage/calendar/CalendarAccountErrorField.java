@@ -49,6 +49,7 @@
 
 package com.openexchange.folderstorage.calendar;
 
+import org.json.JSONObject;
 import com.openexchange.chronos.common.DataHandlers;
 import com.openexchange.conversion.ConversionResult;
 import com.openexchange.conversion.ConversionService;
@@ -112,7 +113,11 @@ public class CalendarAccountErrorField extends FolderField {
             try {
                 DataHandler dataHandler = ServerServiceRegistry.getServize(ConversionService.class).getDataHandler(DataHandlers.OXEXCEPTION2JSON);
                 ConversionResult result = dataHandler.processData(new SimpleData<Object>(property.getValue()), new DataArguments(), null);
-                return result.getData();
+                Object data = result.getData();
+                if (null != data && JSONObject.class.isInstance(data)) {
+                    ((JSONObject) data).remove("error_stack");
+                }
+                return data;
             } catch (Exception e) {
                 LOG.warn("Error writing ox exception \"{}\": {}", property.getValue(), e.getMessage(), e);
             }

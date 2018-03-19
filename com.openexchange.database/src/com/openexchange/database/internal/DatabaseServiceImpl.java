@@ -367,7 +367,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
     @Override
     public Connection get(final int poolId, final String schema) throws OXException {
         setSchemaLogProperty(schema);
-        final Connection con;
+        Connection con;
         try {
             con = pools.getPool(poolId).get();
         } catch (final PoolingException e) {
@@ -380,9 +380,12 @@ public final class DatabaseServiceImpl implements DatabaseService {
         } catch (final SQLException e) {
             try {
                 pools.getPool(poolId).back(con);
+                con = null;
             } catch (final PoolingException e1) {
-                Databases.close(con);
                 LOG.error(e1.getMessage(), e1);
+            } finally {
+                // Something went wrong while trying to put back into pool if con is not null
+                close(con);
             }
             throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
         }
@@ -392,7 +395,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
     @Override
     public Connection getNoTimeout(final int poolId, final String schema) throws OXException {
         setSchemaLogProperty(schema);
-        final Connection con;
+        Connection con;
         try {
             con = pools.getPool(poolId).getWithoutTimeout();
         } catch (final PoolingException e) {
@@ -405,9 +408,12 @@ public final class DatabaseServiceImpl implements DatabaseService {
         } catch (final SQLException e) {
             try {
                 pools.getPool(poolId).back(con);
+                con = null;
             } catch (final PoolingException e1) {
-                Databases.close(con);
                 LOG.error(e1.getMessage(), e1);
+            } finally {
+                // Something went wrong while trying to put back into pool if con is not null
+                close(con);
             }
             throw DBPoolingExceptionCodes.SCHEMA_FAILED.create(e);
         }
@@ -475,24 +481,33 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
-    public void back(final int poolId, final Connection con) {
+    public void back(final int poolId, final Connection connection) {
+        Connection con = connection;
         try {
             pools.getPool(poolId).back(con);
+            con = null;
         } catch (final PoolingException e) {
-            Databases.close(con);
             final OXException e2 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, con.toString());
             LOG.error("", e2);
         } catch (final OXException e) {
             LOG.error("", e);
+        } finally {
+            // Something went wrong while trying to put back into pool if con is not null
+            close(con);
         }
     }
 
     @Override
-    public void backNoTimeoout(final int poolId, final Connection con) {
+    public void backNoTimeoout(final int poolId, final Connection connection) {
+        Connection con = connection;
         try {
             pools.getPool(poolId).backWithoutTimeout(con);
+            con = null;
         } catch (final OXException e) {
             LOG.error("", e);
+        } finally {
+            // Something went wrong while trying to put back into pool if con is not null
+            close(con);
         }
     }
 
@@ -603,6 +618,16 @@ public final class DatabaseServiceImpl implements DatabaseService {
             } catch (Exception e) {
                 // Ignore...
                 LOG.debug("Failed to obtain schema name from connection", e);
+            }
+        }
+    }
+
+    private static void close(Connection con) {
+        if (null != con) {
+            try {
+                con.close();
+            } catch (Exception e) {
+                LOG.error("Failed to close connection.", e);
             }
         }
     }

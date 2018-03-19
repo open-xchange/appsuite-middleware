@@ -95,17 +95,17 @@ public class InfostoreApiClientTest extends AbstractAPIClientSession {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        getClient().login(testUser.getLogin(), testUser.getPassword());
+        getApiClient().login(testUser.getLogin(), testUser.getPassword());
         this.folderId = createFolderForTest();
-        infostoreApi = new InfostoreApi(getClient());
+        infostoreApi = new InfostoreApi(getApiClient());
     }
 
     @Override
     @After
     public void tearDown() throws Exception {
         if (folderId != null) {
-            FoldersApi folderApi = new FoldersApi(getClient());
-            folderApi.deleteFolders(getClient().getSession(), java.util.Collections.singletonList(folderId), "1", new Date().getTime(), null, true, true, false);
+            FoldersApi folderApi = new FoldersApi(getApiClient());
+            folderApi.deleteFolders(getApiClient().getSession(), java.util.Collections.singletonList(folderId), "1", new Date().getTime(), null, true, true, false);
         }
         super.tearDown();
     }
@@ -121,7 +121,7 @@ public class InfostoreApiClientTest extends AbstractAPIClientSession {
 
     protected String uploadInfoItem(String id, File file, String mimeType, String versionComment, byte[] bytes, Long offset, Long filesize) throws ApiException, FileNotFoundException, IOException {
 
-InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(getClient().getSession(),
+InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(getApiClient().getSession(),
                                                                     folderId,
                                                                     file.getName(),
                                                                     bytes,
@@ -148,7 +148,7 @@ InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(getClient().
 
 
     protected InfoItemData getItem(String id) throws ApiException {
-        InfoItemResponse infoItem = infostoreApi.getInfoItem(getClient().getSession(), id, folderId);
+        InfoItemResponse infoItem = infostoreApi.getInfoItem(getApiClient().getSession(), id, folderId);
         Assert.assertNull(infoItem.getError());
         Assert.assertNotNull(infoItem.getData());
         return infoItem.getData();
@@ -156,7 +156,7 @@ InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(getClient().
 
     private String createFolderForTest() throws ApiException {
         final String parent = getPrivateInfostoreFolder();
-        FoldersApi folderApi = new FoldersApi(getClient());
+        FoldersApi folderApi = new FoldersApi(getApiClient());
         NewFolderBody body = new NewFolderBody();
         NewFolderBodyFolder folder = new NewFolderBodyFolder();
         folder.setModule(Module.INFOSTORE.getName());
@@ -165,14 +165,14 @@ InfoItemUpdateResponse uploadInfoItem = infostoreApi.uploadInfoItem(getClient().
         folder.setSubscribed(true);
         folder.setPermissions(null);
         body.setFolder(folder);
-        FolderUpdateResponse folderUpdateResponse = folderApi.createFolder(parent, getClient().getSession(), body, "1", null);
+        FolderUpdateResponse folderUpdateResponse = folderApi.createFolder(parent, getApiClient().getSession(), body, "1", null);
         return checkResponse(folderUpdateResponse);
     }
 
     public String getPrivateInfostoreFolder() throws ApiException {
         if (null == privateInfostoreFolder) {
-            ConfigApi configApi = new ConfigApi(getClient());
-            ConfigResponse configNode = configApi.getConfigNode(Tree.PrivateInfostoreFolder.getPath(), getClient().getSession());
+            ConfigApi configApi = new ConfigApi(getApiClient());
+            ConfigResponse configNode = configApi.getConfigNode(Tree.PrivateInfostoreFolder.getPath(), getApiClient().getSession());
             Object data = checkResponse(configNode);
             privateInfostoreFolder = String.valueOf(data);
 

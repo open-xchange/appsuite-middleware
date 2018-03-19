@@ -57,11 +57,8 @@ import java.io.Serializable;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
-public class UserProperty implements Serializable, Cloneable {
+public class UserProperty implements Serializable {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 1751457900331133343L;
 
     private final String scope;
@@ -73,9 +70,10 @@ public class UserProperty implements Serializable, Cloneable {
     /**
      *
      * Initializes a new {@link UserProperty}.
-     * @param scope
-     * @param name
-     * @param value
+     * 
+     * @param scope The scope
+     * @param name The name of the property
+     * @param value The value of the property
      */
     public UserProperty(String scope, String name, String value) {
         this.scope = scope;

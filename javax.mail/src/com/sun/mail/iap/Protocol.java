@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -238,7 +238,8 @@ public class Protocol {
      */
     public Protocol(InputStream in, PrintStream out, Properties props,
 				boolean debug) throws IOException {
-    this.auditLogEnabled = null == props ? false : PropUtil.getBooleanProperty(props, prefix + ".auditLog.enabled", false);
+    prefix = "mail.imap";
+    this.auditLogEnabled = null == props ? false : PropUtil.getBooleanProperty(props, "mail.imap" + ".auditLog.enabled", false);
     this.host = "localhost";
 	this.port = 143;
 	this.user = null;

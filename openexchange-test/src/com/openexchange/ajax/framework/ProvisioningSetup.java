@@ -119,6 +119,8 @@ public class ProvisioningSetup {
 
                 initialized.compareAndSet(false, true);
                 LOG.info("Finished initialization for {} contexts.", TestContextPool.getAllTimeAvailableContexts().size());
+            } else {
+                LOG.warn("Pool already initialized! Please do not try to remember users/pools multiple times as this will cause unexpected behavior within test execution.");
             }
         }
     }

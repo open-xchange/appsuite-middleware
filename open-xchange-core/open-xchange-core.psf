@@ -172,6 +172,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.pns.monitoring"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.preview"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.proxy"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.proxy.authenticator"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.proxy.servlet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.publish"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.publish.basic"/>

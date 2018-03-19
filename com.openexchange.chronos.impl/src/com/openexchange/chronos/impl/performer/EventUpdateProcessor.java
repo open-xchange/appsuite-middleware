@@ -58,6 +58,7 @@ import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getExceptionDateUpdates;
 import static com.openexchange.chronos.common.CalendarUtils.initRecurrenceRule;
 import static com.openexchange.chronos.common.CalendarUtils.isAttendeeSchedulingResource;
+import static com.openexchange.chronos.common.CalendarUtils.isPublicClassification;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.matches;
@@ -331,15 +332,22 @@ public class EventUpdateProcessor implements EventUpdate {
                 break;
             case CLASSIFICATION:
                 /*
-                 * check validity; for now, deny update for change exceptions, or if there are existing change exceptions
+                 * check validity
+                 */
+                Check.classificationIsValid(updatedEvent.getClassification(), folder);
+                /*
+                 * deny update for change exceptions (but ignore if effectively same classification) 
                  */
                 //TODO: implement correct propagation of classification change to master and change exceptions;
                 //      requires to pass series information in event update processor of change exceptions
-                Check.classificationIsValid(updatedEvent.getClassification(), folder);
                 if (isSeriesException(originalEvent) || isSeriesMaster(originalEvent) && false == isNullOrEmpty(originalEvent.getChangeExceptionDates())) {
-                    throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE.create(
-                        String.valueOf(updatedEvent.getClassification()), originalEvent.getSeriesId(), String.valueOf(originalEvent.getRecurrenceId()));
-                }
+                    if (isPublicClassification(originalEvent) == isPublicClassification(updatedEvent)) {
+                        updatedEvent.setClassification(originalEvent.getClassification());
+                    } else if (false == EventMapper.getInstance().get(EventField.CLASSIFICATION).equals(originalEvent, updatedEvent)) {
+                        throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION_FOR_OCCURRENCE.create(
+                            String.valueOf(updatedEvent.getClassification()), originalEvent.getSeriesId(), String.valueOf(originalEvent.getRecurrenceId()));
+                    }
+                }                
                 break;
             case START_DATE:
             case END_DATE:
@@ -432,7 +440,7 @@ public class EventUpdateProcessor implements EventUpdate {
             if (null != organizer && false == matches(originalEvent.getOrganizer(), organizer)) {
                 throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), EventField.ORGANIZER);
             }
-            updatedEvent.removeOrganizer(); // ignore
+            updatedEvent.setOrganizer(originalEvent.getOrganizer()); // ignore
         }
         if (PublicType.getInstance().equals(folder.getType())) {
             if (null == originalEvent.getFolderId() || updatedEvent.containsFolderId()) {
@@ -451,7 +459,7 @@ public class EventUpdateProcessor implements EventUpdate {
                 if (false == matches(updatedEvent.getCalendarUser(), originalEvent.getCalendarUser())) {
                     throw CalendarExceptionCodes.FORBIDDEN_CHANGE.create(originalEvent.getId(), EventField.CALENDAR_USER);
                 }
-                updatedEvent.removeCalendarUser(); // ignore
+                updatedEvent.setCalendarUser(originalEvent.getCalendarUser()); // ignore
             }
         }
     }

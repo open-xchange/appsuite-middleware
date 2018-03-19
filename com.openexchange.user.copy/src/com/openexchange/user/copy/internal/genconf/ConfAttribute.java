@@ -129,7 +129,7 @@ public class ConfAttribute {
             return false;
         }
 
-        if (!name.equals("account")) {
+        if (name != null && !name.equals("account")) {
             if (value == null) {
                 if (other.value != null) {
                     return false;

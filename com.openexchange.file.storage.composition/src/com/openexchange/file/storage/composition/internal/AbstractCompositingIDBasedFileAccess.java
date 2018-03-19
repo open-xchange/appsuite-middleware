@@ -127,6 +127,7 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.Results;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.CallerRunsCompletionService;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
@@ -357,12 +358,17 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         FileID fileID = new FileID(id);
         FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
         InputStream data = fileAccess.getDocument(fileID.getFolderId(), fileID.getFileId(), version);
-        postEvent(FileStorageEventHelper.buildAccessEvent(
-            session, fileID.getService(), fileID.getAccountId(), fileID.getFolderId(), fileID.toUniqueID(), null, extractRemoteAddress()));
-        /*
-         * return handled stream
-         */
-        return handleInputStream(fileID, version, data);
+        try {
+            postEvent(FileStorageEventHelper.buildAccessEvent(session, fileID.getService(), fileID.getAccountId(), fileID.getFolderId(), fileID.toUniqueID(), null, extractRemoteAddress()));
+            /*
+             * return handled stream
+             */
+            InputStream retval = handleInputStream(fileID, version, data);
+            data = null;
+            return retval;
+        } finally {
+            Streams.close(data);
+        }
     }
 
     @Override
@@ -379,12 +385,17 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
          * get data from random file access & post "access" event
          */
         InputStream data = ((FileStorageRandomFileAccess) fileAccess).getDocument(fileID.getFolderId(), fileID.getFileId(), version, offset, length);
-        postEvent(FileStorageEventHelper.buildAccessEvent(
-            session, fileID.getService(), fileID.getAccountId(), fileID.getFolderId(), fileID.toUniqueID(), null, extractRemoteAddress()));
-        /*
-         * return handled stream
-         */
-        return handleInputStream(fileID, version, data);
+        try {
+            postEvent(FileStorageEventHelper.buildAccessEvent(session, fileID.getService(), fileID.getAccountId(), fileID.getFolderId(), fileID.toUniqueID(), null, extractRemoteAddress()));
+            /*
+             * return handled stream
+             */
+            InputStream retval = handleInputStream(fileID, version, data);
+            data = null;
+            return retval;
+        } finally {
+            Streams.close(data);
+        }
     }
 
     @Override
@@ -1385,7 +1396,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                     listener.onBeforeCopyFile(sourceId, version, destFolderId, update, newData, fields, fileAccess, session);
                 }
             }
-            IDTuple result = fileAccess.copy(new IDTuple(sourceID.getFolderId(), sourceID.getFileId()), version, destinationID.getFolderId(), metadata, newData, fields);
+            IDTuple result = fileAccess.copy(new IDTuple(sourceID.getFolderId(), sourceID.getFileId()), version, destinationID.getFolderId(), metadata, newData, fields != null ? fields : Collections.emptyList());
             FileID newID = new FileID(sourceID.getService(), sourceID.getAccountId(), result.getFolder(), result.getId());
             FolderID newFolderID = new FolderID(sourceID.getService(), sourceID.getAccountId(), result.getFolder());
             postEvent(FileStorageEventHelper.buildCreateEvent(
@@ -1817,10 +1828,16 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                     @Override
                     public InputStream getData() throws OXException {
                         InputStream inputStream = document.getData();
-                        for (FileStreamHandler streamHandler : handlers) {
-                            inputStream = streamHandler.handleDocumentStream(inputStream, fileID, version, session.getContextId());
+                        try {
+                            for (FileStreamHandler streamHandler : handlers) {
+                                inputStream = streamHandler.handleDocumentStream(inputStream, fileID, version, session.getContextId());
+                            }
+                            InputStream retval = inputStream;
+                            inputStream = null;
+                            return retval;
+                        } finally {
+                            Streams.close(inputStream);
                         }
-                        return inputStream;
                     }
                 };
             }

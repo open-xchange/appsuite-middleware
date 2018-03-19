@@ -126,6 +126,9 @@ public final class DuplicateCleaner {
                     first = folderId;
                 }
                 final FolderStorage folderStorage = folderStorageRegistry.getFolderStorage(realTreeId, folderId);
+                if (folderStorage == null) {
+                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(realTreeId, folderId);
+                }
                 final boolean started = folderStorage.startTransaction(storageParameters, true);
                 try {
                     folderStorage.deleteFolder(realTreeId, folderId, storageParameters);

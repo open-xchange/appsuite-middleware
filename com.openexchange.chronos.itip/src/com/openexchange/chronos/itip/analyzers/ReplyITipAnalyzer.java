@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.itip.analyzers;
 
+import static com.openexchange.chronos.common.CalendarUtils.extractEMailAddress;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -193,7 +194,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
         // XXX [MW-852] Resolve possible aliases to avoid false party-crashers
         attendees.add(reply);
         for (Attendee attendee : original.getAttendees()) {
-            if (false == reply.getUri().equals(attendee.getUri())) {
+            if (false == extractEMailAddress(reply.getUri()).equals(extractEMailAddress(attendee.getUri()))) {
                 attendees.add(attendee);
             }
         }
@@ -227,7 +228,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
         for (ITipChange change : analysis.getChanges()) {
             // Replying attendee is first one in list through #ensureAttendees
             Attendee reply = change.getNewEvent().getAttendees().get(0);
-            if (change.getCurrentEvent().getAttendees().stream().noneMatch(a -> reply.getUri().equals(a.getUri()))) {
+            if (change.getCurrentEvent().getAttendees().stream().noneMatch(a -> extractEMailAddress(reply.getUri()).equals(extractEMailAddress(a.getUri())))) {
                 return true;
             }
         }

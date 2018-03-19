@@ -407,6 +407,18 @@ public final class ThresholdFileHolder implements IFileHolder {
     }
 
     /**
+     * Writes zero bytes to this file holder; just for initialization purpose.
+     *
+     * @return This file holder
+     */
+    public ThresholdFileHolder writeZeroBytes() {
+        if (null == tempFile && null == buf) {
+            buf = Streams.newByteArrayOutputStream(initalCapacity);
+        }
+        return this;
+    }
+
+    /**
      * Gets the MD5 sum for this file holder's content
      *
      * @return The MD5 sum

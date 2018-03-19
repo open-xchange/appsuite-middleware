@@ -181,7 +181,7 @@ public class CalendarFolderManager extends AbstractManager {
     /**
      * Updates the folder with the specified identifier
      * 
-     * @param folderId The folder identifier
+     * @param defaultFolderId The folder identifier
      * @return The {@link FolderUpdateResponse}
      * @throws ApiException if an API error is occurred
      * @throws ChronosApiException
@@ -193,7 +193,7 @@ public class CalendarFolderManager extends AbstractManager {
     /**
      * Updates the folder with the specified identifier
      * 
-     * @param folderId The folder identifier
+     * @param defaultFolderId The folder identifier
      * @return The {@link FolderUpdateResponse}
      * @throws ApiException if an API error is occurred
      * @throws ChronosApiException
@@ -224,7 +224,7 @@ public class CalendarFolderManager extends AbstractManager {
     /**
      * Deletes the folders with the specified identifier
      * 
-     * @param folderId The folder identifiers
+     * @param defaultFolderId The folder identifiers
      * @throws ApiException if an API error is occurred
      */
     public void deleteFolders(List<String> folders) throws ApiException {

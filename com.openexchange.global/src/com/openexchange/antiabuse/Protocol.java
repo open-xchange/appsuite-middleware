@@ -60,18 +60,20 @@ public enum Protocol {
     /**
      * The HTTP protocol.
      */
-    HTTP("http"),
+    HTTP("http", false),
     /**
      * The HTTPS protocol.
      */
-    HTTPS("https"),
+    HTTPS("http", true),
 
     ;
 
     private final String name;
+    private final boolean secure;
 
-    private Protocol(String name) {
+    private Protocol(String name, boolean secure) {
         this.name = name;
+        this.secure = secure;
     }
 
     /**
@@ -81,5 +83,14 @@ public enum Protocol {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Checks if this protocol uses a secure transport layer (TLS)
+     *
+     * @return <code>true</code> for secure transport layer; otherwise <code>false</code>
+     */
+    public boolean isSecure() {
+        return secure;
     }
 }

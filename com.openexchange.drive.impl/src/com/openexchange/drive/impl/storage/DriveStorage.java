@@ -53,6 +53,7 @@ import static com.openexchange.drive.impl.DriveConstants.PATH_SEPARATOR;
 import static com.openexchange.drive.impl.DriveConstants.ROOT_PATH;
 import static com.openexchange.drive.impl.DriveUtils.combine;
 import static com.openexchange.drive.impl.DriveUtils.split;
+import java.io.Closeable;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -100,6 +101,7 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -159,18 +161,28 @@ public class DriveStorage {
      * @throws OXException
      */
     public <T> T wrapInTransaction(StorageOperation<T> storageOperation) throws OXException {
+        T t = null;
         try {
             getFileAccess().startTransaction();
             getFolderAccess().startTransaction();
-            T t = storageOperation.call();
+            t = storageOperation.call();
             getFileAccess().commit();
             getFolderAccess().commit();
-            return t;
+            T retval = t;
+            t = null;
+            return retval;
         } catch (OXException e) {
             getFileAccess().rollback();
             getFolderAccess().rollback();
             throw e;
         } finally {
+            if (null != t) {                
+                if (t instanceof Closeable) {
+                    Streams.close((Closeable) t);
+                } else if (t instanceof AutoCloseable) {
+                    Streams.close((AutoCloseable) t);
+                }
+            }
             getFileAccess().finish();
             getFolderAccess().finish();
         }

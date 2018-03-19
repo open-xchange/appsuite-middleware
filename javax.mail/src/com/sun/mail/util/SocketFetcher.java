@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -41,6 +41,7 @@
 package com.sun.mail.util;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
@@ -342,8 +343,6 @@ public class SocketFetcher {
 				Properties props, String prefix,
 				SocketFactory sf, boolean useSSL)
 				throws IOException {
-	Socket socket = null;
-
 	if (logger.isLoggable(Level.FINEST)) {
         logger.finest("create socket: prefix " + prefix +
 		", localaddr " + localaddr + ", localport " + localport +
@@ -352,6 +351,8 @@ public class SocketFetcher {
 		", socket factory " + sf + ", useSSL " + useSSL);
     }
 
+	Socket socket = null;
+    Socket overriddenSocket = null;
 	try {
     String proxyHost = props.getProperty(prefix + ".proxy.host", null);
 	int proxyPort = 80;
@@ -469,7 +470,8 @@ public class SocketFetcher {
         } else {
             ssf = (SSLSocketFactory)SSLSocketFactory.getDefault();
         }
-	    socket = ssf.createSocket(socket, host, port, true);
+	    overriddenSocket = socket;
+	    socket = ssf.createSocket(overriddenSocket, host, port, true);
 	    sf = ssf;
 	}
 
@@ -484,11 +486,10 @@ public class SocketFetcher {
 	 */
 	Socket returnMe = socket;
 	socket = null;
+	overriddenSocket = null;
     return returnMe;
 	} finally {
-	    if (null != socket) {
-            socket.close();
-        }
+	    close(overriddenSocket, socket);
 	}
     }
 
@@ -1013,5 +1014,24 @@ public class SocketFetcher {
 		return cl;
 	    }
 	});
+    }
+
+    /**
+     * Safely closes specified {@link Closeable} instances.
+     *
+     * @param closeables The {@link Closeable} instances
+     */
+    private static void close(Closeable... closeables) {
+        if (null != closeables) {
+            for (Closeable toClose : closeables) {
+                if (null != toClose) {
+                    try {
+                        toClose.close();
+                    } catch (Exception e) {
+                        // Ignore
+                    }
+                }
+            }
+        }
     }
 }

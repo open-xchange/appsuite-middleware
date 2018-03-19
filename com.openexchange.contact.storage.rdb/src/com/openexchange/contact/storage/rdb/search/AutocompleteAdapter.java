@@ -147,7 +147,7 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
 		return Strings.trim(stringBuilder);
 	}
 
-	private static ContactField[] PRIMARY_KEYS = new ContactField[] {ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.CONTEXTID};
+	private static ContactField[] PRIMARY_KEYS = new ContactField[] {ContactField.CONTEXTID,ContactField.OBJECT_ID, ContactField.FOLDER_ID};
 
 	private void appendAutocomplete(List<String> patterns, AutocompleteParameters parameters, int[] folderIDs, int contextID, ContactField[] fields) throws OXException {
         boolean requireEmail = parameters.getBoolean(AutocompleteParameters.REQUIRE_EMAIL, true);
@@ -184,7 +184,8 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
             .append(" AND cons.").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel()).append(" = ").append(Table.OBJECT_USE_COUNT).append(".object")
 
             // 3. Add where condition
-            .append(" WHERE (")
+            .append(" WHERE cons.cid=").append(contextID).append(" AND ").append(getFolderIDsClause(folderIDs))
+            .append(" AND (")
             .append("cons.").append(Mappers.CONTACT.get(PRIMARY_KEYS[0]).getColumnLabel())
             .append(",cons.").append(Mappers.CONTACT.get(PRIMARY_KEYS[1]).getColumnLabel())
             .append(",cons.").append(Mappers.CONTACT.get(PRIMARY_KEYS[2]).getColumnLabel())

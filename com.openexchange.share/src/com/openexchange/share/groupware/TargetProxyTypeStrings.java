@@ -59,11 +59,13 @@ import com.openexchange.i18n.LocalizableStrings;
  * @since v7.8.0
  */
 public class TargetProxyTypeStrings implements LocalizableStrings {
-    
+
     public static final String IMAGE_FILE_TYPE = "image";
-    
+
     public static final String GENERAL_FILE_TYPE = "file";
-    
+
     public static final String FOLDER_TYPE = "folder";
+
+    public static final String CALENDAR_TYPE = "calendar";
 
 }

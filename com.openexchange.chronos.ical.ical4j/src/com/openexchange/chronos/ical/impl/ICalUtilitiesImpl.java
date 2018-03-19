@@ -51,11 +51,13 @@ package com.openexchange.chronos.ical.impl;
 
 import static com.openexchange.chronos.ical.impl.ICalUtils.exportComponents;
 import static com.openexchange.chronos.ical.impl.ICalUtils.getParametersOrDefault;
+import static com.openexchange.chronos.ical.impl.ICalUtils.importCalendar;
 import static com.openexchange.chronos.ical.impl.ICalUtils.parseVAlarmComponents;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.ical.ICalExceptionCodes;
@@ -63,8 +65,10 @@ import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ICalUtilities;
 import com.openexchange.chronos.ical.ical4j.mapping.ICalMapper;
 import com.openexchange.exception.OXException;
+import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.Component;
 import net.fortuna.ical4j.model.ComponentList;
+import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.TimeZoneRegistry;
 import net.fortuna.ical4j.model.component.VAlarm;
 import net.fortuna.ical4j.model.component.VTimeZone;
@@ -89,6 +93,15 @@ public class ICalUtilitiesImpl implements ICalUtilities {
         this.mapper = mapper;
     }
 
+    @Override
+    public String parsePropertyValue(InputStream inputStream, String propertyName, ICalParameters parameters) throws OXException {
+        if (null == propertyName || null == inputStream) {
+            return null;
+        }
+        Calendar calendar = importCalendar(inputStream, parameters);
+        Property property = calendar.getProperty(propertyName.toUpperCase(Locale.US));
+        return null == property ? null : property.getValue();
+    }
 
     @Override
     public List<Alarm> importAlarms(InputStream inputStream, ICalParameters parameters) throws OXException {

@@ -1113,8 +1113,8 @@ public class SieveHandler {
                         if (temp.startsWith("{")) {
                             int cnt = Integer.parseInt(temp.substring(1, temp.length() - 1));
                             char[] buf = new char[cnt];
-                            bis_sieve.read(buf, 0, cnt);
-                            cont = com.openexchange.tools.encoding.Base64.decode(new String(buf));
+                            int read = bis_sieve.read(buf, 0, cnt);
+                            cont = com.openexchange.tools.encoding.Base64.decode(new String(buf, 0, read));
                         } else {
                             // dovecot managesieve sends quoted strings
                             cont = com.openexchange.tools.encoding.Base64.decode(temp.replaceAll("\"", ""));
@@ -1278,7 +1278,7 @@ public class SieveHandler {
      * @return null, if no response code in line, the @{SIEVEResponse.Code} otherwise.
      */
     protected SieveResponse.Code parseSIEVEResponse(final String resp, final String multiline) {
-        if (!useSIEVEResponseCodes) {
+        if (!useSIEVEResponseCodes || null == resp) {
             return null;
         }
 
@@ -1447,7 +1447,7 @@ public class SieveHandler {
 
     /**
      * Parses the {@link WelcomeKeyword} and the specified value
-     * 
+     *
      * @param keyword The {@link WelcomeKeyword} to parse
      * @param value The optional value of the keyword
      */

@@ -533,8 +533,10 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             if(FolderPermissionType.LEGATOR.equals(origPerm.getType())) {
                 // Adjust type of existing permission
                 for(Permission updatedPerm: updated.getPermissions()) {
-                    if(updatedPerm.getEntity()==origPerm.getEntity() && updatedPerm.isGroup() == origPerm.isGroup()) {
-                        updatedPerm.setType(FolderPermissionType.LEGATOR);
+                    if (updatedPerm.getEntity() == origPerm.getEntity() && updatedPerm.isGroup() == origPerm.isGroup() && updatedPerm.getSystem() == origPerm.getSystem()) {
+                        if (!FolderPermissionType.LEGATOR.equals(updatedPerm.getType())) {
+                            updatedPerm.setType(FolderPermissionType.LEGATOR);
+                        }
                         break;
                     }
                 }
@@ -560,12 +562,18 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             if (perm.getType() == FolderPermissionType.INHERITED || perm.getType() == FolderPermissionType.LEGATOR) {
                 boolean exists = false;
                 for (Permission tmp : folder.getPermissions()) {
-                    if (tmp.getEntity() == perm.getEntity() && tmp.isGroup() == perm.isGroup()) {
-                        tmp.setType(FolderPermissionType.INHERITED);
+                    if (tmp.getEntity() == perm.getEntity() && tmp.isGroup() == perm.isGroup() && tmp.getSystem() == perm.getSystem()) {
+                        if (!FolderPermissionType.INHERITED.equals(tmp.getType())) {
+                            tmp.setType(FolderPermissionType.INHERITED);
+                        }
                         if(perm.getType() == FolderPermissionType.LEGATOR) {
-                            tmp.setPermissionLegator(parentId);
+                            if (!tmp.getPermissionLegator().equals(parentId)) {
+                                tmp.setPermissionLegator(parentId);
+                            }
                         } else {
-                            tmp.setPermissionLegator(perm.getPermissionLegator());
+                            if (!tmp.getPermissionLegator().equals(perm.getPermissionLegator())) {
+                                tmp.setPermissionLegator(perm.getPermissionLegator());
+                            }
                         }
                         exists = true;
                         break;

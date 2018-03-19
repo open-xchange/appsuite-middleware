@@ -156,7 +156,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
         final User[] participantUsers = userService.getUser(ctx, Coll2i(userIds.keySet()));
         String organizer = determineOrganizer(original, update, ctx);
-        if (organizer.startsWith("mailto:")) {
+        if (organizer.toLowerCase().startsWith("mailto:")) {
             organizer = organizer.substring(7);
         }
 
@@ -201,11 +201,11 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
             participant.setUser(u);
             participant.setContext(ctx);
 
-            String folderIdForUser = CalendarUtils.prependDefaultAccount(util.getFolderIdForUser(session, appId));
+            String folderIdForUser = util.getFolderIdForUser(session, appId, u.getId());
             if (folderIdForUser == null) {
                 folderIdForUser = update.getFolderId();
             }
-            participant.setFolderId(folderIdForUser);
+            participant.setFolderId(CalendarUtils.prependDefaultAccount(folderIdForUser));
 
             final NotificationConfiguration configuration = defaultConfiguration.clone();
             configure(u, ctx, configuration, participant.hasRole(ITipRole.ORGANIZER));
@@ -243,7 +243,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
             participant.setUser(user);
             participant.setContext(ctx);
-            participant.setFolderId(util.getFolderIdForUser(session, appId));
+            participant.setFolderId(util.getFolderIdForUser(session, appId, user.getId()));
 
             final NotificationConfiguration configuration = defaultConfiguration.clone();
             configure(user, ctx, configuration, participant.hasRole(ITipRole.ORGANIZER));
@@ -278,7 +278,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
             participant.setUser(onBehalfOf);
             participant.setContext(ctx);
-            participant.setFolderId(util.getFolderIdForUser(session, appId));
+            participant.setFolderId(util.getFolderIdForUser(session, appId, onBehalfOf.getId()));
 
             final NotificationConfiguration configuration = defaultConfiguration.clone();
             configure(onBehalfOf, ctx, configuration, participant.hasRole(ITipRole.ORGANIZER));
@@ -313,7 +313,7 @@ public class DefaultNotificationParticipantResolver implements NotificationParti
 
             participant.setUser(principalUser);
             participant.setContext(ctx);
-            participant.setFolderId(util.getFolderIdForUser(session, appId));
+            participant.setFolderId(util.getFolderIdForUser(session, appId, principalUser.getId()));
 
             final NotificationConfiguration configuration = defaultConfiguration.clone();
             configure(principalUser, ctx, configuration, participant.hasRole(ITipRole.ORGANIZER));

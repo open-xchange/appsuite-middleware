@@ -124,7 +124,7 @@ public abstract class AbstractActionPerformer implements ITipActionPerformer {
         if (event.containsFolderId() && event.getFolderId() != null) {
             return;
         }
-        final String privateCalendarFolderId = util.getPrivateCalendarFolderId(session);
+        final String privateCalendarFolderId = util.getPrivateCalendarFolderId(session.getContextId(), session.getUserId());
         event.setFolderId(privateCalendarFolderId);
 
     }

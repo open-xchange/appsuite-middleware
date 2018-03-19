@@ -51,6 +51,7 @@ package com.openexchange.ajax.appointment.bugtests;
 
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
@@ -98,7 +99,16 @@ public class Bug29566Test extends AbstractAJAXSession {
     }
 
     @Test
+    public void testAddParticipantWithExternalOrganizerAndUid() throws Exception {
+        addParticipantWithExternalOrganizerAndUid(false);
+    }
+
+    @Test
     public void testAddParticipantWithExternalOrganizerAndUidShared() throws Exception {
+        addParticipantWithExternalOrganizerAndUid(true);
+    }
+
+    private void addParticipantWithExternalOrganizerAndUid(boolean shared) throws Exception {
         String uid = generateUid();
         appointment.setUid(uid);
         String organizer = "test@extern.example.invalid";
@@ -107,6 +117,9 @@ public class Bug29566Test extends AbstractAJAXSession {
 
         Appointment clone = appointment.clone();
 
+        if (!shared) {
+            clone.setParentFolderID(getClient2().getValues().getPrivateAppointmentFolder());
+        }
         UserParticipant user = new UserParticipant(getClient().getValues().getUserId());
         user.setConfirm(Appointment.NONE);
         UserParticipant user2 = new UserParticipant(getClient2().getValues().getUserId());
@@ -115,8 +128,16 @@ public class Bug29566Test extends AbstractAJAXSession {
         clone.setUsers(new UserParticipant[] { user, user2 });
         catm2.update(clone);
 
-        assertTrue("Error expected.", catm2.getLastResponse().hasError());
-        assertEquals("Wrong error.", OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.getNumber(), catm2.getLastResponse().getException().getCode());
+        if (shared) {
+            assertTrue("Error expected.", catm2.getLastResponse().hasError());
+            assertEquals("Wrong error.", OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.getNumber(), catm2.getLastResponse().getException().getCode());
+        } else {
+            assertFalse("No error expected.", catm2.getLastResponse().hasError());
+
+            Appointment loaded = catm.get(appointment);
+            assertEquals("Expected two participants.", 2, loaded.getParticipants().length);
+            assertEquals("Expected two users.", 2, loaded.getUsers().length);
+        }
     }
 
     @Test

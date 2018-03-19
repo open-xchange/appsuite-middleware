@@ -128,8 +128,12 @@ public class CountingOutputStream extends FilterOutputStream {
      */
     @Override
     public void write(byte[] bts) throws IOException {
+        if (null == bts) {
+            return;
+        }
+        
         try {
-            int len = bts != null ? bts.length : 0;
+            int len = bts.length;
             beforeWrite(len);
             out.write(bts);
             afterWrite(len);

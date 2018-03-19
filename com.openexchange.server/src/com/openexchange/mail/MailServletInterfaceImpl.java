@@ -3083,7 +3083,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 /*
                  * Encrypt the draft
                  */
-                if (draftMail.getSecuritySettings() != null && draftMail.getSecuritySettings().isEncrypt()) {
+                if (draftMail.getSecuritySettings() != null && draftMail.getSecuritySettings().anythingSet()) {
                     EncryptedMailService encryptor = Services.getServiceLookup().getOptionalService(EncryptedMailService.class);
                     if (encryptor != null) {
                         filledMail = encryptor.encryptAutosaveDraftEmail(filledMail, session, draftMail.getSecuritySettings());
@@ -3752,9 +3752,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 LOG.error("", e);
             }
         } else {
-            MailAccess<?, ?> otherAccess = MailAccess.getInstance(session, pathAccount);
-            otherAccess.connect(true);
+            MailAccess<?, ?> otherAccess = null;
             try {
+                otherAccess = MailAccess.getInstance(session, pathAccount);
+                otherAccess.connect(true);
                 otherAccess.getMessageStorage().updateMessageFlags(fullName, uids, MailMessage.FLAG_FORWARDED, true);
                 try {
                     if (MailMessageCache.getInstance().containsFolderMessages(otherAccess.getAccountId(), fullName, session.getUserId(), contextId)) {
@@ -3767,7 +3768,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     LOG.error("", e);
                 }
             } finally {
-                otherAccess.close(false);
+                if (null != otherAccess) {
+                    otherAccess.close(false);
+                }
             }
         }
     }
@@ -3793,9 +3796,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     LOG.error("", e);
                 }
             } else {
-                MailAccess<?, ?> otherAccess = MailAccess.getInstance(session, pathAccount);
-                otherAccess.connect(true);
+                MailAccess<?, ?> otherAccess = null;
                 try {
+                    otherAccess = MailAccess.getInstance(session, pathAccount);
+                    otherAccess.connect(true);
                     otherAccess.getMessageStorage().updateMessageFlags(path.getFolder(), ids, MailMessage.FLAG_FORWARDED, true);
                     try {
                         if (MailMessageCache.getInstance().containsFolderMessages(otherAccess.getAccountId(), path.getFolder(), session.getUserId(), contextId)) {
@@ -3808,7 +3812,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         LOG.error("", e);
                     }
                 } finally {
-                    otherAccess.close(false);
+                    if (null != otherAccess) {
+                        otherAccess.close(false);
+                    }
                 }
             }
         }
@@ -3876,9 +3882,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             /*
              * Mark as \Answered in foreign account
              */
-            MailAccess<?, ?> otherAccess = MailAccess.getInstance(session, pathAccount);
-            otherAccess.connect(true);
+            MailAccess<?, ?> otherAccess = null;
             try {
+                otherAccess = MailAccess.getInstance(session, pathAccount);
+                otherAccess.connect(true);
                 otherAccess.getMessageStorage().updateMessageFlags(fullName, uids, MailMessage.FLAG_ANSWERED, true);
                 try {
                     /*
@@ -3894,7 +3901,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     LOG.error("", e);
                 }
             } finally {
-                otherAccess.close(false);
+                if (null != mailAccess) {
+                    otherAccess.close(false);
+                }
             }
         }
     }

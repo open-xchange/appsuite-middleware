@@ -59,10 +59,11 @@ import java.util.Set;
 import com.openexchange.folderstorage.FolderPermissionType;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
-import com.openexchange.share.groupware.DriveTargetProxyType;
+import com.openexchange.share.groupware.KnownTargetProxyType;
 import com.openexchange.share.groupware.SubfolderAwareTargetPermission;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxyType;
@@ -211,7 +212,10 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
 
     @Override
     public TargetProxyType getProxyType() {
-        return DriveTargetProxyType.FOLDER;
+        if (Module.CALENDAR.getFolderConstant() == folder.getModule()) {
+            return KnownTargetProxyType.CALENDAR;
+        }
+        return KnownTargetProxyType.FOLDER;
     }
 
     public static class OCLPermissionConverter implements PermissionConverter<OCLPermission> {

@@ -904,8 +904,6 @@ public class DatabaseImpl extends DBService {
     }
 
     public Delta<DocumentMetadata> getDelta(final long folderId, final long updateSince, final Metadata[] columns, final Metadata sort, final int order, final boolean onlyOwnObjects, final Context ctx, final User user) throws OXException {
-        DeltaImpl<DocumentMetadata> retval = null;
-
         String onlyOwn = "";
         final StringBuilder ORDER = new StringBuilder();
         if (sort != null) {
@@ -926,6 +924,8 @@ public class DatabaseImpl extends DBService {
         ResultSet resultNew = null;
         ResultSet resultModified = null;
         ResultSet resultDeleted = null;
+
+        boolean error = true;
         try {
             con = getReadConnection(ctx);
             if (onlyOwnObjects) {
@@ -974,20 +974,21 @@ public class DatabaseImpl extends DBService {
             final SearchIterator<DocumentMetadata> isiModified = buildIterator(resultModified, stmtModified, dbColumns, this, ctx, con, false);
             final SearchIterator<DocumentMetadata> isiDeleted = buildIterator(resultDeleted, stmtDeleted, new int[] { INFOSTORE_id }, this, ctx, con, false);
 
-            retval = new DeltaImpl<DocumentMetadata>(isiNew, isiModified, isiDeleted, System.currentTimeMillis());
+            DeltaImpl<DocumentMetadata> retval = new DeltaImpl<DocumentMetadata>(isiNew, isiModified, isiDeleted, System.currentTimeMillis());
+            error = false;
+            return retval;
         } catch (final SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmtNew));
         } catch (final OXException e) {
             throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
         } finally {
-            if (FETCH.equals(Fetch.PREFETCH)) {
+            if (error || FETCH.equals(Fetch.PREFETCH)) {
                 close(stmtNew, resultNew);
                 close(stmtModified, resultModified);
                 close(stmtDeleted, resultDeleted);
                 releaseReadConnection(ctx, con);
             }
         }
-        return retval;
     }
 
     public int countDocuments(final long folderId, final boolean onlyOwnObjects, final Context ctx, final User user) throws OXException {
@@ -1021,28 +1022,21 @@ public class DatabaseImpl extends DBService {
     }
 
     public int countDocumentsperContext(final Context ctx) throws OXException {
-        int retval = 0;
-
         final Connection con = getReadConnection(ctx);
-
+        PreparedStatement stmt = null;
+        ResultSet result = null;
         try {
-            final StringBuilder SQL = new StringBuilder("SELECT count(id) from infostore where infostore.cid=?");
-            final PreparedStatement stmt = con.prepareStatement(SQL.toString());
+            stmt = con.prepareStatement("SELECT count(id) from infostore where infostore.cid=?");
             stmt.setInt(1, ctx.getContextId());
-            final ResultSet result = stmt.executeQuery();
-            if (result.next()) {
-                retval = result.getInt(1);
-            }
-            result.close();
-            stmt.close();
+            result = stmt.executeQuery();
+            return result.next() ? result.getInt(1) : 0;
         } catch (final SQLException e) {
             LOG.error("", e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, "");
         } finally {
+            close(stmt, result);
             releaseReadConnection(ctx, con);
         }
-
-        return retval;
     }
 
     /**

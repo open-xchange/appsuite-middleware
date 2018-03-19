@@ -157,7 +157,7 @@ public class ICalUtils {
         CalendarBuilder calendarBuilder = getCalendarBuilder(iCalParameters);
         Calendar calendar;
         try {
-            if (Boolean.TRUE.equals(parameters.get(ICalParameters.SANITIZE_INPUT, Boolean.class))) {
+            if (Boolean.TRUE.equals(iCalParameters.get(ICalParameters.SANITIZE_INPUT, Boolean.class))) {
                 calendar = new ICal4JParser().parse(calendarBuilder, iCalFile);
             } else {
                 calendar = calendarBuilder.build(iCalFile);
@@ -175,23 +175,7 @@ public class ICalUtils {
 
     static ImportedCalendar importCalendar(InputStream iCalFile, ICalMapper mapper, ICalParameters parameters) throws OXException {
         ICalParameters iCalParameters = getParametersOrDefault(parameters);
-        CalendarBuilder calendarBuilder = getCalendarBuilder(iCalParameters);
-        Calendar calendar;
-        try {
-            if (Boolean.TRUE.equals(parameters.get(ICalParameters.SANITIZE_INPUT, Boolean.class))) {
-                calendar = new ICal4JParser().parse(calendarBuilder, iCalFile);
-            } else {
-                calendar = calendarBuilder.build(iCalFile);
-            }
-        } catch (IOException e) {
-            throw ICalExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (ParserException e) {
-            throw asOXException(e);
-        }
-        if (null == calendar) {
-            throw ICalExceptionCodes.NO_CALENDAR.create();
-        }
-        return importCalendar(new VCalendar(calendar), mapper, iCalParameters);
+        return importCalendar(new VCalendar(importCalendar(iCalFile, iCalParameters)), mapper, iCalParameters);
     }
 
     static ImportedCalendar importCalendar(VCalendar vCalendar, ICalMapper mapper, ICalParameters parameters) throws OXException {

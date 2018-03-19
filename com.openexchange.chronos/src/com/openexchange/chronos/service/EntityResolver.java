@@ -134,15 +134,12 @@ public interface EntityResolver {
     Locale getLocale(int userID) throws OXException;
 
     /**
-     * Tracks newly added attendees from creations and updates found in the supplied calendar result.
-     * <p/>
-     * This includes adding new entries in the collected contacts folder for new external calendar users (utilizing the contact collector
-     * service), as well as incrementing the use counts for already known internal and external entities (using the object use count
-     * service).
+     * Gets the identifier of the contact associated with a specific user.
      *
-     * @param result The calendar result
+     * @param userID The identifier of the user to get the contact identifier for
+     * @return The contact identifier
      */
-    void trackAttendeeUsage(CalendarResult result);
+    int getContactId(int userID) throws OXException;
 
     /**
      * Prepares a new attendee representing the internal user with the supplied identifier.

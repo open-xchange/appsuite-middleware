@@ -269,7 +269,10 @@ public class EventConverter {
         }
     }
 
-    private static boolean hasYear(Date birthday) {
+    protected static boolean hasYear(Date birthday) {
+        if (birthday == null) {
+            return false;
+        }
         Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, birthday);
         int year = calendar.get(Calendar.YEAR);
         return 0 != year && 1 != year && 1604 != year;

@@ -87,7 +87,7 @@ public class TrashTests extends AbstractAPIClientSession {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        client = getClient();
+        client = getApiClient();
         folderApi = new FolderApi(client, testUser);
         infostoreFolder = folderApi.getInfostoreFolder();
         folderManager = new FolderManager(folderApi, "0");

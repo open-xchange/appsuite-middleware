@@ -66,15 +66,6 @@ public interface ICalParser {
 
     ParseResult<Task> parseTasks(InputStream ical, TimeZone defaultTZ, Context context, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
 
-    /**
-     * Parses the first property possibly contained in specified ICal stream.
-     *
-     * @param propertyName The property name; e.g. "UID" or "METHOD"
-     * @param ical The ICal stream
-     * @return The detected property or <code>null</code>
-     */
-    String parseProperty(String propertyName, final InputStream ical);
-
 	void setLimit(int amount);
 
 }

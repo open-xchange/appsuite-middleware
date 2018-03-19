@@ -66,7 +66,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
@@ -76,7 +75,7 @@ import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.tools.JSONCoercion;
-import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.chronos.ical.ICalService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -134,6 +133,9 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.filename.FileNameTools;
 import com.openexchange.tools.session.ServerSession;
+import gnu.trove.procedure.TCharProcedure;
+import gnu.trove.set.TCharSet;
+import gnu.trove.set.hash.TCharHashSet;
 
 /**
  * {@link JsonMessageHandler} - Generates a JSON message representation considering user-sensitive data.
@@ -241,17 +243,6 @@ public final class JsonMessageHandler implements MailMessageHandler {
         }
 
     } // End of class MultipartInfo
-
-    private static final AtomicReference<Boolean> hideInlineImages = new AtomicReference<Boolean>(null);
-    private static boolean hideInlineImages(int userId, int contextId) {
-        Boolean tmp = hideInlineImages.get();
-        if (null == tmp) {
-            synchronized (tmp) {
-
-            }
-        }
-        return tmp.booleanValue();
-    }
 
     // -----------------------------------------------------------------------------------------------------------------
 
@@ -1399,10 +1390,25 @@ public final class JsonMessageHandler implements MailMessageHandler {
             final JSONObject jsonObject = new JSONObject(8);
             jsonObject.put(ID, id);
             String contentType = MimeTypes.MIME_APPL_OCTET;
-            final String filename = part.getFileName();
+            String filename = part.getFileName();
             try {
-                final Locale locale = UserStorage.getInstance().getUser(session.getUserId(), ctx).getLocale();
-                contentType = MimeType2ExtMap.getContentType(new File(filename.toLowerCase(locale)).getName()).toLowerCase(locale);
+                TCharSet separators = new TCharHashSet(new char[] {'/', '\\', File.separatorChar});
+                final String fn = filename;
+                boolean containsSeparatorChar = false == separators.forEach(new TCharProcedure() {
+
+                    @Override
+                    public boolean execute(char separator) {
+                        return fn.indexOf(separator) < 0;
+                    }
+                });
+
+                File file = new File(filename);
+                if (containsSeparatorChar) {
+                    filename = file.getName();
+                    file = new File(filename);
+                }
+
+                contentType = Strings.asciiLowerCase(MimeType2ExtMap.getContentType(file.getName()));
             } catch (final Exception e) {
                 final Throwable t = new Throwable(new StringBuilder("Unable to fetch content/type for '").append(filename).append("': ").append(e).toString());
                 LOG.warn("", t);
@@ -1670,10 +1676,10 @@ public final class JsonMessageHandler implements MailMessageHandler {
             /*
              * Check ICal part for a valid METHOD and its presence in Content-Type header
              */
-            final ICalParser iCalParser = ServerServiceRegistry.getInstance().getService(ICalParser.class);
-            if (iCalParser != null) {
+            final ICalService iCalService = ServerServiceRegistry.getInstance().getService(ICalService.class);
+            if (iCalService != null) {
                 try {
-                    final String method = iCalParser.parseProperty("METHOD", part.getInputStream());
+                    final String method = iCalService.getUtilities().parsePropertyValue(part.getInputStream(), "METHOD", null);
                     if (null != method) {
                         /*
                          * Assume an iTIP response or request

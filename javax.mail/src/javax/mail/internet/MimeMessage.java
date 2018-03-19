@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2017 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2018 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -54,6 +54,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Properties;
 import javax.activation.DataHandler;
 import javax.mail.Address;
 import javax.mail.Flags;
@@ -350,10 +351,11 @@ public class MimeMessage extends Message implements MimePart {
      */
     private void initStrict() {
 	if (session != null) {
-	    strict = PropUtil.getBooleanSessionProperty(session,
-				    "mail.mime.address.strict", true);
-	    allowutf8 = PropUtil.getBooleanSessionProperty(session,
-				    "mail.mime.allowutf8", false);
+	    Properties props = session.getProperties();
+        strict = PropUtil.getBooleanProperty(props,
+                    "mail.mime.address.strict", true);
+        allowutf8 = PropUtil.getBooleanProperty(props,
+                    "mail.mime.allowutf8", false);
 	}
     }
 
@@ -1790,8 +1792,9 @@ public class MimeMessage extends Message implements MimePart {
 	    String replyallccStr = null;
 	    boolean replyallcc = false;
 	    if (session != null)
-		replyallcc = PropUtil.getBooleanSessionProperty(session,
-						"mail.replyallcc", false);
+	    replyallcc = PropUtil.getBooleanProperty(
+                        session.getProperties(),
+                        "mail.replyallcc", false);
 	    // add the recipients from the To field so far
 	    eliminateDuplicates(v, a);
 	    a = getRecipients(Message.RecipientType.TO);

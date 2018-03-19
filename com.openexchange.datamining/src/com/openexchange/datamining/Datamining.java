@@ -690,12 +690,13 @@ public class Datamining {
                     prep.setString(1, "E-Mail");
                     result = prep.executeQuery();
                     while (result.next()) {
-                        Integer ecnt = result.getInt(1);
+                        int ecnt = result.getInt(1);
                         ecnt = ecnt > max ? max : ecnt;
-                        if( null != ret.get(ecnt) ) {
-                            ret.put(ecnt, (ret.get(ecnt))+1);
+                        Integer ecntI = Integer.valueOf(ecnt);
+                        if (null != ret.get(ecntI)) {
+                            ret.put(ecntI, Integer.valueOf(ret.get(ecntI).intValue() + 1));
                         } else {
-                            ret.put(ecnt, 1);
+                            ret.put(ecntI, Integer.valueOf(1));
                         }
                     }
                 } catch (SQLException e) {
