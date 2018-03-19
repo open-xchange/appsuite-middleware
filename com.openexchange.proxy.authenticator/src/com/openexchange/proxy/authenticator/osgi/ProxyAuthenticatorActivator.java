@@ -50,33 +50,28 @@
 package com.openexchange.proxy.authenticator.osgi;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.Authenticator;
-import java.net.PasswordAuthentication;
-import java.util.Map;
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import com.google.common.collect.ImmutableMap;
+import java.net.NetPermission;
+import java.security.Permission;
+import org.slf4j.Logger;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Tools;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.proxy.authenticator.DefaultPasswordAuthenticationProvider;
+import com.openexchange.proxy.authenticator.PasswordAuthenticationProvider;
+import com.openexchange.proxy.authenticator.impl.ProxyAuthenticator;
+import com.openexchange.proxy.authenticator.impl.ReportClientUtil;
 
 /**
- * {@link ProxyAuthenticatorActivator}
+ * {@link ProxyAuthenticatorActivator} sets the default proxy authenticator and prevent any further changes with the help of a {@link SecurityManager}.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.10.0
  */
-public class ProxyAuthenticatorActivator implements BundleActivator {
+public class ProxyAuthenticatorActivator extends HousekeepingActivator {
 
-    private static interface PasswordAuthenticationProvider {
-
-        PasswordAuthentication getPasswordAuthentication(String requestingHost, int requestingPort);
-    }
-
-    // ------------------------------------------------------------------------------------------------
-
-    private Authenticator previousAuthenticator;
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ProxyAuthenticatorActivator.class);
 
     /**
      * Initializes a new {@link ProxyAuthenticatorActivator}.
@@ -86,9 +81,36 @@ public class ProxyAuthenticatorActivator implements BundleActivator {
     }
 
     @Override
-    public synchronized void start(BundleContext context) throws Exception {
-        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ProxyAuthenticatorActivator.class);
-        logger.info("Starting bundle {}", context.getBundle().getSymbolicName());
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { ConfigurationService.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+
+        LOG.info("Starting bundle {}", context.getBundle().getSymbolicName());
+
+        // Set new default Authenticator
+        ProxyAuthenticator authenticator = new ProxyAuthenticator(context);
+        track(PasswordAuthenticationProvider.class, authenticator);
+        Authenticator.setDefault(authenticator);
+
+        setSecurityManager();
+        createDefaultAuthenticationproviders();
+
+        LOG.info("Bundle {} successfully started.", context.getBundle().getSymbolicName());
+
+    }
+
+    private void createDefaultAuthenticationproviders() {
+        // Load report client configuration which is going to be used as fallback values
+        ConfigurationService service = getService(ConfigurationService.class);
+        PasswordAuthenticationProvider reportProvider = null;
+        if(service == null) {
+            LOG.error("ConfigurationService not available. Unable to properly init proxy configuration for report clients.");
+        } else {
+            reportProvider = ReportClientUtil.getProvider(service);
+        }
 
         // Loads all relevant JRE system properties and setups an Authenticator in case user-name and password are set.
         String httpHost = System.getProperty("http.proxyHost");
@@ -103,147 +125,100 @@ public class ProxyAuthenticatorActivator implements BundleActivator {
 
         boolean validHttpProxySettings = validProxySettings(httpHost, httpPort, httpUser, httpPassword);
         boolean validHttpsProxySettings = validProxySettings(httpsHost, httpsPort, httpsUser, httpsPassword);
-        if (validHttpProxySettings || validHttpsProxySettings) {
-            // Remember previous default Authenticator (if any)
-            final Authenticator previousAuthenticator;
-            final Method getPasswordAuthenticationMethod;
-            {
-                Authenticator a = null;
-                Method m = null;
-                try {
-                    Field theAuthenticatorField = Authenticator.class.getDeclaredField("theAuthenticator");
-                    theAuthenticatorField.setAccessible(true);
-                    a = (Authenticator) theAuthenticatorField.get(null);
-                    this.previousAuthenticator = a;
+        if (validHttpProxySettings || validHttpsProxySettings || reportProvider != null) {
 
-                    if (a != null) {
-                        m = Authenticator.class.getDeclaredMethod("getPasswordAuthentication", new Class[0]);
-                        m.setAccessible(true);
-                    }
-                } catch (NoSuchFieldException e) {
-                    logger.warn("Failed to look-up \"theAuthenticator\" field in class {}. Incompatible JRE?", Authenticator.class.getName());
-                } catch (NoSuchMethodException e) {
-                    logger.warn("Failed to look-up \"getPasswordAuthentication\" method in class {}. Incompatible JRE?", Authenticator.class.getName());
-                } catch (IllegalArgumentException | IllegalAccessException e) {
-                    logger.warn("Failed to access \"theAuthenticator\" field in class {}. Incompatible JRE?", Authenticator.class.getName());
-                }
-                previousAuthenticator = a;
-                getPasswordAuthenticationMethod = m;
-            }
+            checkForOldAuthenticator();
 
-            // Password authentication provides for HTTP/HTTPS
-            final Map<String, PasswordAuthenticationProvider> providers;
-            {
-                ImmutableMap.Builder<String, PasswordAuthenticationProvider> builder = ImmutableMap.builder();
-                // HTTP
-                if (validHttpProxySettings) {
-                    builder.put("http", new PasswordAuthenticationProvider() {
-
-                        @Override
-                        public PasswordAuthentication getPasswordAuthentication(String requestingHost, int requestingPort) {
-                            if (httpPort == requestingPort && httpHost.equalsIgnoreCase(requestingHost)) {
-                                // Seems to be OK.
-                                return new PasswordAuthentication(httpUser, httpPassword.toCharArray());
-                            }
-
-                            // Does not match configured host/port for HTTP proxy
-                            return null;
-                        }
-                    });
-                }
-                // HTTPS
-                if (validHttpsProxySettings) {
-                    builder.put("https", new PasswordAuthenticationProvider() {
-
-                        @Override
-                        public PasswordAuthentication getPasswordAuthentication(String requestingHost, int requestingPort) {
-                            if (httpsPort == requestingPort && httpsHost.equalsIgnoreCase(requestingHost)) {
-                                // Seems to be OK.
-                                return new PasswordAuthentication(httpsUser, httpsPassword.toCharArray());
-                            }
-
-                            // Does not match configured host/port for HTTPS proxy
-                            return null;
-                        }
-                    });
-                }
-                providers = builder.build();
-            }
-
-            // Set new default Authenticator
-            Authenticator.setDefault(new Authenticator() {
-
-                @Override
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    if (getRequestorType() == RequestorType.PROXY) {
-                        // Entity-requesting authentication is a HTTP proxy server
-                        String protocol = Strings.asciiLowerCase(getRequestingProtocol());
-                        if (null != protocol) {
-                            // Optionally followed by "/version", where version is a version number.
-                            int pos = protocol.lastIndexOf('/');
-                            PasswordAuthenticationProvider provider = providers.get(pos < 0 ? protocol : protocol.substring(0, pos));
-                            PasswordAuthentication passwordAuthentication;
-                            if (null != provider && (passwordAuthentication = provider.getPasswordAuthentication(getRequestingHost(), getRequestingPort())) != null) {
-                                // Match...
-                                return passwordAuthentication;
-                            }
-                        }
-                    }
-
-                    // Either invoke previous authenticator (if any) or return super implementation
-                    if (null == previousAuthenticator || null == getPasswordAuthenticationMethod) {
-                        return super.getPasswordAuthentication();
-                    }
-
-                    // Delegate to previous default authenticator
-                    try {
-                        Object result = getPasswordAuthenticationMethod.invoke(previousAuthenticator, new Object[0]);
-                        return null == result ? null : (PasswordAuthentication) result;
-                    } catch (IllegalAccessException e) {
-                        // Should not occur since 'setAccessible(true)' has been invoked
-                        return null;
-                    } catch (IllegalArgumentException e) {
-                        // Should not occur
-                        return null;
-                    } catch (InvocationTargetException e) {
-                        Throwable t = e.getCause();
-                        if (t instanceof RuntimeException) {
-                            throw (RuntimeException) t;
-                        } else if (t instanceof Error) {
-                            throw (Error) t;
-                        } else {
-                            throw new IllegalStateException("Not unchecked", t);
-                        }
-                    }
-                }
-            });
+            // Password authentication providers for HTTP/HTTPS
+            // HTTP
             if (validHttpProxySettings) {
-                if (validHttpsProxySettings) {
-                    logger.info("Bundle {} successfully started. Injected authenticator for HTTP and HTTPS proxy server", context.getBundle().getSymbolicName());
-                }
-                logger.info("Bundle {} successfully started. Injected authenticator for HTTP proxy server", context.getBundle().getSymbolicName());
-            } else {
-                logger.info("Bundle {} successfully started. Injected authenticator for HTTPS proxy server", context.getBundle().getSymbolicName());
+                registerService(PasswordAuthenticationProvider.class, new DefaultPasswordAuthenticationProvider("http", httpHost, httpPort, httpUser, httpPassword));
             }
-        } else {
-            logger.info("Bundle {} successfully started. Using no authenticator for HTTP/HTTPS proxy server", context.getBundle().getSymbolicName());
+            // HTTPS
+            if (validHttpsProxySettings) {
+                registerService(PasswordAuthenticationProvider.class, new DefaultPasswordAuthenticationProvider("https", httpsHost, httpsPort, httpsUser, httpsPassword));
+            }
+
+            // Register reportclient provider as fallback to ensure compatibility with old config
+            if (reportProvider != null) {
+                registerService(PasswordAuthenticationProvider.class, reportProvider);
+            }
         }
     }
 
-    private boolean validProxySettings(String httpHost, int httpPort, String httpUser, String httpPassword) {
-        return Strings.isNotEmpty(httpHost) && httpPort > 0 && Strings.isNotEmpty(httpUser) && Strings.isNotEmpty(httpPassword);
+    /**
+     * Checks if a proxy authenticator has already been set and prints a warning.
+     *
+     */
+    private void checkForOldAuthenticator() {
+        try {
+            Field theAuthenticatorField = Authenticator.class.getDeclaredField("theAuthenticator");
+            theAuthenticatorField.setAccessible(true);
+            Authenticator previousAuthenticator = (Authenticator) theAuthenticatorField.get(null);
+            if (previousAuthenticator != null) {
+                LOG.warn("There is already a proxy authenticator defined with the name {}. This authenticator will be overwritten.", previousAuthenticator.getClass().getName());
+            }
+        } catch (NoSuchFieldException e) {
+            LOG.warn("Failed to look-up \"theAuthenticator\" field in class {}. Incompatible JRE?", Authenticator.class.getName());
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            LOG.warn("Failed to access \"theAuthenticator\" field in class {}. Incompatible JRE?", Authenticator.class.getName());
+        }
+    }
+
+    /**
+     * Checks if the given proxy configuration is valid
+     *
+     * @param host The host
+     * @param port The port
+     * @param user The proxy user
+     * @param password the proxy password
+     * @return true if it is valid, false otherwise
+     */
+    private boolean validProxySettings(String host, int port, String user, String password) {
+        return Strings.isNotEmpty(host) && port > 0 && Strings.isNotEmpty(user) && Strings.isNotEmpty(password);
     }
 
     @Override
-    public synchronized void stop(BundleContext context) throws Exception {
+    public synchronized void stopBundle() throws Exception {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(ProxyAuthenticatorActivator.class);
-        logger.info("Stopping bundle {}", context.getBundle().getSymbolicName());
+        logger.info("Stopping bundle {}", this.context.getBundle().getSymbolicName());
 
         // Restore previous default Authenticator
-        Authenticator.setDefault(previousAuthenticator);
-        previousAuthenticator= null;
+        removeSecurityManager();
+        Authenticator.setDefault(null);
 
         logger.info("Bundle {} successfully stopped", context.getBundle().getSymbolicName());
+    }
+
+    SecurityManager oldSecurityManager = null;
+
+    /**
+     * Sets a java {@link SecurityManager} which prevents that the authenticator will be overwritten.
+     */
+    private void setSecurityManager() {
+        oldSecurityManager = System.getSecurityManager();
+        System.setSecurityManager(new SecurityManager() {
+
+            @Override
+            public void checkPermission(Permission perm) {
+                if (perm instanceof NetPermission) {
+                    if (perm.getName().equals("setDefaultAuthenticator")) {
+                        throw new SecurityException("Setting the default authenticator twice is not allowed.");
+                    }
+                }
+                if (oldSecurityManager != null) {
+                    oldSecurityManager.checkPermission(perm);
+                }
+            }
+        });
+    }
+
+    /**
+     * Sets the java {@link SecurityManager} back to its previous value.
+     */
+    private void removeSecurityManager() {
+        System.setSecurityManager(oldSecurityManager);
+        oldSecurityManager = null;
     }
 
 }
