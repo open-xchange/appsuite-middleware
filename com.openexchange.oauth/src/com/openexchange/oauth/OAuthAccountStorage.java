@@ -77,7 +77,7 @@ public interface OAuthAccountStorage {
      * @param session The session
      * @param accountId The account identifier
      * @return The account
-     * @throws OXException If account cannot be returned
+     * @throws OXException If account does not exist, or if any other error is occurred
      */
     OAuthAccount getAccount(Session session, int accountId) throws OXException;
 

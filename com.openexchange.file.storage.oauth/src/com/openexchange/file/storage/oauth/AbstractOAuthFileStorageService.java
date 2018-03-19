@@ -79,6 +79,7 @@ import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthAccountStorage;
 import com.openexchange.oauth.OAuthConstants;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.oauth.scope.OAuthScope;
@@ -235,15 +236,32 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
     @Override
     public void onAfterFileStorageAccountDeletion(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) throws OXException {
         OAuthAccountStorage storage = services.getService(OAuthAccountStorage.class);
-        int accountId = Integer.parseInt((String) eventProps.get("account"));
+        Object value = eventProps.get("account");
+        if (value == null) {
+            LOG.debug("Not OAuth account information was found");
+            return;
+        }
+        int accountId = Integer.parseInt((String) value);
         Session session = getUserSession(userId, contextId);
-        OAuthAccount account = storage.getAccount(session, accountId);
+        OAuthAccount account;
+        try {
+            account = storage.getAccount(session, accountId);
+        } catch (OXException e) {
+            if (OAuthExceptionCodes.ACCOUNT_NOT_FOUND.equals(e)) {
+                LOG.debug("The OAuth file storage account with id '{}' for the user '{}' in context '{}' does not exist anymore", accountId, userId, contextId);
+                return;
+            }
+            throw e;
+        }
+        // Get the enabled scopes...
         Set<OAuthScope> scopes = new HashSet<>();
         for (OAuthScope scope : account.getEnabledScopes()) {
             scopes.add(scope);
         }
+        // ...and remove the 'drive' scope.
         scopes.remove(getScope());
         eventProps.put(OAuthConstants.ARGUMENT_SCOPES, scopes);
+        // Update the account
         storage.updateAccount(userId, contextId, accountId, eventProps);
     }
 
