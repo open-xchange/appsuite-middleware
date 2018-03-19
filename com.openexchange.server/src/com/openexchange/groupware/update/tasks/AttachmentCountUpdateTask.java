@@ -77,7 +77,7 @@ public class AttachmentCountUpdateTask extends UpdateTaskAdapter {
      * Finds all appointments, where the field numberOfAttachments does not match the real amount of attachments.
      */
     // GROUP BY CLAUSE: ensure ONLY_FULL_GROUP_BY compatibility
-    private static final String SELECT = "SELECT pd.cid, pd.intfield01 AS id, ANY_VALUE(pd.intfield08) AS count, COUNT(pa.id) AS realCount " +
+    private static final String SELECT = "SELECT pd.cid, pd.intfield01 AS id, MIN(pd.intfield08) AS count, COUNT(pa.id) AS realCount " +
             "FROM prg_dates pd LEFT JOIN prg_attachment pa " +
             "ON pd.cid = pa.cid AND pd.intfield01 = pa.attached AND pa.module=1 " +
             "GROUP BY pd.cid,pd.intfield01 " +
