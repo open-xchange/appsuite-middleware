@@ -47,63 +47,93 @@
  *
  */
 
-package com.openexchange.net.ssl.config;
+package com.openexchange.net.ssl.config.impl.jslob;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.osgi.annotation.SingletonService;
+import java.util.Map;
+import com.openexchange.exception.OXException;
+import com.openexchange.jslob.JSlobEntry;
+import com.openexchange.jslob.JSlobKeys;
+import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
+import com.openexchange.session.Session;
 
 /**
- * {@link UserAwareSSLConfigurationService}
+ * {@link UserCanManageOwnCertificatesJSLobEntry}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @since v7.8.3
  */
-@SingletonService
-public interface UserAwareSSLConfigurationService {
+public class UserCanManageOwnCertificatesJSLobEntry implements JSlobEntry {
 
-    public static final String USER_CONFIG_ENABLED_PROPERTY = "com.openexchange.net.ssl.user.configuration.enabled";
+    private static final String LOB_NAMESPACE = "security";
+    private static final String LOB_PATH = LOB_NAMESPACE + "/manageCertificates";
+
+    private final UserAwareSSLConfigurationService userAwareSSLConfigurationService;
 
     /**
-     * Name of the user attribute the configuration made by the user is handled for.
+     * Initialises a new {@link UserCanManageOwnCertificatesJSLobEntry}.
      */
-    public static final String USER_ATTRIBUTE_NAME = "acceptUntrustedCertificates";
+    public UserCanManageOwnCertificatesJSLobEntry(UserAwareSSLConfigurationService userAwareSSLConfigurationService) {
+        super();
+        this.userAwareSSLConfigurationService = userAwareSSLConfigurationService;
+    }
 
-    /**
-     * Returns if the user is allowed to define the trust level for external connections.
+    /*
+     * (non-Javadoc)
      * 
-     * @param userId The id of the user to check
-     * @param contextId The id of the context the user is associated to
-     * @return <code>true</code> if the user is allowed to define the trust level; otherwise <code>false</code>
+     * @see com.openexchange.jslob.JSlobEntry#getKey()
      */
-    boolean isAllowedToDefineTrustLevel(int userId, int contextId);
+    @Override
+    public String getKey() {
+        return JSlobKeys.CORE;
+    }
 
-    /**
-     * Returns if the given user configured to trust all external connections.
+    /*
+     * (non-Javadoc)
      * 
-     * @see #setTrustAll(int, Context, boolean)
-     * @param userId The id of the user to check
-     * @param contextId The id of the context the user is associated to
-     * @return <code>true</code> if the user has configured to trust all connections; otherwise <code>false</code>
+     * @see com.openexchange.jslob.JSlobEntry#getPath()
      */
-    boolean isTrustAll(int userId, int contextId);
+    @Override
+    public String getPath() {
+        return LOB_PATH;
+    }
 
-    /**
-     * Sets if the given user would like to trust all external connections without taking the server configuration into account.
+    /*
+     * (non-Javadoc)
      * 
-     * @param userId The id of the user to check
-     * @param contextId The context the user is associated to
-     * @param trustAll <code>true</code> to set if the user would like to trust all connections; otherwise <code>false</code>
+     * @see com.openexchange.jslob.JSlobEntry#isWritable(com.openexchange.session.Session)
      */
-    void setTrustAll(int userId, Context context, boolean trustAll);
+    @Override
+    public boolean isWritable(Session session) throws OXException {
+        return false;
+    }
 
-    /**
-     * Returns <code>true</code> if the user is allowed to manage the SSL certificates; <code>false</code> otherwise
+    /*
+     * (non-Javadoc)
      * 
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return <code>true</code> if the user is allowed to manage the SSL certificates; <code>false</code> otherwise
+     * @see com.openexchange.jslob.JSlobEntry#getValue(com.openexchange.session.Session)
      */
-    boolean canManageCertificates(int userId, int contextId);
+    @Override
+    public Object getValue(Session session) throws OXException {
+        return userAwareSSLConfigurationService.canManageCertificates(session.getUserId(), session.getContextId());
+    }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.jslob.JSlobEntry#setValue(java.lang.Object, com.openexchange.session.Session)
+     */
+    @Override
+    public void setValue(Object value, Session sessiond) throws OXException {
+        // no-op, read-only
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.jslob.JSlobEntry#metadata(com.openexchange.session.Session)
+     */
+    @Override
+    public Map<String, Object> metadata(Session session) throws OXException {
+        // no-op
+        return null;
+    }
 }

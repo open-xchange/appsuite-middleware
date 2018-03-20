@@ -57,6 +57,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -77,6 +78,7 @@ import com.openexchange.report.client.container.ContextDetail;
 import com.openexchange.report.client.container.ContextModuleAccessCombination;
 import com.openexchange.report.client.container.MacDetail;
 import com.openexchange.report.client.container.Total;
+import com.openexchange.tools.encoding.Base64;
 
 /**
  * {@link TransportHandler}
@@ -118,15 +120,8 @@ public class TransportHandler {
         }
 
         if ("true".equals(reportConfiguration.getUseProxy().trim())) {
-            String host = System.getProperty("https.proxyHost");
-            String port = System.getProperty("https.proxyHost");
-            if(host == null && port == null) {
-                System.setProperty("https.proxyHost", reportConfiguration.getProxyAddress().trim());
-                System.setProperty("https.proxyPort", reportConfiguration.getProxyPort().trim());
-            } else if ((!host.equalsIgnoreCase(reportConfiguration.getProxyAddress().trim())) || (!port.equalsIgnoreCase(reportConfiguration.getProxyPort().trim()))) {
-                System.out.println("Can't set proxy system properties because different settings are already defined and doesn't match. Please review your configuration.");
-                throw new Exception("Invalid proxy configuration!");
-            }
+            System.setProperty("https.proxyHost", reportConfiguration.getProxyAddress().trim());
+            System.setProperty("https.proxyPort", reportConfiguration.getProxyPort().trim());
         }
 
         if (savereport) {
@@ -176,6 +171,14 @@ public class TransportHandler {
         httpURLConnection.setDoInput(true);
         httpURLConnection.setRequestMethod("POST");
         httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+
+        if ("true".equals(reportConfiguration.getUseProxy().trim()) && "true".equals(reportConfiguration.getProxyAuthRequired().trim())) {
+            final String proxyAutorizationProperty = "Basic " + Base64.encode((reportConfiguration.getProxyUsername().trim() + ":" + reportConfiguration.getProxyPassword().trim()).getBytes());
+
+            Authenticator.setDefault(new ProxyAuthenticator(reportConfiguration.getProxyUsername().trim(), reportConfiguration.getProxyPassword().trim()));
+
+            httpURLConnection.setRequestProperty("Proxy-Authorization", proxyAutorizationProperty);
+        }
 
         try {
             final DataOutputStream stream = new DataOutputStream(httpURLConnection.getOutputStream());
