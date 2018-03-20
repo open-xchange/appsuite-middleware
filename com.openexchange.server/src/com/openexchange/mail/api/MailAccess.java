@@ -50,7 +50,6 @@
 package com.openexchange.mail.api;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.io.Closeable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -110,7 +109,7 @@ import com.openexchange.version.Version;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMessageStorage> implements Serializable, Closeable, IMailStorage {
+public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMessageStorage> implements Serializable, IMailStorage {
 
     /**
      * Serial version UID
@@ -972,7 +971,11 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
         return AuthType.LOGIN == authType;
     }
 
-    @Override
+    /**
+     * Closes this access, trying to put it into cache for re-usage.
+     * <p>
+     * An already closed access is not going to be put into cache and is treated as a no-op.
+     */
     public void close() {
         try { close(true); } catch (final Exception x) { LOG.debug("Error while closing MailAccess instance.", x); }
     }

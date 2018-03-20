@@ -51,7 +51,6 @@ package com.openexchange.unifiedinbox;
 
 import java.util.Set;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailProperties;
@@ -319,7 +318,7 @@ public final class UnifiedInboxAccess extends MailAccess<UnifiedInboxFolderStora
 
         @Override
         public boolean execute(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> openedMailAccess) {
-            Streams.close(openedMailAccess);
+            MailAccess.closeInstance(openedMailAccess);
             return true;
         }
     };

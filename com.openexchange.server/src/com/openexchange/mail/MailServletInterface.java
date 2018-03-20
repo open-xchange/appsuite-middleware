@@ -50,7 +50,6 @@
 package com.openexchange.mail;
 
 import static com.openexchange.java.Strings.isEmpty;
-import java.io.Closeable;
 import java.util.Collection;
 import java.util.List;
 import org.slf4j.Logger;
@@ -86,7 +85,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class MailServletInterface implements Closeable {
+public abstract class MailServletInterface {
 
     /**
      * The constant for quota storage resource
@@ -685,7 +684,9 @@ public abstract class MailServletInterface implements Closeable {
      */
     public abstract SearchIterator<MailFolder> getPathToDefaultFolder(String folder) throws OXException;
 
-    @Override
+    /**
+     * Closes the interface and releases all resources, trying to put resources into cache for re-usage.
+     */
     public void close() {
         try {
             close(true);
