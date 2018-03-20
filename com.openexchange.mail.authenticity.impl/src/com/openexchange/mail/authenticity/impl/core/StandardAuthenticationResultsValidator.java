@@ -175,6 +175,8 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
         overallResult.addAttribute(MailAuthenticityResultKey.MAIL_AUTH_MECH_RESULTS, results);
         overallResult.addAttribute(MailAuthenticityResultKey.UNCONSIDERED_AUTH_MECH_RESULTS, unconsideredResults);
 
+        determineDomainMismatch(overallResult);
+
         return overallResult;
     }
 
@@ -547,6 +549,21 @@ public class StandardAuthenticationResultsValidator implements AuthenticationRes
                 // Override
                 overallResult.setStatus(bestOfSPF.getResult().convert());
         }
+    }
+
+    /**
+     * Determines whether there is a domain mismatch between the dominant mechanism's domain and the domain from the 'From' header.
+     * Sets the {@link MailAuthenticityResultKey#DOMAN_MISMATCH} to the attributes of the overall result.
+     * 
+     * @param overallResult The overall result
+     */
+    private void determineDomainMismatch(MailAuthenticityResult overallResult) {
+        boolean domainMismatch = true;
+        String mechDomain = (String) overallResult.getAttribute(MailAuthenticityResultKey.FROM_DOMAIN);
+        if (Strings.isNotEmpty(mechDomain)) {
+            domainMismatch = !mechDomain.equals((String) overallResult.getAttribute(MailAuthenticityResultKey.FROM_HEADER_DOMAIN));
+        }
+        overallResult.addAttribute(MailAuthenticityResultKey.DOMAN_MISMATCH, domainMismatch);
     }
 
     ///////////////////////////////// HELPER CLASSES /////////////////////////////////
