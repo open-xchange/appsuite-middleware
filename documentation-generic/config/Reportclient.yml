@@ -1,7 +1,11 @@
 feature_name: Report client
 feature_description: |
-  The first part defines if a proxy server should be used to establish the http connection
-  to the Open-Xchange report server, and if which server and proxy details to use.
+  The first part defines whether a proxy server should be used to establish the http connection
+  to the Open-Xchange report server.
+  
+  IMPORTANT: Please note that these proxy properties are deprecated, since the middleware now supports proxy configuration for all http and https connections.
+  We advice to configure the proxy via well known java system properties (https.proxyHost, https.proxyPort, https.proxyUser, https.proxyPassword).
+  
   The second part configures report serialization.
 
   See [[https://documentation.open-xchange.com/{{version}}/middleware/components/report_client.html]] for more informations.
@@ -9,6 +13,8 @@ properties:
     - key: com.openexchange.report.client.proxy.useproxy
       description: |
         Determine wether a proxy should be used or not. If set to <code>true</code>, the related properties also have to be set.
+        
+        <b>Deprecated</b>: use java system properties instead.
       defaultValue: false
       version:
       reloadable: false
@@ -20,6 +26,8 @@ properties:
     - key: com.openexchange.report.client.proxy.address
       description: |
         The address of the proxy, that should be used.
+        
+        <b>Deprecated</b>: use java system properties instead.
       defaultValue:
       version:
       reloadable: false
@@ -31,6 +39,8 @@ properties:
     - key: com.openexchange.report.client.proxy.port
       description: |
         The port of the proxy, that should be used.
+        
+        <b>Deprecated</b>: use java system properties instead.
       defaultValue: 8080
       version:
       reloadable: false
@@ -42,6 +52,8 @@ properties:
     - key: com.openexchange.report.client.proxy.authrequired
       description: |
         Is authorisation required to use the proxy. If set to <code>true</code>, the related properties have alsos to be set.
+        
+        <b>Deprecated</b>: use java system properties instead.
       defaultValue: false
       version:
       reloadable: false
@@ -53,6 +65,8 @@ properties:
     - key: com.openexchange.report.client.proxy.username
       description: |
         The username that should be used to autherise on the proxy server.
+        
+        <b>Deprecated</b>: use java system properties instead.
       defaultValue:
       version:
       reloadable: false
@@ -64,6 +78,8 @@ properties:
     - key: com.openexchange.report.client.proxy.password
       description: |
         The password that should be used to autherise on the proxy server.
+        
+        <b>Deprecated</b>: use java system properties instead.
       defaultValue:
       version:
       reloadable: false
