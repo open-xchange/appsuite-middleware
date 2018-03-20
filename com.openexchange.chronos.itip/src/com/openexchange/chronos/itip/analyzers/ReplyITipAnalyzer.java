@@ -214,7 +214,7 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
                 continue;
             }
 
-            if (change.getDiff().getUpdatedFields().size() != 0) {
+            if (false == change.getDiff().getAttendeeUpdates().isEmpty()) {
                 return true;
             }
         }
