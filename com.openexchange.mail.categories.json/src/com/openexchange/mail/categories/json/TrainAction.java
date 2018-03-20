@@ -57,9 +57,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.ReorganizeParameter;
@@ -74,12 +71,6 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-@Action(method = RequestMethod.PUT, name = "train", description = "Teaches an existing mail user category.", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "category_id", description = "The category identifier"),
-    @Parameter(name = "apply-for-existing", description = "A optional flag indicating wether old mails should be reorganized. Defaults to 'false'."),
-    @Parameter(name= "apply-for-future-ones", description = "A flag indicating wether a rule should be created or not. Defaults to 'true'.")
-}, responseDescription = "Response: Empty")
 public class TrainAction extends AbstractCategoriesAction {
 
     private static final String CREATE_RULE_PARAMETER = "apply-for-future-ones";

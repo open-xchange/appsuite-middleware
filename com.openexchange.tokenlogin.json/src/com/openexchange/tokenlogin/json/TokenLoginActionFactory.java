@@ -49,8 +49,6 @@
 
 package com.openexchange.tokenlogin.json;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -81,11 +79,6 @@ public class TokenLoginActionFactory implements AJAXActionServiceFactory {
     @Override
     public AJAXActionService createActionService(String action) {
         return actions.get(action);
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return Collections.unmodifiableCollection(actions.values());
     }
 
 }

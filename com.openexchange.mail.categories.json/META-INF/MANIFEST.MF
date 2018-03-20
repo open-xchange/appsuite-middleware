@@ -9,8 +9,6 @@ Bundle-Activator: com.openexchange.mail.categories.osgi.Activator
 Import-Package: com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.writer,
  com.openexchange.capabilities,
- com.openexchange.documentation,
- com.openexchange.documentation.annotations,
  com.openexchange.exception,
  com.openexchange.groupware.ldap,
  com.openexchange.groupware.userconfiguration,

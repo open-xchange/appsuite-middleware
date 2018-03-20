@@ -111,6 +111,9 @@ public final class UpdateAction extends AppointmentAction {
         if (false == appointment.getIgnoreConflicts()) {
             session.set(CalendarParameters.PARAMETER_CHECK_CONFLICTS, Boolean.TRUE);
         }
+        if (false == session.contains(CalendarParameters.PARAMETER_TRACK_ATTENDEE_USAGE)) {
+            session.set(CalendarParameters.PARAMETER_TRACK_ATTENDEE_USAGE, Boolean.TRUE);
+        }
         Event event = getEventConverter(session).getEvent(appointment, eventID);
         if (appointment.containsParentFolderID() && 0 < appointment.getParentFolderID() && false == eventID.getFolderID().equals(asString(appointment.getParentFolderID()))) {
             /*
@@ -139,7 +142,6 @@ public final class UpdateAction extends AppointmentAction {
             }
             throw e;
         }
-        session.getEntityResolver().trackAttendeeUsage(result);
         JSONObject resultObject = new JSONObject(1);
         if (0 < result.getCreations().size()) {
             resultObject.put(DataFields.ID, result.getCreations().get(0).getCreatedEvent().getId());

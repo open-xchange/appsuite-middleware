@@ -49,7 +49,6 @@
 
 package com.openexchange.group.servlet.request;
 
-import java.util.Collection;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -80,11 +79,6 @@ public final class GroupManageActionFactory implements AJAXActionServiceFactory 
         actions.put("update", new com.openexchange.group.servlet.request.actions.UpdateAction(services));
         actions.put("delete", new com.openexchange.group.servlet.request.actions.DeleteAction(services));
         this.actions = actions.build();
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
     @Override

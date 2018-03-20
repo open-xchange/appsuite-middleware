@@ -174,7 +174,7 @@ public class RdbAlarmTriggerStorage extends RdbStorage implements AlarmTriggerSt
         }
         int updated = 0;
         ReminderData originalReminder = selectReminder(connection, context.getContextId(), asInt(event.getId()), userID);
-        if (null == originalReminder) {
+        if (null == originalReminder || 0 == originalReminder.id) {
             updated += insertReminder(connection, context.getContextId(), event, userID, reminder);
         } else {
             ReminderData updatedReminder = getNextReminder(event, userID, alarms, originalReminder);

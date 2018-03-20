@@ -57,7 +57,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -173,11 +172,6 @@ public class OAuthDispatcherServletTest {
             services.put("write", new WriteAction());
             services.put("readwrite", new CustomAction());
             services.put("unprivileged", new GrantAllAction());
-        }
-
-        @Override
-        public Collection<?> getSupportedServices() {
-            return null;
         }
 
         @Override

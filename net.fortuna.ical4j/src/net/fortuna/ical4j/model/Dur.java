@@ -426,10 +426,10 @@ public class Dur implements Comparable, Serializable {
             // return Boolean.valueOf(isNegative()).compareTo(Boolean.valueOf(arg0.isNegative()));
             // for pre-java 1.5 compatibility..
             if (isNegative()) {
-                return Integer.MIN_VALUE;
+                return -1;
             }
             else {
-                return Integer.MAX_VALUE;
+                return 1;
             }
         }
         else if (getWeeks() != arg0.getWeeks()) {

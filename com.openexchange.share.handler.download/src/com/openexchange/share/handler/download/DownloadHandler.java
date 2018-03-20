@@ -72,6 +72,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Streams;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.handler.AccessShareRequest;
 import com.openexchange.share.servlet.handler.HttpAuthShareHandler;
@@ -130,7 +131,11 @@ public class DownloadHandler extends HttpAuthShareHandler {
          * get document
          */
         ServerSession session = ServerSessionAdapter.valueOf(resolvedShare.getSession());
-        final String id = resolvedShare.getShareRequest().getTarget().getItem();
+        ShareTarget target = resolvedShare.getShareRequest().getTarget();
+        if (null == target) {
+            throw ShareExceptionCodes.UNKNOWN_SHARE.create(resolvedShare.getShareRequest().getTargetPath());
+        }
+        final String id = target.getItem();
         final String version = null; // as per com.openexchange.file.storage.FileStorageFileAccess.CURRENT_VERSION
         IDBasedFileAccessFactory service = Services.getService(IDBasedFileAccessFactory.class);
         if (null == service) {
