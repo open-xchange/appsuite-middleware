@@ -54,6 +54,7 @@ import static com.openexchange.chronos.provider.CalendarFolderProperty.COLOR;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.DESCRIPTION;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.SCHEDULE_TRANSP;
 import static com.openexchange.chronos.provider.CalendarFolderProperty.USED_FOR_SYNC;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.arrays.Arrays.contains;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -284,22 +285,14 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
     }
 
     private List<Contact> getBirthdayContacts() throws OXException {
-        List<Contact> searchBirthdayContacts = searchBirthdayContacts(null);
-        // sort out contacts that will be found as the MySQL SELECT will return contacts for birthdays like 0000-00-00: see bug 57781
-        for (Iterator<Contact> iterator = searchBirthdayContacts.iterator(); iterator.hasNext();) {
-            Contact contact = iterator.next();
-            if (!contact.containsBirthday()) {
-                iterator.remove();
-            }
-        }
-        return searchBirthdayContacts;
+        return searchBirthdayContacts(null);
     }
 
     private Contact getBirthdayContact(String eventId) throws OXException {
         try {
             int[] decodedId = eventConverter.decodeEventId(eventId);
             Contact contact = services.getService(ContactService.class).getContact(session, String.valueOf(decodedId[0]), String.valueOf(decodedId[1]));
-            if (!contact.containsBirthday()) {
+            if (null == contact.getBirthday()) {
                 throw OXException.notFound(eventId);
             }
             return contact;
@@ -355,14 +348,25 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
             }
         }
         /*
-         * perform search
+         * perform search & collect contacts with birthday
          */
+        List<Contact> contacts = new ArrayList<Contact>();
         SearchIterator<Contact> searchIterator = null;
         try {
-            return SearchIterators.asList(searchIterator = services.getService(ContactService.class).searchContacts(session, searchTerm, sortOptions));
+            searchIterator = services.getService(ContactService.class).searchContacts(session, searchTerm, sortOptions);
+            while (searchIterator.hasNext()) {
+                Contact contact = searchIterator.next();
+                if (null == contact.getBirthday()) {
+                    org.slf4j.LoggerFactory.getLogger(BirthdaysCalendarAccess.class).debug(
+                        "Skipping contact {} due to missing birthday.", I(contact.getObjectID()));
+                    continue;
+                }
+                contacts.add(contact);
+            }
         } finally {
             SearchIterators.close(searchIterator);
         }
+        return contacts;
     }
 
     private AlarmHelper getAlarmHelper() {
