@@ -20,9 +20,9 @@ class ResultSetCache {
     private int timesSingleQueried = 0;
     private boolean didBulkQuery = false;
 
-    private Map<String, Map<String, List<CachedRow>>> cacheBySchema = new HashMap<String, Map<String, List<CachedRow>>>();
+    private final Map<String, Map<String, List<CachedRow>>> cacheBySchema = new HashMap<String, Map<String, List<CachedRow>>>();
 
-    private Map<String, Object> info = new HashMap<String, Object>();
+    private final Map<String, Object> info = new HashMap<String, Object>();
 
     public List<CachedRow> get(ResultSetExtractor resultSetExtractor) throws DatabaseException {
         try {
@@ -86,10 +86,10 @@ class ResultSetCache {
     }
 
     public static class RowData {
-        private Database database;
-        private String[] parameters;
-        private String catalog;
-        private String schema;
+        private final Database database;
+        private final String[] parameters;
+        private final String catalog;
+        private final String schema;
 
         private String[] keyPermutations;
 
@@ -175,8 +175,15 @@ class ResultSetCache {
 
         ResultSet executeQuery(String sql, Database database) throws DatabaseException, SQLException {
             Statement statement = ((JdbcConnection) database.getConnection()).createStatement();
-            return new StatementClosingResultSet(statement.executeQuery(sql), statement);
-
+            try {
+                StatementClosingResultSet retval = new StatementClosingResultSet(statement.executeQuery(sql), statement);
+                statement = null;
+                return retval;
+            } finally {
+                if (null != statement) {
+                    statement.close();
+                }
+            }
         }
 
         public boolean equals(Object expectedValue, Object foundValue) {
