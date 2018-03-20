@@ -54,14 +54,12 @@ import java.net.Authenticator;
 import java.net.NetPermission;
 import java.security.Permission;
 import org.slf4j.Logger;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Tools;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.proxy.authenticator.DefaultPasswordAuthenticationProvider;
 import com.openexchange.proxy.authenticator.PasswordAuthenticationProvider;
 import com.openexchange.proxy.authenticator.impl.ProxyAuthenticator;
-import com.openexchange.proxy.authenticator.impl.ReportClientUtil;
 
 /**
  * {@link ProxyAuthenticatorActivator} sets the default proxy authenticator and prevent any further changes with the help of a {@link SecurityManager}.
@@ -85,7 +83,7 @@ public class ProxyAuthenticatorActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class };
+        return new Class[] {};
     }
 
     @Override
@@ -105,15 +103,6 @@ public class ProxyAuthenticatorActivator extends HousekeepingActivator {
     }
 
     private void createDefaultAuthenticationproviders() {
-        // Load report client configuration which is going to be used as fallback values
-        ConfigurationService service = getService(ConfigurationService.class);
-        PasswordAuthenticationProvider reportProvider = null;
-        if (service == null) {
-            LOG.error("ConfigurationService not available. Unable to properly init proxy configuration for report clients.");
-        } else {
-            reportProvider = ReportClientUtil.getProvider(service);
-        }
-
         // Loads all relevant JRE system properties and setups an Authenticator in case user-name and password are set.
         String httpHost = System.getProperty("http.proxyHost");
         int httpPort = Tools.getUnsignedInteger(System.getProperty("http.proxyPort", "80").trim());
@@ -127,7 +116,7 @@ public class ProxyAuthenticatorActivator extends HousekeepingActivator {
 
         boolean validHttpProxySettings = validProxySettings(httpHost, httpPort, httpUser, httpPassword);
         boolean validHttpsProxySettings = validProxySettings(httpsHost, httpsPort, httpsUser, httpsPassword);
-        if (validHttpProxySettings || validHttpsProxySettings || reportProvider != null) {
+        if (validHttpProxySettings || validHttpsProxySettings) {
 
             checkForOldAuthenticator();
 
@@ -139,11 +128,6 @@ public class ProxyAuthenticatorActivator extends HousekeepingActivator {
             // HTTPS
             if (validHttpsProxySettings) {
                 registerService(PasswordAuthenticationProvider.class, new DefaultPasswordAuthenticationProvider("https", httpsHost, httpsPort, httpsUser, httpsPassword));
-            }
-
-            // Register reportclient provider as fallback to ensure compatibility with old config
-            if (reportProvider != null) {
-                registerService(PasswordAuthenticationProvider.class, reportProvider);
             }
         }
     }
