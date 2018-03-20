@@ -107,7 +107,7 @@ public class EventUpdateImpl extends DefaultItemUpdate<Event, EventField> implem
         alarmUpdates = AlarmUtils.getAlarmUpdates(
             null != originalEvent ? originalEvent.getAlarms() : null, null != updatedEvent ? updatedEvent.getAlarms() : null);
         attendeeUpdates = CalendarUtils.getAttendeeUpdates(
-            null != originalEvent ? originalEvent.getAttendees() : null, null != updatedEvent ? updatedEvent.getAttendees() : null, true, ignoredAttendeeFields.toArray(new AttendeeField[] {}));
+            null != originalEvent ? originalEvent.getAttendees() : null, null != updatedEvent ? updatedEvent.getAttendees() : null, true, null != ignoredAttendeeFields ? ignoredAttendeeFields.toArray(new AttendeeField[] {}) : null);
         attachmentUpdates = CalendarUtils.getAttachmentUpdates(
             null != originalEvent ? originalEvent.getAttachments() : null, null != updatedEvent ? updatedEvent.getAttachments() : null);
     }
