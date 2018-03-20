@@ -276,6 +276,10 @@ public final class InitAction extends AbstractOAuthTokenAction {
         if (Strings.isNotEmpty(cb)) {
             callbackUrlBuilder.append("&callback=").append(cb);
         }
+        String actionHint = request.getParameter(OAuthConstants.URLPARAM_ACTION_HINT);
+        if (Strings.isNotEmpty(actionHint)) {
+            callbackUrlBuilder.append('&').append(OAuthConstants.URLPARAM_ACTION_HINT).append('=').append(actionHint);
+        }
 
         return callbackUrlBuilder.toString();
     }

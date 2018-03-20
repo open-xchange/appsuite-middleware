@@ -106,6 +106,8 @@ import com.openexchange.tools.session.SessionHolder;
  */
 public class OAuthServiceImpl implements OAuthService {
 
+    private static final String REAUTHORIZE_ACTION_HINT = "reauthorize";
+
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OAuthServiceImpl.class);
 
     private final OAuthServiceMetaDataRegistry registry;
@@ -309,9 +311,26 @@ public class OAuthServiceImpl implements OAuthService {
         Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
         String userIdentity = service.getUserIdentity(session, account.getToken(), account.getSecret());
         account.setUserIdentity(userIdentity);
+        String actionHint = (String) arguments.get(OAuthConstants.ARGUMENT_ACTION_HINT);
         // Search in db for an account matching that id
         DefaultOAuthAccount existingAccount = (DefaultOAuthAccount) oauthAccountStorage.findByUserIdentity(session, userIdentity, serviceMetaData);
+
         if (existingAccount == null) {
+            /*
+             * No account found but 'reauthorize' was requested.
+             * Background information: When initialising an account's oauth access, the unterlying logic
+             * checks for the user identity and if it's missing it will be fetched from the respective
+             * OAuth provider and the account will be updated accordingly
+             * 
+             * Therefore this edge case can only happen after an upgrade and only if the account's access was
+             * not initialised before initiating a re-authorise. In that case there is nothing that can be
+             * done from the middleware's point of view, since a hint is required to somehow identify the
+             * user's account (no accountId is provided, and no identity exists in the database from where
+             * a match can be found.
+             */
+            if (Strings.isNotEmpty(actionHint) && REAUTHORIZE_ACTION_HINT.equals(actionHint)) {
+                throw OAuthExceptionCodes.INVALID_ACCOUNT.create();
+            }
             isNull(arguments, OAuthConstants.ARGUMENT_DISPLAY_NAME);
             oauthAccountStorage.storeAccount(session, account);
             return account;
@@ -324,6 +343,7 @@ public class OAuthServiceImpl implements OAuthService {
         existingAccount.setEnabledScopes(scopes);
         existingAccount.setUserIdentity(userIdentity);
         oauthAccountStorage.updateAccount(session, existingAccount);
+        // and issue a reauthorize
         return existingAccount;
     }
 

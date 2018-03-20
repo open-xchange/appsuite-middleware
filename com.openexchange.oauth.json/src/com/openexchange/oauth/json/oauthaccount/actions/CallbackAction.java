@@ -56,15 +56,20 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.SecureContentWrapper;
+import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
+import com.openexchange.oauth.json.Services;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
 import com.openexchange.oauth.scope.OAuthScope;
+import com.openexchange.policy.retry.ExponentialBackOffRetryPolicy;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -74,6 +79,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class CallbackAction extends AbstractOAuthTokenAction {
+    
+    private static final String REAUTHORIZE_ACTION_HINT = "reauthorize";
 
     /**
      * Initialises a new {@link CallbackAction}.
@@ -108,6 +115,12 @@ public class CallbackAction extends AbstractOAuthTokenAction {
         final Map<String, Object> arguments = processOAuthArguments(requestData, session, service);
         OAuthAccount oauthAccount = oAuthService.upsertAccount(serviceId, OAuthInteractionType.CALLBACK, arguments, session.getUserId(), session.getContextId(), scopes);
 
+        // Trigger a reauthorize task if a reauthorize was requested
+        String actionHint = (String) arguments.get(OAuthConstants.URLPARAM_ACTION_HINT);
+        if (Strings.isNotEmpty(actionHint) && REAUTHORIZE_ACTION_HINT.equals(actionHint)) {
+            ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
+            clusterLockService.runClusterTask(new ReauthorizeClusterTask(requestData, session, Integer.toString(oauthAccount.getId()), serviceId), new ExponentialBackOffRetryPolicy());
+        }
         try {
             final JSONObject jsonAccount = AccountWriter.write(oauthAccount, session);
             return new AJAXRequestResult(new SecureContentWrapper(jsonAccount, "json"), SecureContentWrapper.CONTENT_TYPE);
