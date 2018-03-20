@@ -1,6 +1,6 @@
 # Mail Authenticity
 
-Since 7.10.0 the OX middleware provides the Mail Authenticity feature for the end user which enables her to be visually aware of the authentication status of emails that she receives and helps her identify phisihing mails from regular communication.
+Since 7.10.0 the OX middleware provides the Mail Authenticity feature for the end user which enables her to be visually aware of the authentication status of emails that she receives and helps her identify phishing mails from regular communication.
 
 ## Motivation
 
@@ -14,7 +14,7 @@ One way would be to call the person back and ask them if they indeed send that m
 
 Wouldn't it be great to instantly know the origin of the sender? To have a mechanism that allows the user to trust the sender and verify that it is indeed the real person?
 
-In the old ages they used signatures to sign their messages and sealing wax with an imprint of their sigil to seal the envelope. This way the inteded receiver of the message could verify that they were indeed communicating with the real person and that their message was not intercepted and altered in any way.
+In the old ages they used signatures to sign their messages and sealing wax with an imprint of their sigil to seal the envelope. This way the intended receiver of the message could verify that they were indeed communicating with the real person and that their message was not intercepted and altered in any way.
 
 A similar method is being used in the digital age and is called *Email Authentication*. Though the naming might be a bit misleading and can be easily confused with user authentication, in reality it actually authenticates with a series of different authentication mechanisms that the message is not forged or altered and is indeed originating from the source it claims to be coming from. To avoid any confusion, we slightly altered the naming to *Email Authenticity*. During the rest of the article the *Email Authentication* will be used to refer to the technical standards that make the verification possible, while the term *Email Authenticity* will be used to refer our implementation and implementation details.
 
@@ -91,7 +91,7 @@ foobar.com.       298     IN      NS      dns1.somedns.com.
 ```
 The `TXT` record indicates that a RSA-encrypted `DKIM` signature has been added for the domain foobar.com with the specified public key which is BASE64-Encoded. More information about the DNS entry for `DKIM` can be found in the [RFC-6376, Section 7.5](https://tools.ietf.org/html/rfc6376#section-7.5).
 
-When an e-mail is being sent from a domain that has DKIM signature enabled, then the respecive header will appear on the mail message indicating that.
+When an e-mail is being sent from a domain that has DKIM signature enabled, then the respective header will appear on the mail message indicating that.
 
 ```mail
 Delivered-To: alice@aliceland.com
@@ -110,7 +110,7 @@ The signature can be verified at any hop by retrieving the public key from the D
 
 ### DMARC (Domain-based Message Authentication, Reporting, and Conformance)
 
-The DMARC is built on top of SPF and DKIM and unifies both mechanisms. The domain owner publishes a policy denoting whether she is using SPF and/or DKIM and how e-mail receivers should deal with validation failures. Possible policies are: `none`, `quarantine` and `reject`. In addition an e-mail address is published where aggregated reports about successul validations and failures shall be sent to. This policy is published as a DNS record.
+The DMARC is built on top of SPF and DKIM and unifies both mechanisms. The domain owner publishes a policy denoting whether she is using SPF and/or DKIM and how e-mail receivers should deal with validation failures. Possible policies are: `none`, `quarantine` and `reject`. In addition an e-mail address is published where aggregated reports about successful validations and failures shall be sent to. This policy is published as a DNS record.
 
 Receivers extract the domain part from the `From` headers, fetch the DMARC policies and perform SPF and/or DKIM checks based on that, adhering to the failure policies.
 
@@ -127,7 +127,7 @@ _dmarc.foobar.com. 600    IN      TXT     "v=DMARC1;p=none;rua=mailto:dmarc-repo
 [...]
 
 ```
-The `TXT` record indicates that a `DMARC` entry has been added for the `foobar.com` domain, with policy `none`. It is also configured that reports will be sent to the spceified e-mail address. More information about the syntaxt of a `DMARC` DNS record can be found in [RFC-7489, Section 6.1](https://tools.ietf.org/html/rfc7489#section-6.1).
+The `TXT` record indicates that a `DMARC` entry has been added for the `foobar.com` domain, with policy `none`. It is also configured that reports will be sent to the specified e-mail address. More information about the syntax of a `DMARC` DNS record can be found in [RFC-7489, Section 6.1](https://tools.ietf.org/html/rfc7489#section-6.1).
 
 The results of DMARC are attached to a special e-mail header `Authentication-Results` ([RFC-7601](https://tools.ietf.org/html/rfc7601)) and are applied by the inbound MTA after validation and policy enforcement. Then MUAs that support that header, interpret it and act accordingly by notifying the user.
 
@@ -151,9 +151,9 @@ The Alice is the domain owner of the `example.com` domain and she publishes the 
 A user sends an e-mail to Bob at `bob@acme.org` from the `example.com` domain. That e-mail is sent via the `example.com` submission host in Alice's domain. The e-mail then is being transfered to the relay host in the same domain and the DKIM signature is calculated for that e-mail message. The message arrives at the `acme.org` mail exchange server. The `acme.org` mail exchange server then fetches the DMARC, DKIM and SPF records from the DNS server
 and begins verifying the e-mail. The mail verification entails virus checks, checks for the DMARC policy of the "From" domain (`p=....` part in the DNS record), verification of the SPF and enforcement of the SPC and DMARC policy (if applicable) and finally verification of the DKIM signature (and again enforcement of the DMARC policy). After all those processing/verification steps, adds the results in the `Authentication-Results` header of the e-mail. The message is then being stored in the `acme.org`'s mail store.
 
-Bob checks his e-mail messages via the MUA (in this case the OX AppSuite). The header is being analysed by the OX middleware, an overall status is set and the UI highlights the authentication status for that mesage to Bob. Bob opens the e-mail, interprets the authentication status and decides his further actions regarding that message.
+Bob checks his e-mail messages via the MUA (in this case the OX AppSuite). The header is being analysed by the OX middleware, an overall status is set and the UI highlights the authentication status for that message to Bob. Bob opens the e-mail, interprets the authentication status and decides his further actions regarding that message.
 
-It is worth noting that between the `example.com` mail relay server and the `acme.org` mail exchange server there might be also some more mail relay hops, some might have DKIM enabled, some SPF, some none at all. The in-between mail hops may or may not apply further mail authentication mechanisms. Everytime a mail authentication mechansim is applied, a new header in the e-mail will reflect that.
+It is worth noting that between the `example.com` mail relay server and the `acme.org` mail exchange server there might be also some more mail relay hops, some might have DKIM enabled, some SPF, some none at all. The in-between mail hops may or may not apply further mail authentication mechanisms. Every time a mail authentication mechanism is applied, a new header in the e-mail will reflect that.
   
 ## Header Analysis
 
@@ -189,7 +189,7 @@ If the `DMARC` status is `fail` then the overall result of the message is set to
 
 If the `DKIM` status is `pass` and there is a domain match, then the overall status is set to `pass`, or to `neutral` if there is no domain match. If the `DKIM` status is other than `pass` or `fail`, then that status is converted to their respective overall status.
 
-Last, the `SPF` status is evaluated. Always depending on whether there is a domain match, the overall status is set to `pass` if the `SPF` status is also set to `pass`. Otherwise, it will be set to `neutral` or `fail` depending on whether the `DKIM` mechanism failed previously. An overal status of `neutral` or `fail` is also set when the status of `SPF` is neutral and there is or isn't a domain match respectively.
+Last, the `SPF` status is evaluated. Always depending on whether there is a domain match, the overall status is set to `pass` if the `SPF` status is also set to `pass`. Otherwise, it will be set to `neutral` or `fail` depending on whether the `DKIM` mechanism failed previously. An overall status of `neutral` or `fail` is also set when the status of `SPF` is neutral and there is or isn't a domain match respectively.
 
 The entire decision algorithm is summed up in the following table:
 
@@ -224,11 +224,11 @@ The response of the single mail fetch `mail?action=get` is now extended over a n
 There are four statuses in total:
 
  - `pass`: The e-mail has passed the authenticity validation (The green case)
- - `fail`: The e-mail has failed the authenicity validation (The red case)
- - `neutral`: One or more authenicity mechanisms failed, or the authserv-id is malformed or not existent (The yellow case)
+ - `fail`: The e-mail has failed the authenticity validation (The red case)
+ - `neutral`: One or more authenticity mechanisms failed, or the authserv-id is malformed or not existent (The yellow case)
  - `not-analyzed`: The e-mail was not analysed either due to an error, or due to the configured `threshold` date
 
-If the feature is not enabled (either globally or via config cascade for the user), then the `authenticity` field should not be present in the `mail?action=get` response and the corresponding column (if requested) in `mail?action=all` should be `null`.
+If the feature is not enabled (either globally or via config-cascade for the user), then the `authenticity` field should not be present in the `mail?action=get` response and the corresponding column (if requested) in `mail?action=all` should be `null`.
 
 If the feature is enabled but an e-mail is not applicable for mail authenticity checks, then the result should be `not-analyzed`, otherwise the result should be based on the analysis of the `Authentication-Results` headers.
 
@@ -249,7 +249,7 @@ GET http://{{server}}/appsuite/api/jslob?action=get&id=io.ox/mail&session={{sess
 
 ### Further Core Configuration Properties
 
-There are more properties that define the behaviour of this feature.
+There are more properties that define the behavior of this feature.
 
 First and foremost is the `com.openexchange.mail.authenticity.threshold` property which specifies a date threshold for the received messages that will be considered for verifying their authenticity. If the receive date of a message is BEFORE the defined threshold date, then that message will be not verified and the result will be set to `not-analyzed`. The default value is `0` which means that all messages are considered and verified.
 
@@ -261,11 +261,11 @@ It is also possible to configure the middleware in a way that highlights authent
 
 The property `com.openexchange.mail.authenticity.trusted.tenants` defines a comma separated list of tenants. All further properties contain an optional [tenant] part which must use one tenant defined by this property.
 
-The property `com.openexchange.mail.authenticity.trusted.[tenant].config` specifies a comma separated list of trusted mail address configurations. Each configuration consists of a trusted mail address and an optional imageId separated by a colon (address[:imageId]). The use of the `imageId` will be explained later. The mail address allows wildcards like * (any string) or ? (any character). The optional `[tenant]` part of the property can be used to explicitly define different image and fall-back images for the different tenants.
+The property `com.openexchange.mail.authenticity.trusted.[tenant].config` specifies a comma separated list of trusted mail address configurations. Each configuration consists of a trusted mail address and an optional imageId separated by a colon (address[:imageId]). The use of the `imageId` will be explained later. The mail address allows wild-cards like * (any string) or ? (any character). The optional `[tenant]` part of the property can be used to explicitly define different image and fall-back images for the different tenants.
 
 The property `com.openexchange.mail.authenticity.trusted.[tenant.]image.[imageId]` defines for each tenant a set of images that can be configured and is to be shown by clients for trusted mail addresses.
 
-The property `com.openexchange.mail.authenticity.trusted.[tenant].fallbackImage` defnines for each tenant the fall-back image that is to be shown by the clients for trusted e-mail addresses without a configured image.
+The property `com.openexchange.mail.authenticity.trusted.[tenant].fallbackImage` defines for each tenant the fall-back image that is to be shown by the clients for trusted e-mail addresses without a configured image.
 
 ## Appendix A: Example Configuration
 
@@ -279,7 +279,7 @@ com.openexchange.mail.authenticity.trusted.image.1 = http://xyz.foobar.com/imgs/
 com.openexchange.mail.authenticity.trusted.image.2 = http://abc.foobar.com/imgs/some-other-icon.png
 ```
 
-In the above example the single tenant is configured in a way that considers as trusted senders all addresses that can be matched with the `config` property, i.e. `support@*.foobar.com`, `support@*.foobar.de` and `support@*.foobar.org`. There are also a few images configured, i.e. the `fallbackImage`, the `image.1` and the `image.2`. An e-mail will be marked as trusted if the address of the sender is matched with any of the configured trusted e-mail addresses. The (optional) numerical suffix of each configured address maps to its coresponding `image.xx` property, meaning that if an e-mail is coming from `support@*.foobar.de` then the client will show the image that is configured under `image.1`, if the e-mail is coming from `support@*.foobar.org` then it will show the image that is configured under `image.2` and if there is no numerical suffix, then the `fallbackImage` will be used.
+In the above example the single tenant is configured in a way that considers as trusted senders all addresses that can be matched with the `config` property, i.e. `support@*.foobar.com`, `support@*.foobar.de` and `support@*.foobar.org`. There are also a few images configured, i.e. the `fallbackImage`, the `image.1` and the `image.2`. An e-mail will be marked as trusted if the address of the sender is matched with any of the configured trusted e-mail addresses. The (optional) numerical suffix of each configured address maps to its corresponding `image.xx` property, meaning that if an e-mail is coming from `support@*.foobar.de` then the client will show the image that is configured under `image.1`, if the e-mail is coming from `support@*.foobar.org` then it will show the image that is configured under `image.2` and if there is no numerical suffix, then the `fallbackImage` will be used.
 
 #### Multi-Tenant Example Configuration
 ```properties
