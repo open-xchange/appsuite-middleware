@@ -202,7 +202,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
             Attendee originalAttendee = attendeeToUpdate.getOriginal();
             newAttendees.remove(originalAttendee);
             Attendee newAttendee = AttendeeMapper.getInstance().copy(originalAttendee, null, (AttendeeField[]) null);
-            AttendeeMapper.getInstance().copy(attendeeToUpdate.getUpdate(), newAttendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE);
+            AttendeeMapper.getInstance().copy(attendeeToUpdate.getUpdate(), newAttendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE, AttendeeField.EXTENDED_PARAMETERS);
             newAttendees.add(newAttendee);
         }
         newAttendees.addAll(attendeesToInsert);
@@ -285,7 +285,7 @@ public class AttendeeHelper implements CollectionUpdate<Attendee, AttendeeField>
          */
         for (ItemUpdate<Attendee, AttendeeField> attendeeUpdate : attendeeDiff.getUpdatedItems()) {
             Attendee attendee = AttendeeMapper.getInstance().copy(attendeeUpdate.getOriginal(), null, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
-            AttendeeMapper.getInstance().copy(attendeeUpdate.getUpdate(), attendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE);
+            AttendeeMapper.getInstance().copy(attendeeUpdate.getUpdate(), attendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE, AttendeeField.EXTENDED_PARAMETERS);
             if (false == isInternal(attendee) && false == session.getConfig().isSkipExternalAttendeeURIChecks()) {
                 attendee = Check.requireValidEMail(attendee);
             }

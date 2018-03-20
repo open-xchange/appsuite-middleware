@@ -284,14 +284,22 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
     }
 
     private List<Contact> getBirthdayContacts() throws OXException {
-        return searchBirthdayContacts(null);
+        List<Contact> searchBirthdayContacts = searchBirthdayContacts(null);
+        // sort out contacts that will be found as the MySQL SELECT will return contacts for birthdays like 0000-00-00: see bug 57781
+        for (Iterator<Contact> iterator = searchBirthdayContacts.iterator(); iterator.hasNext();) {
+            Contact contact = iterator.next();
+            if (!contact.containsBirthday()) {
+                iterator.remove();
+            }
+        }
+        return searchBirthdayContacts;
     }
 
     private Contact getBirthdayContact(String eventId) throws OXException {
         try {
             int[] decodedId = eventConverter.decodeEventId(eventId);
             Contact contact = services.getService(ContactService.class).getContact(session, String.valueOf(decodedId[0]), String.valueOf(decodedId[1]));
-            if (null == contact.getBirthday()) {
+            if (!contact.containsBirthday()) {
                 throw OXException.notFound(eventId);
             }
             return contact;
@@ -401,8 +409,7 @@ public class BirthdaysCalendarAccess implements BasicCalendarAccess, SubscribeAw
 
     private List<String> getContactFolderIds(Type type) throws OXException {
         List<String> folderIds = new ArrayList<String>();
-        FolderResponse<UserizedFolder[]> visibleFolders = services.getService(FolderService.class)
-            .getVisibleFolders(FolderStorage.REAL_TREE_ID, ContactContentType.getInstance(), type, false, session, null);
+        FolderResponse<UserizedFolder[]> visibleFolders = services.getService(FolderService.class).getVisibleFolders(FolderStorage.REAL_TREE_ID, ContactContentType.getInstance(), type, false, session, null);
         UserizedFolder[] folders = visibleFolders.getResponse();
         if (null != folders && 0 < folders.length) {
             for (UserizedFolder folder : folders) {

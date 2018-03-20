@@ -78,17 +78,19 @@ public class ITipEventUpdate implements EventUpdate {
     private EventUpdate delegate;
 
     public ITipEventUpdate(Event originalEvent, Event updatedEvent, boolean considerUnset, EventField... ignoredFields) throws OXException {
+        Set<AttendeeField> ignoredAttendeeFields = new HashSet<>(1);
+        ignoredAttendeeFields.add(AttendeeField.EXTENDED_PARAMETERS);
         // Make sure EventField.EXTENDED_PROPERTIES is contained in ignordeFields.
         if (ignoredFields == null || ignoredFields.length == 0) {
-            this.delegate = new EventUpdateImpl(originalEvent, updatedEvent, considerUnset, EventField.EXTENDED_PROPERTIES);
+            this.delegate = new EventUpdateImpl(originalEvent, updatedEvent, considerUnset, ignoredAttendeeFields, EventField.EXTENDED_PROPERTIES);
         } else {
             if (Arrays.stream(ignoredFields).anyMatch(x -> x == EventField.EXTENDED_PROPERTIES)) {
-                this.delegate = new EventUpdateImpl(originalEvent, updatedEvent, considerUnset, ignoredFields);
+                this.delegate = new EventUpdateImpl(originalEvent, updatedEvent, considerUnset, ignoredAttendeeFields, ignoredFields);
             } else {
                 EventField[] fields = new EventField[ignoredFields.length + 1];
                 System.arraycopy(ignoredFields, 0, fields, 0, ignoredFields.length);
                 fields[fields.length - 1] = EventField.EXTENDED_PROPERTIES;
-                this.delegate = new EventUpdateImpl(originalEvent, updatedEvent, considerUnset, fields);
+                this.delegate = new EventUpdateImpl(originalEvent, updatedEvent, considerUnset, ignoredAttendeeFields, fields);
             }
         }
     }

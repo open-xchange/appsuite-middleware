@@ -382,7 +382,7 @@ public class EventPatches {
                             originalOccurrence = calendarUtilities.copyEvent(originalOccurrence, (EventField[]) null);
                             originalOccurrence = EventPatches.Outgoing(factory).applyAll(resource, originalOccurrence);
                             EventUpdate eventUpdate = calendarUtilities.compare(
-                                originalOccurrence, newChangeException, true, EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.RECURRENCE_RULE, EventField.CREATED, EventField.ALARMS);
+                                originalOccurrence, newChangeException, true, EventField.TIMESTAMP, EventField.LAST_MODIFIED, EventField.RECURRENCE_RULE, EventField.CREATED, EventField.ALARMS, EventField.EXTENDED_PROPERTIES);
                             if (eventUpdate.getUpdatedFields().isEmpty() && eventUpdate.getAttendeeUpdates().isEmpty() && false == eventUpdate.getAlarmUpdates().isEmpty()) {
                                 List<Alarm> patchedAlarms = new ArrayList<Alarm>(2);
                                 snoozedAlarm.setUid(originalAlarm.getUid());
@@ -634,7 +634,7 @@ public class EventPatches {
                  */
                 for (Event importedChangeException : importedChangeExceptions) {
                     adjustAttendeeComments(resource, importedChangeException);
-                    restoreResourceCUTypes(resource, importedEvent);
+                    restoreResourceCUTypes(resource, importedChangeException);
                     adjustProposedTimePrefixes(importedChangeException);
                     adjustAlarms(resource, importedChangeException, importedEvent);
                     applyManagedAttachments(importedChangeException);

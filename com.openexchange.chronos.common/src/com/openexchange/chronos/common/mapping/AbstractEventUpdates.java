@@ -90,7 +90,7 @@ public abstract class AbstractEventUpdates extends AbstractSimpleCollectionUpdat
                 if (null != originalItem) {
                     Set<EventField> differentFields = EventMapper.getInstance().getDifferentFields(originalItem, newItem, considerUnset, ignoredFields);
                     if (0 < differentFields.size()) {
-                        updatedItems.add(new EventUpdateImpl(originalItem, newItem, differentFields));
+                        updatedItems.add(new EventUpdateImpl(originalItem, newItem, differentFields, null));
                     }
                 }
             }
