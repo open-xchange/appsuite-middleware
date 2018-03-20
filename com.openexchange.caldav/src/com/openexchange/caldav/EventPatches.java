@@ -627,20 +627,19 @@ public class EventPatches {
                 adjustAlarms(resource, importedEvent, null);
                 applyManagedAttachments(importedEvent);
                 stripExtendedProperties(resource, importedEvent);
-
-                if (null != importedChangeExceptions && !importedChangeExceptions.isEmpty()) {
-                    /*
-                     * patch the change exceptions
-                     */
-                    for (Event importedChangeException : importedChangeExceptions) {
-                        adjustAttendeeComments(resource, importedChangeException);
-                        restoreResourceCUTypes(resource, importedEvent);
-                        adjustProposedTimePrefixes(importedChangeException);
-                        adjustAlarms(resource, importedChangeException, importedEvent);
-                        applyManagedAttachments(importedChangeException);
-                        removeAttachmentsFromExceptions(resource, importedChangeException);
-                        stripExtendedProperties(resource, importedChangeException);
-                    }
+            }
+            if (null != importedChangeExceptions && 0 < importedChangeExceptions.size()) {
+                /*
+                 * patch the change exceptions
+                 */
+                for (Event importedChangeException : importedChangeExceptions) {
+                    adjustAttendeeComments(resource, importedChangeException);
+                    restoreResourceCUTypes(resource, importedEvent);
+                    adjustProposedTimePrefixes(importedChangeException);
+                    adjustAlarms(resource, importedChangeException, importedEvent);
+                    applyManagedAttachments(importedChangeException);
+                    removeAttachmentsFromExceptions(resource, importedChangeException);
+                    stripExtendedProperties(resource, importedChangeException);
                 }
             }
             return new CalDAVImport(resource.getUrl(), caldavImport.getCalender(), importedEvent, importedChangeExceptions);
