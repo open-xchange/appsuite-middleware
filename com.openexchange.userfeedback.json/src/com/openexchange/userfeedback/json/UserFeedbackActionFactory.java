@@ -49,8 +49,6 @@
 
 package com.openexchange.userfeedback.json;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -82,11 +80,6 @@ public class UserFeedbackActionFactory implements AJAXActionServiceFactory {
             throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
         }
         return retval;
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return Collections.unmodifiableCollection(actions.values());
     }
 
 }

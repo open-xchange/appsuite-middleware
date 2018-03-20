@@ -66,7 +66,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
@@ -244,17 +243,6 @@ public final class JsonMessageHandler implements MailMessageHandler {
         }
 
     } // End of class MultipartInfo
-
-    private static final AtomicReference<Boolean> hideInlineImages = new AtomicReference<Boolean>(null);
-    private static boolean hideInlineImages(int userId, int contextId) {
-        Boolean tmp = hideInlineImages.get();
-        if (null == tmp) {
-            synchronized (tmp) {
-
-            }
-        }
-        return tmp.booleanValue();
-    }
 
     // -----------------------------------------------------------------------------------------------------------------
 

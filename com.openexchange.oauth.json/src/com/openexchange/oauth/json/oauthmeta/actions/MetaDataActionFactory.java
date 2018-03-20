@@ -49,7 +49,6 @@
 
 package com.openexchange.oauth.json.oauthmeta.actions;
 
-import java.util.Collection;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -99,10 +98,4 @@ public final class MetaDataActionFactory implements AJAXActionServiceFactory {
         tmp.put("get", new GetAction());
         return tmp.build();
     }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
-
 }

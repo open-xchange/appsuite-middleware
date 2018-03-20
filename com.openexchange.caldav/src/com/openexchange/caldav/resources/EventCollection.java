@@ -400,7 +400,7 @@ public class EventCollection extends FolderCollection<Event> implements Filterin
 
     @Override
     protected SyncStatus<WebdavResource> getSyncStatus(Date since) throws OXException {
-        if (null == since || 0L == since.getTime()) {
+        if (null == since) {
             return getInitialSyncStatus();
         }
         if (null != minDateTime.getMinDateTime() && minDateTime.getMinDateTime().after(since)) {

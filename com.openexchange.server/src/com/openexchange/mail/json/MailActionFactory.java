@@ -199,11 +199,6 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
     }
 
     @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
-
-    @Override
     public AJAXActionService createActionService(final String action) throws OXException {
         return actions.get(action);
     }

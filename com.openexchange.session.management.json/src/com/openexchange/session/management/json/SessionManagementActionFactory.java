@@ -49,8 +49,6 @@
 
 package com.openexchange.session.management.json;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -88,11 +86,6 @@ public class SessionManagementActionFactory implements AJAXActionServiceFactory 
             throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
         }
         return retval;
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return Collections.unmodifiableCollection(actions.values());
     }
 
 }

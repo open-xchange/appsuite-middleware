@@ -47,31 +47,24 @@
  *
  */
 
-package com.openexchange.documentation.descriptions;
+package com.openexchange.chronos.provider.birthdays;
 
+import static org.junit.Assert.assertFalse;
+import org.junit.Test;
 
 /**
- * {@link ModuleDescription} - Description for modules.
+ * {@link EventConverterTest}
  *
- * @see com.openexchange.documentation.annotations.Module
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @deprecated Never used & obsolete, therefore <b>to be removed with v7.10.0</b>. See <a href="../../../../../http-api/readme.md">http-api/readme.md</a> for details about API documentation.
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.0
  */
-@Deprecated
-public interface ModuleDescription extends Description {
+public class EventConverterTest {
 
-	/**
-	 * Specifies the actions. Required.
-	 *
-	 * @return the actions.
-	 */
-	ActionDescription[] getActions();
-
-	/**
-	 * Specifies the containers. Required.
-	 *
-	 * @return the containers.
-	 */
-	ContainerDescription[] getContainers();
+    @Test
+    public void testHasYear_dateIsNull_returnFalse() {
+        boolean hasYear = EventConverter.hasYear(null);
+        
+        assertFalse(hasYear);
+    }
 
 }

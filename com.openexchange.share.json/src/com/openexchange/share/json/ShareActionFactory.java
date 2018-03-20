@@ -49,7 +49,6 @@
 
 package com.openexchange.share.json;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -89,11 +88,6 @@ public class ShareActionFactory implements AJAXActionServiceFactory {
     @Override
     public AJAXActionService createActionService(String action) throws OXException {
         return actions.get(action);
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return null;
     }
 
 }

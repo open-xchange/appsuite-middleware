@@ -49,8 +49,6 @@
 
 package com.openexchange.oauth.json.proxy;
 
-import java.util.Arrays;
-import java.util.Collection;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
@@ -67,11 +65,6 @@ public class OAuthProxyActionFactory implements AJAXActionServiceFactory {
 
     public OAuthProxyActionFactory(OAuthService service, OAuthHTTPClientFactory clients) {
         proxyAction = new OAuthProxyAction(service, clients);
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return Arrays.asList("PUT", "POST");
     }
 
     @Override

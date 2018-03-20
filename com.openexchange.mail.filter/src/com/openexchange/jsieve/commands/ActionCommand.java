@@ -512,11 +512,13 @@ public class ActionCommand extends ControlOrActionCommand {
      */
     private int countTags() {
         int i = 0;
-        for (final List<String> list : this.tagArguments.values()) {
-            if (list.isEmpty()) {
-                i++;
-            } else {
-                i = i + 2;
+        if (this.tagArguments != null) {
+            for (final List<String> list : this.tagArguments.values()) {
+                if (list.isEmpty()) {
+                    i++;
+                } else {
+                    i = i + 2;
+                }
             }
         }
         return i;

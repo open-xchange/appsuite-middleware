@@ -49,7 +49,6 @@
 
 package com.openexchange.conversion.servlet;
 
-import java.util.Collection;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -81,10 +80,5 @@ public class ConversionActionFactory implements AJAXActionServiceFactory {
     @Override
     public AJAXActionService createActionService(final String action) {
         return actions.get(action);
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 }

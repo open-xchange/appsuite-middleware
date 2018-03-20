@@ -49,7 +49,6 @@
 
 package com.openexchange.oauth.provider.json;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -80,10 +79,4 @@ public class OAuthProviderActionFactory implements AJAXActionServiceFactory {
     public AJAXActionService createActionService(String action) {
         return actions.get(action);
     }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return null;
-    }
-
 }

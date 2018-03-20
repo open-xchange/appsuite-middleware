@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.dataRetrieval.actions;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
@@ -95,11 +94,6 @@ public class RetrievalActions implements AJAXActionServiceFactory {
             throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
         }
         return REGISTER_ACTION;
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.singletonList(REGISTER_ACTION);
     }
 
     private final AJAXActionService REGISTER_ACTION = new AJAXActionService() {

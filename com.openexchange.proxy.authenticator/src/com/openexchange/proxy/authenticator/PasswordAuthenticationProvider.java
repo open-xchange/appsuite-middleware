@@ -47,47 +47,31 @@
  *
  */
 
-package com.openexchange.documentation.annotations;
+package com.openexchange.proxy.authenticator;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import com.openexchange.documentation.Type;
+import java.net.PasswordAuthentication;
 
 /**
- * {@link Attribute} - Annotation for {@link Container} attributes.
+ * {@link PasswordAuthenticationProvider}
  *
- * @see com.openexchange.documentation.descriptions.AttributeDescription
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @deprecated Never used & obsolete, therefore <b>to be removed with v7.10.0</b>. See <a href="../../../../../http-api/readme.md">http-api/readme.md</a> for details about API documentation.
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.10.0
  */
-@Deprecated
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Attribute {
+public interface PasswordAuthenticationProvider {
 
-	/**
-	 * Specifies the name. Required.
-	 *
-	 * @return The name
-	 */
-	String name();
+    /**
+     * Retrieves the {@link PasswordAuthentication} in case the host and port matches.
+     *
+     * @param requestingHost The requesting host
+     * @param requestingPort The requesting port
+     * @return The {@link PasswordAuthentication} or <code>null</code>
+     */
+    PasswordAuthentication getPasswordAuthentication(String requestingHost, int requestingPort);
 
-	/**
-	 * Specifies the description. Defaults to <code>""</code>.
-	 *
-	 * @return the description
-	 */
-	String description() default "";
-
-	/**
-	 * Specifies whether the {@link Attribute} is mandatory or not. Defaults to <code>false</code>.
-	 * @return <code>true</code>, if it is mandatory, <code>false</code>, otherwise
-	 */
-	boolean mandatory() default false;
-
-	/**
-	 * Specifies the type. Defaults to <code>Type.STRING</code>.
-	 * @return the type
-	 */
-	Type type() default Type.STRING;
-
+    /**
+     * Gets the protocol for this provider
+     *
+     * @return The protocol
+     */
+    String getProtocol();
 }

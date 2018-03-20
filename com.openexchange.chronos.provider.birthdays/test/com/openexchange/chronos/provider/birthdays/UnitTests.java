@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -46,25 +46,23 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+package com.openexchange.chronos.provider.birthdays;
 
-package com.openexchange.documentation.descriptions;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * {@link ContainerDescription} - Description for containers.
+ * 
+ * {@link UnitTests}
  *
- * @see com.openexchange.documentation.annotations.Container
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @deprecated Never used & obsolete, therefore <b>to be removed with v7.10.0</b>. See <a href="../../../../../http-api/readme.md">http-api/readme.md</a> for details about API documentation.
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.10.0
  */
-@Deprecated
-public interface ContainerDescription extends Description {
-
-	/**
-	 * Specifies the attributes. Required.
-	 *
-	 * @return the attributes
-	 */
-    AttributeDescription[] getAttributes();
+@RunWith(Suite.class)
+@SuiteClasses({
+    EventConverterTest.class,
+})
+public class UnitTests {
 
 }

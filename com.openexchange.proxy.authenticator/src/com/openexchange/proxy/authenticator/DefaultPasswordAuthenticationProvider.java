@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -46,30 +46,53 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.chronos.compat;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+package com.openexchange.proxy.authenticator;
+
+import java.net.PasswordAuthentication;
 
 /**
- * {@link UnitTests}
- *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
- * @since v7.10.0
- */
-@RunWith(Suite.class)
-@SuiteClasses({
-    RecurrenceTests.class,
-    RecurrencePositionTest.class
-})
-public class UnitTests {
+*
+* {@link DefaultPasswordAuthenticationProvider} is a default implementation of the {@link PasswordAuthenticationProvider}
+* which only return a {@link PasswordAuthentication} in case the given host and port match.
+*
+* @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+* @since v7.10.0
+*/
+public class DefaultPasswordAuthenticationProvider implements PasswordAuthenticationProvider {
 
-    /**
-     * Initializes a new {@link UnitTests}.
-     */
-    public UnitTests() {
-        super();
-    }
+   private final String host;
+   private final int port;
+   private final String user;
+   private final String pw;
+   private final String protocol;
+
+   /**
+    * Initializes a new {@link ProxyAuthenticatorActivator.DefaultPasswordAuthenticationProvider}.
+    */
+   public DefaultPasswordAuthenticationProvider(String protocol, String host, int port, String user, String password) {
+       super();
+       this.host = host;
+       this.port = port;
+       this.user = user;
+       this.pw = password;
+       this.protocol = protocol;
+   }
+
+   @Override
+   public PasswordAuthentication getPasswordAuthentication(String requestingHost, int requestingPort) {
+       if (port == requestingPort && host.equalsIgnoreCase(requestingHost)) {
+           // Seems to be OK.
+           return new PasswordAuthentication(user, pw.toCharArray());
+       }
+
+       // Does not match configured host/port
+       return null;
+   }
+
+   @Override
+   public String getProtocol() {
+       return protocol;
+   }
 
 }

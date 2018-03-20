@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.requesthandler.jobqueue.json;
 
-import java.util.Collection;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -119,11 +118,6 @@ public class JobQueueJsonActionFactory implements AJAXActionServiceFactory {
             throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(action, getModule());
         }
         return retval;
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
 }

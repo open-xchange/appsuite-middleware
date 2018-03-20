@@ -421,6 +421,7 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}</li>
      * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
+     * <li>{@link CalendarParameters#PARAMETER_TRACK_ATTENDEE_USAGE}</li>
      * </ul>
      *
      * @param folderId The fully qualified identifier of the parent folder to create the event in
@@ -436,6 +437,7 @@ public interface IDBasedCalendarAccess extends TransactionAware, CalendarParamet
      * <ul>
      * <li>{@link CalendarParameters#PARAMETER_CHECK_CONFLICTS}</li>
      * <li>{@link CalendarParameters#PARAMETER_NOTIFICATION}</li>
+     * <li>{@link CalendarParameters#PARAMETER_TRACK_ATTENDEE_USAGE}</li>
      * </ul>
      *
      * @param eventID The identifier of the event to update

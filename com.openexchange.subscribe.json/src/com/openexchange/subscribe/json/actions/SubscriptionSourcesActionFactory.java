@@ -49,7 +49,6 @@
 
 package com.openexchange.subscribe.json.actions;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -85,11 +84,6 @@ public class SubscriptionSourcesActionFactory implements AJAXActionServiceFactor
             return actions.get(action);
         }
         throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
 }

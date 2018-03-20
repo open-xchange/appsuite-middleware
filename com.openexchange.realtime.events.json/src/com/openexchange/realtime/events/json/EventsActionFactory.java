@@ -49,8 +49,6 @@
 
 package com.openexchange.realtime.events.json;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -80,11 +78,6 @@ public class EventsActionFactory implements AJAXActionServiceFactory {
         actions.put("all", new AllAction(services));
         actions.put("events", new EventsAction(services));
         this.actions = actions.build();
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return Arrays.asList("on", "off", "all", "events");
     }
 
     @Override

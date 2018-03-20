@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.filter.json.v2.actions;
 
-import java.util.Collection;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -107,10 +106,4 @@ public class MailFilterActionFactory implements AJAXActionServiceFactory{
         }
         return retval;
     }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
-
 }

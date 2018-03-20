@@ -49,7 +49,6 @@
 
 package com.openexchange.contacts.json;
 
-import java.util.Collection;
 import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -123,10 +122,4 @@ public class ContactActionFactory implements AJAXActionServiceFactory {
     public AJAXActionService createActionService(final String action) throws OXException {
         return actions.get(action);
     }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
-
 }

@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.itip.json;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -91,10 +90,4 @@ public class ITipActionFactory implements AJAXActionServiceFactory {
     public AJAXActionService createActionService(final String action) throws OXException {
         return actions.get(action);
     }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
-
 }

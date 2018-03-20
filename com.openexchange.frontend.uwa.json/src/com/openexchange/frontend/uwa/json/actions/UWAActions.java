@@ -49,7 +49,6 @@
 
 package com.openexchange.frontend.uwa.json.actions;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -82,11 +81,6 @@ public class UWAActions implements AJAXActionServiceFactory {
             throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
         }
         return actions.get(action);
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
 }
