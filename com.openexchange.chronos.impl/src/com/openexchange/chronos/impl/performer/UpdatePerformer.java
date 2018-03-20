@@ -290,8 +290,14 @@ public class UpdatePerformer extends AbstractUpdatePerformer {
             resultTracker.trackDeletion(originalEvent);
             resultTracker.trackCreation(updatedEvent);
         }
-        Map<Integer, List<Alarm>> alarms = storage.getAlarmStorage().loadAlarms(updatedEvent);
-        storage.getAlarmTriggerStorage().deleteTriggers(originalEvent.getId());
+        Map<Integer, List<Alarm>> alarms;
+        if (eventUpdate.containsAnyChangeOf(new EventField[] { EventField.START_DATE, EventField.END_DATE })) {
+            storage.getAlarmTriggerStorage().deleteTriggers(originalEvent.getId());
+            alarms = storage.getAlarmStorage().loadAlarms(updatedEvent);
+        } else {
+            alarms = storage.getAlarmStorage().loadAlarms(updatedEvent);
+            storage.getAlarmTriggerStorage().deleteTriggers(originalEvent.getId());
+        }
         storage.getAlarmTriggerStorage().insertTriggers(updatedEvent, alarms);
         /*
          * recursively perform pending updates of change exceptions, too
