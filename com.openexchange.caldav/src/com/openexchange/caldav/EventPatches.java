@@ -634,7 +634,7 @@ public class EventPatches {
                  */
                 for (Event importedChangeException : importedChangeExceptions) {
                     adjustAttendeeComments(resource, importedChangeException);
-                    restoreResourceCUTypes(resource, importedEvent);
+                    restoreResourceCUTypes(resource, importedChangeException);
                     adjustProposedTimePrefixes(importedChangeException);
                     adjustAlarms(resource, importedChangeException, importedEvent);
                     applyManagedAttachments(importedChangeException);
