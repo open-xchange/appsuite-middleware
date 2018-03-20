@@ -51,9 +51,7 @@ package com.openexchange.chronos.compat.impl.osgi;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.caching.CacheService;
 import com.openexchange.chronos.compat.impl.attachments.CalendarAttachmentHandler;
-import com.openexchange.chronos.compat.impl.cache.CacheServiceListener;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.Types;
@@ -95,10 +93,6 @@ public class ChronosCompatActivator extends HousekeepingActivator {
             Attachments.getAuthorizationChooserForModule(Types.APPOINTMENT).registerForEverything(attachmentHandler, 18);
             Attachments.getListenerChooserForModule(Types.APPOINTMENT).registerForEverything(attachmentHandler, 18);
             this.attachmentHandler = attachmentHandler;
-            /*
-             * register calendar handler to invalidate legacy caches when upon changes
-             */
-            track(CacheService.class, new CacheServiceListener(context));
             openTrackers();
         } catch (Exception e) {
             LOG.error("error starting {}", context.getBundle(), e);
