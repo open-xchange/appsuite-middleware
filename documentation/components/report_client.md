@@ -231,12 +231,16 @@ or on 6.22 or newer
 	com.openexchange.licensekey.1=PUT\_YOUR\_OPEN-XCHANGE\_LICENSE\_KEY\_HERE
 
 If you are behind a firewall and the report client needs to be
-configured using a HTTP proxy, please configure the well known java system properties for https:
+configured using a HTTP proxy, please edit file:
 
-* https.proxyHost
-* https.proxyPort
-* https.proxyUser
-* https.proxyPassword
+	$ vim /opt/open-xchange/etc/groupware/reportclient.properties
+
+or on 6.22 or newer
+
+	$ vim /opt/open-xchange/etc/reportclient.properties
+
+After editing this file accordingly to your proxy needs, try to start
+the report client again.
 
 # Using the Report tool
 
