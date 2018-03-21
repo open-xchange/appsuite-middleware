@@ -318,7 +318,7 @@ public class OAuthServiceImpl implements OAuthService {
         if (existingAccount == null) {
             /*
              * No account found but 'reauthorize' was requested.
-             * Background information: When initialising an account's oauth access, the unterlying logic
+             * Background information: When initialising an account's oauth access, the underlying logic
              * checks for the user identity and if it's missing it will be fetched from the respective
              * OAuth provider and the account will be updated accordingly
              * 
