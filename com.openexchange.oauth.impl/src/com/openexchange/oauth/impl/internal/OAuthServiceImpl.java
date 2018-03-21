@@ -53,6 +53,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -340,10 +341,11 @@ public class OAuthServiceImpl implements OAuthService {
         existingAccount.setToken(account.getToken());
         existingAccount.setSecret(account.getSecret());
         existingAccount.setDisplayName(account.getDisplayName());
-        existingAccount.setEnabledScopes(scopes);
+        for (OAuthScope scope : scopes) {
+            existingAccount.addEnabledScope(scope);
+        }
         existingAccount.setUserIdentity(userIdentity);
         oauthAccountStorage.updateAccount(session, existingAccount);
-        // and issue a reauthorize
         return existingAccount;
     }
 

@@ -98,8 +98,8 @@ public final class GoogleOAuthServiceMetaData extends AbstractExtendedScribeAwar
     @Override
     public String processAuthorizationURL(String authUrl, Session session) throws OXException {
         StringBuilder authUrlBuilder = new StringBuilder(super.processAuthorizationURL(authUrl, session));
-        // Request a refresh token, too
-        return authUrlBuilder.append("&approval_prompt=force").append("&access_type=offline").toString();
+        // Request a refresh token, too and keep the already granted scopes
+        return authUrlBuilder.append("&approval_prompt=force").append("&access_type=offline").append("&include_granted_scopes=true").toString();
     }
 
     /*
