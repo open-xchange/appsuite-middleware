@@ -94,7 +94,7 @@ public class Participants implements ChangeDescriptionGenerator {
     private static final EventField[] FIELDS = new EventField[] { EventField.ATTENDEES };
 
     protected static enum ChangeType {
-        ADD, REMOVE, ACCEPT, DECLINE, TENTATIVE
+        ADD, REMOVE, ACCEPT, DECLINE, TENTATIVE, NEEDS_ACTION
     }
 
     private static final Map<ChangeType, String> PARTICIPANT_MESSAGE_MAP = new HashMap<ChangeType, String>() {
@@ -302,10 +302,12 @@ public class Participants implements ChangeDescriptionGenerator {
      * @return The {@link ChangeType}
      */
     private ChangeType getChangeType(ParticipationStatus newPartStat) {
-        if (newPartStat.equals(ParticipationStatus.DECLINED)) {
+        if (ParticipationStatus.DECLINED.equals(newPartStat)) {
             return ChangeType.DECLINE;
-        } else if (newPartStat.equals(ParticipationStatus.TENTATIVE)) {
+        } else if (ParticipationStatus.TENTATIVE.equals(newPartStat)) {
             return ChangeType.TENTATIVE;
+        } else if (ParticipationStatus.NEEDS_ACTION.equals(newPartStat)) {
+            return ChangeType.NEEDS_ACTION;
         }
         return ChangeType.ACCEPT;
     }
