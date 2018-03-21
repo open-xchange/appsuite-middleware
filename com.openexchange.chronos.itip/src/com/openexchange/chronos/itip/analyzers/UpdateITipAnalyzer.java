@@ -272,7 +272,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             change.setType(ITipChange.Type.UPDATE);
             analysis.addChange(change);
         }
-        
+
         return analysis;
     }
 
@@ -282,13 +282,13 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
      * @param original The original event to get the resources from
      * @param update The update to add resource to
      */
-    private void addResourcesToUpdate(Event original, Event update) {
-        if (original.getAttendees() == null || original.getAttendees().size() == 0) {
+    protected void addResourcesToUpdate(Event original, Event update) {
+        if (original == null || update == null || original.getAttendees() == null || original.getAttendees().size() == 0) {
             return;
         }
 
         for (Attendee a : original.getAttendees()) {
-            if (a.getCuType().equals(CalendarUserType.RESOURCE)) {
+            if (CalendarUserType.RESOURCE.equals(a.getCuType())) {
                 if (update.getAttendees() == null) {
                     update.setAttendees(new ArrayList<>());
                 }
