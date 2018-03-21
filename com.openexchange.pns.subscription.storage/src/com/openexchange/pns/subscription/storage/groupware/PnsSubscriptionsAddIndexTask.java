@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,56 +47,66 @@
  *
  */
 
-package com.openexchange.pns;
+package com.openexchange.pns.subscription.storage.groupware;
 
+import static com.openexchange.database.Databases.autocommit;
+import static com.openexchange.database.Databases.rollback;
+import java.sql.Connection;
+import java.sql.SQLException;
 import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.tools.update.Tools;
 
 /**
- * {@link PushSubscriptionRegistry} - A registry for retrieving and managing push subscriptions.
+ * {@link PnsSubscriptionsAddIndexTask} - Adds an index for 'token', 'transport' and 'client' columns to table "pns_subscription".
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.3
+ * @since v7.10.0
  */
-@SingletonService
-public interface PushSubscriptionRegistry extends PushSubscriptionProvider {
+public class PnsSubscriptionsAddIndexTask extends UpdateTaskAdapter {
 
     /**
-     * Registers specified subscription.
-     *
-     * @param subscription The subscription to register
-     * @return The subscription result
-     * @throws OXException If registration fails
+     * Initializes a new {@link PnsSubscriptionsAddIndexTask}.
      */
-    PushSubscriptionResult registerSubscription(PushSubscription subscription) throws OXException;
+    public PnsSubscriptionsAddIndexTask() {
+        super();
+    }
 
-    /**
-     * Unregisters specified subscription.
-     *
-     * @param subscription The subscription to unregister
-     * @return <code>true</code> if such a subscription has been deleted; otherwise <code>false</code> if no such subscription existed
-     * @throws OXException If unregistration fails
-     */
-    boolean unregisterSubscription(PushSubscription subscription) throws OXException;
+    @Override
+    public String[] getDependencies() {
+        return new String[] { PnsSubscriptionsReindexTask.class.getName() };
+    }
 
-    /**
-     * Unregisters all subscriptions associated with specified token and transport.
-     *
-     * @param token The token to unregister
-     * @param transportId The identifier of the associated transport
-     * @return The number of unregistered subscriptions
-     * @throws OXException If unregistration fails
-     */
-    int unregisterSubscription(String token, String transportId) throws OXException;
+    @Override
+    public void perform(PerformParameters params) throws OXException {
+        Connection connection = params.getConnection();
+        byte rollback = 0;
+        try {
+            String table = "pns_subscription";
+            String[] columns = new String[] { "token", "transport", "client"};
+            if (null == Tools.existsIndex(connection, table, columns)) {
+                connection.setAutoCommit(false);
+                rollback = 1;
 
-   /**
-    * Updates specified subscription.
-    *
-    * @param subscription The subscription to update
-    * @param newToken The new token to set
-    * @return <code>true</code> if such a subscription has been updated; otherwise <code>false</code> if no such subscription existed
-    * @throws OXException If update fails
-    */
-   boolean updateToken(PushSubscription subscription, String newToken) throws OXException;
+                Tools.createIndex(connection, table, "tokenIndex", columns, false);
+
+                connection.commit();
+                rollback = 2;
+            }
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback > 0) {
+                if (rollback == 1) {
+                    rollback(connection);
+                }
+                autocommit(connection);
+            }
+        }
+    }
 
 }

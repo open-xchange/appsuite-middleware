@@ -70,6 +70,7 @@ import com.openexchange.pns.subscription.storage.groupware.CreatePnsSubscription
 import com.openexchange.pns.subscription.storage.groupware.PnsCreateTableTask;
 import com.openexchange.pns.subscription.storage.groupware.PnsDeleteListener;
 import com.openexchange.pns.subscription.storage.groupware.PnsSubscriptionsAddExpiresColumTask;
+import com.openexchange.pns.subscription.storage.groupware.PnsSubscriptionsAddIndexTask;
 import com.openexchange.pns.subscription.storage.groupware.PnsSubscriptionsReindexTask;
 import com.openexchange.pns.subscription.storage.rdb.RdbPushSubscriptionRegistry;
 import com.openexchange.pns.subscription.storage.rdb.cache.RdbPushSubscriptionRegistryCache;
@@ -132,7 +133,7 @@ public class PushSubscriptionRegistryActivator extends HousekeepingActivator {
         // Register update task, create table job and delete listener
         boolean registerGroupwareStuff = true;
         if (registerGroupwareStuff) {
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PnsCreateTableTask(), new PnsSubscriptionsReindexTask(this), new PnsSubscriptionsAddExpiresColumTask()));
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PnsCreateTableTask(), new PnsSubscriptionsReindexTask(), new PnsSubscriptionsAddExpiresColumTask(), new PnsSubscriptionsAddIndexTask()));
             registerService(CreateTableService.class, new CreatePnsSubscriptionTable());
             registerService(DeleteListener.class, new PnsDeleteListener(persistentRegistry));
         }
