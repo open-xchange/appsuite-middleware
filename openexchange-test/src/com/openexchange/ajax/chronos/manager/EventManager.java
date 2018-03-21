@@ -206,7 +206,7 @@ public class EventManager extends AbstractManager {
      * @throws ChronosApiException
      */
     public JSONObject updateEventWithAttachment(EventData eventData, Asset asset) throws ApiException, ChronosApiException {
-        return handleUpdate(userApi.getEnhancedChronosApi().updateEventWithAttachments(userApi.getEnhancedSession(), defaultFolder, eventData.getId(), System.currentTimeMillis(), eventData.toJson(), new File(asset.getAbsolutePath()), null, true, false, false));
+        return handleUpdate(userApi.getEnhancedChronosApi().updateEventWithAttachments(userApi.getEnhancedSession(), defaultFolder, eventData.getId(), eventData.getLastModified(), eventData.toJson(), new File(asset.getAbsolutePath()), null, true, false, false));
     }
 
     /**
